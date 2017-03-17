@@ -70,13 +70,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class ExistsTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class ExistsTestCommandParser extends AbstractTestCommandParser {
 
     /**
      * Initializes a new {@link ExistsTestCommandParser}.
      */
     public ExistsTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.EXISTS);
     }
 
     @Override
@@ -89,15 +89,8 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser<TestComma
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         jsonObject.put(ExistsTestField.headers.name(), command.getArguments().get(0));
-
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.EXISTS.getCommandName();
-    }
-
 }

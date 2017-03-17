@@ -50,13 +50,13 @@
 package com.openexchange.mailfilter.json.ajax.actions;
 
 import javax.security.auth.Subject;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.json.ajax.Action;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.mailfilter.properties.CredentialSource;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -133,7 +133,7 @@ public abstract class AbstractRequest {
      * @throws OXException if an error is occurred
      */
     public Credentials getCredentials() throws OXException {
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
 
         final int userId = session.getUserId();
         final int contextId = session.getContextId();

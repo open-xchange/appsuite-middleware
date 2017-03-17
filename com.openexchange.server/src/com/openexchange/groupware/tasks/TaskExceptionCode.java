@@ -229,7 +229,7 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     INVALID_DATA("Task contains invalid data: \"%1$s\"", TaskExceptionMessage.INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 47),
 
     /** The task %1$d is not stored in folder %2$s (%3$d). */
-    NOT_IN_FOLDER("The task %1$d is not stored in folder %2$s (%3$d).", TaskExceptionMessage.NOT_IN_FOLDER_MSG,
+    NOT_IN_FOLDER("The task %1$d is not stored in folder %2$s (%3$d).", TaskExceptionMessage.NO_PERMISSION_MSG,
         Category.CATEGORY_PERMISSION_DENIED, 48),
 
     /** Unknown participant type %1$d. */

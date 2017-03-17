@@ -54,6 +54,7 @@ import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
@@ -64,7 +65,6 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.osgi.Services;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
@@ -146,7 +146,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
      */
     private boolean useUTF7Encoding() {
         // TODO: get for user?
-        MailFilterConfigurationService config = Services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
         return config.getBooleanProperty(MailFilterProperty.useUTF7FolderEncoding);
     }
 }

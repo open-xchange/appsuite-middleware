@@ -69,8 +69,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link PGPEncryptActionCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class PGPEncryptActionCommandParser extends AbstractActionCommandParser {
 
@@ -78,7 +77,7 @@ public class PGPEncryptActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link PGPEncryptActionCommandParser}.
      */
     public PGPEncryptActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.PGP_ENCRYPT);
     }
 
     @Override
@@ -105,10 +104,4 @@ public class PGPEncryptActionCommandParser extends AbstractActionCommandParser {
             jsonObject.put(PGPEncryptActionField.keys.getFieldName(), keys);
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.PGP_ENCRYPT.getCommandName();
-    }
-
 }

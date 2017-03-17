@@ -47,71 +47,71 @@
  *
  */
 
-package com.openexchange.mailfilter.properties;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser;
 
-import com.openexchange.config.Reloadable;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.test.ICommand;
+import com.openexchange.jsieve.registry.CommandRegistry;
+import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MailFilterConfigurationService}
+ * {@link AbstractCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFilterConfigurationService extends Reloadable {
+public abstract class AbstractCommandParser<I extends ICommand> {
+
+    protected final ServiceLookup services;
+    private final I command;
 
     /**
-     * Fetches the {@link String} value of specified {@link MailFilterProperty}
-     *
-     * @param property The {@link MailFilterProperty} name to fetch
-     * @return The {@link String} value of the property
+     * Initialises a new {@link AbstractCommandParser}.
      */
-    String getProperty(MailFilterProperty property);
+    public AbstractCommandParser(ServiceLookup services, I command) {
+        super();
+        this.services = services;
+        this.command = command;
+    }
 
     /**
-     * Fetches the {@link String} value of specified {@link MailFilterProperty} for
-     * the specified user in the specified context via ConfigCascade
+     * Checks whether this command is supported
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param property The {@link MailFilterProperty} name to fetch
-     * @return The {@link String} value of the property
+     * @param capabilities The capabilities previously obtained from the {@link MailFilterService} service
+     * @return true if it is supported, false otherwise
+     * @throws OXException
      */
-    String getProperty(int userId, int contextId, MailFilterProperty property);
+    public boolean isCommandSupported(Set<String> capabilities) throws OXException {
+        CommandRegistry<I> commandRegistry = getCommandRegistry();
+        I c = commandRegistry.get(command.getCommandName());
+        return null == c.getRequired() || capabilities.contains(c.getRequired());
+    }
 
     /**
-     * Fetches the {@link Integer} value of specified {@link MailFilterProperty}
-     *
-     * @param property The {@link MailFilterProperty} name to fetch
-     * @return The {@link Integer} value of the property
+     * Retrieves the corresponding {@link ICommand}
+     * 
+     * @return The {@link ICommand}
+     * @throws OXException if an error is occurred
      */
-    int getIntProperty(MailFilterProperty property);
+    public I getCommand() throws OXException {
+        CommandRegistry<I> commandRegistry = getCommandRegistry();
+        return commandRegistry.get(getCommandName());
+    }
 
     /**
-     * Fetches the {@link Integer} value of specified {@link MailFilterProperty} for
-     * the specified user in the specified context via ConfigCascade
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param property The {@link MailFilterProperty} name to fetch
-     * @return The {@link Integer} value of the property
+     * The corresponding {@link ICommand} name
+     * 
+     * @return The command name
      */
-    int getIntProperty(int userId, int contextId, MailFilterProperty property);
+    protected String getCommandName() {
+        return command.getCommandName();
+    }
 
     /**
-     * Fetches the {@link Boolean} value of specified {@link MailFilterProperty}
-     *
-     * @param property The {@link MailFilterProperty} name to fetch
-     * @return The {@link Boolean} value of the property
+     * Returns the corresponding {@link CommandRegistry}
+     * 
+     * @return the corresponding {@link CommandRegistry}
      */
-    boolean getBooleanProperty(MailFilterProperty property);
-
-    /**
-     * Fetches the {@link Boolean} value of specified {@link MailFilterProperty} for
-     * the specified user in the specified context via ConfigCascade
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param property The {@link MailFilterProperty} name to fetch
-     * @return The {@link Boolean} value of the property
-     */
-    boolean getBooleanProperty(int userId, int contextId, MailFilterProperty property);
+    protected abstract <T> CommandRegistry<T> getCommandRegistry();
 }

@@ -144,7 +144,7 @@ public final class MimeProcessingUtility {
             a.setAddress(alias);
             validAddrs.add(a);
         }
-        if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
+        if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
             MsisdnUtility.addMsisdnAddress(validAddrs, session);
             String sAddress = addr.getAddress();
             int pos = sAddress.indexOf('/');

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -97,7 +98,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
 
     @Override
     public String[] getRequiredArguments() {
-        return ARGS;
+        return new String[]{};
     }
 
     @Override
@@ -106,24 +107,26 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
     }
 
     @Override
-    public Object processData(final Data<? extends Object> data, final DataArguments dataArguments,
-            final Session session) throws OXException {
-        final int calendarFolder;
-        try {
-            calendarFolder = Integer.parseInt(dataArguments.get(ARGS[0]));
-        } catch (final NumberFormatException e) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
-        }
-        OXException missingTaskFolderException = null;
-        int taskFolder;
-        try {
-            taskFolder = Integer.parseInt(dataArguments.get(ARGS[1]));
-        } catch (final NumberFormatException e) {
-            missingTaskFolderException = DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
-            taskFolder = -1;
+    public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
+        int calendarFolder = 0;
+        if (dataArguments.containsKey(ARGS[0]) && dataArguments.get(ARGS[0]) != null) {
+            try {
+                calendarFolder = Integer.parseInt(dataArguments.get(ARGS[0]));
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
+            }
         }
 
-        final Confirm confirm = parseConfirmation(dataArguments);
+        int taskFolder = 0;
+        if (dataArguments.containsKey(ARGS[1]) && dataArguments.get(ARGS[1]) != null) {
+            try {
+                taskFolder = Integer.parseInt(dataArguments.get(ARGS[1]));
+            } catch (final NumberFormatException e) {
+                throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
+            }
+        }
+
+        Confirm confirm = parseConfirmation(dataArguments);
 
         final Context ctx = ContextStorage.getStorageContext(session);
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
@@ -157,16 +160,11 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                 /*
                  * Start parsing appointments
                  */
-                appointments = parseAppointmentStream(ctx, iCalParser, inputStreamCopy, conversionErrors,
-                        conversionWarnings, defaultZone);
-                // TODO: Handle errors/warnings
-                conversionErrors.clear();
-                conversionWarnings.clear();
+                appointments = parseAppointmentStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, defaultZone);
                 /*
                  * Start parsing tasks
                  */
-                tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings,
-                        defaultZone);
+                tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, defaultZone);
             }
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
@@ -177,33 +175,37 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
          * The JSON array to return
          */
         final JSONArray folderAndIdArray = new JSONArray();
+        ConversionResult result = new ConversionResult();
         if (!appointments.isEmpty()) {
-            /*
-             * Insert parsed appointments into denoted calendar folder
-             */
-            try {
-                insertAppointments(session, calendarFolder, ctx, appointments, confirm, folderAndIdArray);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
+            if (calendarFolder == 0) {
+                result.addWarning(ConversionWarning.Code.NO_FOLDER_FOR_APPOINTMENTS.create());
+            } else {
+                /*
+                 * Insert parsed appointments into denoted calendar folder
+                 */
+                try {
+                    insertAppointments(session, calendarFolder, ctx, appointments, confirm, folderAndIdArray);
+                } catch (final JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
+                }
             }
         }
         if (!tasks.isEmpty()) {
-            if (taskFolder < 0) {
-                if (null != missingTaskFolderException) {
-                    throw missingTaskFolderException;
+            if (taskFolder == 0) {
+                result.addWarning(ConversionWarning.Code.NO_FOLDER_FOR_TASKS.create());
+            } else {
+                /*
+                 * Insert parsed tasks into denoted task folder
+                 */
+                try {
+                    insertTasks(session, taskFolder, tasks, folderAndIdArray);
+                } catch (final JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
                 }
-                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
-            }
-            /*
-             * Insert parsed tasks into denoted task folder
-             */
-            try {
-                insertTasks(session, taskFolder, tasks, folderAndIdArray);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
-        return folderAndIdArray;
+        result.setData(folderAndIdArray);
+        return result;
     }
 
     private Confirm parseConfirmation(final DataArguments dataArguments) {

@@ -56,11 +56,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.BodyTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
-import com.openexchange.mail.filter.json.v2.json.fields.HeaderTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.server.ServiceLookup;
@@ -70,65 +70,127 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link BodyTestCommandParser}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
-public class BodyTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class BodyTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser {
 
     /**
-     * Initialises a new {@link BodyTestCommandParser}.
+     * Initializes a new {@link BodyTestCommandParser}.
      */
     public BodyTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.BODY);
     }
 
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.BODY.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
-        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName)));
-        final String extensionkey = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionskey.name(), commandName);
+        String matcher = CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName);
+        String normalizedMatcher = MatchType.getNormalName(matcher);
+        if(normalizedMatcher != null){
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
+                handleSimplifiedMatcher(normalizedMatcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+                final String extensionkey = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionskey.name(), commandName);
+                if (null != extensionkey && !extensionkey.equals(JSONObject.NULL.toString())) {
+                    if (extensionkey.equals("text")) {
+                        argList.add(ArgumentUtil.createTagArgument("text"));
+                    } else if (extensionkey.equals("content")) {
+                        argList.add(ArgumentUtil.createTagArgument("content"));
+                        final String extensionvalue = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionsvalue.name(), commandName);
+                        argList.add(extensionvalue);
+                    } else {
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
+                    }
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, BodyTestField.values.name(), commandName)));
+            }
+            return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>()));
+        } else {
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)){
+                handleSimplifiedMatcher(matcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(matcher));
+                final String extensionkey = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionskey.name(), commandName);
+                if (null != extensionkey && !extensionkey.equals(JSONObject.NULL.toString())) {
+                    if (extensionkey.equals("text")) {
+                        argList.add(ArgumentUtil.createTagArgument("text"));
+                    } else if (extensionkey.equals("content")) {
+                        argList.add(ArgumentUtil.createTagArgument("content"));
+                        final String extensionvalue = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionsvalue.name(), commandName);
+                        argList.add(extensionvalue);
+                    } else {
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
+                    }
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, BodyTestField.values.name(), commandName)));
+            }
+            return new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>());
+        }
+    }
+
+    @Override
+    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException{
+        StartsOrEndsWithMatcherUtil.insertMatchesMatcher(argList);
+        final String extensionkey = CommandParserJSONUtil.getString(data, BodyTestField.extensionskey.name(), Commands.BODY.getCommandName());
         if (null != extensionkey && !extensionkey.equals(JSONObject.NULL.toString())) {
             if (extensionkey.equals("text")) {
                 argList.add(ArgumentUtil.createTagArgument("text"));
             } else if (extensionkey.equals("content")) {
                 argList.add(ArgumentUtil.createTagArgument("content"));
-                final String extensionvalue = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionsvalue.name(), commandName);
+                final String extensionvalue = CommandParserJSONUtil.getString(data, BodyTestField.extensionsvalue.name(), Commands.BODY.getCommandName());
                 argList.add(extensionvalue);
             } else {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
             }
         }
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), commandName)));
-        return new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>());
+        List<String> list = CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, BodyTestField.values.name(), Commands.ENVELOPE.getCommandName()));
+        StartsOrEndsWithMatcherUtil.insertValuesArgumentWithWildcards(list, matcher, argList);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.BODY.getCommandName());
-        jsonObject.put(BodyTestField.comparison.name(), command.getMatchType().substring(1));
+
         List<String> tagArguments = command.getTagArguments();
+        List<String> values;
         if (tagArguments.size() > 1) {
             final String extensionkey = tagArguments.get(1).substring(1);
             jsonObject.put(BodyTestField.extensionskey.name(), extensionkey);
             if ("content".equals(extensionkey)) {
+                // allowed according to our specification
                 jsonObject.put(BodyTestField.extensionsvalue.name(), command.getArguments().get(2));
-                jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(3)));
+                values = (List<String>) command.getArguments().get(3);
             } else {
                 jsonObject.put(BodyTestField.extensionsvalue.name(), JSONObject.NULL);
-                jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(2)));
+                values = (List<String>) command.getArguments().get(2);
             }
         } else {
             // no extensionskey
             jsonObject.put(BodyTestField.extensionskey.name(), JSONObject.NULL);
             jsonObject.put(BodyTestField.extensionsvalue.name(), JSONObject.NULL);
-            jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(1)));
+            values = (List<String>) command.getArguments().get(1);
         }
-    }
 
-    @Override
-    public String getCommandName() {
-        return Commands.BODY.getCommandName();
+        String matchType = command.getMatchType();
+        MatchType type;
+        if (matchType == null) {
+            jsonObject.put(BodyTestField.comparison.name(), MatchType.is.name());
+            type = MatchType.is;
+        } else {
+            matchType = matchType.substring(1);
+            type = MatchType.valueOf(matchType);
+            type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
+            if(transformToNotMatcher){
+                jsonObject.put(BodyTestField.comparison.name(), type.getNotName());
+            } else {
+                jsonObject.put(BodyTestField.comparison.name(), type.name());
+            }
+        }
+
+        jsonObject.put(BodyTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));
     }
 }

@@ -77,7 +77,7 @@ public class RemoveFlagActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link RemoveFlagActionCommandParser}.
      */
     public RemoveFlagActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.REMOVEFLAG);
     }
 
     @Override
@@ -100,10 +100,4 @@ public class RemoveFlagActionCommandParser extends AbstractActionCommandParser {
         jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.REMOVEFLAG.getJsonName());
         jsonObject.put(AddFlagsActionField.flags.name(), (List<String>) arguments.get(0));
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.REMOVEFLAG.getCommandName();
-    }
-
 }

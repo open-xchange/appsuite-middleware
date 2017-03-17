@@ -111,7 +111,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
 		return is;
 	} catch (FolderClosedException fex) {
 	    throw new FolderClosedIOException(fex.getFolder(),
-						fex.getMessage());
+						fex.getMessage(), fex);
 	} catch (MessageRemovedException mex) {
         throw new MessageRemovedIOException(mex.getMessage(), mex);
     } catch (MessagingException mex) {

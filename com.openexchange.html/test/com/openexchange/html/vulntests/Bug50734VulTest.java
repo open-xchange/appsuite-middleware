@@ -85,7 +85,7 @@ public class Bug50734VulTest extends AbstractSanitizing {
             "<!-- --!>\n" +
             "<input type=hidden style=`x:expression(alert(/ /))`>\n" +
             "<! XSS=\"><img src=xx:x onerror=alert(1)//\"> ";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "alert", "onerror");
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onerror");
     }
 
 }

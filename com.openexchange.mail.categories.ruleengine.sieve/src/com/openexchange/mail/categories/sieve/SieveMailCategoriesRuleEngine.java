@@ -59,6 +59,7 @@ import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.Token;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
@@ -77,7 +78,6 @@ import com.openexchange.mail.categories.ruleengine.RuleType;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.properties.CredentialSource;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -182,7 +182,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
     private Credentials getCredentials(Session session) {
         String loginName;
         {
-            MailFilterConfigurationService mailFilterConfig = services.getService(MailFilterConfigurationService.class);
+            LeanConfigurationService mailFilterConfig = services.getService(LeanConfigurationService.class);
             String credsrc = mailFilterConfig.getProperty(session.getUserId(), session.getContextId(), MailFilterProperty.credentialSource);
             loginName = CredentialSource.SESSION_FULL_LOGIN.name().equals(credsrc) ? session.getLogin() : session.getLoginName();
         }

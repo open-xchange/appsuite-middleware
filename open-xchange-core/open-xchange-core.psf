@@ -20,6 +20,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.cluster.timer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.config.cascade"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.config.lean"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.config.cascade.context"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.config.cascade.user"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.configread"/>

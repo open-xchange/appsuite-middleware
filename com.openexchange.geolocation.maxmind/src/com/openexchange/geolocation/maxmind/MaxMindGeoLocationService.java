@@ -157,21 +157,11 @@ public class MaxMindGeoLocationService implements GeoLocationService {
             InputStream in = new BundleResourceLoader(bundle).getResourceAsStream(resourceName);
             if (null == in) {
                 // Retry...
-                String filePattern = resourceName;
-                int i = resourceName.lastIndexOf('/');
-                if (i > 0) {
-                    if (i < resourceName.length() - 1) {
-                        filePattern = resourceName.substring(i + 1);
-                    }
-                }
-
-                in = MaxMindGeoLocationServiceActivator.class.getClassLoader().getResourceAsStream(filePattern);
-
+                in = MaxMindGeoLocationServiceActivator.class.getClassLoader().getResourceAsStream(resourceName);
                 if (null == in) {
                     throw OXException.general("No such resource available: " + resourceName);
                 }
             }
-
             return in;
         } catch (IOException e) {
             throw GeoLocationExceptionCodes.IO_ERROR.create(e, "Stream could not be obtained from resource: " + uri);

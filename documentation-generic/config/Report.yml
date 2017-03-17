@@ -9,6 +9,7 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    tags: ["Report"]
   - key: com.openexchange.report.appsuite.maxChunkSize
     description: |
       Determines how many chunks of data can be kept in the report before saving them in the folder described in the 
@@ -19,6 +20,7 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    tags: ["Report","Limit"]
   - key: com.openexchange.report.appsuite.maxThreadPoolSize
     description: |
       Number of threads allowed to work on the report at the same time.
@@ -28,6 +30,7 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    tags: ["Report","Limit"]
   - key: com.openexchange.report.appsuite.threadPriority
     description: |
       The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
@@ -36,4 +39,5 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: reportserialization.properties                
+    file: reportserialization.properties
+    tags: ["Report"]           

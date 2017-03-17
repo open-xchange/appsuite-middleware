@@ -61,16 +61,16 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link AnyOfTestCommandParser}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
 public class AnyOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
 
     /**
-     * Initialises a new {@link AnyOfTestCommandParser}.
+     * Initializes a new {@link AnyOfTestCommandParser}.
      */
     public AnyOfTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ANYOF);
     }
 
     @Override
@@ -80,12 +80,11 @@ public class AnyOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
 
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
-        parse(jsonObject, command, Commands.ANYOF);
+        parse(jsonObject, command, Commands.ANYOF, false);
     }
 
     @Override
-    public String getCommandName() {
-       return Commands.ANYOF.getCommandName();
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+        parse(jsonObject, command, Commands.ANYOF, transformToNotMatcher);
     }
-
 }

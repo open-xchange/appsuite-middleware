@@ -68,8 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link EnotifyActionCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class EnotifyActionCommandParser extends AbstractActionCommandParser {
 
@@ -77,7 +76,7 @@ public class EnotifyActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link EnotifyActionCommandParser}.
      */
     public EnotifyActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ENOTIFY);
     }
 
     @Override
@@ -110,10 +109,5 @@ public class EnotifyActionCommandParser extends AbstractActionCommandParser {
             jsonObject.put(EnotifyActionField.message.getFieldName(), message.get(0));
         }
         jsonObject.put(EnotifyActionField.method.getFieldName(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.ENOTIFY.getCommandName();
     }
 }

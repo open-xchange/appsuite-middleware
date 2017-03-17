@@ -63,8 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link StopActionCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class StopActionCommandParser extends AbstractActionCommandParser {
 
@@ -72,7 +71,7 @@ public class StopActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link StopActionCommandParser}.
      */
     public StopActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.STOP);
     }
 
     @Override
@@ -83,10 +82,5 @@ public class StopActionCommandParser extends AbstractActionCommandParser {
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.STOP.getCommandName();
     }
 }

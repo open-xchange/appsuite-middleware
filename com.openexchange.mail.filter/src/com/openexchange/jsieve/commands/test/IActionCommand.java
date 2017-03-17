@@ -50,7 +50,6 @@
 package com.openexchange.jsieve.commands.test;
 
 import java.util.Hashtable;
-import java.util.List;
 
 /**
  * {@link IActionCommand}
@@ -58,7 +57,7 @@ import java.util.List;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface IActionCommand {
+public interface IActionCommand extends ICommand {
 
     /**
      * Retrieves the number of arguments of this {@link IActionCommand}
@@ -71,17 +70,4 @@ public interface IActionCommand {
      * @return a map of the tag arguments and their number of arguments
      */
     Hashtable<String, Integer> getTagArgs();
-
-    /**
-     * The required sieve server capabilities
-     * @return A list of capabilities
-     */
-    List<String> getRequired();
-
-    /**
-     * The name of the command
-     * @return The command name
-     */
-    String getCommandName();
-
 }

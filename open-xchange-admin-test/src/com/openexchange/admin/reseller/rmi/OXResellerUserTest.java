@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
@@ -54,7 +55,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Stack;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -74,7 +74,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-
 public class OXResellerUserTest extends OXResellerAbstractTest {
 
     private static OXResellerInterface oxresell = null;
@@ -83,34 +82,26 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
     @BeforeClass
     public static void startup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
-        final Credentials creds = DummyMasterCredentials();
-        oxresell = (OXResellerInterface)Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-        oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        oxresell.initDatabaseRestrictions(creds);
+        oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+        oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }
 
-    @AfterClass
-    public static void cleanup() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
-        final Credentials creds = DummyMasterCredentials();
-        oxresell.removeDatabaseRestrictions(creds);
-    }
-
-     @Test
-     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    @Test
+    public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = DummyMasterCredentials();
 
-        ResellerAdmin adm = FooAdminUser();
-        adm.setRestrictions(new Restriction[]{MaxOverallUserRestriction(6)});
+        ResellerAdmin adm = RandomAdmin();
+        adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(6) });
         oxresell.create(adm, creds);
         try {
             Stack<Context> ctxstack = new Stack<Context>();
+            Credentials resellerRandomCredentials = ResellerRandomCredentials(adm.getName());
             try {
                 // create 3 contexts with 1 user -> 6 user total
-                for(final Context ctx : new Context[]{createContext(ResellerFooCredentials()),
-                        createContext(ResellerFooCredentials()), createContext(ResellerFooCredentials())} ){
+                for (final Context ctx : new Context[] { createContext(resellerRandomCredentials), createContext(resellerRandomCredentials), createContext(resellerRandomCredentials) }) {
                     ctxstack.push(ctx);
-                    Credentials ctxauth = new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword());
-                    for(int i=1; i<2; i++) {
+                    Credentials ctxauth = new Credentials(ContextAdmin().getName(), ContextAdmin().getPassword());
+                    for (int i = 1; i < 2; i++) {
                         System.out.println("creating user " + i + " in Context " + ctx.getId());
                         createUser(ctx, ctxauth);
                     }
@@ -119,32 +110,32 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // 7th user must fail
                 boolean createFailed = false;
                 try {
-                    createUser(ctxstack.firstElement(), new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword()));
+                    createUser(ctxstack.firstElement(), new Credentials(ContextAdmin().getName(), ContextAdmin().getPassword()));
                 } catch (StorageException e) {
                     createFailed = true;
                 }
-                assertTrue("Create user must fail",createFailed);
+                assertTrue("Create user must fail", createFailed);
             } finally {
-                for(final Context ctx : ctxstack ){
-                    deleteContext(ctx, ResellerFooCredentials());
+                for (final Context ctx : ctxstack) {
+                    deleteContext(ctx, resellerRandomCredentials);
                 }
             }
         } finally {
-            oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+            oxresell.delete(adm, DummyMasterCredentials());
         }
     }
 
-     @Test
-     public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        final Credentials creds = ResellerFooCredentials();
+    @Test
+    public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+        ResellerAdmin adm = RandomAdmin();
+        final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
         try {
             Context ctx = createContext(creds);
             try {
                 try {
-                    ctx.addExtension(new OXContextExtensionImpl(new Restriction[]{MaxUserPerContextRestriction()}));
+                    ctx.addExtension(new OXContextExtensionImpl(new Restriction[] { MaxUserPerContextRestriction() }));
                 } catch (final DuplicateExtensionException e1) {
                     // Because the context is newly created this exception cannot occur
                     e1.printStackTrace();
@@ -165,12 +156,12 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 } catch (StorageException e) {
                     createFailed = true;
                 }
-                assertTrue("Create user must fail",createFailed);
+                assertTrue("Create user must fail", createFailed);
             } finally {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+            oxresell.delete(adm, DummyMasterCredentials());
         }
     }
 
@@ -178,19 +169,17 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
      * NOTE: this test must be changed, if /opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
      * will be changed!
      */
-     @Test
-     public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        final Credentials creds = ResellerFooCredentials();
+    @Test
+    public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+        ResellerAdmin adm = RandomAdmin();
+        final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
         try {
             Context ctx = createContext(creds);
             try {
                 try {
-                    ctx.addExtension(new OXContextExtensionImpl(new Restriction[]{
-                        new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"),
-                        new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2")
+                    ctx.addExtension(new OXContextExtensionImpl(new Restriction[] { new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX + "webmail_plus", "2"), new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX + "premium", "2")
                     }));
                 } catch (DuplicateExtensionException e1) {
                     // Because the context is newly created this exception cannot occur
@@ -218,7 +207,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 } catch (StorageException e) {
                     createFailed = true;
                 }
-                assertTrue("Create user must fail",createFailed);
+                assertTrue("Create user must fail", createFailed);
 
                 // premium test
                 // premium=contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,
@@ -249,12 +238,12 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 } catch (StorageException e) {
                     createFailed = true;
                 }
-                assertTrue("Create user must fail",createFailed);
+                assertTrue("Create user must fail", createFailed);
             } finally {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+            oxresell.delete(adm, DummyMasterCredentials());
         }
     }
 }

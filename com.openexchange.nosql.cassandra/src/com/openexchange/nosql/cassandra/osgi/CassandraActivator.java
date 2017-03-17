@@ -53,6 +53,7 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
@@ -79,7 +80,7 @@ public class CassandraActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ManagementService.class };
+        return new Class<?>[] { ConfigurationService.class, ManagementService.class, LeanConfigurationService.class };
     }
 
     @Override
@@ -109,7 +110,6 @@ public class CassandraActivator extends HousekeepingActivator {
             ManagementService managementService = getService(ManagementService.class);
             managementService.unregisterMBean(objectName);
         }
-
 
         // Unregister cassandra service
         CassandraService cassandraService = this.cassandraService;

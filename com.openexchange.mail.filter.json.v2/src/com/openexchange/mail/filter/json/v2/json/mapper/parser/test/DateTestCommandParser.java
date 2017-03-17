@@ -63,16 +63,16 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link DateTestCommandParser} parses date sieve tests.
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
 public class DateTestCommandParser extends AbstractDateTestCommandParser {
 
     /**
-     * Initialises a new {@link DateTestCommandParser}.
+     * Initializes a new {@link DateTestCommandParser}.
      */
     public DateTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.DATE);
     }
 
     @Override
@@ -81,23 +81,23 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser {
         final List<Object> argList = new ArrayList<Object>();
 
         parseZone(argList, jsonObject, session, commandName);
-        parseComparisonTag(argList, jsonObject, commandName);
+        boolean isNotMatcher = parseComparisonTag(argList, jsonObject, commandName);
         parseHeader(argList, jsonObject, commandName);
         parseDatePart(argList, jsonObject, commandName);
 
-        return new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>());
+        if(isNotMatcher){
+            return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>()));
+        } else {
+            return new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>());
+        }
     }
 
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         parseZone(jsonObject, command);
-        parseComparisonTag(jsonObject, command);
+        parseComparisonTag(jsonObject, command, transformToNotMatcher);
         parseHeader(jsonObject, command);
         parseDatePart(jsonObject, command);
-    }
 
-    @Override
-    public String getCommandName() {
-        return Commands.DATE.getCommandName();
     }
 }

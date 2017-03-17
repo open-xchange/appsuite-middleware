@@ -72,12 +72,12 @@ import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
@@ -313,7 +313,7 @@ public class SieveHandler {
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
-        final MailFilterConfigurationService mailFilterConfig = Services.getService(MailFilterConfigurationService.class);
+        final LeanConfigurationService mailFilterConfig = Services.getService(LeanConfigurationService.class);
 
         useSIEVEResponseCodes = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
 
@@ -448,16 +448,16 @@ public class SieveHandler {
     /**
      * Returns the {@link PreferredSASLMech}
      * 
-     * @param mailFilterConfig The {@link MailFilterConfigurationService}
+     * @param leanConfigService The {@link LeanConfigurationService}
      * @param sasl The server SASL
      * @return The {@link PreferredSASLMech}
      */
-    private PreferredSASLMech getPreferredSASLMechanism(final MailFilterConfigurationService mailFilterConfig, List<String> sasl) {
+    private PreferredSASLMech getPreferredSASLMechanism(final LeanConfigurationService leanConfigService, List<String> sasl) {
         PreferredSASLMech preferredSASLMechanism = PreferredSASLMech.PLAIN;
         PreferredSASLMech configuredPreferredSASLMechanism = null;
         String psm = null;
         {
-            psm = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
+            psm = leanConfigService.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
             if (!Strings.isEmpty(psm)) {
                 try {
                     configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);

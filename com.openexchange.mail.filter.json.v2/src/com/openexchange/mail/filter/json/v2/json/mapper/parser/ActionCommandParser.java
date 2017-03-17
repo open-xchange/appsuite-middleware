@@ -56,10 +56,17 @@ import com.openexchange.jsieve.commands.test.IActionCommand;
  * {@link ActionCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
-public interface ActionCommandParser<T> extends CommandParser<T>{
+public interface ActionCommandParser<T> extends CommandParser<T> {
 
+    /**
+     * Retrieves the corresponding {@link IActionCommand}
+     * 
+     * @return The {@link IActionCommand}
+     * @throws OXException if an error is occurred
+     */
     IActionCommand getCommand() throws OXException;
 
 }

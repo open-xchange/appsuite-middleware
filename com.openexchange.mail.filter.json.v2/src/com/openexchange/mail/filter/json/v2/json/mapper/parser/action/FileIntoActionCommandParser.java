@@ -54,6 +54,7 @@ import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
@@ -62,7 +63,6 @@ import com.openexchange.mail.filter.json.v2.json.fields.MoveActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -72,8 +72,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 /**
  * {@link FileIntoActionCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class FileIntoActionCommandParser extends AbstractActionCommandParser {
 
@@ -81,7 +80,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link FileIntoActionCommandParser}.
      */
     public FileIntoActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.FILEINTO);
     }
 
     @Override
@@ -89,7 +88,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
         Boolean copy = jsonObject.optBoolean(MoveActionField.copy.name(), false);
-        if(copy){
+        if (copy) {
             argList.add(ArgumentUtil.createTagArgument(MoveActionField.copy.name()));
         }
 
@@ -103,8 +102,8 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         }
 
         argList.add(CommandParserJSONUtil.stringToList(folderName));
-        ActionCommand result =  new ActionCommand(Commands.FILEINTO, argList);
-        if(copy){
+        ActionCommand result = new ActionCommand(Commands.FILEINTO, argList);
+        if (copy) {
             result.addOptionalRequired(MoveActionField.copy.name());
         }
         return result;
@@ -118,7 +117,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
 
         final String folderName;
-        if(arguments.size()==1){
+        if (arguments.size() == 1) {
             if (useUTF7Encoding()) {
                 folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(0)).get(0));
             } else {
@@ -146,12 +145,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
      */
     private boolean useUTF7Encoding() {
         // TODO: get for user?
-        MailFilterConfigurationService config = services.getService(MailFilterConfigurationService.class);
+        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
         return config.getBooleanProperty(MailFilterProperty.useUTF7FolderEncoding);
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.FILEINTO.getCommandName();
     }
 }

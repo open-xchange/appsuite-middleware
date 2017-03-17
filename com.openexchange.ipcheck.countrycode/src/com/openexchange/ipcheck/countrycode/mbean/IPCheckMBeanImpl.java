@@ -85,6 +85,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     @Override
     protected void refresh() {
         metrics = metricAware.getMetricsObject();
+        metrics.calculatePercentages();
     }
 
     /*
@@ -165,5 +166,125 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     @Override
     public int getAcceptedEligibleIPChanges() {
         return metrics.getDeniedCountryChanges();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedPercentage()
+     */
+    @Override
+    public float getAcceptedPercentage() {
+        return metrics.getAcceptedPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedPercentage()
+     */
+    @Override
+    public float getDeniedPercentage() {
+        return metrics.getDeniedPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedPrivatePercentage()
+     */
+    @Override
+    public float getAcceptedPrivatePercentage() {
+        return metrics.getAcceptedPrivatePercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedWhiteListedPercentage()
+     */
+    @Override
+    public float getAcceptedWhiteListedPercentage() {
+        return metrics.getAcceptedWhiteListedPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedEligilePercentage()
+     */
+    @Override
+    public float getAcceptedEligilePercentage() {
+        return metrics.getAcceptedEligilePercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedExceptionPercentage()
+     */
+    @Override
+    public float getDeniedExceptionPercentage() {
+        return metrics.getDeniedExceptionPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedCountryChangedPercentage()
+     */
+    @Override
+    public float getDeniedCountryChangedPercentage() {
+        return metrics.getDeniedCountryChangedPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedPrivateOverallPercentage()
+     */
+    @Override
+    public float getAcceptedPrivateOverallPercentage() {
+        return metrics.getAcceptedPrivateOverallPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedWhiteListedOverallPercentage()
+     */
+    @Override
+    public float getAcceptedWhiteListedOverallPercentage() {
+        return metrics.getAcceptedWhiteListedOverallPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedEligileOverallPercentage()
+     */
+    @Override
+    public float getAcceptedEligileOverallPercentage() {
+        return metrics.getAcceptedEligileOverallPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedExceptionOverallPercentage()
+     */
+    @Override
+    public float getDeniedExceptionOverallPercentage() {
+        return metrics.getDeniedExceptionOverallPercentage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedCountryChangedOverallPercentage()
+     */
+    @Override
+    public float getDeniedCountryChangedOverallPercentage() {
+        return metrics.getDeniedCountryChangedOverallPercentage();
     }
 }

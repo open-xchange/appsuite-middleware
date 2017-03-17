@@ -97,7 +97,7 @@ public final class MailCapabilityServiceTracker implements ServiceTrackerCustomi
                     if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
                         return false;
                     }
-                    return MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId());
+                    return MailProperties.getInstance().isSupportMsisdnAddresses();
                 }
                 return true;
             }

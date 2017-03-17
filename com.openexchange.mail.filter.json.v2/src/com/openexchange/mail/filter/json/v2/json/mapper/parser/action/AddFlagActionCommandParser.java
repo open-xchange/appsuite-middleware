@@ -67,9 +67,8 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AddFlagActionCommandParser}
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class AddFlagActionCommandParser extends AbstractActionCommandParser {
 
@@ -77,9 +76,14 @@ public class AddFlagActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link AddFlagActionCommandParser}.
      */
     public AddFlagActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ADDFLAG);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParser#parse(org.json.JSONObject, com.openexchange.tools.session.ServerSession)
+     */
     @Override
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final JSONArray array = jsonObject.getJSONArray(AddFlagsActionField.flags.name());
@@ -92,6 +96,11 @@ public class AddFlagActionCommandParser extends AbstractActionCommandParser {
         return new ActionCommand(ActionCommand.Commands.ADDFLAG, arrayList);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
@@ -100,10 +109,4 @@ public class AddFlagActionCommandParser extends AbstractActionCommandParser {
         jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ADDFLAG.getJsonName());
         jsonObject.put(AddFlagsActionField.flags.name(), (List<String>) arguments.get(0));
     }
-
-    @Override
-    public String getCommandName() {
-        return Commands.ADDFLAG.getCommandName();
-    }
-
 }

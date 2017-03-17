@@ -57,8 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 /**
  * {@link CommandParserExceptionCodes}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum CommandParserExceptionCodes implements DisplayableOXExceptionCode {
 

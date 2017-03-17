@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
@@ -63,7 +64,9 @@ import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mail.filter.json.v2.actions.MailFilterActionFactory;
 import com.openexchange.mail.filter.json.v2.json.RuleParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParserRegistry;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.AddFlagActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.DiscardActionCommandParser;
@@ -89,15 +92,15 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HasFlagComma
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TrueTestCommandParser;
-import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
 import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTest;
+import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
 import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
 import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link MailFilterJSONActivator}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
@@ -113,7 +116,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class, ActionCommandRegistry.class, MailFilterConfigurationService.class};
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class, ActionCommandRegistry.class, LeanConfigurationService.class };
     }
 
     @Override

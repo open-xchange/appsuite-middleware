@@ -111,8 +111,16 @@ if ! pidof systemd > /dev/null 2>&1
 then
   NRFILES=${NRFILES:-65536}
   NPROC=${NPROC:-65536}
-  ulimit -n ${NRFILE} 2> ${CONSOLELOG}
-  ulimit -u ${NPROC} 2> ${CONSOLELOG}
+  ulimit -n ${NRFILES} 2>> ${CONSOLELOG}
+  ulimit -u ${NPROC} 2>> ${CONSOLELOG}
+fi
+
+# Bug 51074: wrong locale will break encoding of started processes
+LC_CTYPE=$(locale | sed -ne 's/^LC_CTYPE="\?\([^"]*\)"\?$/\1/p')
+if ! [[ "${LC_CTYPE}" =~ .*UTF-8 ]]
+then
+  echo "WARNING: Couldn't detect proper unicode locale for category LC_CTYPE!" >> ${CONSOLELOG}
+  echo "WARNING: Current LC_CTYPE: ${LC_CTYPE} will cause encoding problems!"  >> ${CONSOLELOG}
 fi
 
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.11.0.v20160603-1336.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

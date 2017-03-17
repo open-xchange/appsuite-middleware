@@ -69,8 +69,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link TestCommandRuleFieldMapper}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class TestCommandRuleFieldMapper implements RuleFieldMapper {
 
@@ -99,7 +98,7 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
         JSONObject object = new JSONObject();
         if (!isNull(rule)) {
             TestCommand testCommand = rule.getTestCommand();
-            if(testCommand!=null){
+            if (testCommand != null) {
                 String commandName = testCommand.getCommand().getCommandName();
                 CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
                 CommandParser<TestCommand> parser = parserRegistry.get(commandName);

@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+
+use LWP;
+use JSON;
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	print "yes\n";
+	exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+    print "graph_title Geolocation Composite IP Changes\n";
+    print "graph_args --base 1000 -l 0 -u 100 -r\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel %\n";
+    
+    print "acceptedPrivateIPChanges.label Accepted Private IP Changes\n";
+    print "acceptedPrivateIPChanges.draw AREA\n";
+    
+    print "acceptedWhiteListedIPChanges.label Accepted White-Listed IP Changes\n";
+    print "acceptedWhiteListedIPChanges.draw STACK\n";
+    
+    print "eligibleIPChanges.label Accepted Eligible IP Changes\n";
+    print "eligibleIPChanges.draw STACK\n";
+    
+    print "deniedCountryChanges.label Denied Country Changes\n";
+    print "deniedCountryChanges.draw STACK\n";
+    
+    print "deniedException.label Denied by Exception\n";
+    print "deniedException.draw STACK\n";
+
+    exit 0
+}
+
+my $url = $ENV{oxJolokiaUrl};
+my $username = $ENV{oxJolokiaUser};
+my $password = $ENV{oxJolokiaPassword};
+
+callUrl("acceptedPrivateIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedPrivateOverallPercentage");
+callUrl("acceptedWhiteListedIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedWhiteListedOverallPercentage");
+callUrl("eligibleIPChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/AcceptedEligileOverallPercentage");
+callUrl("deniedCountryChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedCountryChangedOverallPercentage");
+callUrl("deniedException","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/DeniedExceptionOverallPercentage");
+
+sub callUrl {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			print "$_[0].value ";
+			print $json->{value},"\n";
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}

@@ -71,16 +71,16 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link AbstractAllAnyOfTestCommandParser}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
-abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandParser {
 
     /**
-     * Initialises a new {@link AbstractAllAnyOfTestCommandParser}.
+     * Initializes a new {@link AbstractAllAnyOfTestCommandParser}.
      */
-    protected AbstractAllAnyOfTestCommandParser(ServiceLookup services) {
-        super(services);
+    protected AbstractAllAnyOfTestCommandParser(ServiceLookup services, Commands testCommand) {
+        super(services, testCommand);
     }
 
     TestCommand parse(JSONObject jsonObject, Commands command, ServerSession session) throws OXException, JSONException, SieveException {
@@ -99,7 +99,7 @@ abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandPars
         return new TestCommand(command, new ArrayList<Object>(), commandlist);
     }
 
-    void parse(JSONObject jsonObject, TestCommand testCommand, Commands command) throws JSONException, OXException {
+    void parse(JSONObject jsonObject, TestCommand testCommand, Commands command, @SuppressWarnings("unused") boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommandName());
         CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
         List<TestCommand> testCommands = testCommand.getTestCommands();

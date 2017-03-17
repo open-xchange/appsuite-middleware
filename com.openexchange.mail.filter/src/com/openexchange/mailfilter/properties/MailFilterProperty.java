@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.properties;
 
+import com.openexchange.config.lean.Property;
 import com.openexchange.mailfilter.MailFilterService;
 
 /**
@@ -56,7 +57,7 @@ import com.openexchange.mailfilter.MailFilterService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailFilterProperty {
+public enum MailFilterProperty implements Property {
 
     /**
      * Specify which sieve server should be used. Two options are allowed here:
@@ -226,15 +227,6 @@ public enum MailFilterProperty {
     }
 
     /**
-     * Returns the fully qualified name of the property
-     *
-     * @return the fully qualified name of the property
-     */
-    public String getFQPropertyName() {
-        return fqn + name();
-    }
-
-    /**
      * Returns whether the property is optional
      * 
      * @return <code>true</code> if the property is optional; <code>false</code> otherwise
@@ -243,11 +235,22 @@ public enum MailFilterProperty {
         return optional;
     }
 
-    /**
-     * Returns the default value of this property
-     *
-     * @return the default value of this property
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getFQPropertyName()
      */
+    @Override
+    public String getFQPropertyName() {
+        return fqn + name();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getDefaultValue(java.lang.Class)
+     */
+    @Override
     public <T extends Object> T getDefaultValue(Class<T> cls) {
         if (defaultValue.getClass().isAssignableFrom(cls)) {
             return cls.cast(defaultValue);

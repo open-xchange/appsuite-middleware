@@ -101,6 +101,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
         ci = getContextInterface();
         ui = getUserInterface();
+
+        setupContexts();
     }
 
     public final void setupContexts() throws Exception {

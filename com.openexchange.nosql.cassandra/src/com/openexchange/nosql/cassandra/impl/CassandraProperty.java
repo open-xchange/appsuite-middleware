@@ -52,6 +52,7 @@ package com.openexchange.nosql.cassandra.impl;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.openexchange.config.lean.Property;
 import com.openexchange.nosql.cassandra.CassandraService;
 
 /**
@@ -59,7 +60,7 @@ import com.openexchange.nosql.cassandra.CassandraService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum CassandraProperty {
+public enum CassandraProperty implements Property {
     /**
      * Defines the name of the Cassandra cluster. Technically this name does not correlate
      * with the name configured in the real Cassandra cluster, but it's rather used to distinguish
@@ -213,7 +214,8 @@ public enum CassandraProperty {
      *
      * @return the fully qualified name for the property
      */
-    public String getName() {
+    @Override
+    public String getFQPropertyName() {
         return PREFIX + name();
     }
 
@@ -222,6 +224,7 @@ public enum CassandraProperty {
      *
      * @return the default value of this property
      */
+    @Override
     public <T extends Object> T getDefaultValue(Class<T> cls) {
         if (false == defaultValue.getClass().isAssignableFrom(cls)) {
             throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");

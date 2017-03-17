@@ -60,7 +60,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.DateTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
@@ -72,10 +74,11 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link AbstractDateTestCommandParser}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<TestCommand>{
+abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
 
     private enum Comparison {
         is, ge, le
@@ -88,12 +91,11 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
     private final static String dateFormatPattern = "yyyy-MM-dd";
     private final static String timeFormatPattern = "HH:mm";
 
-
     /**
      * Initializes a new {@link AbstractDateTestCommandParser}.
      */
-    protected AbstractDateTestCommandParser(ServiceLookup services) {
-        super(services);
+    protected AbstractDateTestCommandParser(ServiceLookup services, Commands testCommand) {
+        super(services, testCommand);
     }
 
     /**
@@ -127,26 +129,51 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @param argList The argument list
      * @param jsonObject the {@link JSONObject}
      * @param commandName The command's name
+     * @return true if the comparator is a not matcher
      * @throws OXException if a parsing error is occurred
      */
-    protected void parseComparisonTag(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException {
+    protected boolean parseComparisonTag(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException {
         // Parse the comparison tag
         final String comparisonTag = CommandParserJSONUtil.getString(jsonObject, DateTestField.comparison.name(), commandName);
-        Comparison comparison = Comparison.valueOf(comparisonTag);
-        switch (comparison) {
-            case ge:
-                argList.add(ArgumentUtil.createTagArgument("value"));
-                argList.add(CommandParserJSONUtil.stringToList("ge"));
-                break;
-            case is:
-                argList.add(ArgumentUtil.createTagArgument(comparison.name()));
-                break;
-            case le:
-                argList.add(ArgumentUtil.createTagArgument("value"));
-                argList.add(CommandParserJSONUtil.stringToList("le"));
-                break;
-            default:
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
+        String normalizedMatcher = MatchType.getNormalName(comparisonTag);
+        if (normalizedMatcher != null) {
+            Comparison comparison = Comparison.valueOf(normalizedMatcher);
+
+            switch (comparison) {
+                case ge:
+                    argList.add(ArgumentUtil.createTagArgument("value"));
+                    argList.add(CommandParserJSONUtil.stringToList("ge"));
+                    break;
+                case is:
+                    argList.add(ArgumentUtil.createTagArgument(comparison.name()));
+                    break;
+                case le:
+                    argList.add(ArgumentUtil.createTagArgument("value"));
+                    argList.add(CommandParserJSONUtil.stringToList("le"));
+                    break;
+                default:
+                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
+            }
+           return true;
+        } else {
+            Comparison comparison = Comparison.valueOf(comparisonTag);
+
+            switch (comparison) {
+                case ge:
+                    argList.add(ArgumentUtil.createTagArgument("value"));
+                    argList.add(CommandParserJSONUtil.stringToList("ge"));
+                    break;
+                case is:
+                    argList.add(ArgumentUtil.createTagArgument(comparison.name()));
+                    break;
+                case le:
+                    argList.add(ArgumentUtil.createTagArgument("value"));
+                    argList.add(CommandParserJSONUtil.stringToList("le"));
+                    break;
+                default:
+                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
+            }
+            return false;
         }
     }
 
@@ -203,12 +230,30 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @throws JSONException if a JSON error is occurred
      */
     @SuppressWarnings("unchecked")
-    protected void parseComparisonTag(JSONObject jsonObject, TestCommand command) throws JSONException {
+    protected void parseComparisonTag(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        final String comparison = command.getMatchType().substring(1);
-        if ("value".equals(comparison)) {
+
+
+        String matchType = command.getMatchType();
+        final String comparison; // = command.getMatchType().substring(1);
+        if (matchType == null) {
+            comparison = MatchType.is.name();
+        } else {
+            if(transformToNotMatcher){
+                String notMatchType = MatchType.getNotNameForArgumentName(matchType);
+                comparison = notMatchType;
+            } else {
+                comparison = matchType.substring(1);
+            }
+        }
+
+        if (MatchType.value.name().equals(comparison) || MatchType.value.getNotName().equals(comparison)) {
             int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
-            jsonObject.put(DateTestField.comparison.name(), ((List<String>) command.getArguments().get(compPos)).get(0));
+            String resultMatchTtype = ((List<String>) command.getArguments().get(compPos)).get(0);
+            if(transformToNotMatcher){
+                resultMatchTtype = MatchType.valueOf(resultMatchTtype).getNotName();
+            }
+            jsonObject.put(DateTestField.comparison.name(), resultMatchTtype);
         } else {
             jsonObject.put(DateTestField.comparison.name(), comparison);
         }
@@ -224,10 +269,10 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser<T
      * @throws JSONException if a JSON error is occurred
      */
     void parseZone(JSONObject jsonObject, TestCommand command) throws JSONException {
-        for(int x=0; x<command.getArguments().size(); x++){
+        for (int x = 0; x < command.getArguments().size(); x++) {
             Object arg = command.getArguments().get(x);
-            if(ZONE_TAG.equals(arg)){
-                jsonObject.put(DateTestField.zone.name(), command.getArguments().get(x+1));
+            if (ZONE_TAG.equals(arg)) {
+                jsonObject.put(DateTestField.zone.name(), command.getArguments().get(x + 1));
                 return;
             }
         }

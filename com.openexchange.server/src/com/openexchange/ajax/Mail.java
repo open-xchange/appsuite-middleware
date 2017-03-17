@@ -4847,7 +4847,7 @@ public class Mail extends PermissionServlet {
                     for (final String alias : aliases) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
-                    if (MailProperties.getInstance().isSupportMsisdnAddresses(session.getUserId(), session.getContextId())) {
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
                         final String address = from.getAddress();
                         final int pos = address.indexOf('/');

@@ -52,6 +52,8 @@ package com.openexchange.imap;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -1333,8 +1335,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (config.getAccountId() == MailAccount.DEFAULT_ID) {
             boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses(userId, contextId);
-            imapProps.put("mail.imap.multiAddress.enabled", useMultipleAddresses ? "true" : "false");
-
+            if (useMultipleAddresses) {
+                imapProps.put("mail.imap.multiAddress.enabled", "true");
+                int hash = getHashFor(userId, contextId);
+                imapProps.put("mail.imap.multiAddress.key", Integer.toString(hash));
+            }
         }
         /*
          * Enable XOAUTH2/OAUTHBEARER (if appropriate)
@@ -1444,6 +1449,27 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         final javax.mail.Session imapSession = javax.mail.Session.getInstance(imapProps, null);
         imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", storeClass.getName(), "OX Software GmbH", getVersion()));
         return imapSession;
+    }
+
+    private static int getHashFor(int user, int context) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            md.update((byte) user);
+            md.update((byte) context);
+
+            // Calculate hash & create its string representation
+            byte[] bytes = md.digest();
+
+            int i = 0;
+            for (byte b : bytes) {
+                i += b;
+            }
+            return (i < 0) ? -i : i;
+        } catch (NoSuchAlgorithmException e) {
+            // Ignore
+        }
+        return 0;
     }
 
     @Override

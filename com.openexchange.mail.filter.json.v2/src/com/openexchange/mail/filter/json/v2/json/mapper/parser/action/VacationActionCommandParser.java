@@ -80,8 +80,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link VacationActionCommandParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class VacationActionCommandParser extends AbstractActionCommandParser {
 
@@ -89,7 +88,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
      * Initializes a new {@link VacationActionCommandParser}.
      */
     public VacationActionCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.VACATION);
     }
 
     @Override
@@ -221,10 +220,5 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
         } catch (UnsupportedEncodingException e) {
             throw CommandParserExceptionCodes.UNABLE_TO_DECODE.create(field.name(), "Vacation");
         }
-    }
-
-    @Override
-    public String getCommandName() {
-        return Commands.VACATION.getCommandName();
     }
 }

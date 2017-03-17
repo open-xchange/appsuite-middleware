@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.EnvelopeTestField;
@@ -68,49 +69,89 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link EnvelopeTestCommandParser}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
  */
-public class EnvelopeTestCommandParser extends AbstractTestCommandParser<TestCommand> {
+public class EnvelopeTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser {
 
     /**
-     * Initialises a new {@link EnvelopeTestCommandParser}.
+     * Initializes a new {@link EnvelopeTestCommandParser}.
      */
     public EnvelopeTestCommandParser(ServiceLookup services) {
-        super(services);
+        super(services, Commands.ENVELOPE);
     }
 
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
 
         final List<Object> argList = new ArrayList<Object>();
-        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.comparison.name(), Commands.ENVELOPE.getCommandName())));
-        if (jsonObject.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
-            argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+        String matcher = CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.comparison.name(), Commands.ENVELOPE.getCommandName());
+        String normalizedMatcher = MatchType.getNormalName(matcher);
+        if(normalizedMatcher != null){
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
+                handleSimplifiedMatcher(normalizedMatcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
+                if (jsonObject.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
+                    argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName())));
+
+            }
+            return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.ENVELOPE, argList, new ArrayList<TestCommand>()));
+        } else {
+            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)){
+                handleSimplifiedMatcher(matcher, argList, jsonObject);
+            } else {
+                argList.add(ArgumentUtil.createTagArgument(matcher));
+                if (jsonObject.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
+                    argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
+                }
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName())));
+            }
+            return new TestCommand(Commands.ENVELOPE, argList, new ArrayList<TestCommand>());
         }
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName())));
-        return new TestCommand(Commands.ENVELOPE, argList, new ArrayList<TestCommand>());
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        if (command.getMatchType() == null) {
-            jsonObject.put(EnvelopeTestField.comparison.name(), "is");
-        } else {
-            jsonObject.put(EnvelopeTestField.comparison.name(), command.getMatchType().substring(1));
+    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException{
+        StartsOrEndsWithMatcherUtil.insertMatchesMatcher(argList);
+        if (data.hasAndNotNull(EnvelopeTestField.addresspart.name())) {
+            argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(data, EnvelopeTestField.addresspart.name(), Commands.ENVELOPE.getCommandName())));
         }
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, EnvelopeTestField.headers.name(), Commands.ENVELOPE.getCommandName())));
+        List<String> list = CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, EnvelopeTestField.values.name(), Commands.ENVELOPE.getCommandName()));
+        StartsOrEndsWithMatcherUtil.insertValuesArgumentWithWildcards(list, matcher, argList);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
+        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
+        List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size()+1);
+        String matchType = command.getMatchType();
+        MatchType type;
+        if (matchType == null) {
+            jsonObject.put(EnvelopeTestField.comparison.name(), MatchType.is.name());
+            type = MatchType.is;
+        } else {
+            matchType = matchType.substring(1);
+            type = MatchType.valueOf(matchType);
+            type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
+            if(transformToNotMatcher){
+                jsonObject.put(EnvelopeTestField.comparison.name(), type.getNotName());
+            } else {
+                jsonObject.put(EnvelopeTestField.comparison.name(), type.name());
+            }
+        }
+
         if (command.getAddressPart() != null) {
             jsonObject.put(EnvelopeTestField.addresspart.name(), command.getAddressPart().substring(1));
         }
-        jsonObject.put(EnvelopeTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
-        jsonObject.put(EnvelopeTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
-    }
+        jsonObject.put(EnvelopeTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(EnvelopeTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));
 
-    @Override
-    public String getCommandName() {
-        return Commands.ENVELOPE.getCommandName();
     }
 }

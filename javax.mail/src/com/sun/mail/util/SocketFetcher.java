@@ -149,7 +149,7 @@ public class SocketFetcher {
             return getSocket(addresses[0], host, port, props, prefix, useSSL);
         }
 
-        RoundRobinSelector selector = RoundRobinSelector.getSharedSelectorFor(host, addresses);
+        AddressSelector selector = AddressSelector.getSelectorFor(host, addresses, props, prefix);
         return new RoundRobinSocket(selector, host, port, props, prefix, useSSL);
     }
 

@@ -61,7 +61,7 @@ public class Info {
 
     private static final Info INFO_ADMINISTRATIVE = new Info(Purpose.ADMINISTRATIVE);
     private static final Info INFO_GENERAL = new Info(Purpose.GENERAL);
-    private static final Info INFO_DRIVE = new Info(Purpose.GENERAL);
+    private static final Info INFO_DRIVE = new Info(Purpose.DRIVE);
 
     /**
      * Gets the administrative info

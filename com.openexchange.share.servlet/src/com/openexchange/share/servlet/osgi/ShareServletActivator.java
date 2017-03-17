@@ -53,6 +53,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -102,8 +103,9 @@ public class ShareServletActivator extends HousekeepingActivator {
         // Dependently registers Servlets
         {
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
-            ServletRegisterer registerer = new ServletRegisterer(shareHandlerRegistry, context);
+            ServletRegisterer registerer = new ServletRegisterer(shareHandlerRegistry, this, context);
             track(filter, registerer);
+            registerService(Reloadable.class, registerer);
         }
         {
             byte[] hashSalt = getService(ConfigurationService.class).getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();

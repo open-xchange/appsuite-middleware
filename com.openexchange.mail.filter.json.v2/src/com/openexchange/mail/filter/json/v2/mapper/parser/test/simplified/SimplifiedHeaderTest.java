@@ -50,8 +50,10 @@
 package com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import org.json.JSONException;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 
@@ -59,22 +61,32 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.Comman
  * {@link SimplifiedHeaderTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
 public enum SimplifiedHeaderTest {
     Subject("subject", "Subject"),
     From("from", "From"),
-    To("to","To"),
-    Cc("cc","Cc"),
-    AnyRecipient("anyRecipient","to", "cc"),
-    MailingList("mailingList","List-Id", "X-BeenThere","X-Mailinglist","X-Mailing-List");
+    To("to", "To"),
+    Cc("cc", "Cc"),
+    AnyRecipient("anyRecipient", "to", "cc"),
+    MailingList("mailingList", "List-Id", "X-BeenThere", "X-Mailinglist", "X-Mailing-List");
+
+    private static final Map<String, SimplifiedHeaderTest> map;
+    static {
+        Map<String, SimplifiedHeaderTest> m = new HashMap<>(8);
+        for (SimplifiedHeaderTest sht : SimplifiedHeaderTest.values()) {
+            m.put(sht.getCommandName(), sht);
+        }
+        map = Collections.unmodifiableMap(m);
+    }
 
     private String commandName;
     private List<String> headerNames;
 
-    SimplifiedHeaderTest(String commandName, String... headerNames){
-        this.commandName=commandName;
-        this.headerNames=Arrays.asList(headerNames);
+    SimplifiedHeaderTest(String commandName, String... headerNames) {
+        this.commandName = commandName;
+        this.headerNames = Arrays.asList(headerNames);
     }
 
     public String getCommandName() {
@@ -86,24 +98,22 @@ public enum SimplifiedHeaderTest {
      *
      * @param name The name
      * @return The {@link SimplifiedHeaderTest}
-     * @throws JSONException if no {@link SimplifiedHeaderTest} with this name exists
-     * @throws OXException
+     * @throws OXException if no {@link SimplifiedHeaderTest} with this name exists
      */
     public static SimplifiedHeaderTest getTestByName(String name) throws OXException {
-        for(SimplifiedHeaderTest test: values()){
-            if(test.getCommandName().equals(name)){
-                return test;
-            }
+        SimplifiedHeaderTest simplifiedHeaderTest = map.get(name);
+        if (simplifiedHeaderTest == null) {
+            throw CommandParserExceptionCodes.UNKOWN_SIMPLIFIED_RULE.create(name);
         }
-        throw CommandParserExceptionCodes.UNKOWN_SIMPLIFIED_RULE.create(name);
+        return simplifiedHeaderTest;
     }
 
     /**
      * Retrieves the header names of this {@link SimplifiedHeaderTest}
+     * 
      * @return A list of header names
      */
     public List<String> getHeaderNames() {
         return this.headerNames;
     }
-
 }

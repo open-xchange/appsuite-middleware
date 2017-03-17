@@ -66,17 +66,17 @@ public enum CassandraServiceExceptionCodes implements DisplayableOXExceptionCode
      */
     UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
-     * None of the Cassandra contact points '%1%s' is reachable
+     * None of the Cassandra contact points '%1$s' is reachable
      */
-    CONTACT_POINTS_NOT_REACHABLE("None of the Cassandra contact points '%1%s' is reachable", Category.CATEGORY_CONNECTIVITY, 2),
+    CONTACT_POINTS_NOT_REACHABLE("None of the Cassandra contact points '%1$s' is reachable", Category.CATEGORY_CONNECTIVITY, 2),
     /**
      * None of the Cassandra contact points is reachable
      */
     CONTACT_POINTS_NOT_REACHABLE_SIMPLE("None of the Cassandra contact points is reachable", Category.CATEGORY_CONNECTIVITY, 2),
     /**
-     * An authentication error while contacting the initial contact points '%1%s'
+     * An authentication error while contacting the initial contact points '%1$s'
      */
-    AUTHENTICATION_ERROR("An authentication error while contacting the initial contact points '%1%s'", Category.CATEGORY_ERROR, 3),
+    AUTHENTICATION_ERROR("An authentication error while contacting the initial contact points '%1$s'", Category.CATEGORY_ERROR, 3),
     /**
      * Failed to execute query: %1$s
      * <p>

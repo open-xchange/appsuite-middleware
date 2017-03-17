@@ -57,8 +57,10 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
@@ -67,8 +69,6 @@ import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
-import com.openexchange.mailfilter.properties.MailFilterConfigurationService;
-import com.openexchange.mailfilter.properties.internal.MailFilterConfigurationServiceImpl;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -87,16 +87,13 @@ public class MailFilterActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, LeanConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
-
-            registerService(MailFilterConfigurationService.class, new MailFilterConfigurationServiceImpl(this));
-            trackService(MailFilterConfigurationService.class);
 
             registerService(MailFilterInterceptorRegistry.class, new MailFilterInterceptorRegistryImpl());
             trackService(MailFilterInterceptorRegistry.class);
@@ -128,7 +125,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             }
 
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
-            registerService(MailFilterService.class, new MailFilterServiceImpl());
+            registerService(MailFilterService.class, new MailFilterServiceImpl(this));
             registerTestCommandRegistry();
             registerActionCommandRegistry();
 

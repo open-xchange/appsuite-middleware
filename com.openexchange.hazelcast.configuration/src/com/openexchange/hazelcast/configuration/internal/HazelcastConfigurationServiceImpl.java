@@ -203,6 +203,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
             config.getGroupConfig().setPassword(groupPassword);
         }
+        config.setLiteMember(configService.getBoolProperty("com.openexchange.hazelcast.liteMember", false));
         /*
          * Network Join
          */

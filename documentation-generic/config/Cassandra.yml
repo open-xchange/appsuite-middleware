@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.clusterContactPoints
       description: |
         Defines the Cassandra seed node(s) as a comma separated list
@@ -18,6 +19,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.port
       description: |
         Defines the port on which the Cassandra server is running
@@ -27,6 +29,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.loadBalancingPolicy
       description: |
         Defines load balancing policy to use for the cluster. There are three load balancing policies to choose from: <code|RoundRobin</code|, <code|DCAwareRoundRobin</code| and <code|DCTokenAwareRoundRobin</code|.
@@ -46,6 +49,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.retryPolicy
       description: |
         A policy that defines a default behaviour to adopt when a request fails. There are three retry policies to choose from: <code|defaultRetryPolicy</code|, <code|downgradingConsistencyRetryPolicy</code| and <code|fallthroughRetryPolicy</code| 
@@ -64,6 +68,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.logRetryPolicy
       description: |
         Logs the retry decision of the policy
@@ -73,6 +78,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.enableQueryLogger
       description: |
         Enables the query logger which logs all executed statements
@@ -82,6 +88,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.queryLatencyThreshold
       description: |
         Defines the latency threshold in milliseconds beyond which queries are considered 'slow' and logged as such by the Cassandra service. Used in conjunction with the <code|enableQueryLogger</code| property 
@@ -91,6 +98,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.poolingHeartbeat
       description: |
         Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat. When a connection has been idle for the given amount of time, the Cassandra service will simulate activity by writing a dummy request to it (by sending an <code|OPTIONS</code| message). 
@@ -101,6 +109,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode
       description: |
         The Cassandra service's connection pools have a variable size, which gets adjusted automatically depending on the current load. There will always be at least a minimum number of connections, and at most a maximum number. These values can be configured independently by host distance (the distance is determined by your <code|loadBalancingPolicy</code|, and will generally indicate whether a host is in the same datacenter or not).
@@ -111,6 +120,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.maximumLocalConnectionsPerNode
       description: Defines the amount of maximum connections to the local Datacenter
       defaultValue: 10
@@ -119,6 +129,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode
       file: cassandra.properties
+      tags: ["Database", "Limit"]
     - key: com.openexchange.nosql.cassandra.minimumRemoteConnectionsPerNode
       description: Defines the amount of minimum connections to the remote Datacenter
       defaultValue: 2
@@ -127,6 +138,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: Defines the amount of maximum connections to the remote Datacenter
       defaultValue: 4
@@ -135,6 +147,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: |
         When activity goes down, the driver will "trash" connections if the maximum number of requests in a 10 second time period can be satisfied by less than the number of connections opened. Trashed connections are kept open but do not accept new requests. After the given timeout, trashed connections are closed and removed. If during that idle period activity increases again, those connections will be resurrected back into the active pool and reused. 
@@ -144,6 +157,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.idleConnectionTrashTimeout
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: |
         Defines the throttling of concurrent requests per connection on local (on the same datacenter) nodes. 
@@ -156,6 +170,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.maximumRequestsPerLocalConnection
       file: cassandra.properties
+      tags: ["Database", "Limit"]
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: |
         Defines the throttling of concurrent requests per connection on remote (on a different datacenter) nodes.
@@ -168,6 +183,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.maximumRequestsPerRemoteConnection
       file: cassandra.properties
+      tags: ["Database", "Limit"]
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: |
         When the CassandraService tries to send a request to a host, it will first try to acquire a connection from this host's pool. If the pool is busy (i.e. all connections are already handling their maximum number of in flight requests), the acquisition attempt gets enqueued until a connection becomes available again. 
@@ -179,6 +195,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.acquistionQueueMaxSize
       file: cassandra.properties
+      tags: ["Database", "Limit"]
     - key: com.openexchange.nosql.cassandra.connectTimeout
       description: |
         Specifies the connect timeout in milliseconds
@@ -188,6 +205,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]
     - key: com.openexchange.nosql.cassandra.readTimeout
       description: |
         Specifies the read timeout in milliseconds
@@ -197,3 +215,4 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
+      tags: ["Database"]

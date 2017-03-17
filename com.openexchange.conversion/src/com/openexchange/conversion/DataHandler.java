@@ -83,5 +83,5 @@ public interface DataHandler {
      * @return The result of converted data ready for being put into JSON response
      * @throws OXException If data cannot be handled by this data handler
      */
-    public Object processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException;
+    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException;
 }
