@@ -143,7 +143,12 @@ public class ICalHandler extends HttpAuthShareHandler {
 
     @Override
     protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return !shareRequest.isInvalidTarget() && (Module.CALENDAR.getFolderConstant() == shareRequest.getTarget().getModule() || Module.TASK.getFolderConstant() == shareRequest.getTarget().getModule()) &&
+        if (shareRequest.isInvalidTarget()) {
+            return false;
+        }
+
+        ShareTarget target = shareRequest.getTarget();
+        return (Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule()) &&
             (acceptsICal(request) || indicatesICalClient(request) || indicatesForcedICal(request));
     }
 
