@@ -270,7 +270,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#deniedIPChangesPerMinute()
      */
     @Override
-    public long deniedIPChangesPerMinute() {
+    public long getDeniedIPChangesPerMinute() {
         return deniedChangesPerMinute;
     }
 

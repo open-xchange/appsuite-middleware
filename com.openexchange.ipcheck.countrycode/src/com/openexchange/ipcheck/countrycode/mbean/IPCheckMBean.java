@@ -202,5 +202,5 @@ public interface IPCheckMBean {
     
     long getAcceptedIPChangesPerMinute();
     
-    long deniedIPChangesPerMinute();
+    long getDeniedIPChangesPerMinute();
 }
