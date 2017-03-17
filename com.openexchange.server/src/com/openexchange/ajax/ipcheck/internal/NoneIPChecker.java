@@ -91,7 +91,7 @@ public class NoneIPChecker implements IPChecker {
 
     @Override
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
-        IPCheckers.apply(false, current, session, configuration);
+        IPCheckers.updateIPAddress(current, session, false);
     }
 
 }
