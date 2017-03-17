@@ -1,6 +1,8 @@
 ---
-title: SpamHandler
+title: Spam Handler
 ---
+
+This page shows all properties with the tag: Spam Handler
 
 | __Key__ | com.openexchange.spamhandler.name |
 |:----------------|:--------|

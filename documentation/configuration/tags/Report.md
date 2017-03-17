@@ -2,6 +2,8 @@
 title: Report
 ---
 
+This page shows all properties with the tag: Report
+
 | __Key__ | com.openexchange.report.appsuite.fileStorage |
 |:----------------|:--------|
 | __Description__ | Reports filestorage directory for storage of report parts and composed data.<br> |

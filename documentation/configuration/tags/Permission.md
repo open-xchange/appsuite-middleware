@@ -1,6 +1,8 @@
 ---
-title: Folder
+title: Permission
 ---
+
+This page shows all properties with the tag: Permission
 
 | __Key__ | com.openexchange.folderstorage.defaultPermissions |
 |:----------------|:--------|

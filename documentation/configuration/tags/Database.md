@@ -1,6 +1,8 @@
 ---
-title: Cassandra
+title: Database
 ---
+
+This page shows all properties with the tag: Database
 
 | __Key__ | com.openexchange.nosql.cassandra.clusterName |
 |:----------------|:--------|

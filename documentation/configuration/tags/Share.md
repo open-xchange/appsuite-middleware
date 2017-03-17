@@ -2,6 +2,8 @@
 title: Share
 ---
 
+This page shows all properties with the tag: Share
+
 | __Key__ | com.openexchange.share.notification.usePersonalEmailAddress |
 |:----------------|:--------|
 | __Description__ | Specifies whether the user's personal E-Mail address (true) or the configured no-reply address (false) is supposed to be used in case a user<br>without mail permission sends out a sharing invitation<br> |

@@ -1,9 +1,8 @@
 ---
-title: Advertisement
+title: Reseller
 ---
 
-This page describes the properties related to the advertisement feature.
-
+This page shows all properties with the tag: Reseller
 
 | __Key__ | com.openexchange.advertisement.[reseller].packageScheme |
 |:----------------|:--------|

@@ -2,6 +2,8 @@
 title: SSL
 ---
 
+This page shows all properties with the tag: SSL
+
 | __Key__ | com.openexchange.net.ssl.default.truststore.enabled |
 |:----------------|:--------|
 | __Description__ | Defines if the default truststore provided by the JVM should be used. These truststore contains the Application Server’s trusted certificates, including public keys for other entities. For a trusted certificate, the server has confirmed that the public key in the certificate belongs to the certificate’s owner. Trusted certificates generally include those of certification authorities (CAs).<br>The administrator is able to ignore the provided by setting the property to 'false'. If so a custom truststore should be provided. Have a look at 'com.openexchange.net.ssl.custom.truststore.enabled' for more details.<br> |

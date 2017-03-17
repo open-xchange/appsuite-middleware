@@ -1,6 +1,8 @@
 ---
-title: Doveadm
+title: Rest
 ---
+
+This page shows all properties with the tag: Rest
 
 | __Key__ | com.openexchange.dovecot.doveadm.enabled |
 |:----------------|:--------|

@@ -10,6 +10,7 @@ title: Grizzly
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.websockets.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
 | __File__ | grizzly.properties |
 
 ---
@@ -20,6 +21,7 @@ title: Grizzly
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
 | __File__ | grizzly.properties |
 
 ---
@@ -30,6 +32,7 @@ title: Grizzly
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | grizzly.properties |
 
 ---

@@ -2,6 +2,8 @@
 title: CalDAV
 ---
 
+This page shows all properties with the tag: CalDAV
+
 | __Key__ | com.openexchange.caldav.push.apsd.enabled |
 |:----------------|:--------|
 | __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |

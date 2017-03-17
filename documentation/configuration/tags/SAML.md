@@ -1,6 +1,8 @@
 ---
-title: Saml
+title: SAML
 ---
+
+This page shows all properties with the tag: SAML
 
 | __Key__ | com.openexchange.saml.enableSessionIndexAutoLogin |
 |:----------------|:--------|

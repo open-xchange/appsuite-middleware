@@ -2,6 +2,8 @@
 title: CardDAV
 ---
 
+This page shows all properties with the tag: CardDAV
+
 | __Key__ | com.openexchange.carddav.push.apsd.enabled |
 |:----------------|:--------|
 | __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
