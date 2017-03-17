@@ -316,7 +316,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(null).password(null).clientIP(clientIP);
         b.userAgent(userAgent).authId(authId).client(client).version(null);
         b.hash(HashCalculator.getInstance().getHash(req, client));
-        b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
+        b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
+        b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         return b.build();
     }
