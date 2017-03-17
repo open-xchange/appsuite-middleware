@@ -49,26 +49,37 @@
 
 package com.openexchange.userfeedback.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
 import com.openexchange.userfeedback.internal.FeedbackServiceImpl;
 import com.openexchange.userfeedback.internal.FeedbackTypeRegistryImpl;
+import com.openexchange.userfeedback.internal.UserFeedbackProperty;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="vitali.sjablow.ruthmann@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.4
  */
 public class Activator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class, DatabaseService.class, ServerConfigService.class };
+        return new Class[]{ConfigViewFactory.class, DatabaseService.class, CapabilityService.class, ServerConfigService.class, LeanConfigurationService.class};
     }
 
     @Override
@@ -76,6 +87,29 @@ public class Activator extends HousekeepingActivator{
         Services.setServiceLookup(this);
         registerService(FeedbackTypeRegistry.class, FeedbackTypeRegistryImpl.getInstance());
         registerService(FeedbackService.class, new FeedbackServiceImpl());
+        
+        {
+            final String sCapability = "feedback";
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+            registerService(CapabilityChecker.class, new CapabilityChecker() {
+                @Override
+                public boolean isEnabled(String capability, Session ses) throws OXException {
+                    if (sCapability.equals(capability)) {
+                        ServerSession session = ServerSessionAdapter.valueOf(ses);
+                        if (session.isAnonymous() || session.getUser().isGuest()) {
+                            return false;
+                        }
+                        LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
+                        return leanConfig.getBooleanProperty(UserFeedbackProperty.enabled);
+                    }
+
+                    return true;
+                }
+            }, properties);
+
+            getService(CapabilityService.class).declareCapability(sCapability);
+        }
     }
 
     @Override
