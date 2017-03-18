@@ -51,7 +51,6 @@ package com.openexchange.push.imapidle;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -96,6 +95,8 @@ import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -500,11 +501,9 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             // If we're running a node-local lock, there is no need to check for sessions at other nodes
             if (ImapIdleClusterLock.Type.LOCAL != clusterLock.getType()) {
                 // Look-up remote sessions, too, if possible
-                sessions = lookUpRemoteSessionsFor(userId, contextId);
-                for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                        return injectAnotherListenerUsing(session, false).injectedPushListener;
-                    }
+                Session session = lookUpRemoteSessionFor(oldSession);
+                if (null != session) {
+                    return injectAnotherListenerUsing(session, false).injectedPushListener;
                 }
             }
         }
@@ -512,11 +511,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         return null;
     }
 
-    private Collection<Session> lookUpRemoteSessionsFor(int userId, int contextId) {
+    private Session lookUpRemoteSessionFor(Session oldSession) {
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
         ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
         if (null == hzInstance || null == obfuscatorService) {
-            return Collections.emptyList();
+            return null;
         }
 
         Cluster cluster = hzInstance.getCluster();
@@ -527,12 +526,15 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         // Determine other cluster members
         Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
         if (otherMembers.isEmpty()) {
-            return Collections.emptyList();
+            return null;
         }
+
+        int contextId = oldSession.getContextId();
+        int userId = oldSession.getUserId();
 
         IExecutorService executor = hzInstance.getExecutorService("default");
         Map<Member, Future<PortableSessionCollection>> futureMap = executor.submitToMembers(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers);
-        Collection<Session> userSessions = new LinkedList<>();
+        String oldSessionId = oldSession.getSessionID();
         for (Iterator<Entry<Member, Future<PortableSessionCollection>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
             Future<PortableSessionCollection> future = it.next().getValue();
             // Check Future's return value
@@ -546,7 +548,10 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     if (null != portableSessions) {
                         for (PortableSession portableSession : portableSessions) {
                             portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
-                            userSessions.add(portableSession);
+                            if (!oldSessionId.equals(portableSession.getSessionID()) && PushUtility.allowedClient(portableSession.getClient(), portableSession, true)) {
+                                cancelRest(it);
+                                return portableSession;
+                            }
                         }
                     }
                 } catch (InterruptedException e) {
@@ -577,7 +582,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 }
             }
         }
-        return userSessions;
+        return null;
     }
 
     /**
@@ -600,9 +605,27 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      *
      * @param future The {@code Future} to cancel
      */
-    private <V> void cancelFutureSafe(Future<V> future) {
+    static <V> void cancelFutureSafe(Future<V> future) {
         if (null != future) {
             try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+        }
+    }
+
+    private <V> void cancelRest(final Iterator<Entry<Member, Future<PortableSessionCollection>>> it) {
+        ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+        if (null != threadPool) {
+            AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    while (it.hasNext()) {
+                        Future<PortableSessionCollection> future = it.next().getValue();
+                        cancelFutureSafe(future);
+                    }
+                    return null;
+                }
+            };
+            threadPool.submit(task);
         }
     }
 
