@@ -197,6 +197,11 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         globalLock = new ReentrantLockAccessControl();
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     private AccessControl getlockFor(int userId, int contextId) {
         LockService lockService = services.getOptionalService(LockService.class);
         if (null == lockService) {
