@@ -213,7 +213,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     Pattern pattern = Pattern.compile(tmp);
                     params.hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
 
-                    writer.print("  Host name regular expression");
+                    writer.print("  Host name regular expression: ");
                     writer.println(tmp);
                 } catch (PatternSyntaxException e) {
                     LOG.warn("Invalid expression for host name", e);
@@ -229,26 +229,26 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 params.rootSubfoldersAllowed = Boolean.FALSE;
             } else {
                 params.rootSubfoldersAllowed = Boolean.valueOf(tmp);
-                writer.print("  Root sub-folders allowed");
+                writer.print("  Root sub-folders allowed: ");
                 writer.println(params.rootSubfoldersAllowed);
             }
         }
 
         {
             params.namespacePerUser = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.namespacePerUser", false, view);
-            writer.print("  Namespace per User");
+            writer.print("  Namespace per User: ");
             writer.println(params.namespacePerUser);
         }
 
         {
             params.umlautFilterThreshold = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.umlautFilterThreshold", 50, view);
-            writer.print("  Umlaut filter threhold");
+            writer.print("  Umlaut filter threhold: ");
             writer.println(params.umlautFilterThreshold);
         }
 
         {
             params.maxMailboxNameLength = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.maxMailboxNameLength", 60, view);
-            writer.print("  Max. Mailbox Name Length");
+            writer.print("  Max. Mailbox Name Length: ");
             writer.println(params.maxMailboxNameLength);
         }
 
@@ -266,7 +266,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 }
 
                 params.invalidChars = invalidChars;
-                writer.print("  Invalid Mailbox Characters");
+                writer.print("  Invalid Mailbox Characters: ");
                 writer.println(invalids);
             }
 
@@ -274,25 +274,25 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         {
             params.allowESORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowESORT", true, view);
-            writer.print("  Allow ESORT");
+            writer.print("  Allow ESORT: ");
             writer.println(Boolean.toString(params.allowESORT));
         }
 
         {
             params.allowSORTDISPLAY = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowSORTDISPLAY", false, view);
-            writer.print("  Allow SORT-DSIPLAY");
+            writer.print("  Allow SORT-DSIPLAY: ");
             writer.println(Boolean.toString(params.allowSORTDISPLAY));
         }
 
         {
             params.fallbackOnFailedSORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.fallbackOnFailedSORT", false, view);
-            writer.print("  Fallback On Failed SORT");
+            writer.print("  Fallback On Failed SORT: ");
             writer.println(Boolean.toString(params.fallbackOnFailedSORT));
         }
 
         {
             params.useMultipleAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddresses", false, view);
-            writer.print("  Use Multiple IP addresses");
+            writer.print("  Use Multiple IP addresses: ");
             writer.println(Boolean.toString(params.useMultipleAddresses));
         }
 

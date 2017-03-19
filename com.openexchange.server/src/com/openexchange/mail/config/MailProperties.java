@@ -278,7 +278,7 @@ public final class MailProperties implements IMailProperties {
             }
             params.loginSource = loginSource;
 
-            writer.print("  Login Source");
+            writer.print("  Login Source: ");
             writer.println(loginSource.toString());
         }
 
@@ -293,7 +293,7 @@ public final class MailProperties implements IMailProperties {
             }
             params.passwordSource = passwordSource;
 
-            writer.print("  Password Source");
+            writer.print("  Password Source: ");
             writer.println(passwordSource.toString());
         }
 
@@ -309,7 +309,7 @@ public final class MailProperties implements IMailProperties {
             }
             params.mailServerSource = mailServerSource;
 
-            writer.print("  Mail Server Source");
+            writer.print("  Mail Server Source: ");
             writer.println(mailServerSource.toString());
         }
 
@@ -324,7 +324,7 @@ public final class MailProperties implements IMailProperties {
             }
             params.transportServerSource = transportServerSource;
 
-            writer.print("  Transport Server Source");
+            writer.print("  Transport Server Source: ");
             writer.println(transportServerSource.toString());
         }
 
@@ -334,7 +334,7 @@ public final class MailProperties implements IMailProperties {
             if (tmp != null) {
                 mailServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.IMAP);
 
-                writer.print("  Mail Server");
+                writer.print("  Mail Server: ");
                 writer.println(mailServer.toString());
             }
             params.mailServer = mailServer;
@@ -347,7 +347,7 @@ public final class MailProperties implements IMailProperties {
             if (tmp != null) {
                 transportServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.SMTP);
 
-                writer.print("  Transport Server");
+                writer.print("  Transport Server: ");
                 writer.println(transportServer.toString());
             }
             params.transportServer = transportServer;
@@ -358,7 +358,7 @@ public final class MailProperties implements IMailProperties {
             if (masterPassword != null) {
                 masterPassword = masterPassword.trim();
 
-                writer.print("  Master Password");
+                writer.print("  Master Password: ");
                 writer.println("XXXXXXX");
             }
             params.masterPassword = masterPassword;
@@ -375,8 +375,8 @@ public final class MailProperties implements IMailProperties {
                 params.maxToCcBcc = 0;
             }
 
-            writer.print("  maxToCcBcc");
-            writer.println(Integer.toString(params.maxToCcBcc));
+            writer.print("  maxToCcBcc: ");
+            writer.println(params.maxToCcBcc);
         }
 
         {
@@ -387,8 +387,8 @@ public final class MailProperties implements IMailProperties {
                 params.maxDriveAttachments = 20;
             }
 
-            writer.print("  maxDriveAttachments");
-            writer.println(Integer.toString(params.maxDriveAttachments));
+            writer.print("  maxDriveAttachments: ");
+            writer.println(params.maxDriveAttachments);
         }
 
         {
@@ -396,7 +396,7 @@ public final class MailProperties implements IMailProperties {
             if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
                 params.phishingHeaders = phishingHdrsStr.split(" *, *");
 
-                writer.print("  Phishing Headers");
+                writer.print("  Phishing Headers: ");
                 writer.println(Arrays.toString(params.phishingHeaders));
             } else {
                 params.phishingHeaders = null;
@@ -406,7 +406,7 @@ public final class MailProperties implements IMailProperties {
         {
             params.rateLimitPrimaryOnly = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.rateLimitPrimaryOnly", true, view);
 
-            writer.print("  Rate limit primary only");
+            writer.print("  Rate limit primary only: ");
             writer.println(Boolean.toString(params.rateLimitPrimaryOnly));
         }
 
@@ -418,7 +418,7 @@ public final class MailProperties implements IMailProperties {
                 params.rateLimit = 0;
             }
 
-            writer.print("  Sent Rate limit");
+            writer.print("  Sent Rate limit: ");
             writer.println(Integer.toString(params.rateLimit));
         }
 
@@ -430,7 +430,7 @@ public final class MailProperties implements IMailProperties {
             }
             params.ranges = ranges;
 
-            writer.print("  White-listed from send rate limit");
+            writer.print("  White-listed from send rate limit: ");
             writer.println(ranges.toString());
         }
 
@@ -442,43 +442,43 @@ public final class MailProperties implements IMailProperties {
                 params.defaultArchiveDays = 90;
             }
 
-            writer.print("  Default archive days");
-            writer.println(Integer.toString(params.defaultArchiveDays));
+            writer.print("  Default archive days: ");
+            writer.println(params.defaultArchiveDays);
         }
 
         {
             params.preferSentDate = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.preferSentDate", false, view);
 
-            writer.print("  Prefer Sent Date");
-            writer.println(Boolean.toString(params.preferSentDate));
+            writer.print("  Prefer Sent Date: ");
+            writer.println(params.preferSentDate);
         }
 
         {
             params.hidePOP3StorageFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.hidePOP3StorageFolders", false, view);
 
-            writer.print("  Hide POP3 Storage Folder");
-            writer.println(Boolean.toString(params.hidePOP3StorageFolders));
+            writer.print("  Hide POP3 Storage Folder: ");
+            writer.println(params.hidePOP3StorageFolders);
         }
 
         {
             params.translateDefaultFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.translateDefaultFolders", true, view);
 
-            writer.print("  Translate Default Folders");
-            writer.println(Boolean.toString(params.translateDefaultFolders));
+            writer.print("  Translate Default Folders: ");
+            writer.println(params.translateDefaultFolders);
         }
 
         {
             params.deleteDraftOnTransport = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.deleteDraftOnTransport", false, view);
 
-            writer.print("  Delete Draft On Transport");
-            writer.println(Boolean.toString(params.deleteDraftOnTransport));
+            writer.print("  Delete Draft On Transport: ");
+            writer.println(params.deleteDraftOnTransport);
         }
 
         {
             params.forwardUnquoted = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.forwardUnquoted", false, view);
 
-            writer.print("  Forward Unquoted");
-            writer.println(Boolean.toString(params.forwardUnquoted));
+            writer.print("  Forward Unquoted: ");
+            writer.println(params.forwardUnquoted);
         }
 
         {
@@ -496,8 +496,8 @@ public final class MailProperties implements IMailProperties {
             }
             params.maxMailSize = maxMailSize;
 
-            writer.print("  Max. Mail Size");
-            writer.println(Long.toString(params.maxMailSize));
+            writer.print("  Max. Mail Size: ");
+            writer.println(params.maxMailSize);
         }
 
         {
@@ -508,8 +508,8 @@ public final class MailProperties implements IMailProperties {
                 params.maxForwardCount = 8;
             }
 
-            writer.print("  Max. Forward Count");
-            writer.println(Integer.toString(params.maxForwardCount));
+            writer.print("  Max. Forward Count: ");
+            writer.println(params.maxForwardCount);
         }
 
         PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
