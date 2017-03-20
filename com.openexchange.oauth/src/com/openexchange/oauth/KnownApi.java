@@ -50,9 +50,9 @@
 package com.openexchange.oauth;
 
 /**
- * {@link STANDARD_API} - An enumeration for available APIs.
+ * {@link KnownApi} - An enumeration for available APIs.
  */
-public enum STANDARD_API {
+public enum KnownApi implements API {
     /**
      * Twitter
      */
@@ -115,43 +115,61 @@ public enum STANDARD_API {
     SURDOC("SurDoc", "com.openexchange.oauth.surdoc"),
     ;
 
-    private API api;
+    private final String serviceId;
+    private final String name;
 
     /**
-     * Initialises a new {@link STANDARD_API}.
+     * Initializes a new {@link KnownApi}.
      *
      * @param shortName The short name of the API
      * @param fullName The full name of the API
      */
-    private STANDARD_API(String shortName, String fullName) {
-       this.api = new API(fullName, shortName);
+    private KnownApi(String shortName, String fullName) {
+        name = shortName;
+        serviceId = fullName;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getServiceId() {
+        return serviceId;
     }
 
     /**
-     * Gets the shortName
+     * Gets the short name for displaying purposes.
      *
-     * @return The shortName
+     * @return The short name
      */
     public String getShortName() {
-        return api.getName();
+        return name;
     }
 
     /**
-     * Gets the fullName
+     * Gets the full name aka. service identifier
      *
-     * @return The fullName
+     * @return The full name
      */
     public String getFullName() {
-        return api.getServiceId();
+        return serviceId;
     }
 
-    public API getAPI(){
-        return api;
-    }
+    /**
+     * Gets the known API for specified service identifier
+     *
+     * @param serviceId The service identifier to look-up
+     * @return The known API or <code>null</code>
+     */
+    public static KnownApi getApiByServiceId(String serviceId) {
+        if (null == serviceId) {
+            return null;
+        }
 
-    public static STANDARD_API getApiByServiceId(String serviceId){
-        for(STANDARD_API api : STANDARD_API.values()){
-            if(api.getFullName().equals(serviceId)){
+        for (KnownApi api : KnownApi.values()) {
+            if (api.getFullName().equals(serviceId)) {
                 return api;
             }
         }

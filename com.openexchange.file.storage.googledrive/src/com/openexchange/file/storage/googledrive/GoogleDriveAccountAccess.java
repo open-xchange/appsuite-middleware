@@ -61,7 +61,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.file.storage.googledrive.osgi.Services;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -106,7 +106,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
     @Override
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry registry = service.get(STANDARD_API.GOOGLE.getFullName());
+        OAuthAccessRegistry registry = service.get(KnownApi.GOOGLE.getFullName());
         OAuthAccess googleDriveAccess = registry.get(session.getContextId(), session.getUserId());
         if (googleDriveAccess == null) {
             GoogleDriveOAuthAccess access = new GoogleDriveOAuthAccess(account, session);

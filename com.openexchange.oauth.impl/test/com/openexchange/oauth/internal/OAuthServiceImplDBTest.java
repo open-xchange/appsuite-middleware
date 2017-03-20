@@ -65,9 +65,9 @@ import org.junit.Test;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.id.SimIDGenerator;
-import com.openexchange.oauth.STANDARD_API;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.DefaultOAuthAccount;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -118,7 +118,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
             @Override
             public API getAPI() {
-                return STANDARD_API.OTHER.getAPI();
+                return KnownApi.OTHER;
             }
 
             @Override

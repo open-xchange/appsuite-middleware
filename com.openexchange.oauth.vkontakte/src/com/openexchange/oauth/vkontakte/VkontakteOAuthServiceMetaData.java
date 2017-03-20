@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.VkontakteApi;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
@@ -71,7 +71,7 @@ public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAut
      * @param configService The configuration service
      */
     public VkontakteOAuthServiceMetaData(ServiceLookup services) {
-        super(services, STANDARD_API.VKONTAKTE.getAPI(), VkontakteOAuthScope.values());
+        super(services, KnownApi.VKONTAKTE, VkontakteOAuthScope.values());
     }
 
     @Override

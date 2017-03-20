@@ -60,10 +60,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -83,13 +83,13 @@ public class OAuthProxyRequest {
 	private final ServerSession session;
 
 	protected Map<String, List<Pattern>> whitelist = new HashMap<String,List<Pattern>>(){{
-		put(STANDARD_API.LINKEDIN.getFullName(), 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
-		put(STANDARD_API.TWITTER.getFullName(),	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
-		put(STANDARD_API.YAHOO.getFullName(), 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
-		put(STANDARD_API.TUMBLR.getFullName(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
-		put(STANDARD_API.FLICKR.getFullName(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
-		put(STANDARD_API.XING.getFullName(), Arrays.asList(Pattern.compile("^https:\\/\\/api\\.xing\\.com")));
-		put(STANDARD_API.GOOGLE.getFullName(), Arrays.asList(Pattern.compile("^https:\\/\\/www\\.googleapis\\.com")));
+		put(KnownApi.LINKEDIN.getFullName(), 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
+		put(KnownApi.TWITTER.getFullName(),	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
+		put(KnownApi.YAHOO.getFullName(), 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));
+		put(KnownApi.TUMBLR.getFullName(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
+		put(KnownApi.FLICKR.getFullName(), Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
+		put(KnownApi.XING.getFullName(), Arrays.asList(Pattern.compile("^https:\\/\\/api\\.xing\\.com")));
+		put(KnownApi.GOOGLE.getFullName(), Arrays.asList(Pattern.compile("^https:\\/\\/www\\.googleapis\\.com")));
 	}};
 
 	public static enum HTTPMethod {

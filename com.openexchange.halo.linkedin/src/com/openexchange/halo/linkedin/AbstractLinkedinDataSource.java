@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.linkedin.helpers.LinkedinPlusChecker;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -103,8 +103,8 @@ public abstract class AbstractLinkedinDataSource implements HaloContactDataSourc
     protected boolean hasAccount(ServerSession session) throws OXException {
         int uid = session.getUserId();
         int cid = session.getContextId();
-        if (getOauthService().getMetaDataRegistry().containsService(STANDARD_API.LINKEDIN.getFullName(), uid, cid)) {
-            return !getOauthService().getAccounts(STANDARD_API.LINKEDIN.getFullName(), session, uid, cid).isEmpty();
+        if (getOauthService().getMetaDataRegistry().containsService(KnownApi.LINKEDIN.getFullName(), uid, cid)) {
+            return !getOauthService().getAccounts(KnownApi.LINKEDIN.getFullName(), session, uid, cid).isEmpty();
         }
 
         return false;

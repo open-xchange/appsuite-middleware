@@ -70,8 +70,8 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -101,7 +101,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * Initializes a new {@link AbstractOAuthFileStorageService}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param api The {@link STANDARD_API}
+     * @param api The {@link KnownApi}
      * @param displayName The display name of the service
      * @param serviceId The service identifier
      * @param compositeFileStorageAccountManagerProvider The {@link CompositeFileStorageAccountManagerProvider}
@@ -115,7 +115,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * Initializes a new {@link AbstractOAuthFileStorageService}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param api The {@link STANDARD_API}
+     * @param api The {@link KnownApi}
      * @param displayName The display name of the service
      * @param serviceId The service identifier
      */

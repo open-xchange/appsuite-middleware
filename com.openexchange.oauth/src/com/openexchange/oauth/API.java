@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,78 +49,26 @@
 
 package com.openexchange.oauth;
 
-
 /**
- * {@link API}
+ * {@link API} - Represents an OAuth API from a certain service provider.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class API {
-
-    private final String serviceId;
-    private final String name;
-
-    public API(String serviceId, String name){
-        this.serviceId=serviceId;
-        this.name=name;
-    }
-
+public interface API {
 
     /**
-     * Gets the serviceId
+     * Gets the service identifier
      *
-     * @return The serviceId
+     * @return The service identifier
      */
-    public String getServiceId() {
-        return serviceId;
-    }
-
+    String getServiceId();
 
     /**
      * Gets the name
      *
      * @return The name
      */
-    public String getName() {
-        return name;
-    }
+    String getName();
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        API other = (API) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        if (serviceId == null) {
-            if (other.serviceId != null) {
-                return false;
-            }
-        } else if (!serviceId.equals(other.serviceId)) {
-            return false;
-        }
-        return true;
-    }
 }

@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.Google2Api;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
@@ -71,7 +71,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @param services the service lookup instance
      */
     public GoogleOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, STANDARD_API.GOOGLE.getAPI(), GoogleOAuthScope.values());
+        super(services, KnownApi.GOOGLE, GoogleOAuthScope.values());
     }
 
     @Override
