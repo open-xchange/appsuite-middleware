@@ -127,7 +127,7 @@ public final class IMAPExceptionMessages implements LocalizableStrings {
 
     public static final String UNKNOWN_FOLDER_MODE_MSG = "Unknown folder open mode %1$s";
 
-    public static final String UID_EXPUNGE_FAILED_MSG = "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\"";
+    public static final String UID_EXPUNGE_FAILED_MSG = "One or more message in folder %2$s could not be deleted";
 
     public static final String NO_FOLDER_OPEN_MSG = "Not allowed to open folder %1$s due to missing read access";
 

@@ -81,6 +81,7 @@ import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -360,7 +361,11 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * import vCard and merge with existing contact, ensuring that some important properties don't change
              */
-            Contact contact = factory.getContactService().getContact(
+            ContactService contactService = factory.getContactService();
+            if (null == contactService) {
+                throw ServiceExceptionCode.absentService(ContactService.class);
+            }
+            Contact contact = contactService.getContact(
                 factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()));
             String uid = contact.getUid();
             int parentFolderID = contact.getParentFolderID();
@@ -431,8 +436,10 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * image problem, handle by create without image
              */
-            LOG.warn("{}: {} - removing image and trying again.", getUrl(), e.getMessage());
-            object.removeImage1();
+            if(object!=null){
+                LOG.warn("{}: {} - removing image and trying again.", getUrl(), e.getMessage());
+                object.removeImage1();
+            }
             return true;
         } else if (Tools.isDataTruncation(e)) {
             /*

@@ -4,11 +4,17 @@ id:
 comparison:
   type: string
   description: The comparison type, see [Possible comparisons](#possible-comparisons).
+addresspart:
+  type: string
+  description: The addresspart which shall be used for envelope or address tests, see [Possible address parts](#possible-address-parts).
 headers:
   type: array
-  description: An array containing the header fields (for address-, envelope- and header-test).
+  description: An array containing the header fields (for address-, envelope-, exists- and header-test).
   items:
     type: string
+header:
+  type: string
+  description: The header field of the date test.
 values:
   type: array
   description: An array containing the value for the header fields or the values for the body. The test will be true if any of the strings matches (for address-, envelope-, header-test and body-test).
@@ -27,6 +33,9 @@ datevalue:
   items:
     type: integer
     format: int64
+zone: 
+  type: string
+  description: Containing the timezone of date or currentdate tests. E.g. "+0100". If omitted the current timezone of the user is used.
 extensionskey:
   type: string
   description: The [extension key](#possible-extensions) (for body-test).

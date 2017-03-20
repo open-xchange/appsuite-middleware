@@ -158,6 +158,8 @@ public interface CustomPortable extends Portable {
      *   &bull; 301 --> com.openexchange.saml.impl.hz.PortableLogoutRequestInfo
      *   &bull; 400 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck
      *   &bull; 401 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp
+     *   &bull; 402 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp
+     *   &bull; 403 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection
      *   &bull; 500 --> com.openexchange.sms.tools.internal.SMSBucket
      *   &bull; 600 --> com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor
      * </pre>

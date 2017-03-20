@@ -612,6 +612,30 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA("Default folders cannot be created on server %1$s for user %2$s (%3$s) in context on %4$s as mail system denies to create more folders: %5$s",
         MailExceptionStrings.DEFAULT_FOLDER_CHECK_FAILED_OVER_QUOTA_MSG, CATEGORY_PERMISSION_DENIED, 113),
+    /**
+     * Mail access is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s)
+     */
+    MAIL_ACCESS_DISABLED("Mail access is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.MAIL_ACCESS_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 114),
+    /**
+     * OAuth-linked mail access is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s, oauth=%5$s)
+     */
+    MAIL_ACCESS_DISABLED_OAUTH("OAuth-linked mail access is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s, oauth=%5$s)", MailExceptionStrings.MAIL_ACCESS_DISABLED_OAUTH_MSG, CATEGORY_PERMISSION_DENIED, MAIL_ACCESS_DISABLED.getNumber()), // Yapp, same error code
+    /**
+     * Mail transport is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s)
+     */
+    MAIL_TRANSPORT_DISABLED("Mail transport is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.MAIL_TRANSPORT_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 115),
+    /**
+     * Mail transport is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s, oauth=%5$s)
+     */
+    MAIL_TRANSPORT_DISABLED_OAUTH("Mail transport is disabled for server %1$s with login %2$s (user=%3$s, context=%4$s, oauth=%5$s)", MailExceptionStrings.MAIL_TRANSPORT_DISABLED_OAUTH_MSG, CATEGORY_PERMISSION_DENIED, MAIL_TRANSPORT_DISABLED.getNumber()), // Yapp, same error code
+    /**
+     * Unable to save draft, due to exceeded quota.
+     */
+    UNABLE_TO_SAVE_DRAFT_QUOTA("Unable to save draft, due to exceeded quota.", MailExceptionStrings.UNABLE_TO_SAVE_DRAFT_QUOTA_MSG, CATEGORY_CAPACITY, 116),
+    /**
+     * Unable to save the mail, due to exceeded quota.
+     */
+    UNABLE_TO_SAVE_MAIL_QUOTA("Unable to save the mail, due to exceeded quota.", MailExceptionStrings.UNABLE_TO_SAVE_MAIL_QUOTA_MSG, CATEGORY_CAPACITY, 117),
     ;
 
     private static final String PREFIX = "MSG";

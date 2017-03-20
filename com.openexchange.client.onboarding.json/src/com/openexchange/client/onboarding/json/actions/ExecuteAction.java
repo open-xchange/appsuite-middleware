@@ -56,9 +56,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.client.onboarding.ClientDevice;
+import com.openexchange.client.onboarding.ClientDevices;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DefaultOnboardingRequest;
 import com.openexchange.client.onboarding.OnboardingAction;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.ResultObject;
 import com.openexchange.client.onboarding.Scenario;
@@ -111,11 +113,14 @@ public class ExecuteAction extends AbstractOnboardingAction {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create("action_id");
         }
 
-        String clientDeviceId = requestData.getParameter("client");
-        ClientDevice clientDevice = ClientDevice.clientDeviceFor(clientDeviceId);
-        if (null == clientDevice) {
-            // Fall-back to Desktop PC
-            clientDevice = ClientDevice.DESKTOP;
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
+
+        if (false == clientDevice.implies(compositeId.getDevice())) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(compositeId.getScenarioId());
         }
 
         // Parse optional form content

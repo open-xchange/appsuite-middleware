@@ -284,7 +284,9 @@ public final class Utils {
             return new FileSizeTerm(pattern);
         } else if (CommonConstants.FIELD_DATE.equals(field)) {
             final Pair<Comparison, Long> pair = parseDateQuery(query);
-            return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
+            if (null != pair) {
+                return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
+            }
         }
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
@@ -580,6 +582,14 @@ public final class Utils {
                 }
             }
             return new NotTerm(new OrTerm(searchTerms));
+        } else if (FileType.DOC_TEXT.getIdentifier().equals(query)) { 
+            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_TEXT;
+        } else if (FileType.DOC_SPREADSHEET.getIdentifier().equals(query)) { 
+            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_SPREADSHEET;
+        } else if (FileType.DOC_PRESENTATION.getIdentifier().equals(query)) { 
+            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_PRESENTATION;
+        } else if (FileType.PDF.getIdentifier().equals(query)) { 
+            patterns = Constants.FILETYPE_PATTERNS_PDF;
         } else {
             patterns = null;
         }

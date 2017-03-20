@@ -93,6 +93,9 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
+import com.openexchange.mail.dataobjects.SecurityResult;
+import com.openexchange.mail.dataobjects.SignatureResult;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
@@ -132,6 +135,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String NESTED_MESSAGES = MailJSONField.NESTED_MESSAGES.getKey();
     private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
     private static final String ACCOUNT_ID = MailJSONField.ACCOUNT_ID.getKey();
+    private static final String MALICIOUS = "malicious";
     private static final String ACCOUNT_NAME = MailJSONField.ACCOUNT_NAME.getKey();
     private static final String HAS_ATTACHMENTS = MailJSONField.HAS_ATTACHMENTS.getKey();
     private static final String HAS_REAL_ATTACHMENTS = "real_attachment";
@@ -145,6 +149,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String HEADERS = MailJSONField.HEADERS.getKey();
     private static final String ORIGINAL_ID = MailJSONField.ORIGINAL_ID.getKey();
     private static final String ORIGINAL_FOLDER_ID = MailJSONField.ORIGINAL_FOLDER_ID.getKey();
+    private static final String SECURITY = MailJSONField.SECURITY.getKey();
+    private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
 
@@ -360,6 +366,15 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
+                jsonObject.put(MALICIOUS, usm.isSuppressLinks());
+                // Guard info
+                if (mail.containsSecurityInfo()) {
+                    jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
+                }
+                if (mail.hasSecurityResult()) {
+                    jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
+                }
+
                 this.initialiserSequenceId = mail.getSequenceId();
 
 
@@ -385,6 +400,49 @@ public final class JsonMessageHandler implements MailMessageHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Transforms given security result to JSON.
+     *
+     * @param result The security result associated with the mail
+     * @return The JSON representation of security result
+     * @throws JSONException If JSON cannot be returned
+     */
+    public JSONObject securityResultToJSON (SecurityResult result) throws JSONException {
+        JSONObject json = new JSONObject(10);
+        json.put("decrypted", result.getSuccess());
+        json.put("type", result.getType().toString());
+        if (result.hasError()) {
+            json.put("error", result.getError());
+        }
+        json.put("pgpInline", result.isPgpInline());
+        if (result.hasSignatureResults()) {
+            List<SignatureResult> signatureResults = result.getSignatureResults();
+            JSONArray signatures = new JSONArray(signatureResults.size());
+            for (SignatureResult res : signatureResults) {
+                JSONObject sig = new JSONObject(4);
+                sig.put("verified", res.isVerified());
+                sig.put("missing", res.isMissing());
+                sig.put("date", res.getDate());
+                signatures.put(sig);
+            }
+            json.put("signatures", signatures);
+        }
+        return json;
+    }
+
+    /**
+     * Create the JSON representation for this <code>SecurityInfo</code> object.
+     *
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public JSONObject securityInfoToJSON(SecurityInfo info) throws JSONException {
+        JSONObject security = new JSONObject(2);
+        security.put("encrypted", info.isEncrypted());
+        security.put("signed", info.isSigned());
+        return security;
     }
 
     /**
@@ -1116,7 +1174,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
     }
 
-    private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
+    private String getHtmlDisplayVersion(final ContentType contentType, final String src) throws OXException {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
             return HtmlProcessing.formatHTMLForDisplay(
@@ -1382,7 +1440,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             Object value = receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone()));
             jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), value);
-            if (false == MailProperties.getInstance().isPreferSentDate()) {
+            if (false == MailProperties.getInstance().isPreferSentDate(session.getUserId(), session.getContextId())) {
                 jsonObject.put(MailJSONField.DATE.getKey(), value);
             }
             return true;
@@ -1396,7 +1454,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             Object value = sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone()));
             jsonObject.put(MailJSONField.SENT_DATE.getKey(), value);
-            if (MailProperties.getInstance().isPreferSentDate()) {
+            if (MailProperties.getInstance().isPreferSentDate(session.getUserId(), session.getContextId())) {
                 jsonObject.put(MailJSONField.DATE.getKey(), value);
             }
             return true;

@@ -59,8 +59,6 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
@@ -88,7 +86,6 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class FindTasksQueryTests extends AbstractFindTasksTest {
 
     /**

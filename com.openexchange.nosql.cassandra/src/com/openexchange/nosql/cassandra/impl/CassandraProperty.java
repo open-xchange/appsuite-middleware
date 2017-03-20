@@ -50,7 +50,9 @@
 package com.openexchange.nosql.cassandra.impl;
 
 import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.openexchange.config.lean.Property;
 import com.openexchange.nosql.cassandra.CassandraService;
 
 /**
@@ -58,7 +60,7 @@ import com.openexchange.nosql.cassandra.CassandraService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum CassandraProperty {
+public enum CassandraProperty implements Property {
     /**
      * Defines the name of the Cassandra cluster. Technically this name does not correlate
      * with the name configured in the real Cassandra cluster, but it's rather used to distinguish
@@ -96,7 +98,7 @@ public enum CassandraProperty {
      * <li>{@link CassandraRetryPolicy#fallthroughRetryPolicy}</li>
      * </ul>
      * <p/>
-     * 
+     *
      * Defaults to {@link CassandraRetryPolicy#defaultRetryPolicy}
      */
     retryPolicy(CassandraRetryPolicy.defaultRetryPolicy.name()),
@@ -186,14 +188,22 @@ public enum CassandraProperty {
      * If all hosts are busy with a full queue, the request will fail with a {@link NoHostAvailableException}.
      */
     acquisitionQueueMaxSize(256),
+    /**
+     * The connection timeout in milliseconds.
+     */
+    connectTimeout(SocketOptions.DEFAULT_CONNECT_TIMEOUT_MILLIS),
+    /**
+     * The read timeout in milliseconds.
+     */
+    readTimeout(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS),
     ;
 
-    private Object defaultValue;
+    private final Object defaultValue;
 
     private static final String PREFIX = "com.openexchange.nosql.cassandra.";
 
     /**
-     * Initialises a new {@link CassandraProperty}.
+     * Initializes a new {@link CassandraProperty}.
      */
     private CassandraProperty(Object defaultValue) {
         this.defaultValue = defaultValue;
@@ -201,10 +211,11 @@ public enum CassandraProperty {
 
     /**
      * Returns the fully qualified name for the property
-     * 
+     *
      * @return the fully qualified name for the property
      */
-    public String getName() {
+    @Override
+    public String getFQPropertyName() {
         return PREFIX + name();
     }
 
@@ -213,11 +224,12 @@ public enum CassandraProperty {
      *
      * @return the default value of this property
      */
+    @Override
     public <T extends Object> T getDefaultValue(Class<T> cls) {
-        if (defaultValue.getClass().isAssignableFrom(cls)) {
-            return cls.cast(defaultValue);
-        } else {
+        if (false == defaultValue.getClass().isAssignableFrom(cls)) {
             throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
         }
+
+        return cls.cast(defaultValue);
     }
 }

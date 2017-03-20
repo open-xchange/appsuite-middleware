@@ -58,7 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.json.fields.AddressEnvelopeAndHeaderTestField;
+import com.openexchange.mailfilter.json.ajax.json.fields.HeaderTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.BodyTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
@@ -105,7 +105,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
             }
         }
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.values.name(), commandName)));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), commandName)));
         return new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>());
     }
 

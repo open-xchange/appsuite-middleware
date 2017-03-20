@@ -129,9 +129,6 @@ public class LoginListenerRegistryImpl implements LoginListenerRegistry {
         listeners.remove(loginListener);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.login.listener.internal.LoginListenerRegistry#getLoginListeners()
-     */
     @Override
     public List<LoginListener> getLoginListeners() {
         return Collections.unmodifiableList(listeners);

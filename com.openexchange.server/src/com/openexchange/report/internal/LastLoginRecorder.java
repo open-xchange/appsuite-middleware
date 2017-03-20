@@ -49,10 +49,14 @@
 
 package com.openexchange.report.internal;
 
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.ajax.Client;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -68,17 +72,39 @@ public class LastLoginRecorder implements LoginHandlerService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LastLoginRecorder.class);
 
-    private int maxClientCount = -1;
+    private final int maxClientCount;
     private final UserService userService;
+    private final Set<String> whiteList;
 
-    public LastLoginRecorder(ConfigurationService confService, UserService userService) {
+    /**
+     * Initializes a new {@link LastLoginRecorder}.
+     *
+     * @param configService The configuration service to use
+     * @param userService The user service to use
+     */
+    public LastLoginRecorder(ConfigurationService configService, UserService userService) {
         super();
         this.userService = userService;
-        readConfiguration(confService);
-    }
+        maxClientCount = configService.getIntProperty("com.openexchange.user.maxClientCount", -1);
 
-    private void readConfiguration(ConfigurationService confService) {
-        maxClientCount = confService.getIntProperty("com.openexchange.user.maxClientCount", -1);
+        ImmutableSet.Builder<String> whiteList = ImmutableSet.builder();
+        for (Interface iface : Interface.values()) {
+            whiteList.add(iface.toString());
+        }
+
+        String[] knownClients = {
+            Client.OX6_UI.getClientId(),                   // OX6 frontend
+            Client.APPSUITE_UI.getClientId(),              // AppSuite frontend
+            Client.MOBILE_APP.getClientId(),               // Mobile Web Interface
+            Client.OUTLOOK_OXTENDER2_ADDIN.getClientId(),  // Outlook OXtender2 AddIn
+            Client.OXNOTIFIER.getClientId(),               // OXNotifier
+            Client.OUTLOOK_UPDATER1.getClientId(),         // Outlook Updater 1
+            Client.OUTLOOK_UPDATER2.getClientId()          // Outlook Updater 2
+        };
+        for (String knownClient : knownClients) {
+            whiteList.add(knownClient);
+        }
+        this.whiteList = whiteList.build();
     }
 
     @Override
@@ -97,11 +123,12 @@ public class LastLoginRecorder implements LoginHandlerService {
 
         Context context = login.getContext();
         User user = login.getUser();
-        if (!isWhitelistedClient(client) && maxClientCount > 0) {
+        if (maxClientCount > 0 && !isWhitelistedClient(client)) {
             int count = 0;
             for (String origKey : user.getAttributes().keySet()) {
                 if (origKey.startsWith("client:") && ++count > maxClientCount) {
-                    LOG.warn("Login of client {} for login {} (Context: {}, User: {}) will not be recorded in the database.", client, login, context.getContextId(), user.getId());
+                    LOG.warn("Login of client {} for login {} (Context: {}, User: {}) will not be recorded in the database.", client, login, Integer.valueOf(context.getContextId()), Integer.valueOf(user.getId()));
+                    return;
                 }
             }
         }
@@ -110,6 +137,7 @@ public class LastLoginRecorder implements LoginHandlerService {
 
     /**
      * Updates the last-accessed time stamp for given user's client.
+     *
      * @param userService UserService to update the user attributes.
      * @param client The client identifier
      * @param origUser The associated user
@@ -120,22 +148,20 @@ public class LastLoginRecorder implements LoginHandlerService {
         if (context.isReadOnly()) {
             return;
         }
+
         // Set attribute and add current time stamp
-        userService.setAttribute(null, "client:" + client, String.valueOf(System.currentTimeMillis()), origUser.getId(), context, false);
+        try {
+            userService.setAttribute(null, "client:" + client, String.valueOf(System.currentTimeMillis()), origUser.getId(), context, false);
+        } catch (OXException e) {
+            if (!UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.equals(e)) {
+                throw e;
+            }
+            // Ignore. Another thread updated in the meantime
+        }
     }
 
-    private static boolean isWhitelistedClient(String client) {
-        for (Interface iface : Interface.values()) {
-            if (iface.toString().equals(client)) {
-                return true;
-            }
-        }
-        for (String known : KNOWN_CLIENTS) {
-            if (known.equals(client)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean isWhitelistedClient(String client) {
+        return null != client && whiteList.contains(client);
     }
 
     @Override
@@ -143,13 +169,4 @@ public class LastLoginRecorder implements LoginHandlerService {
         // Nothing to to.
     }
 
-    private static final String[] KNOWN_CLIENTS = {
-        "com.openexchange.ox.gui.dhtml",     // OX6 frontend
-        "open-xchange-appsuite",             // AppSuite frontend
-        "com.openexchange.mobileapp",        // Mobile Web Interface
-        "OpenXchange.HTTPClient.OXAddIn",    // Outlook OXtender2 AddIn
-        "OpenXchange.HTTPClient.OXNotifier", // OXNotifier
-        "com.open-xchange.updater.olox1",    // Outlook Updater 1
-        "com.open-xchange.updater.olox2"     // Outlook Updater 2
-    };
 }

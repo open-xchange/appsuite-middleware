@@ -1,0 +1,44 @@
+id:
+  type: string
+  description: The name of the test command, see [Possible tests](#possible-tests) and [Simplified tests](#simplified-tests).
+comparison:
+  type: string
+  description: The comparison type, see [Possible comparisons](#possible-comparisons).
+addresspart:
+  type: string
+  description: The addresspart which shall be used for envelope or address tests, see [Possible address parts](#possible-address-parts).
+headers:
+  type: array
+  description: An array containing the header fields (for address-, envelope-, exists- and header-test).
+  items:
+    type: string
+header:
+  type: string
+  description: The header field of the date test.
+values:
+  type: array
+  description: An array containing the value for the header fields or the values for the body. The test will be true if any of the strings matches (for address-, envelope-, header-test and body-test).
+  items:
+    type: string
+size:
+  type: integer
+  format: int64
+  description: The size in bytes (for size-test).
+datepart:
+  type: string
+  description: Type of the comparison, which can be "date", "weekday" or "time" (for currentdate-test).
+datevalue:
+  type: array
+  description: Contains the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 (sunday) to 6 (saturday) reflecting the equivalent weekday (for currentdate-test).
+  items:
+    type: integer
+    format: int64
+zone: 
+  type: string
+  description: The timezone which should be used for a date or currentdate test. E.g. "+0100". If omitted the current timezone of the user is used.
+extensionskey:
+  type: string
+  description: The [extension key](#possible-extensions) (for body-test).
+extensionsvalue:
+  type: string
+  description: A value for the given key. If the key has no value the value given here is ignored (for body-test).

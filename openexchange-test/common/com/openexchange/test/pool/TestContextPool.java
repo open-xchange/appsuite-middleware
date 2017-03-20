@@ -53,10 +53,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
+import com.openexchange.java.ConcurrentList;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -70,31 +70,40 @@ public class TestContextPool {
 
     private static BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(50);
 
+    private static List<TestContext> allTimeContexts = new ConcurrentList<>();
+
     private static AtomicReference<TestContextWatcher> contextWatcher = new AtomicReference<>();
 
     private static AtomicBoolean watcherInitialized = new AtomicBoolean(false);
 
     public static synchronized void addContext(TestContext context) {
+        remember(context);
         contexts.add(context);
         startWatcher();
         LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
     }
 
-    public static TestContext acquireContext(String acquiredBy) {
-        synchronized (TestContextPool.class) {
-            try {
-                TestContext context = contexts.poll(10L, TimeUnit.SECONDS);
-                Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
-                context.setAcquiredBy(acquiredBy);
-                contextWatcher.get().contextInUse(context);
-                LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
-                return context;
-            } catch (InterruptedException e) {
-                // should not happen
-                LOG.error("", e);
-            }
-            return null;
+    private static void remember(TestContext context) {
+        if (allTimeContexts.contains(context)) {
+            return;
         }
+        allTimeContexts.add(context);
+        LOG.info("Added context {} to all time available context list.", context.getName());
+    }
+
+    public static TestContext acquireContext(String acquiredBy) {
+        try {
+            TestContext context = contexts.take();
+            Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
+            context.setAcquiredBy(acquiredBy);
+            contextWatcher.get().contextInUse(context);
+            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
+            return context;
+        } catch (InterruptedException e) {
+            // should not happen
+            LOG.error("", e);
+        }
+        return null;
     }
 
     public static void backContext(TestContext context) {
@@ -112,14 +121,6 @@ public class TestContextPool {
             // should not happen
             LOG.error("", e);
         }
-    }
-
-    public static List<Integer> getAvailableContexts() {
-        List<Integer> contextIds = new ArrayList<>();
-        for (TestContext context : contexts) {
-            contextIds.add(context.getId());
-        }
-        return contextIds;
     }
 
     // the admin is not handled to be acquired only by one party
@@ -142,7 +143,7 @@ public class TestContextPool {
         }
     }
 
-    public static synchronized List<TestContext> getCopyOfCurrentlyAvailableContexts() {
-        return new ArrayList<>(contexts);
+    public static synchronized List<TestContext> getAllTimeAvailableContexts() {
+        return new ArrayList<>(allTimeContexts);
     }
 }

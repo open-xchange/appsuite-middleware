@@ -67,12 +67,7 @@ import com.openexchange.push.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
- * {@link PushUtility}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-/**
- * {@link PushUtility}
+ * {@link PushUtility} - Utility class for mail push.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

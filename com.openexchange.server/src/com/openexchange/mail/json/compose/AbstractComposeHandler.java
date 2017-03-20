@@ -75,6 +75,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -105,6 +106,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
@@ -333,12 +335,13 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         int length = jDriveIds.length();
         if (length > 0) {
             // Check max. allowed Drive attachments
-            int max = MailProperties.getInstance().getMaxDriveAttachments();
+            ServerSession session = context.getSession();
+            int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
             if (max > 0 && length > max) {
                 throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
             }
             for (int i = 0; i < length; i++) {
-                context.addDrivePart(context.getProvider().getNewDocumentPart(jDriveIds.getString(i), context.getSession()));
+                context.addDrivePart(context.getProvider().getNewDocumentPart(jDriveIds.getString(i), session));
             }
         }
     }
@@ -355,7 +358,8 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         int length = jDataSources.length();
         if (length > 0) {
             // Check max. allowed Drive attachments
-            int max = MailProperties.getInstance().getMaxDriveAttachments();
+            ServerSession session = context.getSession();
+            int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
             if (max > 0 && length > max) {
                 throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
             }
@@ -383,14 +387,14 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
 
                 Data<?> data;
                 if (types.contains(InputStream.class)) {
-                    data = dataSource.getData(InputStream.class, parseDataSourceArguments(jDataSource), context.getSession());
+                    data = dataSource.getData(InputStream.class, parseDataSourceArguments(jDataSource), session);
                 } else if (types.contains(byte[].class)) {
-                    data = dataSource.getData(byte[].class, parseDataSourceArguments(jDataSource), context.getSession());
+                    data = dataSource.getData(byte[].class, parseDataSourceArguments(jDataSource), session);
                 } else {
                     throw MailExceptionCode.UNSUPPORTED_DATASOURCE.create();
                 }
 
-                DataMailPart dataMailPart = context.getProvider().getNewDataPart(data.getData(), data.getDataProperties().toMap(), context.getSession());
+                DataMailPart dataMailPart = context.getProvider().getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
                 context.addDataPart(dataMailPart);
             }
         }
@@ -827,13 +831,24 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Security settings
              */
             {
+                final CryptographicServiceAuthenticationFactory authenticationFactory =
+                    MailJSONActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                String authentication = null;
+                if(authenticationFactory != null) {
+                    if(composeRequest.getRequest() != null) {
+                        authentication = authenticationFactory.createAuthenticationFrom(composeRequest.getRequest());
+                    }
+                }
                 JSONObject jSecuritySettings = jMail.optJSONObject("security");
                 if (null != jSecuritySettings) {
                     SecuritySettings settings = SecuritySettings.builder()
                         .encrypt(jSecuritySettings.optBoolean("encrypt", false))
                         .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
                         .sign(jSecuritySettings.optBoolean("sign", false))
-                        .authentication(jSecuritySettings.optString("authentication", null))
+                        .authentication(authentication)
+                        .guestLanguage(jSecuritySettings.optString("language", null))
+                        .guestMessage(jSecuritySettings.optString("message", null))
+                        .pin(jSecuritySettings.optString("pin", null))
                         .build();
                     if (settings.anythingSet()) {
                         composedMail.setSecuritySettings(settings);

@@ -50,9 +50,7 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.framework.ListIDs.l;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -80,6 +78,7 @@ public class ListTest extends AppointmentTest {
 
     private FolderObject folder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -149,7 +148,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setLabel(2);
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
-        appointmentObj.setOrganizer("someone else");
+        appointmentObj.setOrganizer("someone.else@example.com");
         appointmentObj.setUid("1234567890abcdef" + System.currentTimeMillis());
         appointmentObj.setSequence(0);
 
@@ -249,7 +248,7 @@ public class ListTest extends AppointmentTest {
         appointmentList[2] = new Appointment();
         appointmentList[2].setObjectID(appointment2.getObjectID());
         appointmentList[2].setParentFolderID(appointmentFolderId);
-        
+
         //FIXME no corresponding method in calendartestmanager
 //        List<Appointment> appointmentArray = ctm.all(publicFolderId, null, null, false);
 //
@@ -297,6 +296,7 @@ public class ListTest extends AppointmentTest {
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -63,6 +63,7 @@ import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.text.HtmlProcessing;
@@ -314,7 +315,7 @@ public final class Utility {
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final String charset) {
+    public static String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return HtmlProcessing.getConformHTML(htmlContent, charset);
     }
 

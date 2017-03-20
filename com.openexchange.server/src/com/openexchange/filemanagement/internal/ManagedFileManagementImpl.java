@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -91,7 +93,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileManagementImpl.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileManagementImpl.class);
 
     private static final int DELAY = 120000;
 
@@ -153,7 +156,19 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                         @Override
                         public boolean accept(File file) {
                             // only consider expired files with designated prefix
-                            return file.isFile() && file.getName().startsWith(defaultPrefix) && file.lastModified() < stamp;
+                            if (!file.isFile() || !file.getName().startsWith(defaultPrefix)) {
+                                return false;
+                            }
+
+                            try {
+                                BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                                return attr.creationTime().toMillis() < stamp && attr.lastModifiedTime().toMillis() < stamp;
+                            } catch (IOException e) {
+                                // Failed to determine using Files.readAttributes()
+                                LOG.warn("Failed to read attributes of file: {}", file, e);
+                                long lastModified = file.lastModified();
+                                return 0 == lastModified ? false : (lastModified < stamp);
+                            }
                         }
                     });
                     if (expiredFiles != null) {
@@ -198,10 +213,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     for (Map.Entry<String, File> entry : orphanedFiles.entrySet()) {
                         String name = entry.getKey();
                         File orphaned = entry.getValue();
-                        if (!orphaned.delete()) {
-                            logger.warn("Temporary file could not be deleted: {}", name);
+                        boolean deleted = orphaned.delete();
+                        if (deleted) {
+                            logger.debug("Removed orphaned managed file {}", name);
                         }
-                        logger.debug("Removed orphaned managed file {}", name);
                     }
                 }
             } catch (Exception t) {

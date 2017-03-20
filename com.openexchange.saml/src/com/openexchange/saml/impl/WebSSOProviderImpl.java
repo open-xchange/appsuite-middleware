@@ -108,6 +108,7 @@ import org.opensaml.xml.security.keyinfo.KeyInfoGenerator;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.xml.util.XMLObjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -123,6 +124,9 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.oauth.service.OAuthAccessToken;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService.OAuthGrantType;
 import com.openexchange.saml.SAMLExceptionCode;
 import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
@@ -288,6 +292,9 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             enhanceAuthInfo(authInfo, bearerAssertion);
             Map<String, String> properties = authInfo.getProperties();
+
+            tryExchangeAssertionForOAuthToken(bearerAssertion, authInfo);
+
             String sessionToken = sessionReservationService.reserveSessionFor(
                 authInfo.getUserId(),
                 authInfo.getContextId(),
@@ -318,6 +325,44 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         } catch (ValidationException e) {
             throw SAMLExceptionCode.VALIDATION_FAILED.create(e.getReason().getMessage(), e.getMessage());
+        }
+    }
+
+    /**
+     *
+     * The given assertion is used to exchange it for an OAuth 2.0 token pair, by using the assertion as authorization grant
+     * as defined in RFC 7533: "Security Assertion Markup Language (SAML) 2.0 Profile for OAuth 2.0 Client Authentication and Authorization Grants"
+     *
+     * @param assertion The SAML {@link Assertion}
+     * @param authInfo The {@link AuthenticationInfo} of the user
+     * @throws OXException
+     */
+    private void tryExchangeAssertionForOAuthToken(Assertion assertion, AuthenticationInfo authInfo) throws OXException {
+        try {
+            OAuthAccessTokenService service = services.getService(OAuthAccessTokenService.class);
+            if(service==null){
+                LOG.debug("OAuthAccessTokenService is missing. Unable to exchange the assertion {} for an oauth token pair.", assertion.getID());
+                return;
+            }
+            if (!service.isConfigured(authInfo.getUserId(), authInfo.getContextId())) {
+                LOG.debug("OAuth token endpoint not properly configured. The assertion {} will not be exchanged for an oauth token pair.", assertion.getID());
+                return;
+            }
+
+            Assertion clonedAssertion = XMLObjectHelper.cloneXMLObject(assertion, true);
+            String xmlAssertion = openSAML.marshall(clonedAssertion);
+            String b64Assertion = Base64.encodeBase64URLSafeString(xmlAssertion.getBytes());
+            LOG.debug("Trying to exchange the assertion {} for an oauth token pair...", assertion.getID());
+            OAuthAccessToken token = service.getAccessToken(OAuthGrantType.SAML, b64Assertion, authInfo.getUserId(), authInfo.getContextId(), null);
+            authInfo.getProperties().put(SAMLSessionParameters.ACCESS_TOKEN, token.getAccessToken());
+            if(token.getRefreshToken()!=null){
+                authInfo.getProperties().put(SAMLSessionParameters.REFRESH_TOKEN, token.getRefreshToken());
+                LOG.debug("Successfully exchanged the assertion {} for an oauth access and refresh token.", assertion.getID());
+            } else {
+                LOG.debug("Successfully exchanged the assertion {} for an oauth access token.", assertion.getID());
+            }
+        } catch (MarshallingException | UnmarshallingException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         }
     }
 
@@ -390,7 +435,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             validationStrategy.validateLogoutRequest(logoutRequest, httpRequest, binding);
             LogoutInfo logoutInfo = backend.resolveLogoutRequest(logoutRequest);
             LOG.debug("LogoutRequest is considered valid, starting to terminate sessions based on {}", logoutInfo);
-            terminateSessions(logoutRequest, logoutInfo, httpRequest, httpResponse);
+            terminateSessions(logoutRequest, logoutInfo);
             StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
             statusCode.setValue(StatusCode.SUCCESS_URI);
             status = openSAML.buildSAMLObject(Status.class);
@@ -657,7 +702,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         }
     }
 
-    private void terminateSessions(LogoutRequest logoutRequest, LogoutInfo logoutInfo, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+    private void terminateSessions(LogoutRequest logoutRequest, LogoutInfo logoutInfo) throws OXException {
         SessiondService sessiondService = services.getService(SessiondService.class);
         List<SessionIndex> sessionIndexes = logoutRequest.getSessionIndexes();
         boolean removedAnySession = false;
@@ -706,8 +751,20 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     }
 
     private void enhanceAuthInfo(AuthenticationInfo authInfo, Assertion bearerAssertion) throws OXException {
+        Assertion clonedAssertion;
+        try {
+            // Using a cloned object because the opensaml.marshal method changes the assertion object
+            clonedAssertion = XMLObjectHelper.cloneXMLObject(bearerAssertion, true);
+        } catch (MarshallingException e) {
+            LOG.warn("Could not clone the assertion {}. Single logout for this session will probably fail.", bearerAssertion.getID(), e);
+            return;
+        } catch (UnmarshallingException e) {
+            LOG.warn("Could not clone the assertion {}. Single logout for this session will probably fail.", bearerAssertion.getID(), e);
+            return;
+        }
+
         Map<String, String> properties = authInfo.getProperties();
-        String sessionIndex = extractSessionIndex(bearerAssertion);
+        String sessionIndex = extractSessionIndex(clonedAssertion);
         if (sessionIndex != null) {
             /*
              * The SAML specification states that the bearer assertion must contain a <code>SessionIndex</code> attribute in its
@@ -722,7 +779,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             properties.put(SAMLSessionParameters.SESSION_INDEX, sessionIndex);
         }
 
-        String sessionNotOnOrAfter = extractSessionNotOnOrAfter(bearerAssertion);
+        String sessionNotOnOrAfter = extractSessionNotOnOrAfter(clonedAssertion);
         if (sessionNotOnOrAfter != null) {
             /*
              * If an <AuthnStatement> used to establish a security context for the principal contains a SessionNotOnOrAfter attribute,
@@ -741,16 +798,16 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
          * element. We need to remember the elements XML representation, as it will be later on used to compile logout requests.
          * However if the IDP does not comply to the specification, the attribute might be missing.
          */
-        String subjectID = extractSubjectID(bearerAssertion);
+        String subjectID = extractSubjectID(clonedAssertion);
         if (subjectID != null) {
             properties.put(SAMLSessionParameters.SUBJECT_ID, subjectID);
         }
 
         /*
-         * The bearer assertion might include an Attribute statement, with an attribute conforming to the xXMLml format of the
+         * The bearer assertion might include an Attribute statement, with an attribute conforming to the xml format of the
          * OAuth 2 specification.
          */
-        String accessToken = extractAccessToken(bearerAssertion);
+        String accessToken = extractAccessToken(clonedAssertion);
         if (accessToken != null) {
             properties.put(SAMLSessionParameters.ACCESS_TOKEN, accessToken);
         }

@@ -56,9 +56,9 @@ import com.openexchange.exception.OXException;
  * {@link SessionStorageParameterNamesProvider} - Provides a listing of names for parameters that
  * are supposed to be stored along-side with the session representation held in session storage.
  * <p>
- * (OSGi-wise) Registered implementations of this interface are tracked and contribute to the set
- * of parameter names that are supposed to be taken over from a session to its session storage
- * representation.
+ * {@link org.osgi.framework.BundleContext#registerService(Class, Object, java.util.Dictionary) (OSGi-wise) Registered}
+ * implementations of this interface are tracked and contribute to the set of parameter names that
+ * are supposed to be taken over from a session to its session storage representation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4

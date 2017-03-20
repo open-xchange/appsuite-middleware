@@ -56,8 +56,6 @@ import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONException;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Filter;
@@ -88,7 +86,6 @@ import com.openexchange.find.tasks.TasksFacetType;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**

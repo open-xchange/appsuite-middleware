@@ -12,7 +12,11 @@ BuildRequires: open-xchange-core
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -64,8 +68,6 @@ fi
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
 * Tue Dec 13 2016 Ioannis Chouklis <ioannis.chouklis@open-xchange.com>

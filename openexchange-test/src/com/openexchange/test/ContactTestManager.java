@@ -245,10 +245,12 @@ public class ContactTestManager implements TestManager {
             response = getClient().execute(request, getSleep());
             response.fillObject(contactToCreate);
             lastResponse = response;
+            if (!response.hasError()) {
+                getCreatedEntities().add(contactToCreate);
+            }
         } catch (final Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
-        getCreatedEntities().add(contactToCreate);
         return contactToCreate;
     }
 
@@ -365,6 +367,10 @@ public class ContactTestManager implements TestManager {
             final boolean old = getFailOnError();
             setFailOnError(false);
             deleteAction(contact);
+            if (getLastResponse().hasError()) {
+                org.slf4j.LoggerFactory.getLogger(ContactTestManager.class).warn("Unable to delete the contact with id {} (context {}) in folder '{}': {}", contact.getObjectID(), contact.getContextId(), contact.getParentFolderID(), getLastResponse().getException().getMessage());
+            }
+
             setFailOnError(old);
         }
     }
@@ -383,16 +389,16 @@ public class ContactTestManager implements TestManager {
         return allContacts.toArray(new Contact[] {});
     }
 
-//    public InputStream image(final int folderId, final int objectId) {
-//        ImageRequest request = new ImageRequest(folderId, objectId, failOnError);
-//        try {
-//            final ImageResponse response = getClient().execute(request);
-//            lastResponse = response;
-//        } catch (final Exception e) {
-//            doExceptionHandling(e, "AllRequest for folder " + folderId);
-//        }
-//        return null;
-//    }
+    //    public InputStream image(final int folderId, final int objectId) {
+    //        ImageRequest request = new ImageRequest(folderId, objectId, failOnError);
+    //        try {
+    //            final ImageResponse response = getClient().execute(request);
+    //            lastResponse = response;
+    //        } catch (final Exception e) {
+    //            doExceptionHandling(e, "AllRequest for folder " + folderId);
+    //        }
+    //        return null;
+    //    }
 
     public Contact[] allAction(final int folderId, final int[] columns) {
         List<Contact> allContacts = new LinkedList<Contact>();

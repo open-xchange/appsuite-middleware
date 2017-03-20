@@ -54,8 +54,9 @@ import org.junit.runners.Suite;
 import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
 import com.openexchange.ajax.appointment.bugtests.FolderIdTestAjax;
 import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     AllTest.class,
     ConfirmTest.class,

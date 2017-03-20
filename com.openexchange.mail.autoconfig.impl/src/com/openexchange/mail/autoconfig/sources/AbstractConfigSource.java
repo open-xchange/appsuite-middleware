@@ -79,59 +79,103 @@ public abstract class AbstractConfigSource implements ConfigSource {
                 continue;
             }
 
-            IncomingServer currentIncomingServer = null;
-            for (IncomingServer incomingServer : emailProvider.getIncomingServer()) {
-                // First incomingServer
-                if (currentIncomingServer == null) {
-                    currentIncomingServer = incomingServer;
-                    continue;
+            // Apply data from best fitting incoming server
+            {
+                IncomingServer currentIncomingServer = null;
+                for (IncomingServer incomingServer : emailProvider.getIncomingServer()) {
+                    // First incomingServer
+                    if (currentIncomingServer == null) {
+                        currentIncomingServer = incomingServer;
+                        continue;
+                    }
+                    // Better ServerType (e.g. IMAP > POP3)
+                    if (incomingServer.getType().compareTo(currentIncomingServer.getType()) > 0) {
+                        currentIncomingServer = incomingServer;
+                        continue;
+                    }
+                    // Better SocketType (e.g. SSL > STARTTLS)
+                    if (incomingServer.getType().compareTo(currentIncomingServer.getType()) == 0 && incomingServer.getSocketType().compareTo(
+                        currentIncomingServer.getSocketType()) > 0) {
+                        currentIncomingServer = incomingServer;
+                        continue;
+                    }
                 }
-                // Better ServerType (e.g. IMAP > POP3)
-                if (incomingServer.getType().compareTo(currentIncomingServer.getType()) > 0) {
-                    currentIncomingServer = incomingServer;
-                    continue;
+
+                if (null == currentIncomingServer) {
+                    return null;
                 }
-                // Better SocketType (e.g. SSL > STARTTLS)
-                if (incomingServer.getType().compareTo(currentIncomingServer.getType()) == 0 && incomingServer.getSocketType().compareTo(
-                    currentIncomingServer.getSocketType()) > 0) {
-                    currentIncomingServer = incomingServer;
-                    continue;
+
+                autoconfig.setMailPort(currentIncomingServer.getPort());
+                autoconfig.setMailProtocol(currentIncomingServer.getType().getKeyword());
+                SocketType incomingSocket = currentIncomingServer.getSocketType();
+                switch (incomingSocket) {
+                    case PLAIN:
+                        autoconfig.setMailSecure(false);
+                        autoconfig.setMailStartTls(false);
+                        break;
+                    case SSL:
+                        autoconfig.setMailSecure(true);
+                        autoconfig.setMailStartTls(false);
+                        break;
+                    case STARTTLS:
+                        autoconfig.setMailSecure(false);
+                        autoconfig.setMailStartTls(true);
+                        break;
+                    default:
+                        break;
                 }
+                autoconfig.setMailServer(currentIncomingServer.getHostname());
+                autoconfig.setUsername(currentIncomingServer.getUsername());
             }
 
-            autoconfig.setMailPort(currentIncomingServer.getPort());
-            autoconfig.setMailProtocol(currentIncomingServer.getType().getKeyword());
-            SocketType incomingSocket = currentIncomingServer.getSocketType();
-            autoconfig.setMailSecure(incomingSocket == SocketType.SSL /*|| incomingSocket == SocketType.STARTTLS*/);
-            autoconfig.setMailServer(currentIncomingServer.getHostname());
+            // Apply data from best fitting outgoing server
+            {
+                OutgoingServer currentOutgoingServer = null;
+                for (OutgoingServer outgoingServer : emailProvider.getOutgoingServer()) {
+                    // First outgoingServer
+                    if (currentOutgoingServer == null) {
+                        currentOutgoingServer = outgoingServer;
+                        continue;
+                    }
+                    // Better ServerType (e.g. SMTP > ???)
+                    if (outgoingServer.getType().compareTo(currentOutgoingServer.getType()) > 0) {
+                        currentOutgoingServer = outgoingServer;
+                        continue;
+                    }
+                    // Better SocketType (e.g. SSL > STARTTLS)
+                    if (outgoingServer.getType().compareTo(currentOutgoingServer.getType()) == 0 && outgoingServer.getSocketType().compareTo(
+                        currentOutgoingServer.getSocketType()) > 0) {
+                        currentOutgoingServer = outgoingServer;
+                        continue;
+                    }
+                }
 
-            OutgoingServer currentOutgoingServer = null;
-            for (OutgoingServer outgoingServer : emailProvider.getOutgoingServer()) {
-                // First outgoingServer
-                if (currentOutgoingServer == null) {
-                    currentOutgoingServer = outgoingServer;
-                    continue;
+                if (null == currentOutgoingServer) {
+                    return null;
                 }
-                // Better ServerType (e.g. SMTP > ???)
-                if (outgoingServer.getType().compareTo(currentOutgoingServer.getType()) > 0) {
-                    currentOutgoingServer = outgoingServer;
-                    continue;
+
+                autoconfig.setTransportPort(currentOutgoingServer.getPort());
+                autoconfig.setTransportProtocol(currentOutgoingServer.getType().getKeyword());
+                SocketType outgoingSocket = currentOutgoingServer.getSocketType();
+                switch (outgoingSocket) {
+                    case PLAIN:
+                        autoconfig.setTransportSecure(false);
+                        autoconfig.setTransportStartTls(false);
+                        break;
+                    case SSL:
+                        autoconfig.setTransportSecure(true);
+                        autoconfig.setTransportStartTls(false);
+                        break;
+                    case STARTTLS:
+                        autoconfig.setTransportSecure(false);
+                        autoconfig.setTransportStartTls(true);
+                        break;
+                    default:
+                        break;
                 }
-                // Better SocketType (e.g. SSL > STARTTLS)
-                if (outgoingServer.getType().compareTo(currentOutgoingServer.getType()) == 0 && outgoingServer.getSocketType().compareTo(
-                    currentOutgoingServer.getSocketType()) > 0) {
-                    currentOutgoingServer = outgoingServer;
-                    continue;
-                }
+
+                autoconfig.setTransportServer(currentOutgoingServer.getHostname());
             }
-
-            autoconfig.setTransportPort(currentOutgoingServer.getPort());
-            autoconfig.setTransportProtocol(currentOutgoingServer.getType().getKeyword());
-            SocketType outgoingSocket = currentOutgoingServer.getSocketType();
-            autoconfig.setTransportSecure(outgoingSocket == SocketType.SSL /*|| outgoingSocket == SocketType.STARTTLS*/);
-            autoconfig.setTransportServer(currentOutgoingServer.getHostname());
-
-            autoconfig.setUsername(currentIncomingServer.getUsername());
 
             break;
         }

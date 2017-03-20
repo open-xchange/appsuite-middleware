@@ -244,7 +244,15 @@ public enum MailJSONField {
     /**
      * The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header).
      */
-    DATE("date")
+    DATE("date"),
+    /**
+     * If the E-Mail is Guard-encrypted
+     */
+    SECURITY("security"),
+    /**
+     * If the E-Mail contains encryption or signatures
+     */
+    SECURITY_INFO("security_info")
     ;
 
 

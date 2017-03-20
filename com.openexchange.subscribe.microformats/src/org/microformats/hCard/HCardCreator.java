@@ -261,7 +261,7 @@ class HCardCreator {
 			}
 		}
 
-		if (null == longitude) {
+		if (null == longitude || null == latitude) {
 		    return null;
 		}
 		try {

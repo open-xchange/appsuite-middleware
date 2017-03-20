@@ -77,6 +77,7 @@ import com.openexchange.jsieve.commands.test.ITestCommand;
  * <li><code>not &lt;test&gt;</code></li>
  * <li><code>size &lt;":over" / ":under"&gt; &lt;limit: number&gt;</code></li>
  * <li><code>header [COMPARATOR] [MATCH-TYPE] &lt;header-names: string-list&gt; &lt;key-list: string-list&gt;</code></li>
+ * <li><code>body [COMPARATOR] [MATCH-TYPE] [BODY-TRANSFORM] &lt;key-list: string-list&gt;</code></li>
  * <li><code>allof &lt;tests: test-list&gt;</code> (logical AND)</li>
  * <li><code>anyof &lt;tests: test-list&gt; </code> (logical OR)</code></li>
  * <li><code>Match-types are ":is", ":contains", and ":matches"</code></li>
@@ -87,36 +88,145 @@ import com.openexchange.jsieve.commands.test.ITestCommand;
  */
 public class TestCommand extends Command {
 
+    /**
+     * {@link Commands} - Supported sieve test commands
+     *
+     * <p>Order of arguments:</p>
+     * <ul>
+     * <li>command name</li>
+     * <li>number of minimum arguments</li>
+     * <li>number of maximum arguments</li>
+     * <li>part (either address part or body part elements)</li>
+     * <li>comparators</li>
+     * <li>match types</li>
+     * <li>JSON mappings to sieve match types</li>
+     * <li>required plugins</li>
+     * <li>other arguments</li>
+     * </ul>
+     */
     public enum Commands implements ITestCommand {
-        ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null, null),
-        ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
-        //        EXITS("exists", 1, 1, null, null, null, null, null),
+        /**
+         * <p>The "address" test matches Internet addresses in structured headers that
+         * contain addresses. The type of match is specified by the optional match argument,
+         * which defaults to ":is" if not specified</p>
+         * <code>address [ADDRESS-PART] [COMPARATOR] [MATCH-TYPE] &lt;header-list: string-list&gt; &lt;key-list: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.1">RFC-5228: Test address</a></p>
+         */
+        ADDRESS("address", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null),
+        /**
+         * <p>The "envelope" test is true if the specified part of the [SMTP] (or equivalent)
+         * envelope matches the specified key. The type of match is specified by the optional
+         * match argument, which defaults to ":is" if not specified</p>
+         * <code>envelope [COMPARATOR] [ADDRESS-PART] [MATCH-TYPE] &lt;envelope-part: string-list&gt; &lt;key-list: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.4">RFC-5228: Test envelope</a></p>
+         */
+        ENVELOPE("envelope", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
+        /**
+         * <p>The "exists" test is true if the headers listed in the header-names argument exist within the message. All of the headers must exist or the test is false.
+         * <code>exists &lt;header-names: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.5">RFC-5228: Test exists</a></p>
+         */
+        EXISTS("exists", 1, 1, null, null, null, null, null, null),
+        /**
+         * <p>The "false" test always evaluates to false.</p>
+         * <code>false</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.6">RFC-5228: Test false</a></p>
+         */
         FALSE("false", 0, 0, null, null, null, null, null, null),
+        /**
+         * <p>The "true" test always evaluates to true.</p>
+         * <code>true</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.10">RFC-5228: Test true</a></p>
+         */
         TRUE("true", 0, 0, null, null, null, null, null, null),
+        /**
+         * <p>The "not" test takes some other test as an argument, and yields the opposite result.</p>
+         * <code>not &lt;test&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.8">RFC-5228: Test not</a></p>
+         */
         NOT("not", 0, 0, null, null, null, null, null, null),
+        /**
+         * <p>The "size" test deals with the size of a message.</p>
+         * <code>size &lt;":over" / ":under"&gt; &lt;limit: number&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.9">RFC-5228: Test size</a></p>
+         */
         SIZE("size", 1, 1, null, null, matchTypeSize(), standardJSONSizeMatchTypes(), null, null),
+        /**
+         * <p>The "header" test evaluates to true if the value of any of the named
+         * headers, ignoring leading and trailing whitespace, matches any key. The
+         * type of match is specified by the optional match argument, which defaults
+         * to ":is" if not specified</p>
+         * <code>header [COMPARATOR] [MATCH-TYPE] &lt;header-names: string-list&gt; &lt;key-list: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.7">RFC-5228: Test header</a></p>
+         */
         HEADER("header", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null),
+        /**
+         * <p>The "allof" test performs a logical AND on the tests supplied to it.</p>
+         * <code>allof &lt;tests: test-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.2">RFC-5228: Test allof</a></p>
+         */
         ALLOF("allof", 0, 0, null, null, null, null, null, null),
+        /**
+         * <p>The "anyof" test performs a logical OR on the tests supplied to it.</p>
+         * <code>anyof &lt;tests: test-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.3">RFC-5228: Test anyof</a></p>
+         */
         ANYOF("anyof", 0, 0, null, null, null, null, null, null),
+        /**
+         * <p>The body test matches content in the body of an email message, that
+         * is, anything following the first empty line after the header. </p>
+         * <code>body [COMPARATOR] [MATCH-TYPE] [BODY-TRANSFORM] &lt;key-list: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5173#section-4">RFC-5173: Test body</a></p>
+         */
         BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), "body", null),
-        //DATE("date", 3, null, null, date_match_types(), "date"),
+        /**
+         * <p>The date test matches date/time information derived from headers
+         * containing [RFC2822] date-time values.  The date/time information is
+         * extracted from the header, shifted to the specified time zone, and
+         * the value of the given date-part is determined.  The test returns
+         * true if the resulting string matches any of the strings specified in
+         * the key-list, as controlled by the comparator and match keywords.</p>
+         * <code>date [&lt;":zone" &lt;time-zone: string&gt;&gt; / ":originalzone"] [COMPARATOR] [MATCH-TYPE] &lt;header-name: string&gt; &lt;date-part: string&gt; &lt;key-list: string-list&gt;
+         * <p><a href="https://tools.ietf.org/html/rfc5260#section-4">RFC-5260: Date Test</a></p>
+         *
+         */
+        DATE("date", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
+        /**
+         * <p>The currentdate test is similar to the date test, except that it
+         * operates on the current date/time rather than a value extracted from
+         * the message header.</p>
+         * <code>currentdate [":zone" &lt;time-zone: string&gt;] [COMPARATOR] [MATCH-TYPE] &lt;date-part: string&gt; ;&ltkey-list: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5260#section-5">RFC-5260: Test currentdate</a></p>
+         */
         CURRENTDATE("currentdate", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
-        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null);
+        /**
+         * <p>The hasflag test evaluates to true if any of the variables matches any flag name.</p>
+         * <code>hasflag [MATCH-TYPE] [COMPARATOR] [&lt;variable-list: string-list&gt;] &lt;list-of-flags: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5232#section-4">RFC-5232: Test hasflag</a></p>
+         */
+        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "imap4flags", null);
 
+        ////////////////////////////////// MATCH TYPES /////////////////////////////////////////////////
+
+        /**
+         * <p>Specifies the match types ':over' and ':under' as described
+         * in <a href="https://tools.ietf.org/html/rfc5228#section-5.9">RFC-5228: Test size</a>.</p>
+         *
+         * @return A {@link Hashtable} with the size match types
+         */
         private static Hashtable<String, String> matchTypeSize() {
             final Hashtable<String, String> match_type_size = new Hashtable<String, String>(2);
-            match_type_size.put(":over", "");
-            match_type_size.put(":under", "");
+            match_type_size.put(MatchType.over.getArgumentName(), MatchType.over.getRequire());
+            match_type_size.put(MatchType.under.getArgumentName(), MatchType.under.getRequire());
             return match_type_size;
         }
 
-        private static List<String[]> standardJSONSizeMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "", "over" });
-            standard_match_types.add(new String[] { "", "under" });
-            return standard_match_types;
-        }
-
+        /**
+         * <p>Specifies the addresspart arguments ':localpart', ':domain', ':all' as described
+         * in <a href="href=https://tools.ietf.org/html/rfc5228#section-2.7.4">RFC-5228</a>.</p>
+         *
+         * @return A {@link Hashtable} with the standard addressparts
+         */
         private static Hashtable<String, String> standardAddressPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
             standard_address_part.put(":localpart", "");
@@ -126,6 +236,12 @@ public class TestCommand extends Command {
             return standard_address_part;
         }
 
+        /**
+         * <p>Specifies the match types ':content' and ':text' as described
+         * in <a https://tools.ietf.org/html/rfc5173#section-5">RFC-5173: Body transform</a>.</p>
+         *
+         * @return A {@link Hashtable} with the body match types
+         */
         private static Hashtable<String, String> standardBodyPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
             //standard_address_part.put(":raw", "");
@@ -135,69 +251,135 @@ public class TestCommand extends Command {
             return standard_address_part;
         }
 
-        private static Hashtable<String, String> standardAddressMatchTypes() {
-            final Hashtable<String, String> standard_match_types = standardMatchTypes();
-            standard_match_types.putAll(standardAddressPart());
-            standard_match_types.put(":user", "subaddress");
-            standard_match_types.put(":detail", "subaddress");
-            return standard_match_types;
+        /**
+         * <p>Specifies the addressparts ':user' and ':detail' as described
+         * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a>.</p>
+         *
+         * @return A {@link Hashtable} with the subaddress addressparts
+         */
+        private static Hashtable<String, String> addressParts() {
+            final Hashtable<String, String> standard_address_parts = new Hashtable<>(5);
+            standard_address_parts.putAll(standardAddressPart());
+            standard_address_parts.put(":user", "subaddress");
+            standard_address_parts.put(":detail", "subaddress");
+            return standard_address_parts;
         }
 
-        private static List<String[]> standardJSONAddressMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "subaddress", "user" });
-            standard_match_types.add(new String[] { "subaddress", "detail" });
-            standard_match_types.add(new String[] { "", "all" });
-            standard_match_types.add(new String[] { "", "domain" });
-            standard_match_types.add(new String[] { "", "localpart" });
-            return standard_match_types;
-        }
-
+        /**
+         * <p>Specifies the standard match types ':is', ':contains', ':matches' as described
+         * in <a href=https://tools.ietf.org/html/rfc5228#section-2.7.1">RFC-5228</a>.</p>
+         *
+         * @return A {@link Hashtable} with tthe standard match types
+         */
         private static Hashtable<String, String> standardMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(4);
-            standard_match_types.put(":is", "");
-            standard_match_types.put(":contains", "");
-            standard_match_types.put(":matches", "");
+            standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
+            standard_match_types.put(MatchType.contains.getArgumentName(), MatchType.contains.getRequire());
+            standard_match_types.put(MatchType.matches.getArgumentName(), MatchType.matches.getRequire());
             // Add further extensions here... and don't forget to raise the
             // initial number
-            standard_match_types.put(":regex", "regex");
+            standard_match_types.put(MatchType.regex.getArgumentName(), MatchType.regex.getRequire());
             return standard_match_types;
         }
 
-        private static List<String[]> standardJSONMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(4));
-            standard_match_types.add(new String[] { "regex", "regex" });
-            standard_match_types.add(new String[] { "", "is" });
-            standard_match_types.add(new String[] { "", "contains" });
-            standard_match_types.add(new String[] { "", "matches" });
-            return standard_match_types;
-        }
-
+        /**
+         * The match types that are applicable to dates
+         *
+         * @return A {@link Hashtable} with the match types
+         */
         private static Hashtable<String, String> dateMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(2);
-            standard_match_types.put(":is", "");
-            standard_match_types.put(":contains", "");
-            standard_match_types.put(":matches", "");
-            standard_match_types.put(":value", "relational");
+            standard_match_types.put(MatchType.is.getArgumentName(), MatchType.is.getRequire());
+            standard_match_types.put(MatchType.value.getArgumentName(), MatchType.value.getRequire());
             return standard_match_types;
         }
 
+        /**
+         * Specifies the ':zone' argument as described in
+         * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone Arguments</a>
+         *
+         * @return A hashtable with the argument
+         */
         private static Hashtable<String, String> dateOtherArguments() {
-            final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(1);
-            standard_match_types.put(":zone", "");
+            final Hashtable<String, String> arguments = new Hashtable<String, String>(1);
+            arguments.put(":zone", "");
+            return arguments;
+        }
+
+        ///////////////////////////////////// JSON MAPPINGS ////////////////////////////////////////////
+
+        /**
+         * The JSON mapping of the size match types ({@link #matchTypeSize()})
+         *
+         * @return A {@link List} with the mappings
+         */
+        private static List<JSONMatchType> standardJSONSizeMatchTypes() {
+            final List<JSONMatchType> sizeMatchTypes = Collections.synchronizedList(new ArrayList<JSONMatchType>(4));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.over.name(), MatchType.over.getRequire(), 0));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.under.name(), MatchType.under.getRequire(), 0));
+
+            // add not matchers
+            sizeMatchTypes.add(new JSONMatchType(MatchType.over.getNotName(), MatchType.over.getRequire(), 2));
+            sizeMatchTypes.add(new JSONMatchType(MatchType.under.getNotName(), MatchType.under.getRequire(), 2));
+
+            return sizeMatchTypes;
+        }
+
+        /**
+         * The JSON mappings for the standard match types ({@link #standardMatchTypes()})
+         *
+         * @return A {@link List} with the mappings
+         */
+        private static List<JSONMatchType> standardJSONMatchTypes() {
+            final List<JSONMatchType> standard_match_types = Collections.synchronizedList(new ArrayList<JSONMatchType>(12));
+
+            // add normal matcher
+            standard_match_types.add(new JSONMatchType(MatchType.regex.name(), MatchType.regex.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.name(), MatchType.contains.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.name(), MatchType.matches.getRequire(), 0));
+            standard_match_types.add(new JSONMatchType(MatchType.startswith.name(), MatchType.startswith.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.endswith.name(), MatchType.endswith.getRequire(), 2));
+
+            // add not matchers
+            standard_match_types.add(new JSONMatchType(MatchType.regex.getNotName(), MatchType.regex.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.contains.getNotName(), MatchType.contains.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.matches.getNotName(), MatchType.matches.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.startswith.getNotName(), MatchType.startswith.getRequire(), 2));
+            standard_match_types.add(new JSONMatchType(MatchType.endswith.getNotName(), MatchType.endswith.getRequire(), 2));
+
             return standard_match_types;
         }
 
-        private static List<String[]> dateJSONMatchTypes() {
-            final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[] { "relational", "ge" });
-            standard_match_types.add(new String[] { "relational", "le" });
-            standard_match_types.add(new String[] { "", "is" });
-            standard_match_types.add(new String[] { "", "contains" });
-            standard_match_types.add(new String[] { "", "matches" });
-            return standard_match_types;
+        /**
+         * The JSON mappings for dates
+         *
+         * @return A {@link List} with the mappings
+         */
+        private static List<JSONMatchType> dateJSONMatchTypes() {
+            final List<JSONMatchType> dateMatchTypes = Collections.synchronizedList(new ArrayList<JSONMatchType>(14));
+            // add normal matcher
+            dateMatchTypes.add(new JSONMatchType(MatchType.is.name(), MatchType.is.getRequire(), 0));
+            dateMatchTypes.add(new JSONMatchType(MatchType.ge.name(), MatchType.ge.getRequire(), 0));
+            dateMatchTypes.add(new JSONMatchType(MatchType.le.name(), MatchType.le.getRequire(), 0));
+
+            // add not matchers
+            dateMatchTypes.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
+            dateMatchTypes.add(new JSONMatchType(MatchType.ge.getNotName(), MatchType.ge.getRequire(), 2));
+            dateMatchTypes.add(new JSONMatchType(MatchType.le.getNotName(), MatchType.le.getRequire(), 2));
+
+
+            return dateMatchTypes;
         }
 
+        ///////////////////////////////////// COMPARATORS ///////////////////////////////////////////////////
+
+        /**
+         * Specifies the standard comparators used for matching.
+         *
+         * @return A {@link Hashtable} with the comparators
+         */
         private static Hashtable<String, String> standardComparators() {
             final Hashtable<String, String> standard_comparators = new Hashtable<String, String>(2);
             standard_comparators.put("i;ascii-casemap", "");
@@ -246,14 +428,27 @@ public class TestCommand extends Command {
         /**
          * Needed for the resolution of the configuration parameters for JSON
          */
-        private final List<String[]> jsonMatchTypes;
+        private final List<JSONMatchType> jsonMatchTypes;
 
         /**
          * Defines if this command needs a require or not
          */
         private String required;
 
-        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<String[]> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
+        /**
+         * Initializes a new {@link Commands}.
+         *
+         * @param commandName The command's name
+         * @param numberOfArguments The minimum number of arguments
+         * @param maxNumberOfArguments The maximum number of arguments
+         * @param address The part match types
+         * @param comparator The comparators
+         * @param matchTypes The match types
+         * @param jsonMatchTypes The json mappings of the match types
+         * @param required The 'require'
+         * @param otherArguments Other optional arguments
+         */
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
             this.commandName = commandName;
             this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
@@ -330,7 +525,7 @@ public class TestCommand extends Command {
         }
 
         @Override
-        public List<String[]> getJsonMatchTypes() {
+        public List<JSONMatchType> getJsonMatchTypes() {
             return jsonMatchTypes;
         }
     }
@@ -343,10 +538,12 @@ public class TestCommand extends Command {
 
     private final List<TestCommand> testCommands;
 
+    private final List<String> optRequired = new ArrayList<>();
+
     private final int indexOfComparator = -1;
 
     /**
-     *
+     * Initialises a new {@link TestCommand}.
      */
     public TestCommand() {
         super();
@@ -355,6 +552,14 @@ public class TestCommand extends Command {
         this.tagArguments = new ArrayList<String>();
     }
 
+    /**
+     * Initialises a new {@link TestCommand}.
+     *
+     * @param command The {@link ITestCommand}
+     * @param arguments A {@link List} with arguments
+     * @param testcommands A {@link List} with {@link TestCommand}s
+     * @throws SieveException If the command structure is invalid
+     */
     public TestCommand(final ITestCommand command, final List<Object> arguments, final List<TestCommand> testcommands) throws SieveException {
         this.command = command;
         this.tagArguments = new ArrayList<String>();
@@ -369,6 +574,11 @@ public class TestCommand extends Command {
         checkCommand();
     }
 
+    /**
+     * Checks the {@link TestCommand} for validity
+     *
+     * @throws SieveException If the command structure is invalid
+     */
     private void checkCommand() throws SieveException {
         if (null != this.tagArguments) {
             final ArrayList<String> tagArray = new ArrayList<String>(this.tagArguments);
@@ -388,86 +598,68 @@ public class TestCommand extends Command {
             if (null != otherArguments) {
                 tagArray.removeAll(otherArguments.keySet());
             }
-            //            final Hashtable<String, String> comparator = this.command.getComparator();
-            //            if (null != comparator) {
-            //                final boolean comparatorrule = tagarray.remove(":comparator");
-            //                if (comparatorrule) {
-            //                    // The argument of the comparator is located one after the
-            //                    // comparator tag itself
-            //                    indexOfComparator = searchcomparator() + 1;
-            //                    final Object object = this.arguments.get(indexOfComparator);
-            //                    if (object instanceof ArrayList) {
-            //                        final ArrayList<String> new_name = (ArrayList<String>) object;
-            //                        final String comparatorarg = new_name.get(0);
-            //                        if (!comparator.containsKey(comparatorarg)) {
-            //                            throw new SieveException(comparatorarg + " is no valid comparator for " + this.command.getCommandname());
-            //                        }
-            //                    } else {
-            //                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
-            //                    }
-            //                }
-            //            }
+
             if (!tagArray.isEmpty()) {
                 throw new SieveException("One of the tagArguments: " + tagArray + " is not valid for " + this.command.getCommandName());
             }
-        }
-        if (null != this.arguments && this.command.getNumberOfArguments() >= 0) {
-            final int realArguments = this.arguments.size() - this.tagArguments.size();
-            final int minArguments = this.command.getNumberOfArguments() + ((-1 != indexOfComparator) ? 1 : 0);
-            final int maxArguments = this.command.getMaxNumberOfArguments();
-            if (realArguments < minArguments || realArguments > maxArguments) {
-                throw new SieveException("The number of arguments (" + realArguments + ") for " + this.command.getCommandName() + " is not valid.");
+
+            if (null != this.arguments && this.command.getNumberOfArguments() >= 0) {
+                final int realArguments = this.arguments.size() - this.tagArguments.size();
+                final int minArguments = this.command.getNumberOfArguments() + ((-1 != indexOfComparator) ? 1 : 0);
+                final int maxArguments = this.command.getMaxNumberOfArguments();
+                if (realArguments < minArguments || realArguments > maxArguments) {
+                    throw new SieveException("The number of arguments (" + realArguments + ") for " + this.command.getCommandName() + " is not valid.");
+                }
             }
         }
+
         // Add test for testcommands here only anyof and allof are allowed to
         // take further tests
     }
 
     /**
-     * This method searches for the comparator tag in the array and returns its
-     * position. This method must find the right tag, otherwise this is an
-     * error. So an exception is thrown here if the comparator tag isn't found
+     * Returns the {@link ITestCommand}
      *
-     * @return
-     * @throws SieveException
+     * @return the {@link ITestCommand}
      */
-    private int searchComparator() throws SieveException {
-        for (int i = 0; i < this.arguments.size(); i++) {
-            final Object obj = this.arguments.get(i);
-            if (obj instanceof TagArgument) {
-                final TagArgument tag = (TagArgument) obj;
-                if (":comparator".equals(tag.getTag())) {
-                    return i;
-                }
-            }
-        }
-        throw new SieveException("An error occured while search the comparator tag in the arguments");
-    }
-
     public final ITestCommand getCommand() {
         return command;
     }
 
     /**
+     * Sets the {@link TestCommand}
+     *
      * @param command the command to set
      */
     public final void setCommand(final Commands command) {
         this.command = command;
     }
 
+    /**
+     * Returns a {@link List} with all the tag arguments
+     *
+     * @return a {@link List} with all the tag arguments
+     */
     public final List<String> getTagArguments() {
         return tagArguments;
     }
 
     /**
-     * @param o
-     * @return
+     * Adds a tag argument
+     *
+     * @param o The tag argument to add
+     * @return <code>true</code if the argument was added to the {@link List}; false otherwise
      * @see java.util.List#add(java.lang.Object)
      */
     public boolean addTagArguments(final String o) {
         return tagArguments.add(o);
     }
 
+    /**
+     * Returns a {@link List} with all the arguments
+     *
+     * @return a {@link List} with all the arguments
+     */
     public final List<Object> getArguments() {
         return arguments;
     }
@@ -478,6 +670,9 @@ public class TestCommand extends Command {
      * @return
      */
     public final String getMatchType() {
+        if(this.command.getMatchTypes()==null){
+            return null;
+        }
         final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchTypes().keySet());
         arrayList.retainAll(this.tagArguments);
         if (1 == arrayList.size()) {
@@ -487,19 +682,54 @@ public class TestCommand extends Command {
         }
     }
 
+    /**
+     * This method returns the addresspart of this command
+     *
+     * @return
+     */
+    public final String getAddressPart() {
+        final ArrayList<String> arrayList = new ArrayList<String>(this.command.getAddress().keySet());
+        arrayList.retainAll(this.tagArguments);
+        if (1 == arrayList.size()) {
+            return arrayList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns a {@link List} with all the {@link TestCommand}s
+     *
+     * @return a {@link List} with all the {@link TestCommand}s
+     */
     public final List<TestCommand> getTestCommands() {
         return testCommands;
     }
 
+    /**
+     * Removes the specified {@link TestCommand}
+     *
+     * @param command The {@link TestCommand} to remove
+     */
     public final void removeTestCommand(TestCommand command) {
         this.testCommands.remove(command);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + ": " + this.command.getCommandName() + " : " + this.tagArguments + " : " + this.arguments + " : " + this.testCommands;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.jsieve.commands.Command#getRequired()
+     */
     @Override
     public HashSet<String> getRequired() {
         final HashSet<String> retval = new HashSet<String>();
@@ -524,6 +754,14 @@ public class TestCommand extends Command {
                 retval.add(string);
             }
         }
+
+        retval.addAll(optRequired);
+
         return retval;
+    }
+
+    @Override
+    public void addOptionalRequired(String required){
+        optRequired.add(required);
     }
 }

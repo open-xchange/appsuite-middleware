@@ -197,6 +197,9 @@ public class Patches {
         		/*
         		 * no changes in individual participants, restore participants from original
         		 */
+        	    if (null == original.getParticipants() || null == original.getUsers() ) {
+        	        return true;
+        	    }
         		Participant[] restoredParticipants = Arrays.copyOf(original.getParticipants(), original.getParticipants().length);
         		UserParticipant[] restoredUsers = Arrays.copyOf(original.getUsers(), original.getUsers().length);
         		for (Participant updatedParticipant : updateIndividualParticipants) {

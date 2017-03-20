@@ -49,9 +49,7 @@
 
 package com.openexchange.test;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.i2I;
+import static com.openexchange.java.Autoboxing.*;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -90,8 +88,7 @@ import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -100,12 +97,11 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link CalendarTestManager}
@@ -217,6 +213,9 @@ public class CalendarTestManager implements TestManager {
         // exceptions
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
             delete(appointment, true);
+            if (getLastResponse().hasError()) {
+                org.slf4j.LoggerFactory.getLogger(CalendarTestManager.class).warn("Unable to delete the appointment with id {} in folder {} with name '{}': {}", appointment.getObjectID(), appointment.getParentFolderID(), appointment.getTitle(), getLastResponse().getException().getMessage());
+            }
         }
         setFailOnError(old);
     }
@@ -434,7 +433,9 @@ public class CalendarTestManager implements TestManager {
         NewAppointmentSearchResponse resp = execute(req);
         extractInfo(resp);
         try {
-            return Arrays.asList(resp.getAppointments());
+            Appointment[] appointments = resp.getAppointments();
+            createdEntities.addAll(Arrays.asList(appointments));
+            return Arrays.asList(appointments);
         } catch (Exception e) {
             lastException = e;
             return null;
@@ -463,86 +464,12 @@ public class CalendarTestManager implements TestManager {
         }
         CommonAllResponse response = execute(request);
         extractInfo(response);
-        List<Appointment> appointments = new ArrayList<Appointment>();
-
-        int[] actualColumns = response.getColumns();
-        for (Object[] row : response.getArray()) {
-            Appointment app = new Appointment();
-            appointments.add(app);
-            for (int i = 0; i < row.length; i++) {
-                if (row[i] == null) {
-                    continue;
-                }
-                if (actualColumns[i] == Appointment.LAST_MODIFIED_UTC) {
-                    continue;
-                } else if (actualColumns[i] == Appointment.CONFIRMATIONS) {
-                    parseConfirmations((JSONArray) row[i], app);
-                    continue;
-                } else if (actualColumns[i] == Appointment.USERS) {
-                    parseUsers((JSONArray) row[i], app);
-                } else {
-                    try {
-                        app.set(actualColumns[i], row[i]);
-                    } catch (ClassCastException x) {
-                        if (x.getMessage().equals("java.lang.Long")) {
-                            if (!tryDate(app, actualColumns[i], (Long) row[i])) {
-                                tryInteger(app, actualColumns[i], (Long) row[i]);
-                            }
-                        } else if (x.getMessage().equals("java.lang.Long cannot be cast to java.util.Date")) {
-                            app.set(actualColumns[i], new Date((Long) row[i]));
-                        } else if (x.getMessage().equals("java.lang.String cannot be cast to java.lang.Long")) {
-                            app.set(actualColumns[i], Long.parseLong((String) row[i]));
-                        } else if (x.getMessage().equals("org.json.JSONArray cannot be cast to [Ljava.util.Date;")) {
-                            //
-                        }
-                    }
-                }
-
-            }
-        }
-
-        return appointments.toArray(new Appointment[appointments.size()]);
-
-    }
-
-    private void parseUsers(JSONArray jUsers, Appointment app) {
-        List<UserParticipant> users = new ArrayList<UserParticipant>();
         try {
-            for (int i = 0; i < jUsers.length(); i++) {
-                final JSONObject jUser = jUsers.getJSONObject(i);
-                final UserParticipant user = new UserParticipant(jUser.getInt(ParticipantsFields.ID));
-                if (jUser.has(ParticipantsFields.CONFIRMATION)) {
-                    user.setConfirm(jUser.getInt(ParticipantsFields.CONFIRMATION));
-                }
-                if (jUser.has(ParticipantsFields.CONFIRM_MESSAGE)) {
-                    user.setConfirmMessage(jUser.getString(ParticipantsFields.CONFIRM_MESSAGE));
-                }
-
-                if (jUser.has(CalendarFields.ALARM)) {
-                    user.setAlarmDate(new Date(jUser.getLong(CalendarFields.ALARM)));
-                }
-                users.add(user);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+            return CTMUtils.jsonArray2AppointmentArray((JSONArray) response.getData(), response.getColumns(), timezone);
+        } catch (JSONException | OXException e) {
+            fail(e.getMessage());
+            return null;
         }
-
-        app.setUsers(users);
-    }
-
-    private void parseConfirmations(JSONArray confirmations, Appointment app) {
-        ParticipantParser parser = new ParticipantParser();
-        List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
-        for (int j = 0; j < confirmations.length(); j++) {
-            JSONObject confirmation;
-            try {
-                confirmation = confirmations.getJSONObject(j);
-                confirmableParticipants.add(parser.parseConfirmation(true, confirmation));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        app.setConfirmations(confirmableParticipants);
     }
 
     public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns) {
@@ -550,34 +477,7 @@ public class CalendarTestManager implements TestManager {
     }
 
     public Appointment[] all(int parentFolderID, Date start, Date end) {
-        AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
-        CommonAllResponse response = execute(request);
-        extractInfo(response);
-        List<Appointment> appointments = new ArrayList<Appointment>();
-
-        for (Object[] row : response.getArray()) {
-            Appointment app = new Appointment();
-            appointments.add(app);
-            for (int i = 0; i < row.length; i++) {
-                if (row[i] == null) {
-                    continue;
-                }
-                if (Appointment.ALL_COLUMNS[i] == Appointment.LAST_MODIFIED_UTC) {
-                    continue;
-                }
-                try {
-                    app.set(Appointment.ALL_COLUMNS[i], row[i]);
-                } catch (ClassCastException x) {
-                    if (x.getMessage() != null && x.getMessage().equals("java.lang.Long")) {
-                        if (!tryDate(app, Appointment.ALL_COLUMNS[i], (Long) row[i])) {
-                            tryInteger(app, Appointment.ALL_COLUMNS[i], (Long) row[i]);
-                        }
-                    }
-                }
-            }
-        }
-
-        return appointments.toArray(new Appointment[appointments.size()]);
+        return all(parentFolderID, start, end, Appointment.ALL_COLUMNS);
     }
 
     public void delete(Appointment appointment, Date recurrenceDatePosition) {
@@ -650,24 +550,6 @@ public class CalendarTestManager implements TestManager {
         return copy;
     }
 
-    private boolean tryInteger(Appointment app, int field, Long value) {
-        try {
-            app.set(field, new Integer(value.intValue()));
-            return true;
-        } catch (ClassCastException x) {
-            return false;
-        }
-    }
-
-    private boolean tryDate(Appointment app, int field, Long value) {
-        try {
-            app.set(field, new Date(value.longValue()));
-            return true;
-        } catch (ClassCastException x) {
-            return false;
-        }
-    }
-
     public void clearFolder(int folderId, Date start, Date end) {
         for (Appointment app : all(folderId, start, end)) {
             delete(app, true);
@@ -695,6 +577,22 @@ public class CalendarTestManager implements TestManager {
 
         final JSONArray arr = (JSONArray) response.getResponse().getData();
         return CTMUtils.jsonArray2AppointmentArray(arr, client.getValues().getTimeZone());
+    }
+
+    /**
+     * Resets the permissions of the user's personal calendar folder to their defaults in case there are currently two or more permission
+     * entities defined.
+     */
+    public void resetDefaultFolderPermissions() throws Exception {
+        FolderObject folder = getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, getPrivateFolder())).getFolder();
+        if (1 < folder.getPermissions().size()) {
+            FolderObject folderUpdate = new FolderObject(getPrivateFolder());
+            folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
+                getClient().getValues().getUserId(), false, true,
+                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
+            getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderUpdate));
+        }
     }
 
     public static Appointment createAppointmentObject(int parentFolderId, String title, Date start, Date end) {

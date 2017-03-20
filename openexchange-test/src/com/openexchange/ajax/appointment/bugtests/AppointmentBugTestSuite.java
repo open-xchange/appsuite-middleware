@@ -51,13 +51,14 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for appointment bug tests.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     Bug13214Test.class,
     Bug13027Test.class,
@@ -137,6 +138,7 @@ import org.junit.runners.Suite;
     Bug47012Test.class,
     Bug48149Test.class,
     Bug48165Test.class,
+    Bug51918Test.class,
 
 })
 public class AppointmentBugTestSuite {

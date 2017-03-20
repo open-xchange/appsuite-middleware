@@ -178,6 +178,10 @@ public class ReminderTestManager implements TestManager {
     public void cleanUp() {
         for (ReminderObject reminder : new ArrayList<ReminderObject>(createdEntities)) {
             delete(reminder);
+            if (getLastResponse().hasError()) {
+                org.slf4j.LoggerFactory.getLogger(ReminderTestManager.class).warn("Unable to delete the reminder with id {} in folder '{}': {}", reminder.getObjectId(), reminder.getFolder(), getLastResponse().getException().getMessage());
+            }
+
         }
     }
 

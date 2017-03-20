@@ -50,8 +50,8 @@
 package com.openexchange.ajax.oauth.provider;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link OAuthProviderTests}
@@ -59,14 +59,12 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @SuiteClasses({ 
     AuthorizationEndpointTest.class, 
     TokenEndpointTest.class, 
     ProtocolFlowTest.class, 
     RevokeTokensTest.class, 
-    ReadFoldersTest.class, 
-    JSONApiTest.class, 
     ClientManagementTest.class
 })
 public class OAuthProviderTests {

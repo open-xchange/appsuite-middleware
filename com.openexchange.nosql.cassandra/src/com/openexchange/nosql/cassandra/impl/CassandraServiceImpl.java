@@ -64,7 +64,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.mapping.MappingManager;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.exceptions.CassandraServiceExceptionCodes;
@@ -115,10 +115,10 @@ public class CassandraServiceImpl implements CassandraService {
             // Initialise cluster
             cluster.init();
             // Register the query logger
-            ConfigurationService configurationService = services.getService(ConfigurationService.class);
-            boolean enableQueryLogger = configurationService.getBoolProperty(CassandraProperty.enableQueryLogger.getName(), CassandraProperty.enableQueryLogger.getDefaultValue(Boolean.class));
+            LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
+            boolean enableQueryLogger = leanConfigurationService.getBooleanProperty(CassandraProperty.enableQueryLogger);
             if (enableQueryLogger) {
-                int slowQueryLatencyThresholdMillis = configurationService.getIntProperty(CassandraProperty.queryLatencyThreshold.getName(), CassandraProperty.queryLatencyThreshold.getDefaultValue(Integer.class));
+                int slowQueryLatencyThresholdMillis = leanConfigurationService.getIntProperty(CassandraProperty.queryLatencyThreshold);
                 QueryLogger queryLogger = QueryLogger.builder().withConstantThreshold(slowQueryLatencyThresholdMillis).build();
                 cluster.register(queryLogger);
             }

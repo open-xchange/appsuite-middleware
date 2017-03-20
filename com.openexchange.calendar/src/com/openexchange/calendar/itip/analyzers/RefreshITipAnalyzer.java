@@ -103,11 +103,15 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
 
+        if (null == appointment) {
+            throw new OXException(new IllegalArgumentException("No appointment instance given"));
+        }
+
         analysis.setUid(appointment.getUid());
 
         refreshed = util.resolveUid(appointment.getUid(), session);
 
-        if (isException) {
+        if (isException && refreshed!=null) {
             refreshed = findAndRemoveMatchingException(appointment, util.getExceptions(refreshed, session));
         }
 

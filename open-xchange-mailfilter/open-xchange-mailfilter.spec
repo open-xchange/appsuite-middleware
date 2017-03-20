@@ -12,7 +12,11 @@ BuildRequires: open-xchange-core
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -61,6 +65,21 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-3843
     ox_remove_property com.openexchange.mail.filter.preferGSSAPI $PFILE
     ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
+
+    # SoftwareChange_Request-3987
+    OLDNAMES=( SIEVE_LOGIN_TYPE SIEVE_CREDSRC SIEVE_SERVER SIEVE_PORT SCRIPT_NAME SIEVE_AUTH_ENC NON_RFC_COMPLIANT_TLS_REGEX TLS VACATION_DOMAINS )
+    NEWNAMES=( com.openexchange.mail.filter.loginType com.openexchange.mail.filter.credentialSource com.openexchange.mail.filter.server com.openexchange.mail.filter.port com.openexchange.mail.filter.scriptName com.openexchange.mail.filter.authenticationEncoding com.openexchange.mail.filter.nonRFCCompliantTLSRegex com.openexchange.mail.filter.tls com.openexchange.mail.filter.vacationDomains )
+    for I in $(seq 1 ${#OLDNAMES[@]})
+    do
+        OLDNAME=${OLDNAMES[$I-1]}
+        NEWNAME=${NEWNAMES[$I-1]}
+        VALUE=$(ox_read_property $OLDNAME $PFILE)
+        ox_add_property $NEWNAME "$VALUE" $PFILE
+        ox_remove_property $OLDNAME $PFILE
+    done
+
+    # SoftwareChange_Request-4007
+    ox_add_property com.openexchange.mail.filter.authTimeout 6000 $PFILE
 fi
 
 %clean

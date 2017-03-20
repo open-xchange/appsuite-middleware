@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.dataobjects;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * {@link SecuritySettings} - (Immutable) Security settings for mail transport.
  *
@@ -70,9 +73,13 @@ public class SecuritySettings {
     public static final class Builder {
 
         private boolean encrypt;
+        private boolean decrypt;
         private boolean sign;
         private boolean pgpInline;
         private String authentication;
+        private String guest_language;
+        private String guest_message;
+        private String pin;
 
         /**
          * Initializes a new {@link DefaultDoveAdmCommand.Builder} with optional identifier default to <code>"1"</code>.
@@ -89,6 +96,16 @@ public class SecuritySettings {
          */
         public Builder encrypt(boolean encrypt) {
             this.encrypt = encrypt;
+            return this;
+        }
+
+        /**
+         * Sets the decrypt flag
+         * @param decrypt The decrypt flag
+         * @return This builder
+         */
+        public Builder decrypt(boolean decrypt) {
+            this.decrypt = decrypt;
             return this;
         }
 
@@ -125,29 +142,52 @@ public class SecuritySettings {
             return this;
         }
 
+        public Builder guestLanguage (String lang) {
+            this.guest_language = lang;
+            return this;
+        }
+
+        public Builder guestMessage (String message) {
+            this.guest_message = message;
+            return this;
+        }
+
+        public Builder pin(String pin) {
+            this.pin = pin;
+            return this;
+        }
+
         /**
          * Builds the <code>SecuritySettings</code> instance from this builder's arguments.
          *
          * @return The <code>SecuritySettings</code> instance
          */
         public SecuritySettings build() {
-            return new SecuritySettings(encrypt, pgpInline, sign, authentication);
+            return new SecuritySettings(encrypt, decrypt, pgpInline, sign, authentication, guest_language, guest_message, pin);
         }
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
     private final boolean encrypt;
+    private final boolean decrypt;
     private final boolean sign;
     private final boolean pgpInline;
     private final String authentication;
+    private final String guest_language;
+    private final String guest_message;
+    private final String pin;
 
-    SecuritySettings(boolean encrypt, boolean pgpInline, boolean sign, String authentication) {
+    SecuritySettings(boolean encrypt, boolean decrypt, boolean pgpInline, boolean sign, String authentication, String guest_language, String guest_message, String pin) {
         super();
         this.encrypt = encrypt;
+        this.decrypt = decrypt;
         this.pgpInline = pgpInline;
         this.sign = sign;
         this.authentication = authentication;
+        this.guest_language = guest_language;
+        this.guest_message = guest_message;
+        this.pin = pin;
     }
 
     /**
@@ -178,6 +218,14 @@ public class SecuritySettings {
     }
 
     /**
+     * Gets the decrypt flag
+     * @return The decrypt flag
+     */
+    public boolean isDecrypt() {
+        return decrypt;
+    }
+
+    /**
      * Gets the sign flag
      *
      * @return The sign flag
@@ -201,6 +249,37 @@ public class SecuritySettings {
      */
     public String getAuthentication() {
         return authentication;
+    }
+
+    /**
+     * Returns guest greeting message
+     * @return
+     */
+    public String getGuestMessage () {
+        return guest_message;
+    }
+
+    public String getGuestLanguage () {
+        return guest_language;
+    }
+
+    public String getJsonString() throws JSONException {
+        return (getJSON().toString());
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public JSONObject getJSON() throws JSONException {
+        JSONObject settings = new JSONObject();
+        settings.put("encrypt", this.isEncrypt());
+        settings.put("sign", this.isSign());
+        settings.put("inline", this.isPgpInline());
+        settings.put("guest_language", this.getGuestLanguage());
+        settings.put("guest_message", this.getGuestMessage());
+        settings.put("pin", this.getPin());
+        return settings;
     }
 
 }

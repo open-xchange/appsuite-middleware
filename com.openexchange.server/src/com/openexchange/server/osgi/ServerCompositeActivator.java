@@ -75,6 +75,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.filemanagement.osgi.ManagedFileManagementActivator(),
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
+        new com.openexchange.ajax.ipcheck.osgi.IPCheckActivator(),
         new com.openexchange.ajax.printing.osgi.AJAXPrintingActivator(),
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),
@@ -88,6 +89,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.tools.images.osgi.ImageToolsActivator(),
         new com.openexchange.mail.json.osgi.MailJSONActivator(),
         new com.openexchange.mail.json.compose.share.osgi.ShareComposeActivator(),
+        new com.openexchange.mail.osgi.UserSettingMailActivator(),
         new com.openexchange.filemanagement.json.osgi.ManagedFileJSONActivator(),
         new com.openexchange.group.json.osgi.GroupJSONActivator(),
         new com.openexchange.resource.json.osgi.ResourceJSONActivator(),
@@ -109,6 +111,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.anonymizer.osgi.AnonymizerActivator(),
         new com.openexchange.server.osgi.inspector.SessionInspectorChainActivator(),
         new com.openexchange.groupware.upload.osgi.UploadActivator(),
+        new com.openexchange.net.ssl.management.osgi.SSLCertificateManagementActivator(),
+        new com.openexchange.net.ssl.management.json.osgi.SSLCertificateManagementJSONActivator(),
     };
 
     public ServerCompositeActivator() {

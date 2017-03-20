@@ -336,6 +336,11 @@ public class FolderTestManager implements TestManager {
             for (final FolderObject folder : deleteMe) {
                 folder.setLastModified(new Date(Long.MAX_VALUE));
                 deleteFolderOnServer(folder, Boolean.TRUE);
+
+                if (getLastResponse().hasError()) {
+                    org.slf4j.LoggerFactory.getLogger(FolderTestManager.class).warn("Unable to delete the folder with id {} in folder {} with name '{}': {}", folder.getObjectID(), folder.getParentFolderID(), folder.getFolderName(), getLastResponse().getException().getMessage());
+                }
+
             }
         } catch (final Exception e) {
             doExceptionHandling(e, "clean-up");

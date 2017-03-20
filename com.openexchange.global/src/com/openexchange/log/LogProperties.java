@@ -255,6 +255,10 @@ public final class LogProperties {
          */
         MAIL_SESSION("com.openexchange.mail.session"),
         /**
+         * com.openexchange.mail.endpoint
+         */
+        MAIL_ENDPOINT("com.openexchange.mail.endpoint"),
+        /**
          * com.openexchange.database.schema
          */
         DATABASE_SCHEMA("com.openexchange.database.schema"),
@@ -841,6 +845,19 @@ public final class LogProperties {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Gets the available host name
+     *
+     * @return The host name or <code>null</code>
+     */
+    public static String getHostName() {
+        String hostname = LogProperties.get(Name.HOSTNAME);
+        if (null == hostname) {
+            hostname = LogProperties.get(Name.GRIZZLY_SERVER_NAME);
+        }
+        return hostname;
     }
 
 }

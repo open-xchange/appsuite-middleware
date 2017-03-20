@@ -14,7 +14,11 @@ BuildRequires: open-xchange-xerces
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -39,6 +43,8 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-config-cascade = %{version}
 Obsoletes:     open-xchange-config-cascade < %{version}
+Provides:      open-xchange-config-lean = %{version}
+Obsoletes:     open-xchange-config-lean < %{version}
 Provides:      open-xchange-config-cascade-context = %{version}
 Obsoletes:     open-xchange-config-cascade-context < %{version}
 Provides:      open-xchange-config-cascade-user = %{version}
@@ -1433,6 +1439,9 @@ ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
 
 # SoftwareChange_Request-3882
 ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
+
+# SoftwareChange_Request-3934
+ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"

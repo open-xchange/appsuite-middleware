@@ -59,9 +59,6 @@ import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
@@ -167,7 +164,7 @@ public final class MailConfigTest {
 
             MailProperties.getInstance().setAuthProxyDelimiter("#");
 
-            MailConfig.fillLoginAndPassword(mailConfig, session, "user#001", account);
+            MailConfig.fillLoginAndPassword(mailConfig, session, "user#001", account, true);
 
             assertEquals("Unexpected login", "login", mailConfig.getLogin());
             assertEquals("Unexpected password", "password", mailConfig.getPassword());

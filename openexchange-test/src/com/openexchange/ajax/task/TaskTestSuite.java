@@ -51,13 +51,14 @@ package com.openexchange.ajax.task;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for all task tests.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     TasksTest.class,
     TaskAttachmentTests.class,

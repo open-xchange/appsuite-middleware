@@ -90,6 +90,7 @@ public class ServletActivator extends AbstractSessionServletActivator {
     @Override
     protected void stopBundle() throws Exception {
         unregister();
+        super.stopBundle();
     }
 
     private void register() {
@@ -120,8 +121,6 @@ public class ServletActivator extends AbstractSessionServletActivator {
     private void unregister() {
         PublicationServlet.setFactory(null);
         PublicationTargetServlet.setFactory(null);
-
-        cleanUp();
     }
 
 }

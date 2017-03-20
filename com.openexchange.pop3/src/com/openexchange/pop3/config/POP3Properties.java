@@ -224,6 +224,15 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         cipherSuites = null;
     }
 
+    /**
+     * Gets the spam handler name.
+     *
+     * @return The spam handler name
+     */
+    public String getSpamHandlerName() {
+        return spamHandlerName;
+    }
+
     @Override
     public String getPOP3AuthEnc() {
         return pop3AuthEnc;
@@ -252,15 +261,6 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     @Override
     public int getPOP3BlockSize() {
         return pop3BlockSize;
-    }
-
-    /**
-     * Gets the spam handler name.
-     *
-     * @return The spam handler name
-     */
-    public String getSpamHandlerName() {
-        return spamHandlerName;
     }
 
     @Override

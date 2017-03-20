@@ -84,9 +84,9 @@ if [ $# -eq 0 ]; then
 	exit 0
 fi
 
-# Return code is 0, no flag '-h' supplied, DumpSchema exited successfully, feed output to mysqldump, 
+# Return code is 0, no flag '-h' or '--help' supplied, DumpSchema exited successfully, feed output to mysqldump, 
 # otherwise return output and the exit code of the java tool
-if [ $RETVAL -eq 0 ] && [ $1 != "-h" ]; then
+if [ $RETVAL -eq 0 ] && [ $1 != "-h" ] && [ $1 != "--help" ]; then
         schema="$(echo $OUTPUT | awk '{print $1}')"
         echo -n "Dumping schema '$schema'..."
         dump="mysqldump $OUTPUT"

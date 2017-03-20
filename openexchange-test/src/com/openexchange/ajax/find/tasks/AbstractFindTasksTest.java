@@ -58,6 +58,8 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.exception.OXException;
@@ -69,6 +71,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public abstract class AbstractFindTasksTest extends FindTasksTestEnvironment {
 
     /**

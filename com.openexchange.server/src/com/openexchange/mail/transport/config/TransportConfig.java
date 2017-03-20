@@ -55,6 +55,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -92,32 +93,21 @@ public abstract class TransportConfig extends MailConfig {
          */
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        TransportAccount transportAccount;
-        {
-            MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            transportAccount = storage.getTransportAccount(accountId, userId, contextId);
-        }
+        TransportAccount transportAccount = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true).getTransportAccount(accountId, userId, contextId);
+        transportConfig.account = transportAccount;
         transportConfig.accountId = accountId;
-        fillLoginAndPassword(transportConfig, session, getUser(session).getLoginInfo(), transportAccount);
-        transportConfig.setStartTls(transportAccount.isTransportStartTls());
+        transportConfig.session = session;
+        fillLoginAndPassword(transportConfig, session, getUser(session).getLoginInfo(), transportAccount, false);
 
-        UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount);
+        UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount, userId, contextId);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
-            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
+            if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource(userId, contextId))) {
                 throw MailConfigException.create(new StringBuilder(128).append("Property \"").append("com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
             }
             throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(userId).append(" in context ").append(contextId).toString());
         }
-        {
-            /*
-             * Remove ending '/' character
-             */
-            int lastPos = serverURL.length() - 1;
-            if (serverURL.charAt(lastPos) == '/') {
-                serverURL = serverURL.substring(0, lastPos);
-            }
-        }
+
         transportConfig.parseServerURL(urlInfo);
         transportConfig.doCustomParsing(transportAccount, session);
         return transportConfig;
@@ -127,14 +117,16 @@ public abstract class TransportConfig extends MailConfig {
      * Gets the transport server URL appropriate to configured transport server source.
      *
      * @param transportAccount The mail account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The appropriate transport server URL or <code>null</code>
      */
-    public static UrlInfo getTransportServerURL(final TransportAccount transportAccount) {
+    public static UrlInfo getTransportServerURL(final TransportAccount transportAccount, int userId, int contextId) {
         if (!transportAccount.isDefaultAccount()) {
             return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
         }
-        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
-            return new UrlInfo(MailProperties.getInstance().getTransportServer().getUrlString(true), MailProperties.getInstance().isTransportStartTls());
+        if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource(userId, contextId))) {
+            return new UrlInfo(MailProperties.getInstance().getTransportServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isTransportStartTls(userId, contextId));
         }
         return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
     }
@@ -148,8 +140,14 @@ public abstract class TransportConfig extends MailConfig {
      * @throws OXException If transport server URL cannot be returned
      */
     public static UrlInfo getTransportServerURL(final Session session, final int accountId) throws OXException {
-        final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        return getTransportServerURL(storage.getTransportAccount(accountId, session.getUserId(), session.getContextId()));
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource(userId, contextId))) {
+            return new UrlInfo(MailProperties.getInstance().getTransportServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isTransportStartTls(userId, contextId));
+        }
+
+        MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        return getTransportServerURL(storage.getTransportAccount(accountId, session.getUserId(), session.getContextId()), session.getUserId(), session.getContextId());
     }
 
     @Override

@@ -52,9 +52,11 @@ package com.openexchange.charset.osgi;
 import java.nio.charset.spi.CharsetProvider;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.charset.CollectionCharsetProvider;
-import com.openexchange.charset.ModifyCharsetExtendedProvider;
-import com.openexchange.charset.ModifyCharsetStandardProvider;
+import com.openexchange.charset.CharsetService;
+import com.openexchange.charset.internal.CharsetServiceImpl;
+import com.openexchange.charset.internal.CollectionCharsetProvider;
+import com.openexchange.charset.internal.ModifyCharsetExtendedProvider;
+import com.openexchange.charset.internal.ModifyCharsetStandardProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -128,6 +130,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
              */
             track(CharsetProvider.class, this);
             openTrackers();
+            registerService(CharsetService.class, CharsetServiceImpl.newInstance(backupStandardCharsetProvider, backupExtendedCharsetProvider));
             LOG.info("Charset bundle successfully started");
         } catch (final Throwable t) {
             LOG.error("", t);
@@ -139,7 +142,6 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
     public void stopBundle() {
         LOG.info("stopping bundle: com.openexchange.charset");
         try {
-            closeTrackers();
             /*
              * Restore original
              */
@@ -155,7 +157,6 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
             LOG.info("Collection charset provider replaced with former standard/external charset provider. Charset bundle successfully stopped");
         } catch (final Throwable t) {
             LOG.error("", t);
-//            throw t instanceof Exception ? (Exception) t : new Exception(t);
         } finally {
             collectionCharsetProvider = null;
             cleanUp();

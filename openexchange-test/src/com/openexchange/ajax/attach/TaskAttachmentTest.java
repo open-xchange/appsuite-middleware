@@ -94,7 +94,6 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
      * 
      * @throws Throwable if an error occurs.
      */
-    //FIXME has to be reviewed - causes MySQLSyntaxErrorException: SELECT ,pa.attached,pa.module,pa.filename,pa.file_size,pa.file_mimetype,pa.rtf_flag,pa.creation_date FROM prg_attachment AS pa  WHERE pa.module = 22 and pa.attached = 22 and pa.cid = 1  ORDER BY pa.creation_date ASC
     @Test
     public void testAll() throws Throwable {
         doAll();

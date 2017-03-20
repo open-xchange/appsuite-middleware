@@ -49,7 +49,7 @@
 
 package com.openexchange.sessionstorage;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -152,25 +152,28 @@ public class SessionStorageConfiguration {
      * @param contextId The context identifier
      * @return The parameter names
      */
-    public List<String> getRemoteParameterNames(int userId, int contextId) {
+    public Collection<String> getRemoteParameterNames(int userId, int contextId) {
         Iterator<SessionStorageParameterNamesProvider> iter = providers.iterator();
         if (false == iter.hasNext()) {
             return configuredRemoteParameterNames;
         }
 
-        Set<String> names = new TreeSet<String>(configuredRemoteParameterNames);
+        Set<String> names = null;
         do {
             SessionStorageParameterNamesProvider provider = iter.next();
             try {
                 List<String> parameterNames = provider.getParameterNames(userId, contextId);
-                if (null != parameterNames) {
+                if (null != parameterNames && !parameterNames.isEmpty()) {
+                    if (null == names) {
+                        names = new TreeSet<String>(configuredRemoteParameterNames);
+                    }
                     names.addAll(parameterNames);
                 }
             } catch (Exception e) {
                 LOG.warn("Failed to retrieve remote parameter names from provider '{}'", provider.getClass().getName(), e);
             }
         } while (iter.hasNext());
-        return new ArrayList<>(names);
+        return null == names ? configuredRemoteParameterNames : Collections.unmodifiableSet(names);
     }
 
 }

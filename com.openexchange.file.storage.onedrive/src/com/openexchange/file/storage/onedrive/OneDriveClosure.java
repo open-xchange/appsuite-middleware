@@ -100,7 +100,7 @@ public abstract class OneDriveClosure<R> {
         try {
             return doPerform(httpClient);
         } catch (HttpResponseException e) {
-            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+            if ((400 == e.getStatusCode() || 401 == e.getStatusCode()) && resourceAccess!=null) {
                 // Authentication failed -- recreate token
                 if (!handleAuthError) {
                     throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), OneDriveConstants.ID, e.getMessage());

@@ -128,7 +128,7 @@ public class ReminderServiceImpl implements ReminderService{
         try {
             ReminderObject oldReminder = ReminderHandler.getInstance().loadReminder(reminder.getObjectId(), writeConnection, serverSession.getContext());
             checkPermission(session, oldReminder, true);
-            ReminderHandler.getInstance().deleteReminder(oldReminder, serverSession.getContext());
+            ReminderHandler.getInstance().deleteReminder(oldReminder, serverSession.getContext(), writeConnection);
         } finally {
             if (writeConnection != null) {
                 Database.back(serverSession.getContext(), true, writeConnection);
@@ -203,7 +203,7 @@ public class ReminderServiceImpl implements ReminderService{
             checkPermission(session, oldReminder, true);
             return true;
         } catch (OXException e) {
-            if (e.equals(ReminderExceptionCode.NOT_FOUND)) {
+            if (ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 return false;
             }
             throw e;
@@ -298,7 +298,7 @@ public class ReminderServiceImpl implements ReminderService{
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         ReminderObject oldReminder = ReminderHandler.getInstance().loadReminder(reminder.getObjectId(), serverSession.getContext());
         checkPermission(session, oldReminder, true);
-        ReminderHandler.getInstance().remindAgain(oldReminder, session, ctx);
+        ReminderHandler.getInstance().remindAgain(reminder, session, ctx);
     }
 
     @Override

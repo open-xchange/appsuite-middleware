@@ -52,13 +52,14 @@ package com.openexchange.ajax.resource;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for the resource tests.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     ResourceAllAJAXTest.class,
     ResourceDeleteAJAXTest.class,

@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.login.listener.AutoLoginAwareLoginListener;
 import com.openexchange.login.listener.LoginListener;
 import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 
@@ -61,7 +62,7 @@ import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class LoginListenerCustomizer implements ServiceTrackerCustomizer<LoginListener, LoginListener> {
+public class LoginListenerCustomizer implements ServiceTrackerCustomizer<Object, Object> {
 
     private final BundleContext context;
 
@@ -76,10 +77,12 @@ public class LoginListenerCustomizer implements ServiceTrackerCustomizer<LoginLi
     }
 
     @Override
-    public LoginListener addingService(ServiceReference<LoginListener> serviceReference) {
-        LoginListener listener = context.getService(serviceReference);
-        if (LoginListenerRegistryImpl.getInstance().addLoginListener(listener)) {
-            return listener;
+    public Object addingService(ServiceReference<Object> serviceReference) {
+        Object service = context.getService(serviceReference);
+        if ((service instanceof LoginListener) || (service instanceof AutoLoginAwareLoginListener)) {
+            if (LoginListenerRegistryImpl.getInstance().addLoginListener((LoginListener) service)) {
+                return service;
+            }
         }
         // Nothing to track
         context.ungetService(serviceReference);
@@ -87,14 +90,14 @@ public class LoginListenerCustomizer implements ServiceTrackerCustomizer<LoginLi
     }
 
     @Override
-    public void modifiedService(ServiceReference<LoginListener> serviceReference, LoginListener listener) {
+    public void modifiedService(ServiceReference<Object> serviceReference, Object service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference<LoginListener> serviceReference, LoginListener listener) {
-        if (null != listener) {
-            LoginListenerRegistryImpl.getInstance().removeLoginListener(listener);
+    public void removedService(ServiceReference<Object> serviceReference, Object service) {
+        if ((service instanceof LoginListener) || (service instanceof AutoLoginAwareLoginListener)) {
+            LoginListenerRegistryImpl.getInstance().removeLoginListener((LoginListener) service);
             context.ungetService(serviceReference);
         }
     }

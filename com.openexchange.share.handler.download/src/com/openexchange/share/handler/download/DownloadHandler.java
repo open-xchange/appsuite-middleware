@@ -70,6 +70,8 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
@@ -114,7 +116,12 @@ public class DownloadHandler extends HttpAuthShareHandler {
 
     @Override
     protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return Module.INFOSTORE.getFolderConstant() == shareRequest.getTarget().getModule() && null != shareRequest.getTarget().getItem() && (indicatesDownload(request) || indicatesRaw(request));
+        if (shareRequest.isInvalidTarget()) {
+            return false;
+        }
+
+        ShareTarget target = shareRequest.getTarget();
+        return Module.INFOSTORE.getFolderConstant() == target.getModule() && null != target.getItem() && (indicatesDownload(request) || indicatesRaw(request));
     }
 
     @Override
@@ -125,7 +132,11 @@ public class DownloadHandler extends HttpAuthShareHandler {
         ServerSession session = ServerSessionAdapter.valueOf(resolvedShare.getSession());
         final String id = resolvedShare.getShareRequest().getTarget().getItem();
         final String version = null; // as per com.openexchange.file.storage.FileStorageFileAccess.CURRENT_VERSION
-        final IDBasedFileAccess fileAccess = Services.getService(IDBasedFileAccessFactory.class).createAccess(session);
+        IDBasedFileAccessFactory service = Services.getService(IDBasedFileAccessFactory.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
+        }
+        final IDBasedFileAccess fileAccess = service.createAccess(session);
         FileHolder fileHolder;
         String eTag;
         final Document document = fileAccess.getDocumentAndMetadata(id, version);

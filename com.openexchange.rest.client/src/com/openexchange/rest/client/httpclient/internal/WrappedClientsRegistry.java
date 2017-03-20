@@ -55,6 +55,7 @@ import java.util.List;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 
@@ -83,6 +84,7 @@ public class WrappedClientsRegistry {
 
     private final List<ClientAndConfig> wrappers; // guarded by synchronized
     private SSLSocketFactoryProvider factoryProvider; // guarded by synchronized
+    private SSLConfigurationService sslConfig; // guarded by synchronized
 
     /**
      * Initializes a new {@link WrappedClientsRegistry}.
@@ -101,8 +103,10 @@ public class WrappedClientsRegistry {
      */
     public DefaultHttpClient createWrapped(ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider;
+        SSLConfigurationService sslConfig;
         synchronized (wrappers) {
             factoryProvider = this.factoryProvider;
+            sslConfig = this.sslConfig;
             if (null == factoryProvider) {
                 DefaultHttpClient fallbackHttpClient = HttpClients.getFallbackHttpClient(config);
                 WrappingDefaultHttpClient wrapper = new WrappingDefaultHttpClient(fallbackHttpClient);
@@ -112,25 +116,27 @@ public class WrappedClientsRegistry {
         }
 
         // Return unmanaged instance
-        return HttpClients.getHttpClient(config, factoryProvider);
+        return HttpClients.getHttpClient(config, factoryProvider, sslConfig);
     }
 
 
     /**
-     * Sets the SSL socket factory provider
+     * Sets the SSL services
      *
      * @param factoryProvider The SSL socket factory provider to set
+     * @param sslConfig The SSL configuration service to set
      */
-    public void setFactoryProvider(SSLSocketFactoryProvider factoryProvider) {
+    public void setSSLServices(SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         synchronized (wrappers) {
             this.factoryProvider = factoryProvider;
+            this.sslConfig = sslConfig;
             if (null != factoryProvider) {
                 for (Iterator<ClientAndConfig> iter = wrappers.iterator(); iter.hasNext();) {
                     // Create unmanaged instance
                     ClientAndConfig clientEntry = iter.next();
                     DefaultHttpClient newHttpClient = null;
                     try {
-                        newHttpClient = HttpClients.getHttpClient(clientEntry.config, factoryProvider);
+                        newHttpClient = HttpClients.getHttpClient(clientEntry.config, factoryProvider, sslConfig);
                         clientEntry.wrapper.replaceHttpClient(newHttpClient);
                         newHttpClient = null; // Avoid preliminary shut-down
                         iter.remove();

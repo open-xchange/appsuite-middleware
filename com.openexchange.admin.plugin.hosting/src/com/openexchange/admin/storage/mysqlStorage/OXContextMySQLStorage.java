@@ -1739,27 +1739,32 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 to = new TableObject();
                 to.setName(table_name);
                 // fetch all columns from table and see if it contains matching column
-                final ResultSet columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
+                ResultSet columns_res = null;
+                try {
+                    columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
 
-                boolean table_matches = false;
-                while (columns_res.next()) {
+                    boolean table_matches = false;
+                    while (columns_res.next()) {
 
-                    final TableColumnObject tco = new TableColumnObject();
-                    final String column_name = columns_res.getString("COLUMN_NAME");
-                    tco.setName(column_name);
-                    tco.setType(columns_res.getInt("DATA_TYPE"));
-                    tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
+                        final TableColumnObject tco = new TableColumnObject();
+                        final String column_name = columns_res.getString("COLUMN_NAME");
+                        tco.setName(column_name);
+                        tco.setType(columns_res.getInt("DATA_TYPE"));
+                        tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
 
-                    // if table has our criteria column, we should fetch data from it
-                    if (column_name.equals(this.selectionCriteria)) {
-                        table_matches = true;
+                        // if table has our criteria column, we should fetch data from it
+                        if (column_name.equals(this.selectionCriteria)) {
+                            table_matches = true;
+                        }
+                        // add column to table
+                        to.addColumn(tco);
                     }
-                    // add column to table
-                    to.addColumn(tco);
-                }
-                columns_res.close();
-                if (table_matches) {
-                    tableObjects.add(to);
+                    
+                    if (table_matches) {
+                        tableObjects.add(to);
+                    }
+                } finally {
+                    closeSQLStuff(columns_res);
                 }
             }
         } finally {
@@ -1804,26 +1809,31 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     private void findReferences(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
         DatabaseMetaData dbmeta = ox_db_write_con.getMetaData();
         String dbCatalog = ox_db_write_con.getCatalog();
+
         for (TableObject to : fetchTableObjects) {
             // get references from this table to another
             String tableName = to.getName();
             // ResultSet table_references =
             // dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
-            final ResultSet tableReferences = dbmeta.getImportedKeys(dbCatalog, null, tableName);
-            LOG.debug("Table {} has pk reference to table-column:", tableName);
-            while (tableReferences.next()) {
-                final String pk = tableReferences.getString("PKTABLE_NAME");
-                final String pkc = tableReferences.getString("PKCOLUMN_NAME");
-                LOG.debug("--> Table: {} column ->{}", pk, pkc);
-                to.addCrossReferenceTable(pk);
-                final int pos = tableListContainsObject(pk, fetchTableObjects);
-                if (pos != -1) {
-                    LOG.debug("Found referenced by {}<->{}->{}", tableName, pk, pkc);
-                    final TableObject editMe = fetchTableObjects.get(pos);
-                    editMe.addReferencedBy(tableName);
+
+            ResultSet tableReferences = dbmeta.getImportedKeys(dbCatalog, null, tableName);
+            try {
+                LOG.debug("Table {} has pk reference to table-column:", tableName);
+                while (tableReferences.next()) {
+                    final String pk = tableReferences.getString("PKTABLE_NAME");
+                    final String pkc = tableReferences.getString("PKCOLUMN_NAME");
+                    LOG.debug("--> Table: {} column ->{}", pk, pkc);
+                    to.addCrossReferenceTable(pk);
+                    final int pos = tableListContainsObject(pk, fetchTableObjects);
+                    if (pos != -1) {
+                        LOG.debug("Found referenced by {}<->{}->{}", tableName, pk, pkc);
+                        final TableObject editMe = fetchTableObjects.get(pos);
+                        editMe.addReferencedBy(tableName);
+                    }
                 }
+            } finally {
+                closeSQLStuff(tableReferences);
             }
-            tableReferences.close();
         }
     }
 

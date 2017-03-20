@@ -53,6 +53,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -61,7 +62,6 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
@@ -73,6 +73,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
@@ -268,7 +269,9 @@ public final class NewAction extends AbstractMailAction {
                     composedMail.removeHeader("Message-ID");
                     composedMail.removeMessageId();
                 }
+
                 MailServletInterface mailInterface = getMailInterface(req);
+
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId).toString();
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
@@ -568,27 +571,30 @@ public final class NewAction extends AbstractMailAction {
         }
 
         // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
-        final JSONValue responseData;
         if (folder == null) {
-            responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail(), req.getRequest());
-        } else {
-            String[] ids;
-            MailServletInterface mailInterface = MailServletInterface.getInstance(session);
-            try {
-                ids = mailInterface.appendMessages(folder, new MailMessage[] { data.getMail() }, force);
-                if (flags > 0) {
-                    mailInterface.updateMessageFlags(folder, ids, flags, true);
-                }
-            } finally {
-                mailInterface.close(true);
+            AJAXRequestResult result = transportMessage(session, flags, force, data.getFromAddress(), data.getMail(), req.getRequest());
+            if (null == result) {
+                result = new AJAXRequestResult(new JSONObject(), "json");
             }
-            JSONObject responseObj = new JSONObject(3);
-            responseObj.put(FolderChildFields.FOLDER_ID, folder);
-            responseObj.put(DataFields.ID, ids[0]);
-            responseData = responseObj;
+            return result;
         }
 
-        AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
+        String[] ids;
+        MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+        try {
+            ids = mailInterface.appendMessages(folder, new MailMessage[] { data.getMail() }, force);
+            if (flags > 0) {
+                mailInterface.updateMessageFlags(folder, ids, flags, true);
+            }
+        } finally {
+            mailInterface.close(true);
+        }
+
+        JSONObject responseObj = new JSONObject(3);
+        responseObj.put(FolderChildFields.FOLDER_ID, folder);
+        responseObj.put(DataFields.ID, ids[0]);
+
+        AJAXRequestResult result = new AJAXRequestResult(responseObj, "json");
         result.addWarnings(warnings);
         return result;
     }
@@ -641,7 +647,7 @@ public final class NewAction extends AbstractMailAction {
         }
     }
 
-    private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m, AJAXRequestData request) throws OXException, JSONException {
+    private AJAXRequestResult transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m, AJAXRequestData request) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */
@@ -669,11 +675,11 @@ public final class NewAction extends AbstractMailAction {
          */
         if (isOAuthRequest(request)) {
             if (MailAccount.DEFAULT_ID == accountId) {
-                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
                 switch (passwordSource) {
                     case GLOBAL: {
                         // Just for convenience
-                        String masterPassword = MailProperties.getInstance().getMasterPassword();
+                        String masterPassword = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
                         if (masterPassword == null) {
                             throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
                         }
@@ -744,18 +750,20 @@ public final class NewAction extends AbstractMailAction {
                     }
                 }
             }
-            JSONObject responseData = null;
+            AJAXRequestResult result = null;
             if (!usm.isNoCopyIntoStandardSentFolder()) {
                 /*
                  * Copy in sent folder allowed
                  */
+                List<OXException> warnings = new LinkedList<>();
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                 try {
                     mailAccess = MailAccess.getInstance(session, accountId);
-                    mailAccess.connect();
-                    final String sentFullname = MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
-                    final String[] uidArr;
+                    String sentFullname;
+                    String[] uidArr;
                     try {
+                        mailAccess.connect();
+                        sentFullname = MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
                         /*
                          * Append to default "sent" folder
                          */
@@ -794,14 +802,19 @@ public final class NewAction extends AbstractMailAction {
                         /*
                          * Mark appended sent mail as seen
                          */
-                        mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
+                        try {
+                            mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
+                        } catch (OXException e) {
+                            warnings.add(e.setCategory(Category.CATEGORY_WARNING));
+                        }
                     }
                     /*
                      * Compose JSON object
                      */
-                    responseData = new JSONObject(2);
+                    JSONObject responseData = new JSONObject(2);
                     responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, sentFullname));
                     responseData.put(DataFields.ID, uidArr[0]);
+                    result = new AJAXRequestResult(responseData, "json");
                 } finally {
                     if (null != mailAccess) {
                         mailAccess.close(true);
@@ -811,7 +824,7 @@ public final class NewAction extends AbstractMailAction {
             if (null != oxError) {
                 throw oxError;
             }
-            return responseData;
+            return result;
         } finally {
             transport.close();
         }

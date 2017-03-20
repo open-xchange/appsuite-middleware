@@ -49,19 +49,27 @@
 
 package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.jsieve.SieveException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
+import com.openexchange.mailfilter.json.ajax.json.fields.HeaderTestField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link HeaderTestCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class HeaderTestCommandParser implements CommandParser<TestCommand> {
 
@@ -74,21 +82,29 @@ public class HeaderTestCommandParser implements CommandParser<TestCommand> {
 
     /*
      * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, com.openexchange.tools.session.ServerSession)
      */
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
-        return TestCommandParserUtil.createAddressEnvelopeOrHeaderTest(jsonObject, Commands.HEADER);
+        final List<Object> argList = new ArrayList<Object>();
+        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, HeaderTestField.comparison.name(), Commands.HEADER.getCommandName())));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), Commands.HEADER.getCommandName())));
+        return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
-        TestCommandParserUtil.fillWithAddressEnvelopeOrHeaderTest(jsonObject, command);
+        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
+        jsonObject.put(HeaderTestField.comparison.name(), command.getMatchType().substring(1));
+        jsonObject.put(HeaderTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(HeaderTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
     }
 }

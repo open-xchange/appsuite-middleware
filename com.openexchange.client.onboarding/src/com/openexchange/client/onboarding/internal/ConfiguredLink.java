@@ -49,8 +49,8 @@
 
 package com.openexchange.client.onboarding.internal;
 
-import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkType;
+import com.openexchange.client.onboarding.internal.ConfiguredLinkImage.Type;
 
 /**
  * {@link ConfiguredLink} - A link for a scenario having type set to "link".
@@ -58,9 +58,14 @@ import com.openexchange.client.onboarding.LinkType;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfiguredLink extends Link {
+public class ConfiguredLink {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfiguredLink.class);
+
+    private final String url;
+    private final LinkType type;
     private final boolean property;
+    private final ConfiguredLinkImage image;
 
     /**
      * Initializes a new {@link ConfiguredLink}.
@@ -68,10 +73,59 @@ public class ConfiguredLink extends Link {
      * @param link The link
      * @param property Whether the link denotes a property
      * @param type The link type
+     * @param imageInfo The optional image info
      */
-    public ConfiguredLink(String link, boolean property, LinkType type) {
-        super(link, type);
+    public ConfiguredLink(String link, boolean property, LinkType type, String imageInfo) {
+        super();
+        this.url = link;
+        this.type = type;
         this.property = property;
+
+        if (null == imageInfo) {
+            image = null;
+        } else {
+            int pos = imageInfo.indexOf("://");
+            if (pos <= 0) {
+                image = new ConfiguredLinkImage(imageInfo, Type.RESOURCE);
+            } else {
+                String scheme = imageInfo.substring(0, pos);
+                String name = imageInfo.substring(pos + 3);
+                Type iType = Type.typeFor(scheme);
+                if (iType == null) {
+                    LOG.warn("Unknown image type: {}", scheme);
+                    image = null;
+                } else {
+                    image = new ConfiguredLinkImage(name, iType);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the image
+     *
+     * @return The image
+     */
+    public ConfiguredLinkImage getImage() {
+        return image;
+    }
+
+    /**
+     * Gets the URL or property name.
+     *
+     * @return The URL or property name
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * Gets the type
+     *
+     * @return The type
+     */
+    public LinkType getType() {
+        return type;
     }
 
     /**

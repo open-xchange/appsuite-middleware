@@ -58,7 +58,9 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.file.storage.googledrive.GoogleDriveFileStorageService;
+import com.openexchange.file.storage.googledrive.oauth.GoogleDriveOAuthAccountAssociationProvider;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 
 /**
  * {@link GoogleDriveServiceRegisterer}
@@ -68,10 +70,11 @@ import com.openexchange.oauth.OAuthAccountDeleteListener;
 public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
     private final BundleContext context;
-    private volatile FileStorageAccountManagerProvider provider;
-    private volatile GoogleDriveFileStorageService service;
-    private volatile ServiceRegistration<FileStorageService> serviceRegistration;
-    private volatile ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
+    private FileStorageAccountManagerProvider provider; // guarded by synchronized
+    private GoogleDriveFileStorageService service; // guarded by synchronized
+    private ServiceRegistration<FileStorageService> serviceRegistration; // guarded by synchronized
+    private ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration; // guarded by synchronized
+    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration; // guarded by synchronized
 
     /**
      * Initializes a new {@link GoogleDriveServiceRegisterer}.
@@ -102,6 +105,8 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
                 service = new GoogleDriveFileStorageService(Services.getServiceLookup());
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
+                this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new GoogleDriveOAuthAccountAssociationProvider(service), null);
+
                 this.service = service;
                 this.provider = provider;
             } else {
@@ -116,6 +121,7 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
                     service = new GoogleDriveFileStorageService(Services.getServiceLookup(), compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
+                    this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new GoogleDriveOAuthAccountAssociationProvider(service), null);
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -150,14 +156,20 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
     private void unregisterService(final ServiceReference<FileStorageAccountManagerProvider> ref) {
         ServiceRegistration<FileStorageService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
-            serviceRegistration.unregister();
             this.serviceRegistration = null;
+            serviceRegistration.unregister();
         }
 
         ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;
         if (null != listenerRegistration) {
-            listenerRegistration.unregister();
             this.listenerRegistration = null;
+            listenerRegistration.unregister();
+        }
+
+        ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration = this.associationProviderRegistration;
+        if (null != associationProviderRegistration) {
+            this.associationProviderRegistration = null;
+            associationProviderRegistration.unregister();
         }
 
         ServiceReference<FileStorageAccountManagerProvider> reference = ref;

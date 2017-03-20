@@ -62,6 +62,7 @@ import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.TableMetadata;
 import com.datastax.driver.core.UserType;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.AnnotatedDynamicStandardMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.mbean.CassandraKeyspaceMBean;
 import com.openexchange.server.ServiceLookup;
@@ -71,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraKeyspaceMBeanImpl extends AbstractCassandraMBean implements CassandraKeyspaceMBean {
+public class CassandraKeyspaceMBeanImpl extends AnnotatedDynamicStandardMBean implements CassandraKeyspaceMBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraKeyspaceMBeanImpl.class);
 
@@ -97,9 +98,9 @@ public class CassandraKeyspaceMBeanImpl extends AbstractCassandraMBean implement
      * @see com.openexchange.nosql.cassandra.beans.AbstractCassandraMBean#refresh()
      */
     @Override
-    void refresh() {
+    protected void refresh() {
         try {
-            CassandraService cassandraService = services.getService(CassandraService.class);
+            CassandraService cassandraService = getService(CassandraService.class);
             Cluster cluster = cassandraService.getCluster();
             keyspaceMetadata = cluster.getMetadata().getKeyspace(keyspaceName);
         } catch (OXException e) {

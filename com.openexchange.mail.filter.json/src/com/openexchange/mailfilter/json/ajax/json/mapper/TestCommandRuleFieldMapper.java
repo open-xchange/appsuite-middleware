@@ -108,10 +108,12 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
         JSONObject object = new JSONObject();
         if (!isNull(rule)) {
             TestCommand testCommand = rule.getTestCommand();
-            String commandName = testCommand.getCommand().getCommandName();
-            CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
-            CommandParser<TestCommand> parser = parserRegistry.get(commandName);
-            parser.parse(object, testCommand);
+            if(testCommand!=null){
+                String commandName = testCommand.getCommand().getCommandName();
+                CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+                CommandParser<TestCommand> parser = parserRegistry.get(commandName);
+                parser.parse(object, testCommand);
+            }
         }
         return object;
     }

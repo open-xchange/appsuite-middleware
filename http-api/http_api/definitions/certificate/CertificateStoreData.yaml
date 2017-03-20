@@ -1,0 +1,11 @@
+type: object
+properties:
+  fingerprint:
+    type: string
+    description: The fingerprint of the SSL certificate
+  hostname:
+    type: string
+    description: The hostname which the endpoint call was done, or the hostname for which the exception is valid
+  trusted:
+    type: boolean
+    description: Whether the SSL certificate is trusted by the user

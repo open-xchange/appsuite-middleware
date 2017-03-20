@@ -157,7 +157,7 @@ public class PListDownloadServlet extends WebDavServlet {
             PListDict plist = null;
             try {
                 OnboardingService onboardingService = lookup.getService(OnboardingService.class);
-                scenario = onboardingService.getScenario(scenarioId, ClientDevice.DESKTOP, device, userId, contextId);
+                scenario = onboardingService.getScenario(scenarioId, ClientDevice.IMPLIES_ALL, device, userId, contextId);
                 String hostName = determineHostName(req, userId, contextId);
 
                 for (OnboardingProvider provider : scenario.getProviders(userId, contextId)) {

@@ -51,13 +51,14 @@ package com.openexchange.ajax.jslob;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link JSlobTestSuite}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     Bug28821Test.class,
     Bug34552Test.class,

@@ -3,8 +3,7 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-system"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-osgi"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-xerces-sun"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-xerces-ibm"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-xerces"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-admin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-admin-autocontextid"/>
@@ -51,6 +50,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-file-storage-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-file-storage-onedrive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-freebusy"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-geoip"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-cluster-upgrade-from-76x"/>
@@ -69,7 +69,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-meta"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-mobile-config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-munin-scripts"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-munin-scripts-jolokia"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-oauth-provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-client-onboarding"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-drive-client-windows"/>
@@ -78,6 +77,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-passwordchange-script"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-pop3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-pns-impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-pns-mobile-api-facade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-pns-transport-websockets"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-push-dovecot"/>

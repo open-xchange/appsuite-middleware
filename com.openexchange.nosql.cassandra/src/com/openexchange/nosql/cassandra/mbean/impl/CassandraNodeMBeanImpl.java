@@ -60,6 +60,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Session.State;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.AnnotatedDynamicStandardMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
 import com.openexchange.nosql.cassandra.mbean.CassandraNodeMBean;
@@ -70,7 +71,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CassandraNodeMBeanImpl extends AbstractCassandraMBean implements CassandraNodeMBean {
+public class CassandraNodeMBeanImpl extends AnnotatedDynamicStandardMBean implements CassandraNodeMBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraNodeMBeanImpl.class);
 
@@ -98,9 +99,9 @@ public class CassandraNodeMBeanImpl extends AbstractCassandraMBean implements Ca
      * @see com.openexchange.nosql.cassandra.impl.AbstractCassandraMBean#refresh()
      */
     @Override
-    void refresh() {
+    protected void refresh() {
         try {
-            CassandraService cassandraService = services.getService(CassandraService.class);
+            CassandraService cassandraService = getService(CassandraService.class);
             Cluster cluster = cassandraService.getCluster();
             LoadBalancingPolicy loadBalancingPolicy = cluster.getConfiguration().getPolicies().getLoadBalancingPolicy();
             PoolingOptions poolingOptions = cluster.getConfiguration().getPoolingOptions();

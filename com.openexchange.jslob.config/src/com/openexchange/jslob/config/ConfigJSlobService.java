@@ -580,21 +580,32 @@ public final class ConfigJSlobService implements JSlobService {
             for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
                 final String lobPath = mapping.getValue();
-                try {
-                    final Setting setting = configTree.getSettingByPath(configTreePath);
-                    stor.readValues(setting);
 
-                    Object value = convert2JS(setting);
-                    if (value != JSONObject.NULL) {
-                        putToJsonObject(lobPath, value, jObject);
-                    }
-                } catch (final OXException e) {
+                // Get setting by config-tree path
+                Setting setting = null;
+                try {
+                    setting = configTree.getSettingByPath(configTreePath);
+                } catch (OXException e) {
                     LOG.warn("Illegal config-tree path: {}. Please check paths.perfMap file (JSlob ID: {}) OR if path-associatd bundle has been started.", configTreePath, lobPath, e);
+                } catch (Exception e) {
+                    LOG.warn("Failed to get setting by config-tree path: {} (JSlob ID: {}).", configTreePath, lobPath, e);
+                }
+
+                // Get its value & put it into JSlob
+                if (null != setting) {
+                    try {
+                        stor.readValues(setting);
+
+                        Object value = convert2JS(setting);
+                        if (value != JSONObject.NULL) {
+                            putToJsonObject(lobPath, value, jObject);
+                        }
+                    } catch (Exception e) {
+                        LOG.warn("Failed to read value for config-tree path: {} (JSlob ID: {})", configTreePath, lobPath, e);
+                    }
                 }
             }
             jsLob.setJsonObject(jObject);
-        } catch (final JSONException e) {
-            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         }

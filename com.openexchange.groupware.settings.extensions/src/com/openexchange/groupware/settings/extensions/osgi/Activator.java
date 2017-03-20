@@ -55,7 +55,6 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -171,13 +170,9 @@ public class Activator extends HousekeepingActivator {
                                 //setting.setSingleValue(UNDEFINED);
                                 return;
                             }
-                            try {
-                                // Let's turn this into a nice object, if it conforms to JSON
-                                value = new JSONObject("{value: "+value+"}").get("value");
 
-                            } catch (final JSONException x) {
-                                // Ah well, let's pretend it's a string.
-                            }
+                            // Let's turn this into a nice object, if it conforms to JSON
+                            value = toPojo(value);
 
                             setting.setSingleValue(value);
                     }
@@ -262,12 +257,8 @@ public class Activator extends HousekeepingActivator {
                             final ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
                             Object value = prop.get(metadataName);
                             if (null != value) {
-                                try {
-                                    // Let's turn this into a nice object, if it conforms to JSON
-                                    value = new JSONTokener(value.toString()).nextValue();
-                                } catch (final JSONException x) {
-                                    // Ah well, let's pretend it's a string.
-                                }
+                                // Let's turn this into a nice object, if it conforms to JSON
+                                value = toPojo(value);
                             }
                             setting.setSingleValue(value);
                         }
@@ -347,6 +338,26 @@ public class Activator extends HousekeepingActivator {
         };
 
         servicePublisher.publishService(PreferencesItemService.class, configurableItem);
+    }
+
+    /**
+     * Tries to convert given value's string representation to an appropriate Java object.
+     *
+     * @param value The value to parse
+     * @return The appropriate Java object or the value itself
+     */
+    static Object toPojo(Object value) {
+        if (!(value instanceof String)) {
+            return value;
+        }
+
+        try {
+            // Let's turn this into a nice object, if it conforms to JSON
+            return new JSONObject("{value: "+value+"}").get("value");
+        } catch (JSONException e) {
+            // Ah well, let's pretend it's a string.
+            return value;
+        }
     }
 
     /**

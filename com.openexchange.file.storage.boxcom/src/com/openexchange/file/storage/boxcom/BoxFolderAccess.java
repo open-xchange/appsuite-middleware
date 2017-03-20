@@ -133,6 +133,9 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                     return parseBoxFolder(folderInfo);
                 } catch (final BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(folderId, account.getId(), e);
                 }
             }
@@ -177,6 +180,9 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     }
                     return folders.toArray(new FileStorageFolder[folders.size()]);
                 } catch (final BoxAPIException e) {
+                    if (SC_UNAUTHORIZED == e.getResponseCode()) {
+                        throw e;
+                    }
                     throw handleHttpResponseError(parentIdentifier, account.getId(), e);
                 }
             }

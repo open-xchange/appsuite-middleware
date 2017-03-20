@@ -369,6 +369,10 @@ public class TaskTestManager implements TestManager {
         }
         for (Task task : objects) {
             deleteTaskOnServer(task, false);
+            if (getLastResponse().hasError()) {
+                org.slf4j.LoggerFactory.getLogger(TaskTestManager.class).warn("Unable to delete the task with id {} in folder {} with name '{}': {}", task.getObjectID(), task.getParentFolderID(), task.getTitle(), getLastResponse().getException().getMessage());
+            }
+
         }
     }
 

@@ -72,8 +72,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -130,7 +128,6 @@ import com.openexchange.share.recipient.ShareRecipient;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] { createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"), createNamedGuestPermission("horst@example.com", "Horst Example", "secret"), createAnonymousGuestPermission("secret"), createAnonymousGuestPermission()

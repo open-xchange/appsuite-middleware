@@ -936,9 +936,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
-            jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
+            jsonObject.put(MailJSONField.SIZE.getKey(), null == content ? 0 : content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
-            jsonObject.put(MailJSONField.CONTENT.getKey(), content);
+            jsonObject.put(MailJSONField.CONTENT.getKey(), null == content ? JSONObject.NULL : content);
 
             final JSONArray bodyArr = getBodyArr();
             final int len = bodyArr.length();

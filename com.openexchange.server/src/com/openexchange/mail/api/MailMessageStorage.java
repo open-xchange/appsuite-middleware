@@ -84,6 +84,13 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
 
+    /**
+     * Initializes a new {@link MailMessageStorage}.
+     */
+    protected MailMessageStorage() {
+        super();
+    }
+
     @Override
     public <T> T supports(Class<T> iface) throws OXException {
         if (iface.isInstance(this)) {
@@ -147,6 +154,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
+        if (null == contentId) {
+            return null;
+        }
         final MailMessage mail = getMessage(folder, mailId, false);
         if (null == mail) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);

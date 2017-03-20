@@ -92,7 +92,6 @@ import com.openexchange.java.CountingOutputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -379,14 +378,10 @@ public final class MailMessageParser {
         handler.handleMessageEnd(mail);
     }
 
-    private void parseMailContent(final MailPart mailPartArg, final MailMessageHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
+    private void parseMailContent(final MailPart mailPart, final MailMessageHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
-        /*
-         * Part modifier
-         */
-        final MailPart mailPart = MailConfig.usePartModifier() ? MailConfig.getPartModifier().modifyPart(mailPartArg) : mailPartArg;
         /*
          * Set part information
          */
@@ -593,7 +588,7 @@ public final class MailMessageParser {
                 stop = true;
                 return;
             }
-            
+
         } else if (TNEFUtils.isTNEFMimeType(lcct)) {
             try {
                 /*
@@ -693,9 +688,11 @@ public final class MailMessageParser {
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
-                            final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
-                            if (summary != null) {
-                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                            if(vEvent != null) {
+                                final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
+                                if (summary != null) {
+                                    part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                                }
                             }
                         }
                         /*

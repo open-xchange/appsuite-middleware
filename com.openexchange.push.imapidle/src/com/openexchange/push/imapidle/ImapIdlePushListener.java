@@ -81,6 +81,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -128,7 +129,7 @@ import gnu.trove.list.array.TLongArrayList;
  */
 public final class ImapIdlePushListener implements PushListener, Runnable {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
 
     /** The timeout threshold; cluster lock timeout minus one minute */
     private static final long TIMEOUT_THRESHOLD_MILLIS = ImapIdleClusterLock.TIMEOUT_MILLIS - 60000L;
@@ -670,8 +671,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
              * Check for IDLE capability
              */
             access.connect(false);
-            final IMAPCapabilities capabilities = (IMAPCapabilities) access.getMailConfig().getCapabilities();
-            if (!capabilities.hasIdle()) {
+            final MailCapabilities capabilities = access.getMailConfig().getCapabilities();
+            if (!(capabilities instanceof IMAPCapabilities) || !((IMAPCapabilities) capabilities).hasIdle()) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
             }
         } catch (OXException e) {
@@ -692,10 +693,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     /**
      * Cancels this IMAP IDLE listener.
      *
-     * @return <code>true</code> if reconnected; otherwise <code>false</code> if terminated
+     * @return <code>null</code> if reconnected; otherwise a clean-up task if terminated
      */
-    public synchronized boolean cancel(boolean tryToReconnect) {
-        boolean reconnected = false;
+    public synchronized Runnable cancel(boolean tryToReconnect) {
+        Runnable cleanUpTask = null;
         try {
             // Mark as canceled
             canceled.set(true);
@@ -724,28 +725,36 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 if (null == anotherListener) {
                     // No other listener available
                     // Give up lock and return
-                    try {
-                        instance.releaseLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
-                    } catch (Exception e) {
-                        LOGGER.warn("Failed to release lock for user {} in context {}.", session.getUserId(), session.getContextId(), e);
-                    }
+                    cleanUpTask = createCleanUpTask(instance);
                 } else {
                     try {
                         anotherListener.start();
-                        reconnected = true;
+                        cleanUpTask = null;
                     } catch (Exception e) {
-                        LOGGER.warn("Failed to start new listener for user {} in context {}.", session.getUserId(), session.getContextId(), e);
+                        LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                         // Give up lock and return
-                        try {
-                            instance.releaseLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
-                        } catch (Exception x) {
-                            LOGGER.warn("Failed to release DB lock for user {} in context {}.", session.getUserId(), session.getContextId(), x);
-                        }
+                        cleanUpTask = createCleanUpTask(instance);
                     }
                 }
             }
         }
-        return reconnected;
+        return cleanUpTask;
+    }
+
+    private Runnable createCleanUpTask(final ImapIdlePushManagerService instance) {
+        final Session session = this.session;
+        final boolean permanent = this.permanent;
+        final ServiceLookup services = this.services;
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    instance.releaseLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                }
+            }
+        };
     }
 
     private void launderOXException(OXException e) throws OXException {
@@ -756,7 +765,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             /*
              * Missing mail account; drop listener
              */
-            LOGGER.debug("Missing (default) mail account for user {} in context {}. Stopping obsolete IMAP-IDLE listener.", session.getUserId(), session.getContextId());
+            LOGGER.debug("Missing (default) mail account for user {} in context {}. Stopping obsolete IMAP-IDLE listener.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             throw e;
         }
         if ("DBP".equals(e.getPrefix())) {

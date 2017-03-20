@@ -12,7 +12,11 @@ BuildRequires: open-xchange-core
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -83,6 +87,10 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2576
     ox_add_property com.openexchange.hazelcast.configuration.map.indexes.attributes altId $PFILE
+
+    # SCR-4041
+    ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-7" $PFILE
+    ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "altId, contextId, userId" $PFILE
 fi
 
 %clean

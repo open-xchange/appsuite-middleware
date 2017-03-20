@@ -69,8 +69,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ChangeCore extends UserFilestoreAbstraction {
 	
-	protected CLIOption removeDriveFolderFlagsOption = null;
-    protected static final String OPT_REMOVE_DRIVE_FOLDER_FLAGS = "remove-drive-folder-flags";
+	protected CLIOption convertDriveUserFoldersOption = null;
+    protected static final String OPT_CONVERT_DRIVE_USER_FOLDERS = "convert-drive-user-folders";
 
     protected final void setOptions(final AdminParser parser) {
 
@@ -88,7 +88,7 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
 
         setFurtherOptions(parser);
         
-        this.removeDriveFolderFlagsOption = setLongOpt(parser, OPT_REMOVE_DRIVE_FOLDER_FLAGS, "Remove the default folder flags for media folders", false, false);
+        this.convertDriveUserFoldersOption = setLongOpt(parser, OPT_CONVERT_DRIVE_USER_FOLDERS, "Convert drive user folders into normal folders", false, false);
 
         parser.allowDynamicOptions();
     }
@@ -143,8 +143,8 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
             // Dynamic Options
             applyDynamicOptionsToUser(parser, usr);
             
-            if (parser.hasOption(this.removeDriveFolderFlagsOption)) {
-            	usr.setRemoveDriveFolderFlags(true);
+            if (parser.hasOption(this.convertDriveUserFoldersOption)) {
+            	usr.setConvertDriveUserFolders(true);
             }
 
             // finally do change call last (must be done last because else we cannot

@@ -55,7 +55,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.dropbox.access.DropboxAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -70,17 +70,17 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
      * Initializes a new {@link BoxFileStorageService}.
      */
     public DropboxFileStorageService(ServiceLookup services) {
-        super(services, API.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID);
+        super(services, KnownApi.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID);
     }
 
     /**
      * Initialises a new {@link BoxFileStorageService}.
-     * 
+     *
      * @param services
      * @param compositeFileStorageAccountManagerProvider
      */
     public DropboxFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID, compositeFileStorageAccountManagerProvider);
+        super(services, KnownApi.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

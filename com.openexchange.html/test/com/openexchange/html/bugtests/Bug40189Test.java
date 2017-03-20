@@ -55,13 +55,13 @@ import com.openexchange.html.AbstractSanitizing;
 
 /**
  * {@link Bug40189Test}
- * 
+ *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
 public class Bug40189Test extends AbstractSanitizing {
      @Test
-     public void testInsecureHref() {
+     public void testInsecureHref() throws Exception {
 
         String content = "<a href=3D\"http://neon-response.hmmh.de/argon/jsp/DoubleOptNLZG=" +
             ".jsp?DOINLZGID=3D1SBPO-WgpKBxr3e3AzwHxpL8UI1qj72ypu-bJfhmKYs&SecureAdressKe=" +

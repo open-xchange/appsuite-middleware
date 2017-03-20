@@ -90,6 +90,11 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public Map<String, List<String>> getHeaders() {
                 return loginReq.getHeaders();
             }
+            
+            @Override
+            public Map<String, String[]> getRequestParameter() {
+                return loginReq.getRequestParameter();
+            }
 
             @Override
             public Interface getInterface() {

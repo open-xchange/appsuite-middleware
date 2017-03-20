@@ -73,7 +73,7 @@ public class MailColorModePreferenceItem implements PreferencesItemService, Conf
 
     @Override
     public String[] getPath() {
-        return new String[] { "modules", "mail", "features", "color" };
+        return new String[] { "modules", "mail", "features", "flag", "color" };
     }
 
     @Override
@@ -116,12 +116,12 @@ public class MailColorModePreferenceItem implements PreferencesItemService, Conf
 
     @Override
     public String getConfigTreePath() {
-        return "modules/mail/features/color";
+        return "modules/mail/features/flag/color";
     }
 
     @Override
     public String getJslobPath() {
-        return "io.ox/mail//features/color";
+        return "io.ox/mail//features/flag/color";
     }
 
 }

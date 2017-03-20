@@ -223,7 +223,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 Streams.close(upload);
             }
         }
-        
+
         // Update an existing file
         String path = toPath(file.getFolderId(), file.getId());
 
@@ -264,7 +264,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             // can only copy the current revision
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
         }
-
+        checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
 
@@ -300,6 +300,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
+        checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
         String destPath = toPath(destFolder, destName);
@@ -355,7 +356,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveDocument(file, data);
+        return saveDocument(file, data, null != modifiedFields && modifiedFields.contains(Field.VERSION_COMMENT));
     }
 
     /*
@@ -750,18 +751,21 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If the file cannot be uploaded or any other error is occurred
      */
-    private IDTuple saveDocument(File file, InputStream data) throws OXException {
-        
+    private IDTuple saveDocument(File file, InputStream data, boolean overwrite) throws OXException {
+
         checkFolderExistence(file.getFolderId());
-        
+
         long fileSize = file.getFileSize();
-        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
+        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data, overwrite) : singleUpload(file, data, overwrite);
         file.copyFrom(dbxFile, copyFields);
         return dbxFile.getIDTuple();
     }
-    
+
     private void checkFolderExistence(String folderId) throws OXException{
         try {
+            if(Strings.isEmpty(folderId) || folderId.equals("/")){
+                return; // The root folder is always present
+            }
             getFolderMetadata(folderId);
         } catch (GetMetadataErrorException e) {
             OXException interpretedException = DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
@@ -771,7 +775,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             throw interpretedException;
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
-        } 
+        }
     }
 
     /**
@@ -782,7 +786,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If an error is occurred
      */
-    private DropboxFile sessionUpload(File file, InputStream data) throws OXException {
+    private DropboxFile sessionUpload(File file, InputStream data, boolean overwrite) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
@@ -807,7 +811,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Upload the remaining chunk
             long remaining = sink.getCount() - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.ADD, true, file.getLastModified(), false);
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), overwrite ? WriteMode.OVERWRITE : WriteMode.ADD, true, file.getLastModified(), false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
@@ -830,12 +834,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException if an error is occurred
      */
-    private DropboxFile singleUpload(File file, InputStream data) throws OXException {
+    private DropboxFile singleUpload(File file, InputStream data, boolean overwrite) throws OXException {
         String name = file.getFileName();
         String fileName = name;
         String path = new StringBuilder(file.getFolderId()).append('/').append(fileName).toString();
         try {
-            UploadBuilder builder = client.files().uploadBuilder(path).withAutorename(true);
+            UploadBuilder builder = client.files().uploadBuilder(path).withMode(overwrite ? WriteMode.OVERWRITE : WriteMode.ADD).withAutorename(true);
             FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
@@ -879,7 +883,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             if (Strings.isEmpty(pattern) || pattern.equals("*")) {
                 // Return everything
-                return getAllFiles(folderId, true);
+                return getAllFiles(folderId, includeSubfolders);
             } else {
                 // Search
                 return fireSearch(folderId, pattern, includeSubfolders);

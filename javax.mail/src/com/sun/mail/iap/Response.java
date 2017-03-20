@@ -196,6 +196,15 @@ public class Response {
         return this;
     }
 
+    /**
+     * Gets the BYE exception
+     *
+     * @return The BYE exception or <code>null</code>
+     */
+    public Exception getByeException() {
+        return byeException;
+    }
+
     public void skipSpaces() {
 	while (index < size && buffer[index] == ' ')
 	    index++;

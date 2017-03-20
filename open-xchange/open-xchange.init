@@ -104,6 +104,10 @@ test -x $OX_BIN || { echo "$OX_BIN not installed";
 # Use the SUSE rc_ init script functions;
 # emulate them on LSB, RH and other systems
 
+# Save system value of LC_ALL as we don't want to start open-xchange with POSIX
+# environment but let init specific tools default to it.
+OLD_LC_ALL=$(locale | sed -ne 's/^LC_ALL="\?\([^"]*\)"\?$/\1/p')
+
 # Default: Assume sysvinit binaries exist
 start_daemon() { /sbin/start_daemon ${1+"$@"}; }
 killproc()     { /sbin/killproc     ${1+"$@"}; }
@@ -230,6 +234,9 @@ fi
 
 case "$1" in
     start)
+	# Revert SUSE behaviour of enforcing a POSIX environment for our JVM
+	export LC_ALL=$OLD_LC_ALL
+
 	$TRIGGER_UPDATE_THEMES -u || exit 1
 	echo -n "Starting open-xchange "
 	## Start daemon with startproc(8). If this fails
@@ -238,6 +245,7 @@ case "$1" in
 		ox_start_daemon $OX_BIN $(basename $OX_BIN) open-xchange
 	fi
 
+	export LC_ALL=POSIX
 	# Remember status and be verbose
 	rc_status -v
 	;;

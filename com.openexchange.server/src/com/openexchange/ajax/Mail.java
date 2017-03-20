@@ -2250,7 +2250,7 @@ public class Mail extends PermissionServlet {
         }
     }
 
-    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) throws OXException {
         return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
@@ -4380,11 +4380,15 @@ public class Mail extends PermissionServlet {
                 }
             }
         } catch (final OXException e) {
-            LOG.error("", e);
+            OXException oxException = e;
+            if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(e)) {
+                oxException = MailExceptionCode.UNABLE_TO_SAVE_MAIL_QUOTA.create();
+            }
+            LOG.error("", oxException);
             final Response response = new Response(session);
             for (String mailID : mailIDs) {
                 response.reset();
-                response.setException(e);
+                response.setException(oxException);
                 response.setData(JSONObject.NULL);
                 response.setTimestamp(null);
                 ResponseWriter.write(response, writer, localeFrom(session));

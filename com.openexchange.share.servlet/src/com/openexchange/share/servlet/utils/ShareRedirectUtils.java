@@ -53,7 +53,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -86,8 +88,9 @@ public class ShareRedirectUtils {
      * @param target The share target within the share, or <code>null</code> if not addressed
      * @param loginConfig The login configuration to use
      * @return The redirect URL
+     * @throws OXException If redirect URL cannot be generated
      */
-    public static String getWebSessionRedirectURL(Session session, User user, ShareTarget target, LoginConfiguration loginConfig) {
+    public static String getWebSessionRedirectURL(Session session, User user, ShareTarget target, LoginConfiguration loginConfig, String host) throws OXException {
         /*
          * evaluate link destination based on share or target
          */
@@ -123,7 +126,11 @@ public class ShareRedirectUtils {
         redirectLink = P_CONTEXT_ID.matcher(redirectLink).replaceAll(String.valueOf(session.getContextId()));
         redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
         if (module > 0) {
-            String name = ShareServiceLookup.getService(ModuleSupport.class).getShareModule(module);
+            ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class);
+            if (null == moduleSupport) {
+                throw ServiceExceptionCode.absentService(ModuleSupport.class);
+            }
+            String name = moduleSupport.getShareModule(module);
             redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(name));
         }
         if (null != folder) {
@@ -132,7 +139,7 @@ public class ShareRedirectUtils {
         if (null != item) {
             redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(item));
         }
-        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin() ? "true" : "false");
+        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin(host) ? "true" : "false");
         return redirectLink;
     }
 

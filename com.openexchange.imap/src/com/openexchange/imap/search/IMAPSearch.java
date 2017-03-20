@@ -58,19 +58,15 @@ import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.SearchException;
 import javax.mail.search.SearchTerm;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPFolderWorker;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.config.IMAPReloadable;
-import com.openexchange.imap.services.Services;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -102,7 +98,7 @@ public final class IMAPSearch {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a searching fails
      */
-    public static int[] searchMessages(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, final IMAPConfig imapConfig) throws MessagingException, OXException {
+    public static int[] searchMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, IMAPConfig imapConfig, Session session) throws MessagingException, OXException {
         int msgCount = imapFolder.getMessageCount();
         if (msgCount <= 0) {
             return new int[0];
@@ -113,7 +109,7 @@ public final class IMAPSearch {
             if (imapConfig.forceImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
                 // Too many messages in IMAP folder or IMAP-based search should be forced.
                 // Fall-back to IMAP-based search and accept a non-type-sensitive search.
-                int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
+                int[] seqNums = issueIMAPSearch(imapFolder, searchTerm, session.getUserId(), session.getContextId());
                 if (null != seqNums) {
                     return seqNums;
                 }
@@ -126,7 +122,7 @@ public final class IMAPSearch {
 
         // Perform an IMAP-based search if IMAP search is forces through configuration or is enabled and number of messages exceeds limit.
         if (imapConfig.isImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
-            int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
+            int[] seqNums = issueIMAPSearch(imapFolder, searchTerm, session.getUserId(), session.getContextId());
             if (null != seqNums) {
                 return seqNums;
             }
@@ -186,42 +182,11 @@ public final class IMAPSearch {
         return list.toArray();
     }
 
-    private static volatile Integer umlautFilterThreshold;
-    public static int umlautFilterThreshold() {
-        Integer i = umlautFilterThreshold;
-        if (null == i) {
-            synchronized (IMAPSearch.class) {
-                i = umlautFilterThreshold;
-                if (null == i) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    final int defaultVal = 50;
-                    if (null == service) {
-                        return defaultVal;
-                    }
-                    i = Integer.valueOf(service.getIntProperty("com.openexchange.imap.umlautFilterThreshold", defaultVal));
-                    umlautFilterThreshold = i;
-                }
-            }
-        }
-        return i.intValue();
+    public static int umlautFilterThreshold(int userId, int contextId) {
+        return IMAPProperties.getInstance().getUmlautFilterThreshold(userId, contextId);
     }
 
-    static {
-        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
-            @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
-                umlautFilterThreshold = null;
-            }
-
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.umlautFilterThreshold");
-            }
-        });
-    }
-
-    public static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, MessagingException {
+    public static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, int userId, int contextId) throws OXException, MessagingException {
         try {
             if (searchTerm.containsWildcard()) {
                 /*
@@ -230,7 +195,7 @@ public final class IMAPSearch {
                 return issueNonWildcardSearch(searchTerm.getNonWildcardJavaMailSearchTerm(), imapFolder);
             }
             final int[] seqNums = issueNonWildcardSearch(searchTerm.getJavaMailSearchTerm(), imapFolder);
-            final int umlautFilterThreshold = umlautFilterThreshold();
+            final int umlautFilterThreshold = umlautFilterThreshold(userId, contextId);
             if ((umlautFilterThreshold > 0) && (seqNums.length <= umlautFilterThreshold) && !searchTerm.isAscii()) {
                 /*
                  * Search with respect to umlauts in pre-selected messages

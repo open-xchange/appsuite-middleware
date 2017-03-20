@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.junit.After;
@@ -138,11 +137,6 @@ public class SessionHandlerTest {
             @Override
             public long getLongTermSessionContainerTimeout() {
                 return 10000l;
-            }
-
-            @Override
-            public List<String> getRemoteParameterNames() {
-                return Arrays.asList(PROP_NAMES);
             }
 
             @Override

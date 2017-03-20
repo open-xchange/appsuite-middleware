@@ -57,12 +57,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -151,7 +151,8 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
         HttpURLConnection httpConnection = (HttpURLConnection) connection;
         if ("https".equals(feedUrl.getProtocol()) || 443 == feedUrl.getPort()) {
             HttpsURLConnection httpsConnection = (HttpsURLConnection) httpConnection;
-            httpsConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
+            SSLSocketFactory sslSocketFactory = Services.getService(SSLSocketFactoryProvider.class).getDefault();
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
             httpConnection = httpsConnection;
         }
 

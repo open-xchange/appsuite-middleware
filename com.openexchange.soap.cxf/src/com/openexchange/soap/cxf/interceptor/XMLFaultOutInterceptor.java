@@ -75,7 +75,10 @@ public class XMLFaultOutInterceptor extends AbstractOutDatabindingInterceptor {
 
             if (xmlFault.getDetail() != null) {
                 StaxUtils.writeStartElement(writer, prefix, XMLFault.XML_FAULT_DETAIL, XMLConstants.NS_XML_FORMAT);
-                StaxUtils.writeNode(DOMUtils.getChild(xmlFault.getDetail(), Node.ELEMENT_NODE), writer, false);
+                Node child = DOMUtils.getChild(xmlFault.getDetail(), Node.ELEMENT_NODE);
+                if (child != null) {
+                    StaxUtils.writeNode(child, writer, false);
+                }
                 writer.writeEndElement();
             }
             // fault root

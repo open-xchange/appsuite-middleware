@@ -190,6 +190,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
                     if (!tree && !hasValidationReason(accountDescription, jAccount, checkPassword, passwd, storageService, session)) {
                         return new AJAXRequestResult(Boolean.TRUE);
                     }
+
+                    accountDescription.setId(-1);
                 }
             }
 

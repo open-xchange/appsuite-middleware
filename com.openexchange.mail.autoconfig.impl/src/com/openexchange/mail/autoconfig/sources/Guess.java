@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +59,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.mail.autoconfig.tools.ConnectMode;
 import com.openexchange.mail.autoconfig.tools.MailValidator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.net.URIDefaults;
@@ -70,12 +70,6 @@ import com.openexchange.tools.net.URIDefaults;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Guess extends AbstractConfigSource {
-
-    private static final List<String> IMAP_PREFIXES = Arrays.asList("", "imap.", "mail.");
-
-    private static final List<String> SMTP_PREFIXES = Arrays.asList("", "smtp.", "mail.");
-
-    private static final List<String> POP3_PREFIXES = Arrays.asList("", "pop3.", "mail.");
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Guess.class);
 
@@ -104,22 +98,26 @@ public class Guess extends AbstractConfigSource {
             return null;
         }
 
-        // Proceed...
+        // Guess the configuration...
         DefaultAutoconfig config = new DefaultAutoconfig();
+        Map<String, Object> properties = new HashMap<String, Object>(2);
 
-        final Map<String, Object> properties = new HashMap<String, Object>(2);
-        boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config, properties, forceSecure);
+        // Check mail access (first IMAP, then POP3)
+        boolean imapSuccess = fillProtocol(Protocol.IMAP, emailLocalPart, emailDomain, password, config, properties, forceSecure);
         boolean generalSuccess = imapSuccess;
         if (!imapSuccess) {
-            generalSuccess = fillProtocol(URIDefaults.POP3, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
+            generalSuccess = fillProtocol(Protocol.POP3, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
         }
 
-        boolean preGeneralSuccess = generalSuccess;
-        generalSuccess = fillProtocol(URIDefaults.SMTP, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
+        boolean mailSuccess = generalSuccess;
 
-        if (properties.containsKey("smtp.auth-supported")) {
-            final Boolean smtpAuthSupported = (Boolean) properties.get("smtp.auth-supported");
-            if (!smtpAuthSupported.booleanValue() && !preGeneralSuccess) {
+        // Check transport access (SMTP)
+        generalSuccess = fillProtocol(Protocol.SMTP, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
+
+        // Check for special SMTP that does not support authentication
+        {
+            Boolean smtpAuthSupported = (Boolean) properties.get("smtp.auth-supported");
+            if (null != smtpAuthSupported && !smtpAuthSupported.booleanValue() && !mailSuccess) {
                 // Neither IMAP nor POP3 reachable, but SMTP works as it does not support authentication
                 // Therefore return null
                 return null;
@@ -130,101 +128,157 @@ public class Guess extends AbstractConfigSource {
         return generalSuccess ? config : null;
     }
 
-    private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, DefaultAutoconfig config, Map<String, Object> properties, boolean forceSecure) {
-        Object[] guessedHost = guessHost(protocol, emailDomain);
-        if (guessedHost != null) {
-            String host = (String) guessedHost[0];
-            boolean secure = (Boolean) guessedHost[1];
-            Integer port = (Integer) guessedHost[2];
-            String login = guessLogin(protocol, host, port.intValue(), secure, forceSecure, emailLocalPart, emailDomain, password, properties);
-            if (login == null) {
-                return false;
-            }
-            if (protocol == URIDefaults.SMTP) {
-                config.setTransportPort(port);
-                config.setTransportProtocol(protocol.getProtocol());
-                config.setTransportSecure(secure);
-                config.setTransportServer(host);
-                config.setUsername(login);
-            } else {
-                config.setMailPort(port);
-                config.setMailProtocol(protocol.getProtocol());
-                config.setMailSecure(secure);
-                config.setMailServer(host);
-                config.setUsername(login);
-            }
-            config.setMailStartTls(forceSecure);
-            config.setTransportStartTls(forceSecure);
-            return true;
+    private boolean fillProtocol(Protocol protocol, String emailLocalPart, String emailDomain, String password, DefaultAutoconfig config, Map<String, Object> properties, boolean forceSecure) {
+        ConnectSettings connectSettings = guessHost(protocol, emailDomain);
+        if (connectSettings == null) {
+            return false;
         }
-        return false;
+
+        String login = guessLogin(protocol, connectSettings.host, connectSettings.port, connectSettings.secure, forceSecure, emailLocalPart, emailDomain, password, properties);
+        if (login == null) {
+            return false;
+        }
+
+        if (Protocol.SMTP == protocol) {
+            config.setTransportPort(connectSettings.port);
+            config.setTransportProtocol(protocol.getProtocol());
+            config.setTransportSecure(connectSettings.secure);
+            config.setTransportServer(connectSettings.host);
+            config.setTransportStartTls(forceSecure); // Take over since end-point has been checked with proper STARTTLS setting if we reach this point
+            config.setUsername(login);
+        } else {
+            config.setMailPort(connectSettings.port);
+            config.setMailProtocol(protocol.getProtocol());
+            config.setMailSecure(connectSettings.secure);
+            config.setMailServer(connectSettings.host);
+            config.setMailStartTls(forceSecure); // Take over since end-point has been checked with proper STARTTLS setting if we reach this point
+            config.setUsername(login);
+        }
+        return true;
     }
 
-    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, boolean requireTls, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
+    private String guessLogin(Protocol protocol, String host, int port, boolean secure, boolean requireTls, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
         List<String> logins = Arrays.asList(emailLocalPart, emailLocalPart+"@"+emailDomain);
+        ConnectMode connectMode = ConnectMode.connectModeFor(secure, requireTls);
 
         for (String login : logins) {
-            if (protocol == URIDefaults.IMAP) {
-                if (MailValidator.validateImap(host, port, secure, requireTls, login, password)) {
-                    return login;
-                }
-            } else if (protocol == URIDefaults.POP3) {
-                if (MailValidator.validatePop3(host, port, secure, requireTls, login, password)) {
-                    return login;
-                }
-            } else if (protocol == URIDefaults.SMTP) {
-                if (MailValidator.validateSmtp(host, port, secure, requireTls, login, password, properties)) {
-                    return login;
-                }
+            switch (protocol) {
+                case IMAP:
+                    if (MailValidator.validateImap(host, port, connectMode, login, password)) {
+                        return login;
+                    }
+                    break;
+                case POP3:
+                    if (MailValidator.validatePop3(host, port, connectMode, login, password)) {
+                        return login;
+                    }
+                    break;
+                case SMTP:
+                    if (MailValidator.validateSmtp(host, port, connectMode, login, password, properties)) {
+                        return login;
+                    }
+                    break;
             }
         }
+
         return null;
     }
 
-    private Object[] guessHost(URIDefaults protocol, String emailDomain) {
+    private static final List<String> IMAP_PREFIXES = Arrays.asList("", "imap.", "mail.");
+    private static final List<String> SMTP_PREFIXES = Arrays.asList("", "smtp.", "mail.");
+    private static final List<String> POP3_PREFIXES = Arrays.asList("", "pop3.", "mail.");
+
+    private ConnectSettings guessHost(Protocol protocol, String emailDomain) {
+        URIDefaults uriDefaults = null;
         List<String> prefixes = null;
         int altPort = 0;
-        if (protocol == URIDefaults.IMAP) {
-            prefixes = IMAP_PREFIXES;
-        } else if (protocol == URIDefaults.SMTP) {
-            prefixes = SMTP_PREFIXES;
-            altPort = 587;
-        } else if (protocol == URIDefaults.POP3) {
-            prefixes = POP3_PREFIXES;
-        }
 
-        if (prefixes == null) {
-            return null;
+        switch (protocol) {
+            case IMAP:
+                prefixes = IMAP_PREFIXES;
+                uriDefaults = URIDefaults.IMAP;
+                break;
+            case POP3:
+                prefixes = POP3_PREFIXES;
+                uriDefaults = URIDefaults.POP3;
+                break;
+            case SMTP:
+                prefixes = SMTP_PREFIXES;
+                altPort = 587;
+                uriDefaults = URIDefaults.SMTP;
+                break;
+            default:
+                return null;
         }
 
         for (String prefix : prefixes) {
             String host = prefix + emailDomain;
-            if (checkSave(protocol, host, protocol.getSSLPort(), true)) {
-                return new Object[] { host, true, protocol.getSSLPort() };
-            } else if (checkSave(protocol, host, protocol.getPort(), true)) {
-                return new Object[] { host, true, protocol.getPort() };
-            } else if (altPort > 0 && checkSave(protocol, host, altPort, false)) {
-                return new Object[] { host, false, altPort };
-            } else if (checkSave(protocol, host, protocol.getPort(), false)) {
-                return new Object[] { host, false, protocol.getPort() };
+
+            // Try SSL connect using default SSL port
+            if (tryConnect(protocol, host, uriDefaults.getSSLPort(), true)) {
+                return new ConnectSettings(host, true, uriDefaults.getSSLPort());
+            }
+
+            // Try SSL connect using default port
+            if (tryConnect(protocol, host, uriDefaults.getPort(), true)) {
+                return new ConnectSettings(host, true, uriDefaults.getPort());
+            }
+
+            // Try plain connect using alternative port
+            if (altPort > 0 && tryConnect(protocol, host, altPort, false)) {
+                return new ConnectSettings(host, false, altPort);
+            }
+
+            // Try plain connect using default port
+            if (tryConnect(protocol, host, uriDefaults.getPort(), false)) {
+                return new ConnectSettings(host, false, uriDefaults.getPort());
             }
         }
+
         return null;
     }
 
-    private boolean checkSave(URIDefaults protocol, String emailDomain, int port, boolean secure) {
-        try {
-            if (protocol == URIDefaults.IMAP) {
-                return MailValidator.checkForImap(emailDomain, port, secure);
-            } else if (protocol == URIDefaults.SMTP) {
-                return MailValidator.checkForSmtp(emailDomain, port, secure);
-            } else if (protocol == URIDefaults.POP3) {
-                return MailValidator.checkForPop3(emailDomain, port, secure);
-            } else {
-                return false;
-            }
-        } catch (IOException e) {
-            return false;
+    private boolean tryConnect(Protocol protocol, String emailDomain, int port, boolean secure) {
+        switch (protocol) {
+            case IMAP:
+                return MailValidator.tryImapConnect(emailDomain, port, secure);
+            case POP3:
+                return MailValidator.tryPop3Connect(emailDomain, port, secure);
+            case SMTP:
+                return MailValidator.trySmtpConnect(emailDomain, port, secure);
+        }
+
+        return false;
+    }
+
+    // ----------------------------------------------------- Helper classes -------------------------------------------------
+
+    private static enum Protocol {
+        IMAP("imap"), SMTP("smtp"), POP3("pop3");
+
+        private final String protocol;
+
+        private Protocol(String protocol) {
+            this.protocol = protocol;
+        }
+
+
+        String getProtocol() {
+            return protocol;
+        }
+    }
+
+    private static class ConnectSettings {
+
+        final String host;
+        final int port;
+        final boolean secure;
+
+        ConnectSettings(String host, boolean secure, int port) {
+            super();
+            this.host = host;
+            this.port = port;
+            this.secure = secure;
         }
     }
 

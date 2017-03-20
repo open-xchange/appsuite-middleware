@@ -294,6 +294,11 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
                         if (accessToken != null) {
                             session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken);
                         }
+
+                        String refreshToken = reservationState.get(SAMLSessionParameters.REFRESH_TOKEN);
+                        if (refreshToken != null) {
+                            session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, refreshToken);
+                        }
                     }
                 };
 

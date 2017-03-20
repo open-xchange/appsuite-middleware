@@ -141,35 +141,44 @@ public class ExceptionUtils {
                 }
             }
         } else if ("Java heap space".equalsIgnoreCase(message)) {
-            try {
-                MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-
-                Pair<Boolean, String> heapDumpArgs = checkHeapDumpArguments();
-
-                // Is HeapDumpOnOutOfMemoryError enabled?
-                if (!heapDumpArgs.getFirst().booleanValue() && null == System.getProperties().put("__heap_dump_created", Boolean.TRUE)) {
-                    boolean error = true;
-                    try {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
-                        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        // Either "/tmp" or path configured through "-XX:HeapDumpPath" JVM argument
-                        String path = null == heapDumpArgs.getSecond() ? "/tmp" : heapDumpArgs.getSecond();
-                        String fn = path + "/" + dateFormat.format(new Date()) + "-heap.hprof";
-                        String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
-                        server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
-                        LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
-                        error = false;
-                    } finally {
-                        if (error) {
-                            System.getProperties().remove("__heap_dump_created");
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                // Failed for any reason...
-            }
+            createHeapDump(false);
         }
         logVirtualMachineError(oom);
+    }
+
+    /**
+     * Creates a heap dump (if <code>"-XX:+HeapDumpOnOutOfMemoryError"</code> JVM option is not already specified)
+     *
+     * @param force <code>true</code> to create a heap dump even if <code>"-XX:+HeapDumpOnOutOfMemoryError"</code> JVM option is given; otherwise <code>false</code> to only create if that option is absent
+     */
+    public static void createHeapDump(boolean force) {
+        try {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+            Pair<Boolean, String> heapDumpArgs = checkHeapDumpArguments();
+
+            // Forced or is HeapDumpOnOutOfMemoryError enabled?
+            if ((force || !heapDumpArgs.getFirst().booleanValue()) && null == System.getProperties().put("__heap_dump_created", Boolean.TRUE)) {
+                boolean error = true;
+                try {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    // Either "/tmp" or path configured through "-XX:HeapDumpPath" JVM argument
+                    String path = null == heapDumpArgs.getSecond() ? "/tmp" : heapDumpArgs.getSecond();
+                    String fn = path + "/" + dateFormat.format(new Date()) + "-heap.hprof";
+                    String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
+                    server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                    LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
+                    error = false;
+                } finally {
+                    if (error) {
+                        System.getProperties().remove("__heap_dump_created");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Failed for any reason...
+        }
     }
 
     private static void logVirtualMachineError(final Throwable t) {

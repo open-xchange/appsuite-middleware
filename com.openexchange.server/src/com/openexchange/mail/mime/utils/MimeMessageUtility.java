@@ -751,7 +751,7 @@ public final class MimeMessageUtility {
         if (count == MailPart.NO_ENCLOSED_PARTS) {
             return hasAttachmentInMetadata(mp);
         }
-        
+
         boolean found = false;
         ContentType ct = new ContentType();
         for (int i = count; !found && i-- > 0;) {
@@ -774,7 +774,7 @@ public final class MimeMessageUtility {
         if (part.getContentType().getBaseType().toLowerCase().startsWith("application") && part.getContentType().getSubType().toLowerCase().endsWith("-signature")) {
             return false;
         }
-        
+
         ContentDisposition contentDisposition = part.getContentDisposition();
         if (contentDisposition != null) {
             if (contentDisposition.getFilenameParameter() != null) {
@@ -802,7 +802,7 @@ public final class MimeMessageUtility {
         if (null == mp) {
             return false;
         }
-        
+
         if (mp.getContentType().toLowerCase().startsWith("multipart/")) {
             int count = ((Multipart) mp).getCount();
             return hasAttachments0((Multipart) mp, count);
@@ -833,7 +833,7 @@ public final class MimeMessageUtility {
         if (part.getContentType().toLowerCase().startsWith("application") && part.getContentType().toLowerCase().endsWith("-signature")) {
             return false;
         }
-        
+
         String disposition = part.getDisposition();
         if (disposition != null) {
             ContentDisposition cd = new ContentDisposition(disposition);
@@ -905,23 +905,34 @@ public final class MimeMessageUtility {
          * is transferred as:
          * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
          */
-        final String s = checkNonAscii(subject);
-        final int length = s.length();
-        final StringBuilder sb = new StringBuilder(length);
+        String s = checkNonAscii(subject);
+
+        int length = s.length();
+        StringBuilder sb = null;
         int i = 0;
         while (i < length) {
-            final char c = s.charAt(i);
+            char c = s.charAt(i);
             if ('\t' == c || ' ' == c) {
+                int k = i;
                 while ((i + 1) < length && ' ' == s.charAt(i + 1)) {
                     i++;
                 }
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (k > 0) {
+                        sb.append(s, 0, k);
+                    }
+                }
                 sb.append(' ');
             } else if ('\r' != c && '\n' != c) {
-                sb.append(c);
+                if (null != sb) {
+                    sb.append(c);
+                }
             }
             i++;
         }
-        return decodeEnvelopeHeader0(sb.toString());
+
+        return decodeEnvelopeHeader0(null == sb ? s : sb.toString());
     }
 
     /**
@@ -941,7 +952,6 @@ public final class MimeMessageUtility {
      * @return The decoded header value
      */
     private static String decodeEnvelopeHeader0(final String value) {
-        final int length = value.length();
         /*
          * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
          */
@@ -990,6 +1000,31 @@ public final class MimeMessageUtility {
         return decodeMultiEncodedHeader0(checkNonAscii(headerValue), true);
     }
 
+    private static final class Base64EncodedValue {
+
+        final String charset;
+        final StringBuilder value;
+
+        Base64EncodedValue(String charset, String value) {
+            super();
+            this.charset = charset;
+            this.value = new StringBuilder(value);
+        }
+
+        boolean combine(Base64EncodedValue other) {
+            if (charset.equals(other.charset)) {
+                value.append(other.value);
+                return true;
+            }
+
+            return false;
+        }
+
+        String asEncodedWord() {
+            return new StringBuilder(value.length() + 8).append("=?").append(charset).append("?B?").append(value).append("?=").toString();
+        }
+    }
+
     private static String decodeMultiEncodedHeader0(final String headerValue, final boolean unfold) {
         if (headerValue == null) {
             return null;
@@ -1001,57 +1036,68 @@ public final class MimeMessageUtility {
         if (hdrVal.indexOf("=?") < 0) {
             return hdrVal;
         }
-        final Matcher m = ENC_PATTERN.matcher(hdrVal);
+        Matcher m = ENC_PATTERN.matcher(hdrVal);
         if (m.find()) {
-            final StringBuilder sb = new StringBuilder(hdrVal.length());
+            StringBuilder sb = new StringBuilder(hdrVal.length());
             int lastMatch = 0;
+            Base64EncodedValue prev = null;
             do {
                 try {
-                    sb.append(hdrVal.substring(lastMatch, m.start()));
-                    /*
-                     * Decode encoded-word
-                     */
-                    final String charset = m.group(1);
-                    if (MessageUtility.isBig5(charset)) {
-                        final String encodedWord = m.group();
-                        String decodeWord = MimeUtility.decodeWord(encodedWord);
-                        if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "Big5-HKSCS"));
+                    String encoding = m.group(2);
+                    String charset = m.group(1);
+
+                    boolean doEncode = true;
+                    int start = m.start();
+                    if (lastMatch == start) {
+                        if ("b".equalsIgnoreCase(encoding)) {
+                            Base64EncodedValue ev = new Base64EncodedValue(charset, m.group(3));
+                            if (null == prev) {
+                                prev = ev;
+                                doEncode = false;
+                            } else {
+                                if (false == prev.combine(ev)) {
+                                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString(), prev.asEncodedWord()));
+                                    prev = ev;
+                                }
+                                doEncode = false;
+                            }
                         }
-                        sb.append(decodeWord);
-                    } else if (MessageUtility.isGB2312(charset)) {
-                        final String encodedWord = m.group();
-                        String decodeWord = MimeUtility.decodeWord(encodedWord);
-                        if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "GB18030"));
-                        }
-                        sb.append(decodeWord);
-                    } else if (MessageUtility.isShiftJis(charset)) {
-                        String encodedWord = m.group();
-                        if ("cp932".equalsIgnoreCase(charset)) {
-                            encodedWord = new StringBuilder(encodedWord.length()).append("=?MS932?").append(m.group(2)).append('?').append(m.group(3)).append("?=").toString();
-                        }
-                        String decodeWord = MimeUtility.decodeWord(encodedWord);
-                        if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                            decodeWord = CP932EmojiMapping.getInstance().replaceIn(MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932")));
-                        }
-                        sb.append(decodeWord);
                     } else {
-                        sb.append(MimeUtility.decodeWord(m.group()));
+                        if (null != prev) {
+                            sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString(), prev.asEncodedWord()));
+                            prev = null;
+                        }
+                        sb.append(hdrVal.substring(lastMatch, m.start()));
                     }
-                    /*
-                     * Remember last match position
-                     */
+
+                    // Decode encoded-word
+                    if (doEncode) {
+                        sb.append(decodeEncodedWord(charset, encoding, m.group(3), m.group()));
+                    }
+
+                    // Remember last match position
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
                     LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    sb.append(handleUnsupportedEncoding(m));
+                    sb.append(handleUnsupportedEncoding(m.group(2), m.group(3)));
                     lastMatch = m.end();
                 } catch (final ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
                 }
             } while (m.find());
-            sb.append(hdrVal.substring(lastMatch));
+            if (null != prev) {
+                try {
+                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString(), prev.asEncodedWord()));
+                } catch (UnsupportedEncodingException e) {
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
+                    sb.append(handleUnsupportedEncoding(prev.charset, prev.value.toString()));
+                } catch (ParseException e) {
+                    return decodeMultiEncodedHeaderSafe(headerValue);
+                }
+            }
+            if (lastMatch < hdrVal.length()) {
+                sb.append(hdrVal.substring(lastMatch));
+            }
             return sb.toString();
         }
 
@@ -1080,12 +1126,39 @@ public final class MimeMessageUtility {
         return hdrVal;
     }
 
-    private static String handleUnsupportedEncoding(final Matcher m) {
-        final String asciiText = m.group(3);
+    private static String decodeEncodedWord(String charset, String encoding, String encodedValue, String encodedWord) throws ParseException, UnsupportedEncodingException {
+        if (MessageUtility.isBig5(charset)) {
+            String decodeWord = MimeUtility.decodeWord(encodedWord);
+            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+                decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "Big5-HKSCS"));
+            }
+            return decodeWord;
+        } else if (MessageUtility.isGB2312(charset)) {
+            String decodeWord = MimeUtility.decodeWord(encodedWord);
+            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+                decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "GB18030"));
+            }
+            return decodeWord;
+        } else if (MessageUtility.isShiftJis(charset)) {
+            if ("cp932".equalsIgnoreCase(charset)) {
+                encodedWord = new StringBuilder(encodedWord.length()).append("=?MS932?").append(encoding).append('?').append(encodedValue).append("?=").toString();
+            }
+            String decodeWord = MimeUtility.decodeWord(encodedWord);
+            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+                decodeWord = CP932EmojiMapping.getInstance().replaceIn(MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932")));
+            }
+            return decodeWord;
+        } else {
+            return MimeUtility.decodeWord(encodedWord);
+        }
+    }
+
+    private static String handleUnsupportedEncoding(String encoding, String encodedValue) {
+        final String asciiText = encodedValue;
         final String detectedCharset;
         final byte[] rawBytes;
         {
-            final String transferEncoding = m.group(2);
+            final String transferEncoding = encoding;
             if ("Q".equalsIgnoreCase(transferEncoding)) {
                 try {
                     rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(asciiText));

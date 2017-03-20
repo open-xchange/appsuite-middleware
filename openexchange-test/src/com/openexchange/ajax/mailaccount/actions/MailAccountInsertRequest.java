@@ -138,11 +138,6 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             }
 
             @Override
-            public boolean isMailAccount() {
-                return true;
-            }
-
-            @Override
             public String getLogin() {
                 return acc.getLogin();
             }
@@ -373,6 +368,16 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             @Override
             public String getRootFolder() {
                 return null;
+            }
+
+            @Override
+            public boolean isMailDisabled() {
+                return acc.isMailDisabled();
+            }
+
+            @Override
+            public boolean isTransportDisabled() {
+                return acc.isTransportDisabled();
             }
         };
     }

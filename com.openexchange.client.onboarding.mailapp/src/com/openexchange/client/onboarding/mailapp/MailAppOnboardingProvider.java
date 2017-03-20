@@ -199,7 +199,7 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return new Link(value, linkType);
+        return new Link(value, linkType, null);
     }
 
 }

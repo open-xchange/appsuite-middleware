@@ -60,20 +60,20 @@ public class AppointmentAttachmentTest {
         assertTrue("Got no object_id", oid != 0);
         assertTrue("Got no conflicts ", conflicts == null);
 
-        csql.attachmentAction(fid, oid, userid, session, context, 1);
-        csql.attachmentAction(fid, oid, userid, session, context, 1);
-        csql.attachmentAction(fid, oid, userid, session, context, 1);
-        csql.attachmentAction(fid, oid, userid, session, context, 1);
+        csql.attachmentAction(fid, oid, userid, session, context, 1, null);
+        csql.attachmentAction(fid, oid, userid, session, context, 1, null);
+        csql.attachmentAction(fid, oid, userid, session, context, 1, null);
+        csql.attachmentAction(fid, oid, userid, session, context, 1, null);
 
-        csql.attachmentAction(fid, oid, userid, session, context, -1);
-        csql.attachmentAction(fid, oid, userid, session, context, -1);
-        csql.attachmentAction(fid, oid, userid, session, context, -1);
-        csql.attachmentAction(fid, oid, userid, session, context, -1);
+        csql.attachmentAction(fid, oid, userid, session, context, -1, null);
+        csql.attachmentAction(fid, oid, userid, session, context, -1, null);
+        csql.attachmentAction(fid, oid, userid, session, context, -1, null);
+        csql.attachmentAction(fid, oid, userid, session, context, -1, null);
 
         long last_modified = 0;
         try {
             final long check_modified = System.currentTimeMillis();
-            last_modified = csql.attachmentAction(fid, oid, userid, session, context, -1);
+            last_modified = csql.attachmentAction(fid, oid, userid, session, context, -1, null);
             assertTrue("Check for last_modified ", last_modified > check_modified);
         } catch (final Exception e) {
             return;

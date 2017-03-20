@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthentic
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -94,6 +95,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -802,6 +804,28 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         } else {
             jFile = object;
+        }
+
+        // Disallow to manually set weird MIME type
+        {
+            Object mimeType = jFile.opt(File.Field.FILE_MIMETYPE.getName());
+            if (null != mimeType) {
+                String cts = mimeType.toString();
+                if (Strings.isEmpty(cts)) {
+                    jFile.remove(File.Field.FILE_MIMETYPE.getName());
+                } else {
+                    try {
+                        ContentType contentType = new ContentType(cts);
+                        if (contentType.startsWith("multipart/") || contentType.containsBoundaryParameter()) {
+                            // deny weird MIME types
+                            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
+                        }
+                    } catch (Exception e) {
+                        // MIME type could not be safely parsed
+                        throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(e, e.getMessage());
+                    }
+                }
+            }
         }
 
         UploadFile uploadFile = null;

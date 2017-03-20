@@ -57,7 +57,6 @@ import com.openexchange.ajax.framework.SmtpMockSetup;
 import com.openexchange.ajax.oauth.provider.OAuthProviderSmtpTests;
 import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
-import com.openexchange.exception.OXException;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -74,19 +73,16 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ShareAJAXSuite.class,
 })
 public final class InterfaceSmtpMockTests {
-
+    
     @BeforeClass
-    public static void setUp() {
-        try {
-            SmtpMockSetup.init();
-        } catch (OXException e) {
-            e.printStackTrace();
-        }
+    public static void before() throws Exception {
+        SmtpMockSetup.init();
     }
-
+    
     @AfterClass
-    public static void tearDown() {
+    public static void after() throws Exception {
         SmtpMockSetup.restore();
     }
+
 
 }

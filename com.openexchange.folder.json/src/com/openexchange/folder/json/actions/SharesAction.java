@@ -107,6 +107,7 @@ public class SharesAction extends AbstractFolderAction {
          * prepare folder service decorator based on additional request parameters
          */
         FolderServiceDecorator decorator = new FolderServiceDecorator()
+            .setLocale(optLocale(request))
             .setTimeZone(Tools.getTimeZone(request.getParameter(AJAXServlet.PARAMETER_TIMEZONE)))
             .setAllowedContentTypes(collectAllowedContentTypes(request))
             .put("mailRootFolders", request.getParameter("mailRootFolders"))

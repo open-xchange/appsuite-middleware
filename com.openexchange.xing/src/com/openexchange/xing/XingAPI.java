@@ -227,11 +227,11 @@ public class XingAPI<S extends Session> {
                 session);
             final JSONArray jItems = responseInformation.getJSONObject("results").optJSONArray("items");
             if (null == jItems) {
-                return null;
+                return Collections.emptyList();
             }
             final int length = jItems.length();
             if (length <= 0) {
-                return null;
+                return Collections.emptyList();
             }
 
             for (int i = 0; i < jItems.length(); i++) {
@@ -634,7 +634,7 @@ public class XingAPI<S extends Session> {
             }
             // Manually sort contacts
             final Contacts contacts = new Contacts(responseInformation.getJSONObject("shared_contacts"));
-            Collections.sort(contacts.getUsers(), (null == orderBy ? UserField.ID : orderBy).getComparator(false));
+            Collections.sort(contacts.getUsers(), orderBy.getComparator(false));
             return contacts;
         } catch (final JSONException e) {
             throw new XingException(e);

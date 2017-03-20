@@ -59,7 +59,9 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.BoxFileStorageService;
 import com.openexchange.file.storage.boxcom.Services;
+import com.openexchange.file.storage.boxcom.oauth.BoxOAuthAccountAssociationProvider;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 
 /**
  * {@link BoxServiceRegisterer}
@@ -69,10 +71,11 @@ import com.openexchange.oauth.OAuthAccountDeleteListener;
 public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
     private final BundleContext context;
-    private volatile FileStorageAccountManagerProvider provider;
-    private volatile BoxFileStorageService service;
-    private volatile ServiceRegistration<FileStorageService> serviceRegistration;
-    private volatile ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
+    private FileStorageAccountManagerProvider provider;
+    private BoxFileStorageService service;
+    private ServiceRegistration<FileStorageService> serviceRegistration;
+    private ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
+    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration; // guarded by synchronized
 
     /**
      * Initializes a new {@link BoxServiceRegisterer}.
@@ -103,6 +106,7 @@ public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<File
                 service = new BoxFileStorageService(Services.getServices());
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
+                this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new BoxOAuthAccountAssociationProvider(service), null);
                 this.service = service;
                 this.provider = provider;
             } else {
@@ -117,6 +121,7 @@ public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<File
                     service = new BoxFileStorageService(Services.getServices(), compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
+                    this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new BoxOAuthAccountAssociationProvider(service), null);
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -151,14 +156,20 @@ public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<File
     private void unregisterService(final ServiceReference<FileStorageAccountManagerProvider> ref) {
         ServiceRegistration<FileStorageService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
-            serviceRegistration.unregister();
             this.serviceRegistration = null;
+            serviceRegistration.unregister();
         }
 
         ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;
         if (null != listenerRegistration) {
-            listenerRegistration.unregister();
             this.listenerRegistration = null;
+            listenerRegistration.unregister();
+        }
+
+        ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration = this.associationProviderRegistration;
+        if (null != associationProviderRegistration) {
+            this.associationProviderRegistration = null;
+            associationProviderRegistration.unregister();
         }
 
         ServiceReference<FileStorageAccountManagerProvider> reference = ref;

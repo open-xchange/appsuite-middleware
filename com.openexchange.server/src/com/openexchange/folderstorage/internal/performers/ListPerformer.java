@@ -275,7 +275,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     private List<SortableId> filterPOP3SubfolderIds(FolderStorage neededStorage, String treeId, String parentId, SortableId[] subfolderIds, StorageParameters newParameters) throws OXException {
         final List<SortableId> l;
-        if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
+        if (MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId()) && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
             l = new ArrayList<SortableId>(Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters)));
             final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
             if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
@@ -301,7 +301,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         /*
          * The subfolders can be completely fetched from already opened parent's folder storage
          */
-        if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
+        if (MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId()) && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
             final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
             if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
                 final List<String> l = new ArrayList<String>(Arrays.asList(subfolderIds));

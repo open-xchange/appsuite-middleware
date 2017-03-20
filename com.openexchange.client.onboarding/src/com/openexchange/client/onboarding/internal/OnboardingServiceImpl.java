@@ -84,9 +84,13 @@ import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.client.onboarding.service.OnboardingView;
 import com.openexchange.exception.OXException;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link OnboardingServiceImpl}
@@ -180,6 +184,11 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         // Invocation chain - looping through providers
         Scenario scenario = request.getScenario();
+        if (false == request.getClientDevice().implies(request.getDevice())) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenario.getId());
+        }
+
+
         Result result = null;
         for (OnboardingProvider provider : scenario.getProviders(session)) {
             Result currentResult = provider.execute(request, result, session);
@@ -254,6 +263,10 @@ public class OnboardingServiceImpl implements OnboardingService {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
 
+        if (false == clientDevice.implies(device)) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
         Scenario scenario = getScenario(scenarioId, configuredScenarios, session);
         if (null == scenario || !scenario.isEnabled(session)) {
@@ -279,6 +292,10 @@ public class OnboardingServiceImpl implements OnboardingService {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
 
+        if (false == clientDevice.implies(device)) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
         Scenario scenario = getScenario(scenarioId, configuredScenarios, userId, contextId);
         if (null == scenario || !scenario.isEnabled(userId, contextId)) {
@@ -298,6 +315,10 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public List<DeviceAwareScenario> getScenariosFor(ClientDevice clientDevice, Device device, Session session) throws OXException {
+        if (false == clientDevice.implies(device)) {
+            return Collections.emptyList();
+        }
+
         List<String> availableScenarios = device.getScenarios(session);
         if (null == availableScenarios || availableScenarios.isEmpty()) {
             return Collections.emptyList();
@@ -513,8 +534,19 @@ public class OnboardingServiceImpl implements OnboardingService {
             return null;
         }
 
+        String linkImageUrl = null;
+        {
+            ConfiguredLinkImage image = configuredLink.getImage();
+            if (null != image) {
+                // Build image location
+                ImageLocation imageLocation = new ImageLocation.Builder(image.getName()).id(image.getType().getScheme()).optImageHost(HtmlProcessing.imageHost()).build();
+                OnboardingImageDataSource imgSource = OnboardingImageDataSource.getInstance();
+                linkImageUrl = imgSource.generateUrl(imageLocation, session);
+            }
+        }
+
         if (false == configuredLink.isProperty()) {
-            return new Link(configuredLink.getUrl(), configuredLink.getType());
+            return new Link(configuredLink.getUrl(), configuredLink.getType(), linkImageUrl);
         }
 
         // Look up the actual link by retrieving the denoted property
@@ -524,7 +556,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             LOG.warn("No such property providing the link: {}", configuredLink.getUrl());
             return null;
         }
-        return new Link(url, configuredLink.getType());
+        return new Link(url, configuredLink.getType(), linkImageUrl);
     }
 
     private Link resolveLink(ConfiguredLink configuredLink, int userId, int contextId) throws OXException {
@@ -532,8 +564,28 @@ public class OnboardingServiceImpl implements OnboardingService {
             return null;
         }
 
+        String linkImageUrl = null;
+        {
+            ConfiguredLinkImage image = configuredLink.getImage();
+            if (null != image) {
+                // Try to build image location
+                String optSessionId = LogProperties.get(LogProperties.Name.SESSION_SESSION_ID);
+                if (null != optSessionId) {
+                    SessiondService service = services.getOptionalService(SessiondService.class);
+                    if (null != service) {
+                        Session session = service.getSession(optSessionId);
+                        if (null != session && session.getContextId() == contextId && session.getUserId() == userId) {
+                            ImageLocation imageLocation = new ImageLocation.Builder(image.getName()).id(image.getType().getScheme()).optImageHost(HtmlProcessing.imageHost()).build();
+                            OnboardingImageDataSource imgSource = OnboardingImageDataSource.getInstance();
+                            linkImageUrl = imgSource.generateUrl(imageLocation, session);
+                        }
+                    }
+                }
+            }
+        }
+
         if (false == configuredLink.isProperty()) {
-            return new Link(configuredLink.getUrl(), configuredLink.getType());
+            return new Link(configuredLink.getUrl(), configuredLink.getType(), linkImageUrl);
         }
 
         // Look up the actual link by retrieving the denoted property
@@ -543,7 +595,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             LOG.warn("No such property providing the link: {}", configuredLink.getUrl());
             return null;
         }
-        return new Link(url, configuredLink.getType());
+        return new Link(url, configuredLink.getType(), linkImageUrl);
     }
 
     @Override
@@ -554,21 +606,23 @@ public class OnboardingServiceImpl implements OnboardingService {
             Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
             availableDevices = new EnumMap<Device, List<CompositeId>>(Device.class);
             for (Device device : Device.values()) {
-                List<String> availableScenarios = device.getScenarios(session);
-                if (null != availableScenarios && !availableScenarios.isEmpty()) {
+                if (clientDevice.implies(device)) {
+                    List<String> availableScenarios = device.getScenarios(session);
+                    if (null != availableScenarios && !availableScenarios.isEmpty()) {
 
-                    List<CompositeId> compositeIds = availableDevices.get(device);
-                    if (null == compositeIds) {
-                        compositeIds = new ArrayList<CompositeId>(8);
-                        availableDevices.put(device, compositeIds);
-                    }
+                        List<CompositeId> compositeIds = availableDevices.get(device);
+                        if (null == compositeIds) {
+                            compositeIds = new ArrayList<CompositeId>(8);
+                            availableDevices.put(device, compositeIds);
+                        }
 
-                    for (String scenarioId : availableScenarios) {
-                        ConfiguredScenario configuredScenario = configuredScenarios.get(scenarioId);
-                        if (null != configuredScenario && configuredScenario.isEnabled()) {
-                            Scenario scenario = getScenario(configuredScenario, configuredScenarios, false, session);
-                            if (null != scenario) {
-                                compositeIds.add(new CompositeId(device, scenarioId));
+                        for (String scenarioId : availableScenarios) {
+                            ConfiguredScenario configuredScenario = configuredScenarios.get(scenarioId);
+                            if (null != configuredScenario && configuredScenario.isEnabled()) {
+                                Scenario scenario = getScenario(configuredScenario, configuredScenarios, false, session);
+                                if (null != scenario) {
+                                    compositeIds.add(new CompositeId(device, scenarioId));
+                                }
                             }
                         }
                     }

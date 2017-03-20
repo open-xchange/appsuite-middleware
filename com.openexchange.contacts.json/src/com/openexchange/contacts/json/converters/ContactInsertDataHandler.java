@@ -62,6 +62,7 @@ import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -112,7 +113,7 @@ public final class ContactInsertDataHandler implements DataHandler {
     }
 
     @Override
-    public Object processData(Data<?> data, DataArguments dataArguments, Session session) throws OXException {
+    public ConversionResult processData(Data<?> data, DataArguments dataArguments, Session session) throws OXException {
         /*
          * get target folder identifier
          */
@@ -184,7 +185,9 @@ public final class ContactInsertDataHandler implements DataHandler {
             /*
              * return JSON array of imported contacts
              */
-            return jsonArray;
+            ConversionResult result = new ConversionResult();
+            result.setData(jsonArray);
+            return result;
         } finally {
             SearchIterators.close(searchIterator);
             Streams.close(inputStream);

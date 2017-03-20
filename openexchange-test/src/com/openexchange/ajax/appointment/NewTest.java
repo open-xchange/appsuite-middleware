@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,6 +58,8 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.group.GroupTest;
@@ -75,6 +75,26 @@ import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
 
 public class NewTest extends AppointmentTest {
+
+    private CalendarTestManager ctm2;
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        ctm2 = new CalendarTestManager(getClient2());
+        ctm2.setFailOnError(true);
+    }
+
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        try {
+            ctm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
+    }
 
     @Test
     public void testSimple() throws Exception {
@@ -348,8 +368,10 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParticipants(participants);
 
         int objectId = catm.insert(appointmentObj).getObjectID();
+        assertFalse(catm.getLastResponse().hasConflicts());
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        assertFalse(catm.getLastResponse().hasConflicts());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
@@ -377,6 +399,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
 
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        assertFalse(catm.getLastResponse().hasConflicts());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 
@@ -457,10 +480,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
 
-        catm.setClient(getClient2());
-        int objectId = catm.insert(appointmentObj).getObjectID();
-
-        final Appointment loadAppointment = catm.get(targetFolder, objectId);
+        int objectId = ctm2.insert(appointmentObj).getObjectID();
+        final Appointment loadAppointment = ctm2.get(targetFolder, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
     }
 

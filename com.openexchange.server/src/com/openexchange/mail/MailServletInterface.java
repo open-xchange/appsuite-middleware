@@ -120,6 +120,30 @@ public abstract class MailServletInterface implements Closeable {
     }
 
     /**
+     * Gets a proper implementation of {@link MailServletInterface} which supports email decryption.
+     * <p>
+     * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
+     *
+     * <pre>
+     * MailInterface mailInterface = MailInterface.getInstance(session);
+     * try {
+     *     //Do some stuff here...
+     * } finally {
+     *     mailInterface.close(true);
+     * }
+     * </pre>
+     *
+     * @param session The session
+     * @param cryptoAuthentication authentication for decrypting emails
+     * @return An instance of {@link MailServletInterface}
+     * @throws OXException
+     */
+    public static final MailServletInterface getInstanceWithDecryptionSupport(Session session, String cryptoAuthentication) throws OXException {
+        final boolean doDecryption = true;
+        return new MailServletInterfaceImpl(session, doDecryption, cryptoAuthentication);
+    }
+
+    /**
      * Mail monitor
      */
     public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
@@ -754,5 +778,24 @@ public abstract class MailServletInterface implements Closeable {
     public MailImportResult[] getMailImportResults() {
         return new MailImportResult[0];
     }
+
+    /**
+     * Searches mails located in given folder.
+     *
+     * @param folder The folder full name
+     * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
+     *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
+     *            range is <code>end - start</code>.
+     * @param sortField The sort field
+     * @param orderDirection Whether ascending or descending sort order
+     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
+     * @param mailFields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @param headerNames The optional header names to pre-fill in returned instances of {@link MailMessage}
+     * @return The desired, pre-filled instances of {@link MailMessage}
+     * @throws OXException If mails cannot be returned
+     */
+    public abstract MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection orderDirection, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException;
+
+
 
 }

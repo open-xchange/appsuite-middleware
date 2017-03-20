@@ -355,6 +355,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     FILE_MOVE_ABORTED("The file(s) were not moved due to possible data loss. Please review the warnings for details.", Category.CATEGORY_CONFLICT, 70, FileStorageExceptionMessages.FILE_MOVE_ABORTED_MSG),
 
+    /**
+     * The specified MIME type is not allowed being set
+     */
+    DENIED_MIME_TYPE("The specified MIME type is not allowed being set", Category.CATEGORY_USER_INPUT, 71, OXExceptionStrings.MESSAGE_DENIED);
     ;
 
     /**

@@ -52,6 +52,7 @@ package com.openexchange.mail.authentication.handler;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -78,14 +79,14 @@ public class DefaultAuthenticationFailedHandler implements AuthenticationFailedH
     }
 
     @Override
-    public Result handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
+    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuth, Service service, MailConfig mailConfig, Session session) throws OXException {
         if (AuthType.isOAuthType(mailConfig.getAuthType())) {
             sessiondService.removeSession(session.getSessionID());
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(failedAuth, new Object[0]);
+            return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(failedAuth, new Object[0]));
         }
 
         // Don't care...
-        return Result.NEUTRAL;
+        return AuthenticationFailureHandlerResult.createContinueResult();
     }
 
 }

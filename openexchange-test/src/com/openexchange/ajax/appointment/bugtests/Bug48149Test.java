@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
@@ -88,6 +87,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -100,27 +100,17 @@ public class Bug48149Test extends AbstractAJAXSession {
         ftm2 = new FolderTestManager(client2);
 
         // Remove all permissions
-        FolderObject privateFolder1 = ftm1.getFolderFromServer(getClient().getValues().getPrivateAppointmentFolder());
-        Iterator<OCLPermission> i = privateFolder1.getPermissions().iterator();
-        while (i.hasNext()) {
-            OCLPermission permission = i.next();
-            if (permission.getEntity() != getClient().getValues().getUserId()) {
-                i.remove();
-            }
-        }
-        privateFolder1.setLastModified(new Date(Long.MAX_VALUE));
-        ftm1.updateFolderOnServer(privateFolder1);
+        FolderObject folderUpdate = new FolderObject(getClient().getValues().getPrivateAppointmentFolder());
+        folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
+            getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+        folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
+        ftm1.updateFolderOnServer(folderUpdate);
 
-        FolderObject privateFolder2 = ftm2.getFolderFromServer(client2.getValues().getPrivateAppointmentFolder());
-        i = privateFolder2.getPermissions().iterator();
-        while (i.hasNext()) {
-            OCLPermission permission = i.next();
-            if (permission.getEntity() != client2.getValues().getUserId()) {
-                i.remove();
-            }
-        }
-        privateFolder2.setLastModified(new Date(Long.MAX_VALUE));
-        ftm2.updateFolderOnServer(privateFolder2);
+        folderUpdate = new FolderObject(client2.getValues().getPrivateAppointmentFolder());
+        folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
+            client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+        folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
+        ftm2.updateFolderOnServer(folderUpdate);
 
         // Add new shared folder.
         sharedFolder1 = ftm1.generateSharedFolder("Shared Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client3.getValues().getUserId());
@@ -166,6 +156,7 @@ public class Bug48149Test extends AbstractAJAXSession {
         assertTrue("Excpected something with permissions. (" + ctm3.getLastResponse().getErrorMessage() + ")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.groupware.contact.ContactExceptionMessages;
 
 /**
  * Error codes for task exceptions.
@@ -136,8 +135,8 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     /** Cannot detach more attachments than actually available. */
     WRONG_ATTACHMENT_COUNT("Cannot detach more attachments than actually available.", Category.CATEGORY_ERROR, 22),
 
-    /** You are not allowed to read the contents of folder %1$s (%2$d). */
-    NO_READ_PERMISSION("You are not allowed to read the contents of folder %1$s (%2$d).", TaskExceptionMessage.NO_READ_PERMISSION_MSG,
+    /** You are not allowed to read the contents of the folder with id %2$d. */
+    NO_READ_PERMISSION("You are not allowed to read the contents of the folder with id %1$d.", TaskExceptionMessage.NO_READ_PERMISSION_MSG,
         Category.CATEGORY_PERMISSION_DENIED, 23),
 
     /** Tasks are disable for you (%d). */
@@ -171,8 +170,8 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     /** cannot send event to event system. */
     EVENT("Cannot send event to event system.", Category.CATEGORY_ERROR, 32),
 
-    /** You are not allowed to edit tasks in folder %1$s (%2$d). */
-    NO_WRITE_PERMISSION("You are not allowed to edit tasks in folder %1$s (%2$d).", TaskExceptionMessage.NO_WRITE_PERMISSION_MSG,
+    /** You are not allowed to edit tasks in the folder with id %1$d. */
+    NO_WRITE_PERMISSION("You are not allowed to edit tasks in the folder with id %1$d.", TaskExceptionMessage.NO_WRITE_PERMISSION_MSG,
         Category.CATEGORY_PERMISSION_DENIED, 33),
 
     /** Moving items from or into shared folder %1$s (%2$d) is not allowed. */
@@ -230,7 +229,7 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     INVALID_DATA("Task contains invalid data: \"%1$s\"", TaskExceptionMessage.INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 47),
 
     /** The task %1$d is not stored in folder %2$s (%3$d). */
-    NOT_IN_FOLDER("The task %1$d is not stored in folder %2$s (%3$d).", TaskExceptionMessage.NOT_IN_FOLDER_MSG,
+    NOT_IN_FOLDER("The task %1$d is not stored in folder %2$s (%3$d).", TaskExceptionMessage.NO_PERMISSION_MSG,
         Category.CATEGORY_PERMISSION_DENIED, 48),
 
     /** Unknown participant type %1$d. */
@@ -263,8 +262,8 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     /** "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again." */
     INCORRECT_STRING("Field \"%2$s\" contains invalid character: \"%1$s\"", TaskExceptionMessage.INCORRECT_STRING_DISPLAY, Category.CATEGORY_USER_INPUT, 58),
 
-    /** This folder (%2$d) is not visible. */
-    NOT_VISIBLE("This folder (%2$d) is not visible.", TaskExceptionMessage.NOT_VISIBLE, Category.CATEGORY_PERMISSION_DENIED, 59),;
+    /** This folder (%1$d) is not visible. */
+    NOT_VISIBLE("This folder (%1$d) is not visible.", TaskExceptionMessage.NOT_VISIBLE, Category.CATEGORY_PERMISSION_DENIED, 59),;
 
     private String message;
 

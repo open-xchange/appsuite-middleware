@@ -106,6 +106,7 @@ public class GrizzlyConfig {
         private int httpProtoPort = 80;
         private int httpsProtoPort = 443;
         private String echoHeader = "X-Echo-Header";
+        private String robotsMetaTag = "none";
         private int maxBodySize = 104857600;
         private int maxNumberOfHttpSessions = 250000;
         private boolean isSessionAutologin = false;
@@ -178,6 +179,12 @@ public class GrizzlyConfig {
             this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 1000);
             this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
             this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
+            if (configService.getBoolProperty("com.openexchange.servlet.useRobotsMetaTag", true)) {
+                String robotsMetaTag = configService.getProperty("com.openexchange.servlet.robotsMetaTag", "none").trim();
+                this.robotsMetaTag = robotsMetaTag;
+            } else {
+                this.robotsMetaTag = null;
+            }
 
             // sessiond properties
             this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
@@ -351,6 +358,11 @@ public class GrizzlyConfig {
             return this;
         }
 
+        public Builder setRobotsMetaTag(String robotsMetaTag) {
+            this.robotsMetaTag = robotsMetaTag;
+            return this;
+        }
+
         public Builder setMaxBodySize(int maxBodySize) {
             this.maxBodySize = maxBodySize;
             return this;
@@ -387,7 +399,7 @@ public class GrizzlyConfig {
         }
 
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
         }
     }
 
@@ -486,6 +498,9 @@ public class GrizzlyConfig {
     /** The name of the echo header whose value is echoed for each request providing that header, see mod_id for apache */
     private final String echoHeader;
 
+    /** The value of the <code>X-Robots-Tag</code> response header to set. Default is none. */
+    private final String robotsMetaTag;
+
     /** The maximum allowed size for PUT and POST bodies */
     private final int maxBodySize;
 
@@ -511,7 +526,7 @@ public class GrizzlyConfig {
     /** Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created */
     private final boolean checkTrackingIdInRequestParameters;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -545,6 +560,7 @@ public class GrizzlyConfig {
         this.httpProtoPort = httpProtoPort;
         this.httpsProtoPort = httpsProtoPort;
         this.echoHeader = echoHeader;
+        this.robotsMetaTag = robotsMetaTag;
         this.maxBodySize = maxBodySize;
         this.maxNumberOfHttpSessions = maxNumberOfHttpSessions;
         this.isSessionAutologin = isSessionAutologin;
@@ -803,6 +819,15 @@ public class GrizzlyConfig {
      */
     public String getEchoHeader() {
         return this.echoHeader;
+    }
+
+    /**
+     * Gets the value of the <code>X-Robots-Tag</code> response header to set. Default is none.
+     *
+     * @return The value of the <code>X-Robots-Tag</code> response header
+     */
+    public String getRobotsMetaTag() {
+        return robotsMetaTag;
     }
 
     /** Get the maximum allowed size for PUT and POST bodies */

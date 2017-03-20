@@ -55,6 +55,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * {@link SSLConfigurationService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 @SingletonService

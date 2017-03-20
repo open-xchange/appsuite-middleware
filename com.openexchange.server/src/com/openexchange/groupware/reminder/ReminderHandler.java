@@ -265,8 +265,29 @@ public class ReminderHandler implements ReminderSQLInterface {
 
     @Override
     public void deleteReminder(final ReminderObject reminder, Context context) throws OXException {
-        int contextId = context.getContextId();
         Connection writeCon = DBPool.pickupWriteable(context);
+        try {
+            deleteReminder(reminder, context, writeCon);
+        } finally {
+            DBPool.closeWriterSilent(context, writeCon);
+        }
+    }
+
+    /**
+     * Deletes a reminder
+     *
+     * @param reminder A reminder object containing at least the reminder id
+     * @param context The context
+     * @param writeCon The connection to use
+     * @throws OXException
+     */
+    public void deleteReminder(final ReminderObject reminder, Context context, Connection writeCon) throws OXException {
+        if (null == writeCon) {
+            deleteReminder(reminder, context);
+            return;
+        }
+
+        int contextId = context.getContextId();
         PreparedStatement ps = null;
         try {
             ps = writeCon.prepareStatement(SQL.DELETE_WITH_ID);
@@ -280,11 +301,9 @@ public class ReminderHandler implements ReminderSQLInterface {
         } catch (final SQLException exc) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } catch (final NumberFormatException e) {
-            throw ReminderExceptionCode.MANDATORY_FIELD_TARGET_ID.create("can't parse number.");
+            throw ReminderExceptionCode.MANDATORY_FIELD_TARGET_ID.create(e, "can't parse number.");
         } finally {
             DBUtils.closeSQLStuff(ps);
-            DBUtils.autocommit(writeCon);
-            DBPool.closeWriterSilent(context, writeCon);
         }
     }
 

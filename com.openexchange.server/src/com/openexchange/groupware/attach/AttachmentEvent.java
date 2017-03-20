@@ -88,4 +88,6 @@ public interface AttachmentEvent {
 
     UserConfiguration getUserConfig();
 
+    AttachmentBatch getAttachmentBatch();
+
 }

@@ -1,10 +1,8 @@
 package com.openexchange.rss.preprocessors;
 
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssResult;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class PreprocessorChainingTest {
@@ -30,13 +28,13 @@ public class PreprocessorChainingTest {
 	}
 
 	     @Test
-     public void testChaining(){
+     public void testChaining() throws OXException{
 		String actual = new Pre1().chain(new Pre2().chain(new Pre3())).process("", null);
 		assertEquals("ABC", actual);
 	}
 
 	     @Test
-     public void testNoChain(){
+     public void testNoChain() throws OXException{
 		String actual = new Pre1().process("", null);
 		assertEquals("A", actual);
 	}

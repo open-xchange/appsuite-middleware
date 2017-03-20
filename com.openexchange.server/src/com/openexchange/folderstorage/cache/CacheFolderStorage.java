@@ -647,7 +647,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
      * @throws OXException If removal fails
      */
     public void removeFromCache(String id, String treeId, boolean singleOnly, Session session) throws OXException {
-        removeFromCache(id, treeId, singleOnly, null, null, session, null);
+        if (null != session) {
+            removeFromCache(id, treeId, singleOnly, null, null, session, null);
+        }
     }
 
     /**
@@ -1429,8 +1431,8 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 allSubfolderIds = new LinkedList<SortableId>();
 
                 // Query storages (except first one) using dedicated threads
-                CompletionService<java.util.List<SortableId>> completionService = new ThreadPoolCompletionService<java.util.List<SortableId>>(
-                    ThreadPools.getThreadPool()).setTrackable(true);
+                ThreadPoolService tps = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+                CompletionService<java.util.List<SortableId>> completionService = new ThreadPoolCompletionService<java.util.List<SortableId>>(tps).setTrackable(true);
                 int submittedTasks = 0;
                 for (int i = 1; i < neededStorages.length; i++) {
                     final FolderStorage neededStorage = neededStorages[i];
@@ -1590,7 +1592,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         if (isMove) {
             /*-
              * Do not reload folders.
-             * 
+             *
              * In case of a cross file storage move (e.g. Dropbox to InfoStore), the previously opened in-transaction connection will not
              * see the newly created folder (as not yet committed) or read a stale state.
              */
@@ -1735,11 +1737,11 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     public Folder loadFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws OXException {
         return loadFolder(treeId, folderId, storageType, false, storageParameters);
     }
-    
+
     private Folder loadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);
     }
-    
+
     private Folder optLoadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         try {
             return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);

@@ -61,7 +61,7 @@ public class CompositeId {
     private final String scenarioId;
 
     /**
-     * Initializes a new {@link CompositeId}.
+     * Initializes a new {@link CompositeId} for a device and scenario identifier tuple; e.g. <code>"apple.iphone/davsync"</code>.
      *
      * @param device The device
      * @param scenarioId The scenario identifier

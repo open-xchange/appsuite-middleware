@@ -473,7 +473,7 @@ public final class JSONObjectConverter {
 
     private static final Enriched2HtmlConverter ENRCONV = new Enriched2HtmlConverter();
 
-    private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
+    private String getHtmlDisplayVersion(final ContentType contentType, final String src) throws OXException {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
             return HtmlProcessing.formatHTMLForDisplay(

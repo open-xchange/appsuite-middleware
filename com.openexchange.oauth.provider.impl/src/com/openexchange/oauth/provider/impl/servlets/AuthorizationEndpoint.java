@@ -265,26 +265,20 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         String sessionId = request.getParameter(OAuthProviderConstants.PARAM_SESSION);
         if (sessionId != null) {
             // Session must only be provided by a previous login POST. This is enforced via additional cookie hash parameters.
-            LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
             Session session = requireService(SessiondService.class, services).getSession(sessionId);
             if (session != null) {
                 Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
                 Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + cookieHash(request, authRequest));
                 if (secretCookie != null && session.getSecret().equals(secretCookie.getValue())) {
-                    String remoteAddress = request.getRemoteAddr();
-                    if (loginConfig.isIpCheck()) {
-                        try {
-                            SessionUtility.checkIP(true, loginConfig.getRanges(), session, remoteAddress, loginConfig.getIpCheckWhitelist());
-                            return session;
-                        } catch (OXException e) {
-                            if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
-                                LOG.debug("Client IP check failed during OAuth flow.");
-                            } else {
-                                throw e;
-                            }
-                        }
-                    } else {
+                    try {
+                        SessionUtility.checkIP(session, request.getRemoteAddr());
                         return session;
+                    } catch (OXException e) {
+                        if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
+                            LOG.debug("Client IP check failed during OAuth flow.");
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             }
@@ -319,6 +313,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             .hash(hash)
             .iface(HTTP_JSON)
             .headers(Tools.copyHeaders(request))
+            .requestParameter(request.getParameterMap())
             .cookies(Tools.getCookieFromHeader(request))
             .secure(Tools.considerSecure(request, true))
             .serverName(serverName)

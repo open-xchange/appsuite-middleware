@@ -1,7 +1,8 @@
 %define __jar_repack %{nil}
 
 Name:          open-xchange-munin-scripts
-BuildArch:	   noarch
+%define use_systemd (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >=1210)
+BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
@@ -11,9 +12,13 @@ BuildRequires: ant-nodeps
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
 %endif
-Version:	   @OXVERSION@
+%endif
+Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
@@ -23,9 +28,9 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Autoreqprov:   no
-Requires:	   open-xchange-core >= @OXVERSION@
-Requires:      munin-node
-Conflicts:     open-xchange-munin-scripts-jolokia
+Requires:      munin-node, perl-JSON, perl-libwww-perl
+Provides:      open-xchange-munin-scripts-jolokia = %{version}
+Obsoletes:     open-xchange-munin-scripts-jolokia < %{version}
 
 %description
 Munin is a highly flexible and powerful solution used to create graphs of
@@ -53,6 +58,34 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
+GLOBIGNORE='*'
+
+function contains() { grep $@ >/dev/null 2>&1; return $?; }
+
+# only when updating
+if [ ${1:-0} -eq 2 ]; then
+  # SoftwareChange_request-3870
+  PFILE=/etc/munin/plugin-conf.d/ox
+  if test -f ${PFILE} && ! contains env.oxJolokiaUrl ${PFILE}; then
+    sed -i '$ a env.oxJolokiaUrl http://localhost:8009/monitoring/jolokia' ${PFILE}
+  fi
+
+  if test -f ${PFILE} && ! contains env.oxJolokiaUser ${PFILE}; then
+    sed -i '$ {
+      a ### oxJolokiaUser must be the same as com.openexchange.jolokia.user inside jolokia.properties
+      a env.oxJolokiaUser changeMe!Now
+    }' ${PFILE}
+  fi
+
+  if test -f ${PFILE} && ! contains env.oxJolokiaPassword ${PFILE}; then
+    sed -i '$ {  
+      a ### oxJolokiaPassword must be the same as com.openexchange.jolokia.password inside jolokia.properties
+      a env.oxJolokiaPassword s3cr3t!toBeChanged
+    }' ${PFILE}
+  fi
+fi
+
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`
 munin-node-configure --libdir /usr/share/munin/plugins/ --shell > $TMPFILE || :
 if [ -f $TMPFILE ] ; then
@@ -60,7 +93,21 @@ if [ -f $TMPFILE ] ; then
   rm -f $TMPFILE
 fi
 find -L /etc/munin/plugins -name 'ox_*' -type l -delete
+
+# The admin has to actively configure and start jolokia and munin
+PFILE=/opt/open-xchange/etc/jolokia.properties
+jolokia_enabled=$(ox_read_property com.openexchange.jolokia.start ${PFILE})
+if [[ ! ${jolokia_enabled//[[:space:]]/} = true ]]
+then
+  echo -e "\n\e[31mWARNING\e[0m: You have to properly configure and activate jolokia and munin for working monitoring! \n"
+fi
+
+#no common service wrapper dependency across rpm distros
+%if %{use_systemd}
+systemctl try-restart munin-node >/dev/null 2>&1 || :
+%else
 /etc/init.d/munin-node restart || :
+%endif
 exit 0
 
 
@@ -74,7 +121,7 @@ exit 0
 /usr/share/munin/plugins/
 %dir /etc/munin/
 %dir /etc/munin/plugin-conf.d/
-%config(noreplace) /etc/munin/plugin-conf.d/*
+%config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
 * Fri Nov 25 2016 Carsten Hoeger <choeger@open-xchange.com>

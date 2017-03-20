@@ -65,15 +65,20 @@ public class I18nServiceListener implements ServiceTrackerCustomizer<I18nService
     private final BundleContext context;
     private final I18nServices services = I18nServices.getInstance();
 
-    public I18nServiceListener(final BundleContext context) {
+    public I18nServiceListener(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
     public I18nService addingService(final ServiceReference<I18nService> reference) {
-        final I18nService i18n = context.getService(reference);
-        services.addService(i18n);
+        I18nService i18n = context.getService(reference);
+        boolean added = services.addService(i18n);
+        if (false == added) {
+            context.ungetService(reference);
+            return null;
+        }
+
         FolderI18nNamesServiceImpl.getInstance().addService(i18n);
         GroupI18nNamesService.getInstance().addService(i18n);
         return i18n;

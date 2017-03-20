@@ -114,6 +114,10 @@ public class MailThreadParser {
 
     private void parseUnifiedResponse(String unifiedResult, String fullName, BoolReference hasNonExistingParent, List<MailThread> mailThreads, TLongObjectMap<MailMessage> messages) throws OXException {
         int length = unifiedResult.length();
+        if (length <= 0) {
+            return;
+        }
+
         char c0 = unifiedResult.charAt(0);
         if (c0 == '{') {
             // Entering a thread

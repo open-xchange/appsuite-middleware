@@ -114,45 +114,6 @@ public abstract class AbstractConfig {
     }
 
     /**
-     * Returns <code>true</code> if and only if the property named by the argument exists and is equal to the string <code>"true"</code>.
-     * The test of this string is case insensitive.
-     * <p>
-     * If there is no property with the specified name, or if the specified name is empty or null, then <code>false</code> is returned.
-     *
-     * @param key the property name.
-     * @return the <code>boolean</code> value of the property.
-     */
-    protected final boolean getBooleanInternal(final String key) {
-        return getBooleanInternal(key, null);
-    }
-
-    /**
-     * Returns the boolean value of the property. If the propery isn't set the def arguments is returned.
-     *
-     * @param key the property name.
-     * @param def default value to return if the property isn't set.
-     * @return the boolean value of the property.
-     */
-    protected final boolean getBooleanInternal(final String key, final boolean def) {
-        return getBooleanInternal(key, Boolean.valueOf(def).toString());
-    }
-
-    /**
-     * Returns the boolean value of the property. If the propery isn't set the def arguments is returned.
-     *
-     * @param key the property name.
-     * @param def default value to return if the property isn't set.
-     * @return the boolean value of the property.
-     */
-    protected final boolean getBooleanInternal(final String key, final String def) {
-        String value = getPropertyInternal(key);
-        if (null == value) {
-            value = def;
-        }
-        return Boolean.parseBoolean(value);
-    }
-
-    /**
      * @return an iterator of the properties keys.
      */
     protected final Iterator<String> keyIterator() {

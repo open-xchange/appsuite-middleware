@@ -31,6 +31,7 @@ import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLVersion;
@@ -83,13 +84,16 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.util.XMLHelper;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.SessionEnhancement;
-import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
@@ -102,6 +106,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.DefaultExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
@@ -115,7 +120,6 @@ import com.openexchange.session.reservation.SimSessionReservationService;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SimSessiondService;
-import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
 
@@ -174,6 +178,9 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(OAuthAccessTokenService.class)
+@PowerMockIgnore({"javax.net.*","javax.security.*","javax.crypto.*"})
 public class SAMLWebSSOProviderTest {
 
     private static SAMLWebSSOProvider provider;
@@ -214,6 +221,9 @@ public class SAMLWebSSOProviderTest {
         services.add(SessiondService.class, sessiondService);
         userService = new SimUserService();
         services.add(UserService.class, userService);
+        OAuthAccessTokenService mock = PowerMockito.mock(OAuthAccessTokenService.class);
+        PowerMockito.when(mock, "isConfigured", 1,1).thenReturn(false);
+        services.add(OAuthAccessTokenService.class,mock);
         userService.addUser(new SimUser(1), 1);
         stateManagement = new SimStateManagement();
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
@@ -605,6 +615,7 @@ public class SAMLWebSSOProviderTest {
             .build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
 
@@ -1242,9 +1253,6 @@ public class SAMLWebSSOProviderTest {
                 false,
                 false,
                 false,
-                new ClientWhitelist(),
-                false,
-                Collections.<IPRange>emptyList(),
                 true,
                 true,
                 false,

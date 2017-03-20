@@ -51,13 +51,14 @@ package com.openexchange.ajax.group;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Combines all group tests.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     FunctionTest.class,
     Bug11659Test.class,

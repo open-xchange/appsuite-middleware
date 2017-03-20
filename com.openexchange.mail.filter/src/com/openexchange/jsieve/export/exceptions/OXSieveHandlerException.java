@@ -64,6 +64,7 @@ public class OXSieveHandlerException extends Exception {
 	private final int sieveHostPort;
 	private final SieveResponse.Code sieveResponseCode;
     private boolean parseError;
+    private boolean authTimeoutError;
 
     /**
      * Initializes a new {@link OXSieveHandlerException}
@@ -106,12 +107,32 @@ public class OXSieveHandlerException extends Exception {
     }
 
     /**
+     * Sets whether this SIEVE exception is caused by a timeout during authentication
+     *
+     * @param authTimeoutError The flag to set
+     * @return This <code>OXSieveHandlerException</code> instance
+     */
+    public OXSieveHandlerException setAuthTimeoutError(boolean authTimeoutError) {
+        this.authTimeoutError = authTimeoutError;
+        return this;
+    }
+
+    /**
      * Signals whether this SIEVE exception is caused by a parsing error
      *
      * @return <code>true</code> for parse error; otherwise <code>false</code>
      */
     public boolean isParseError() {
         return parseError;
+    }
+
+    /**
+     * Signals whether this SIEVE exception is caused by a timeout during authentication
+     *
+     * @return <code>true</code> for timeout during authentication; otherwise <code>false</code>
+     */
+    public boolean isAuthTimeoutError() {
+        return authTimeoutError;
     }
 
 	/**

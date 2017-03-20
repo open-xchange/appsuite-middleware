@@ -61,13 +61,14 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -86,7 +87,8 @@ public final class BoxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, ClusterLockService.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class,
+            TimerService.class, OAuthService.class, ClusterLockService.class, OAuthAccessRegistryService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -108,7 +110,7 @@ public final class BoxActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, API.BOX_COM), serviceProperties);
+            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, KnownApi.BOX_COM), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

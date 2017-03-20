@@ -101,6 +101,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.user.UserService;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -259,10 +260,15 @@ public final class LoginPerformer {
                 authService.authorizeUser(ctx, user);
             }
             if (storeLanguage && !Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
-                UserStorage us = UserStorage.getInstance();
                 UserImpl impl = new UserImpl(user);
                 impl.setPreferredLanguage(userLoginLanguage);
-                us.updateUser(impl, ctx);
+                UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+                if (null != userService) {
+                    userService.updateUser(impl, ctx);
+                } else {
+                    LOG.warn("Unable to access user service, updating directly via storage.", ServiceExceptionCode.absentService(UserService.class));
+                    UserStorage.getInstance().updateUser(impl, ctx);
+                }
                 user = impl;
             }
             retval.setContext(ctx);
@@ -656,7 +662,8 @@ public final class LoginPerformer {
 
         AuditLogService auditLogService = ServerServiceRegistry.getInstance().getService(AuditLogService.class);
         if (null != auditLogService) {
-            String login = request.getLogin();
+            Session session = result.getSession();
+            String login = null == session ? request.getLogin() : session.getLoginName();
             if (null != login) {
                 String client = request.getClient();
                 auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client));

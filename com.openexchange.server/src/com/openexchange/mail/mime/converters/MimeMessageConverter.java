@@ -110,8 +110,10 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -123,6 +125,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -133,6 +136,7 @@ import com.openexchange.mail.mime.filler.SessionCompositionParameters;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -2021,6 +2025,7 @@ public final class MimeMessageConverter {
              */
             mail.setSubject(getSubject(mail));
             mail.setThreadLevel(0);
+            mail.setSecurityInfo(getSecurityInfo(mail));
             return mail;
         } catch (final MessageRemovedException e) {
             final String[] sa = getFolderAndIdSafe(msg);
@@ -2037,6 +2042,30 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if given mail is an encrypted or signed PGP email
+     *
+     * @return <code>true</code> if mail is an encrypted; otherwise <code>false</code>
+     */
+    private static SecurityInfo getSecurityInfo (MimeMailMessage mail) {
+        ServiceLookup services = MailJSONActivator.SERVICES.get();
+        if (null == services) {
+            return null;
+        }
+
+        PGPMailRecognizer recognizer = services.getOptionalService(PGPMailRecognizer.class);
+        if (null == recognizer) {
+            return null;
+        }
+
+        try {
+            return new SecurityInfo (recognizer.isPGPMessage(mail), recognizer.isPGPSignedMessage(mail));
+        } catch (Exception e) {
+            LOG.warn("Failed to check if mail is encrypted", e);
+            return null;
         }
     }
 

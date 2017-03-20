@@ -101,7 +101,7 @@ public class PhishingHeaders implements PreferencesItemService {
             @Override
             public void getValue(final Session session, final Context ctx, final User user,
                     final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final String[] phishingHeaders = MailProperties.getInstance().getPhishingHeaders();
+                final String[] phishingHeaders = MailProperties.getInstance().getPhishingHeaders(session.getUserId(), session.getContextId());
                 if (null == phishingHeaders || phishingHeaders.length == 0) {
                     setting.setSingleValue(null);
                 } else {

@@ -422,7 +422,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Try to authenticate
              */
-            boolean forceSecure = config.isStartTls() || config.isRequireTls() || config.getMailProperties().isEnforceSecureConnection();
+            boolean forceSecure = config.isRequireTls() || config.getMailProperties().isEnforceSecureConnection();
             pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, -1, session, false, forceSecure).getPop3Store();
             /*
              * Add warning if non-secure
@@ -586,9 +586,10 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         try {
-            final MailAccountStorageService storageService =
-                POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-            return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+            MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+            int userId = session.getUserId();
+            int contextId = session.getContextId();
+            return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, userId, contextId), userId, contextId);
         } catch (final OXException e) {
             throw e;
         }

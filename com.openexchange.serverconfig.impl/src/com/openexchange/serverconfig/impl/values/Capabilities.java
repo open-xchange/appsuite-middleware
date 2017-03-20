@@ -82,6 +82,7 @@ public class Capabilities implements ComputedServerConfigValueService {
         } else {
             capabilities = capabilityService.getCapabilities(optSession, true).asSet();
         }
+
         serverConfig.put("capabilities", capabilities);
     }
 

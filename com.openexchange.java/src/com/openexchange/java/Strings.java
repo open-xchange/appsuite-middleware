@@ -251,6 +251,15 @@ public class Strings {
     }
 
     /**
+     * High speed test for ASCII letter!
+     *
+     * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
+     */
+    public static boolean isAsciiLetter(final char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    /**
      * Gets specified string's ASCII bytes
      *
      * @param str The string
@@ -960,13 +969,24 @@ public class Strings {
         if (null == chars) {
             return null;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
+
+        int length = chars.length();
+        StringBuilder builder = null;
         for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            char c = chars.charAt(i);
+            if (null == builder) {
+                if ((c >= 'a') && (c <= 'z')) {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(chars, 0, i);
+                    }
+                    builder.append((char) (c & 0x5f));
+                }
+            } else {
+                builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            }
         }
-        return builder.toString();
+        return null == builder ? chars.toString() : builder.toString();
     }
 
     /** ASCII-wise to lower-case */
@@ -974,13 +994,24 @@ public class Strings {
         if (null == chars) {
             return null;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
+
+        int length = chars.length();
+        StringBuilder builder = null;
         for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+            char c = chars.charAt(i);
+            if (null == builder) {
+                if ((c >= 'A') && (c <= 'Z')) {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(chars, 0, i);
+                    }
+                    builder.append((char) (c ^ 0x20));
+                }
+            } else {
+                builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+            }
         }
-        return builder.toString();
+        return null == builder ? chars.toString() : builder.toString();
     }
 
     private static char[] lowercases = {

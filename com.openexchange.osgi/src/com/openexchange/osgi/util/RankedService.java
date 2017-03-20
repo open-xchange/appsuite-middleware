@@ -51,6 +51,7 @@ package com.openexchange.osgi.util;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.osgi.Ranked;
 
 /**
  * {@link RankedService} - A service plus its ranking.
@@ -85,7 +86,7 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
      * @return The newly created ranked service
      */
     public static <S> RankedService<S> newRankedService(ServiceReference<S> reference, S service, int defaultRanking) {
-        return new RankedService<S>(service, getRanking(reference, defaultRanking));
+        return new RankedService<S>(service, getRanking(service, reference, defaultRanking));
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -167,8 +168,9 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
      *
      * @param reference The service reference providing properties Dictionary object of the service
      * @return The ranking or <code>0</code> (zero) if absent
+     * @see #getRanking(Object, ServiceReference, int)
      */
-    public static <S> int getRanking(final ServiceReference<S> reference) {
+    public static <S> int getRanking(ServiceReference<S> reference) {
         return getRanking(reference, 0);
     }
 
@@ -179,12 +181,33 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
      *
      * @param reference The service reference providing properties Dictionary object of the service
      * @param defaultRanking The default ranking if {@link Constants#SERVICE_RANKING} property is absent
+     * @return The ranking or given <code>defaultRanking</code> if absent
+     * @see #getRanking(Object, ServiceReference, int)
+     */
+    public static <S> int getRanking(ServiceReference<S> reference, int defaultRanking) {
+        return getRanking(null, reference, defaultRanking);
+    }
+
+    /**
+     * Gets the service ranking either by given service instance (if not <code>null</code>) or by look-up of <code>"service.ranking"</code> property.
+     * <p>
+     * Service instance is checked if {@link Ranked} is implemented, if not, look-up falls-back to <code>"service.ranking"</code> property.
+     * <p>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param service The (optional) obtained service
+     * @param reference The service reference providing properties Dictionary object of the service
+     * @param defaultRanking The default ranking if {@link Constants#SERVICE_RANKING} property is absent
      * @return The ranking or <code>0</code> (zero) if absent
      */
-    public static <S> int getRanking(final ServiceReference<S> reference, final int defaultRanking) {
+    public static <S> int getRanking(S service, ServiceReference<S> reference, int defaultRanking) {
         int ranking = defaultRanking;
         {
-            final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
+            if (service instanceof Ranked) {
+                return ((Ranked) service).getRanking();
+            }
+
+            Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
             if (null != oRanking) {
                 if (oRanking instanceof Integer) {
                     ranking = ((Integer) oRanking).intValue();
@@ -197,6 +220,7 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
                 }
             }
         }
+
         return ranking;
     }
 

@@ -74,7 +74,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.session.Session;
 
 /**
@@ -105,18 +104,16 @@ final class DropboxExceptionHandler {
 
         // Invalid token or account was unlinked
         if (InvalidAccessTokenException.class.isInstance(e)) {
-            String cburl = OAuthUtil.buildCallbackURL(oauthAccount);
             API api = oauthAccount.getAPI();
-            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
         }
 
         // Bad request
         if (BadRequestException.class.isInstance(e)) {
             String message = e.getMessage();
             if (null != message && message.indexOf("access token is malformed") >= 0) {
-                String cburl = OAuthUtil.buildCallbackURL(oauthAccount);
                 API api = oauthAccount.getAPI();
-                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
             }
         }
 

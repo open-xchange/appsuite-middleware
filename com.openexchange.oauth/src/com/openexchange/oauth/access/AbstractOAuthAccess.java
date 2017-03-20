@@ -57,7 +57,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.session.Session;
 
 /**
@@ -84,7 +83,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
 
     /**
      * Initializes a new {@link AbstractOAuthAccess}.
-     * 
+     *
      * @param session The groupware {@link Session}
      */
     protected AbstractOAuthAccess(Session session) {
@@ -108,16 +107,15 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * <ul>
      * <li>accessToken exists?</li>
      * </ul>
-     * 
+     *
      * @param account The {@link OAuthAccount} to check for validity
      * @throws OXException if the account is not valid
      */
     protected void verifyAccount(OAuthAccount account) throws OXException {
-        // Verify that the account has an access token 
+        // Verify that the account has an access token
         if (Strings.isEmpty(account.getToken())) {
-            String cburl = OAuthUtil.buildCallbackURL(account);
             API api = account.getAPI();
-            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), account.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), account.getId(), session.getUserId(), session.getContextId());
         }
 
         // Other checks?

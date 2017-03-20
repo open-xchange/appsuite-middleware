@@ -101,11 +101,10 @@ public class ProvisioningSetup {
     private static final String RESOURCE_PARTICIPANT2 = "resource_participant2";
     private static final String RESOURCE_PARTICIPANT3 = "resource_participant3";
 
-    // should only be called once and be valid for all tests
     public static void init() throws OXException {
-
         synchronized (ProvisioningSetup.class) {
             if (!initialized.get()) {
+                LOG.info("Starting initialization of contexts.");
                 AJAXConfig.init();
                 Properties contextsAndUsers = getProperties();
 
@@ -115,6 +114,7 @@ public class ProvisioningSetup {
                 TestContextPool.startWatcher();
 
                 initialized.compareAndSet(false, true);
+                LOG.info("Finished initialization for {} contexts.", TestContextPool.getAllTimeAvailableContexts().size());
             }
         }
     }

@@ -156,6 +156,10 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             return null;
         }
 
+        if (mailAccount.isMailDisabled()) {
+            return KnownStatus.DISABLED;
+        }
+
         Boolean valid = actionValidateBoolean(mailAccount, session, false, warnings, false);
         return valid.booleanValue() ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
     }
@@ -177,6 +181,8 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             return Boolean.TRUE;
         }
 
+        boolean ignoreTransport = ignoreInvalidTransport;
+
         MailAccountDescription accountDescription = new MailAccountDescription();
         accountDescription.setMailServer(account.getMailServer());
         accountDescription.setMailPort(account.getMailPort());
@@ -193,7 +199,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
         if (!isEmpty(account.getTransportServer())) {
             if (TransportAuth.NONE == account.getTransportAuth()) {
-                return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings, errorOnDenied);
+                return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
             }
 
             accountDescription.setTransportServer(account.getTransportServer());
@@ -207,6 +213,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
                 accountDescription.setTransportLogin(accountDescription.getLogin());
                 accountDescription.setTransportPassword(accountDescription.getPassword());
                 accountDescription.setTransportAuthType(accountDescription.getAuthType());
+                ignoreTransport = true;
             } else {
                 String transportLogin = account.getTransportLogin();
                 accountDescription.setTransportLogin(transportLogin);
@@ -216,7 +223,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             }
         }
 
-        return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings, errorOnDenied);
+        return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
     }
 
 }

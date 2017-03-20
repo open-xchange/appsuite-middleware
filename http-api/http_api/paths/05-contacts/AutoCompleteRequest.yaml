@@ -3,7 +3,7 @@
     operationId: doAutoCompleteContacts
     tags:
       - Contacts
-    summary: Auto-complete conntacts.
+    summary: Auto-complete contacts.
     description: Finds contacts based on a prefix, usually used to auto-complete e-mail recipients while the user is typing.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

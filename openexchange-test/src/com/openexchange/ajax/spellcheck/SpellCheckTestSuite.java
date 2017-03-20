@@ -51,6 +51,7 @@ package com.openexchange.ajax.spellcheck;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link SpellCheckTestSuite}
@@ -58,7 +59,7 @@ import org.junit.runners.Suite;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     com.openexchange.ajax.spellcheck.CheckTest.class,
     com.openexchange.ajax.spellcheck.SuggestionsTest.class,

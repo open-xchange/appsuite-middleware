@@ -379,7 +379,7 @@ public final class IMAPFolderConverter {
                      * Check reliably for subscribed subfolders through LSUB command since folder attributes need not to to be present as
                      * per RFC 3501
                      */
-                    mailFolder.setSubscribedSubfolders(ListLsubCache.hasAnySubscribedSubfolder(imapFullName, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()));
+                    mailFolder.setSubscribedSubfolders(mailFolder.hasSubfolders() && ListLsubCache.hasAnySubscribedSubfolder(imapFullName, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()));
                 }
                 /*
                  * Set full name, name, and parent full name
@@ -640,7 +640,7 @@ public final class IMAPFolderConverter {
              * Check if subfolder creation is allowed
              */
             final ACLPermission ownPermission = new ACLPermission();
-            final int fp = RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, rootFolder) ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
+            final int fp = RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, rootFolder, session) ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
             ownPermission.setEntity(session.getUserId());
             ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
             ownPermission.setFolderAdmin(false);

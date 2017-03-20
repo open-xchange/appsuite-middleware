@@ -56,7 +56,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.attach.AttachmentTools;
 import com.openexchange.ajax.fields.OrderFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.search.Order;
 
@@ -127,8 +126,8 @@ public class AllRequest extends AbstractAttachmentRequest<AllResponse> {
     }
 
     @Override
-    public AbstractAJAXParser<? extends AllResponse> getParser() {
-        return new AllParser(failOnError);
+    public AllParser getParser() {
+        return new AllParser(failOnError, columns);
     }
 
     @Override

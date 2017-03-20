@@ -75,6 +75,7 @@ import com.openexchange.client.onboarding.FontAwesomeIcon;
 import com.openexchange.client.onboarding.Icon;
 import com.openexchange.client.onboarding.IconType;
 import com.openexchange.client.onboarding.OnboardingAction;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingSMSConstants;
 import com.openexchange.client.onboarding.Platform;
 import com.openexchange.client.onboarding.ResultObject;
@@ -312,7 +313,11 @@ public class OnboardingViewConverter implements ResultConverter {
                                 actionCollector.addAction(compositeActionId, jAction);
                                 actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
                             } catch (OXException e) {
-                                LOGGER.warn("Failed to retrieve data for action '{}' and will therefore be ignored.", compositeActionId, e);
+                                if (OnboardingExceptionCodes.UNSUPPORTED_DEVICE.equals(e)) {
+                                    LOGGER.debug("Failed to retrieve data for action '{}' and will therefore be ignored.", compositeActionId, e);
+                                } else {
+                                    LOGGER.warn("Failed to retrieve data for action '{}' and will therefore be ignored.", compositeActionId, e);
+                                }
                                 actionId = null;
                             }
                         } else {

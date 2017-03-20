@@ -197,7 +197,6 @@ public class TestContext implements Serializable {
         int result = super.hashCode();
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((acquiredBy == null) ? 0 : acquiredBy.hashCode());
         return result;
     }
 
@@ -218,13 +217,6 @@ public class TestContext implements Serializable {
                 return false;
             }
         } else if (!name.equalsIgnoreCase(other.name)) {
-            return false;
-        }
-        if (acquiredBy == null) {
-            if (other.acquiredBy != null) {
-                return false;
-            }
-        } else if (!acquiredBy.equals(other.acquiredBy)) {
             return false;
         }
         if (id == null) {

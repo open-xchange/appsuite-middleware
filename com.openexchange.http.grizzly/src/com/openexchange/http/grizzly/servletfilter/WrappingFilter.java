@@ -54,7 +54,7 @@ import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapp
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -65,12 +65,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -92,6 +92,8 @@ public class WrappingFilter implements Filter {
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
+    private final AtomicLong counter;
+    private final int serverId;
     private final String forHeader;
     private final Set<String> knownProxies;
     private final String protocolHeader;
@@ -99,20 +101,29 @@ public class WrappingFilter implements Filter {
     private final String echoHeaderName;
     private final boolean considerEchoHeader;
     private final String contentSecurityPolicy;
+    private final boolean considerContentSecurityPolicy;
     private final boolean checkTrackingIdInRequestParameters;
+    private final String robotsMetaTag;
+    private final boolean considerRobotsMetaTag;
 
     /**
      * Initializes a new {@link WrappingFilter}.
      */
     public WrappingFilter(GrizzlyConfig config) {
         super();
+        serverId = Math.abs(OXException.getServerId());
+        counter = new AtomicLong(serverId >> 1);
         this.forHeader = config.getForHeader();
         this.knownProxies = new LinkedHashSet<>(config.getKnownProxies());
         this.protocolHeader = config.getProtocolHeader();
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeaderName = config.getEchoHeader();
         this.considerEchoHeader = !Strings.isEmpty(echoHeaderName);
+        this.robotsMetaTag = config.getRobotsMetaTag();
+        this.considerRobotsMetaTag = !Strings.isEmpty(robotsMetaTag);
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
+        this.considerContentSecurityPolicy = !Strings.isEmpty(contentSecurityPolicy);
+
         this.checkTrackingIdInRequestParameters = config.isCheckTrackingIdInRequestParameters();
     }
 
@@ -134,13 +145,15 @@ public class WrappingFilter implements Filter {
         }
 
         // Set Content-Security-Policy header
-        {
+        if (considerContentSecurityPolicy) {
             String contentSecurityPolicy = this.contentSecurityPolicy;
-            if (!Strings.isEmpty(contentSecurityPolicy)) {
-                httpResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
-                httpResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
-                httpResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
-            }
+            httpResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
+            httpResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
+            httpResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
+        }
+
+        if (considerRobotsMetaTag) {
+            httpResponse.setHeader("X-Robots-Tag", robotsMetaTag);
         }
 
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
@@ -167,7 +180,7 @@ public class WrappingFilter implements Filter {
             LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpRequest.getRemoteAddr());
 
             // Names, addresses
-            final Thread currentThread = Thread.currentThread();
+            Thread currentThread = Thread.currentThread();
             LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
             LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
             LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpRequest.getServerName());
@@ -176,21 +189,29 @@ public class WrappingFilter implements Filter {
                 LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
             }
 
-            boolean b = false;
-            if (b) {
-                chain.doFilter(httpRequest, httpResponse);
-                return;
-            }
-
             // Tracking identifier
-            String trackingId = checkTrackingIdInRequestParameters ? request.getParameter("trackingId") : null;
-            if (trackingId == null) {
-                trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
+            if (checkTrackingIdInRequestParameters) {
+                String trackingId = request.getParameter("trackingId");
+                if (trackingId == null) {
+                    trackingId = generateTrackingId();
+                }
+                LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
+            } else {
+                LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, generateTrackingId());
             }
-            LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
         }
 
         chain.doFilter(httpRequest, httpResponse);
+    }
+
+    private String generateTrackingId() {
+        long count = counter.incrementAndGet();
+        while (count < 0) {
+            long newNext = 1;
+            count = counter.compareAndSet(count, newNext) ? newNext : counter.incrementAndGet();
+        }
+
+        return new StringBuilder(16).append(serverId).append('-').append(count).toString();
     }
 
     private HttpServletRequestWrapper buildHttpServletRequestWrapper(HttpServletRequest httpRequest) {

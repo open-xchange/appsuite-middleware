@@ -106,6 +106,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
@@ -235,7 +236,7 @@ public final class MessageParser {
                 int length = datasourceArray.length();
                 if (length > 0) {
                     // Check max. allowed Drive attachments
-                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
                     if (max > 0 && length > max) {
                         throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
                     }
@@ -278,7 +279,7 @@ public final class MessageParser {
                 int length = ja.length();
                 if (length > 0) {
                     // Check max. allowed Drive attachments
-                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
                     if (max > 0 && length > max) {
                         throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
                     }
@@ -422,6 +423,21 @@ public final class MessageParser {
                     transportMail.setContentType(part.getContentType());
                     // Add text part
                     attachmentHandler.setTextPart(part);
+                }
+                JSONObject jSecuritySettings = jsonObj.optJSONObject("security");
+                if (null != jSecuritySettings) {
+                    SecuritySettings settings = SecuritySettings.builder()
+                        .encrypt(jSecuritySettings.optBoolean("encrypt", false))
+                        .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
+                        .sign(jSecuritySettings.optBoolean("sign", false))
+                        .authentication(null)
+                        .guestLanguage(jSecuritySettings.optString("language", null))
+                        .guestMessage(jSecuritySettings.optString("message", null))
+                        .pin(jSecuritySettings.optString("pin", null))
+                        .build();
+                    if (settings.anythingSet()) {
+                        ((ComposedMailMessage) mail).setSecuritySettings(settings);
+                    }
                 }
             }
             /*

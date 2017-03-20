@@ -51,7 +51,6 @@ package com.openexchange.folderstorage.mail;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,8 +74,8 @@ public final class RemoveAfterAccessExtRootFolder extends ExternalMailAccountRoo
      * @param session The session
      * @throws OXException If creation fails
      */
-    public RemoveAfterAccessExtRootFolder(final MailAccount mailAccount, final MailConfig mailConfig, final ServerSession session) throws OXException {
-        super(mailAccount, mailConfig, session);
+    public RemoveAfterAccessExtRootFolder(final MailAccount mailAccount, /*final MailConfig mailConfig,*/ final ServerSession session) throws OXException {
+        super(mailAccount, /*mailConfig,*/ session);
     }
 
     @Override

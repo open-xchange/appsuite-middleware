@@ -120,6 +120,8 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected int mailOAuthId;
     protected int transportOAuthId;
     protected String rootFolder;
+    protected boolean mailDisabled;
+    protected boolean transportDisabled;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
@@ -137,16 +139,13 @@ public abstract class AbstractMailAccount implements MailAccount {
         mailProtocol = mailProvider == null ? "imap" : mailProvider;
         mailOAuthId = -1;
         transportOAuthId = -1;
+        mailDisabled = false;
+        transportDisabled = false;
     }
 
     @Override
     public int getId() {
         return id;
-    }
-
-    @Override
-    public boolean isMailAccount() {
-        return true;
     }
 
     @Override
@@ -203,6 +202,11 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     @Override
+    public boolean isMailDisabled() {
+        return mailDisabled;
+    }
+
+    @Override
     public TransportAuth getTransportAuth() {
         return transportAuth;
     }
@@ -225,6 +229,11 @@ public abstract class AbstractMailAccount implements MailAccount {
     @Override
     public boolean isTransportSecure() {
         return transportSecure;
+    }
+
+    @Override
+    public boolean isTransportDisabled() {
+        return transportDisabled;
     }
 
     @Override
@@ -303,6 +312,24 @@ public abstract class AbstractMailAccount implements MailAccount {
         } else {
             properties.put("replyto", replyTo);
         }
+    }
+
+    /**
+     * Sets whether mail access is disabled
+     *
+     * @param mailDisabled <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public void setMailDisabled(boolean mailDisabled) {
+        this.mailDisabled = mailDisabled;
+    }
+
+    /**
+     * Sets whether mail transport is disabled
+     *
+     * @param transportDisabled <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public void setTransportDisabled(boolean transportDisabled) {
+        this.transportDisabled = transportDisabled;
     }
 
     /**
