@@ -56,6 +56,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.SizePolicy;
 import com.openexchange.session.Session;
 
 /**
@@ -93,7 +94,7 @@ public class MessageWriterParams {
         private int tokenTimeout;
         private MimeFilter mimeFilter;
         private TimeZone optTimeZone;
-        private boolean exactLength;
+        private SizePolicy sizePolicy;
         private int maxContentSize;
         private int maxNestedMessageLevels;
         private boolean includePlainText;
@@ -104,6 +105,7 @@ public class MessageWriterParams {
             this.mail = mail;
             this.session = session;
             asMarkup = true;
+            sizePolicy = SizePolicy.NONE;
         }
 
         /**
@@ -197,12 +199,12 @@ public class MessageWriterParams {
         }
 
         /**
-         * Sets the exactLength
+         * Sets the size policy
          * @param exactLength The exactLength to set
          * @return This builder
          */
-        public Builder setExactLength(boolean exactLength) {
-            this.exactLength = exactLength;
+        public Builder setSizePolicy(SizePolicy sizePolicy) {
+            this.sizePolicy = sizePolicy;
             return this;
         }
 
@@ -242,7 +244,7 @@ public class MessageWriterParams {
          * @return The <code>MessageWriterParams</code> instance
          */
         public MessageWriterParams build() {
-            return new MessageWriterParams(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, exactLength, maxContentSize, maxNestedMessageLevels, includePlainText);
+            return new MessageWriterParams(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, sizePolicy, maxContentSize, maxNestedMessageLevels, includePlainText);
         }
     }
 
@@ -260,7 +262,7 @@ public class MessageWriterParams {
     private final int tokenTimeout;
     private final MimeFilter mimeFilter;
     private final TimeZone optTimeZone;
-    private final boolean exactLength;
+    private final SizePolicy sizePolicy;
     private final int maxContentSize;
     private final int maxNestedMessageLevels;
     private final boolean includePlaintext;
@@ -268,7 +270,7 @@ public class MessageWriterParams {
     /**
      * Initializes a new {@link MessageWriterParams}.
      */
-    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext) {
+    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext) {
         super();
         this.accountId = accountId;
         this.mail = mail;
@@ -282,7 +284,7 @@ public class MessageWriterParams {
         this.tokenTimeout = tokenTimeout;
         this.mimeFilter = mimeFilter;
         this.optTimeZone = optTimeZone;
-        this.exactLength = exactLength;
+        this.sizePolicy = sizePolicy;
         this.maxContentSize = maxContentSize;
         this.maxNestedMessageLevels = maxNestedMessageLevels;
         this.includePlaintext = includePlaintext;
@@ -401,8 +403,8 @@ public class MessageWriterParams {
      *
      * @return The exactLength
      */
-    public boolean isExactLength() {
-        return exactLength;
+    public SizePolicy getSizePolicy() {
+        return sizePolicy;
     }
 
     /**
