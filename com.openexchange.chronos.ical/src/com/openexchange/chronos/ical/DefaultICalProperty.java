@@ -50,6 +50,7 @@
 package com.openexchange.chronos.ical;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * {@link DefaultICalProperty}
@@ -100,6 +101,19 @@ public class DefaultICalProperty implements ICalProperty {
     @Override
     public Map<String, String> getParameters() {
         return parameters;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(name);
+        if (null != parameters && 0 < parameters.size()) {
+            for (Entry<String, String> parameter : parameters.entrySet()) {
+                stringBuilder.append(';').append(parameter.getKey()).append('=').append(parameter.getValue());
+            }
+        }
+        stringBuilder.append(':').append(value);
+        return stringBuilder.toString();
     }
 
 }
