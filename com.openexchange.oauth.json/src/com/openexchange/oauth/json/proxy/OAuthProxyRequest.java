@@ -172,7 +172,11 @@ public class OAuthProxyRequest {
 		    if(service == null){
 		        throw ServiceExceptionCode.absentService(OAuthAPIRegistry.class);
 		    }
-			API api = service.resolveFromServiceId(req.getParameter("api"));
+			String sApi = req.getParameter("api");
+            API api = service.resolveFromServiceId(sApi);
+			if (null == api) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("api", sApi);
+            }
 
 			return oauthService.getDefaultAccount(api, session);
 		}
