@@ -92,7 +92,7 @@ public class TestEstimateLength extends AbstractMailTest {
     }
 
     @Test
-    public void testBug37472Reply() throws OXException, IOException, JSONException {
+    public void testEstimateLength() throws OXException, IOException, JSONException {
         String mailId = null;
         String folderId = null;
         try {
