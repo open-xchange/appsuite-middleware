@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.scope.OXScope;
@@ -170,7 +171,7 @@ public abstract class AbstractGoogleDriveAccess {
                 return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
             }
             if (e.getMessage().indexOf("insufficientPermissions") > 0) {
-                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, API.GOOGLE.getShortName(), OXScope.drive.getDisplayName());
+                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, KnownApi.GOOGLE.getShortName(), OXScope.drive.getDisplayName());
             }
         }
 
@@ -185,7 +186,7 @@ public abstract class AbstractGoogleDriveAccess {
     private OXException createInvalidAccessTokenException() {
         OAuthAccount oAuthAccount = googleDriveAccess.getOAuthAccount();
         API api = oAuthAccount.getAPI();
-        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
     }
 
     /**

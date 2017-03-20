@@ -86,6 +86,7 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.SizePolicy;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -195,7 +196,7 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1, -1);
+        return writeMailMessage(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, null, SizePolicy.NONE, -1, -1);
     }
 
     /**
@@ -217,12 +218,12 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels) throws OXException {
         MessageWriterParams params = MessageWriterParams.builder(accountId, mail, session)
             .setDisplayMode(displayMode)
             .setEmbedded(embedded)
             .setAsMarkup(asMarkup)
-            .setExactLength(exactLength)
+            .setSizePolicy(sizePolicy)
             .setMaxContentSize(maxContentSize)
             .setMaxNestedMessageLevels(maxNestedMessageLevels)
             .setMimeFilter(mimeFilter)
@@ -270,7 +271,7 @@ public final class MessageWriter {
 
         try {
             JsonMessageHandler handler = new JsonMessageHandler(params.getAccountId(), mailPath, mail, params.getDisplayMode(), params.isEmbedded(), params.isAsMarkup(), params.getSession(), usm, params.isToken(), params.getTokenTimeout(), params.getMaxContentSize(), params.getMaxNestedMessageLevels());
-            handler.setExactLength(params.isExactLength());
+            handler.setSizePolicy(params.getSizePolicy());
             if (null != params.getOptTimeZone()) {
                 handler.setTimeZone(params.getOptTimeZone());
             }

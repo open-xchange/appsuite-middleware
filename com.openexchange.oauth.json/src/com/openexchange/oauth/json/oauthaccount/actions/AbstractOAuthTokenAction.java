@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthToken;
+import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -90,6 +91,7 @@ import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -280,11 +282,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         }
         return OAuthExceptionCodes.OAUTH_PROBLEM_UNEXPECTED.create(oauth_problem);
     }
-    
+
 
     /**
      * Gets the scopes from the request and converts them to {@link OAuthScope}s using the {@link OAuthScopeRegistry}
-     * 
+     *
      * @param request The {@link AJAXRequestData}
      * @param serviceId The OAuth service provider's identifier
      * @return A {@link Set} with all {@link OAuthScope}s to enable
@@ -294,10 +296,18 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         // Get the scope parameter
         String scope = request.getParameter("scopes");
+        OAuthAPIRegistry service = Services.getService(OAuthAPIRegistry.class);
+        if(service==null){
+            throw ServiceExceptionCode.absentService(OAuthAPIRegistry.class);
+        }
         if (isEmpty(scope)) {
-            return scopeRegistry.getLegacyScopes(API.resolveFromServiceId(serviceId));
+            API api = service.resolveFromServiceId(serviceId);
+            if (null == api) {
+                throw OXException.general("No such API: " + serviceId);
+            }
+            return scopeRegistry.getLegacyScopes(api);
         }
         // Get the scopes
-        return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), OXScope.valuesOf(scope));
+        return scopeRegistry.getAvailableScopes(service.resolveFromServiceId(serviceId), OXScope.valuesOf(scope));
     }
 }

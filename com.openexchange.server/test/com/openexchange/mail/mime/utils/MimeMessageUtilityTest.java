@@ -64,10 +64,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.utils.MessageUtility;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
@@ -78,7 +76,7 @@ import static org.junit.Assert.*;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
-public class MimeMessageUtilityTest {    
+public class MimeMessageUtilityTest {
     private static final String ATTACHMENT_WRONG_FOUND = "Attachment found where none should be";
     private static final String TESTFILE_RTF = "testfile; filename=randomfile.rtf";
     private static final String PLAIN_TEXT = "plain/text";
@@ -90,9 +88,9 @@ public class MimeMessageUtilityTest {
     private MailPart mailpart;
     @Mock
     private BODYSTRUCTURE bodystructure;
-    
+
     private static final String MIXED_SUBTYPE = "mixed";
-    
+
     @Before
     public void setUp() {
         bodystructure.subtype = MIXED_SUBTYPE;
@@ -100,6 +98,14 @@ public class MimeMessageUtilityTest {
 
     public MimeMessageUtilityTest() {
         super();
+    }
+
+    @Test
+    public void testForBug52314() {
+       String s = "=?utf-8?B?44CQ6YeN6KaB44CR5oqA6KGT5bGANOaciDHml6XjgYvjgonj?= =?utf-8?B?ga7pgYvnlKjlpInmm7TvvIjmp4vpgKDmlLnpnanvvIk=?=";
+       s = MimeMessageUtility.decodeEnvelopeSubject(s);
+
+       assertTrue("Subject nor properly unfolded/decoded.", s.indexOf(MessageUtility.UNKNOWN) < 0);
     }
 
          @Test
@@ -185,7 +191,7 @@ public class MimeMessageUtilityTest {
         }
         assertFalse(ATTACHMENT_WRONG_FOUND, result);
     }
-    
+
          @Test
      public void testHasAttachment_MailpartDisposition() {
         boolean result = false;
@@ -259,7 +265,7 @@ public class MimeMessageUtilityTest {
         result = MimeMessageUtility.hasAttachments(bodystructure);
         assertFalse(ATTACHMENT_WRONG_FOUND, result);
     }
-    
+
     public void testHasAttachment_BodystructureMessageRFC() {
         boolean result = true;
         bodystructure.type = "message";
@@ -267,7 +273,7 @@ public class MimeMessageUtilityTest {
         result = MimeMessageUtility.hasAttachments(bodystructure);
         assertTrue(ATTACHMENT_WRONG_FOUND, result);
     }
-    
+
     private static void setContentTypePlainText(BODYSTRUCTURE bs) {
         bs.type = "plain";
         bs.subtype = "text";

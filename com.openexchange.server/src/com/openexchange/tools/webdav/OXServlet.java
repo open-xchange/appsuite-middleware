@@ -177,6 +177,11 @@ public abstract class OXServlet extends WebDavServlet {
         public Map<String, List<String>> getHeaders() {
             return copyHeaders(req);
         }
+        
+        @Override
+        public Map<String, String[]> getRequestParameter() {
+            return req.getParameterMap();
+        }
 
         @Override
         public com.openexchange.authentication.Cookie[] getCookies() {

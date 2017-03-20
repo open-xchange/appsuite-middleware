@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.websockets.enabled
       file: grizzly.properties
+      tags: ["Websockets"]
     - key: com.openexchange.http.grizzly.sessionExpiryCheckInterval
       description: |
         Specifies the interval in seconds when to check for expired/invalid HTTP sessions
@@ -20,6 +21,7 @@ properties:
       reloadable: false
       configcascadeAware: false
       file: grizzly.properties
+      tags: ["Session"]
     - key: com.openexchange.http.grizzly.maxNumberOfConcurrentRequests
       description: |
         Specifies the number of concurrent HTTP requests that are allowed being processed.
@@ -33,3 +35,4 @@ properties:
       reloadable: false
       configcascadeAware: false
       file: grizzly.properties
+      tags: ["Limit"]

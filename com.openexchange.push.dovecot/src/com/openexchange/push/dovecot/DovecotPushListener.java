@@ -263,9 +263,10 @@ public class DovecotPushListener implements PushListener, Runnable {
      *
      * @throws OXException If unregistration fails
      */
-    public synchronized boolean unregister(boolean tryToReconnect) throws OXException {
+    public synchronized Runnable unregister(boolean tryToReconnect) throws OXException {
         // Avoid subsequent initialization attempt
         initialized = true;
+        Runnable cleanUpTask = null;
 
         // Cancel timer tasks
         {
@@ -282,38 +283,44 @@ public class DovecotPushListener implements PushListener, Runnable {
             }
         }
 
-        boolean reconnected = false;
         DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(session) : null;
         if (null == anotherListener) {
             // No other listener available
             // Give up lock and return
-            try {
-                pushManager.releaseLock(new SessionInfo(session, permanent));
-            } catch (Exception e) {
-                LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-            }
+            cleanUpTask = createCleanUpTask(pushManager);
         } else {
             try {
                 // No need to re-execute registration
-                reconnected = true;
+                cleanUpTask = null;
             } catch (Exception e) {
                 LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 // Give up lock and return
-                try {
-                    pushManager.releaseLock(new SessionInfo(session, permanent));
-                } catch (Exception x) {
-                    LOGGER.warn("Failed to release DB lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), x);
-                }
+                cleanUpTask = createCleanUpTask(pushManager);
             }
         }
 
-        if (false == reconnected) {
+        if (null != cleanUpTask) {
             doUnregistration();
             // Mark as uninitialized
             initialized = false;
         }
 
-        return reconnected;
+        return cleanUpTask;
+    }
+
+    private Runnable createCleanUpTask(final DovecotPushManagerService pushManager) {
+        final Session session = this.session;
+        final boolean permanent = this.permanent;
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    pushManager.releaseLock(new SessionInfo(session, permanent));
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                }
+            }
+        };
     }
 
     private void doUnregistration() throws OXException {

@@ -168,7 +168,12 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer<Object,
     }
 
     private UserAgentBlacklist parseBlacklist(ConfigurationService configService) {
-        String blacklist = configService.getProperty("com.openexchange.share.userAgentBlacklist");
+        boolean enabled = configService.getBoolProperty("com.openexchange.share.userAgentBlacklist.enabled", true);
+        if (false == enabled) {
+            return null;
+        }
+
+        String blacklist = configService.getProperty("com.openexchange.share.userAgentBlacklist.values");
         if (Strings.isEmpty(blacklist)) {
             return UserAgentBlacklist.DEFAULT_BLACKLIST;
         }
@@ -189,7 +194,9 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer<Object,
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForProperties("com.openexchange.share.userAgentBlacklist");
+        return Reloadables.interestsForProperties(
+            "com.openexchange.share.userAgentBlacklist.enabled",
+            "com.openexchange.share.userAgentBlacklist.values");
     }
 
 }

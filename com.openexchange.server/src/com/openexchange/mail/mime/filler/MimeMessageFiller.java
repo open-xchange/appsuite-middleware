@@ -1716,7 +1716,14 @@ public class MimeMessageFiller {
                                 continue;
                             }
                             ImageProvider tmp = null;
-                            String prefix = "<" + UUIDs.getUnformattedString(UUID.fromString(id));
+                            String prefix = null;
+                            try {
+                                prefix = "<" + UUIDs.getUnformattedString(UUID.fromString(id));
+                            } catch (IllegalArgumentException e) {
+                                // looks like the id is invalid. Skip image.
+                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                                continue;
+                            }
                             for (int i = size; null == tmp && i-- > 0;) {
                                 MailPart part = mail.getEnclosedMailPart(i);
                                 if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {

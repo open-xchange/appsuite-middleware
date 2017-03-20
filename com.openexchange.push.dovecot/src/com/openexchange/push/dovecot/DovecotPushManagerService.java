@@ -53,17 +53,29 @@ import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.slf4j.Logger;
+import com.hazelcast.core.Cluster;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
+import com.openexchange.lock.ReentrantLockAccessControl;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
@@ -75,9 +87,14 @@ import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -140,7 +157,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
     private final String authLogin;
     private final String authPassword;
     private final URI uri;
-    private final Lock globalLock;
+    private final AccessControl globalLock;
 
     /**
      * Initializes a new {@link DovecotPushManagerService}.
@@ -177,17 +194,22 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         }
 
         // The fall-back lock
-        globalLock = new ReentrantLock();
+        globalLock = new ReentrantLockAccessControl();
     }
 
-    private Lock getlockFor(int userId, int contextId) {
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    private AccessControl getlockFor(int userId, int contextId) {
         LockService lockService = services.getOptionalService(LockService.class);
         if (null == lockService) {
             return globalLock;
         }
 
         try {
-            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("dovecotpush-").append(contextId).append('-').append(userId).toString());
+            return lockService.getAccessControlFor("dovecotpush", 1, userId, contextId);
         } catch (Exception e) {
             LOGGER.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
             return globalLock;
@@ -234,17 +256,131 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             }
 
             // Look-up remote sessions, too, if possible
-            if (sessiondService instanceof SessiondServiceExtended) {
-                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
-                for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                        return injectAnotherListenerUsing(session, false);
-                    }
-                }
+            Session session = lookUpRemoteSessionFor(oldSession);
+            if (null != session) {
+                return injectAnotherListenerUsing(session, false);
             }
         }
 
         return null;
+    }
+
+    private Session lookUpRemoteSessionFor(Session oldSession) {
+        HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
+        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        if (null == hzInstance || null == obfuscatorService) {
+            return null;
+        }
+
+        Cluster cluster = hzInstance.getCluster();
+
+        // Get local member
+        Member localMember = cluster.getLocalMember();
+
+        // Determine other cluster members
+        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        if (otherMembers.isEmpty()) {
+            return null;
+        }
+
+        int contextId = oldSession.getContextId();
+        int userId = oldSession.getUserId();
+
+        IExecutorService executor = hzInstance.getExecutorService("default");
+        Map<Member, Future<PortableSessionCollection>> futureMap = executor.submitToMembers(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers);
+        String oldSessionId = oldSession.getSessionID();
+        for (Iterator<Entry<Member, Future<PortableSessionCollection>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
+            Future<PortableSessionCollection> future = it.next().getValue();
+            // Check Future's return value
+            int retryCount = 3;
+            while (retryCount-- > 0) {
+                try {
+                    PortableSessionCollection portableSessionCollection = future.get();
+                    retryCount = 0;
+
+                    PortableSession[] portableSessions = portableSessionCollection.getSessions();
+                    if (null != portableSessions) {
+                        for (PortableSession portableSession : portableSessions) {
+                            portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
+                            if (!oldSessionId.equals(portableSession.getSessionID()) && PushUtility.allowedClient(portableSession.getClient(), portableSession, true)) {
+                                cancelRest(it);
+                                return portableSession;
+                            }
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    // Interrupted - Keep interrupted state
+                    Thread.currentThread().interrupt();
+                } catch (CancellationException e) {
+                    // Canceled
+                    retryCount = 0;
+                } catch (ExecutionException e) {
+                    Throwable cause = e.getCause();
+
+                    // Check for Hazelcast timeout
+                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                        if (cause instanceof RuntimeException) {
+                            throw ((RuntimeException) cause);
+                        }
+                        if (cause instanceof Error) {
+                            throw (Error) cause;
+                        }
+                        throw new IllegalStateException("Not unchecked", cause);
+                    }
+
+                    // Timeout while awaiting remote result
+                    if (retryCount <= 0) {
+                        // No further retry
+                        cancelFutureSafe(future);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the other cluster members
+     *
+     * @param allMembers All known members
+     * @param localMember The local member
+     * @return Other cluster members
+     */
+    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
+        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
+        if (!otherMembers.remove(localMember)) {
+            LOGGER.warn("Couldn't remove local member from cluster members.");
+        }
+        return otherMembers;
+    }
+
+    /**
+     * Cancels given {@link Future} safely
+     *
+     * @param future The {@code Future} to cancel
+     */
+    static <V> void cancelFutureSafe(Future<V> future) {
+        if (null != future) {
+            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+        }
+    }
+
+    private <V> void cancelRest(final Iterator<Entry<Member, Future<PortableSessionCollection>>> it) {
+        ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+        if (null != threadPool) {
+            AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    while (it.hasNext()) {
+                        Future<PortableSessionCollection> future = it.next().getValue();
+                        cancelFutureSafe(future);
+                    }
+                    return null;
+                }
+            };
+            threadPool.submit(task);
+        }
     }
 
     /**
@@ -285,9 +421,10 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      * @throws OXException If unregistration attempt fails
      */
     public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, int userId, int contextId) throws OXException {
-        Lock lock = getlockFor(userId, contextId);
-        lock.lock();
+        AccessControl lock = getlockFor(userId, contextId);
+        Runnable cleanUpTask = null;
         try {
+            lock.acquireGrant();
             SimpleKey key = SimpleKey.valueOf(userId, contextId);
             DovecotPushListener listener = listeners.get(key);
             if (null != listener) {
@@ -299,8 +436,8 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 listeners.remove(key);
 
                 boolean tryRecon = tryToReconnect || (!listener.isPermanent() && hasPermanentPush(userId, contextId));
-                boolean reconnected = listener.unregister(tryRecon);
-                if (!reconnected) {
+                cleanUpTask = listener.unregister(tryRecon);
+                if (null != cleanUpTask) {
                     return StopResult.STOPPED;
                 }
 
@@ -308,8 +445,14 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
             }
             return StopResult.NONE;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
         } finally {
-            lock.unlock();
+            Streams.close(lock);
+            if (null != cleanUpTask) {
+                cleanUpTask.run();
+            }
         }
     }
 
@@ -342,16 +485,17 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         }
         int contextId = session.getContextId();
         int userId = session.getUserId();
+
         SessionInfo sessionInfo = new SessionInfo(session, false);
         if (clusterLock.acquireLock(sessionInfo)) {
-            Lock lock = getlockFor(userId, contextId);
-            lock.lock();
+            // Locked...
+            boolean unlock = true;
             try {
-                // Locked...
-                boolean unlock = true;
                 boolean removeListener = false;
                 SimpleKey key = SimpleKey.valueOf(userId, contextId);
+                AccessControl lock = getlockFor(userId, contextId);
                 try {
+                    lock.acquireGrant();
                     if (false == listeners.containsKey(key)) {
                         DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, session, false, this, services);
                         listeners.put(key, listener);
@@ -370,16 +514,19 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         // Already running for session user
                         LOGGER.info("Did not start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
                     }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new OXException(e);
                 } finally {
                     if (removeListener) {
                         listeners.remove(key);
                     }
-                    if (unlock) {
-                        releaseLock(sessionInfo);
-                    }
+                    Streams.close(lock);
                 }
             } finally {
-                lock.unlock();
+                if (unlock) {
+                    releaseLock(sessionInfo);
+                }
             }
         } else {
             LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
@@ -447,14 +594,14 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
 
         SessionInfo sessionInfo = new SessionInfo(session, true);
         if (clusterLock.acquireLock(sessionInfo)) {
-            Lock lock = getlockFor(userId, contextId);
-            lock.lock();
+            // Locked...
+            boolean unlock = true;
             try {
-                // Locked...
-                boolean unlock = true;
                 boolean removeListener = false;
                 SimpleKey key = SimpleKey.valueOf(userId, contextId);
+                AccessControl lock = getlockFor(userId, contextId);
                 try {
+                    lock.acquireGrant();
                     DovecotPushListener current = listeners.get(key);
                     if (null == current) {
                         DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, session, true, this, services);
@@ -490,16 +637,19 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         // Already running for session user
                         LOGGER.info("Did not start permanent Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
                     }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new OXException(e);
                 } finally {
                     if (removeListener) {
                         listeners.remove(key);
                     }
-                    if (unlock) {
-                        releaseLock(sessionInfo);
-                    }
+                    Streams.close(lock);
                 }
             } finally {
-                lock.unlock();
+                if (unlock) {
+                    releaseLock(sessionInfo);
+                }
             }
         } else {
             LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());

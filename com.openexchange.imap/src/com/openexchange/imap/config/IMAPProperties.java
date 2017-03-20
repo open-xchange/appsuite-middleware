@@ -50,6 +50,7 @@
 package com.openexchange.imap.config;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,8 +62,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import org.slf4j.MDC;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
@@ -194,8 +195,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         ConfigView view = viewFactory.getView(userId, contextId);
 
-        Set<String> toRemove = new HashSet<>(32);
         PrimaryIMAPProperties.Params params = new PrimaryIMAPProperties.Params();
+
+        StringBuilder logMessageBuilder = new StringBuilder(1024);
+        PrintWriter writer = new PrintWriter(new StringBuilderWriter(logMessageBuilder));
+        writer.print("Primary IMAP properties successfully loaded for user ");
+        writer.print(userId);
+        writer.print(" in context ");
+        writer.print(contextId);
+        writer.println();
 
         {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.greeting.host.regex", view);
@@ -205,14 +213,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     Pattern pattern = Pattern.compile(tmp);
                     params.hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
 
-                    String key = "  Host name regular expression";
-                    MDC.put(key, tmp);
-                    toRemove.add(key);
+                    writer.print("  Host name regular expression: ");
+                    writer.println(tmp);
                 } catch (PatternSyntaxException e) {
                     LOG.warn("Invalid expression for host name", e);
-                    String key = "  Host name regular expression";
-                    MDC.put(key, "<none>");
-                    toRemove.add(key);
+                    writer.print("  Host name regular expression");
+                    writer.println("<none>");
                 }
             }
         }
@@ -223,31 +229,27 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 params.rootSubfoldersAllowed = Boolean.FALSE;
             } else {
                 params.rootSubfoldersAllowed = Boolean.valueOf(tmp);
-                String key = "  Root sub-folders allowed";
-                MDC.put(key, params.rootSubfoldersAllowed.toString());
-                toRemove.add(key);
+                writer.print("  Root sub-folders allowed: ");
+                writer.println(params.rootSubfoldersAllowed);
             }
         }
 
         {
             params.namespacePerUser = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.namespacePerUser", false, view);
-            String key = "  Namespace per User";
-            MDC.put(key, Boolean.toString(params.namespacePerUser));
-            toRemove.add(key);
+            writer.print("  Namespace per User: ");
+            writer.println(params.namespacePerUser);
         }
 
         {
             params.umlautFilterThreshold = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.umlautFilterThreshold", 50, view);
-            String key = "  Umlaut filter threhold";
-            MDC.put(key, Integer.toString(params.umlautFilterThreshold));
-            toRemove.add(key);
+            writer.print("  Umlaut filter threhold: ");
+            writer.println(params.umlautFilterThreshold);
         }
 
         {
             params.maxMailboxNameLength = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.maxMailboxNameLength", 60, view);
-            String key = "  Max. Mailbox Name Length";
-            MDC.put(key, Integer.toString(params.maxMailboxNameLength));
-            toRemove.add(key);
+            writer.print("  Max. Mailbox Name Length: ");
+            writer.println(params.maxMailboxNameLength);
         }
 
         {
@@ -264,46 +266,38 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 }
 
                 params.invalidChars = invalidChars;
-                String key = "  Invalid Mailbox Characters";
-                MDC.put(key, invalids);
-                toRemove.add(key);
+                writer.print("  Invalid Mailbox Characters: ");
+                writer.println(invalids);
             }
 
         }
 
         {
             params.allowESORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowESORT", true, view);
-            String key = "  Allow ESORT";
-            MDC.put(key, Boolean.toString(params.allowESORT));
-            toRemove.add(key);
+            writer.print("  Allow ESORT: ");
+            writer.println(Boolean.toString(params.allowESORT));
         }
 
         {
             params.allowSORTDISPLAY = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowSORTDISPLAY", false, view);
-            String key = "  Allow SORT-DSIPLAY";
-            MDC.put(key, Boolean.toString(params.allowSORTDISPLAY));
-            toRemove.add(key);
+            writer.print("  Allow SORT-DSIPLAY: ");
+            writer.println(Boolean.toString(params.allowSORTDISPLAY));
         }
 
         {
             params.fallbackOnFailedSORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.fallbackOnFailedSORT", false, view);
-            String key = "  Fallback On Failed SORT";
-            MDC.put(key, Boolean.toString(params.fallbackOnFailedSORT));
-            toRemove.add(key);
+            writer.print("  Fallback On Failed SORT: ");
+            writer.println(Boolean.toString(params.fallbackOnFailedSORT));
         }
 
         {
             params.useMultipleAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddresses", false, view);
-            String key = "  Use Multiple IP addresses";
-            MDC.put(key, Boolean.toString(params.useMultipleAddresses));
-            toRemove.add(key);
+            writer.print("  Use Multiple IP addresses: ");
+            writer.println(Boolean.toString(params.useMultipleAddresses));
         }
 
         PrimaryIMAPProperties primaryIMAPProps = new PrimaryIMAPProperties(params);
-        LOG.info("Primary IMAP properties successfully loaded for user {} in context {}!", userId, contextId);
-        for (String key : toRemove) {
-            MDC.remove(key);
-        }
+        LOG.info(logMessageBuilder.toString());
         return primaryIMAPProps;
     }
 

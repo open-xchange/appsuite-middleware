@@ -9,6 +9,7 @@ title: SpamHandler
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | spamhandler.properties |
 
 ---
@@ -20,6 +21,7 @@ title: SpamHandler
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.spamhandler.name |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | spamhandler.properties |
 
 ---

@@ -69,6 +69,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -101,14 +102,15 @@ import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.json.writer.MessageWriter;
-import com.openexchange.mail.json.writer.MessageWriterParams;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
+import com.openexchange.mail.json.writer.MessageWriterParams;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.SizePolicy;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -723,14 +725,24 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             String str = paramContainer.getStringParam(Mail.PARAMETER_ALLOW_NESTED_MESSAGES);
             allowNestedMessages = null == str ? true : AJAXRequestDataTools.parseBoolParameter(str);
         }
-        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
+        SizePolicy sizePolicy;
+        {
+            boolean b = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
+            if (b) {
+                sizePolicy = SizePolicy.EXACT;
+            } else {
+                b = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("estimate_length"));
+                sizePolicy = b ? SizePolicy.ESTIMATE : SizePolicy.NONE;
+            }
+        }
+
         JSONObject jMail;
         try {
             MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail, session)
                                                             .setDisplayMode(displayMode)
                                                             .setEmbedded(embedded)
                                                             .setAsMarkup(asMarkup)
-                                                            .setExactLength(exactLength)
+                                                            .setSizePolicy(sizePolicy)
                                                             .setIncludePlainText(includePlainText)
                                                             .setMaxContentSize(maxContentSize)
                                                             .setMaxNestedMessageLevels(allowNestedMessages ? -1 : 1)
@@ -743,6 +755,17 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                                                             .build();
             jMail = MessageWriter.writeMailMessage(params);
         } catch (final OXException e) {
+            if (DisplayMode.DOCUMENT.isIncluded(displayMode)) {
+                HttpServletResponse resp = paramContainer.getHttpServletResponse();
+                if (resp != null) {
+                    try {
+                        SessionServlet.writeErrorPage(HttpServletResponse.SC_NOT_FOUND, e.getDisplayMessage(session.getUser().getLocale()), resp);
+                    } catch (IOException e1) {
+                        LOG.warn("Unable to write error page.", e1);
+                    }
+                    return null;
+                }
+            }
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof javax.mail.MessageRemovedException) {
@@ -842,7 +865,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         boolean allowNestedMessages = AJAXRequestDataTools.parseBoolParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, requestData, true);
         List<OXException> warnings = new ArrayList<OXException>(2);
-        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, asMarkup, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize, allowNestedMessages ? -1 : 1);
+        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, asMarkup, session, usmNoSave, warnings, false, -1, null, null, SizePolicy.NONE, maxContentSize, allowNestedMessages ? -1 : 1);
 
         {
             String csid = (String) result.getParameter("csid");

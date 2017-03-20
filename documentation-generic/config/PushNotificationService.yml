@@ -10,6 +10,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      tags: ["Push"]
     - key: com.openexchange.pns.timerFrequency
       description: |
         The frequency/delay in milliseconds when the buffering queue will be checked for due
@@ -20,6 +21,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      tags: ["Push"]
     - key: com.openexchange.pns.numProcessorThreads
       description: |
         Specifies the number of threads that concurrently handle due notifications that were transferred
@@ -30,6 +32,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      tags: ["Push"]
     - key: com.openexchange.pns.maxProcessorTasks
       description: |
         Specifies the buffer size for due notifications that were transferred from buffering queue to
@@ -40,6 +43,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      tags: ["Push","Limit"]
     - key: com.openexchange.pns.transport.apn.ios.enabled
       description: |
         Specifies whether the APNS transport is enabled. That property is responsive to config-cascade
@@ -62,6 +66,7 @@ properties:
       configcascadeAware: true
       related:
       file: pns.properties
+      tags: ["Push"]
     - key: com.openexchange.pns.transport.apn.ios.feedbackQueryInterval
       description: |
         Specifies the frequency in milliseconds when to query the Apple feedback service to check for expired
@@ -72,6 +77,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      tags: ["Push"]
     - key: com.openexchange.pns.transport.gcm.enabled
       description: |
         Specifies whether the GCM transport is enabled. That property is responsive to config-cascade
@@ -94,6 +100,7 @@ properties:
       configcascadeAware: true
       related:
       file: pns.properties
+      tags: ["Push"]
     - key: com.openexchange.pns.transport.wns.enabled
       description: |
         Specifies whether the WNS transport is enabled. That property is responsive to config-cascade
@@ -116,6 +123,7 @@ properties:
       configcascadeAware: true
       related:
       file: pns.properties
+      tags: ["Push"]
     - key: com.openexchange.pns.transport.websocket.enabled
       description: |
         Specifies whether the Web Socket transport is enabled. That property is responsive to config-cascade
@@ -138,3 +146,4 @@ properties:
       configcascadeAware: true
       related: com.openexchange.websockets.enabled
       file: pns.properties
+      tags: ["Push"]

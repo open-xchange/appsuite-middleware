@@ -90,6 +90,7 @@ import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
 import com.openexchange.push.impl.mbean.PushMBeanImpl;
 import com.openexchange.push.mbean.PushMBean;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -137,6 +138,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(EventAdmin.class);
             trackService(CryptoService.class);
             trackService(HazelcastInstance.class);
+            trackService(ObfuscatorService.class);
 
             // Track management service & register MBean
             {

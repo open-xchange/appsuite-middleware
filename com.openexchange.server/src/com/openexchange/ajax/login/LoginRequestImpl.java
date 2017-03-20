@@ -71,6 +71,7 @@ public class LoginRequestImpl implements LoginRequest {
         protected String clientToken;
         protected Interface iface;
         protected Map<String, List<String>> headers;
+        protected Map<String, String[]> requestParameters;
         protected Cookie[] cookies;
         protected boolean secure;
         protected String serverName;
@@ -125,6 +126,9 @@ public class LoginRequestImpl implements LoginRequest {
         public Builder headers(Map<String, List<String>> headers) {
             this.headers = headers; return this;
         }
+        public Builder requestParameter(Map<String, String[]> reqeustParameter) {
+            this.requestParameters = reqeustParameter; return this;
+        }
         public Builder cookies(Cookie[] cookies) {
             this.cookies = cookies; return this;
         }
@@ -155,6 +159,7 @@ public class LoginRequestImpl implements LoginRequest {
     private String clientToken;
     private final Interface iface;
     private final Map<String, List<String>> headers;
+    private final Map<String, String[]> requestParameters;
     private final Cookie[] cookies;
     private final boolean secure;
     private final String serverName;
@@ -181,6 +186,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.hash = builder.hash;
         this.iface = builder.iface;
         this.headers = builder.headers;
+        this.requestParameters = builder.requestParameters;
         this.cookies = builder.cookies;
         this.secure = builder.secure;
         this.serverName = builder.serverName;
@@ -204,13 +210,14 @@ public class LoginRequestImpl implements LoginRequest {
      * @param hash The hash string
      * @param iface The associated interface
      * @param headers The headers
+     * @param requestParameters The parameters provided by the {@link javax.servlet.http.HttpServletRequest#getParameterMap()}
      * @param cookies The cookies
      * @param secure Whether associated request is considered to use a secure connection
      * @param serverName The server name
      * @param serverPort The server port
      * @param httpSessionID The identifier of the associated HTTP session
      */
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language, boolean storeLanguage) {
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language, boolean storeLanguage) {
         super();
         this.login = login;
         this.password = password;
@@ -222,6 +229,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.hash = hash;
         this.iface = iface;
         this.headers = headers;
+        this.requestParameters = requestParameters;
         this.cookies = cookies;
         this.secure = secure;
         this.serverName = serverName;
@@ -231,12 +239,12 @@ public class LoginRequestImpl implements LoginRequest {
         this.storeLanguage = storeLanguage;
     }
 
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language) {
-        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, cookies, secure, serverName, serverPort, httpSessionID, language, false);
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language) {
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, language, false);
     }
 
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
-        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, cookies, secure, serverName, serverPort, httpSessionID, null);
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, null);
     }
 
     @Override
@@ -301,6 +309,11 @@ public class LoginRequestImpl implements LoginRequest {
     @Override
     public Map<String, List<String>> getHeaders() {
         return headers;
+    }
+    
+    @Override
+    public Map<String, String[]> getRequestParameter() {
+        return requestParameters;
     }
 
     @Override

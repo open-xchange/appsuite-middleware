@@ -9,6 +9,7 @@ title: Saml
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a> |
 | __File__ | saml.properties |
 
 ---
@@ -18,6 +19,7 @@ title: Saml
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
 | __File__ | saml.properties |
 
 ---
@@ -28,6 +30,7 @@ title: Saml
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.saml.oauth.tokenEndpoint |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
 | __File__ | saml.properties |
 
 ---
@@ -38,6 +41,7 @@ title: Saml
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.saml.oauth.tokenEndpoint |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
 | __File__ | saml.properties |
 
 ---

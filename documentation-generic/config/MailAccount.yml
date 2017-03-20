@@ -7,8 +7,9 @@ properties:
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.mailaccount.failedAuth.span
       file: mailaccount.properties
+      tags: ["Mail","Limit"]
     - key: com.openexchange.mailaccount.failedAuth.span
       description: |
         Specifies the time span in which the failed authentication attempts are tracked.
@@ -17,5 +18,6 @@ properties:
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.mailaccount.failedAuth.limit
       file: mailaccount.properties
+      tags: ["Mail"]

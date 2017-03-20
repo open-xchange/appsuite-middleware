@@ -118,7 +118,36 @@ public class IPCheckers {
         }
     }
 
+    /**
+     * Updates the current IP address in specified session
+     *
+     * @param current The current IP address to set
+     * @param session The session to apply to
+     * @param whiteListed <code>true</code> if session-associated client/request has been excluded from IP check; otherwise <code>false</code> if IP check happened
+     */
+    public static void updateIPAddress(String current, Session session, boolean whiteListed) {
+        if (whiteListed) {
+            // Change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
+            updateIPAddress(current, session);
+        } else {
+            // Do not change session's IP address anymore in case of USM/EAS (Bug #29136)
+            if (!isUsmEas(session.getClient())) {
+                updateIPAddress(current, session);
+            }
+        }
+    }
+
+    /**
+     * Updates the current IP address in specified session
+     *
+     * @param current The current IP address to set
+     * @param session The session to apply to
+     */
     private static void updateIPAddress(String current, Session session) {
+        if (null == current) {
+            return;
+        }
+
         SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != service) {
             String oldIP = session.getLocalIp();

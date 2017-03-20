@@ -9,6 +9,7 @@ title: Mail
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
 | __File__ | mail.properties |
 
 ---
@@ -19,6 +20,7 @@ title: Mail
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | imap.properties |
 
 ---
@@ -29,6 +31,7 @@ title: Mail
 | __Version__ | 7.8.3 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
 
 ---
@@ -39,6 +42,7 @@ title: Mail
 | __Version__ | 7.6.2 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
 | __File__ | mail.properties |
 
 ---
@@ -49,6 +53,7 @@ title: Mail
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
 | __File__ | mail.properties |
 
 ---
@@ -59,6 +64,7 @@ title: Mail
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
 | __File__ | mail.properties |
 
 ---
@@ -70,6 +76,7 @@ title: Mail
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.mail.flagging.color |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
 
 ---
@@ -81,6 +88,7 @@ title: Mail
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.mail.flagging.mode |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
 
 ---
@@ -92,6 +100,7 @@ title: Mail
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.mail.maliciousFolders.listing |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
 | __File__ | mail.properties |
 
 ---
@@ -103,15 +112,17 @@ title: Mail
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.mail.maliciousFolders.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
 | __File__ | mail.properties |
 
 ---
 | __Key__ | com.openexchange.imap.greeting.host.regex |
 |:----------------|:--------|
-| __Description__ | Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary<br>IMAP server. Only applicable for primary IMAP server! Default is empty.<br><br>The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html<br><br>Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.<br>I.e. "Dovecot at ([0-9a-zA-Z._-]*) is ready", then the capturing group is supposed to extract the host name/IP addres information<br> |
+| __Description__ | Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary<br>IMAP server. Only applicable for primary IMAP server! Default is empty.<br><br>The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html<br><br>Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.<br>I.e. "Dovecot at ([0-9a-zA-Z._-]\*) is ready", then the capturing group is supposed to extract the host name/IP addres information<br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
 | __File__ | imap.properties |
 
 ---

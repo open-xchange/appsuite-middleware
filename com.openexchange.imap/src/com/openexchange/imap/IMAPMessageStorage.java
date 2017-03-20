@@ -4051,6 +4051,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
                         filler.setAccountId(accountId);
                         filler.setCommonHeaders(mimeMessage);
+                        mimeMessage.setFlag(DRAFT, true);
                     }
                 } catch (final Exception e) {
                     mimeMessage = null;

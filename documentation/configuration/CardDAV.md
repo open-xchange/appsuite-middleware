@@ -9,6 +9,7 @@ title: CardDAV
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | carddav.properties |
 
 ---
@@ -19,6 +20,7 @@ title: CardDAV
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | carddav.properties |
 
 ---
@@ -29,6 +31,7 @@ title: CardDAV
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | carddav.properties |
 
 ---
@@ -39,6 +42,7 @@ title: CardDAV
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | carddav.properties |
 
 ---
@@ -49,6 +53,7 @@ title: CardDAV
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | carddav.properties |
 
 ---
@@ -59,6 +64,7 @@ title: CardDAV
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | carddav.properties |
 
 ---

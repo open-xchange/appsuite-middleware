@@ -9,6 +9,7 @@ title: Websockets
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
 | __File__ | websockets.properties |
 
 ---
@@ -19,6 +20,7 @@ title: Websockets
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
 | __File__ | websockets.properties |
 
 ---
@@ -29,6 +31,7 @@ title: Websockets
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | websockets.properties |
 
 ---
@@ -39,6 +42,7 @@ title: Websockets
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
 | __File__ | websockets.properties |
 
 ---

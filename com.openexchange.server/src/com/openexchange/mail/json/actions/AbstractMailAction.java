@@ -174,9 +174,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
         // Parsing crypto authentication from the request if decrypting
         String cryptoAuthentication = null;
-        if(decrypt) {
-            CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = services.getService(CryptographicServiceAuthenticationFactory.class);
-            if(encryptionAuthenticationFactory != null) {
+        if (decrypt) {
+            CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+            if (encryptionAuthenticationFactory != null) {
                 cryptoAuthentication = encryptionAuthenticationFactory.createAuthenticationFrom(mailRequest.getRequest());
             }
         }

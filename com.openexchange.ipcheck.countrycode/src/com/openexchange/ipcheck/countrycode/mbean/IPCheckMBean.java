@@ -164,4 +164,43 @@ public interface IPCheckMBean {
      * @return The deniedCountryChangedPercentage
      */
     float getDeniedCountryChangedPercentage();
+
+    /**
+     * Gets the acceptedPrivateOverallPercentage
+     *
+     * @return The acceptedPrivateOverallPercentage
+     */
+    float getAcceptedPrivateOverallPercentage();
+
+    /**
+     * Gets the acceptedWhiteListedOverallPercentage
+     *
+     * @return The acceptedWhiteListedOverallPercentage
+     */
+    float getAcceptedWhiteListedOverallPercentage();
+
+    /**
+     * Gets the acceptedEligileOverallPercentage
+     *
+     * @return The acceptedEligileOverallPercentage
+     */
+    float getAcceptedEligileOverallPercentage();
+
+    /**
+     * Gets the deniedExceptionOverallPercentage
+     *
+     * @return The deniedExceptionOverallPercentage
+     */
+    float getDeniedExceptionOverallPercentage();
+
+    /**
+     * Gets the deniedCountryChangedOverallPercentage
+     *
+     * @return The deniedCountryChangedOverallPercentage
+     */
+    float getDeniedCountryChangedOverallPercentage();
+    
+    long getAcceptedIPChangesPerMinute();
+    
+    long getDeniedIPChangesPerMinute();
 }

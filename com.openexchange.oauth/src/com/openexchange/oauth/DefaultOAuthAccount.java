@@ -129,7 +129,7 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthAccount#getEnabledScopes()
      */
     @Override

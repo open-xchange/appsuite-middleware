@@ -632,6 +632,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Unable to save draft, due to exceeded quota.
      */
     UNABLE_TO_SAVE_DRAFT_QUOTA("Unable to save draft, due to exceeded quota.", MailExceptionStrings.UNABLE_TO_SAVE_DRAFT_QUOTA_MSG, CATEGORY_CAPACITY, 116),
+    /**
+     * Unable to save the mail, due to exceeded quota.
+     */
+    UNABLE_TO_SAVE_MAIL_QUOTA("Unable to save the mail, due to exceeded quota.", MailExceptionStrings.UNABLE_TO_SAVE_MAIL_QUOTA_MSG, CATEGORY_CAPACITY, 117),
     ;
 
     private static final String PREFIX = "MSG";

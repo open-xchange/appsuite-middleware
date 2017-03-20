@@ -16,3 +16,4 @@ properties:
       configcascadeAware: true
       related: com.openexchange.IPCheck
       file: server.properties
+      tags: ["Session"]

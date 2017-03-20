@@ -55,17 +55,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import org.slf4j.MDC;
+import org.apache.commons.io.output.StringBuilderWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
@@ -258,8 +257,16 @@ public final class MailProperties implements IMailProperties {
 
         ConfigView view = viewFactory.getView(userId, contextId);
 
-        Set<String> toRemove = new HashSet<>(32);
         PrimaryMailProps.Params params = new PrimaryMailProps.Params();
+
+        StringBuilder logMessageBuilder = new StringBuilder(1024);
+        PrintWriter writer = new PrintWriter(new StringBuilderWriter(logMessageBuilder));
+        writer.print("Primary mail properties successfully loaded for user ");
+        writer.print(userId);
+        writer.print(" in context ");
+        writer.print(contextId);
+        writer.println();
+
         {
             final String loginStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.loginSource", view);
             if (loginStr == null) {
@@ -271,9 +278,8 @@ public final class MailProperties implements IMailProperties {
             }
             params.loginSource = loginSource;
 
-            String key = "  Login Source";
-            MDC.put(key, loginSource.toString());
-            toRemove.add(key);
+            writer.print("  Login Source: ");
+            writer.println(loginSource.toString());
         }
 
         {
@@ -287,9 +293,8 @@ public final class MailProperties implements IMailProperties {
             }
             params.passwordSource = passwordSource;
 
-            String key = "  Password Source";
-            MDC.put(key, passwordSource.toString());
-            toRemove.add(key);
+            writer.print("  Password Source: ");
+            writer.println(passwordSource.toString());
         }
 
         {
@@ -304,9 +309,8 @@ public final class MailProperties implements IMailProperties {
             }
             params.mailServerSource = mailServerSource;
 
-            String key = "  Mail Server Source";
-            MDC.put(key, mailServerSource.toString());
-            toRemove.add(key);
+            writer.print("  Mail Server Source: ");
+            writer.println(mailServerSource.toString());
         }
 
         {
@@ -320,9 +324,8 @@ public final class MailProperties implements IMailProperties {
             }
             params.transportServerSource = transportServerSource;
 
-            String key = "  Transport Server Source";
-            MDC.put(key, transportServerSource.toString());
-            toRemove.add(key);
+            writer.print("  Transport Server Source: ");
+            writer.println(transportServerSource.toString());
         }
 
         {
@@ -331,9 +334,8 @@ public final class MailProperties implements IMailProperties {
             if (tmp != null) {
                 mailServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.IMAP);
 
-                String key = "  Mail Server";
-                MDC.put(key, mailServer.toString());
-                toRemove.add(key);
+                writer.print("  Mail Server: ");
+                writer.println(mailServer.toString());
             }
             params.mailServer = mailServer;
 
@@ -345,9 +347,8 @@ public final class MailProperties implements IMailProperties {
             if (tmp != null) {
                 transportServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.SMTP);
 
-                String key = "  Transport Server";
-                MDC.put(key, transportServer.toString());
-                toRemove.add(key);
+                writer.print("  Transport Server: ");
+                writer.println(transportServer.toString());
             }
             params.transportServer = transportServer;
         }
@@ -357,9 +358,8 @@ public final class MailProperties implements IMailProperties {
             if (masterPassword != null) {
                 masterPassword = masterPassword.trim();
 
-                String key = "  Master Password";
-                MDC.put(key, "XXXXXXX");
-                toRemove.add(key);
+                writer.print("  Master Password: ");
+                writer.println("XXXXXXX");
             }
             params.masterPassword = masterPassword;
         }
@@ -375,9 +375,8 @@ public final class MailProperties implements IMailProperties {
                 params.maxToCcBcc = 0;
             }
 
-            String key = "  maxToCcBcc";
-            MDC.put(key, Integer.toString(params.maxToCcBcc));
-            toRemove.add(key);
+            writer.print("  maxToCcBcc: ");
+            writer.println(params.maxToCcBcc);
         }
 
         {
@@ -388,9 +387,8 @@ public final class MailProperties implements IMailProperties {
                 params.maxDriveAttachments = 20;
             }
 
-            String key = "  maxDriveAttachments";
-            MDC.put(key, Integer.toString(params.maxDriveAttachments));
-            toRemove.add(key);
+            writer.print("  maxDriveAttachments: ");
+            writer.println(params.maxDriveAttachments);
         }
 
         {
@@ -398,9 +396,8 @@ public final class MailProperties implements IMailProperties {
             if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
                 params.phishingHeaders = phishingHdrsStr.split(" *, *");
 
-                String key = "  Phishing Headers";
-                MDC.put(key, Arrays.toString(params.phishingHeaders));
-                toRemove.add(key);
+                writer.print("  Phishing Headers: ");
+                writer.println(Arrays.toString(params.phishingHeaders));
             } else {
                 params.phishingHeaders = null;
             }
@@ -409,9 +406,8 @@ public final class MailProperties implements IMailProperties {
         {
             params.rateLimitPrimaryOnly = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.rateLimitPrimaryOnly", true, view);
 
-            String key = "  Rate limit primary only";
-            MDC.put(key, Boolean.toString(params.rateLimitPrimaryOnly));
-            toRemove.add(key);
+            writer.print("  Rate limit primary only: ");
+            writer.println(Boolean.toString(params.rateLimitPrimaryOnly));
         }
 
         {
@@ -422,9 +418,8 @@ public final class MailProperties implements IMailProperties {
                 params.rateLimit = 0;
             }
 
-            String key = "  Sent Rate limit";
-            MDC.put(key, Integer.toString(params.rateLimit));
-            toRemove.add(key);
+            writer.print("  Sent Rate limit: ");
+            writer.println(Integer.toString(params.rateLimit));
         }
 
         {
@@ -435,9 +430,8 @@ public final class MailProperties implements IMailProperties {
             }
             params.ranges = ranges;
 
-            String key = "  White-listed from send rate limit";
-            MDC.put(key, ranges.toString());
-            toRemove.add(key);
+            writer.print("  White-listed from send rate limit: ");
+            writer.println(ranges.toString());
         }
 
         {
@@ -448,49 +442,43 @@ public final class MailProperties implements IMailProperties {
                 params.defaultArchiveDays = 90;
             }
 
-            String key = "  Default archive days";
-            MDC.put(key, Integer.toString(params.defaultArchiveDays));
-            toRemove.add(key);
+            writer.print("  Default archive days: ");
+            writer.println(params.defaultArchiveDays);
         }
 
         {
             params.preferSentDate = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.preferSentDate", false, view);
 
-            String key = "  Prefer Sent Date";
-            MDC.put(key, Boolean.toString(params.preferSentDate));
-            toRemove.add(key);
+            writer.print("  Prefer Sent Date: ");
+            writer.println(params.preferSentDate);
         }
 
         {
             params.hidePOP3StorageFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.hidePOP3StorageFolders", false, view);
 
-            String key = "  Hide POP3 Storage Folder";
-            MDC.put(key, Boolean.toString(params.hidePOP3StorageFolders));
-            toRemove.add(key);
+            writer.print("  Hide POP3 Storage Folder: ");
+            writer.println(params.hidePOP3StorageFolders);
         }
 
         {
             params.translateDefaultFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.translateDefaultFolders", true, view);
 
-            String key = "  Translate Default Folders";
-            MDC.put(key, Boolean.toString(params.translateDefaultFolders));
-            toRemove.add(key);
+            writer.print("  Translate Default Folders: ");
+            writer.println(params.translateDefaultFolders);
         }
 
         {
             params.deleteDraftOnTransport = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.deleteDraftOnTransport", false, view);
 
-            String key = "  Delete Draft On Transport";
-            MDC.put(key, Boolean.toString(params.deleteDraftOnTransport));
-            toRemove.add(key);
+            writer.print("  Delete Draft On Transport: ");
+            writer.println(params.deleteDraftOnTransport);
         }
 
         {
             params.forwardUnquoted = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.forwardUnquoted", false, view);
 
-            String key = "  Forward Unquoted";
-            MDC.put(key, Boolean.toString(params.forwardUnquoted));
-            toRemove.add(key);
+            writer.print("  Forward Unquoted: ");
+            writer.println(params.forwardUnquoted);
         }
 
         {
@@ -508,9 +496,8 @@ public final class MailProperties implements IMailProperties {
             }
             params.maxMailSize = maxMailSize;
 
-            String key = "  Max. Mail Size";
-            MDC.put(key, Long.toString(params.maxMailSize));
-            toRemove.add(key);
+            writer.print("  Max. Mail Size: ");
+            writer.println(params.maxMailSize);
         }
 
         {
@@ -521,16 +508,12 @@ public final class MailProperties implements IMailProperties {
                 params.maxForwardCount = 8;
             }
 
-            String key = "  Max. Forward Count";
-            MDC.put(key, Integer.toString(params.maxForwardCount));
-            toRemove.add(key);
+            writer.print("  Max. Forward Count: ");
+            writer.println(params.maxForwardCount);
         }
 
         PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
-        LOG.info("Primary mail properties successfully loaded for user {} in context {}!", I(userId), I(contextId));
-        for (String key : toRemove) {
-            MDC.remove(key);
-        }
+        LOG.info(logMessageBuilder.toString());
         return primaryMailProps;
     }
 

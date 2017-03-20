@@ -51,11 +51,15 @@ package com.openexchange.share.servlet.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Strings;
 
@@ -69,26 +73,113 @@ public class UserAgentBlacklist {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UserAgentBlacklist.class);
 
+    private static interface Tokens {
+
+        /**
+         * Gets the number of tokens.
+         *
+         * @return The number of tokens
+         */
+        int size();
+
+        /**
+         * Checks if all tokens from this instance are contained in given string.
+         *
+         * @param toCheck The string that possibly contains all tokens
+         * @return <code>true</code> if all tokens are contained; otherwise <code>false</code>
+         */
+        boolean allContainedIn(String toCheck);
+    }
+
+    private static final class DefaultTokens implements Tokens {
+
+        private final List<String> tokens;
+
+        /**
+         * Initializes a new {@link DefaultTokens}.
+         *
+         * @param tokens The contained token collection
+         */
+        DefaultTokens(List<String> tokens) {
+            super();
+            this.tokens = tokens;
+        }
+
+        @Override
+        public int size() {
+            return tokens.size();
+        }
+
+        @Override
+        public boolean allContainedIn(String toCheck) {
+            boolean allContained = true;
+            for (int i = tokens.size(); allContained && i-- > 0;) {
+                if (toCheck.indexOf(tokens.get(i)) < 0) {
+                    allContained = false;
+                }
+            }
+            return allContained;
+        }
+
+        @Override
+        public String toString() {
+            return tokens.toString();
+        }
+    }
+
+    private static final class SingletonTokens implements Tokens {
+
+        private final String token;
+
+        /**
+         * Initializes a new {@link SingletonTokens}.
+         *
+         * @param token The singleton token
+         */
+        SingletonTokens(String token) {
+            super();
+            this.token = token;
+        }
+
+        @Override
+        public int size() {
+            return 1;
+        }
+
+        @Override
+        public boolean allContainedIn(String toCheck) {
+            return toCheck.indexOf(token) >= 0;
+        }
+
+        @Override
+        public String toString() {
+            return token;
+        }
+    }
+
     /**
      * The default User-Agent black-list based on <a href="https://perishablepress.com/list-all-user-agents-top-search-engines/">this article</a>.
      */
     public static UserAgentBlacklist DEFAULT_BLACKLIST = new UserAgentBlacklist(
-        "*aolbuild*, *baidu*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*", true);
+        "*aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*", true);
 
     // ----------------------------------------------------------------------------------------------------------------
 
     private final ImmutableMap<Matcher, Matcher> map;
-    private final ConcurrentMap<String, Boolean> deniedCache;
+    private final Cache<String, Boolean> deniedCache;
 
     /**
      * Initializes a new {@link UserAgentBlacklist}.
+     *
+     * @param wildcardPatterns The comma-separated list of User-Agent expressions
+     * @param ignoreCase Whether to ignore-case match against possible User-Agent identifiers
      */
     public UserAgentBlacklist(String wildcardPatterns, boolean ignoreCase) {
         super();
 
         String[] wps = wildcardPatterns.split(" *, *", 0);
         List<Matcher> blacklistMatchers = new ArrayList<>(wps.length);
-        List<String> containees = new ArrayList<>(wps.length);
+        List<Tokens> containees = new ArrayList<>(wps.length);
         for (String wildcardPattern : wps) {
             if (!Strings.isEmpty(wildcardPattern)) {
                 String expr = wildcardPattern.trim();
@@ -97,12 +188,12 @@ public class UserAgentBlacklist {
                     if (Strings.isEmpty(unquoted)) {
                         LOG.warn("Ignoring empty pattern expression: {}", expr);
                     } else {
-                        String contains = isContainsMatcher(unquoted);
-                        if (null == contains) {
+                        Tokens tokens = isContainsMatcher(unquoted, ignoreCase);
+                        if (null == tokens) {
                             Pattern pattern = Pattern.compile(Strings.wildcardToRegex(unquoted), ignoreCase ? Pattern.CASE_INSENSITIVE : 0);
                             blacklistMatchers.add(new PatternMatcher(pattern));
                         } else {
-                            containees.add(ignoreCase ? Strings.asciiLowerCase(contains) : contains);
+                            containees.add(tokens);
                         }
                     }
                 } catch (PatternSyntaxException e) {
@@ -121,10 +212,10 @@ public class UserAgentBlacklist {
         }
         this.map = map.build();
 
-        deniedCache = new ConcurrentHashMap<String, Boolean>(1024, 0.9f, 1);
+        deniedCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
     }
 
-    private static String isContainsMatcher(String expr) {
+    private static Tokens isContainsMatcher(String expr, boolean ignoreCase) {
         int len = expr.length();
         if (len <= 2) {
             return null;
@@ -134,14 +225,32 @@ public class UserAgentBlacklist {
             return null;
         }
 
-        for (int i = len - 1; i-- > 1;) {
-            char ch = expr.charAt(i);
-            if (false == Strings.isAsciiLetter(ch) && ch != ' ' && ch != '-' && ch != '_') {
-                return null;
+        String[] tokens = expr.split("\\*");
+
+        int numTokens = tokens.length;
+        if (numTokens == 0) {
+            return null;
+        }
+
+        List<String> list = new ArrayList<>(numTokens);
+        for (String token : tokens) {
+            if (false == Strings.isEmpty(token)) {
+                for (int i = token.length() - 1; i-- > 1;) {
+                    char ch = token.charAt(i);
+                    if (false == Strings.isAsciiLetter(ch) && ch != ' ' && ch != '-' && ch != '_') {
+                        return null;
+                    }
+                }
+                list.add(ignoreCase ? Strings.asciiLowerCase(token) : token);
             }
         }
 
-        return expr.substring(1, len - 1);
+        int size = list.size();
+        if (0 == size) {
+            return null;
+        }
+
+        return 1 == size ? new SingletonTokens(list.get(0)) : new DefaultTokens(list);
     }
 
     /**
@@ -159,23 +268,39 @@ public class UserAgentBlacklist {
      * @param userAgent The User-Agent identifier
      * @return <code>true</code> if specified User-Agent identifier is black-listed; otherwise <code>false</code>
      */
-    public boolean isBlacklisted(String userAgent) {
+    public boolean isBlacklisted(final String userAgent) {
         if (null == userAgent) {
             return false;
         }
 
-        Boolean cached = deniedCache.get(userAgent);
+        Boolean cached = deniedCache.getIfPresent(userAgent);
         if (null != cached) {
             return cached.booleanValue();
         }
 
+        Callable<Boolean> loader = new Callable<Boolean>() {
+
+            @Override
+            public Boolean call() throws Exception {
+                return Boolean.valueOf(doCheckBlacklisted(userAgent));
+            }
+        };
+
+        try {
+            return deniedCache.get(userAgent, loader).booleanValue();
+        } catch (ExecutionException e) {
+            // Cannot occur
+            LOG.error("Failed to check User-Agent: {}", userAgent, e.getCause());
+            return false;
+        }
+    }
+
+    boolean doCheckBlacklisted(String userAgent) {
         for (Matcher matcher : map.keySet()) {
             if (matcher.matches(userAgent)) {
-                deniedCache.put(userAgent, Boolean.TRUE);
                 return true;
             }
         }
-        deniedCache.put(userAgent, Boolean.FALSE);
         return false;
     }
 
@@ -210,20 +335,24 @@ public class UserAgentBlacklist {
 
     private static final class ContainsMatcher implements Matcher {
 
-        private final List<String> containees;
+        private final List<Tokens> containees;
         private final boolean ignoreCase;
 
-        ContainsMatcher(boolean ignoreCase, List<String> containees) {
+        ContainsMatcher(boolean ignoreCase, List<Tokens> containees) {
             super();
-            this.containees = containees;
+            ImmutableList.Builder<Tokens> builder = ImmutableList.builder();
+            for (Tokens contained : containees) {
+                builder.add(contained);
+            }
+            this.containees = builder.build();
             this.ignoreCase = ignoreCase;
         }
 
         @Override
         public boolean matches(String userAgent) {
             String toCheck = ignoreCase ? Strings.asciiLowerCase(userAgent) : userAgent;
-            for (String contained : containees) {
-                if (toCheck.indexOf(contained) >= 0) {
+            for (Tokens contained : containees) {
+                if (contained.allContainedIn(toCheck)) {
                     return true;
                 }
             }

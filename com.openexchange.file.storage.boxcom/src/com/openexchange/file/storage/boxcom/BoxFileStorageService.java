@@ -54,7 +54,7 @@ import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -69,17 +69,17 @@ public final class BoxFileStorageService extends AbstractOAuthFileStorageService
      * Initializes a new {@link BoxFileStorageService}.
      */
     public BoxFileStorageService(ServiceLookup services) {
-        super(services, API.BOX_COM, BoxConstants.DISPLAY_NAME, BoxConstants.ID);
+        super(services, KnownApi.BOX_COM, BoxConstants.DISPLAY_NAME, BoxConstants.ID);
     }
 
     /**
      * Initialises a new {@link BoxFileStorageService}.
-     * 
+     *
      * @param services
      * @param compositeFileStorageAccountManagerProvider
      */
     public BoxFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.BOX_COM, BoxConstants.DISPLAY_NAME, BoxConstants.ID, compositeFileStorageAccountManagerProvider);
+        super(services, KnownApi.BOX_COM, BoxConstants.DISPLAY_NAME, BoxConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

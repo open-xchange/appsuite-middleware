@@ -82,6 +82,7 @@ import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -111,6 +112,7 @@ import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.SizePolicy;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -247,7 +249,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final boolean asMarkup;
     private boolean attachHTMLAlternativePart;
     private boolean includePlainText;
-    private boolean exactLength;
+    private SizePolicy sizePolicy;
     private final int maxContentSize;
     private int currentNestingLevel = 0;
     private final int maxNestedMessageLevels;
@@ -451,8 +453,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param exactLength <code>true</code> to set the exact length of mail parts; otherwise use mail system's size estimation
      * @return This {@link JsonMessageHandler} with new behavior applied
      */
-    public JsonMessageHandler setExactLength(final boolean exactLength) {
-        this.exactLength = exactLength;
+    public JsonMessageHandler setSizePolicy(final SizePolicy sizePolicy) {
+        this.sizePolicy = sizePolicy;
         return this;
     }
 
@@ -581,17 +583,27 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Size
              */
-            boolean checkSize = true;
-            if (exactLength) {
-                try {
-                    jsonObject.put(SIZE, Streams.countInputStream(part.getInputStream()));
-                    checkSize = false;
-                } catch (final Exception e) {
-                    // Failed counting part's content
+            {
+                boolean checkSize = true;
+                if (SizePolicy.EXACT == sizePolicy) {
+                    try {
+                        jsonObject.put(SIZE, Streams.countInputStream(part.getInputStream()));
+                        checkSize = false;
+                    } catch (final Exception e) {
+                        // Failed counting part's content
+                    }
+                } else if (SizePolicy.ESTIMATE == sizePolicy) {
+                    if (part.containsSize()) {
+                        String transferEncoding = Strings.asciiLowerCase(part.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC));
+                        if ("base64".equals(transferEncoding)) {
+                            jsonObject.put(SIZE, (int)(0.75 * part.getSize()));
+                            checkSize = false;
+                        }
+                    }
                 }
-            }
-            if (checkSize && part.containsSize()) {
-                jsonObject.put(SIZE, part.getSize());
+                if (checkSize && part.containsSize()) {
+                    jsonObject.put(SIZE, part.getSize());
+                }
             }
             /*
              * Disposition
@@ -1362,7 +1374,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
                 msgHandler.tokenFolder = tokenFolder;
                 msgHandler.tokenMailId = tokenMailId;
-                msgHandler.exactLength = exactLength;
+                msgHandler.sizePolicy = sizePolicy;
                 // msgHandler.originalMailPath = originalMailPath;
                 msgHandler.currentNestingLevel = currentNestingLevel + 1;
                 if (this.initialiserSequenceId != null) {

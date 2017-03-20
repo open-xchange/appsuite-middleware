@@ -9,6 +9,7 @@ title: IPCheck
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.IPCheck |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
 | __File__ | server.properties |
 
 ---

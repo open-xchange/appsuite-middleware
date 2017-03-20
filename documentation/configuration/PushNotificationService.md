@@ -9,6 +9,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---
@@ -19,6 +20,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---
@@ -29,6 +31,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---
@@ -39,6 +42,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | pns.properties |
 
 ---
@@ -49,6 +53,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---
@@ -59,6 +64,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---
@@ -69,6 +75,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---
@@ -79,6 +86,7 @@ title: PushNotificationService
 | __Version__ | 7.8.3 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---
@@ -90,6 +98,7 @@ title: PushNotificationService
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.websockets.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
 
 ---

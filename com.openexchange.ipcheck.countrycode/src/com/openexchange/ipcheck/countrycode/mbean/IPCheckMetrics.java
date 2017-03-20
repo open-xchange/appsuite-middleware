@@ -69,15 +69,6 @@ public class IPCheckMetrics {
     private final AtomicInteger deniedException;
     private final AtomicInteger deniedCountryChanged;
 
-    private float acceptedPercentage;
-    private float deniedPercentage;
-
-    private float acceptedPrivatePercentage;
-    private float acceptedWhiteListedPercentage;
-    private float acceptedEligilePercentage;
-    private float deniedExceptionPercentage;
-    private float deniedCountryChangedPercentage;
-
     /**
      * Initialises a new {@link IPCheckMetrics}.
      */
@@ -93,29 +84,6 @@ public class IPCheckMetrics {
 
         deniedException = new AtomicInteger();
         deniedCountryChanged = new AtomicInteger();
-    }
-
-    public synchronized void calculatePercentages() {
-        // Work with local copies
-        int total = totalIPChanges.get();
-        int totalAccepted = acceptedIPChanges.get();
-        int totalDenied = deniedIPChanges.get();
-        acceptedPercentage = ((float) totalAccepted / total) * 100;
-        deniedPercentage = ((float) totalDenied / total) * 100;
-
-        // Accepted percentages
-        int acceptedPrivate = acceptedPrivateIP.get();
-        acceptedPrivatePercentage = ((float) acceptedPrivate / totalAccepted) * 100;
-        int acceptedWL = acceptedWhiteListed.get();
-        acceptedWhiteListedPercentage = ((float) acceptedWL / totalAccepted) * 100;
-        int acceptedEligible = acceptedEligibleIPChanges.get();
-        acceptedEligilePercentage = ((float) acceptedEligible / totalAccepted) * 100;
-
-        // Denied percentages
-        int deniedEx = deniedException.get();
-        deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
-        int deniedCC = deniedCountryChanged.get();
-        deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
     }
 
     public void incrementTotalIPChanges() {
@@ -219,68 +187,5 @@ public class IPCheckMetrics {
      */
     public AtomicInteger getDeniedCountryChanged() {
         return deniedCountryChanged;
-    }
-
-    /**
-     * Gets the acceptedPercentage
-     *
-     * @return The acceptedPercentage
-     */
-    public float getAcceptedPercentage() {
-        return acceptedPercentage;
-    }
-
-    /**
-     * Gets the deniedPercentage
-     *
-     * @return The deniedPercentage
-     */
-    public float getDeniedPercentage() {
-        return deniedPercentage;
-    }
-
-    /**
-     * Gets the acceptedPrivatePercentage
-     *
-     * @return The acceptedPrivatePercentage
-     */
-    public float getAcceptedPrivatePercentage() {
-        return acceptedPrivatePercentage;
-    }
-
-    /**
-     * Gets the acceptedWhiteListedPercentage
-     *
-     * @return The acceptedWhiteListedPercentage
-     */
-    public float getAcceptedWhiteListedPercentage() {
-        return acceptedWhiteListedPercentage;
-    }
-
-    /**
-     * Gets the acceptedEligilePercentage
-     *
-     * @return The acceptedEligilePercentage
-     */
-    public float getAcceptedEligilePercentage() {
-        return acceptedEligilePercentage;
-    }
-
-    /**
-     * Gets the deniedExceptionPercentage
-     *
-     * @return The deniedExceptionPercentage
-     */
-    public float getDeniedExceptionPercentage() {
-        return deniedExceptionPercentage;
-    }
-
-    /**
-     * Gets the deniedCountryChangedPercentage
-     *
-     * @return The deniedCountryChangedPercentage
-     */
-    public float getDeniedCountryChangedPercentage() {
-        return deniedCountryChangedPercentage;
     }
 }

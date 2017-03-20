@@ -74,7 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -133,7 +133,7 @@ public class GoogleApiClients {
         }
 
         // Get default Google account
-        OAuthAccount defaultAccount = oAuthService.getDefaultAccount(API.GOOGLE, session);
+        OAuthAccount defaultAccount = oAuthService.getDefaultAccount(KnownApi.GOOGLE, session);
 
         if (reacquireIfExpired) {
             try {

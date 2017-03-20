@@ -508,7 +508,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             return null;
         }
         boolean autoRename = allowAutorename ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
-        String lowercaseTargetName = folderToSave.getName().toLowerCase(getLocale());
+        Locale loc = getLocale();
+        String lowercaseTargetName = folderToSave.getName().toLowerCase(loc);
         /*
          * check for equally named folder on same level
          */
@@ -522,13 +523,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         UserizedFolder[] existingFolders = listPerformer.doList(treeId, targetFolderId, true, true);
         for (UserizedFolder existingFolder : existingFolders) {
             if (false == existingFolder.getID().equals(folderToSave.getID())) {
-                String conflictingName = existingFolder.getName().toLowerCase(getLocale());
+                String conflictingName = existingFolder.getName().toLowerCase(loc);
                 if (false == autoRename && lowercaseTargetName.equals(conflictingName)) {
                     return existingFolder;
                 }
                 conflictingNames.add(conflictingName);
                 if (false == InfostoreContentType.getInstance().toString().equals(contentType.toString())) {
-                    String conflictingLocalizedName = existingFolder.getLocalizedName(getLocale()).toLowerCase(getLocale());
+                    String conflictingLocalizedName = existingFolder.getLocalizedName(loc).toLowerCase(loc);
                     if (false == autoRename && lowercaseTargetName.equals(conflictingLocalizedName)) {
                         return existingFolder;
                     }
