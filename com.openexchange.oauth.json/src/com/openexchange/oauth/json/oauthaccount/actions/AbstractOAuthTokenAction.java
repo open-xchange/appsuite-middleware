@@ -81,6 +81,7 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthConstants;
@@ -300,7 +301,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             throw ServiceExceptionCode.absentService(OAuthAPIRegistry.class);
         }
         if (isEmpty(scope)) {
-            return scopeRegistry.getLegacyScopes(service.resolveFromServiceId(serviceId));
+            API api = service.resolveFromServiceId(serviceId);
+            if (null == api) {
+                throw OXException.general("No such API: " + serviceId);
+            }
+            return scopeRegistry.getLegacyScopes(api);
         }
         // Get the scopes
         return scopeRegistry.getAvailableScopes(service.resolveFromServiceId(serviceId), OXScope.valuesOf(scope));
