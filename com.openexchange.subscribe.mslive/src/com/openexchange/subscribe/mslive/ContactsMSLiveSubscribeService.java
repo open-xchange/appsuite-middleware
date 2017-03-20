@@ -60,7 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -143,7 +143,7 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
                 JSONObject error = wholeResponse.getJSONObject("error");
                 String code = error.getString("code");
                 if (code.equals("request_token_unauthorized")) {
-                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.MS_LIVE_CONNECT.getShortName(), OXScope.contacts_ro.getDisplayName());
+                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(KnownApi.MS_LIVE_CONNECT.getShortName(), OXScope.contacts_ro.getDisplayName());
                 }
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(error.getString("message"));
             }

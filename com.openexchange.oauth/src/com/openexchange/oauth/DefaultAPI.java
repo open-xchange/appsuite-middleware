@@ -47,53 +47,94 @@
  *
  */
 
-package com.openexchange.xing.access.internal;
+package com.openexchange.oauth;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
- * {@link XingEventHandler} - The {@link EventHandler event handler}.
+ * {@link DefaultAPI} - The default API implementation.
  *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class XingEventHandler implements EventHandler {
+public class DefaultAPI implements API {
+
+    private final String serviceId;
+    private final String name;
+    private final int hash;
 
     /**
-     * The logger constant.
+     * Initializes a new {@link DefaultAPI}.
+     *
+     * @param serviceId The service identifier
+     * @param name The API's name
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingEventHandler.class);
-
-    /**
-     * Initializes a new {@link XingEventHandler}.
-     */
-    public XingEventHandler() {
-        super();
+    public DefaultAPI(String serviceId, String name){
+        this.serviceId=serviceId;
+        this.name=name;
+        int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        hash = result;
     }
 
     @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
-        try {
-            if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(KnownApi.XING.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("XING session removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            }
-        } catch (final Exception e) {
-            LOG.error("Error while handling SessionD event \"{}\".", topic, e);
-        }
+    public String getServiceId() {
+        return serviceId;
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DefaultAPI other = (DefaultAPI) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (serviceId == null) {
+            if (other.serviceId != null) {
+                return false;
+            }
+        } else if (!serviceId.equals(other.serviceId)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(48);
+        builder.append("[");
+        if (serviceId != null) {
+            builder.append("serviceId=").append(serviceId).append(", ");
+        }
+        if (name != null) {
+            builder.append("name=").append(name);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

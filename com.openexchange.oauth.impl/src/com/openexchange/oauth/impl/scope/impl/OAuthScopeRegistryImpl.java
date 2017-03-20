@@ -50,10 +50,10 @@
 package com.openexchange.oauth.impl.scope.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -72,36 +72,29 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthScopeRegistryImpl.class);
 
-    private final Map<API, Set<OAuthScope>> registry;
+    private final ConcurrentMap<String, ConcurrentMap<OAuthScope, OAuthScope>> registry;
 
     /**
      * Initialises a new {@link OAuthScopeRegistryImpl}.
      */
     public OAuthScopeRegistryImpl() {
         super();
-        registry = new HashMap<>();
+        registry = new ConcurrentHashMap<>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#registerScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.OAuthScope)
-     */
     @Override
     public void registerScope(API api, OAuthScope scope) {
-        Set<OAuthScope> scopes = registry.get(api);
-        if (scopes == null) {
-            scopes = new HashSet<>();
-            registry.put(api, scopes);
+        ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api);
+        if (null == scopes) {
+            ConcurrentMap<OAuthScope, OAuthScope> newScopes = new ConcurrentHashMap<>(8, 0.9F, 1);
+            scopes = registry.putIfAbsent(api.getServiceId(), newScopes);
+            if (null == scopes) {
+                scopes = newScopes;
+            }
         }
-        scopes.add(scope);
+        scopes.put(scope, scope);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#registrerScopes(com.openexchange.oauth.API, com.openexchange.oauth.scope.OAuthScope[])
-     */
     @Override
     public void registerScopes(API api, OAuthScope... scopes) {
         for (OAuthScope scope : scopes) {
@@ -109,17 +102,12 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#unregisterScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module)
-     */
     @Override
     public void unregisterScope(API api, OXScope module) {
         try {
             OAuthScope scope = getScope(api, module);
 
-            Set<OAuthScope> scopes = registry.get(api);
+            ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api.getServiceId());
             if (scopes == null || scopes.isEmpty()) {
                 return;
             }
@@ -130,65 +118,40 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#unregisterScopes(com.openexchange.oauth.API)
-     */
     @Override
     public void unregisterScopes(API api) {
-        registry.remove(api);
+        registry.remove(api.getServiceId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#purge()
-     */
     @Override
     public void purge() {
         registry.clear();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getAvailableScopes(com.openexchange.oauth.API)
-     */
     @Override
     public Set<OAuthScope> getAvailableScopes(API api) throws OXException {
-        Set<OAuthScope> scopes = registry.get(api);
+        ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api.getServiceId());
         if (scopes == null) {
-            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getFullName());
+            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getName());
         }
-        return Collections.unmodifiableSet(scopes);
+        return Collections.unmodifiableSet(scopes.keySet());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getLegacyScopes(com.openexchange.oauth.API)
-     */
     @Override
     public Set<OAuthScope> getLegacyScopes(API api) throws OXException {
-        Set<OAuthScope> scopes = registry.get(api);
+        ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api.getServiceId());
         Set<OAuthScope> legacyScopes = new HashSet<>();
-        for (OAuthScope scope : scopes) {
+        for (OAuthScope scope : scopes.keySet()) {
             if (scope.getOXScope().isLegacy()) {
                 legacyScopes.add(scope);
             }
         }
         if (legacyScopes.isEmpty()) {
-            throw OAuthScopeExceptionCodes.NO_LEGACY_SCOPES.create(api.getFullName());
+            throw OAuthScopeExceptionCodes.NO_LEGACY_SCOPES.create(api.getName());
         }
-        return Collections.unmodifiableSet(legacyScopes);
+        return legacyScopes;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getAvailableScopes(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module[])
-     */
     @Override
     public Set<OAuthScope> getAvailableScopes(API api, OXScope... modules) throws OXException {
         Set<OAuthScope> availableScopes = new HashSet<>(modules.length);
@@ -198,11 +161,6 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
         return Collections.unmodifiableSet(availableScopes);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module)
-     */
     @Override
     public OAuthScope getScope(API api, OXScope module) throws OXException {
         Set<OAuthScope> availableScopes = getAvailableScopes(api);
@@ -211,6 +169,6 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
                 return scope;
             }
         }
-        throw OAuthScopeExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getFullName());
+        throw OAuthScopeExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getName());
     }
 }

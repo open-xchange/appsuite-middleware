@@ -47,53 +47,65 @@
  *
  */
 
-package com.openexchange.xing.access.internal;
+package com.openexchange.oauth.impl;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.oauth.OAuthAPIRegistry;
 
 /**
- * {@link XingEventHandler} - The {@link EventHandler event handler}.
+ * {@link OAuthAPIRegistryImpl}
  *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class XingEventHandler implements EventHandler {
+public class OAuthAPIRegistryImpl implements OAuthAPIRegistry {
+
+    private static final OAuthAPIRegistry INSTANCE = new OAuthAPIRegistryImpl();
 
     /**
-     * The logger constant.
+     * Gets the registry instance
+     *
+     * @return The instance
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingEventHandler.class);
+    public static OAuthAPIRegistry getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<String, API> registry;
 
     /**
-     * Initializes a new {@link XingEventHandler}.
+     * Initializes a new {@link OAuthAPIRegistryImpl}.
      */
-    public XingEventHandler() {
+    private OAuthAPIRegistryImpl() {
         super();
+        KnownApi[] apis = KnownApi.values();
+        registry = new ConcurrentHashMap<>(apis.length, 0.9F, 1);
+        for (KnownApi api : apis) {
+            registry.put(api.getServiceId(), api);
+        }
     }
 
     @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
-        try {
-            if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(KnownApi.XING.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("XING session removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            }
-        } catch (final Exception e) {
-            LOG.error("Error while handling SessionD event \"{}\".", topic, e);
-        }
+    public boolean registerAPI(String serviceId, API api) {
+        return null == registry.putIfAbsent(serviceId, api);
     }
+
+    @Override
+    public API resolveFromServiceId(String serviceId) {
+        return registry.get(serviceId);
+    }
+
+    @Override
+    public Collection<API> getAllAPIs() {
+        return Collections.unmodifiableCollection(registry.values());
+    }
+
 }

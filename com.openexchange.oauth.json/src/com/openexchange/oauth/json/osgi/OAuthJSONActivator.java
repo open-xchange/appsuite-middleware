@@ -59,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.association.OAuthAccountAssociationService;
@@ -87,7 +88,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthScopeRegistry.class, OAuthHTTPClientFactory.class, CapabilityService.class, ClusterLockService.class,
-            OAuthAccessRegistryService.class, OAuthAccountAssociationService.class };
+            OAuthAccessRegistryService.class, OAuthAccountAssociationService.class, OAuthAPIRegistry.class };
     }
 
     @Override

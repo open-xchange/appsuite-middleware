@@ -47,53 +47,43 @@
  *
  */
 
-package com.openexchange.xing.access.internal;
+package com.openexchange.oauth;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondEventConstants;
+import java.util.Collection;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link XingEventHandler} - The {@link EventHandler event handler}.
+ * {@link OAuthAPIRegistry} - A registry for known OAuth APIs.
  *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class XingEventHandler implements EventHandler {
+@SingletonService
+public interface OAuthAPIRegistry {
 
     /**
-     * The logger constant.
+     * Registers specified OAuth API.
+     *
+     * @param serviceId The service id
+     * @param DefaultAPI the OAuth API
+     * @return <code>true</code> if specified OAuth API has been successfully registered; otherwise <code>false</code> if there is already such an OAuth API
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingEventHandler.class);
+    boolean registerAPI(String serviceId, API defaultAPI);
 
     /**
-     * Initializes a new {@link XingEventHandler}.
+     * Resolves the specified service identifier to a known OAuth API
+     *
+     * @param serviceId The service identifier to resolve
+     * @return The resolved OAuth API or <code>null</code> if no such API is known
      */
-    public XingEventHandler() {
-        super();
-    }
+    API resolveFromServiceId(String serviceId);
 
-    @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
-        try {
-            if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(KnownApi.XING.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("XING session removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            }
-        } catch (final Exception e) {
-            LOG.error("Error while handling SessionD event \"{}\".", topic, e);
-        }
-    }
+    /**
+     * Gets all currently registered OAuth APIs.
+     *
+     * @return All OAuth APIs
+     */
+    Collection<API> getAllAPIs();
+
 }

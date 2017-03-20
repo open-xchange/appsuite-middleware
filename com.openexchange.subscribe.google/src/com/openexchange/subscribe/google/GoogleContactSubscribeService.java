@@ -80,7 +80,7 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
@@ -356,10 +356,10 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             contactFeed = contactsService.getFeed(query, ContactFeed.class);
         } catch (AuthenticationException e) {
             LOG.debug("Unable to fetch google contacts: "+e.getMessage());
-            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), OXScope.contacts_ro.getDisplayName());
+            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(KnownApi.GOOGLE.getShortName(), OXScope.contacts_ro.getDisplayName());
         } catch (NullPointerException e) {
             if (e.getMessage().equals("No authentication header information")) {
-                throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), OXScope.contacts_ro.getDisplayName());
+                throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(KnownApi.GOOGLE.getShortName(), OXScope.contacts_ro.getDisplayName());
             }
             throw e;
         }
