@@ -109,7 +109,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
     @Override
     public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         int calendarFolder = 0;
-        if (dataArguments.containsKey(ARGS[0]) && dataArguments.get(ARGS[0]) != null) {
+        if (hasValue(dataArguments, ARGS[0])) {
             try {
                 calendarFolder = Integer.parseInt(dataArguments.get(ARGS[0]));
             } catch (final NumberFormatException e) {
@@ -118,7 +118,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         }
 
         int taskFolder = 0;
-        if (dataArguments.containsKey(ARGS[1]) && dataArguments.get(ARGS[1]) != null) {
+        if (hasValue(dataArguments, ARGS[1])) {
             try {
                 taskFolder = Integer.parseInt(dataArguments.get(ARGS[1]));
             } catch (final NumberFormatException e) {
@@ -206,6 +206,22 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         }
         result.setData(folderAndIdArray);
         return result;
+    }
+    
+    private boolean hasValue(DataArguments dataArguments, String key) {
+        if (!dataArguments.containsKey(key)) {
+            return false;
+        }
+        if (dataArguments.get(key) == null) {
+            return false;
+        }
+        if (dataArguments.get(key).equals("null")) {
+            return false;
+        }
+        if (dataArguments.get(key).trim().isEmpty()) {
+            return false;
+        }
+        return true;
     }
 
     private Confirm parseConfirmation(final DataArguments dataArguments) {
