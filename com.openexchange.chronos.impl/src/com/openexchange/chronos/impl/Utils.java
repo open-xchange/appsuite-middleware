@@ -72,6 +72,7 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -796,6 +797,50 @@ public class Utils {
                     return item1.getValue() == item2.getValue();
                 }
                 return false;
+            }
+        };
+    }
+
+    /**
+     * Initializes a new alarm collection update based on the supplied original and updated alarm lists.
+     *
+     * @param originalAlarms The original alarms
+     * @param updatedAlarms The updated alarms
+     * @return The collection update
+     */
+    public static AbstractCollectionUpdate<Alarm, AlarmField> getAlarmUpdates(List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
+        return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
+
+            @Override
+            protected boolean matches(Alarm alarm1, Alarm alarm2) {
+                if (null == alarm1) {
+                    return null == alarm2;
+                } else if (null != alarm2) {
+                    if (0 < alarm1.getId() && alarm1.getId() == alarm2.getId()) {
+                        return true;
+                    }
+                    if (null != alarm1.getUid() && alarm1.getUid().equals(alarm2.getUid())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Initializes a new attendee collection update based on the supplied original and updated attendee lists.
+     *
+     * @param originalAlarms The original attendees
+     * @param updatedAlarms The updated attendees
+     * @return The collection update
+     */
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+        return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees) {
+
+            @Override
+            protected boolean matches(Attendee item1, Attendee item2) {
+                return CalendarUtils.matches(item1, item2);
             }
         };
     }

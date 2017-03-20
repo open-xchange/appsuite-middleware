@@ -97,7 +97,6 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
@@ -620,7 +619,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      */
     private boolean updateAlarms(Event event, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
-        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, updatedAlarms);
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = Utils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (false == alarmUpdates.isEmpty()) {
             if (session.getUser().getId() != calendarUser.getId()) {
                 requireWritePermissions(event);

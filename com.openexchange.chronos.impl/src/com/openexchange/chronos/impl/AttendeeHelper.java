@@ -225,7 +225,7 @@ public class AttendeeHelper {
     private void processUpdatedEvent(List<Attendee> updatedAttendees) throws OXException {
         session.getEntityResolver().prefetch(updatedAttendees);
         updatedAttendees = session.getEntityResolver().prepare(updatedAttendees);
-        AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = AttendeeMapper.getInstance().getAttendeeUpdate(originalAttendees, updatedAttendees);
+        AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = Utils.getAttendeeUpdates(originalAttendees, updatedAttendees);
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
          * delete removed attendees

@@ -49,9 +49,10 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.Date;
 import java.util.EnumMap;
-import java.util.List;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.exception.OXException;
@@ -83,26 +84,6 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
      */
     private AlarmMapper() {
         super();
-    }
-
-    public AbstractCollectionUpdate<Alarm, AlarmField> getAlarmUpdate(List<Alarm> originalAlarms, List<Alarm> newAlarms) throws OXException {
-        return new AbstractCollectionUpdate<Alarm, AlarmField>(this, originalAlarms, newAlarms) {
-
-            @Override
-            protected boolean matches(Alarm alarm1, Alarm alarm2) {
-                if (null == alarm1) {
-                    return null == alarm2;
-                } else if (null != alarm2) {
-                    if (0 < alarm1.getId() && alarm1.getId() == alarm2.getId()) {
-                        return true;
-                    }
-                    if (null != alarm1.getUid() && alarm1.getUid().equals(alarm2.getUid())) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        };
     }
 
     @Override
@@ -143,8 +124,63 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
 
             @Override
             public void remove(Alarm object) {
-                //                object.removeTrigger();
                 object.setTrigger(null);
+            }
+        });
+        mappings.put(AlarmField.ACTION, new DefaultMapping<AlarmAction, Alarm>() {
+
+            @Override
+            public void copy(Alarm from, Alarm to) throws OXException {
+                AlarmAction value = get(from);
+                set(to, value);
+            }
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return null != object.getAction();
+            }
+
+            @Override
+            public void set(Alarm object, AlarmAction value) throws OXException {
+                object.setAction(value);
+            }
+
+            @Override
+            public AlarmAction get(Alarm object) {
+                return object.getAction();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.setAction(null);
+            }
+        });
+        mappings.put(AlarmField.ACTION, new DefaultMapping<Date, Alarm>() {
+
+            @Override
+            public void copy(Alarm from, Alarm to) throws OXException {
+                Date value = get(from);
+                set(to, value);
+            }
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return null != object.getAcknowledged();
+            }
+
+            @Override
+            public void set(Alarm object, Date value) throws OXException {
+                object.setAcknowledged(value);
+            }
+
+            @Override
+            public Date get(Alarm object) {
+                return object.getAcknowledged();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.setAcknowledged(null);
             }
         });
         return mappings;

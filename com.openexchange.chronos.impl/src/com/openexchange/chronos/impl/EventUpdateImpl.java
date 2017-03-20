@@ -77,23 +77,23 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
     /**
      * Initializes a new {@link EventUpdateImpl}.
      *
-     * @param original The original event
-     * @param update The updated event
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences
      * @return The event update providing the differences
      */
-    public EventUpdateImpl(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
-        this(original, update, getDifferentFields(EventMapper.getInstance(), original, update, considerUnset, ignoredFields));
+    public EventUpdateImpl(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
+        this(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoredFields));
     }
 
     private EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields) throws OXException {
         super(originalEvent, updatedEvent, updatedFields);
-        this.alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(
+        alarmUpdates = Utils.getAlarmUpdates(
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
-        this.attendeeUpdates = AttendeeMapper.getInstance().getAttendeeUpdate(
+        attendeeUpdates = Utils.getAttendeeUpdates(
             null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
-        this.attachmentUpdates = Utils.getAttachmentUpdates(
+        attachmentUpdates = Utils.getAttachmentUpdates(
             null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
     }
 

@@ -126,18 +126,27 @@ public abstract class AbstractSimpleCollectionUpdate<O> implements SimpleCollect
         return 0 == addedItems.size() && 0 == removedItems.size();
     }
 
-    @Override
-    public String toString() {
-        return "SimpleCollectionUpdate [" + removedItems.size() + " removed, " + addedItems.size() + " added]";
-    }
-
+    /**
+     * Searches a collection for a specific item, utilizing the {@link #matches(Object, Object)} method.
+     *
+     * @param items The items to search
+     * @param item The item to lookup
+     * @return The matching item, or <code>null</code> if no matching item was found
+     */
     protected O find(Collection<O> items, O item) {
-        for (O o : items) {
-            if (matches(item, o)) {
-                return o;
+        if (null != items) {
+            for (O o : items) {
+                if (matches(item, o)) {
+                    return o;
+                }
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleCollectionUpdate [" + removedItems.size() + " removed, " + addedItems.size() + " added]";
     }
 
 }

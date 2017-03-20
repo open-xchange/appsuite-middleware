@@ -61,5 +61,13 @@ public enum AlarmField {
      * Specifies when an alarm will trigger.
      */
     TRIGGER,
+    /**
+     * Specifies when an alarm was last sent or acknowledged.
+     */
+    ACKNOWLEDGED,
+    /**
+     * Specifies the type of action invoked when the alarm is triggered.
+     */
+    ACTION,
 
 }
