@@ -95,6 +95,8 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String UNABLE_TO_SAVE_DRAFT_QUOTA_MSG = "Unable to save draft, due to exceeded quota.";
 
+    public final static String UNABLE_TO_SAVE_MAIL_QUOTA_MSG = "Unable to save the mail, due to exceeded quota.";
+
     public final static String COPY_TO_SENT_FOLDER_FAILED_MSG = "Message has been successfully sent. A copy could not be placed in your sent folder though.";
 
     public final static String BAD_PARAM_VALUE_MSG = "Bad value \"%1$s\" in parameter \"%2$s\".";
