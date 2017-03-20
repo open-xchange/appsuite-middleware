@@ -54,7 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.getFields;
-import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
+import static com.openexchange.tools.arrays.Collections.put;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,7 +85,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link FreeBusyPerformer}
@@ -93,7 +92,7 @@ import com.openexchange.folderstorage.UserizedFolder;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class FreeBusyPerformer extends AbstractQueryPerformer {
+public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
     /** The event fields returned in free/busy queries by default */
     private static final EventField[] FREEBUSY_FIELDS = {
@@ -150,26 +149,26 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
             return eventsPerAttendee;
         }
         readAttendeeData(eventsInPeriod, Boolean.TRUE);
-        List<UserizedFolder> visibleFolders = getVisibleFolders(session);
         /*
          * step through events & build free/busy per requested attendee
          */
         for (Event eventInPeriod : eventsInPeriod) {
+            if (false == considerForFreeBusy(eventInPeriod)) {
+                continue; // exclude events classified as 'private' (but keep 'confidential' ones)
+            }
             for (Attendee attendee : attendees) {
                 Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);
                 if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
                     continue;
                 }
-                // TODO: com.openexchange.ajax.appointment.FreeBusyTest.testResourceParticipantStatusFree() still expects 0 for resource attendee
-                //                int folderID = chooseFolderID(eventInPeriod, visibleFolders);
-                int folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod, visibleFolders) : -1;
+                int folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod) : -1;
                 if (isSeriesMaster(eventInPeriod)) {
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
                     while (iterator.hasNext()) {
-                        com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
+                        put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
                     }
                 } else {
-                    com.openexchange.tools.arrays.Collections.put(eventsPerAttendee, attendee, getResultingEvent(eventInPeriod, folderID));
+                    put(eventsPerAttendee, attendee, getResultingEvent(eventInPeriod, folderID));
                 }
             }
         }
@@ -233,7 +232,8 @@ public class FreeBusyPerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Normalizes the contained free/busy intervals. This means<ul>
+     * Normalizes the contained free/busy intervals. This means
+     * <ul>
      * <li>the intervals are sorted chronologically, i.e. the earliest interval is first</li>
      * <li>all intervals beyond or above the 'from' and 'until' range are removed, intervals overlapping the boundaries are shortened to
      * fit</li>

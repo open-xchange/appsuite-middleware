@@ -79,7 +79,7 @@ import com.openexchange.java.util.TimeZones;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class HasPerformer extends AbstractQueryPerformer {
+public class HasPerformer extends AbstractFreeBusyPerformer {
 
     /**
      * Initializes a new {@link HasPerformer}.

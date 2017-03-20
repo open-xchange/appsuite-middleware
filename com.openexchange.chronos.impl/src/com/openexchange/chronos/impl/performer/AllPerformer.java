@@ -55,7 +55,7 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
-import static com.openexchange.chronos.impl.Utils.isIncludePrivate;
+import static com.openexchange.chronos.impl.Utils.isIncludeClassifiedEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
@@ -108,7 +108,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
         readAdditionalEventData(events, session.getUser().getId(), fields);
-        return postProcess(events, session.getUser().getId(), isIncludePrivate(session));
+        return postProcess(events, session.getUser().getId(), true);
     }
 
     /**
@@ -128,7 +128,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
         readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
-        return postProcess(events, folder, true);
+        return postProcess(events, folder, isIncludeClassifiedEvents(session));
     }
 
 }

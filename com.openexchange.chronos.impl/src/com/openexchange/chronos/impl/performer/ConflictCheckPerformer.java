@@ -80,7 +80,6 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.impl.EventConflictImpl;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
@@ -97,7 +96,7 @@ import com.openexchange.java.Reference;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ConflictCheckPerformer extends AbstractQueryPerformer {
+public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
 
     private final int maxConflictsPerRecurrence;
     private final int maxConflicts;
@@ -106,7 +105,6 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
     private final Date today;
 
     private Map<Integer, Permission> folderPermissions;
-    private List<UserizedFolder> visibleFolders;
 
     /**
      * Initializes a new {@link ConflictCheckPerformer}.
@@ -194,6 +192,9 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             if (null == conflictingAttendees || 0 == conflictingAttendees.size()) {
                 continue;
             }
+            if (Boolean.FALSE.equals(hardConflict.getValue()) && false == considerForFreeBusy(eventInPeriod)) {
+                continue; // exclude 'soft' conflicts for events classified as 'private' (but keep 'confidential' ones)
+            }
             if (isSeriesMaster(eventInPeriod)) {
                 /*
                  * expand & check all occurrences of event series in period
@@ -268,6 +269,9 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             if (null == conflictingAttendees || 0 == conflictingAttendees.size()) {
                 continue;
             }
+            if (Boolean.FALSE.equals(hardConflict.getValue()) && false == considerForFreeBusy(eventInPeriod)) {
+                continue; // exclude 'soft' conflicts for events classified as 'private' (but keep 'confidential' ones)
+            }
             if (isSeriesMaster(eventInPeriod)) {
                 /*
                  * expand & check all occurrences of event series in period
@@ -331,7 +335,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         if (detailsVisible(event)) {
             eventData.setSummary(event.getSummary());
             eventData.setLocation(event.getLocation());
-            eventData.setFolderId(chooseFolderID(event, getVisibleFolders()));
+            eventData.setFolderId(chooseFolderID(event));
         }
         return new EventConflictImpl(eventData, conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
@@ -357,7 +361,7 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
         if (detailsVisible(seriesMaster)) {
             eventData.setSummary(seriesMaster.getSummary());
             eventData.setLocation(seriesMaster.getLocation());
-            eventData.setFolderId(chooseFolderID(seriesMaster, getVisibleFolders()));
+            eventData.setFolderId(chooseFolderID(seriesMaster));
         }
         return new EventConflictImpl(eventData, conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
     }
@@ -448,13 +452,6 @@ public class ConflictCheckPerformer extends AbstractQueryPerformer {
             }
             return false;
         }
-    }
-
-    private List<UserizedFolder> getVisibleFolders() throws OXException {
-        if (null == visibleFolders) {
-            visibleFolders = Utils.getVisibleFolders(session);
-        }
-        return visibleFolders;
     }
 
     private Map<Integer, Permission> getFolderPermissions() throws OXException {

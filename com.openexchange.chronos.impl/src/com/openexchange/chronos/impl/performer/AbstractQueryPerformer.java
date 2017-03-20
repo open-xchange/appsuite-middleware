@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -70,7 +69,6 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -85,7 +83,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -197,13 +194,13 @@ public abstract class AbstractQueryPerformer {
      *
      * @param events The events to post-process
      * @param inFolder The parent folder representing the view on the event
-     * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
+     * @param includeClassified <code>true</code> to include <i>confidential</i> events in shared folders, <code>false</code>, otherwise
      * @return The processed events
      */
-    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {
+    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includeClassified) throws OXException {
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         for (Event event : events) {
-            if (isExcluded(event, session, includePrivate)) {
+            if (isExcluded(event, session, includeClassified)) {
                 continue;
             }
             event.setFolderId(i(inFolder));
@@ -259,119 +256,6 @@ public abstract class AbstractQueryPerformer {
 
     private List<Event> resolveOccurrences(Event master) throws OXException {
         return Utils.asList(resolveOccurrences(master, getFrom(session), getUntil(session)));
-    }
-
-    /**
-     * Chooses the most appropriate parent folder identifier to render an event in for the current session's user. This is
-     * <ul>
-     * <li>the common parent folder identifier for an event in a public folder, in case the user has appropriate folder permissions</li>
-     * <li><code>-1</code> for an event in a public folder, in case the user has no appropriate folder permissions</li>
-     * <li>the user attendee's personal folder identifier for an event in a non-public folder, in case the user is attendee of the event</li>
-     * <li>another attendee's personal folder identifier for an event in a non-public folder, in case the user does not attend on his own, but has appropriate folder permissions for this attendee's folder</li>
-     * <li><code>-1</code> for an event in a non-public folder, in case the user has no appropriate folder permissions for any of the attendees</li>
-     * </ul>
-     *
-     * @param event The event to choose the folder identifier for
-     * @param visibleFolders A collection of calendar folder the current session user has access to
-     * @return The chosen folder identifier, or <code>-1</code> if there is none
-     */
-    protected int chooseFolderID(Event event, Collection<UserizedFolder> visibleFolders) throws OXException {
-        /*
-         * check common folder permissions for events in public folders
-         */
-        if (0 < event.getPublicFolderId()) {
-            UserizedFolder folder = findFolder(visibleFolders, event.getPublicFolderId());
-            if (null != folder) {
-                int readPermission = folder.getOwnPermission().getReadPermission();
-                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUser().getId()) {
-                    return event.getPublicFolderId();
-                }
-            }
-            return -1;
-        }
-        /*
-         * prefer user's personal folder if user is attendee
-         */
-        Attendee ownAttendee = find(event.getAttendees(), session.getUser().getId());
-        if (null != ownAttendee) {
-            return ownAttendee.getFolderID();
-        }
-        /*
-         * choose the most appropriate attendee folder, otherwise
-         */
-        UserizedFolder chosenFolder = null;
-        for (Attendee attendee : event.getAttendees()) {
-            UserizedFolder folder = findFolder(visibleFolders, attendee.getFolderID());
-            if (null != folder) {
-                int readPermission = folder.getOwnPermission().getReadPermission();
-                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUser().getId()) {
-                    chosenFolder = chooseFolder(chosenFolder, folder);
-                }
-            }
-        }
-        return null == chosenFolder ? -1 : i(chosenFolder);
-    }
-
-    /**
-     * Chooses a folder from two candidates based on the <i>highest</i> own permissions.
-     *
-     * @param folder1 The first candidate, or <code>null</code> to always choose the second candidate
-     * @param folder2 The second candidate, or <code>null</code> to always choose the first candidate
-     * @return The chosen folder, or <code>null</code> in case both candidates were <code>null</code>
-     */
-    private static UserizedFolder chooseFolder(UserizedFolder folder1, UserizedFolder folder2) {
-        if (null == folder1) {
-            return folder2;
-        }
-        if (null == folder2) {
-            return folder1;
-        }
-        Permission permission1 = folder1.getOwnPermission();
-        Permission permission2 = folder2.getOwnPermission();
-        if (permission1.getReadPermission() > permission2.getReadPermission()) {
-            return folder1;
-        }
-        if (permission1.getReadPermission() < permission2.getReadPermission()) {
-            return folder2;
-        }
-        if (permission1.getWritePermission() > permission2.getWritePermission()) {
-            return folder1;
-        }
-        if (permission1.getWritePermission() < permission2.getWritePermission()) {
-            return folder2;
-        }
-        if (permission1.getDeletePermission() > permission2.getDeletePermission()) {
-            return folder1;
-        }
-        if (permission1.getDeletePermission() < permission2.getDeletePermission()) {
-            return folder2;
-        }
-        if (permission1.getFolderPermission() > permission2.getFolderPermission()) {
-            return folder1;
-        }
-        if (permission1.getFolderPermission() < permission2.getFolderPermission()) {
-            return folder2;
-        }
-        return permission1.isAdmin() ? folder1 : permission2.isAdmin() ? folder2 : folder1;
-    }
-
-    /**
-     * Searches a userized folder in a collection of folders by its numerical identifier.
-     *
-     * @param folders The folders to search
-     * @param id The identifier of the folder to lookup
-     * @return The matching folder, or <code>null</code> if not found
-     */
-    private static UserizedFolder findFolder(Collection<UserizedFolder> folders, int id) {
-        if (null != folders) {
-            String folderID = String.valueOf(id);
-            for (UserizedFolder folder : folders) {
-                if (folderID.equals(folder.getID())) {
-                    return folder;
-                }
-            }
-        }
-        return null;
     }
 
 }
