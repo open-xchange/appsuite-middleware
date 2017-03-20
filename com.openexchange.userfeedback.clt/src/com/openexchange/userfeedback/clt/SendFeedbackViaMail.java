@@ -250,8 +250,14 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
 
     private JSONObject extractSingleRecipient(String recipients) throws JSONException {
         int startOfAddress = recipients.lastIndexOf("<");
-        String address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
-        String displayName = startOfAddress != 0 ? recipients.substring(0,  startOfAddress - 1) : "" ;
+        String address = "";
+        String displayName = "";
+        if (startOfAddress >= 0) {
+            address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
+            displayName = startOfAddress != 0 ? recipients.substring(0,  startOfAddress - 1) : "" ;
+        } else {
+            address = recipients;
+        }
         JSONObject json = getAddressJSON(address, displayName);
         return json;
     }
