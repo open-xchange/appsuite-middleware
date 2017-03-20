@@ -163,7 +163,12 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     @Override
     public OAuthScope getScope(API api, OXScope module) throws OXException {
-        Set<OAuthScope> availableScopes = getAvailableScopes(api);
+        ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api.getServiceId());
+        if (scopes == null) {
+            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getName());
+        }
+
+        Set<OAuthScope> availableScopes = scopes.keySet();
         for (OAuthScope scope : availableScopes) {
             if (scope.getOXScope().equals(module)) {
                 return scope;
