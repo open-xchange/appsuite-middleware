@@ -91,6 +91,12 @@ public interface CalendarExport {
      */
     CalendarExport add(String timeZoneID);
 
+    /**
+     * Adds an iCal property to the exported calendar component.
+     *
+     * @param property The iCal property to add
+     * @return A self reference
+     */
     CalendarExport add(ICalProperty property);
 
     /**
