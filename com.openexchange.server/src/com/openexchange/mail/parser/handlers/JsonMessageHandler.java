@@ -596,7 +596,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     if (part.containsSize()) {
                         String transferEncoding = Strings.asciiLowerCase(part.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC));
                         if ("base64".equals(transferEncoding)) {
-                            jsonObject.put(SIZE, 0.75 * part.getSize());
+                            jsonObject.put(SIZE, (int)(0.75 * part.getSize()));
                             checkSize = false;
                         }
                     }
