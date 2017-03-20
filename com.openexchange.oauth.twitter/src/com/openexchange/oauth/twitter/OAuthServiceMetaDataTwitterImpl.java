@@ -56,7 +56,7 @@ import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -74,7 +74,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
      */
     public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
-        super(services, STANDARD_API.TWITTER.getAPI(), true, true, TwitterOAuthScope.values());
+        super(services, KnownApi.TWITTER, true, true, TwitterOAuthScope.values());
     }
 
     @Override

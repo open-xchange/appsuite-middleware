@@ -53,7 +53,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.server.ServiceLookup;
@@ -69,7 +69,7 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthFileStorageAccountEventHandler.class);
 
-    private final STANDARD_API api;
+    private final KnownApi api;
     private ServiceLookup services;
 
     /**
@@ -77,7 +77,7 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
      * 
      * 
      */
-    public OAuthFileStorageAccountEventHandler(ServiceLookup services, STANDARD_API api) {
+    public OAuthFileStorageAccountEventHandler(ServiceLookup services, KnownApi api) {
         super();
         this.services = services;
         this.api = api;

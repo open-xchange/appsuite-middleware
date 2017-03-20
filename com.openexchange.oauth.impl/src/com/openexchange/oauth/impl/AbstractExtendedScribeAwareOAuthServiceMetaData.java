@@ -64,8 +64,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.DefaultAPI;
 import com.openexchange.oauth.DefaultOAuthToken;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthConfigurationProperty;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -88,7 +89,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
      *
      * @param services The {@link ServiceLookup}
-     * @param api The {@link API}
+     * @param api The {@link DefaultAPI}
      * @param scopes The {@link OAuthScope}s
      */
     public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, OAuthScope... scopes) {
@@ -99,7 +100,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param api The {@link API}
+     * @param api The {@link DefaultAPI}
      * @param needsRequestToken Whether it needs a request token
      * @param registerTokenBasedDeferrer Whether to register the token based deferrer
      */

@@ -47,52 +47,65 @@
  *
  */
 
-package com.openexchange.oauth;
+package com.openexchange.oauth.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAPIRegistry;
 
 /**
  * {@link OAuthAPIRegistryImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
 public class OAuthAPIRegistryImpl implements OAuthAPIRegistry {
 
     private static final OAuthAPIRegistry INSTANCE = new OAuthAPIRegistryImpl();
-    private final Map<String, API> registry;
 
-    public static OAuthAPIRegistry getInstance(){
+    /**
+     * Gets the registry instance
+     *
+     * @return The instance
+     */
+    public static OAuthAPIRegistry getInstance() {
         return INSTANCE;
     }
+
+    // ------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<String, API> registry;
 
     /**
      * Initializes a new {@link OAuthAPIRegistryImpl}.
      */
     private OAuthAPIRegistryImpl() {
         super();
-        STANDARD_API[] apis = STANDARD_API.values();
-        registry = new HashMap<>(apis.length);
-        for(STANDARD_API api: apis){
-            registry.put(api.getFullName(), api.getAPI());
+        KnownApi[] apis = KnownApi.values();
+        registry = new ConcurrentHashMap<>(apis.length, 0.9F, 1);
+        for (KnownApi api : apis) {
+            registry.put(api.getServiceId(), api);
         }
     }
 
     @Override
-    public void registerAPI(String serviceId, API api){
-        registry.put(serviceId, api);
+    public boolean registerAPI(String serviceId, API api) {
+        return null == registry.putIfAbsent(serviceId, api);
     }
 
     @Override
-    public API resolveFromServiceId(String serviceId){
-        API result = registry.get(serviceId);
+    public API resolveFromServiceId(String serviceId) {
+        return registry.get(serviceId);
+    }
 
-        if(result == null){
-            throw new IllegalArgumentException("The serviceId '" + serviceId + "' cannot be resolved to any known OAuth API");
-        } else {
-            return result;
-        }
+    @Override
+    public Collection<API> getAllAPIs() {
+        return Collections.unmodifiableCollection(registry.values());
     }
 
 }

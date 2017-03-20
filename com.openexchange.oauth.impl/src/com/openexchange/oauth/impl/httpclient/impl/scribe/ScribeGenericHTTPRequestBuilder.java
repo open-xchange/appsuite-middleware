@@ -73,8 +73,8 @@ import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
-import com.openexchange.oauth.STANDARD_API;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.impl.httpclient.OAuthHTTPRequest;
@@ -123,7 +123,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
      * @throws IllegalStateException If given API cannot be mapped to a Scribe provider
      */
     protected static Class<? extends Api> getProvider(final API api) {
-        STANDARD_API stdApi = STANDARD_API.getApiByServiceId(api.getServiceId());
+        KnownApi stdApi = KnownApi.getApiByServiceId(api.getServiceId());
         if(stdApi==null){
             throw new IllegalStateException("Unsupported API type: " + api);
         }

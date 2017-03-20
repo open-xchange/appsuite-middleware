@@ -62,7 +62,7 @@ import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -85,7 +85,7 @@ public class MSLiveApiClient {
      */
     public static OAuthAccount getDefaultOAuthAccount(Session session) throws OXException {
         final OAuthService service = Services.getService(OAuthService.class);
-        return service.getDefaultAccount(STANDARD_API.MS_LIVE_CONNECT.getAPI(), session);
+        return service.getDefaultAccount(KnownApi.MS_LIVE_CONNECT, session);
     }
 
     /**

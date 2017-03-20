@@ -65,12 +65,14 @@ import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oauth.CallbackRegistry;
+import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.http.OAuthHTTPClientFactory;
+import com.openexchange.oauth.impl.OAuthAPIRegistryImpl;
 import com.openexchange.oauth.impl.access.impl.OAuthAccessRegistryServiceImpl;
 import com.openexchange.oauth.impl.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
 import com.openexchange.oauth.impl.internal.CallbackRegistryImpl;
@@ -192,6 +194,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(EncryptedItemDetectorService.class, oauthService);
             registerService(SecretMigrator.class, oauthService);
             registerService(EncryptedItemCleanUpService.class, oauthService);
+            registerService(OAuthAPIRegistry.class, OAuthAPIRegistryImpl.getInstance());
 
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
             registerService(OAuthHTTPClientFactory.class, oauthFactory);

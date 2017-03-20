@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.openexchange.oauth
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Activator: com.openexchange.oauth.osgi.Activator
 Import-Package: com.openexchange.exception,
  com.openexchange.framework.request,
  com.openexchange.groupware.notify.hostname,

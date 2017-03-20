@@ -55,7 +55,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
@@ -129,7 +129,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
                 final OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
 
                 OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                OAuthAccessRegistry registry = registryService.get(STANDARD_API.XING.getFullName());
+                OAuthAccessRegistry registry = registryService.get(KnownApi.XING.getFullName());
                 OAuthAccess oAuthAccess = registry.get(session.getContextId(), session.getUserId());
                 if (oAuthAccess == null) {
                     // Create
@@ -147,7 +147,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
             public int getXingOAuthAccount(Session session) throws OXException {
                 try {
                     final OAuthService oAuthService = getService(OAuthService.class);
-                    return oAuthService.getDefaultAccount(STANDARD_API.XING.getAPI(), session).getId();
+                    return oAuthService.getDefaultAccount(KnownApi.XING, session).getId();
                 } catch (OXException e) {
                     if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
                         throw XingExceptionCodes.NO_OAUTH_ACCOUNT.create(e, session.getUserId(), session.getContextId());

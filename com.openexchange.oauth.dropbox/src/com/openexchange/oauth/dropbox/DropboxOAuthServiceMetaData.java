@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
@@ -69,7 +69,7 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
      * Initialises a new {@link DropboxOAuthServiceMetaData}.
      */
     public DropboxOAuthServiceMetaData(ServiceLookup serviceLookup) {
-        super(serviceLookup, STANDARD_API.DROPBOX.getAPI(), DropboxOAuthScope.values());
+        super(serviceLookup, KnownApi.DROPBOX, DropboxOAuthScope.values());
     }
 
     /*
@@ -89,7 +89,7 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
      */
     @Override
     public API getAPI() {
-        return STANDARD_API.DROPBOX.getAPI();
+        return KnownApi.DROPBOX;
     }
 
     /*

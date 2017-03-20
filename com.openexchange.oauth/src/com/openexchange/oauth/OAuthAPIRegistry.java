@@ -49,29 +49,41 @@
 
 package com.openexchange.oauth;
 
+import java.util.Collection;
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
- * {@link OAuthAPIRegistry}
+ * {@link OAuthAPIRegistry} - A registry for known OAuth APIs.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
+@SingletonService
 public interface OAuthAPIRegistry {
 
     /**
-     * Registers an OAuth API
+     * Registers specified OAuth API.
      *
      * @param serviceId The service id
-     * @param API the OAuth API
+     * @param DefaultAPI the OAuth API
+     * @return <code>true</code> if specified OAuth API has been successfully registered; otherwise <code>false</code> if there is already such an OAuth API
      */
-    void registerAPI(String serviceId, API api);
+    boolean registerAPI(String serviceId, API defaultAPI);
 
     /**
-     * Resolves the specified service identifier to a known OAuth {@link STANDARD_API}
+     * Resolves the specified service identifier to a known OAuth API
      *
      * @param serviceId The service identifier to resolve
-     * @return The resolved OAuth API
-     * @throws IllegalArgumentException if the specified service identifier cannot be resolved to any known OAuth API
+     * @return The resolved OAuth API or <code>null</code> if no such API is known
      */
     API resolveFromServiceId(String serviceId);
+
+    /**
+     * Gets all currently registered OAuth APIs.
+     *
+     * @return All OAuth APIs
+     */
+    Collection<API> getAllAPIs();
 
 }

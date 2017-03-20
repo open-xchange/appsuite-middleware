@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.oauth.STANDARD_API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -105,7 +105,7 @@ public class OAuthYahooDropTokensTask extends UpdateTaskAdapter {
             statement.setString(parameterIndex++, "");
             statement.setString(parameterIndex++, "");
             statement.setInt(parameterIndex++, contextId);
-            statement.setString(parameterIndex++, STANDARD_API.YAHOO.getFullName());
+            statement.setString(parameterIndex++, KnownApi.YAHOO.getFullName());
 
             statement.execute();
         } catch (SQLException e) {
