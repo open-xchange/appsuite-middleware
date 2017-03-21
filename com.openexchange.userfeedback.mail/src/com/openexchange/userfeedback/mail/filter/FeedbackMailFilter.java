@@ -64,14 +64,14 @@ import com.openexchange.userfeedback.filter.FeedbackFilter;
  */
 public class FeedbackMailFilter implements FeedbackFilter {
 
-    private String ctxGroup;
-    private Map<String, String> recipients;
-    private Map<String, String> pgpKeys;
-    private String subject;
-    private String body;
-    private long start;
-    private long end;
-    private String type;
+    private final String ctxGroup;
+    private final Map<String, String> recipients;
+    private final Map<String, String> pgpKeys;
+    private final String subject;
+    private final String body;
+    private final long start;
+    private final long end;
+    private final String type;
 
     private static final String DEFAULT_BODY = "";
     private static final String DEFAULT_CONTEXT_GROUP = "default";
@@ -85,14 +85,14 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
     public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, Map<String, String> pgpKeys, String subject, String body, long start, long end, String type) {
         super();
-        this.ctxGroup = ctxGroup;
-        this.recipients = recipients;
-        this.pgpKeys = pgpKeys;
-        this.subject = subject;
-        this.body = body;
-        this.start = start;
-        this.end = end;
-        this.type = type;
+        this.ctxGroup = ctxGroup == null ? DEFAULT_CONTEXT_GROUP : ctxGroup;
+        this.recipients = recipients == null ? new HashMap<String, String>(0) : recipients;
+        this.pgpKeys = pgpKeys == null ? new HashMap<String, String>(0) : pgpKeys;;
+        this.subject = subject == null ? String.format(DEFAULT_SUBJECT, getTimerangeString()) : subject;
+        this.body = body == null ? DEFAULT_BODY : body;
+        this.start = start == 0 ? Long.MIN_VALUE : start;
+        this.end = end == 0 ? Long.MAX_VALUE : end;
+        this.type = type == null ? DEFAULT_TYPE : type;
     }
 
     @Override
@@ -112,53 +112,32 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
     @Override
     public String getType() {
-        if (type == null) {
-            type = DEFAULT_TYPE;
-        }
         return type;
     }
 
     @Override
     public Long start() {
-        if (start == 0) {
-            return Long.MIN_VALUE;
-        }
         return start;
     }
 
     @Override
     public Long end() {
-        if (end == 0) {
-            return Long.MAX_VALUE;
-        }
         return end;
     }
 
     public String getCtxGroup() {
-        if (ctxGroup == null) {
-            ctxGroup = DEFAULT_CONTEXT_GROUP;
-        }
         return ctxGroup;
     }
 
     public Map<String, String> getRecipients() {
-        if (recipients == null) {
-            recipients = new HashMap<>();
-        }
         return recipients;
     }
 
     public Map<String, String> getPgpKeys() {
-        if (null == pgpKeys) {
-            pgpKeys = new HashMap<>();
-        }
         return pgpKeys;
     }
 
     public String getSubject() {
-        if (subject == null) {
-            subject = String.format(DEFAULT_SUBJECT, getTimerangeString());
-        }
         return subject;
     }
 
@@ -179,22 +158,21 @@ public class FeedbackMailFilter implements FeedbackFilter {
     }
 
     public String getBody() {
-        if (body == null) {
-            body = DEFAULT_BODY;
-        }
         return body;
     }
 
+    // --------------------------------------------------------------------------------------
+
     public static class FeedBackMailFilterBuilder {
 
-        private String builderCtxGroup;
+        private final String builderCtxGroup;
         private Map<String, String> builderRecipients;
         private Map<String, String> builderPgpKeys;
         private String builderSubject;
         private String builderBody;
         private long builderStart;
         private long builderEnd;
-        private String builerType;
+        private final String builerType;
 
         public FeedBackMailFilterBuilder(String ctxGroup, String type) {
             this.builderCtxGroup = ctxGroup;
@@ -221,7 +199,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
             this.builderRecipients = recipients;
             return this;
         }
-        
+
         public FeedBackMailFilterBuilder pgpKeys(Map<String, String> pgpKeys) {
             this.builderPgpKeys = pgpKeys;
             return this;
