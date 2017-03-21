@@ -10,6 +10,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Dovecot_Mail_Push.html">Dovecot Mail Push</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>
