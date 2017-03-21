@@ -91,7 +91,7 @@ public class StoreAction implements AJAXActionService {
         if (service == null) {
             throw ServiceExceptionCode.absentService(FeedbackService.class);
         }
-        String hostname = getHostname(requestData);
+        String hostname = getHostname(requestData, session);
 
         Map<String, String> params = new HashMap<>();
         params.put("type", type);
@@ -102,11 +102,12 @@ public class StoreAction implements AJAXActionService {
         return new AJAXRequestResult();
     }
 
-    private static String getHostname(AJAXRequestData request) {
+    private static String getHostname(AJAXRequestData request, ServerSession session) {
         String hostname = null;
-        HostnameService hostnameService = Services.getService(HostnameService.class);
+        HostnameService hostnameService = Services.optService(HostnameService.class);
+
         if (hostnameService != null) {
-            hostname = hostnameService.getHostname(-1, -1);
+            hostname = hostnameService.getHostname(session.getUserId(), session.getContextId());
         }
 
         if (hostname == null) {

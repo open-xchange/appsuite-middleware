@@ -64,12 +64,15 @@ public class UserFeedbackJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FeedbackService.class, HostnameService.class };
+        return new Class<?>[] { FeedbackService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        trackService(HostnameService.class);
+        openTrackers();
+
         registerModule(new UserFeedbackActionFactory(), "userfeedback");
     }
 
