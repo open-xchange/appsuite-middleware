@@ -545,7 +545,8 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().toLowerCaseString());
+                        // Only base type in case of JSON object
+                        jsonContainer.toObject().put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                     } else {
                         jsonContainer.toArray().put(mail.getContentType().toLowerCaseString());
                     }
