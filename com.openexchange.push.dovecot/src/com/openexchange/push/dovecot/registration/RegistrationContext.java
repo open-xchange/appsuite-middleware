@@ -160,7 +160,7 @@ public class RegistrationContext {
      * @throws OXException If DoveAdm client cannot be returned
      */
     public DoveAdmClient getDoveAdmClient() throws OXException {
-        return doveAdmClientProvider.getDoveAdmClient();
+        return null == doveAdmClientProvider ? null : doveAdmClientProvider.getDoveAdmClient();
     }
 
     /**
