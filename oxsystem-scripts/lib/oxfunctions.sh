@@ -662,3 +662,43 @@ quote_s_re () {
   sed -e 's/[\/&]/\\&/g' <<< "$1"
 }
 
+# Scans the file given as parameter1 for uncommentented lines starting with
+# either the old style JAVA_XTRAOPTS or the post RM-177 style JAVA_OPTS_MEM for
+# the JVM max heap size configuration option given as either -Xmx or
+# -XX:MaxHeapSize.
+#
+# Param1: The file to read the maximum heap size from
+# Return: The first found config option for the JVM's max heap size or "n/a"
+#         if either the file can't be read or the option can't be found
+# Example:
+#
+#   root@host:~$ max_heap=$(ox_get_max_heap /opt/open-xchange/etc/ox-scriptconf.sh)
+#   root@host:~$ echo ${max_heap}
+#   root@host:~$ 512M
+#
+ox_get_max_heap() {
+  local config_file=$1
+  test -z "${config_file}" && die "ox_get_max_heap: missing config file argument (arg 1)"
+  if [ -r "${config_file}" ]
+  then
+    local max_heap=$(awk '/^JAVA_XTRAOPTS|^JAVA_OPTS_MEM/ {
+      gsub("JAVA.[^\"]*","")
+      gsub("\"","")
+      num_opts = split($0, mem_opts, " ")
+      for (x=1; x <= num_opts; ++x) {
+        if (mem_opts[x] ~ /-Xmx/) {
+          gsub("-Xmx","", mem_opts[x])
+          print mem_opts[x]
+          exit
+        } else if (mem_opts[x] ~ /-XX:MaxHeapSize/) {
+          split(mem_opts[x], heap_size , "=")
+          print heap_size[2]
+          exit
+        }
+      }
+    }' ${config_file})
+  fi
+  local max_heap=${max_heap:-"n/a"}
+  echo ${max_heap}
+}
+
