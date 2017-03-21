@@ -445,7 +445,7 @@ class UpdateData {
                 throw TaskExceptionCode.NOT_IN_FOLDER.create(I(getTaskId()), folder.getFolderName(), I(getFolderId()));
             }
             if (Tools.isFolderShared(folder, user) && getOrigTask().getPrivateFlag()) {
-                throw TaskExceptionCode.NO_PERMISSION.create(I(getTaskId()), folder.getFolderName(), I(getFolderId()));
+                throw TaskExceptionCode.NO_PERMISSION.create(I(getTaskId()), I(getFolderId()));
             }
         }
     }
