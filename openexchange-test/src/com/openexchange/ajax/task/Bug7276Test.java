@@ -71,7 +71,7 @@ import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
  * Tests problem described in bug #7276.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug7276Test extends AbstractTaskTest {
@@ -89,6 +89,7 @@ public class Bug7276Test extends AbstractTaskTest {
     /**
      * {@inheritDoc}
      */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -98,6 +99,7 @@ public class Bug7276Test extends AbstractTaskTest {
     /**
      * {@inheritDoc}
      */
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -109,7 +111,7 @@ public class Bug7276Test extends AbstractTaskTest {
 
     /**
      * Tests if bug #7276 appears again.
-     * 
+     *
      * @throws Throwable if this test fails.
      */
     @Test
@@ -140,7 +142,7 @@ public class Bug7276Test extends AbstractTaskTest {
         {
             final GetResponse response = TaskTools.get(client2, new GetRequest(folder2, task.getObjectID(), false));
             assertTrue("Server does not give exception although it has to.", response.hasError());
-            OXException expectedErr = TaskExceptionCode.NO_PERMISSION.create(I(0), "", I(0));
+            OXException expectedErr = TaskExceptionCode.NO_PERMISSION.create(I(0), I(0));
             OXException actual = response.getException();
             assertTrue("Wrong exception", actual.similarTo(expectedErr));
         }
