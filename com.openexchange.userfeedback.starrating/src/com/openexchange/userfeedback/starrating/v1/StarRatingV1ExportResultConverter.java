@@ -111,7 +111,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         ThresholdFileHolder sink = new ThresholdFileHolder();
         OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
         try {
-            final StarRatingV1JsonFields[] jsonFields = StarRatingV1JsonFields.values();
+            final StarRatingV1Fields[] jsonFields = StarRatingV1Fields.values();
             writer.write(convertToLine(jsonFields, null));
 
             for (Feedback feedback : feedbacks) {
@@ -125,10 +125,10 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         return exportResult;
     }
 
-    private String convertToLine(StarRatingV1JsonFields[] jsonFields, JSONObject object) throws JSONException {
+    private String convertToLine(StarRatingV1Fields[] jsonFields, JSONObject object) throws JSONException {
         boolean isHeader = object == null;
         StringBuilder bob = new StringBuilder(1024);
-        for (StarRatingV1JsonFields token : jsonFields) {
+        for (StarRatingV1Fields token : jsonFields) {
             bob.append('"');
             if (isHeader) {
                 bob.append(PATTERN_QUOTE.matcher(token.getDisplayName()).replaceAll("\"\""));

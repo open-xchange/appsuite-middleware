@@ -221,6 +221,6 @@ public class StarRatingV1 extends AbstractFeedbackType {
 
     @Override
     public JSONObject cleanUpFeedback(JSONObject jsonFeedback) throws OXException {
-        return cleanUpFeedback(jsonFeedback, StarRatingV1JsonFields.requiredJsonKeys());
+        return cleanUpFeedback(jsonFeedback, StarRatingV1Fields.requiredJsonKeys());
     }
 }

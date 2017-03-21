@@ -54,14 +54,12 @@ import java.util.Set;
 import org.json.JSONObject;
 
 /**
- * {@link StarRatingV1JsonFields}
+ * {@link StarRatingV1Fields}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public enum StarRatingV1JsonFields {
-    date("Date"),
-    user("User"),
+public enum StarRatingV1Fields {
     score("Score"),
     app("App"),
     entry_point("Entry Point"),
@@ -72,6 +70,9 @@ public enum StarRatingV1JsonFields {
     user_agent("User Agent"),
     screen_resolution("Screen Resolution"),
     language("Language"),
+    // only for export
+    date("Date"),
+    user("User"),
     server_version("Server Version"),
     client_version("Client Version"),
     ;
@@ -79,14 +80,14 @@ public enum StarRatingV1JsonFields {
     private static final Set<String> INTERNAL_KEYS = new HashSet<String>();
 
     static {
-        for (StarRatingV1JsonFields field : StarRatingV1JsonFields.values()) {
+        for (StarRatingV1Fields field : StarRatingV1Fields.values()) {
             INTERNAL_KEYS.add(field.name().toLowerCase());
         }
     }
 
     private String displayName;
 
-    StarRatingV1JsonFields(String displayName) {
+    StarRatingV1Fields(String displayName) {
         this.displayName = displayName;
     }
 
@@ -100,7 +101,7 @@ public enum StarRatingV1JsonFields {
     }
 
     /**
-     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1JsonFields#values()} are retrieved from other tables.
+     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1Fields#values()} are retrieved from other tables.
      * 
      * @return Set of {@link String} that are required within the {@link JSONObject}
      */
