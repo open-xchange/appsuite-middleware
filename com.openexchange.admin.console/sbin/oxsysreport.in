@@ -354,8 +354,8 @@ collect_ox_configs() {
             cp -aL ${ox_config_dir} ${_ox_config_copy}
             if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
                 echo "Removing secrets: ${_ox_config_copy}"
-                exclude_secret_entries ${_ox_config_copy}
                 exclude_secret_ox_config_files ${_ox_config_copy}
+                exclude_secret_entries ${_ox_config_copy}
             fi
         fi
     done
