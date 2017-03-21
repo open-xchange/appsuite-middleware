@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,76 +50,31 @@
 package com.openexchange.charset;
 
 import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
-import java.nio.charset.spi.CharsetProvider;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
+import com.openexchange.charset.internal.CharsetServiceUtility;
 
 /**
- * {@link ASCIIReplacementCharsetProvider} - A charset provider which returns the "WINDOWS-1252" charset when "ISO-8859-1" is requested.
+ * {@link CharsetServices} - Utility class for charset service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class ASCIIReplacementCharsetProvider extends CharsetProvider {
-
-    private final Set<String> aliases;
-
-    private final CharsetProvider standardProvider;
-
-    private final Charset windows1252;
-
-    private final Locale english;
+public class CharsetServices {
 
     /**
-     * Initializes a new {@link ASCIIReplacementCharsetProvider}.
-     *
-     * @throws UnsupportedCharsetException If "WINDOWS-1252" charset cannot be found
+     * Initializes a new {@link CharsetServices}.
      */
-    public ASCIIReplacementCharsetProvider(final CharsetProvider standardProvider) {
+    private CharsetServices() {
         super();
-        this.standardProvider = standardProvider;
-        windows1252 = Charset.forName("WINDOWS-1252");
-
-        final Charset ascii = Charset.forName("US-ASCII");
-        english = Locale.ENGLISH;
-        aliases = new HashSet<String>(16);
-        aliases.add("US-ASCII");
-        for (final String alias : ascii.aliases()) {
-            aliases.add(alias.toUpperCase(english));
-        }
     }
 
-    @Override
-    public int hashCode() {
-        return standardProvider.hashCode();
-    }
-
-    @Override
-    public Iterator<Charset> charsets() {
-        return standardProvider.charsets();
-    }
-
-    @Override
-    public Charset charsetForName(final String charsetName) {
-        if (aliases.contains(charsetName.toUpperCase(english))) {
-            return windows1252;
-        }
-        /*
-         * Delegate to standard provider
-         */
-        return standardProvider.charsetForName(charsetName);
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return standardProvider.equals(obj);
-    }
-
-    @Override
-    public String toString() {
-        return standardProvider.toString();
+    /**
+     * Gets the ISO-8859-1 character set.
+     *
+     * @return The ISO-8859-1 character set
+     */
+    public static Charset getIso8859Charset() {
+        Charset iso8859cs = CharsetServiceUtility.getIso8859CS();
+        return null == iso8859cs ? Charset.forName("ISO-8859-1") : iso8859cs;
     }
 
 }

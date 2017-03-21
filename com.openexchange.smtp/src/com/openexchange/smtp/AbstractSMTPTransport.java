@@ -602,15 +602,16 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         final String login = smtpConfig.getLogin();
         try {
             if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                final String encodedPassword = encodePassword(smtpConfig.getPassword());
+                final String encodedPassword = authEncode(smtpConfig.getPassword());
+                final String encodedLogin = authEncode(login);
                 if (isKerberosAuth()) {
                     try {
-                        Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, login, encodedPassword));
+                        Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, encodedLogin, encodedPassword));
                     } catch (final PrivilegedActionException e) {
                         handlePrivilegedActionException(e);
                     }
                 } else {
-                    transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
+                    transport.connect(server, port, null == encodedLogin ? "" : encodedLogin, null == encodedPassword ? "" : encodedPassword);
                 }
             } else {
                 transport.connect(server, port, null, null);
@@ -1207,17 +1208,17 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-    private String encodePassword(final String password) throws OXException {
-        String tmpPass = password;
-        if (tmpPass != null) {
+    private String authEncode(final String s) throws OXException {
+        String tmp = s;
+        if (tmp != null) {
             try {
-                tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
+                tmp = new String(s.getBytes(Charsets.forName(getTransportConfig().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored", e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }
         }
-        return tmpPass;
+        return tmp;
     }
 
     private void prepareAddresses(final Address[] addresses) {

@@ -403,7 +403,7 @@ public class ContactServiceImpl extends DefaultContactService {
         Contact storedContact = storage.get(session, folderID, objectID, ContactField.values());
         Check.contactNotNull(storedContact, contextId, Tools.parse(objectID));
         if (storedContact.getCreatedBy() != userID) {
-            if (storedContact.getCreatedBy() == Tools.getContext(contextId).getContextId()) {
+            if (storedContact.getCreatedBy() == Tools.getContext(contextId).getMailadmin()) {
                 /*
                  * take over bugfix for https://bugs.open-xchange.com/show_bug.cgi?id=19128#c9:
                  * Accepting context admin as a user's contact creator, too, and executing self-healing mechanism

@@ -55,9 +55,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
@@ -149,6 +152,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private String cipherSuites;
 
+    private HostExtractingGreetingListener hostExtractingGreetingListener;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -163,6 +168,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         propagateHostNames = Collections.emptySet();
         allowFetchSingleHeaders = true;
         allowFolderCaches = true;
+        hostExtractingGreetingListener = null;
     }
 
     @Override
@@ -430,6 +436,20 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
             logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
         }
+        
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.greeting.host.regex", "").trim();
+            tmp = Strings.isEmpty(tmp) ? null : tmp;
+            if (null != tmp) {
+                try {
+                    Pattern pattern = Pattern.compile(tmp);
+                    hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
+                    logBuilder.append("\tHost name regular expression: ").append(tmp).append("\n");
+                } catch (PatternSyntaxException e) {
+                    logBuilder.append("\tHost name regular expression: Invalid value \"").append(null == tmp ? "<none>" : tmp).append("\". Using no host name extraction\n");
+                }
+            }
+        }
 
         logBuilder.append("Global IMAP properties successfully loaded!");
 
@@ -462,6 +482,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         notifyFullNames = "INBOX";
         sslProtocols = "SSLv3 TLSv1";
         cipherSuites = null;
+        hostExtractingGreetingListener = null;
     }
 
     @Override
@@ -690,6 +711,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public String getSSLCipherSuites() {
         return cipherSuites;
+    }
+
+    /**
+     * Gets the greeting listener to parse the host name information from <b><i>primary</i></b> IMAP server's greeting string.
+     *
+     * @return The host name extractor or <code>null</code>
+     */
+    public HostExtractingGreetingListener getHostNameRegex() {
+        return hostExtractingGreetingListener;
     }
 
 }

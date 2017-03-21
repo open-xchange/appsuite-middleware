@@ -53,6 +53,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
 
@@ -73,6 +74,7 @@ class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService
     public void removedService(ServiceReference<SessiondService> reference, SessiondService service) {
         PortableSessionRemoteLookUp.setSessiondServiceReference(null);
         PortableSessionExistenceCheck.setSessiondServiceReference(null);
+        PortableMultipleSessionRemoteLookUp.setSessiondServiceReference(null);
         context.ungetService(reference);
     }
 
@@ -86,6 +88,7 @@ class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService
         SessiondService service = context.getService(reference);
         PortableSessionExistenceCheck.setSessiondServiceReference(service);
         PortableSessionRemoteLookUp.setSessiondServiceReference(service);
+        PortableMultipleSessionRemoteLookUp.setSessiondServiceReference(service);
         return service;
     }
 

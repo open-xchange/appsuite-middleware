@@ -77,10 +77,10 @@ import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.internal.AbstractCapabilityService;
-import com.openexchange.charset.CollectionCharsetProvider;
+import com.openexchange.charset.internal.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
-import com.openexchange.charset.ModifyCharsetExtendedProvider;
+import com.openexchange.charset.internal.ModifyCharsetExtendedProvider;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.cluster.timer.internal.ClusterTimerServiceImpl;
 import com.openexchange.config.ConfigurationService;
@@ -310,7 +310,9 @@ public final class Init {
 
         SessiondInit.getInstance(),
 
-        new GroupInit() };
+        new GroupInit(),
+
+    };
 
     private static boolean databaseUpdateinitialized = false;
 

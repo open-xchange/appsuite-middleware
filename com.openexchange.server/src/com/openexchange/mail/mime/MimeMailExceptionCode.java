@@ -330,6 +330,14 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * Encountered a read timeout while trying to send to the following recipient: %1$s (%2$s) (<i>arbitrary server information</i>)
      */
     SEND_TIMED_OUT_ERROR("Message could not be sent: %1$s (%2$s)", CATEGORY_ERROR, 1033, MimeMailExceptionMessage.SEND_TIMED_OUT_ERROR_MSG_DISPLAY),
+    /**
+     * Connection timed out while attempting to read a response from remote mail server %1$s for user %2$s.
+     */
+    READ_TIMEOUT("Connection timed out while attempting to read a response from remote mail server %1$s for user %2$s.", CATEGORY_SERVICE_DOWN, 1034, MimeMailExceptionMessage.READ_TIMEOUT_MSG_DISPLAY),
+    /**
+     * Mail server %1$s unexpectedly closed connection for user %2$s.
+     */
+    CONNECTION_CLOSED("Mail server %1$s unexpectedly closed connection for user %2$s.", CATEGORY_SERVICE_DOWN, 1035, MimeMailExceptionMessage.CONNECTION_CLOSED_MSG_DISPLAY),
 
     ;
 

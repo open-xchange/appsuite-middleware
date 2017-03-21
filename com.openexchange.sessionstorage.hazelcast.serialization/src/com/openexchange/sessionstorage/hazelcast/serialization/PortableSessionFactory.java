@@ -49,6 +49,7 @@
 
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
@@ -67,6 +68,11 @@ public class PortableSessionFactory extends AbstractCustomPortableFactory {
     @Override
     public int getClassId() {
         return PortableSession.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableSession.CLASS_DEFINITION;
     }
 
 }

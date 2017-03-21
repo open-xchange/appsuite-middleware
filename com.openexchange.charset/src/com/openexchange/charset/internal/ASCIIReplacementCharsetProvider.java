@@ -47,49 +47,79 @@
  *
  */
 
-package com.openexchange.charset;
+package com.openexchange.charset.internal;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.nio.charset.spi.CharsetProvider;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Set;
 
 /**
- * {@link ReflectionHelper} - The reflection helper class.
+ * {@link ASCIIReplacementCharsetProvider} - A charset provider which returns the "WINDOWS-1252" charset when "ISO-8859-1" is requested.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ReflectionHelper {
+public final class ASCIIReplacementCharsetProvider extends CharsetProvider {
+
+    private final Set<String> aliases;
+
+    private final CharsetProvider standardProvider;
+
+    private final Charset windows1252;
+
+    private final Locale english;
 
     /**
-     * Initializes a new {@link ReflectionHelper}.
+     * Initializes a new {@link ASCIIReplacementCharsetProvider}.
+     *
+     * @throws UnsupportedCharsetException If "WINDOWS-1252" charset cannot be found
      */
-    private ReflectionHelper() {
+    public ASCIIReplacementCharsetProvider(final CharsetProvider standardProvider) {
         super();
+        this.standardProvider = standardProvider;
+        windows1252 = Charset.forName("WINDOWS-1252");
+
+        final Charset ascii = Charset.forName("US-ASCII");
+        english = Locale.ENGLISH;
+        aliases = new HashSet<String>(16);
+        aliases.add("US-ASCII");
+        for (final String alias : ascii.aliases()) {
+            aliases.add(alias.toUpperCase(english));
+        }
     }
 
-    /**
-     * Sets the final static field.
-     *
-     * @param field The field to set
-     * @param value The new value to apply
-     * @throws NoSuchFieldException If there is no such field
-     * @throws IllegalAccessException If access is prohibited
-     */
-    public static void setStaticFinalField(final Field field, final Object value) throws NoSuchFieldException, IllegalAccessException {
-        // Mark the field to be public
-        field.setAccessible(true);
+    @Override
+    public int hashCode() {
+        return standardProvider.hashCode();
+    }
 
-        // Change the modifier in the Field instance to
-        // not be final anymore, thus tricking reflection into
-        // letting us modify the static final field
-        final Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        int modifiers = modifiersField.getInt(field);
+    @Override
+    public Iterator<Charset> charsets() {
+        return standardProvider.charsets();
+    }
 
-        // Blank out the final bit in the modifiers integer
-        modifiers &= ~Modifier.FINAL;
-        modifiersField.setInt(field, modifiers);
-        final sun.reflect.FieldAccessor fa = sun.reflect.ReflectionFactory.getReflectionFactory().newFieldAccessor(field, false);
-        fa.set(null, value);
+    @Override
+    public Charset charsetForName(final String charsetName) {
+        if (aliases.contains(charsetName.toUpperCase(english))) {
+            return windows1252;
+        }
+        /*
+         * Delegate to standard provider
+         */
+        return standardProvider.charsetForName(charsetName);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return standardProvider.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return standardProvider.toString();
     }
 
 }

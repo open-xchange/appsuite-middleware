@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,79 +47,46 @@
  *
  */
 
-package com.openexchange.charset;
+package com.openexchange.lock;
 
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
-import java.nio.charset.spi.CharsetProvider;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
 
 /**
- * {@link ISOReplacementCharsetProvider} - A charset provider which returns the "WINDOWS-1252" charset when "ISO-8859-1" is requested.
+ * {@link AccessControl} - Limits the number of concurrent access to a resource.
+ * <pre>
+ * AccessControl accessControl = lockService.getAccessControlFor(...);
+ * try {
+ *     accessControl.acquireGrant();
+ *      ...
+ * } catch (InterruptedException e) {
+ *     Thread.currentThread().interrupt();
+ *     throw ...
+ * } finally {
+ *    accessControl.close();
+ * }
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public final class ISOReplacementCharsetProvider extends CharsetProvider {
-
-    private final Set<String> aliases;
-
-    private final CharsetProvider standardProvider;
-
-    private final Charset windows1252;
-
-    private final Locale english;
+public interface AccessControl extends AutoCloseable {
 
     /**
-     * Initializes a new {@link ISOReplacementCharsetProvider}.
+     * Acquires a grant from this access control; waiting for an available grant if needed.
      *
-     * @throws UnsupportedCharsetException If "WINDOWS-1252" charset cannot be found
+     * @throws InterruptedException If interrupted while waiting for a grant
      */
-    public ISOReplacementCharsetProvider(final CharsetProvider standardProvider) {
-        super();
-        this.standardProvider = standardProvider;
-        windows1252 = Charset.forName("WINDOWS-1252");
+    void acquireGrant() throws InterruptedException;
 
-        final Charset iso_8859_1 = Charset.forName("ISO-8859-1");
-        english = Locale.ENGLISH;
-        aliases = new HashSet<String>(16);
-        aliases.add("ISO-8859-1");
-        for (final String alias : iso_8859_1.aliases()) {
-            aliases.add(alias.toUpperCase(english));
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return standardProvider.hashCode();
-    }
-
-    @Override
-    public Iterator<Charset> charsets() {
-        return standardProvider.charsets();
-    }
-
-    @Override
-    public Charset charsetForName(final String charsetName) {
-        if (aliases.contains(charsetName.toUpperCase(english))) {
-            return windows1252;
-        }
-        /*
-         * Delegate to standard provider
-         */
-        return standardProvider.charsetForName(charsetName);
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return standardProvider.equals(obj);
-    }
-
-    @Override
-    public String toString() {
-        return standardProvider.toString();
-    }
+    /**
+     * Releases this access control.
+     * <p>
+     * This is the same as calling {@link #close()}.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">May only be invoked one time per thread!</div>
+     * <p>
+     *
+     * @return <code>true</code> if released; otherwise <code>false</code>
+     */
+    boolean release();
 
 }

@@ -56,6 +56,7 @@ import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.locking.DbImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.HzImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.LocalImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.NoOpImapIdleClusterLock;
 import com.openexchange.server.ServiceLookup;
 
@@ -108,6 +109,8 @@ public class ImapIdleConfiguration {
                 clusterLock = new HzImapIdleClusterLock("imapidle-2", services);
             } else if ("db".equalsIgnoreCase(tmp)) {
                 clusterLock = new DbImapIdleClusterLock(services);
+            } else if ("local".equalsIgnoreCase(tmp)) {
+                clusterLock = new LocalImapIdleClusterLock(services);
             } else {
                 clusterLock = new NoOpImapIdleClusterLock();
             }

@@ -225,6 +225,11 @@ public class MimeMailException extends OXException {
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                         e.getMessage());
             } else if (e instanceof javax.mail.FolderClosedException) {
+                if (isTimeoutException(e)) {
+                    // javax.mail.FolderClosedException through a read timeout
+                    return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+
                 final Folder f = ((javax.mail.FolderClosedException) e).getFolder();
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.FOLDER_CLOSED_EXT.create(
@@ -369,6 +374,11 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(invalidAddresses), null == smtpInfo ? exc.getMessage() : smtpInfo.toString());
             } else if (e instanceof javax.mail.StoreClosedException) {
+                if (isTimeoutException(e)) {
+                    // javax.mail.FolderClosedException through a read timeout
+                    return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.STORE_CLOSED_EXT.create(e, mailConfig.getServer(), mailConfig.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), EMPTY_ARGS);
                 }
@@ -400,6 +410,16 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.BIND_ERROR.create(e, mailConfig == null ? STR_EMPTY : Integer.valueOf(mailConfig.getPort()));
             } else if (nextException instanceof com.sun.mail.iap.ConnectionException) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
+                com.sun.mail.iap.ConnectionException connectionException = (com.sun.mail.iap.ConnectionException) nextException;
+                if (isTimeoutException(connectionException)) {
+                    // A read timeout
+                    return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+                if (isByeException(connectionException)) {
+                    // Unexpected connection close
+                    return MimeMailExceptionCode.CONNECTION_CLOSED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+
                 return MimeMailExceptionCode.CONNECT_ERROR.create(
                     e,
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
@@ -439,7 +459,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(e.getMessage(), folder));
             } else if (nextException instanceof java.net.SocketTimeoutException) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
-                return MimeMailExceptionCode.CONNECT_ERROR.create(
+                return MimeMailExceptionCode.READ_TIMEOUT.create(
                     e,
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                         mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
@@ -743,6 +763,52 @@ public class MimeMailException extends OXException {
         }
 
         return isEitherOf(e, com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
+    }
+
+    /**
+     * Checks if cause of specified messaging exception indicates a timeout problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a timeout problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTimeoutException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class);
+    }
+
+    /**
+     * Checks if cause of specified connection exception indicates a timeout problem.
+     *
+     * @param e The connection exception to examine
+     * @return <code>true</code> if a timeout problem is indicated; otherwise <code>false</code>
+     */
+    private static boolean isTimeoutException(com.sun.mail.iap.ConnectionException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class);
+    }
+
+    /**
+     * Checks if cause of specified connection exception indicates unexpected connection closure.
+     *
+     * @param e The connection exception to examine
+     * @return <code>true</code> if unexpected connection closure is indicated; otherwise <code>false</code>
+     */
+    private static boolean isByeException(com.sun.mail.iap.ConnectionException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, com.sun.mail.iap.ByeIOException.class);
+    }
+
+    public static boolean isSSLHandshakeException(MessagingException e) {
+        return isEitherOf(e, javax.net.ssl.SSLHandshakeException.class);
     }
 
     private static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
