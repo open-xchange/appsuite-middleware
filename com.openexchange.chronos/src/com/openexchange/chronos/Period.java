@@ -120,8 +120,7 @@ public class Period {
      * @return The duration in total days
      */
     public long getTotalDays() {
-        // TODO ...
-        return (endDate.getTime() - startDate.getTime()) / TimeUnit.DAYS.toMillis(1L);
+        return TimeUnit.MILLISECONDS.toDays(getDuration());
     }
 
     /**

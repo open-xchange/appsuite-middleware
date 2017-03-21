@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.add;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
@@ -62,6 +63,7 @@ import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.isIgnoreConflicts;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -159,12 +161,12 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * derive checked period (+/- one day to cover floating events in different timezone)
          */
-        //TODO check that
-        Date until = new Date(event.getEndDate().getTime() + 86400000);
+        TimeZone eventTimeZone = isFloating(event) || null == event.getStartTimeZone() ? getTimeZone(session) : TimeZone.getTimeZone(event.getStartTimeZone());
+        Date from = add(event.getStartDate(), Calendar.DATE, -1, eventTimeZone);
+        Date until = add(event.getEndDate(), Calendar.DATE, 1, eventTimeZone);
         if (today.after(until)) {
             return Collections.emptyList();
         }
-        Date from = new Date(event.getStartDate().getTime() - 86400000);
         /*
          * search for potentially conflicting events in period
          */
@@ -175,7 +177,6 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * check against each event in period
          */
-        TimeZone eventTimeZone = isFloating(event) || null == event.getStartTimeZone() ? getTimeZone(session) : TimeZone.getTimeZone(event.getStartTimeZone());
         List<EventConflict> conflicts = new ArrayList<EventConflict>();
         for (Event eventInPeriod : eventsInPeriod) {
             /*

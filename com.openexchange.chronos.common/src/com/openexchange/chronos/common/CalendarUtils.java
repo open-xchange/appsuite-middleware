@@ -79,6 +79,7 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -343,6 +344,34 @@ public class CalendarUtils {
      */
     public static Date getDateInTimeZone(Date floatingDate, TimeZone timeZone) {
         return new Date(floatingDate.getTime() - timeZone.getOffset(floatingDate.getTime()));
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time of the given calendar field to the supplied date.<p/>
+     * The calendar is initialized with <code>UTC</code> timezone implicitly.
+     *
+     * @param date The date to add or subtract the time to/from
+     * @param field The calendar field
+     * @param amount The amount of date or time to be added to the field
+     * @return A new date derived from the calendar after adding the amount of time
+     */
+    public static Date add(Date date, int field, int amount) {
+        return add(date, field, amount, TimeZones.UTC);
+    }
+
+    /**
+     * Adds or subtracts the specified amount of time of the given calendar field to the supplied date.
+     *
+     * @param calendar The calendar to add or subtract the time to/from
+     * @param field The calendar field
+     * @param amount The amount of date or time to be added to the field
+     * @param The timezone to perform the add/substract operation in
+     * @return A new date derived from the calendar after adding the amount of time
+     */
+    public static Date add(Date date, int field, int amount, TimeZone timeZone) {
+        Calendar calendar = initCalendar(timeZone, date);
+        calendar.add(field, amount);
+        return calendar.getTime();
     }
 
     /**
