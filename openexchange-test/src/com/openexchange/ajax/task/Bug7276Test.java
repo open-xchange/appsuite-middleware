@@ -67,6 +67,7 @@ import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
  * Tests problem described in bug #7276.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug7276Test extends AbstractTaskTest {
@@ -85,7 +86,8 @@ public class Bug7276Test extends AbstractTaskTest {
      * {@inheritDoc}
      */
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(AJAXClient.User.User2);
     }
@@ -94,13 +96,18 @@ public class Bug7276Test extends AbstractTaskTest {
      * {@inheritDoc}
      */
     @Override
-    protected void tearDown() throws Exception {
-        client2.logout();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client2.logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
      * Tests if bug #7276 appears again.
+     *
      * @throws Throwable if this test fails.
      */
     public void testBug() throws Throwable {
@@ -133,12 +140,10 @@ public class Bug7276Test extends AbstractTaskTest {
         }
         // Now User 2 tries to load the task again.
         {
-            final GetResponse response = TaskTools.get(client2, new GetRequest(
-                folder2, task.getObjectID(), false));
-            assertTrue("Server does not give exception although it has to.",
-                response.hasError());
-            OXException expectedErr = TaskExceptionCode.NO_PERMISSION.create(I(0), "", I(0));
-            OXException actual= response.getException();
+            final GetResponse response = TaskTools.get(client2, new GetRequest(folder2, task.getObjectID(), false));
+            assertTrue("Server does not give exception although it has to.", response.hasError());
+            OXException expectedErr = TaskExceptionCode.NO_PERMISSION.create(I(0), I(0));
+            OXException actual = response.getException();
             assertTrue("Wrong exception", actual.similarTo(expectedErr));
         }
         // Clean up
