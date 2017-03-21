@@ -16,6 +16,8 @@ consumes:
 tags:
   - name: Userfeedback
     description: The user feedback module
+  - name: Advertisement
+    description: The advertisement module
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

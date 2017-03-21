@@ -1,0 +1,61 @@
+/advertisement/v1/config/package:
+  put:
+    operationId: put
+    tags:
+      - Advertisement
+    summary: Sets an advertisement configuration for a package of a reseller
+    parameters:
+      - 
+        name: reseller
+        in: query
+        description: The reseller name
+        required: true
+        type: string
+      - 
+        name: package
+        in: query
+        description: The package name
+        required: true
+        type: string
+      -
+        name: body
+        in: formData
+        description: JSONObject describing the advertisement configuration
+        required: true
+        type: string
+        format: JSON
+
+    responses:
+      200:
+        description: The configuration result
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized
+
+  delete:
+    operationId: delete
+    tags:
+      - Advertisement
+    summary: Remove the current configuration for a package of a reseller
+    parameters:
+      - 
+        name: reseller
+        in: query
+        description: The reseller name
+        required: true
+        type: string
+      - 
+        name: package
+        in: query
+        description: The package name
+        required: true
+        type: string
+
+    responses:
+      200:
+        description: The configuration result
+      400:
+        description: Bad request, response contains error message.
+      401:
+        description: Not authorized
