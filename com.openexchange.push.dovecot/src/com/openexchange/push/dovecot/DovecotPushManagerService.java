@@ -238,37 +238,60 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         // Prefer permanent listener prior to performing look-up for another valid session
         if (hasPermanentPush(userId, contextId)) {
             try {
-                Session session = generateSessionFor(userId, contextId);
-                return injectAnotherListenerUsing(session, true);
+                DoveAdmClient doveAdmClient = services.getOptionalService(DoveAdmClient.class);
+                RegistrationContext registrationContext;
+                if (null == doveAdmClient) {
+                    Session session = generateSessionFor(userId, contextId);
+                    registrationContext = RegistrationContext.createSessionContext(session);
+                } else {
+                    registrationContext = RegistrationContext.createDoveAdmClientContext(userId, contextId, new ServiceLookupDoveAdmClientProvider(services));
+                }
+
+                return injectAnotherListenerUsing(registrationContext, true);
             } catch (OXException e) {
                 // Failed to inject a permanent listener
             }
         }
 
+        Session session = lookUpSessionFor(userId, contextId, oldSession);
+        if (null == session) {
+            // No push-capable session
+            return null;
+        }
+
+        DoveAdmClient doveAdmClient = services.getOptionalService(DoveAdmClient.class);
+        RegistrationContext registrationContext = null == doveAdmClient ? RegistrationContext.createSessionContext(session) : RegistrationContext.createDoveAdmClientContext(userId, contextId, new ServiceLookupDoveAdmClientProvider(services));
+        return injectAnotherListenerUsing(registrationContext, false);
+    }
+
+    /**
+     * Looks-up a push-capable session for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param optOldSession The optional old session (which expired)
+     * @return A push-capable session or <code>null</code>
+     */
+    public Session lookUpSessionFor(int userId, int contextId, Session optOldSession) {
         // Look-up sessions
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (null != sessiondService) {
-            String oldSessionId = oldSession.getSessionID();
+            String oldSessionId = null == optOldSession ? null : optOldSession.getSessionID();
 
-            // Query local ones first
+            // Query local ones
             Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
             for (Session session : sessions) {
-                if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                    return injectAnotherListenerUsing(session, false);
+                if ((null == oldSessionId || false == oldSessionId.equals(session.getSessionID())) && PushUtility.allowedClient(session.getClient(), session, true)) {
+                    return session;
                 }
-            }
-
-            // Look-up remote sessions, too, if possible
-            Session session = lookUpRemoteSessionFor(oldSession);
-            if (null != session) {
-                return injectAnotherListenerUsing(session, false);
             }
         }
 
-        return null;
+        // Look-up remote sessions, too, if possible
+        return lookUpRemoteSessionFor(userId, contextId, optOldSession);
     }
 
-    private Session lookUpRemoteSessionFor(Session oldSession) {
+    private Session lookUpRemoteSessionFor(int userId, int contextId, Session optOldSession) {
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
         ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
         if (null == hzInstance || null == obfuscatorService) {
@@ -286,12 +309,9 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             return null;
         }
 
-        int contextId = oldSession.getContextId();
-        int userId = oldSession.getUserId();
-
         IExecutorService executor = hzInstance.getExecutorService("default");
         Map<Member, Future<PortableSessionCollection>> futureMap = executor.submitToMembers(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers);
-        String oldSessionId = oldSession.getSessionID();
+        String oldSessionId = null == optOldSession ? null : optOldSession.getSessionID();
         for (Iterator<Entry<Member, Future<PortableSessionCollection>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
             Future<PortableSessionCollection> future = it.next().getValue();
             // Check Future's return value
@@ -305,7 +325,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                     if (null != portableSessions) {
                         for (PortableSession portableSession : portableSessions) {
                             portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
-                            if (!oldSessionId.equals(portableSession.getSessionID()) && PushUtility.allowedClient(portableSession.getClient(), portableSession, true)) {
+                            if ((null == oldSessionId || false == oldSessionId.equals(portableSession.getSessionID())) && PushUtility.allowedClient(portableSession.getClient(), portableSession, true)) {
                                 cancelRest(it);
                                 return portableSession;
                             }
@@ -394,10 +414,10 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      * @return The new listener or <code>null</code>
      * @throws OXException If operation fails
      */
-    public DovecotPushListener injectAnotherListenerUsing(Session newSession, boolean permanent) {
-        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, RegistrationContext.createSessionContext(newSession), permanent, this, services);
+    public DovecotPushListener injectAnotherListenerUsing(RegistrationContext registrationContext, boolean permanent) {
+        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, registrationContext, permanent, this, services);
         // Replace old/existing one
-        listeners.put(SimpleKey.valueOf(newSession), listener);
+        listeners.put(SimpleKey.valueOf(registrationContext.getUserId(), registrationContext.getContextId()), listener);
         return listener;
     }
 

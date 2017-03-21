@@ -65,6 +65,7 @@ import com.openexchange.push.dovecot.registration.RegistrationPerformer;
 import com.openexchange.push.dovecot.registration.RegistrationResult;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -285,10 +286,20 @@ public class DovecotPushListener implements PushListener, Runnable {
         // Check if DoveAdm is used
         if (registrationContext.isDoveAdmBased()) {
             if (tryToReconnect) {
-                // Not associated with a certain session. Keep as-is
-                return null;
+                if (permanent) {
+                    // Not associated with a certain session. Keep as-is
+                    return null;
+                }
+
+                // Check if there is still a valid push-capable session available
+                Session session = pushManager.lookUpSessionFor(registrationContext.getUserId(), registrationContext.getContextId(), null);
+                if (null != session) {
+                    // Keep as-is
+                    return null;
+                }
             }
 
+            // Dispose...
             Runnable cleanUpTask = createCleanUpTask(pushManager);
             doUnregistration();
             initialized = false;
