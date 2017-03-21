@@ -123,6 +123,7 @@ import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -1603,7 +1604,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     mail.setOriginalId(origUid.toString());
                 }
                 if (null != origFolder) {
-                    mail.setOriginalFolder(origFolder);
+                    mail.setOriginalFolder(new FullnameArgument(accountId, origFolder));
                 }
                 mail.setMailId(Long.toString(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));

@@ -313,7 +313,7 @@ public final class Threadables {
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName);
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId());
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);

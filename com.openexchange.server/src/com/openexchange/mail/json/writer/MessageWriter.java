@@ -499,7 +499,7 @@ public final class MessageWriter {
                 try {
                     Object originalFolder;
                     if (mail.containsOriginalFolder() && null != mail.getOriginalFolder()) {
-                        originalFolder = prepareFullname(accountId, mail.getOriginalFolder());
+                        originalFolder = prepareFullname(mail.getOriginalFolder().getAccountId(), mail.getOriginalFolder().getFullName());
                     } else {
                         // Fall back to regular folder
                         int accId = accountId;

@@ -83,6 +83,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -387,15 +388,15 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         jsonObject.put(ORIGINAL_ID, originalId);
                     }
                 }
-                String originalFolder = null;
+                FullnameArgument originalFolder = null;
                 if (mail.containsOriginalFolder()) {
                     originalFolder = mail.getOriginalFolder();
                     if (null != originalFolder) {
-                        jsonObject.put(ORIGINAL_FOLDER_ID, prepareFullname(accountId, originalFolder));
+                        jsonObject.put(ORIGINAL_FOLDER_ID, originalFolder.getPreparedName());
                     }
                 }
                 if (null != originalId && null != originalFolder) {
-                    originalMailPath = new MailPath(null == mailPath ? mail.getAccountId() : mailPath.getAccountId(), originalFolder, originalId);
+                    originalMailPath = new MailPath(originalFolder.getAccountId(), originalFolder.getFullName(), originalId);
                 }
             }
             this.originalMailPath = originalMailPath;

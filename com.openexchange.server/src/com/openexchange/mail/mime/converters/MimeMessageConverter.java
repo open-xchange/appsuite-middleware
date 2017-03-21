@@ -1879,20 +1879,6 @@ public final class MimeMessageConverter {
                 }
             }
             /*
-             * Check for special items
-             */
-            if (msg instanceof IMAPMessage) {
-                IMAPMessage imapMessage = (IMAPMessage) msg;
-                Long origUid = (Long) imapMessage.getItem("X-REAL-UID");
-                if (null != origUid) {
-                    mail.setOriginalId(origUid.toString());
-                }
-                String origFolder = (String) imapMessage.getItem("X-MAILBOX");
-                if (null != origFolder) {
-                    mail.setOriginalFolder(origFolder);
-                }
-            }
-            /*
              * Set headers
              */
             setHeaders(msg, mail);

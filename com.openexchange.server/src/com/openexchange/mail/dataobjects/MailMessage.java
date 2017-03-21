@@ -66,6 +66,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
@@ -492,7 +493,7 @@ public abstract class MailMessage extends MailPart {
     /**
      * The original folder identifier
      */
-    private String originalFolder;
+    private FullnameArgument originalFolder;
     private boolean b_originalFolder;
 
     /**
@@ -1559,7 +1560,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @return the original folder
      */
-    public String getOriginalFolder() {
+    public FullnameArgument getOriginalFolder() {
         return originalFolder;
     }
 
@@ -1583,7 +1584,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param originalFolder the original folder to set
      */
-    public void setOriginalFolder(final String originalFolder) {
+    public void setOriginalFolder(final FullnameArgument originalFolder) {
         this.originalFolder = originalFolder;
         b_originalFolder = true;
     }
