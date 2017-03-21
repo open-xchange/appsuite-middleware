@@ -159,7 +159,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
 
         String user = getLoginFor(registrationContext);
         String userInfo = generateIdFor(registrationContext);
-        DoveAdmCommand command = craftMailboxMetadataSetCommandUsing(userInfo, "reg-" + userInfo, user);
+        DoveAdmCommand command = craftMailboxMetadataSetCommandUsing("user=" + userInfo, "reg-" + userInfo, user);
         DoveAdmResponse response = doveAdmClient.executeCommand(command);
         if (response.isError()) {
             OXException oexc = PushExceptionCodes.UNEXPECTED_ERROR.create("Failed to register Dovecot Push for user " + registrationContext.getUserId() + " in context " + registrationContext.getContextId() + ": " + response.toString());
