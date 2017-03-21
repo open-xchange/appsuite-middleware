@@ -62,7 +62,6 @@ public enum UserFeedbackMailProperty implements Property {
     senderAddress(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "mail."),
     hostname(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
     port(587, UserFeedbackMailProperty.PREFIX + "smtp."),
-    protocol("TLSv1", UserFeedbackMailProperty.PREFIX + "smtp."),
     timeout(50000, UserFeedbackMailProperty.PREFIX + "smtp."),
     connectionTimeout(10000, UserFeedbackMailProperty.PREFIX + "smtp."),
     username(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
