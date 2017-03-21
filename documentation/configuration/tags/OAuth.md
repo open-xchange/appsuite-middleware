@@ -4,38 +4,6 @@ title: OAuth
 
 This page shows all properties with the tag: OAuth
 
-| __Key__ | com.openexchange.saml.oauth.tokenEndpoint |
-|:----------------|:--------|
-| __Description__ | Specifies the OAuth HTTP token end-point.<br> |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
-| __File__ | saml.properties |
-
----
-| __Key__ | com.openexchange.saml.oauth.clientId |
-|:----------------|:--------|
-| __Description__ | Specifies the client id used to authenticate the client against the OAuth token end-point.<br> |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.saml.oauth.tokenEndpoint |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
-| __File__ | saml.properties |
-
----
-| __Key__ | com.openexchange.saml.oauth.clientSecret |
-|:----------------|:--------|
-| __Description__ | Specifies the client secret used to authenticate the client against the OAuth token end-point.<br> |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.saml.oauth.tokenEndpoint |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
-| __File__ | saml.properties |
-
----
 | __Key__ | com.openexchange.mail.authType |
 |:----------------|:--------|
 | __Description__ | Specifies the authentication type which should be used for primary account's mail access. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
@@ -66,5 +34,37 @@ This page shows all properties with the tag: OAuth
 | __Configcascade Aware__ | true |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
 | __File__ | oauth.properties |
+
+---
+| __Key__ | com.openexchange.saml.oauth.tokenEndpoint |
+|:----------------|:--------|
+| __Description__ | Specifies the OAuth HTTP token end-point.<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
+| __File__ | saml.properties |
+
+---
+| __Key__ | com.openexchange.saml.oauth.clientId |
+|:----------------|:--------|
+| __Description__ | Specifies the client id used to authenticate the client against the OAuth token end-point.<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.saml.oauth.tokenEndpoint |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
+| __File__ | saml.properties |
+
+---
+| __Key__ | com.openexchange.saml.oauth.clientSecret |
+|:----------------|:--------|
+| __Description__ | Specifies the client secret used to authenticate the client against the OAuth token end-point.<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.saml.oauth.tokenEndpoint |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a> |
+| __File__ | saml.properties |
 
 ---

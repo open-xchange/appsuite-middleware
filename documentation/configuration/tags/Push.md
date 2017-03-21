@@ -4,70 +4,103 @@ title: Push
 
 This page shows all properties with the tag: Push
 
-| __Key__ | com.openexchange.carddav.push.apsd.enabled |
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.badge.enabled |
 |:----------------|:--------|
-| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
+| __Description__ | Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.<br>These get displayed on the app icon.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.enabled |
+|:----------------|:--------|
+| __Description__ | Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.filename |
+|:----------------|:--------|
+| __Description__ | Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.<br>This file needs to be included in the app, otherwise a default sound is played. the string 'default' also causes<br>the default iOS sound to be played.<br> |
+| __Default__ | default |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.caldav.push.apsd.enabled |
+|:----------------|:--------|
+| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
 | __Default__ | false |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.bundleId |
+| __Key__ | com.openexchange.caldav.push.apsd.bundleId |
 |:----------------|:--------|
-| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.contact.XServer.a5243d3e-b635-11e6-80f5-76304dec7eb7". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".<br> |
+| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.calendar.XServer.934668ca-125e-4246-afee-8cf2df37aab8". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".<br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.carddav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.keystore |
+| __Key__ | com.openexchange.caldav.push.apsd.keystore |
 |:----------------|:--------|
-| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.contact.p12". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.calendar.p12". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.carddav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.password |
+| __Key__ | com.openexchange.caldav.push.apsd.password |
 |:----------------|:--------|
-| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.carddav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.production |
+| __Key__ | com.openexchange.caldav.push.apsd.production |
 |:----------------|:--------|
 | __Description__ | Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. <br> |
 | __Default__ | true |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.refreshInterval |
+| __Key__ | com.openexchange.caldav.push.apsd.refreshInterval |
 |:----------------|:--------|
 | __Description__ | Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. <br> |
 | __Default__ | 172800 |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
 | __Key__ | com.openexchange.pns.delayDuration |
@@ -170,102 +203,69 @@ This page shows all properties with the tag: Push
 | __File__ | pns.properties |
 
 ---
-| __Key__ | com.openexchange.caldav.push.apsd.enabled |
+| __Key__ | com.openexchange.carddav.push.apsd.enabled |
 |:----------------|:--------|
-| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
+| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
 | __Default__ | false |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
-| __Key__ | com.openexchange.caldav.push.apsd.bundleId |
+| __Key__ | com.openexchange.carddav.push.apsd.bundleId |
 |:----------------|:--------|
-| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.calendar.XServer.934668ca-125e-4246-afee-8cf2df37aab8". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".<br> |
+| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.contact.XServer.a5243d3e-b635-11e6-80f5-76304dec7eb7". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".<br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.caldav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
-| __Key__ | com.openexchange.caldav.push.apsd.keystore |
+| __Key__ | com.openexchange.carddav.push.apsd.keystore |
 |:----------------|:--------|
-| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.calendar.p12". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
+| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.contact.p12". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.caldav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
-| __Key__ | com.openexchange.caldav.push.apsd.password |
+| __Key__ | com.openexchange.carddav.push.apsd.password |
 |:----------------|:--------|
-| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
+| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.caldav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
-| __Key__ | com.openexchange.caldav.push.apsd.production |
+| __Key__ | com.openexchange.carddav.push.apsd.production |
 |:----------------|:--------|
 | __Description__ | Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. <br> |
 | __Default__ | true |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
-| __Key__ | com.openexchange.caldav.push.apsd.refreshInterval |
+| __Key__ | com.openexchange.carddav.push.apsd.refreshInterval |
 |:----------------|:--------|
 | __Description__ | Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. <br> |
 | __Default__ | 172800 |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.badge.enabled |
-|:----------------|:--------|
-| __Description__ | Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.<br>These get displayed on the app icon.<br> |
-| __Default__ | true |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.enabled |
-|:----------------|:--------|
-| __Description__ | Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.<br> |
-| __Default__ | true |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.filename |
-|:----------------|:--------|
-| __Description__ | Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.<br>This file needs to be included in the app, otherwise a default sound is played. the string 'default' also causes<br>the default iOS sound to be played.<br> |
-| __Default__ | default |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
