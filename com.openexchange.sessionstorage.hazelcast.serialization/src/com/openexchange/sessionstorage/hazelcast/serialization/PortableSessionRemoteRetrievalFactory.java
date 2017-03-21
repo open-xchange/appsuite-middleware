@@ -47,49 +47,26 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast.serialization.osgi;
+package com.openexchange.sessionstorage.hazelcast.serialization;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.session.ObfuscatorService;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteRetrieval;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link ObfuscatorServiceTracker}
+ * {@link PortableSessionRemoteRetrievalFactory} - The portable factory for {@link PortableSessionRemoteRetrieval} type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-class ObfuscatorServiceTracker implements ServiceTrackerCustomizer<ObfuscatorService, ObfuscatorService> {
+public class PortableSessionRemoteRetrievalFactory extends AbstractCustomPortableFactory {
 
-    private final BundleContext context;
-
-    ObfuscatorServiceTracker(BundleContext context) {
-        this.context = context;
+    @Override
+    public CustomPortable create() {
+        return new PortableSessionRemoteRetrieval();
     }
 
     @Override
-    public void removedService(ServiceReference<ObfuscatorService> reference, ObfuscatorService service) {
-        PortableSessionRemoteLookUp.setObfuscatorServiceReference(null);
-        PortableSessionRemoteRetrieval.setObfuscatorServiceReference(null);
-        PortableMultipleSessionRemoteLookUp.setObfuscatorServiceReference(null);
-        context.ungetService(reference);
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<ObfuscatorService> reference, ObfuscatorService service) {
-        // Ignore
-    }
-
-    @Override
-    public ObfuscatorService addingService(ServiceReference<ObfuscatorService> reference) {
-        ObfuscatorService service = context.getService(reference);
-        PortableSessionRemoteLookUp.setObfuscatorServiceReference(service);
-        PortableSessionRemoteRetrieval.setObfuscatorServiceReference(service);
-        PortableMultipleSessionRemoteLookUp.setObfuscatorServiceReference(service);
-        return service;
+    public int getClassId() {
+        return PortableSessionRemoteRetrieval.CLASS_ID;
     }
 
 }
