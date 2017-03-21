@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -217,11 +218,7 @@ public class Appointment2Event {
      * @return The categories list
      */
     public static List<String> getCategories(String categories) {
-        // TODO: escaping?
-        if (Strings.isEmpty(categories)) {
-            return null;
-        }
-        return Strings.splitAndTrim(categories, ",");
+        return Arrays.asList(Strings.splitByCommaNotInQuotes(categories));
     }
 
     /**
