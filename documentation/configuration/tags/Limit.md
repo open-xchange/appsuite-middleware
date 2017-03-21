@@ -4,62 +4,6 @@ title: Limit
 
 This page shows all properties with the tag: Limit
 
-| __Key__ | com.openexchange.mailaccount.failedAuth.limit |
-|:----------------|:--------|
-| __Description__ | Specifies the max. number of failed authentication attempts until the associated mail account is disabled.<br> |
-| __Default__ | 5 |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mailaccount.failedAuth.span |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | mailaccount.properties |
-
----
-| __Key__ | com.openexchange.report.appsuite.maxChunkSize |
-|:----------------|:--------|
-| __Description__ | Determines how many chunks of data can be kept in the report before saving them in the folder described in the <br>com.openexchange.report.client.fileStorage property<br> |
-| __Default__ | 200 |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | reportserialization.properties |
-
----
-| __Key__ | com.openexchange.report.appsuite.maxThreadPoolSize |
-|:----------------|:--------|
-| __Description__ | Number of threads allowed to work on the report at the same time.<br> |
-| __Default__ | 20 |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | reportserialization.properties |
-
----
-| __Key__ | com.openexchange.http.grizzly.maxNumberOfConcurrentRequests |
-|:----------------|:--------|
-| __Description__ | Specifies the number of concurrent HTTP requests that are allowed being processed.<br>Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page<br>A value of less than or equal to 0 (zero) effectively disables that limitation.<br>The chosen value for this property should be aligned to the configured "ulimit" of the backing operating system. E.g. having "ulimit" set<br>to 8,192 (given that JVM is the only main process running for OS user) implies that ~6,000 should be considered for this property leaving<br>some room for threads not associated with an HTTP request.<br> |
-| __Default__ | 0 |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | grizzly.properties |
-
----
-| __Key__ | com.openexchange.websockets.grizzly.remote.maxDelayDuration |
-|:----------------|:--------|
-| __Description__ | The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)<br>is at max. queued in buffer to await & aggregate equal messages that arrive during that time.<br>So, even if there was an equal message recently, message is flushed from queue to avoid holding back<br>a message forever in case there are frequent equal messages.<br> |
-| __Default__ | 3000 |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | websockets.properties |
-
----
 | __Key__ | com.openexchange.nosql.cassandra.maximumLocalConnectionsPerNode |
 |:----------------|:--------|
 | __Description__ | Defines the amount of maximum connections to the local Datacenter |
@@ -117,5 +61,61 @@ This page shows all properties with the tag: Limit
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | pns.properties |
+
+---
+| __Key__ | com.openexchange.websockets.grizzly.remote.maxDelayDuration |
+|:----------------|:--------|
+| __Description__ | The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)<br>is at max. queued in buffer to await & aggregate equal messages that arrive during that time.<br>So, even if there was an equal message recently, message is flushed from queue to avoid holding back<br>a message forever in case there are frequent equal messages.<br> |
+| __Default__ | 3000 |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | websockets.properties |
+
+---
+| __Key__ | com.openexchange.report.appsuite.maxChunkSize |
+|:----------------|:--------|
+| __Description__ | Determines how many chunks of data can be kept in the report before saving them in the folder described in the <br>com.openexchange.report.client.fileStorage property<br> |
+| __Default__ | 200 |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | reportserialization.properties |
+
+---
+| __Key__ | com.openexchange.report.appsuite.maxThreadPoolSize |
+|:----------------|:--------|
+| __Description__ | Number of threads allowed to work on the report at the same time.<br> |
+| __Default__ | 20 |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | reportserialization.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.maxNumberOfConcurrentRequests |
+|:----------------|:--------|
+| __Description__ | Specifies the number of concurrent HTTP requests that are allowed being processed.<br>Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page<br>A value of less than or equal to 0 (zero) effectively disables that limitation.<br>The chosen value for this property should be aligned to the configured "ulimit" of the backing operating system. E.g. having "ulimit" set<br>to 8,192 (given that JVM is the only main process running for OS user) implies that ~6,000 should be considered for this property leaving<br>some room for threads not associated with an HTTP request.<br> |
+| __Default__ | 0 |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | grizzly.properties |
+
+---
+| __Key__ | com.openexchange.mailaccount.failedAuth.limit |
+|:----------------|:--------|
+| __Description__ | Specifies the max. number of failed authentication attempts until the associated mail account is disabled.<br> |
+| __Default__ | 5 |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.mailaccount.failedAuth.span |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | mailaccount.properties |
 
 ---
