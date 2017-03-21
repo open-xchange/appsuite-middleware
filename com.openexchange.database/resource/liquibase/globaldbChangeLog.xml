@@ -143,5 +143,55 @@
     <changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
         <tagDatabase tag="7.8.0-milestone" />
     </changeSet>
+    
+    <changeSet id="7.8.4:feedback:create" author="kevin.ruthmann@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="feedback" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'feedback' to save feedback metadata.
+        </comment>
+        <sql>
+            CREATE TABLE feedback (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                groupId VARCHAR(255) NOT NULL,
+                type VARCHAR(255) NOT NULL,
+                date BIGINT(20) UNSIGNED NOT NULL, 
+                cid INT(10) UNSIGNED NOT NULL, 
+                user INT(10) UNSIGNED NOT NULL,
+                login_name VARCHAR(255) NOT NULL,
+                typeId BIGINT UNSIGNED NOT NULL,
+                client_version VARCHAR(127) NOT NULL,
+                server_version VARCHAR(127) NOT NULL,
+                PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="feedback" />
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="7.8.4:feedback_star_rating_v1:create" author="kevin.ruthmann@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="star_rating_v1" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'feedback_star_rating_v1' to save feedback data.
+        </comment>
+        <sql>
+            CREATE TABLE feedback_star_rating_v1 (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                data BLOB NOT NULL,
+                PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="feedback_star_rating_v1" />
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>

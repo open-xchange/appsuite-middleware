@@ -253,6 +253,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     // Delegate global database service methods.
 
     @Override
+    public boolean isGlobalDatabaseAvailable() {
+        return globalDatabaseService.isGlobalDatabaseAvailable();
+    }
+
+    @Override
     public boolean isGlobalDatabaseAvailable(String group) throws OXException {
         return globalDatabaseService.isGlobalDatabaseAvailable(group);
     }

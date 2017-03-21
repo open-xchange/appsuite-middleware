@@ -1,0 +1,21 @@
+/userfeedback?action=store:
+  put:
+    operationId: store
+    tags:
+      - userfeedback
+    summary: Store user feedback
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: type
+        description: The feedback type
+        required: true
+      - in: body
+        name: body
+        description: A JSON object describing the feedback
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object signaling success. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).

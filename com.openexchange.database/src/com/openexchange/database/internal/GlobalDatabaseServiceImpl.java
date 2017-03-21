@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import liquibase.changelog.ChangeSet;
 import org.osgi.framework.FrameworkUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -73,6 +72,7 @@ import com.openexchange.database.migration.DBMigrationState;
 import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import liquibase.changelog.ChangeSet;
 
 /**
  * {@link GlobalDatabaseServiceImpl}
@@ -228,6 +228,11 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
             migrationStates.add(migrationService.scheduleDBMigration(migration, migrationCallback));
         }
         return migrationStates;
+    }
+
+    @Override
+    public boolean isGlobalDatabaseAvailable() {
+        return !globalDbConfigs.isEmpty();
     }
 
     @Override
