@@ -41,4 +41,12 @@
       <sha1>07cac950b5752e22fd266f5eb2365bf75c7ef22b</sha1>
       <cpe>cpe:/a:apple:imageio:3.2.1</cpe>
    </suppress>
+   <!-- Only used for open api generation -->
+   <suppress>
+      <notes><![CDATA[
+         file name: jackson-core-2.6.4.jar]]>
+      </notes>
+      <sha1>27d3a9f7bbdcf72d93c9b2da7017e39551bfa9fb</sha1>
+      <cpe>cpe:/a:fasterxml:jackson:2.6.4</cpe>
+   </suppress>
 </suppressions>
