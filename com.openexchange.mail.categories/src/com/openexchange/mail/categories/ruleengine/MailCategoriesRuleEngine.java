@@ -120,8 +120,8 @@ public interface MailCategoriesRuleEngine {
     public void removeValueFromHeader(Session session, String value, String header) throws OXException;
 
     /**
-     * Removes all rules which does not belong to any category.
-     * 
+     * Removes all rules which do not belong to any category.
+     *
      * @param flags The category flags
      * @param session The user session
      * @throws OXException if cleanUp fails

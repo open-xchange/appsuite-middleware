@@ -953,6 +953,15 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Gets the light-weight flag.
+     *
+     * @return The light-weight flag
+     */
+    public boolean isLightWeight() {
+        return lightWeight;
+    }
+
+    /**
      * Gets the interceptable
      *
      * @return The interceptable

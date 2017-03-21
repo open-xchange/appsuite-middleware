@@ -51,19 +51,31 @@ package com.openexchange.push.imapidle;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
+import com.hazelcast.core.Cluster;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
+import com.openexchange.lock.ReentrantLockAccessControl;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
@@ -77,9 +89,13 @@ import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -132,7 +148,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     private final ImapIdleClusterLock clusterLock;
     private final long delay;
     private final ScheduledTimerTask timerTask;
-    private final Lock globalLock;
+    private final AccessControl globalLock;
 
     /**
      * Initializes a new {@link ImapIdlePushManagerService}.
@@ -157,17 +173,17 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         timerTask = timerService.scheduleWithFixedDelay(new ImapIdleControlTask(control), 30, 30, TimeUnit.SECONDS);
 
         // The fall-back lock
-        globalLock = new ReentrantLock();
+        globalLock = new ReentrantLockAccessControl();
     }
 
-    private Lock getlockFor(int userId, int contextId) {
+    private AccessControl getlockFor(int userId, int contextId) {
         LockService lockService = services.getOptionalService(LockService.class);
         if (null == lockService) {
             return globalLock;
         }
 
         try {
-            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("imapidle-").append(contextId).append('-').append(userId).toString());
+            return lockService.getAccessControlFor("imapidle", 1, userId, contextId);
         } catch (Exception e) {
             LOGGER.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
             return globalLock;
@@ -246,12 +262,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
         SessionInfo sessionInfo = new SessionInfo(session, true, false);
         if (clusterLock.acquireLock(sessionInfo)) {
-            Lock lock = getlockFor(userId, contextId);
-            lock.lock();
+            // Locked...
+            boolean unlock = true;
             try {
-                // Locked...
-                boolean unlock = true;
+                AccessControl lock = getlockFor(userId, contextId);
                 try {
+                    lock.acquireGrant();
                     ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, supportsPermanentListeners(), control, services);
                     ImapIdlePushListener current = listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener);
                     if (null == current) {
@@ -271,13 +287,16 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
                     // Already running for session user
                     LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new OXException(e);
                 } finally {
-                    if (unlock) {
-                        releaseLock(sessionInfo);
-                    }
+                    Streams.close(lock);
                 }
             } finally {
-                lock.unlock();
+                if (unlock) {
+                    releaseLock(sessionInfo);
+                }
             }
         } else {
             LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
@@ -320,12 +339,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
         SessionInfo sessionInfo = new SessionInfo(session, false, isTransient(session, services));
         if (clusterLock.acquireLock(sessionInfo)) {
-            Lock lock = getlockFor(userId, contextId);
-            lock.lock();
+            // Locked...
+            boolean unlock = true;
             try {
-                // Locked...
-                boolean unlock = true;
+                AccessControl lock = getlockFor(userId, contextId);
                 try {
+                    lock.acquireGrant();
                     ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, supportsPermanentListeners(), control, services);
                     if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
                         listener.start();
@@ -336,13 +355,16 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
                     // Already running for session user
                     LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
+                }  catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new OXException(e);
                 } finally {
-                    if (unlock) {
-                        releaseLock(sessionInfo);
-                    }
+                    Streams.close(lock);
                 }
             } finally {
-                lock.unlock();
+                if (unlock) {
+                    releaseLock(sessionInfo);
+                }
             }
         } else {
             LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
@@ -379,16 +401,17 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     /**
      * Stops the listener associated with given user.
      *
-     * @param tryToReconnect <code>true</code> to signal that a reconnect using another sessions should be performed; otherwise <code>false</code>
+     * @param tryToReconnect <code>true</code> to signal that a reconnect using another session should be performed; otherwise <code>false</code>
      * @param stopIfPermanent <code>true</code> to signal that current listener is supposed to be stopped even though it might be associated with a permanent push registration; otherwise <code>false</code>
      * @param userId The user identifier
      * @param contextId The corresponding context identifier
      * @return The stop result
      */
     public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, int userId, int contextId) {
-        Lock lock = getlockFor(userId, contextId);
-        lock.lock();
+        AccessControl lock = getlockFor(userId, contextId);
+        Runnable cleanUpTask = null;
         try {
+            lock.acquireGrant();
             SimpleKey key = SimpleKey.valueOf(userId, contextId);
             ImapIdlePushListener listener = listeners.get(key);
             if (null != listener) {
@@ -400,8 +423,8 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 listeners.remove(key);
 
                 boolean tryRecon = tryToReconnect || (!listener.isPermanent() && hasPermanentPush(userId, contextId));
-                boolean reconnected = listener.cancel(tryRecon);
-                if (!reconnected) {
+                cleanUpTask = listener.cancel(tryRecon);
+                if (null != cleanUpTask) {
                     return StopResult.STOPPED;
                 }
 
@@ -409,8 +432,14 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
             }
             return StopResult.NONE;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
         } finally {
-            lock.unlock();
+            Streams.close(lock);
+            if (null != cleanUpTask) {
+                cleanUpTask.run();
+            }
         }
     }
 
@@ -468,9 +497,10 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 }
             }
 
-            // Look-up remote sessions, too, if possible
-            if (sessiondService instanceof SessiondServiceExtended) {
-                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
+            // If we're running a node-local lock, there is no need to check for sessions at other nodes
+            if (ImapIdleClusterLock.Type.LOCAL != clusterLock.getType()) {
+                // Look-up remote sessions, too, if possible
+                sessions = lookUpRemoteSessionsFor(userId, contextId);
                 for (Session session : sessions) {
                     if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
                         return injectAnotherListenerUsing(session, false).injectedPushListener;
@@ -480,6 +510,100 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         }
 
         return null;
+    }
+
+    private Collection<Session> lookUpRemoteSessionsFor(int userId, int contextId) {
+        HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
+        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        if (null == hzInstance || null == obfuscatorService) {
+            return Collections.emptyList();
+        }
+
+        Cluster cluster = hzInstance.getCluster();
+
+        // Get local member
+        Member localMember = cluster.getLocalMember();
+
+        // Determine other cluster members
+        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        if (otherMembers.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        IExecutorService executor = hzInstance.getExecutorService("default");
+        Map<Member, Future<PortableSessionCollection>> futureMap = executor.submitToMembers(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers);
+        Collection<Session> userSessions = new LinkedList<>();
+        for (Iterator<Entry<Member, Future<PortableSessionCollection>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
+            Future<PortableSessionCollection> future = it.next().getValue();
+            // Check Future's return value
+            int retryCount = 3;
+            while (retryCount-- > 0) {
+                try {
+                    PortableSessionCollection portableSessionCollection = future.get();
+                    retryCount = 0;
+
+                    PortableSession[] portableSessions = portableSessionCollection.getSessions();
+                    if (null != portableSessions) {
+                        for (PortableSession portableSession : portableSessions) {
+                            portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
+                            userSessions.add(portableSession);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    // Interrupted - Keep interrupted state
+                    Thread.currentThread().interrupt();
+                } catch (CancellationException e) {
+                    // Canceled
+                    retryCount = 0;
+                } catch (ExecutionException e) {
+                    Throwable cause = e.getCause();
+
+                    // Check for Hazelcast timeout
+                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                        if (cause instanceof RuntimeException) {
+                            throw ((RuntimeException) cause);
+                        }
+                        if (cause instanceof Error) {
+                            throw (Error) cause;
+                        }
+                        throw new IllegalStateException("Not unchecked", cause);
+                    }
+
+                    // Timeout while awaiting remote result
+                    if (retryCount <= 0) {
+                        // No further retry
+                        cancelFutureSafe(future);
+                    }
+                }
+            }
+        }
+        return userSessions;
+    }
+
+    /**
+     * Gets the other cluster members
+     *
+     * @param allMembers All known members
+     * @param localMember The local member
+     * @return Other cluster members
+     */
+    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
+        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
+        if (!otherMembers.remove(localMember)) {
+            LOGGER.warn("Couldn't remove local member from cluster members.");
+        }
+        return otherMembers;
+    }
+
+    /**
+     * Cancels given {@link Future} safely
+     *
+     * @param future The {@code Future} to cancel
+     */
+    private <V> void cancelFutureSafe(Future<V> future) {
+        if (null != future) {
+            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+        }
     }
 
     /**

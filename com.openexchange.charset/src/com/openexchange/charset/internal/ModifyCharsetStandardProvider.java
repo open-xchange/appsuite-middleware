@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.charset;
+package com.openexchange.charset.internal;
 
 import java.lang.reflect.Field;
 import java.nio.charset.UnsupportedCharsetException;
@@ -101,16 +101,6 @@ public final class ModifyCharsetStandardProvider {
             org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
                 new StringBuilder("Charset \"CP50220\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\". Japanese encoding \"ISO-2022-JP\" not supported ! ! !").toString());
-        }
-        try {
-            charsetProvider = new ISOReplacementCharsetProvider(null == charsetProvider ? backupCharsetProvider : charsetProvider);
-        } catch (final UnsupportedCharsetException e) {
-            /*
-             * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
-             */
-            org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
-                new StringBuilder("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
-                    System.getProperty("java.vm.version")).append("\".").toString());
         }
         try {
             charsetProvider = new ASCIIReplacementCharsetProvider(null == charsetProvider ? backupCharsetProvider : charsetProvider);

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.charset;
+package com.openexchange.charset.internal;
 
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -55,82 +55,46 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.Iterator;
-import java.util.Locale;
+import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
- * {@link AsianReplacementCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
+ * {@link CachingCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AsianReplacementCharsetProvider extends CharsetProvider {
+public final class CachingCharsetProvider extends CharsetProvider {
 
-    private static final class DelegatingCharset extends Charset {
-
-        private final Charset encodeDelegate;
-        private final Charset decodeDelegate;
-
-        protected DelegatingCharset(final Charset decodeDelegate, final Charset encodeDelegate) {
-            super(decodeDelegate.name(), decodeDelegate.aliases().toArray(new String[0]));
-            this.decodeDelegate = decodeDelegate;
-            this.encodeDelegate = encodeDelegate;
-        }
+    private static final Charset NULL = new Charset("x-null", new String[0]) {
 
         @Override
-        public String displayName() {
-            return decodeDelegate.displayName();
-        }
-
-        @Override
-        public String displayName(final Locale locale) {
-            return decodeDelegate.displayName(locale);
-        }
-
-        @Override
-        public boolean contains(final Charset cs) {
-            return decodeDelegate.contains(cs);
+        public CharsetEncoder newEncoder() {
+            return null;
         }
 
         @Override
         public CharsetDecoder newDecoder() {
-            return decodeDelegate.newDecoder();
+            return null;
         }
 
         @Override
-        public CharsetEncoder newEncoder() {
-            return encodeDelegate.newEncoder();
+        public boolean contains(final Charset cs) {
+            return false;
         }
-
-        @Override
-        public boolean canEncode() {
-            return encodeDelegate.canEncode();
-        }
-
-    } // End of class DelegatingCharset
+    };
 
     private final CharsetProvider standardProvider;
-
-    private final Charset cp50220;
-
-    private final Charset delegatingCharset;
+    private final ConcurrentMap<String, Charset> cache;
 
     /**
-     * Initializes a new {@link AsianReplacementCharsetProvider}.
+     * Initializes a new {@link CachingCharsetProvider}.
      *
      * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
      */
-    public AsianReplacementCharsetProvider(final CharsetProvider standardProvider) {
+    public CachingCharsetProvider(final CharsetProvider standardProvider) {
         super();
         this.standardProvider = standardProvider;
-        cp50220 = Charset.forName("CP50220");
-        // Delegating charset
-        final Charset iso2022CN_Encoder = Charset.forName("ISO2022CN_GB");
-        final Charset iso2022CN = Charset.forName("iso-2022-cn");
-        delegatingCharset = new DelegatingCharset(iso2022CN, iso2022CN_Encoder);
-        /*-
-         * Retry with: "x-windows-50220", "MS50220"
-         *
-         * http://www.docjar.com/html/api/sun/nio/cs/ext/MS50220.java.html
-         */
+        cache = new NonBlockingHashMap<String, Charset>(32);
     }
 
     @Override
@@ -145,16 +109,18 @@ public final class AsianReplacementCharsetProvider extends CharsetProvider {
 
     @Override
     public Charset charsetForName(final String charsetName) {
-        if ("ISO-2022-JP".equalsIgnoreCase(charsetName)) {
-            return cp50220;
+        Charset charset = cache.get(charsetName);
+        if (null == charset) {
+            Charset ncharset = standardProvider.charsetForName(charsetName);
+            if (null == ncharset) {
+                ncharset = NULL;
+            }
+            charset = cache.putIfAbsent(charsetName, ncharset);
+            if (null == charset) {
+                charset = ncharset;
+            }
         }
-        if ("iso-2022-cn".equalsIgnoreCase(charsetName) || "ISO2022CN".equalsIgnoreCase(charsetName)) {
-            return delegatingCharset;
-        }
-        /*
-         * Delegate to standard provider
-         */
-        return standardProvider.charsetForName(charsetName);
+        return NULL == charset ? null : charset;
     }
 
     @Override

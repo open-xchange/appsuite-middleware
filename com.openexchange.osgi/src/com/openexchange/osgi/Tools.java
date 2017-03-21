@@ -81,8 +81,18 @@ public class Tools {
         if (null == classes) {
             throw new IllegalArgumentException("classes is null.");
         }
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
+
+        if (0 == classes.length) {
+            throw new IllegalArgumentException("classes is empty.");
+        }
+
+        if (classes.length == 1) {
+            StringBuilder sb = new StringBuilder(64).append("(");
+            sb.append(Constants.OBJECTCLASS);
+            sb.append('=');
+            sb.append(classes[0].getName());
+            sb.append(")");
+            return context.createFilter(sb.toString());
         }
 
         StringBuilder sb = new StringBuilder(16 << classes.length).append("(|(");

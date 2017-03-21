@@ -49,14 +49,15 @@
 
 package com.openexchange.pop3.connect;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,6 +71,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.log.audit.DefaultAttribute;
@@ -275,16 +277,9 @@ public final class POP3StoreConnector {
              * JavaMail POP3 implementation requires capabilities "UIDL" and "TOP"
              */
             final POP3StoreResult result = new POP3StoreResult(staticCapabilities);
-            final String login = pop3Config.getLogin();
+            String login = authEncode(pop3Config.getLogin(), POP3Properties.getInstance().getPOP3AuthEnc());
             boolean responseCodeAware = staticCapabilities.indexOf("RESP-CODES") >= 0;
-            String tmpPass = pop3Config.getPassword();
-            if (tmpPass != null) {
-                try {
-                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), com.openexchange.java.Charsets.ISO_8859_1);
-                } catch (final UnsupportedEncodingException e) {
-                    LOG.error("", e);
-                }
-            }
+            String tmpPass = authEncode(pop3Config.getPassword(), POP3Properties.getInstance().getPOP3AuthEnc());
             /*
              * Check for already failed authentication
              */
@@ -418,7 +413,7 @@ public final class POP3StoreConnector {
                 AuditLogService auditLogService = getServiceRegistry().getOptionalService(AuditLogService.class);
                 if (null != auditLogService) {
                     String eventId = MailAccount.DEFAULT_ID == accountId ? "pop3.primary.login" : "pop3.external.login";
-                    auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("pop3.login", login), DefaultAttribute.arbitraryFor("pop3.server", server), DefaultAttribute.arbitraryFor("pop3.port", Integer.toString(port)));
+                    auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("pop3.login", pop3Config.getLogin()), DefaultAttribute.arbitraryFor("pop3.server", server), DefaultAttribute.arbitraryFor("pop3.port", Integer.toString(port)));
                 }
 
                 // Fetch capabilities again
@@ -453,9 +448,9 @@ public final class POP3StoreConnector {
                 if (responseCodeAware && e.getMessage().indexOf("[LOGIN-DELAY]") >= 0) {
                     final int seconds = parseLoginDelaySeconds(capabilities);
                     if (-1 == seconds) {
-                        throw POP3ExceptionCode.LOGIN_DELAY.create(e, server, login, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e.getMessage());
+                        throw POP3ExceptionCode.LOGIN_DELAY.create(e, server, pop3Config.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e.getMessage());
                     }
-                    throw POP3ExceptionCode.LOGIN_DELAY2.create(e, server, login, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), Integer.valueOf(seconds), e.getMessage());
+                    throw POP3ExceptionCode.LOGIN_DELAY2.create(e, server, pop3Config.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), Integer.valueOf(seconds), e.getMessage());
                 }
                 throw e;
             } catch (final MessagingException e) {
@@ -499,13 +494,13 @@ public final class POP3StoreConnector {
                         if (errorOnMissingUIDL) {
                             throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("UIDL",
                                 server,
-                                login,
+                                pop3Config.getLogin(),
                                 Integer.valueOf(session.getUserId()),
                                 Integer.valueOf(session.getContextId()));
                         }
                         result.addWarning(POP3ExceptionCode.EXPUNGE_MODE_ONLY.create("UIDL",
                             server,
-                            login,
+                            pop3Config.getLogin(),
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId())));
                     }
@@ -516,7 +511,7 @@ public final class POP3StoreConnector {
                          */
                         throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("TOP",
                             server,
-                            login,
+                            pop3Config.getLogin(),
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()));
                     }
@@ -679,6 +674,19 @@ public final class POP3StoreConnector {
             }
             return true;
         }
+    }
+
+    private static String authEncode(String s, String charset) {
+        String tmp = s;
+        if (tmp != null) {
+            try {
+                tmp = new String(s.getBytes(Charsets.forName(charset)), Charsets.ISO_8859_1);
+            } catch (final UnsupportedCharsetException e) {
+                LOG.error("Unsupported encoding in a message detected and monitored", e);
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+            }
+        }
+        return tmp;
     }
 
 }

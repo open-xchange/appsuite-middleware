@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  org.apache.commons.logging,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
@@ -16,3 +17,4 @@ Import-Package: com.openexchange.java,
  org.slf4j,
  sun.misc,
  sun.reflect
+Export-Package: com.openexchange.charset

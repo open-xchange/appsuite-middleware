@@ -54,6 +54,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
+import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
 
 
@@ -81,6 +82,11 @@ public class LockServiceImpl implements LockService {
      */
     public void dispose() {
         locks.dispose();
+    }
+
+    @Override
+    public AccessControl getAccessControlFor(String identifier, int permits, int userId, int contextId) throws OXException {
+       return AccessControlImpl.getAccessControl(identifier, permits, userId, contextId);
     }
 
     @Override

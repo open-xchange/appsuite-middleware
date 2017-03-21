@@ -62,6 +62,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.charset.CharsetService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -130,7 +131,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
             EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class,
-            SSLConfigurationService.class, UserAwareSSLConfigurationService.class };
+            SSLConfigurationService.class, UserAwareSSLConfigurationService.class, CharsetService.class };
     }
 
     @Override

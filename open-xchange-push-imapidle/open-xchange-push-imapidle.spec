@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 17
+%define        ox_release 18
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -67,6 +67,10 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2572
     ox_add_property com.openexchange.push.imapidle.supportsPermanentListeners false $PFILE
+
+    # SCR-4030
+    ox_set_property com.openexchange.push.imapidle.clusterLock local $PFILE
+
 fi
 
 %clean
@@ -84,6 +88,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/imapidle.properties
 
 %changelog
+* Thu Mar 16 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-03-20 (4016)
 * Mon Mar 06 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-03-06 (3985)
 * Fri Feb 24 2017 Carsten Hoeger <choeger@open-xchange.com>
