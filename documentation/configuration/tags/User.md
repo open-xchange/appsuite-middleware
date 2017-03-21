@@ -1,42 +1,97 @@
 ---
-title: Folder
+title: User
 ---
 
-This page shows all properties with the tag: Folder
+This page shows all properties with the tag: User
 
-| __Key__ | com.openexchange.mail.useStaticDefaultFolders |
+| __Key__ | DEFAULT_TIMEZONE |
 |:----------------|:--------|
-| __Description__ | Defines whether standard folder names should be initialized with the default values or not. <br>The default values can be configured within the Adminuser.properties file.<br> |
+| __Description__ | Specifies the default time zone to assume when creating a user<br>and no explicit time zone is given in arguments.<br> |
+| __Default__ | Europe/Berlin |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timezone.html">Timezone</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Provisioning.html">Provisioning</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | AUTO_TO_LOWERCASE_UID |
+|:----------------|:--------|
+| __Description__ | This check will be performed on user names in case CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS is set to true.<br> |
+| __Default__ | [$@%\.+a-zA-Z0-9_-] |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS |
+|:----------------|:--------|
+| __Description__ | This will check the user name using the check defined in CHECK_USER_UID_REGEXP.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | CHECK_USER_UID_REGEXP |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | CHECK_USER_UID_REGEXP |
+|:----------------|:--------|
+| __Description__ | This check will be performed on user names in case CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS is set to true.<br> |
+| __Default__ | [$@%\.+a-zA-Z0-9_-] |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | USERNAME_CHANGEABLE |
+|:----------------|:--------|
+| __Description__ | WARNING: Changing the username might have impact on external systems like<br>imap server that allows acls to be set. Imap ACLS usually use<br>symbolic names so when changing the user name without changing<br>the ACL breaks the ACL. open-xchange-admin will NOT change those<br>ACLS, so DO NOT CHANGE THIS SETTING ON OX Express<br> |
 | __Default__ | false |
 | __Version__ | 7.8.3 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | mail.properties |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a> |
+| __File__ | AdminUser.properties |
 
 ---
-| __Key__ | com.openexchange.mail.maliciousFolders.enabled |
+| __Key__ | PRIMARY_MAIL_UNCHANGEABLE |
 |:----------------|:--------|
-| __Description__ | Enables/disables support for malicious folders.<br><br>If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing" property, the mail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way to disable any hyper-links.<br><br>I.e.<br>"...&lt;a href="http://evil.com/click.me"&gt;Get something for free here&lt;/a&gt;..."<br>is turned to<br>"...&lt;a href="#" onclick"return false;" data-disabled="true"&gt;Get something for free here&lt;/a&gt;..."<br> |
-| __Default__ | true |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mail.maliciousFolders.listing |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | mail.properties |
+| __Description__ | Here you can set whether the primary mail address can be changed or not.<br>If set to false, it is possible to change the primary mail address.<br>Only change, if you know what you are doing (Outlook might<br>not work anymore under certain circumstances)<br> |
+| __Default__ | false |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | AdminUser.properties |
 
 ---
-| __Key__ | com.openexchange.mail.maliciousFolders.listing |
+| __Key__ | AVERAGE_USER_SIZE |
 |:----------------|:--------|
-| __Description__ | Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.<br><br>The value is supposed to be comma-separated list of folder paths. An entry in the CSV list is either a full path of a folder in the primary mail account (e.g. "INBOX/Malware") or a reserved identifier denoting the standard folder and its sub-folders of every mail account (incl. Unified Mail). Supported reserved identifiers are: "$Spam", "$Drafts", "$Sent", "$Trash", "$Confirmed-spam", "$Confirmed-ham".<br><br>Example: $Spam, INBOX/Malware<br>Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.<br> |
-| __Default__ | $Spam, $Confirmed-spam |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mail.maliciousFolders.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | mail.properties |
+| __Description__ | The average file storage occupation for a user in MB.<br> |
+| __Default__ | 100 |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET |
+|:----------------|:--------|
+| __Description__ | Defines whether it is allowed to change the quota value for a user that has no individual file storage set<br><br>If set to "true" and the user has not yet an individual file storage set, an appropriate file storage gets<br>assigned to the user. This implicitly includes to move the user's files from context file storage to that<br>newly assigned file storage, which might be a long operation.<br> |
+| __Default__ | false |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __File__ | AdminUser.properties |
 
 ---
 | __Key__ | SENT_MAILFOLDER_[language] |
