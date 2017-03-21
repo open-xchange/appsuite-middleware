@@ -299,10 +299,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private <R> R accessMailStorage(AbstractFindRequest request, ServerSession session, MailServletClosure<R> closure) throws OXException {
         long start = System.currentTimeMillis();
-        FullnameArgument fullnameArgument = determineFolder(session, request);
+        String folderId = request.getFolderId();
+        FullnameArgument fullnameArgument = determineFolder(session, folderId);
         MailServletInterface mailServletInterface = MailServletInterface.getInstance(session);
         try {
-            mailServletInterface.openFor(fullnameArgument.getFullName());
+            mailServletInterface.openFor(folderId);
             IMailFolderStorage folderStorage = mailServletInterface.getMailAccess().getFolderStorage();
             MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
             return closure.call(mailServletInterface, folder);
@@ -319,18 +320,16 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     }
 
-    private FullnameArgument determineFolder(ServerSession session, AbstractFindRequest request) throws OXException {
-        String folderName = request.getFolderId();
-
-        if (folderName == null) {
+    private FullnameArgument determineFolder(ServerSession session, String folderId) throws OXException {
+        if (folderId == null) {
             String allMessageFolder = getAllMessageFolder(session);
             if (Strings.isEmpty(allMessageFolder)) {
                 throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
             }
-            folderName = allMessageFolder;
+            folderId = allMessageFolder;
         }
 
-        return MailFolderUtility.prepareMailFolderParam(folderName);
+        return MailFolderUtility.prepareMailFolderParam(folderId);
     }
 
     private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens, boolean addFileNameSearch) {
