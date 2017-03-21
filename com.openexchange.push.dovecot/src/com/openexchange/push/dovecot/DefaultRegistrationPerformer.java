@@ -49,27 +49,40 @@
 
 package com.openexchange.push.dovecot;
 
+import static com.openexchange.java.Autoboxing.I;
 import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import org.slf4j.Logger;
+import com.openexchange.dovecot.doveadm.client.DefaultDoveAdmCommand;
+import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
+import com.openexchange.dovecot.doveadm.client.DoveAdmCommand;
+import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPFolderStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.dovecot.commands.RegistrationCommand;
 import com.openexchange.push.dovecot.commands.UnregistrationCommand;
+import com.openexchange.push.dovecot.registration.RegistrationContext;
 import com.openexchange.push.dovecot.registration.RegistrationPerformer;
 import com.openexchange.push.dovecot.registration.RegistrationResult;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -99,8 +112,65 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         return 0;
     }
 
+    private String getLoginFor(RegistrationContext registrationContext) throws OXException {
+        int userId = registrationContext.getUserId();
+        int contextId = registrationContext.getContextId();
+
+        MailAccountStorageService mailAccountService = services.getOptionalService(MailAccountStorageService.class);
+        if (null == mailAccountService) {
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+        }
+        MailAccount defaultMailAccount = mailAccountService.getDefaultMailAccount(userId, contextId);
+
+        User user;
+        if (registrationContext.getSession() instanceof ServerSession) {
+            user = ((ServerSession) registrationContext.getSession()).getUser();
+        } else {
+            UserService userService = services.getOptionalService(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.absentService(UserService.class);
+            }
+            user = userService.getUser(userId, contextId);
+        }
+
+        String login = MailConfig.getMailLogin(defaultMailAccount, user.getLoginInfo(), userId, contextId);
+
+        String proxyDelim = Utility.getValueFromProperty("com.openexchange.push.dovecot.proxyDelimiter", null, userId, contextId, services);
+        if (false == Strings.isEmpty(proxyDelim)) {
+            int pos = login.indexOf(proxyDelim);
+            if (pos > 0) {
+                login = login.substring(0, pos);
+            }
+        }
+
+        return login;
+    }
+
+    private String generateIdFor(RegistrationContext registrationContext) {
+        return new StringBuilder(16).append(registrationContext.getUserId()).append('@').append(registrationContext.getContextId()).toString();
+    }
+
     @Override
-    public RegistrationResult initateRegistration(Session session) throws OXException {
+    public RegistrationResult initateRegistration(RegistrationContext registrationContext) throws OXException {
+        DoveAdmClient doveAdmClient = registrationContext.isDoveAdmBased() ? registrationContext.getDoveAdmClient() : null;
+        if (null == doveAdmClient) {
+            return initateRegistration(registrationContext.getSession());
+        }
+
+        String user = getLoginFor(registrationContext);
+        String userInfo = generateIdFor(registrationContext);
+        DoveAdmCommand command = craftMailboxMetadataSetCommandUsing(userInfo, "reg-" + userInfo, user);
+        DoveAdmResponse response = doveAdmClient.executeCommand(command);
+        if (response.isError()) {
+            OXException oexc = PushExceptionCodes.UNEXPECTED_ERROR.create("Failed to register Dovecot Push for user " + registrationContext.getUserId() + " in context " + registrationContext.getContextId() + ": " + response.toString());
+            return RegistrationResult.failedRegistrationResult(oexc, true, null);
+        }
+
+        LOGGER.debug("Successfully registered Dovecot Push for user {} in context {}", registrationContext.getUserId(), registrationContext.getContextId());
+        return RegistrationResult.successRegistrationResult();
+    }
+
+    private RegistrationResult initateRegistration(Session session) throws OXException {
         String logInfo = null;
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
@@ -155,7 +225,25 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
     }
 
     @Override
-    public void unregister(Session session) throws OXException {
+    public void unregister(RegistrationContext registrationContext) throws OXException {
+        DoveAdmClient doveAdmClient = registrationContext.isDoveAdmBased() ? registrationContext.getDoveAdmClient() : null;
+        if (null == doveAdmClient) {
+            unregister(registrationContext.getSession());
+            return;
+        }
+
+        String user = getLoginFor(registrationContext);
+        DoveAdmCommand command = craftMailboxMetadataUnsetCommandUsing("unreg-" + generateIdFor(registrationContext), user);
+        DoveAdmResponse response = doveAdmClient.executeCommand(command);
+        if (response.isError()) {
+            LOGGER.warn("Failed to unregister Dovecot Push for user {} in context {}: {}", I(registrationContext.getUserId()), I(registrationContext.getContextId()), response.toString());
+            return;
+        }
+
+        LOGGER.debug("Successfully unregistered Dovecot Push for user {} in context {}", I(registrationContext.getUserId()), I(registrationContext.getContextId()));
+    }
+
+    private void unregister(Session session) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             MailService mailService = services.getOptionalService(MailService.class);
@@ -205,6 +293,28 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
             }
         }
         return (IMAPFolderStorage) fstore;
+    }
+
+    private DoveAdmCommand craftMailboxMetadataSetCommandUsing(String userInfo, String commandId, String user) {
+        return DefaultDoveAdmCommand.builder()
+            .command("mailboxMetadataSet")
+            .optionalIdentifier(commandId)
+            .setParameter("user", user)
+            .setParameter("mailbox", "")
+            .setParameter("allowEmptyMailboxName", true)
+            .setParameter("key", "/private/vendor/vendor.dovecot/http-notify")
+            .setParameter("value", userInfo)
+            .build();
+    }
+    private DoveAdmCommand craftMailboxMetadataUnsetCommandUsing(String commandId, String user) {
+        return DefaultDoveAdmCommand.builder()
+            .command("mailboxMetadataUnset")
+            .optionalIdentifier(commandId)
+            .setParameter("user", user)
+            .setParameter("mailbox", "")
+            .setParameter("allowEmptyMailboxName", true)
+            .setParameter("key", "/private/vendor/vendor.dovecot/http-notify")
+            .build();
     }
 
 }
