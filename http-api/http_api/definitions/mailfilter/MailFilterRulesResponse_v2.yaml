@@ -4,4 +4,4 @@ properties:
   data:
     type: array
     items:
-      $ref: "#/definitions/MailFilterRule_v2"
+      $ref: "#/definitions/MailFilterRulev2"

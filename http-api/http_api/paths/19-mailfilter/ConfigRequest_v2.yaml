@@ -26,5 +26,5 @@
           (containing an array of valid actions. See [Possible action commands](#possible-action-commands)). In case of errors the responsible fields in the response are
           filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/MailFilterConfigResponse_v2"
+          $ref: "#/definitions/MailFilterConfigResponsev2"
 
