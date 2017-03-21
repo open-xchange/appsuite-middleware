@@ -268,21 +268,6 @@ public class DovecotPushListener implements PushListener, Runnable {
         // Avoid subsequent initialization attempt
         initialized = true;
 
-        // Cancel timer tasks
-        {
-            ScheduledTimerTask retryTask = this.retryTask;
-            if (null != retryTask) {
-                this.retryTask = null;
-                retryTask.cancel();
-            }
-
-            ScheduledTimerTask refreshLockTask = this.refreshLockTask;
-            if (null != refreshLockTask) {
-                this.refreshLockTask = null;
-                refreshLockTask.cancel();
-            }
-        }
-
         // Check if DoveAdm is used
         if (registrationContext.isDoveAdmBased()) {
             if (tryToReconnect) {
@@ -299,11 +284,42 @@ public class DovecotPushListener implements PushListener, Runnable {
                 }
             }
 
+            // Cancel timer tasks
+            {
+                ScheduledTimerTask retryTask = this.retryTask;
+                if (null != retryTask) {
+                    this.retryTask = null;
+                    retryTask.cancel();
+                }
+
+                ScheduledTimerTask refreshLockTask = this.refreshLockTask;
+                if (null != refreshLockTask) {
+                    this.refreshLockTask = null;
+                    refreshLockTask.cancel();
+                }
+            }
+
             // Dispose...
             Runnable cleanUpTask = createCleanUpTask(pushManager);
             doUnregistration();
             initialized = false;
             return cleanUpTask;
+        }
+
+        // Session-based...
+        // Cancel timer tasks
+        {
+            ScheduledTimerTask retryTask = this.retryTask;
+            if (null != retryTask) {
+                this.retryTask = null;
+                retryTask.cancel();
+            }
+
+            ScheduledTimerTask refreshLockTask = this.refreshLockTask;
+            if (null != refreshLockTask) {
+                this.refreshLockTask = null;
+                refreshLockTask.cancel();
+            }
         }
 
         Runnable cleanUpTask = null;
