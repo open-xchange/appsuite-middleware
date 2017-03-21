@@ -10,14 +10,14 @@
         name: context-group
         description: The context group identifying the global DB where the feedback is stored.
         required: true
-        type: String
+        type: string
         default: default
 
       - in: path
         name: type
         description: The feedback type to send.
         required: true
-        type: String
+        type: string
         default: star-rating-v1
 
       - 
