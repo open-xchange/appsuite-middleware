@@ -53,6 +53,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pgp.keys.parsing.PGPKeyRingParser;
+import com.openexchange.pgp.mail.PGPMimeService;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.internal.FeedbackMailServiceSMTP;
@@ -67,7 +69,7 @@ public class UserFeedbackMailActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, FeedbackService.class, SSLSocketFactoryProvider.class, LeanConfigurationService.class };
+        return new Class[] { ConfigurationService.class, FeedbackService.class, SSLSocketFactoryProvider.class, LeanConfigurationService.class, PGPMimeService.class, PGPKeyRingParser.class };
     }
 
     @Override

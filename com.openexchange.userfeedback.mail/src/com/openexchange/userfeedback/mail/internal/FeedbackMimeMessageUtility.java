@@ -49,13 +49,16 @@
 
 package com.openexchange.userfeedback.mail.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -70,18 +73,24 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPSecretKey;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.pgp.keys.parsing.KeyRingParserResult;
+import com.openexchange.pgp.keys.parsing.PGPKeyRingParser;
 import com.openexchange.userfeedback.ExportResult;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
 /**
  * {@link FeedbackMimeMessageUtility}
- * 
+ *
  * Utility class for creation of {@link MimeMessage}s and related operations for user feedback purposes.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
@@ -92,19 +101,15 @@ public class FeedbackMimeMessageUtility {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMimeMessageUtility.class);
     private static final String FILENAME = "feedback";
     private static final String FILE_TYPE = ".csv";
-    private boolean isPGPEncrypted;
-    private boolean isSigned;
 
     /**
      * Initializes a new {@link FeedbackMimeMessageUtility}.
-     * 
+     *
      * @param isPGPEncrypted
      * @param isSigned
      */
-    public FeedbackMimeMessageUtility(boolean isPGPEncrypted, boolean isSigned) {
+    public FeedbackMimeMessageUtility() {
         super();
-        this.isPGPEncrypted = isPGPEncrypted;
-        this.isSigned = isSigned;
     }
 
     /**
@@ -118,13 +123,7 @@ public class FeedbackMimeMessageUtility {
      */
     public MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
         MimeMessage mimeMessage = new MimeMessage(session);
-        if (isPGPEncrypted) {
-            //Not ready yet
-        } else if (isSigned) {
-            //Not ready yet
-        } else {
-            mimeMessage = getNotEncryptedUnsignedMail(feedbackFile, filter, session);
-        }
+        mimeMessage = getNotEncryptedUnsignedMail(feedbackFile, filter, session);
         return mimeMessage;
     }
 
@@ -157,7 +156,7 @@ public class FeedbackMimeMessageUtility {
     /**
      * Loads the file with all user feedback from the {@link FeedbackService} and translates
      * the result into a file, that is returned.
-     * 
+     *
      * @param filter, all necessary filter informations
      * @return a file with all user feedback for the given filter
      * @throws OXException, when something during the export goes wrong
@@ -191,7 +190,7 @@ public class FeedbackMimeMessageUtility {
     /**
      * Extract all valid email addresses from the given filter and also put all invalid addresses into
      * the given list of "invalidAddresses".
-     * 
+     *
      * @param filter, the filter object with all needed information
      * @param invalidAddresses, the list where all invalid email addresses should be stored
      * @return an Array with {@link InternetAddress}s
@@ -214,4 +213,55 @@ public class FeedbackMimeMessageUtility {
         }
         return validRecipients.toArray(new InternetAddress[validRecipients.size()]);
     }
+
+    public Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) throws OXException {
+        Map<String, String> pgpKeys = filter.getPgpKeys();
+        Map<Address, PGPPublicKey> result = new HashMap<>();
+        for (String mailAddress : pgpKeys.keySet()) {
+            PGPPublicKey key = parsePublicKey(pgpKeys.get(mailAddress));
+            String displayName = filter.getRecipients().remove(mailAddress);
+            InternetAddress address = null;
+            try {
+                address = new InternetAddress(mailAddress, displayName);
+                address.validate();
+                result.put(address, key);
+            } catch (UnsupportedEncodingException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (@SuppressWarnings("unused") AddressException e) {
+                invalidAddresses.add(address);
+                // validation exception does not trigger any logging
+            }
+        }
+        return result;
+    }
+
+    private PGPPublicKey parsePublicKey(String ascPgpPublicKey) throws OXException {
+        PGPKeyRingParser parser = Services.getService(PGPKeyRingParser.class);
+        ByteArrayInputStream in = null;
+        try {
+            in = new ByteArrayInputStream(ascPgpPublicKey.getBytes());
+            KeyRingParserResult result = parser.parse(in);
+            return result.toEncryptionKey();
+        } catch (IOException e) {
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
+        }
+    }
+
+    public PGPSecretKey parsePrivateKey(String file) throws OXException {
+        PGPKeyRingParser parser = Services.getService(PGPKeyRingParser.class);
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            KeyRingParserResult result = parser.parse(in);
+            return result.toSigningKey();
+        } catch (IOException e) {
+            //
+        } finally {
+            Streams.close(in);
+        }
+        return null;
+    }
+
 }

@@ -153,6 +153,9 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             String contextGroup = cmd.getOptionValue(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_DEFAULT);
             String type = cmd.getOptionValue(TYPE_SHORT, TYPE_DEFAULT);
             WebTarget target = baseTarget.path(contextGroup).path(type);
+            if (cmd.hasOption(USE_PGP_SHORT) && Boolean.parseBoolean(cmd.getOptionValue(USE_PGP_SHORT))) {
+                target = target.path("pgp");
+            }
 
             if (cmd.hasOption(START_SHORT)) {
                 target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
@@ -165,9 +168,6 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             }
             if (cmd.hasOption(BODY_SHORT)) {
                 target = target.queryParam("body", cmd.getOptionValue(BODY_SHORT));
-            }
-            if (cmd.hasOption(USE_PGP_SHORT)) {
-                target = target.queryParam("usePgp", cmd.getOptionValue(USE_PGP_SHORT));
             }
             return target;
         } catch (URISyntaxException e) {

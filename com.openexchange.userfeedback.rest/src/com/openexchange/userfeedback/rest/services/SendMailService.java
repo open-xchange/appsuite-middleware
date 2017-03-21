@@ -103,7 +103,7 @@ public class SendMailService extends JAXRSService {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
         @QueryParam("subject") String subject, @QueryParam("body") String body, String json) {
-        return send(contextGroup, type, start, end, subject, body, json, false);
+        return send(contextGroup, type, start, end, subject, body, json);
     }
 
     @POST
@@ -112,10 +112,10 @@ public class SendMailService extends JAXRSService {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
         @QueryParam("subject") String subject, @QueryParam("body") String body, @QueryParam("usePgp") String usePgp, String json) {
-        return send(contextGroup, type, start, end, subject, body, json, true);
+        return send(contextGroup, type, start, end, subject, body, json);
     }
 
-    private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, String json, boolean usePgp) {
+    private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, String json) {
         JSONArray array = null;
         try {
             array = new JSONArray(json);
@@ -136,12 +136,14 @@ public class SendMailService extends JAXRSService {
                 JSONObject object = array.getJSONObject(i);
                 String address = object.getString("address");
                 String displayName = object.getString("displayName");
-                String pgpKey = object.optString("pgpKey");
+                if (object.hasAndNotNull("pgpKey")) {
+                    String pgpKey = object.optString("pgpKey");
+                    pgpKeys.put(address, pgpKey);
+                }
                 recipients.put(address, displayName);
-                pgpKeys.put(address, pgpKey);
             }
             FeedbackMailService service = getService(FeedbackMailService.class);
-            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, subject, mailBody, start, end, type);
+            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, pgpKeys, subject, mailBody, start, end, type);
             String response = service.sendFeedbackMail(filter);
             builder = Response.status(Status.OK);
             if (Strings.isEmpty(response)) {
@@ -174,7 +176,7 @@ public class SendMailService extends JAXRSService {
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
-            } 
+            }
             ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON);
             builder.entity(errorJson);
             return builder.build();

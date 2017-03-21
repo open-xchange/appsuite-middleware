@@ -52,6 +52,7 @@ package com.openexchange.userfeedback.mail.internal;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import javax.mail.Address;
 import javax.mail.MessagingException;
@@ -59,9 +60,13 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPSecretKey;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.pgp.mail.PGPMimeService;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
@@ -69,7 +74,7 @@ import com.openexchange.userfeedback.mail.osgi.Services;
 
 /**
  * {@link FeedbackMailServiceSMTP}
- * 
+ *
  * Send user feedback in form of a csv-file to a set of given recipients. Ensure a valid smtp server
  * configuration beforehand, see {@link MailProperties} for more information.
  *
@@ -94,9 +99,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
         invalidAddresses = new ArrayList<>();
-        if (this.messageUtility == null) {
-            messageUtility = new FeedbackMimeMessageUtility(false, false);
-        }
+        messageUtility = new FeedbackMimeMessageUtility();
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
         File feedbackfile = messageUtility.getFeedbackfile(filter);
         if (feedbackfile != null) {
@@ -113,19 +116,37 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     }
 
     private String sendMail(File feedbackFile, FeedbackMailFilter filter) throws OXException {
-        Properties smtpProperties = getSMTPProperties();
+        LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
+        boolean usePgp = false;
+        String secretKeyFile = null;
+        String secretKeyPassword = null;
+        if (null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
+            secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
+            secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
+            if (Strings.isNotEmpty(secretKeyFile) && Strings.isNotEmpty(secretKeyPassword)) {
+                usePgp = true;
+            }
+        }
+        Properties smtpProperties = getSMTPProperties(leanConfig);
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
 
         try {
-            Address[] recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
+            MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
+            Address[] recipients = null;
+            transport = smtpSession.getTransport("smtp");
+            transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
+            if (usePgp) {
+                Map<Address, PGPPublicKey> pgpRecipients = messageUtility.extractRecipientsForPgp(filter, invalidAddresses);
+                PGPSecretKey signingKey = messageUtility.parsePrivateKey(secretKeyFile);
+                PGPMimeService pgpMimeService = Services.getService(PGPMimeService.class);
+                MimeMessage encryptedSignedMail = pgpMimeService.encryptSigned(mail, signingKey, secretKeyPassword.toCharArray(), new ArrayList<>(pgpRecipients.values()));
+                transport.sendMessage(encryptedSignedMail, pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]));
+            }
+            recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
             if (recipients.length == 0) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
-            MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
-            transport = smtpSession.getTransport("smtp");
-            LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
-            transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
             transport.sendMessage(mail, recipients);
 
             StringBuilder result = new StringBuilder();
@@ -142,7 +163,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
     /**
      * Appends the sending result to the specified {@link StringBuilder}
-     * 
+     *
      * @param recipients The recipients
      * @param builder The {@link StringBuilder}
      */
@@ -165,8 +186,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         }
     }
 
-    private Properties getSMTPProperties() {
-        LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
+    private Properties getSMTPProperties(LeanConfigurationService leanConfig) {
         Properties properties = new Properties();
         SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
         String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
@@ -187,7 +207,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
     /**
      * Appends any warnings to the specified {@link StringBuilder}
-     * 
+     *
      * @param builder The {@link StringBuilder} to append the warnings to
      */
     private void appendWarnings(StringBuilder builder) {
@@ -198,4 +218,5 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             }
         }
     }
+
 }

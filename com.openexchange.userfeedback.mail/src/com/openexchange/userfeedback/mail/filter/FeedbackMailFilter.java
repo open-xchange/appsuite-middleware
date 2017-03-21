@@ -58,7 +58,7 @@ import com.openexchange.userfeedback.filter.FeedbackFilter;
 
 /**
  * {@link FeedbackMailFilter}
- * 
+ *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since 7.8.4
  */
@@ -66,12 +66,13 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
     private String ctxGroup;
     private Map<String, String> recipients;
+    private Map<String, String> pgpKeys;
     private String subject;
     private String body;
     private long start;
     private long end;
     private String type;
-    
+
     private static final String DEFAULT_BODY = "";
     private static final String DEFAULT_CONTEXT_GROUP = "default";
     private static final String DEFAULT_TYPE = "star-rating-v1";
@@ -79,9 +80,14 @@ public class FeedbackMailFilter implements FeedbackFilter {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, String subject, String body, long start, long end, String type) {
+        this(ctxGroup, recipients, null, subject, body, start, end, type);
+    }
+
+    public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, Map<String, String> pgpKeys, String subject, String body, long start, long end, String type) {
         super();
         this.ctxGroup = ctxGroup;
         this.recipients = recipients;
+        this.pgpKeys = pgpKeys;
         this.subject = subject;
         this.body = body;
         this.start = start;
@@ -142,6 +148,13 @@ public class FeedbackMailFilter implements FeedbackFilter {
         return recipients;
     }
 
+    public Map<String, String> getPgpKeys() {
+        if (null == pgpKeys) {
+            pgpKeys = new HashMap<>();
+        }
+        return pgpKeys;
+    }
+
     public String getSubject() {
         if (subject == null) {
             subject = String.format(DEFAULT_SUBJECT, getTimerangeString());
@@ -161,7 +174,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
         if (result.length() == 0) {
             result = "no timerange selected";
         }
-        
+
         return result;
     }
 
@@ -176,6 +189,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
         private String builderCtxGroup;
         private Map<String, String> builderRecipients;
+        private Map<String, String> builderPgpKeys;
         private String builderSubject;
         private String builderBody;
         private long builderStart;
@@ -207,9 +221,14 @@ public class FeedbackMailFilter implements FeedbackFilter {
             this.builderRecipients = recipients;
             return this;
         }
+        
+        public FeedBackMailFilterBuilder pgpKeys(Map<String, String> pgpKeys) {
+            this.builderPgpKeys = pgpKeys;
+            return this;
+        }
 
         public FeedbackMailFilter build() {
-            return new FeedbackMailFilter(builderCtxGroup, builderRecipients, builderSubject, builderBody, builderStart, builderEnd, builerType);
+            return new FeedbackMailFilter(builderCtxGroup, builderRecipients, builderPgpKeys, builderSubject, builderBody, builderStart, builderEnd, builerType);
         }
     }
 }

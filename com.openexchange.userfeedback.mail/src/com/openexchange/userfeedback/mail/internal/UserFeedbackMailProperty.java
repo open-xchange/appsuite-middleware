@@ -53,7 +53,7 @@ import com.openexchange.config.lean.Property;
 
 /**
  * {@link UserFeedbackMailProperty}
- * 
+ *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -66,7 +66,10 @@ public enum UserFeedbackMailProperty implements Property {
     timeout(50000, UserFeedbackMailProperty.PREFIX + "smtp."),
     connectionTimeout(10000, UserFeedbackMailProperty.PREFIX + "smtp."),
     username(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
-    password(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp.");
+    password(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
+    signKeyFile(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "pgp."),
+    signKeyPassword(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "pgp."),
+    ;
 
     private static final String EMPTY = "";
     private static final String PREFIX = "com.openexchange.userfeedback.";
@@ -105,6 +108,7 @@ public enum UserFeedbackMailProperty implements Property {
      *
      * @return the fully qualified name of the property
      */
+    @Override
     public String getFQPropertyName() {
         return fqn + name();
     }
@@ -114,6 +118,7 @@ public enum UserFeedbackMailProperty implements Property {
      *
      * @return the default value of this property
      */
+    @Override
     public <T extends Object> T getDefaultValue(Class<T> cls) {
         if (defaultValue.getClass().isAssignableFrom(cls)) {
             return cls.cast(defaultValue);

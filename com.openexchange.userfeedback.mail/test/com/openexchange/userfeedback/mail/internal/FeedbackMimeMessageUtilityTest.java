@@ -43,7 +43,7 @@ public class FeedbackMimeMessageUtilityTest {
 
     @Test
     public void createMailMessageTest_NoSecurity() throws OXException, IOException, MessagingException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility(false, false);
+        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
         MimeMessage mimeMessage = messageUtility.createMailMessage(new File(TESTFILES_PATH + "feedback.csv"), getDefaultFilter(), null);
         // Check if message has a multipart body with a plain text part and a file attachment
         Multipart content = (Multipart) mimeMessage.getContent();
@@ -62,7 +62,7 @@ public class FeedbackMimeMessageUtilityTest {
 
     @Test
     public void extractRecipientsTest_NoneNotNullResult() throws UnsupportedEncodingException, OXException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility(false, false);
+        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
         FeedbackMailFilter filter = getDefaultFilter();
         Address[] extractRecipients = messageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         assertTrue(extractRecipients != null);
@@ -70,7 +70,7 @@ public class FeedbackMimeMessageUtilityTest {
 
     @Test
     public void extractRecipientsTest_AdressNoPrivate() throws UnsupportedEncodingException, OXException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility(false, false);
+        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
         recipients.put(recipient, "");
@@ -84,7 +84,7 @@ public class FeedbackMimeMessageUtilityTest {
 
     @Test
     public void extractRecipientsTest_MultipleAdresses() throws UnsupportedEncodingException, OXException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility(false, false);
+        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
         recipients.put(recipient, "");
