@@ -50,18 +50,13 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
-import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
-import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -1035,38 +1030,12 @@ public class LoginServlet extends AJAXServlet {
         if (null != domain) {
             cookie.setDomain(domain);
         } 
-        else if (null != serverName && useShardingForHost(serverName) && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
+        else if (Tools.validateDomainRegardingSharding(serverName)) {
             cookie.setDomain(serverName);
         }
         return cookie;
     }
     
-    
-
-    private static boolean useShardingForHost(String serverName) {
-        boolean result = false;
-        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-        try {
-            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
-            if (customHostConfigurations != null) {
-                result = areShardingHostsAvailable(customHostConfigurations);
-            }
-        } catch (OXException e) {
-            LOG.error("Unable to load custom host configuration", e);
-        }
-        return result;
-    }
-    
-    private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
-        List<String> shardingSubdomains = new ArrayList<>();
-        for (Map<String, Object> map : customHostConfigurations) {
-            if (map.containsKey("shardingSubdomains")) {
-                shardingSubdomains = (List<String>) map.get("shardingSubdomains");
-            }
-        }
-        return shardingSubdomains.isEmpty() ? false : true;
-    }
-
     /**
      * Configures specific cookie properties based on configuration and the incoming request, which includes setting the cookie path
      * to <code>/</code>, applying the <code>secure</code> flag and domain setting the max-age and cookie domain.

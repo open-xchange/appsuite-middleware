@@ -65,6 +65,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.Cookies;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -258,11 +259,15 @@ public class OXSessionManager implements SessionManager {
     public void configureSessionCookie(Request request, Cookie cookie) {
         cookie.setPath("/");
 
-        String domain = Cookies.getDomainValue(request.getServerName());
+        String serverName  = request.getServerName();
+        String domain = Cookies.getDomainValue(null == serverName ? determineServerNameByLogProperty() : serverName);
         if (domain != null) {
             cookie.setDomain(domain);
         }
-
+        else if (Tools.validateDomainRegardingSharding(serverName)) {
+            cookie.setDomain(serverName);
+        }
+        
         /*
          * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
          * proxy in front of apache terminates ssl. The exception from forced https is a request from the local LAN.
@@ -280,6 +285,10 @@ public class OXSessionManager implements SessionManager {
         }
     }
 
+    private static String determineServerNameByLogProperty() {
+        return LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
+    }
+    
     /**
      * Create a new JSessioID String that consists of a:
      * <pre>

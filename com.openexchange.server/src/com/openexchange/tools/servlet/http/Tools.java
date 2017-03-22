@@ -50,6 +50,8 @@
 package com.openexchange.tools.servlet.http;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -99,6 +101,7 @@ import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -1137,5 +1140,33 @@ public final class Tools {
 
     public static void setConfigurationService(final ConfigurationService configurationService) {
         CONFIG_SERVICE_REF.set(configurationService);
+    }
+    
+    public static boolean validateDomainRegardingSharding(String serverName) {
+        return null != serverName && useShardingForHost(serverName) && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName));
+    }
+    
+    public static boolean useShardingForHost(String serverName) {
+        boolean result = false;
+        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+        try {
+            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
+            if (customHostConfigurations != null) {
+                result = areShardingHostsAvailable(customHostConfigurations);
+            }
+        } catch (OXException e) {
+            LOG.error("Unable to load custom host configuration", e);
+        }
+        return result;
+    }
+    
+    private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
+        List<String> shardingSubdomains = new ArrayList<>();
+        for (Map<String, Object> map : customHostConfigurations) {
+            if (map.containsKey("shardingSubdomains")) {
+                shardingSubdomains = (List<String>) map.get("shardingSubdomains");
+            }
+        }
+        return shardingSubdomains.isEmpty() ? false : true;
     }
 }
