@@ -5,10 +5,13 @@ title: Tags
 This page lists all available tags.
 
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Appointments.html">Appointments</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Attachment.html">Attachment</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Black_List.html">Black List</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contacts.html">Contacts</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Dovecot_Mail_Push.html">Dovecot Mail Push</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>
@@ -30,6 +33,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tasks.html">Tasks</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timezone.html">Timezone</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>
