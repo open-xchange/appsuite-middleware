@@ -65,7 +65,10 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -105,6 +108,8 @@ public final class InlineImageDataSource implements ImageDataSource {
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
+    private CryptographicAwareMailAccessFactory cryptoMailAccessFactory;
+
     /**
      * Initializes a new {@link InlineImageDataSource}
      */
@@ -116,6 +121,10 @@ public final class InlineImageDataSource implements ImageDataSource {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
+            if(cryptoMailAccessFactory != null) {
+                //Handling for encrypted mails if a cryptographic aware service is available.
+                mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session);
+            }
             mailAccess.connect();
             return loadImagePart(fullname, mailId, cid, mailAccess);
         } catch (final OXException e) {
@@ -144,6 +153,15 @@ public final class InlineImageDataSource implements ImageDataSource {
         }
         imagePart.loadContent();
         return imagePart;
+    }
+
+    /**
+     * Sets a MailAccess factory which allows to process inline images from encrypted mails.
+     *
+     * @param cryptoMailAccessFactory The factory used for handling encrypted mails.
+     */
+    public void setCryptoAwareMailAccessFactory(CryptographicAwareMailAccessFactory cryptoMailAccessFactory) {
+        this.cryptoMailAccessFactory = cryptoMailAccessFactory;
     }
 
     @Override
