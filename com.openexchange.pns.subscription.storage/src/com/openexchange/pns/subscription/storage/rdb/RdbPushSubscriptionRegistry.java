@@ -681,11 +681,19 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=? AND client=?");
-            stmt.setInt(1, subscription.getContextId());
-            stmt.setInt(2, subscription.getUserId());
-            stmt.setString(3, subscription.getToken());
-            stmt.setString(4, subscription.getClient());
+            String client = subscription.getClient();
+            if (null == client) {
+                stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=?");
+                stmt.setInt(1, subscription.getContextId());
+                stmt.setInt(2, subscription.getUserId());
+                stmt.setString(3, subscription.getToken());
+            } else {
+                stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=? AND token=? AND client=?");
+                stmt.setInt(1, subscription.getContextId());
+                stmt.setInt(2, subscription.getUserId());
+                stmt.setString(3, subscription.getToken());
+                stmt.setString(4, client);
+            }
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return false;
