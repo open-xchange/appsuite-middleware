@@ -71,6 +71,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.filename.FileNameTools;
 
 /**
  * {@link JsonFieldHandler}
