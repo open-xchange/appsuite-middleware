@@ -106,15 +106,6 @@ public class SendMailService extends JAXRSService {
         return send(contextGroup, type, start, end, subject, body, json);
     }
 
-    @POST
-    @Path("/{context-group}/{type}/pgp")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
-        @QueryParam("subject") String subject, @QueryParam("body") String body, @QueryParam("usePgp") String usePgp, String json) {
-        return send(contextGroup, type, start, end, subject, body, json);
-    }
-
     private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, String json) {
         JSONArray array = null;
         try {

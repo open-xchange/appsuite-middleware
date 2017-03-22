@@ -49,7 +49,6 @@
 
 package com.openexchange.userfeedback.clt;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -110,9 +109,6 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     private static final String RECIPIENTS_SHORT = "r";
     private static final String RECIPIENT_LONG = "recipients";
 
-    private static final String USE_PGP_SHORT = "p";
-    private static final String USE_PGP_LONG = "use-pgp";
-
     private static final String ENDPOINT_LONG = "api-root";
     private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/mail";
 
@@ -136,7 +132,6 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Single Recipient's mail address like \"Displayname <email@example.com>\" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.");
         recipients.setRequired(true);
         options.addOption(recipients);
-        options.addOption(USE_PGP_SHORT, USE_PGP_LONG, true, "");
         options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
     }
 
@@ -153,9 +148,6 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
             String contextGroup = cmd.getOptionValue(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_DEFAULT);
             String type = cmd.getOptionValue(TYPE_SHORT, TYPE_DEFAULT);
             WebTarget target = baseTarget.path(contextGroup).path(type);
-            if (cmd.hasOption(USE_PGP_SHORT) && Boolean.parseBoolean(cmd.getOptionValue(USE_PGP_SHORT))) {
-                target = target.path("pgp");
-            }
 
             if (cmd.hasOption(START_SHORT)) {
                 target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
