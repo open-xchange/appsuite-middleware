@@ -72,6 +72,7 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.status.ErrorStatus;
 import ch.qos.logback.core.status.Status;
+import ch.qos.logback.core.util.FileSize;
 
 
 /**
@@ -102,7 +103,7 @@ public class Slf4jAuditLogService implements AuditLogService, Runnable {
 
         SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
         triggeringPolicy.setContext(context);
-        triggeringPolicy.setMaxFileSize(Integer.toString(configuration.getFileLimit()));
+        triggeringPolicy.setMaxFileSize(FileSize.valueOf(Integer.toString(configuration.getFileLimit())));
 
         FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
         rollingPolicy.setContext(context);

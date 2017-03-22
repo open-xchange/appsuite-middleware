@@ -264,8 +264,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         boolean done = false;
         try {
             {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
+                final Map<String, String> mdcMap = MDC.getCopyOfContextMap();
                 for (final Task<T> t : tasks) {
                     final CustomFutureTask<T> ftask = new CustomFutureTask<T>(t, mdcMap);
                     futures.add(ftask);
@@ -305,8 +304,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         boolean done = false;
         try {
             {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
+                final Map<String, String> mdcMap = MDC.getCopyOfContextMap();
                 for (final Task<T> t : tasks) {
                     futures.add(new CustomFutureTask<T>(t, mdcMap));
                 }
@@ -386,8 +384,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         if (tasks == null) {
             throw new NullPointerException();
         }
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
+        final Map<String, String> mdcMap = MDC.getCopyOfContextMap();
         final CompletionService<T> completionService = new CustomExecutorCompletionService<T>(threadPoolExecutor, behavior, mdcMap);
         for (final Task<T> task : tasks) {
             completionService.submit(task);
@@ -434,8 +431,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         if (task == null) {
             throw new NullPointerException();
         }
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
+        final Map<String, String> mdcMap = MDC.getCopyOfContextMap();
         final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, mdcMap);
         threadPoolExecutor.execute(ftask);
         return ftask;
@@ -446,8 +442,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         if (task == null) {
             throw new NullPointerException();
         }
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
+        final Map<String, String> mdcMap = MDC.getCopyOfContextMap();
         final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, refusedExecutionBehavior, mdcMap);
         threadPoolExecutor.execute(ftask);
         return ftask;
@@ -462,14 +457,14 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         private final Executor executor;
         private final RefusedExecutionBehavior behavior;
         private final BlockingQueue<Future<V>> completionQueue;
-        private final Map<String, Object> mdcMap;
+        private final Map<String, String> mdcMap;
 
         /**
          * FutureTask extension to enqueue upon completion
          */
         private class CustomQueueingFuture extends CustomFutureTask<V> {
 
-            CustomQueueingFuture(final Task<V> task, final Map<String, Object> mdcMap) {
+            CustomQueueingFuture(final Task<V> task, final Map<String, String> mdcMap) {
                 super(task, behavior, mdcMap);
             }
 
@@ -487,7 +482,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
          * @param mdcMap The MDC map
          * @throws NullPointerException if executor is <tt>null</tt>
          */
-        public CustomExecutorCompletionService(final Executor executor, final RefusedExecutionBehavior behavior, Map<String, Object> mdcMap) {
+        public CustomExecutorCompletionService(final Executor executor, final RefusedExecutionBehavior behavior, Map<String, String> mdcMap) {
             if (executor == null) {
                 throw new NullPointerException();
             }

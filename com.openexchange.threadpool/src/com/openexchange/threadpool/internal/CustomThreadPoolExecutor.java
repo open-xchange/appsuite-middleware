@@ -62,9 +62,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -1259,7 +1259,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         }
 
-        void addTask(final long number, final Thread thread, final Map<String, Object> logProperties) {
+        void addTask(final long number, final Thread thread, final Map<String, String> logProperties) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -1331,10 +1331,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
                                 // Append log properties from the Thread to logBuilder
                                 {
-                                    Map<String, Object> logProperties = taskInfo.logProperties;
+                                    Map<String, String> logProperties = taskInfo.logProperties;
                                     if (null != logProperties) {
                                         Map<String, String> sorted = new TreeMap<String, String>();
-                                        for (Map.Entry<String, Object> entry : logProperties.entrySet()) {
+                                        for (Map.Entry<String, String> entry : logProperties.entrySet()) {
                                             String propertyName = entry.getKey();
                                             Object value = entry.getValue();
                                             if (null != value) {
@@ -1378,13 +1378,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private static final class TaskInfo {
         final Thread t;
         final long stamp;
-        final Map<String, Object> logProperties;
+        final Map<String, String> logProperties;
 
         TaskInfo(final Thread t) {
             this(t, null);
         }
 
-        TaskInfo(final Thread t, final Map<String, Object> logProperties) {
+        TaskInfo(final Thread t, final Map<String, String> logProperties) {
             super();
             this.t = t;
             stamp = System.currentTimeMillis();
@@ -1747,7 +1747,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             task.beforeExecute(thread);
             // MDC map for executing thread
             {
-                Map<String, Object> mdc = customFutureTask.getMdc();
+                Map<String, String> mdc = customFutureTask.getMdc();
                 if (null != mdc) {
                     MDC.setContextMap(mdc);
                 }
@@ -1758,7 +1758,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         } else if (r instanceof MdcProvider) {
             // MDC map for executing thread
-            final Map<String, Object> mdc = ((MdcProvider) r).getMdc();
+            final Map<String, String> mdc = ((MdcProvider) r).getMdc();
             if (null != mdc) {
                 MDC.setContextMap(mdc);
             }
@@ -2570,16 +2570,16 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private static final class MDCProvidingRunnable implements Runnable, MdcProvider {
 
         private final Runnable delegate;
-        private final Map<String, Object> mdc;
+        private final Map<String, String> mdc;
 
-        MDCProvidingRunnable(Runnable delegate, Map<String, Object> mdc) {
+        MDCProvidingRunnable(Runnable delegate, Map<String, String> mdc) {
             super();
             this.delegate = delegate;
             this.mdc = mdc;
         }
 
         @Override
-        public Map<String, Object> getMdc() {
+        public Map<String, String> getMdc() {
             return mdc;
         }
 
