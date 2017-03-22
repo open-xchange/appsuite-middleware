@@ -75,6 +75,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
+import com.openexchange.ajax.customizer.file.SanitizedFilename;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
@@ -700,6 +702,10 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(QuotaProvider.class, new MailQuotaProvider(mailAccountStorageService, mailService));
         // Register ID generator
         registerService(IDGeneratorService.class, ServerServiceRegistry.getInstance().getService(IDGeneratorService.class));
+        /*
+         * register an additional file field providing a sanitized filename
+         */
+        registerService(AdditionalFileField.class, new SanitizedFilename());
         /*
          * Register data sources
          */
