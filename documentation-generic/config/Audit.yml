@@ -1,0 +1,85 @@
+feature_name: Audit
+properties:
+    - key: com.openexchange.audit.logging.AuditFileHandler.enabled
+      description: |
+        Enables the audit feature.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.pattern
+      description: |
+        The location of the log file.
+      defaultValue: /var/log/open-xchange/audit.log
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: audit.properties
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.level
+      description: |
+        The log level.
+      defaultValue: ALL
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.limit
+      description: |
+        The maximum file size.
+      defaultValue: 2097152
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      tags: ["Audit", "Limit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.formatter
+      description: |
+        The logging formatter.
+      defaultValue: java.util.logging.SimpleFormatter
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.append
+      description: |
+        A flag indicating whether the log should be appended or not.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.FileAccessLogging.enabled
+      description: |
+        Set to true to enable logging of file accesses and downloads.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      tags: ["Audit"]
+
+
+
+      
+
+
+
+
+
+
+
+#Set to true to enable logging of file accesses and downloads
+com.openexchange.audit.logging.FileAccessLogging.enabled=false
