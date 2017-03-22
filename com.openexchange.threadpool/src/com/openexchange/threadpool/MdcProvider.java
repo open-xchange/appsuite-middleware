@@ -64,5 +64,5 @@ public interface MdcProvider {
      *
      * @return The MDC map
      */
-    Map<String, Object> getMdc();
+    Map<String, String> getMdc();
 }
