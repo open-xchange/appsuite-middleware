@@ -123,14 +123,16 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         String secretKeyPassword = null;
         PGPSecretKey signingKey = null;
         PGPMimeService pgpMimeService = Services.getService(PGPMimeService.class);
-        if (null != pgpMimeService && null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
+        if (null != pgpMimeService) {
             secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
             secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
             if (Strings.isNotEmpty(secretKeyFile) && Strings.isNotEmpty(secretKeyPassword)) {
                 signingKey = messageUtility.parsePrivateKey(secretKeyFile);
                 sign = true;
             }
-            encrypt = true;
+            if (null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
+                encrypt = true;
+            }
         }
         Properties smtpProperties = getSMTPProperties(leanConfig);
         Session smtpSession = Session.getInstance(smtpProperties);
@@ -141,10 +143,10 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             Address[] recipients = null;
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
-            if (sign || encrypt) {
+            if (encrypt) {
                 Map<Address, PGPPublicKey> pgpRecipients = messageUtility.extractRecipientsForPgp(filter, invalidAddresses);
                 MimeMessage pgpMail = null;
-                if (encrypt) {
+                if (sign) {
                     pgpMail = pgpMimeService.encryptSigned(mail, signingKey, secretKeyPassword.toCharArray(), new ArrayList<>(pgpRecipients.values()));
                 } else {
                     pgpMail = pgpMimeService.encrypt(mail, new ArrayList<>(pgpRecipients.values()));
