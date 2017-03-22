@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.Part;
@@ -73,6 +74,7 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -579,7 +581,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
                 jsonObject.put(ATTACHMENT_FILE_NAME, val);
             } else {
-                jsonObject.put(ATTACHMENT_FILE_NAME, fileName);
+                jsonObject.put(ATTACHMENT_FILE_NAME, DownloadUtility.sanitizeFilename(fileName));
             }
             /*
              * Size

@@ -610,10 +610,16 @@ public final class DownloadUtility {
             }
         } else {
             PercentEscaper encoder = new PercentEscaper("", false);
-            String encoded = encoder.escape(fn);
+            String encoded = encoder.escape(sanitizeFilename(fn));
             appendTo.append("; filename*=UTF-8''").append(encoded);
         }
         appendTo.append("; filename=\"").append(foo).append('"');
+    }
+
+    private static final Pattern FILENAME = Pattern.compile("[^\\p{L}0-9-_+ .]");
+    
+    public static String sanitizeFilename(String filename) {
+        return FILENAME.matcher(filename).replaceAll("_");
     }
 
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
