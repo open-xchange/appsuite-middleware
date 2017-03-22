@@ -257,11 +257,10 @@ public class FeedbackMimeMessageUtility {
             KeyRingParserResult result = parser.parse(in);
             return result.toSigningKey();
         } catch (IOException e) {
-            //
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);
         }
-        return null;
     }
 
 }

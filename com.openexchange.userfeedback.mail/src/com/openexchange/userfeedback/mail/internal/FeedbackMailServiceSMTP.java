@@ -117,15 +117,20 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
     private String sendMail(File feedbackFile, FeedbackMailFilter filter) throws OXException {
         LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
-        boolean usePgp = false;
+        boolean sign = false;
+        boolean encrypt = false;
         String secretKeyFile = null;
         String secretKeyPassword = null;
-        if (null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
+        PGPSecretKey signingKey = null;
+        PGPMimeService pgpMimeService = Services.getService(PGPMimeService.class);
+        if (null != pgpMimeService && null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
             secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
             secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
             if (Strings.isNotEmpty(secretKeyFile) && Strings.isNotEmpty(secretKeyPassword)) {
-                usePgp = true;
+                signingKey = messageUtility.parsePrivateKey(secretKeyFile);
+                sign = true;
             }
+            encrypt = true;
         }
         Properties smtpProperties = getSMTPProperties(leanConfig);
         Session smtpSession = Session.getInstance(smtpProperties);
@@ -136,18 +141,26 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             Address[] recipients = null;
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
-            if (usePgp) {
+            if (sign || encrypt) {
                 Map<Address, PGPPublicKey> pgpRecipients = messageUtility.extractRecipientsForPgp(filter, invalidAddresses);
-                PGPSecretKey signingKey = messageUtility.parsePrivateKey(secretKeyFile);
-                PGPMimeService pgpMimeService = Services.getService(PGPMimeService.class);
-                MimeMessage encryptedSignedMail = pgpMimeService.encryptSigned(mail, signingKey, secretKeyPassword.toCharArray(), new ArrayList<>(pgpRecipients.values()));
-                transport.sendMessage(encryptedSignedMail, pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]));
+                MimeMessage pgpMail = null;
+                if (encrypt) {
+                    pgpMail = pgpMimeService.encryptSigned(mail, signingKey, secretKeyPassword.toCharArray(), new ArrayList<>(pgpRecipients.values()));
+                } else {
+                    pgpMail = pgpMimeService.encrypt(mail, new ArrayList<>(pgpRecipients.values()));
+                }
+                transport.sendMessage(pgpMail, pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]));
             }
             recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
             if (recipients.length == 0) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
-            transport.sendMessage(mail, recipients);
+            if (sign) {
+                MimeMessage signedMail = pgpMimeService.sign(mail, signingKey, secretKeyPassword.toCharArray());
+                transport.sendMessage(signedMail, recipients);
+            } else {
+                transport.sendMessage(mail, recipients);
+            }
 
             StringBuilder result = new StringBuilder();
             appendPositiveSendingResult(recipients, result);
