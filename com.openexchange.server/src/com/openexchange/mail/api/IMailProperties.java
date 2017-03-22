@@ -49,21 +49,12 @@
 
 package com.openexchange.mail.api;
 
+/**
+ * {@link IMailProperties} - The properties associated with mail access.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public interface IMailProperties {
-
-    /**
-     * Signals whether secure connections to external accounts are mandatory.
-     *
-     * @return <code>true</code> if secure connections are enforced; otherwise <code>false</code>
-     */
-    public boolean isEnforceSecureConnection();
-
-    /**
-     * Sets whether secure connections to external accounts are mandatory.
-     *
-     * @param enforceSecureConnection <code>true</code> to signal secure connections to external accounts are mandatory; otherwise <code>false</code>
-     */
-    public void setEnforceSecureConnection(boolean enforceSecureConnection);
 
     /**
      * Checks if default folders (e.g. "Sent Mail", "Drafts") are supposed to be created below personal namespace folder (INBOX) even though
@@ -73,97 +64,97 @@ public interface IMailProperties {
      *
      * @return <code>true</code> if default folders are supposed to be created below personal namespace folder; otherwise <code>false</code>
      */
-    public boolean isAllowNestedDefaultFolderOnAltNamespace();
+    boolean isAllowNestedDefaultFolderOnAltNamespace();
 
     /**
      * Gets the max. allowed size (in bytes) for attachment for being displayed.
      *
      * @return The max. allowed size (in bytes) for attachment for being displayed
      */
-    public int getAttachDisplaySize();
+    int getAttachDisplaySize();
 
     /**
      * Gets the default separator character.
      *
      * @return The default separator character
      */
-    public char getDefaultSeparator();
+    char getDefaultSeparator();
 
     /**
      * Indicates whether subscription shall be ignored or not.
      *
      * @return <code>true</code> if subscription shall be ignored; otherwise <code>false</code>
      */
-    public boolean isIgnoreSubscription();
+    boolean isIgnoreSubscription();
 
     /**
      * Indicates whether subscription is supported or not.
      *
      * @return <code>true</code> if subscription is supported; otherwise <code>false</code>
      */
-    public boolean isSupportSubscription();
+    boolean isSupportSubscription();
 
     /**
      * Gets the mail fetch limit.
      *
      * @return The mail fetch limit
      */
-    public int getMailFetchLimit();
+    int getMailFetchLimit();
 
     /**
      * Indicates if user flags are enabled.
      *
      * @return <code>true</code> if user flags are enabled; otherwise <code>false</code>
      */
-    public boolean isUserFlagsEnabled();
+    boolean isUserFlagsEnabled();
 
     /**
      * Indicates if watcher is enabled.
      *
      * @return <code>true</code> if watcher is enabled; otherwise <code>false</code>
      */
-    public boolean isWatcherEnabled();
+    boolean isWatcherEnabled();
 
     /**
      * Gets the watcher frequency.
      *
      * @return The watcher frequency
      */
-    public int getWatcherFrequency();
+    int getWatcherFrequency();
 
     /**
      * Indicates if watcher is allowed to close exceeded connections.
      *
      * @return <code>true</code> if watcher is allowed to close exceeded connections; otherwise <code>false</code>
      */
-    public boolean isWatcherShallClose();
+    boolean isWatcherShallClose();
 
     /**
      * Gets the watcher time.
      *
      * @return The watcher time
      */
-    public int getWatcherTime();
+    int getWatcherTime();
 
     /**
      * Gets the mail access cache shrinker-interval seconds.
      *
      * @return The mail access cache shrinker-interval seconds
      */
-    public int getMailAccessCacheShrinkerSeconds();
+    int getMailAccessCacheShrinkerSeconds();
 
     /**
      * Gets the mail access cache idle seconds.
      *
      * @return The mail access cache idle seconds.
      */
-    public int getMailAccessCacheIdleSeconds();
+    int getMailAccessCacheIdleSeconds();
 
     /**
      * Waits for loading this properties.
      *
-     * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for
-     *             loading the properties.
+     * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for loading the properties.
      */
-    public void waitForLoading() throws InterruptedException;
+    void waitForLoading() throws InterruptedException;
+
 }

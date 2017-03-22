@@ -138,16 +138,6 @@ public final class UnifiedInboxProperties extends AbstractProtocolProperties imp
     }
 
     @Override
-    public boolean isEnforceSecureConnection() {
-        return mailProperties.isEnforceSecureConnection();
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        mailProperties.setEnforceSecureConnection(enforceSecureConnection);
-    }
-
-    @Override
     public boolean isIgnoreSubscription() {
         return mailProperties.isIgnoreSubscription();
     }

@@ -50,6 +50,11 @@
 
 package com.openexchange.mail.transport.config;
 
+/**
+ * {@link ITransportProperties} - The properties associated with mail transport.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public interface ITransportProperties {
 
     /**
@@ -57,20 +62,6 @@ public interface ITransportProperties {
      *
      * @return the referencedPartLimit
      */
-    public int getReferencedPartLimit();
-
-    /**
-     * Signals whether secure connections to external accounts are mandatory.
-     *
-     * @return <code>true</code> if secure connections are enforced; otherwise <code>false</code>
-     */
-    public boolean isEnforceSecureConnection();
-
-    /**
-     * Sets whether secure connections to external accounts are mandatory.
-     *
-     * @param enforceSecureConnection <code>true</code> to signal secure connections to external accounts are mandatory; otherwise <code>false</code>
-     */
-    public void setEnforceSecureConnection(boolean enforceSecureConnection);
+    int getReferencedPartLimit();
 
 }

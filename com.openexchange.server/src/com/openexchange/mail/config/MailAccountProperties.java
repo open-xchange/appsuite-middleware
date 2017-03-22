@@ -62,8 +62,6 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountProperties.class);
 
-    protected Boolean enforceSecureConnection;
-
     /** The mail server URL */
     protected final String url;
 
@@ -128,22 +126,6 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
     @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return lookUpBoolProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace());
-
-    }
-
-    @Override
-    public boolean isEnforceSecureConnection() {
-        Boolean b = this.enforceSecureConnection;
-        if (null != b) {
-            return b.booleanValue();
-        }
-
-        return lookUpBoolProperty("com.openexchange.mail.enforceSecureConnection", MailProperties.getInstance().isEnforceSecureConnection());
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        this.enforceSecureConnection = Boolean.valueOf(enforceSecureConnection);
     }
 
     @Override

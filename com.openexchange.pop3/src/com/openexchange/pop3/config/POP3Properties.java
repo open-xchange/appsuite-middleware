@@ -304,16 +304,6 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public boolean isEnforceSecureConnection() {
-        return mailProperties.isEnforceSecureConnection();
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        mailProperties.setEnforceSecureConnection(enforceSecureConnection);
-    }
-
-    @Override
     public boolean isIgnoreSubscription() {
         return mailProperties.isIgnoreSubscription();
     }

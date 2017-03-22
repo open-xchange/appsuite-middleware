@@ -601,8 +601,6 @@ public final class MailProperties implements IMailProperties {
     /** Indicates whether MSISDN addresses should be supported or not. */
     private boolean supportMsisdnAddresses;
 
-    private boolean enforceSecureConnection;
-
     private int defaultArchiveDays;
 
     private HostList ranges;
@@ -706,7 +704,6 @@ public final class MailProperties implements IMailProperties {
         maxDriveAttachments = 20;
         authProxyDelimiter = null;
         supportMsisdnAddresses = false;
-        enforceSecureConnection = false;
         defaultArchiveDays = 90;
         ranges = HostList.EMPTY;
         mailStartTls = false;
@@ -955,12 +952,6 @@ public final class MailProperties implements IMailProperties {
                     }
                 }
             }
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.enforceSecureConnection", "false").trim();
-            enforceSecureConnection = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tEnforced secure connections to external accounts: ").append(enforceSecureConnection).append('\n');
         }
 
         {
@@ -1215,16 +1206,6 @@ public final class MailProperties implements IMailProperties {
      */
     public int getBodyDisplaySize() {
         return bodyDisplaySize;
-    }
-
-    @Override
-    public boolean isEnforceSecureConnection() {
-        return enforceSecureConnection;
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        throw new UnsupportedOperationException("setEnforceSecureConnection() not allowed for static MailProperties");
     }
 
     /**
