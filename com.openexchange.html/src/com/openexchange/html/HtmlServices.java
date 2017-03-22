@@ -266,13 +266,14 @@ public final class HtmlServices {
             return false;
         }
 
-        boolean letter = true;
-        while (letter && c >= 0) {
-            letter = Strings.isAsciiLetter(s.charAt(npos));
+        while (c >= 0) {
+            if (false == Strings.isAsciiLetter(s.charAt(npos))) {
+                return false;
+            }
             npos = pos + c--;
         }
 
-        return letter;
+        return true;
     }
 
     private static String dropWhitespacesFrom(String str) {
