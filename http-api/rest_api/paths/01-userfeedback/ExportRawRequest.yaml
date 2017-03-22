@@ -1,9 +1,9 @@
-/userfeedback/v1/export/{context-group}/{type}:
+/userfeedback/v1/export/{context-group}/{type}/raw:
   get:
     operationId: export
     tags:
       - Userfeedback
-    summary: Exports user feedback as CSV
+    summary: Exports user feedback
     parameters:
 
       - in: path
@@ -34,9 +34,12 @@
         required: false
         type: integer
         format: int64
+
     responses:
       200:
-        description: Blank in case of success.
+        description: A JSON array containing the stored user feedbacks.
+        schema:
+          type: string
       400:
         description: Bad request, response contains error message.
       401:
@@ -48,5 +51,5 @@
 
     x-ox-examples:
       Example:
-        description: Export user feedback from 2016-01-01 to 2016-12-31 as CSV
-        example: GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1?start=1451606400&end=1483228799
+        description: Export user feedback from 2016-01-01 to 2016-12-31
+        example: GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1/raw?start=1451606400&end=1483228799
