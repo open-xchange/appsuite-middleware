@@ -109,7 +109,6 @@ import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.UserGroupID;
-import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.FolderUtility;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
@@ -3512,11 +3511,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private IMAPFolder getIMAPFolderWithRecentListener(String fullName) throws MessagingException {
-        IMAPFolder ret = DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
-        if (MailAccount.DEFAULT_ID == accountId && imapConfig.getIMAPProperties().notifyRecent()) {
-            IMAPNotifierMessageRecentListener.addNotifierFor(ret, fullName, accountId, session, true);
-        }
-        return ret;
+        return DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
     }
 
     private boolean doesExist(IMAPFolder imapFolder, boolean mayCheckCache) throws OXException, MessagingException {

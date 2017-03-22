@@ -682,19 +682,3 @@ properties:
       related: com.openexchange.mail.maliciousFolders.enabled
       file: mail.properties
       tags: ["Mail","Folder"]
-    - key: com.openexchange.imap.greeting.host.regex
-      description: |
-        Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary
-        IMAP server. Only applicable for primary IMAP server! Default is empty.
-
-        The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
-
-        Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.
-        I.e. "Dovecot at ([0-9a-zA-Z._-]*) is ready", then the capturing group is supposed to extract the host name/IP addres information
-      defaultValue: 
-      version: 7.8.4
-      reloadable: false
-      configcascadeAware: false
-      related: 
-      file: imap.properties
-      tags: ["Mail","IMAP"]

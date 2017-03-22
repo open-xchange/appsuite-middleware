@@ -317,12 +317,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean fastFetch;
 
-    private boolean notifyRecent;
-
-    private int notifyFrequencySeconds;
-
-    private String notifyFullNames;
-
     private BoolCapVal supportsACLs;
 
     private int imapTimeout;
@@ -386,29 +380,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         logBuilder.append("\nLoading global IMAP properties...\n");
 
         final ConfigurationService configuration = Services.getService(ConfigurationService.class);
-        {
-            final String tmp = configuration.getProperty("com.openexchange.imap.notifyRecent", STR_FALSE).trim();
-            notifyRecent = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tNotify Recent: ").append(notifyRecent).append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.imap.notifyFrequencySeconds", "300").trim();
-            try {
-                notifyFrequencySeconds = Integer.parseInt(tmp);
-                logBuilder.append("\tNotify Frequency Seconds: ").append(notifyFrequencySeconds).append('\n');
-            } catch (final NumberFormatException e) {
-                notifyFrequencySeconds = 300;
-                logBuilder.append("\tNotify Frequency Seconds: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
-                    notifyFrequencySeconds).append('\n');
-            }
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.imap.notifyFullNames", "INBOX").trim();
-            notifyFullNames = tmp;
-        }
-
         {
             final String allowFolderCachesStr = configuration.getProperty("com.openexchange.imap.allowFolderCaches", "true").trim();
             allowFolderCaches = "true".equalsIgnoreCase(allowFolderCachesStr);
@@ -685,9 +656,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         maxNumConnection = -1;
         sContainerType = "boundary-aware";
         spamHandlerName = null;
-        notifyRecent = false;
-        notifyFrequencySeconds = 300;
-        notifyFullNames = "INBOX";
         sslProtocols = "SSLv3 TLSv1";
         cipherSuites = null;
         hostExtractingGreetingListener = null;
@@ -895,21 +863,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isFastFetch() {
         return fastFetch;
-    }
-
-    @Override
-    public boolean notifyRecent() {
-        return notifyRecent;
-    }
-
-    @Override
-    public int getNotifyFrequencySeconds() {
-        return notifyFrequencySeconds;
-    }
-
-    @Override
-    public String getNotifyFullNames() {
-        return notifyFullNames;
     }
 
     @Override

@@ -92,8 +92,6 @@ import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
-import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
-import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
@@ -840,15 +838,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             this.connected = true;
             /*
-             * Register notifier task if enabled
-             */
-            if (MailAccount.DEFAULT_ID == accountId && config.getIMAPProperties().notifyRecent()) {
-                /*
-                 * This call is re-invoked during IMAPNotifierTask's run
-                 */
-                IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session);
-            }
-            /*
              * Add folder listener
              */
             // imapStore.addFolderListener(new ListLsubCacheFolderListener(accountId, session));
@@ -1176,16 +1165,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapSession;
     }
 
-    /**
-     * Whether to notify about recent messages. Notification is enabled if both conditions are met:<br>
-     * It's the primary account's IMAP store <b>AND</b> notify-recent has been enabled by configuration.
-     *
-     * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
-     */
-    public boolean notifyRecent() {
-        return MailAccount.DEFAULT_ID == accountId && getIMAPConfig().getIMAPProperties().notifyRecent();
-    }
-
     @Override
     protected void startup() throws OXException {
         initMaps();
@@ -1245,7 +1224,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         MBoxEnabledCache.tearDown();
         RootSubfoldersEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
-        IMAPNotifierMessageRecentListener.dropFullNameChecker();
         dropMaps();
     }
 
