@@ -251,6 +251,53 @@ public class Strings {
     }
 
     /**
+     * High speed test for punctuation character!
+     *
+     * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
+     */
+    public static boolean isPunctuation(char ch) {
+        // !"#$%&'()*+,-./:;<=>?@[\]^_`´{|}~
+        switch (ch) {
+            case '!':
+            case '"':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case '\'':
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '-':
+            case '.':
+            case '/':
+            case ':':
+            case ';':
+            case '<':
+            case '=':
+            case '>':
+            case '?':
+            case '@':
+            case '[':
+            case ']':
+            case '\\':
+            case '^':
+            case '_':
+            case 96:
+            case 180:
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * High speed test for ASCII letter!
      *
      * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>

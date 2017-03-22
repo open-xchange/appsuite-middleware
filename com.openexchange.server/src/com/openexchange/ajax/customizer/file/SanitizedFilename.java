@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,59 @@
  *
  */
 
-package com.openexchange.html.internal.emoji;
+package com.openexchange.ajax.customizer.file;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.tools.filename.FileNameTools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link EmojiRegistry} - The Emoji registry based on <a href="http://unicode.org/emoji/charts/full-emoji-list.html">full emoji list</a>.
+ * {@link SanitizedFilename}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.4
  */
-public class EmojiRegistry {
+public class SanitizedFilename implements AdditionalFileField {
 
-    private static final EmojiRegistry INSTANCE = new EmojiRegistry();
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static EmojiRegistry getInstance() {
-        return INSTANCE;
-    }
-    private EmojiRegistry() {
-        super();
+    @Override
+    public int getColumnID() {
+        return 7040;
     }
 
-    /**
-     * Checks if specified character is known to be an Emoji character.
-     *
-     * @param c The character to check
-     * @return <code>true</code> if character is an Emoji character; otherwise <code>false</code>
-     */
-    public boolean isEmoji(char c) {
-        return com.openexchange.emoji.EmojiRegistry.getInstance().isEmoji(c);
+    @Override
+    public String getColumnName() {
+        return "com.openexchange.file.sanitizedFilename";
     }
 
-    /**
-     * Checks if specified code point is known to be an Emoji character.
-     *
-     * @param codePoint The code point to check
-     * @return <code>true</code> if codePoint is an Emoji character; otherwise <code>false</code>
-     */
-    public boolean isEmoji(int codePoint) {
-        return com.openexchange.emoji.EmojiRegistry.getInstance().isEmoji(codePoint);
+    @Override
+    public Object getValue(File item, ServerSession session) {
+        return FileNameTools.sanitizeFilename(item.getFileName());
+    }
+
+    @Override
+    public List<Object> getValues(List<File> items, ServerSession session) {
+        if (items == null) {
+            return null;
+        }
+        List<Object> retval = new ArrayList<Object>(items.size());
+        for (File file : items) {
+            retval.add(getValue(file, session));
+        }
+        return retval;
+    }
+
+    @Override
+    public Object renderJSON(AJAXRequestData requestData, Object value) {
+        return value;
+    }
+
+    @Override
+    public Field[] getRequiredFields() {
+        return new Field[] { Field.FILENAME };
     }
 
 }
