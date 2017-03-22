@@ -84,7 +84,11 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     @Override
     public void registerScope(API api, OAuthScope scope) {
-        ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api);
+        if (null == api || null == scope) {
+            return;
+        }
+
+        ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api.getServiceId());
         if (null == scopes) {
             ConcurrentMap<OAuthScope, OAuthScope> newScopes = new ConcurrentHashMap<>(8, 0.9F, 1);
             scopes = registry.putIfAbsent(api.getServiceId(), newScopes);
