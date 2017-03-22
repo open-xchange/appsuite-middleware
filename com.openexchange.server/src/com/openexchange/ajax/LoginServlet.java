@@ -1035,7 +1035,7 @@ public class LoginServlet extends AJAXServlet {
         if (null != domain) {
             cookie.setDomain(domain);
         } 
-        else if (useShardingForHost(serverName) && null != serverName && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
+        else if (null != serverName && useShardingForHost(serverName) && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
             cookie.setDomain(serverName);
         }
         return cookie;
