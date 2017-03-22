@@ -1,5 +1,5 @@
 requests:
-  - DeleteUserFeedbackRequest.yaml
-  - ExportUserFeedbackCSVRequest.yaml
-  - ExportUserFeedbackRawRequest.yaml
+  - DeleteRequest.yaml
+  - ExportCSVRequest.yaml
+  - ExportRawRequest.yaml
   - SendMailRequest.yaml
