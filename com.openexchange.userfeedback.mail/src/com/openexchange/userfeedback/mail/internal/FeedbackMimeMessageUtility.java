@@ -217,12 +217,12 @@ public class FeedbackMimeMessageUtility {
     public Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) throws OXException {
         Map<String, String> pgpKeys = filter.getPgpKeys();
         Map<Address, PGPPublicKey> result = new HashMap<>();
-        for (String mailAddress : pgpKeys.keySet()) {
-            PGPPublicKey key = parsePublicKey(pgpKeys.get(mailAddress));
+        for (Map.Entry<String, String> mailAddress : pgpKeys.entrySet()) {
+            PGPPublicKey key = parsePublicKey(mailAddress.getValue());
             String displayName = filter.getRecipients().remove(mailAddress);
             InternetAddress address = null;
             try {
-                address = new InternetAddress(mailAddress, displayName);
+                address = new InternetAddress(mailAddress.getKey(), displayName);
                 address.validate();
                 result.put(address, key);
             } catch (UnsupportedEncodingException e) {
