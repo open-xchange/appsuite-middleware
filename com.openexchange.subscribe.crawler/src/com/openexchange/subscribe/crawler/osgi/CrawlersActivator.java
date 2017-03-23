@@ -51,8 +51,6 @@ package com.openexchange.subscribe.crawler.osgi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -62,15 +60,14 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-import org.yaml.snakeyaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.java.Streams;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
@@ -150,19 +147,12 @@ public class CrawlersActivator implements BundleActivator {
         for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
-                    Reader reader = null;
-                    try {
-                        reader = new FileReader(file);
-                        Yaml yaml = new Yaml();
-                        final CrawlerDescription crawlerDescription = yaml.loadAs(reader, CrawlerDescription.class);
-                        // Only add if not explicitly disabled as per file 'crawler.properties'
-                        if (config.getBoolProperty(crawlerDescription.getId(), true)) {
-                            crawlers.add(crawlerDescription);
-                        } else {
-                            LOG.info("Ignoring crawler description \"{}\" as per 'crawler.properties' file.", crawlerDescription.getId());
-                        }
-                    } finally {
-                        Streams.close(reader);
+                    final CrawlerDescription crawlerDescription = Yaml.loadType(file, CrawlerDescription.class);
+                    // Only add if not explicitly disabled as per file 'crawler.properties'
+                    if (config.getBoolProperty(crawlerDescription.getId(), true)) {
+                        crawlers.add(crawlerDescription);
+                    } else {
+                        LOG.info("Ignoring crawler description \"{}\" as per 'crawler.properties' file.", crawlerDescription.getId());
                     }
                 }
             } catch (final FileNotFoundException e) {
@@ -182,16 +172,9 @@ public class CrawlersActivator implements BundleActivator {
                     for (final File file : files) {
                         try {
                             if (file.isFile() && file.getPath().endsWith(".yml")) {
-                                Reader reader = null;
-                                try {
-                                    reader = new FileReader(file);
-                                    Yaml yaml = new Yaml();
-                                    CrawlerDescription crawler = yaml.loadAs(reader, CrawlerDescription.class);
-                                    if (crawler.getId().equals(crawlerIdToDelete)) {
-                                        return file.delete();
-                                    }
-                                } finally {
-                                    Streams.close(reader);
+                                final CrawlerDescription crawler = Yaml.loadType(file, CrawlerDescription.class);
+                                if (crawler.getId().equals(crawlerIdToDelete)) {
+                                    return file.delete();
                                 }
                             }
                         } catch (final FileNotFoundException e) {
