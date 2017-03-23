@@ -37,6 +37,8 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Group.html">Group</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Halo.html">Halo</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/JSON.html">JSON</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>
