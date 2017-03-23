@@ -1,5 +1,7 @@
 /userfeedback/v1/export/{context-group}/{type}/raw:
   get:
+    security:
+      - basic: []
     operationId: export
     tags:
       - Userfeedback
