@@ -106,7 +106,10 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             try {
                 result = sendMail(feedbackfile, filter);
             } catch (OXException e) {
-                feedbackfile.delete();
+                boolean deleted = feedbackfile.delete();
+                if (false == deleted) {
+                    LOG.warn("Failed to delete file: {}", feedbackfile);
+                }
                 throw e;
             }
             feedbackfile.delete();
