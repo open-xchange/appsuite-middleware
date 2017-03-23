@@ -124,3 +124,10 @@ CREATE TABLE contexts_per_dbschema (
     count INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (schemaname)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `ctx_per_schema_sem` (
+   `id` BIGINT UNSIGNED NOT NULL,
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+INSERT INTO `ctx_per_schema_sem` VALUES (0);
