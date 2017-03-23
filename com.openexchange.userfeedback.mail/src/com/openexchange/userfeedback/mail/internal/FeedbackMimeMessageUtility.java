@@ -123,9 +123,7 @@ public class FeedbackMimeMessageUtility {
      * @throws OXException
      */
     public MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
-        MimeMessage mimeMessage = new MimeMessage(session);
-        mimeMessage = getNotEncryptedUnsignedMail(feedbackFile, filter, session);
-        return mimeMessage;
+        return getNotEncryptedUnsignedMail(feedbackFile, filter, session);
     }
 
     private MimeMessage getNotEncryptedUnsignedMail(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
