@@ -253,9 +253,172 @@ properties:
       version: 
       reloadable: true
       configcascadeAware: true
-      related: com.openexchange.imap.storeContainerType
+      related: 
       file: imap.properties
       tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.invalidMailboxNameCharacters
+      description: |
+        Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;
+        e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . | \\"<<
+        Default is empty.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap[.primary].allowFolderCaches
+      description: |
+        Enables/disables caching of IMAP folders.
+        Default is true.
+        Note: Only disable IMAP folder cache if you certainly know what you are doing.
+        Disabling that cache may result in noticeable performance decrease.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap[.primary].ssl.protocols
+      description: |
+        Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
+        Default is empty
+        
+        Note: This property is statically used in IMAP authentication bundle
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap[.primary].ssl.ciphersuites
+      description: |
+        Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
+        Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.
+        Default value is empty (fall-back to current JVM's default SSL cipher suite)
+        
+        Note: This property is statically used in IMAP authentication bundle
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.maxMailboxNameLength
+      description: |
+        The max. length of a mailbox name
+      defaultValue: 60
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.invalidMailboxNameCharacters
+      description: |
+        Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;
+        e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . | \\"<<
+        Default is empty.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.namespacePerUser
+      description: |
+        This option controls whether there it is expected to have a dedicated NAMESPACE per user or not.
+        In case of "true" each mailbox account on associated IMAP server is allowed to have its own NAMESPACE set; might be "" (root) or "INBOX.".
+        Otherwise for "false" every mailbox is assumed to have the same NAMESPACE set.
+        
+        This influences the way Open-Xchange Server detects & caches NAMESPACE information; either on a per user basis (more IMAP traffic) or
+        globally (only requested once).
+        
+        Do not touch unless you certainly know IMAP sever's behavior.
+        
+        Default is "true"
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.rootSubfoldersAllowed
+      description: |
+        If either "true" or "false" set, it enforces whether to assume root sub-folder capability for primary account.
+        If not set, root sub-folder capability is probed through creating a temporary folder.
+        
+        Default is empty (probe through temp. folder)
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.allowSORTDISPLAY
+      description: |
+        Specifies if "SORT=DISPLAY" IMAP extension is supposed to be considered when returning a mail listing sorted by From/To
+        
+        Default is "false"
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.fallbackOnFailedSORT
+      description: |
+        Specifies if a fall-back to in-application sort is supposed to be performed in case the IMAP server quits with a "NO" response for the
+        issued SORT command.
+        Note: Doing in-application sort contains the danger of utilizing too much memory (especially for big mailboxes).
+        
+        Default is "false"
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap[.primary].auditLog.enabled
+      description: |
+        Enables the audit log for issued IMAP commands via 'com.sun.mail.imap.AuditLog' class.
+        
+        Accepts the "primary." suffix to only enable for primary account;
+        e.g. "com.openexchange.imap.primary.auditLog.enabled=true"
+        
+        Default is "false"
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.initWithSpecialUse
+      description: |
+        Specifies whether the primary mail account should be initialized with special-use folders from the imap server in case no standard folder names are configured.
+        
+        Default is 'true'
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","IMAP"]
+
+
+
+
 
 
 
