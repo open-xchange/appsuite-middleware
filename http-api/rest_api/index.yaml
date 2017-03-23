@@ -23,5 +23,9 @@ definitions:
   $ref: ./definitions/index.yaml
 parameters:
   $ref: ./parameters/index.yaml
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: HTTP Basic Authentication.
 paths:
   source: ./paths/
