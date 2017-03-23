@@ -37,6 +37,26 @@ This page shows all properties with the tag: Push
 | __File__ | pns-mobile-api-facade.properties |
 
 ---
+| __Key__ | com.openexchange.http.grizzly.hasCometEnabled |
+|:----------------|:--------|
+| __Description__ | Comet is an umbrella term used to describe a technique allowing web browser to<br>receive almost real time updates from the server. The two most common<br>approaches are long polling and streaming. Long polling differs from streaming<br>in that each update from the server ultimately results in another follow up<br>request from the client.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | grizzly.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.hasWebSocketsEnabled |
+|:----------------|:--------|
+| __Description__ | Bi-directional, full-duplex communications channels over a single TCP connection.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
+| __File__ | grizzly.properties |
+
+---
 | __Key__ | com.openexchange.drive.events.apn.ios.enabled |
 |:----------------|:--------|
 | __Description__ | Enables or disables push event notifications to clients using the Apple Push<br>Notification service (APNS) for iOS devices. This requires a valid<br>configuration for the APNS certificate and keys, see either options below,<br>or install the restricted components packages for drive.  <br> |

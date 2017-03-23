@@ -36,6 +36,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Find.html">Find</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/JSON.html">JSON</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>
@@ -44,6 +45,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MSLiveConnect.html">MSLiveConnect</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MailAccount.html">MailAccount</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Monitoring.html">Monitoring</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/PList.html">PList</a>
@@ -65,6 +67,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Signature.html">Signature</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SpamHandler.html">SpamHandler</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sync_App.html">Sync App</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tasks.html">Tasks</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timezone.html">Timezone</a>

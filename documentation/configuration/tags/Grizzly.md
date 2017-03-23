@@ -2,11 +2,7 @@
 title: Grizzly
 ---
 
-This page shows the properties for the grizzly server contained in the package
-open-xchange-grizzly. In your OX setup grizzly is located behind the
-load-balancer and accepts incoming client requests. Communication with the
-load balancer is done via http, e.g via Apache's mod_proxy_http.
-
+This page shows all properties with the tag: Grizzly
 
 | __Key__ | com.openexchange.http.grizzly.wsTimeoutMillis |
 |:----------------|:--------|

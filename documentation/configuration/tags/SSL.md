@@ -4,6 +4,43 @@ title: SSL
 
 This page shows all properties with the tag: SSL
 
+| __Key__ | com.openexchange.http.grizzly.hasSSLEnabled |
+|:----------------|:--------|
+| __Description__ | Enable secure network listener.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SSL.html">SSL</a> |
+| __File__ | grizzly.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.enabledCipherSuites |
+|:----------------|:--------|
+| __Description__ | Comma-separated list of cipher suites that should be used for secure connections.<br>See https://www.openssl.org/docs/manmaster/apps/ciphers.html<br>No value means system-default.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SSL.html">SSL</a> |
+| __File__ | grizzly.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.keystorePath |
+|:----------------|:--------|
+| __Description__ | Path to keystore containing certificate for secure connections.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SSL.html">SSL</a> |
+| __File__ | grizzly.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.keystorePassword |
+|:----------------|:--------|
+| __Description__ | Password for keystore containing certificate for secure connections.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SSL.html">SSL</a> |
+| __File__ | grizzly.properties |
+
+---
 | __Key__ | com.openexchange.net.ssl.default.truststore.enabled |
 |:----------------|:--------|
 | __Description__ | Defines if the default truststore provided by the JVM should be used. These truststore contains the Application Server’s trusted certificates, including public keys for other entities. For a trusted certificate, the server has confirmed that the public key in the certificate belongs to the certificate’s owner. Trusted certificates generally include those of certification authorities (CAs).<br>The administrator is able to ignore the provided by setting the property to 'false'. If so a custom truststore should be provided. Have a look at 'com.openexchange.net.ssl.custom.truststore.enabled' for more details.<br> |
