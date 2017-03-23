@@ -77,6 +77,7 @@ import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.pgp.keys.parsing.KeyRingParserResult;
 import com.openexchange.pgp.keys.parsing.PGPKeyRingParser;
@@ -239,7 +240,7 @@ public class FeedbackMimeMessageUtility {
         PGPKeyRingParser parser = Services.getService(PGPKeyRingParser.class);
         ByteArrayInputStream in = null;
         try {
-            in = new ByteArrayInputStream(ascPgpPublicKey.getBytes());
+            in = new ByteArrayInputStream(Charsets.toAsciiBytes(ascPgpPublicKey));
             KeyRingParserResult result = parser.parse(in);
             return result.toEncryptionKey();
         } catch (IOException e) {
