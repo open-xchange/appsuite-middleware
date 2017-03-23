@@ -61,7 +61,19 @@ import com.openexchange.userfeedback.FeedbackTypeRegistry;
  */
 public class FeedbackTypeRegistryImpl implements FeedbackTypeRegistry {
 
-    private static volatile FeedbackTypeRegistry INSTANCE;
+    private static final FeedbackTypeRegistryImpl INSTANCE = new FeedbackTypeRegistryImpl();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static FeedbackTypeRegistryImpl getInstance() {
+        return INSTANCE;
+    }
+
+    // ----------------------------------------------------------------------------
+
     private final ConcurrentHashMap<String, FeedbackType> map = new ConcurrentHashMap<String, FeedbackType>(1);
 
     /**
@@ -84,19 +96,6 @@ public class FeedbackTypeRegistryImpl implements FeedbackTypeRegistry {
     @Override
     public FeedbackType getFeedbackType(String type) {
         return map.get(type);
-    }
-
-    public static FeedbackTypeRegistry getInstance() {
-        FeedbackTypeRegistry tmp = INSTANCE;
-        if (null == tmp) {
-            synchronized (FeedbackTypeRegistryImpl.class) {
-                tmp = INSTANCE;
-                if (null == tmp) {
-                    tmp = INSTANCE = new FeedbackTypeRegistryImpl();
-                }
-            }
-        }
-        return tmp;
     }
 
 }
