@@ -11,8 +11,8 @@ This page shows all properties with the tag: Permission
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
-| __File__ | foldercache.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
 
 ---
 | __Key__ | com.openexchange.folderstorage.inheritParentPermissions |
@@ -22,7 +22,18 @@ This page shows all properties with the tag: Permission
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
-| __File__ | foldercache.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.inheritParentPermissions |
+|:----------------|:--------|
+| __Description__ | Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.<br> |
+| __Default__ | false |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
 
 ---

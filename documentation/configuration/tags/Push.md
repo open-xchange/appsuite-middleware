@@ -37,6 +37,138 @@ This page shows all properties with the tag: Push
 | __File__ | pns-mobile-api-facade.properties |
 
 ---
+| __Key__ | com.openexchange.drive.events.apn.ios.enabled |
+|:----------------|:--------|
+| __Description__ | Enables or disables push event notifications to clients using the Apple Push<br>Notification service (APNS) for iOS devices. This requires a valid<br>configuration for the APNS certificate and keys, see either options below,<br>or install the restricted components packages for drive.  <br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.ios.keystore |
+|:----------------|:--------|
+| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS<br>certificate and keys for the iOS application, e.g.<br>"/opt/open-xchange/etc/drive-apns.p12". Required if<br>"com.openexchange.drive.events.apn.ios.enabled" is "true" and the package<br>containing the restricted drive components is not installed.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.drive.events.apn.ios.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.ios.password |
+|:----------------|:--------|
+| __Description__ | Specifies the password used when creating the referenced keystore containing<br>the certificate of the iOS application. Note that blank or null passwords<br>are in violation of the PKCS #12 specifications. Required if<br>"com.openexchange.drive.events.apn.ios.enabled" is "true" and the package<br>containing the restricted drive components is not installed.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.drive.events.apn.ios.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.ios.production |
+|:----------------|:--------|
+| __Description__ | Indicates which APNS service is used when sending push notifications to iOS<br>devices. A value of "true" will use the production service, a value of<br>"false" the sandbox service.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.ios.feedbackQueryInterval |
+|:----------------|:--------|
+| __Description__ | Configures the interval between queries to the APN feedback service for the<br>subscribed iOS devices. The value can be defined using units of measurement:<br>"D" (=days), "W" (=weeks) and "H" (=hours).<br>Leaving this parameter empty disables the feedback queries on this node.<br>Since each received feedback is processed cluster-wide, only one node in the<br>cluster should be enabled here.<br> |
+| __Default__ | 1D |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.macos.enabled |
+|:----------------|:--------|
+| __Description__ | Enables or disables push event notifications to clients using the Apple Push<br>Notification service (APNS) for Mac OS devices. This requires a valid<br>configuration for the APNS certificate and keys, see either options below,<br>or install the restricted components packages for drive.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.macos.keystore |
+|:----------------|:--------|
+| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS<br>certificate and keys for the Mac OS application, e.g.<br>"/opt/open-xchange/etc/drive-apns.p12". Required if<br>"com.openexchange.drive.events.apn.macos.enabled" is "true" and the package<br>containing the restricted drive components is not installed.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.drive.events.apn.macos.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.macos.password |
+|:----------------|:--------|
+| __Description__ | Specifies the password used when creating the referenced keystore containing<br>the certificate of the Mac OS application. Note that blank or null passwords<br>are in violation of the PKCS #12 specifications. Required if<br>"com.openexchange.drive.events.apn.macos.enabled" is "true" and the package<br>containing the restricted drive components is not installed.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.drive.events.apn.macos.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.macos.production |
+|:----------------|:--------|
+| __Description__ | Indicates which APNS service is used when sending push notifications to Mac<br>OS devices. A value of "true" will use the production service, a value of<br>"false" the sandbox service.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.drive.events.apn.macos.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.apn.macos.feedbackQueryInterval |
+|:----------------|:--------|
+| __Description__ | Configures the interval between queries to the APN feedback service for the<br>subscribed Mac OS devices. The value can be defined using units of<br>measurement: "D" (=days), "W" (=weeks) and "H" (=hours). <br>Leaving this parameter empty disables the feedback queries on<br>this node. Since each received feedback is processed cluster-wide, only one<br>node in the cluster should be enabled here.<br> |
+| __Default__ | 1D |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.drive.events.apn.macos.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.gcm.enabled |
+|:----------------|:--------|
+| __Description__ | Enables or disables push event notifications to clients using the Google<br>Cloud Messaging (GCM) service. This requires a valid configuration for the<br>GCM API key, see options below.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Android.html">Android</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.gcm.key |
+|:----------------|:--------|
+| __Description__ | Specifies the API key of the server application. Required if<br>"com.openexchange.drive.events.gcm.enabled" is "true" and the package<br>containing the restricted drive components is not installed.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.drive.events.gcm.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Android.html">Android</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.events.blockingLongPolling.enabled |
+|:----------------|:--------|
+| __Description__ | Configures whether blocking long polling for pushing synchronization events<br>to clients may be used as fallback when no other long polling handlers are<br>available due to missing support of the HTTP service. Handling long polling<br>in a blocking manner consumes a server thread, and should therefore only be<br>enabled for testing purposes. Defaults to "false".<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | drive.properties |
+
+---
 | __Key__ | com.openexchange.caldav.push.apsd.enabled |
 |:----------------|:--------|
 | __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |

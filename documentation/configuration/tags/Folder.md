@@ -99,3 +99,255 @@ This page shows all properties with the tag: Folder
 | __File__ | AdminUser.properties |
 
 ---
+| __Key__ | com.openexchange.folderstorage.defaultPermissions |
+|:----------------|:--------|
+| __Description__ | Specifies default permission to use in case folder is supposed to be created below a certain parent folder.<br>The value is a pipe ("&#124;") separated listing of expressions; each expression defines the default permissions<br>for a denoted parent folder. Currently the reserved folder identifiers "2" and "15" are considered as "2"<br>denoted the public PIM folder whereas "15" denotes the public Drive folder.<br><br>An expression starts with the parent folder identifier followed by '=' character; e.g. "2=".<br>Then there is a comma-separated list of permissions to assume per entity (user or group).<br><br>Each permission either starts with "user_", "admin_user_", "group_" or "admin_group_" (the prefix "admin_" controls<br>whether the entity is supposed to be set as folder administrator) followed by the numeric entity identifier.<br><br>Then an '@' character is supposed to occur and finally followed by rights expression. The rights may be dot-separated<br>listing (<folder-permission> + "." + <read-permission> + "." + <write-permission> + "." + <delete-permission>) or one<br>of the tokens  "viewer", "writer" or "author".<br><br>More formally<br>expressions = expression ("&#124;" expression)\*<br>expression = folder "=" permission ("," permission)\*<br>permission = ("admin_")? ("group_" &#124; "user_") entity(int) "@" rights<br>rights = (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) &#124; ("viewer" &#124; "writer" &#124; "author")<br><br>Example<br>2=group_2@2.4.0.0,admin_user_5@8.4.4.4&#124;15=admin_group_2@8.8.8.8<br>2=group_2@viewer,admin_user_5@author&#124;15=admin_group_2@writer<br> |
+| __Default__ | No defaut value |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.inheritParentPermissions |
+|:----------------|:--------|
+| __Description__ | Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.<br> |
+| __Default__ | false |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.inheritParentPermissions |
+|:----------------|:--------|
+| __Description__ | Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.<br> |
+| __Default__ | false |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
+
+---
+| __Key__ | ENABLE_DB_GROUPING |
+|:----------------|:--------|
+| __Description__ | Define where to perform folder grouping.<br>This filters the database results for duplicate folders in the where <br>clause of the db statement or afterwards in the application. <br>Possible values: TRUE / FALSE<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cache.html">Cache</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | ENABLE_FOLDER_CACHE |
+|:----------------|:--------|
+| __Description__ | Enable or disable folder caching. Possible values: TRUE / FALSE<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cache.html">Cache</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | IGNORE_SHARED_ADDRESSBOOK |
+|:----------------|:--------|
+| __Description__ | Determine whether to ignore 'shared addressbook' folder or not.<br>Possible values: TRUE / FALSE<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cache.html">Cache</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | ENABLE_INTERNAL_USER_EDIT |
+|:----------------|:--------|
+| __Description__ | Define if users are allowed to edit their own contact object<br>contained in folder 'Global Address Book' aka 'Internal Users'.<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore |
+|:----------------|:--------|
+| __Description__ | Specifies whether a user's default InfoStore folder should appear below<br>InfoStore root folder:<br><br>- Infostore<br>-- My files<br>-- Public infostore<br>-- Userstore<br>-- Other infstore folders<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.database.preferDisplayName |
+|:----------------|:--------|
+| __Description__ | Specifies whether default InfoStore folders are labeled with owning user's display name<br>or name is read from folder storage (database).<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | com.openexchange.drive.useTempFolder |
+|:----------------|:--------|
+| __Description__ | Specifies whether the synchronization logic will make use of a folder named<br>".drive" below the root synchronization folder or not. If enabled, this<br>folder is used to store temporary uploads and removed files, which usually<br>leads to a better user experience since previously synchronized files can<br>be restored from there for example. If not, removed files are not kept, and<br>uploads are performed directly in the target folder.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.cleaner.interval |
+|:----------------|:--------|
+| __Description__ | Configures the interval between runs of the cleaner process for the<br>temporary ".drive" folder. A cleaner run is only initiated if the<br>synchronization is idle, i.e. the last synchronization resulted in no<br>actions to be performed, and the last run was before the configured<br>interval. The value can be defined using units of measurement: "D" (=days),<br>"W" (=weeks) and "H" (=hours).<br> |
+| __Default__ | 1D |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.cleaner.maxAge |
+|:----------------|:--------|
+| __Description__ | Defines the maximum age of files and directories to be kept inside the<br>temporary ".drive" folder. Files or directories that were last modified<br>before the configured age are deleted during the next run of the cleaner<br>process. The value can be defined using units of measurement: "D" (=days),<br>"W" (=weeks) and "H" (=hours).<br> |
+| __Default__ | 1D |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.maxDirectories |
+|:----------------|:--------|
+| __Description__ | Defines the maximum number of synchronizable directories per root folder. A<br>value of "-1" disables the limitation.<br> |
+| __Default__ | 65535 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.maxFilesPerDirectory |
+|:----------------|:--------|
+| __Description__ | Defines the maximum number of synchronizable files per root folder. A<br>value of "-1" disables the limitation.<br> |
+| __Default__ | 65535 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.drive.excludedFolders |
+|:----------------|:--------|
+| __Description__ | Allows to exclude specific root folders from OX Drive synchronization explicitly. <br>Excluded folders may not be used as root folder for the synchronization, <br>however, this does not apply to their subfolders automatically.<br>Excluded folders should be specified in a comma-separated list of their unique identifiers.<br>Typical candidates for the blacklist would be folder 15 (the "public folders" root) <br>or folder 10 (the "shared folders" root) in large enterprise installations.      <br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam |
+|:----------------|:--------|
+| __Description__ | Indicates whether to create the confirmed-spam folder during check for default mail folders<br>during login if spam is enabled for logged-in user.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | defaultspamhandler.properties |
+
+---
+| __Key__ | com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam |
+|:----------------|:--------|
+| __Description__ | Indicates whether to create the confirmed-ham folder during check for default mail folders<br>during login if spam is enabled for logged-in user.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | defaultspamhandler.properties |
+
+---
+| __Key__ | com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders |
+|:----------------|:--------|
+| __Description__ | Indicates whether the confirmed-spam/confirmed-ham folders shall automatically be unsubscribed during login.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | defaultspamhandler.properties |
+
+---
+| __Key__ | com.openexchange.caldav.tree |
+|:----------------|:--------|
+| __Description__ | Configures the ID of the folder tree used by the CalDAV interface.<br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | caldav.properties |
+
+---
+| __Key__ | com.openexchange.caldav.url |
+|:----------------|:--------|
+| __Description__ | Tells users where to find a caldav folder. This can be displayed in frontends.<br>You can use the variables [hostname] and [folderId] <br>If you chose to deploy caldav as a virtual host (say 'dav.open-xchange.com') use<br>https://dav.open-xchange.com/caldav/[folderId] as the value<br>If you are using user-agent sniffing use<br>https://[hostname]/caldav/[folderId]        <br> |
+| __Default__ | https://[hostname]/caldav/[folderId] |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | caldav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.ignoreFolders |
+|:----------------|:--------|
+| __Description__ | A comma-separated list of folder IDs to exclude from the synchronization. <br>Use this to disable syncing of very large folders (e.g. the global address <br>list in large contexts, which always has ID 6). By default, no folders are<br>excluded.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.tree |
+|:----------------|:--------|
+| __Description__ | Configures the ID of the folder tree used by the CardDAV interface.<br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.exposedCollections |
+|:----------------|:--------|
+| __Description__ | Controls which collections are exposed via the CardDAV interface. Possible <br>values are '0', '1' and '2'. A value of '1' makes each visible folder <br>available as a resource collection, while '2' only exposes an aggregated <br>collection containing  all contact resources from all visible folders. The <br>default value '0' exposes either an aggregated collection or individual <br>collections for each folder, depending on the client's user-agent that is <br>matched against the pattern in 'userAgentForAggregatedCollection'. <br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.userAgentForAggregatedCollection |
+|:----------------|:--------|
+| __Description__ | Specifies if all visible folders are used to create the aggregated <br>collection, or if a reduced set of folders only containing the global <br>addressbook and the personal contacts folders should be used. This setting<br>only influences the aggregated collection that is used for clients that<br>don't support multiple collections. Possible values are 'true' and 'false.<br> |
+| __Default__ | .\*CFNetwork.\*Darwin.\*&#124;.\*AddressBook.\*CardDAVPlugin.\*Mac_OS_X.\*&#124;.\*Mac OS X.\*AddressBook.\* |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.carddav.exposedCollections |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders |
+|:----------------|:--------|
+| __Description__ | Specifies if changes to personal folders (personal in terms of non-global e.g. folders kept in database) are supposed to be propagated<br>to remote nodes. This option is only useful for installations that do offer collaboration features or do not support session stickyness.<br>For instance users are able to share mail folders or might be load-balanced to other nodes while active in a single session.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
+| __File__ | cache.properties |
+
+---

@@ -4,6 +4,76 @@ title: CardDAV
 
 This page shows all properties with the tag: CardDAV
 
+| __Key__ | com.openexchange.client.onboarding.carddav.url |
+|:----------------|:--------|
+| __Description__ | Specifies the URL to the CardDAV end-point; e.g. "dav.open-xchange.invalid" or "http://dav.open-xchange.invalid".<br><br>Note:<br>Specifying a protocol/scheme is optional and may be used to control whether the end-point is<br>supposed to be accessed via SSL or not.<br>Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.<br>The administrator has ensure that end-point is reachable by a well-known path;<br>E.g. "PROPFIND /dav.example.com%3A8843/.well-known/carddav HTTP/1.1"<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a> |
+| __File__ | client-onboarding-carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.enabled |
+|:----------------|:--------|
+| __Description__ | Whether CardDAV is enabled or not<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.ignoreFolders |
+|:----------------|:--------|
+| __Description__ | A comma-separated list of folder IDs to exclude from the synchronization. <br>Use this to disable syncing of very large folders (e.g. the global address <br>list in large contexts, which always has ID 6). By default, no folders are<br>excluded.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.tree |
+|:----------------|:--------|
+| __Description__ | Configures the ID of the folder tree used by the CardDAV interface.<br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.exposedCollections |
+|:----------------|:--------|
+| __Description__ | Controls which collections are exposed via the CardDAV interface. Possible <br>values are '0', '1' and '2'. A value of '1' makes each visible folder <br>available as a resource collection, while '2' only exposes an aggregated <br>collection containing  all contact resources from all visible folders. The <br>default value '0' exposes either an aggregated collection or individual <br>collections for each folder, depending on the client's user-agent that is <br>matched against the pattern in 'userAgentForAggregatedCollection'. <br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.userAgentForAggregatedCollection |
+|:----------------|:--------|
+| __Description__ | Regular expression to match against the client's user-agent to decide <br>whether the aggregated collection is exposed or not. The default pattern <br>matches all known varieties of the Mac OS Addressbook client, that doesn't <br>support multiple collections. Only used if 'exposedCollections' is set to <br>'0'. The pattern is used case insensitive. <br> |
+| __Default__ | .\*CFNetwork.\*Darwin.\*&#124;.\*AddressBook.\*CardDAVPlugin.\*Mac_OS_X.\*&#124;.\*Mac OS X.\*AddressBook.\* |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.carddav.exposedCollections |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.userAgentForAggregatedCollection |
+|:----------------|:--------|
+| __Description__ | Specifies if all visible folders are used to create the aggregated <br>collection, or if a reduced set of folders only containing the global <br>addressbook and the personal contacts folders should be used. This setting<br>only influences the aggregated collection that is used for clients that<br>don't support multiple collections. Possible values are 'true' and 'false.<br> |
+| __Default__ | .\*CFNetwork.\*Darwin.\*&#124;.\*AddressBook.\*CardDAVPlugin.\*Mac_OS_X.\*&#124;.\*Mac OS X.\*AddressBook.\* |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.carddav.exposedCollections |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | carddav.properties |
+
+---
 | __Key__ | com.openexchange.carddav.push.apsd.enabled |
 |:----------------|:--------|
 | __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |

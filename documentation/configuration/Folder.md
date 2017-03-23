@@ -9,8 +9,8 @@ title: Folder
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
-| __File__ | foldercache.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
 
 ---
 | __Key__ | com.openexchange.folderstorage.inheritParentPermissions |
@@ -20,7 +20,78 @@ title: Folder
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.inheritParentPermissions |
+|:----------------|:--------|
+| __Description__ | Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.<br> |
+| __Default__ | false |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a> |
+| __File__ | folder.properties |
+
+---
+| __Key__ | ENABLE_DB_GROUPING |
+|:----------------|:--------|
+| __Description__ | Define where to perform folder grouping.<br>This filters the database results for duplicate folders in the where <br>clause of the db statement or afterwards in the application. <br>Possible values: TRUE / FALSE<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cache.html">Cache</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | ENABLE_FOLDER_CACHE |
+|:----------------|:--------|
+| __Description__ | Enable or disable folder caching. Possible values: TRUE / FALSE<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cache.html">Cache</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | IGNORE_SHARED_ADDRESSBOOK |
+|:----------------|:--------|
+| __Description__ | Determine whether to ignore 'shared addressbook' folder or not.<br>Possible values: TRUE / FALSE<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cache.html">Cache</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | ENABLE_INTERNAL_USER_EDIT |
+|:----------------|:--------|
+| __Description__ | Define if users are allowed to edit their own contact object<br>contained in folder 'Global Address Book' aka 'Internal Users'.<br> |
+| __Default__ | TRUE |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore |
+|:----------------|:--------|
+| __Description__ | Specifies whether a user's default InfoStore folder should appear below<br>InfoStore root folder:<br><br>- Infostore<br>-- My files<br>-- Public infostore<br>-- Userstore<br>-- Other infstore folders<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | foldercache.properties |
+
+---
+| __Key__ | com.openexchange.folderstorage.database.preferDisplayName |
+|:----------------|:--------|
+| __Description__ | Specifies whether default InfoStore folders are labeled with owning user's display name<br>or name is read from folder storage (database).<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | foldercache.properties |
 
 ---
