@@ -66,10 +66,11 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
 /**
- * 
+ *
  * {@link AbstractRestCLI}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -108,10 +109,10 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
                 user.setRequired(true);
                 options.addOption(user);
             }
-            
+
             // Add other options
             addOptions(options);
-            
+
             // Check if help output is requested
             if (showHelp(args)) {
                 printHelp(options);
@@ -133,7 +134,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             Builder request = endpoint.request();
             if (requiresAdministrativePermission()) {
                 String authString = cmd.getOptionValue(USER_SHORT);
-                String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes());
+                String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
                 request.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
             }
             R retval = invoke(options, cmd, request);
@@ -189,7 +190,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
                 //do nothing
             }
         }
-        
+
         return result;
     }
 
