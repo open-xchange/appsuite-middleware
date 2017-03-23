@@ -1,0 +1,42 @@
+feature_name: Group
+properties:
+    - key: GID_NUMBER_START
+      description: |
+        Set to higher than 0 to enable gid number feature.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: Group.properties
+      tags: ["Group"]
+    - key: v
+      description: |
+        If set to true this will check the group name using the check defined in CHECK_GROUP_UID_REGEXP.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: CHECK_GROUP_UID_REGEXP
+      file: Group.properties
+      tags: ["Group"]
+    - key: CHECK_GROUP_UID_REGEXP
+      description: |
+        If CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS is set to true group names will be checked against this regex.
+      defaultValue: "[ $@%\\.+a-zA-Z0-9_-]"
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS
+      file: Group.properties
+      tags: ["Group"]
+    - key: AUTO_TO_LOWERCASE_UID
+      description: |
+        This will lowercase the uid.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS
+      file: Group.properties
+      tags: ["Group"]
