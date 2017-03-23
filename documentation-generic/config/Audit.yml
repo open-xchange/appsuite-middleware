@@ -70,16 +70,3 @@ properties:
       related: 
       file: audit.properties
       tags: ["Audit"]
-
-
-
-      
-
-
-
-
-
-
-
-#Set to true to enable logging of file accesses and downloads
-com.openexchange.audit.logging.FileAccessLogging.enabled=false
