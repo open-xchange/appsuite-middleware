@@ -1,0 +1,120 @@
+feature_name: SMTP
+feature_description: |
+  To differentiate between settings that apply all SMTP accounts or settings that only apply to the primary account
+  each property containing the "[.primary]" suffix allows to specify a value only applicable to the primary account
+  by appending the "primary." suffix to properties' common "com.openexchange.smtp." prefix..
+  E.g.
+  "com.openexchange.smtp.smtpTimeout=50000" specifies 50sec read timeout for every SMTP account
+  "com.openexchange.smtp.primary.smtpTimeout=20000" specifies 20sec read timeout for primary-only SMTP account
+properties:
+    - key: com.openexchange.smtp[.primary].smtpLocalhost
+      description: |
+        The localhost name that is going to be used on SMTP's HELO or EHLO command.
+        The default is set to InetAddress.getLocalHost().getHostName() but if either JDK or name service are not
+        configured properly, this routine fails and the HELO or EHLO command is send without a name which
+        leads to an error: "501 HELO requires domain address"
+        The value "null" falls back to InetAddress.getLocalHost().getHostName() which works in most cases.
+        Default is "null"
+      defaultValue: null
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp[.primary].smtpAuthEnc
+      description: |
+        Define the encoding for SMTP authentication
+        Default is UTF-8
+      defaultValue: UTF-8
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.setSMTPEnvelopeFrom
+      description: |
+        Defines if SMTP header ENVELOPE-FROM should be explicitly set to
+        user's primary email address or not
+        Default is false
+        Applies only to primary SMTP account; considered as "false" for every external SMTP account.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp[.primary].smtpTimeout
+      description: |
+        Define the socket read timeout value in milliseconds. A value less than
+        or equal to zero is infinite timeout. See also mail.smtp.timeout
+        Default is 50000
+      defaultValue: 50000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp[.primary].smtpConnectionTimeout
+      description: |
+        Define the socket connect timeout value in milliseconds. A value less
+        or equal to zero is infinite timeout. See also mail.smtp.connectiontimeout
+        Default is 10000
+      defaultValue: 10000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.logTransport
+      description: |
+        Specifies whether a transported message shall be logged providing "Message-Id" header, login, and SMTP server information
+        Default is false
+        Applies only to primary SMTP account; considered as "false" for every external SMTP account
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp[.primary].ssl.protocols
+      description: |
+        Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
+        Default is empty
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp[.primary].ssl.ciphersuites
+      description: |
+        Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
+        
+        Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.
+        
+        Default value is empty (fall-back to current JVM's default SSL cipher suite)
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.sendPartial
+      description: |
+        Whether partial send is allowed or message transport is supposed to be aborted
+        Default is "false"
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      tags: ["Mail","SMTP"]
