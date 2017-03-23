@@ -696,6 +696,7 @@ public final class SessionUtility {
     }
 
     private static final String SECRET_PREFIX = LoginServlet.SECRET_PREFIX;
+    private static final String SHARE_PREFIX = LoginServlet.SHARE_PREFIX;
 
     /**
      * Extracts the secret string from specified cookies using given hash string.
@@ -894,7 +895,7 @@ public final class SessionUtility {
         {
             Cookie cookie = cookies.get(SESSION_PREFIX + hash);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", resp);
             }
         }
 
@@ -902,7 +903,7 @@ public final class SessionUtility {
         {
             Cookie cookie = cookies.get(SECRET_PREFIX + hash);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", resp);
             }
         }
 
@@ -910,7 +911,7 @@ public final class SessionUtility {
         {
             Cookie cookie = cookies.get(LoginServlet.getShareCookieName(req));
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", resp);
             }
         }
 
@@ -919,7 +920,7 @@ public final class SessionUtility {
             String cookieName = getPublicSessionCookieName(req, new String[] { Integer.toString(optSession.getContextId()), Integer.toString(optSession.getUserId()) });
             Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", resp);
             }
         }
     }
@@ -956,14 +957,19 @@ public final class SessionUtility {
      * @param cookieNames The names of the cookies to remove
      */
     public static void removeOXCookies(final HttpServletRequest req, final HttpServletResponse resp, final List<String> cookieNames) {
-        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies == null) {
             return;
         }
+
         for (final String cookieName : cookieNames) {
-            final Cookie cookie = cookies.get(cookieName);
+            Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                if (startsWithOXPrefix(cookieName)) {
+                    removeCookie(cookie, "invalid", resp);
+                } else {
+                    removeCookie(cookie, null, resp);
+                }
             }
         }
     }
@@ -982,7 +988,7 @@ public final class SessionUtility {
         final String name = Tools.JSESSIONID_COOKIE;
         final Cookie cookie = cookies.get(name);
         if (null != cookie) {
-            removeCookie(cookie, resp);
+            removeCookie(cookie, null, resp);
         }
     }
 
@@ -990,24 +996,31 @@ public final class SessionUtility {
      * Removes a given cookie by setting its MaxAge parameter to 0.
      *
      * @param cookie The cookie
+     * @param newValue The optional new value to set
      * @param resp The HTTP Servlet response
      */
-    public static void removeCookie(final Cookie cookie, final HttpServletResponse resp) {
-        final String name = cookie.getName();
-        final String value = cookie.getValue();
-        final Cookie respCookie = new Cookie(name, value);
+    public static void removeCookie(Cookie cookie, String newValue, HttpServletResponse resp) {
+        String name = cookie.getName();
+        String value = null == newValue ? cookie.getValue() : newValue;
+
+        Cookie respCookie = new Cookie(name, value);
         respCookie.setPath("/");
-        final String domain = extractDomainValue(value);
-        if (null != domain) {
-            respCookie.setDomain(domain);
-            // Once again without domain parameter
-            final Cookie respCookie2 = new Cookie(name, value);
-            respCookie2.setPath("/");
-            respCookie2.setMaxAge(0); // delete
-            resp.addCookie(respCookie2);
-        }
         respCookie.setMaxAge(0); // delete
+
+        String domain = extractDomainValue(value);
+        if (null == domain) {
+            resp.addCookie(respCookie);
+            return;
+        }
+
+        // Once again w/ and w/o domain parameter
+        respCookie.setDomain(domain);
         resp.addCookie(respCookie);
+
+        Cookie respCookie2 = new Cookie(name, value);
+        respCookie2.setPath("/");
+        respCookie2.setMaxAge(0); // delete
+        resp.addCookie(respCookie2);
     }
 
     /**
@@ -1135,11 +1148,19 @@ public final class SessionUtility {
         if (null != existingCookies) {
             Cookie cookie = existingCookies.get(name);
             if (null != cookie && (null == value || value.equals(cookie.getValue()))) {
-                removeCookie(cookie, response);
+                if (startsWithOXPrefix(name)) {
+                    removeCookie(cookie, "invalid", response);
+                } else {
+                    removeCookie(cookie, null, response);
+                }
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean startsWithOXPrefix(String name) {
+        return (name.startsWith(SESSION_PREFIX) || name.startsWith(SECRET_PREFIX) || name.startsWith(PUBLIC_SESSION_PREFIX) || name.startsWith(SHARE_PREFIX));
     }
 
     // ------------------------------------- Private constructor -------------------------------------------------- //

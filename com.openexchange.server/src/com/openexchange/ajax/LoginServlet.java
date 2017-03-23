@@ -180,7 +180,7 @@ public class LoginServlet extends AJAXServlet {
     /**
      * <code>"open-xchange-share-"</code>
      */
-    private static final String SHARE_PREFIX = "open-xchange-share-".intern();
+    public static final String SHARE_PREFIX = "open-xchange-share-".intern();
 
     /**
      * <code>"open-xchange-public-session-"</code>
@@ -1029,13 +1029,13 @@ public class LoginServlet extends AJAXServlet {
         final String domain = getDomainValue(null == serverName ? determineServerNameByLogProperty() : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
-        } 
+        }
         else if (Tools.validateDomainRegardingSharding(serverName)) {
             cookie.setDomain(serverName);
         }
         return cookie;
     }
-    
+
     /**
      * Configures specific cookie properties based on configuration and the incoming request, which includes setting the cookie path
      * to <code>/</code>, applying the <code>secure</code> flag and domain setting the max-age and cookie domain.
