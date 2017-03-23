@@ -241,7 +241,7 @@ public final class HtmlServices {
                     return false;
                 }
             } else if (pos > 0) {
-                if (false == Strings.isAsciiLetter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
+                if (false == Strings.isAsciiLetterOrDigit(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
                     return false;
                 }
             }
