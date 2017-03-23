@@ -130,6 +130,9 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             checkOptions(cmd, options);
 
             WebTarget endpoint = getEndpoint(cmd);
+            if (null == endpoint) {
+                return null;
+            }
 
             Builder request = endpoint.request();
             if (requiresAdministrativePermission()) {
