@@ -71,7 +71,7 @@ import com.openexchange.server.impl.OCLPermission;
  * {@link PublicFolderMovePermissionTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.4
+ * @since v7.8.3
  */
 public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
 
@@ -81,11 +81,15 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
     private FolderObject toMove;
     private OCLPermission permission;
 
+    public PublicFolderMovePermissionTest(String name) {
+        super(name);
+    }
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(testUser2);
+        client2 = new AJAXClient(AJAXClient.User.User2);
 
         permission = new OCLPermission();
         permission.setEntity(client2.getValues().getUserId());
