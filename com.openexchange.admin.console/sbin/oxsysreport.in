@@ -604,23 +604,32 @@ exclude_secret_entries() {
 # _secret_part=secret
 # _modified_line=com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
     local _config_copy=${1}
-    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/configs-secret-exclude)
+    local _tmp_exclude_status=$(mktemp)
+    local _exclude_status=$(normalize_path ${TMP}/${LOGDIR}/configs-secret-exclude)
+    local _separator='@SEPARATOR@'
+    local _pattern='[[:blank:]]*(=|:)'
     local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|^[[:blank:]]*#'
-    local _blacklist='pass(word)*[[:blank:]]*(=|:)|secret[[:blank:]]*(=|:)|key[[:blank:]]*(=|:)|secretsource[[:blank:]]*(=|:)|secretrandom[[:blank:]]*(=|:)|salt[[:blank:]]*(=|:)|sslkey(pass|name)[[:blank:]]*(=|:)|(\.|JMX|JDBC|:[[:blank:]]*)login(name)*[[:blank:]]*(=|:)|(\.|=|:[[:blank:]]*)user(name)*[[:blank:]]*(=|:)'
+    local _blacklist="pass(word|wd)*${_pattern}"
+    local _blacklist="${_blacklist}|secret(source|random)*${_pattern}"
+    local _blacklist="${_blacklist}|key${_pattern}"
+    local _blacklist="${_blacklist}|salt${_pattern}"
+    local _blacklist="${_blacklist}|(${_separator}|\.|JMX|JDBC|[[:blank:]])login(name)*${_pattern}"
+    local _blacklist="${_blacklist}|(${_separator}|\.|[[:blank:]]|=)user(name)*${_pattern}"
     find "${_config_copy}" -type f | \
         sed 's|[[:blank:]]|\\ |g' | \
         xargs egrep -iHrIv "${_whitelist}" | \
-        egrep -i "${_blacklist}" >> ${_tmp_exclude_status}
+        sed -r 's/(:)/@SEPARATOR@/' | \
+        egrep -i "${_blacklist}" > ${_tmp_exclude_status}
 
     # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties:com.openexchange.oauth.msn.apiSecret=secret
     while read line; do
         # /tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties
         local _file=$(echo "${line}" | \
-            awk -F ':' '{print $1}' | \
+            awk -F "${_separator}" '{print $1}' | \
             sed 's|[[:blank:]]|\ |g')
         # com.openexchange.oauth.msn.apiSecret=secret
         local _original_line=$(echo "${line}" | \
-            sed "s|^${_file}:||g")
+            sed "s|^${_file}${_separator}||g")
         # com.openexchange.oauth.msn.apiSecret=
         local _plain_property=$(echo "${_original_line}" | \
             sed 's|=.*$|=|g' | \
@@ -650,16 +659,19 @@ exclude_secret_entries() {
             local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
         fi
         sed -i "s|^${_original_line}[[:blank:]]*$|${_modified_line}|g" "${_file}"
-        sed -i "s|:${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
+        sed -i "s|${_separator}${_original_line}[[:blank:]]*$|:${_modified_line}|g" "${_tmp_exclude_status}"
     done < ${_tmp_exclude_status}
     print_hint_to_line_end ${_tmp_exclude_status} "modified"
-    ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
+    cat ${_tmp_exclude_status} >> ${_exclude_status}
+    ALL_EXCLUDED="${_exclude_status} ${ALL_EXCLUDED}"
+    rm -rf ${_tmp_exclude_status}
 }
 
 exclude_secret_ox_config_files() {
 # This function removes every file which is not whitelisted.
     local _ox_config_copy=${1}
-    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-exclude)
+    local _tmp_exclude_status=$(mktemp)
+    local _exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-exclude)
     local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names|readerengine.*list'
     find ${_ox_config_copy} -type f | \
         egrep -v "${_whitelist}" | \
@@ -667,7 +679,9 @@ exclude_secret_ox_config_files() {
     cat ${_tmp_exclude_status} | \
         xargs -r rm -f
     print_hint_to_line_end ${_tmp_exclude_status} "removed"
-    ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
+    cat ${_tmp_exclude_status} >> ${_exclude_status}
+    ALL_EXCLUDED="${_exclude_status} ${ALL_EXCLUDED}"
+    rm -f ${_tmp_exclude_status}
 }
 
 fix_log_archive_tarball_name() {
