@@ -71,6 +71,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.filename.FileNameTools;
 
 /**
  * {@link JsonFieldHandler}
@@ -139,6 +140,8 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
         }
 
         switch (field) {
+        case FILENAME:
+            return FileNameTools.sanitizeFilename((String) value);
         case CATEGORIES:
             return handleCategories((String) value);
         case META:
