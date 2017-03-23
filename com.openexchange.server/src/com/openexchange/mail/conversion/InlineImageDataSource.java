@@ -73,6 +73,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -108,7 +109,7 @@ public final class InlineImageDataSource implements ImageDataSource {
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
-    private CryptographicAwareMailAccessFactory cryptoMailAccessFactory;
+    private ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link InlineImageDataSource}
@@ -121,9 +122,12 @@ public final class InlineImageDataSource implements ImageDataSource {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
-            if(cryptoMailAccessFactory != null) {
-                //Handling for encrypted mails if a cryptographic aware service is available.
-                mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session);
+            if(serviceLookup != null) {
+                CryptographicAwareMailAccessFactory cryptoMailAccessFactory = serviceLookup.getOptionalService(CryptographicAwareMailAccessFactory.class);
+                if(cryptoMailAccessFactory != null) {
+                    //Handling for encrypted mails if a cryptographic aware service is available.
+                    mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session);
+                }
             }
             mailAccess.connect();
             return loadImagePart(fullname, mailId, cid, mailAccess);
@@ -156,12 +160,12 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     /**
-     * Sets a MailAccess factory which allows to process inline images from encrypted mails.
+     * Sets the ServiceLookup
      *
-     * @param cryptoMailAccessFactory The factory used for handling encrypted mails.
+     * @param serviceLookup
      */
-    public void setCryptoAwareMailAccessFactory(CryptographicAwareMailAccessFactory cryptoMailAccessFactory) {
-        this.cryptoMailAccessFactory = cryptoMailAccessFactory;
+    public void setServiceLookup(ServiceLookup serviceLookup) {
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
@@ -316,6 +320,5 @@ public final class InlineImageDataSource implements ImageDataSource {
     public String getAlias() {
         return ALIAS;
     }
-
 }
 

@@ -61,7 +61,6 @@ import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.image.Mp3ImageDataSource;
-import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 
 /**
@@ -85,7 +84,7 @@ public class ImageActivator extends AJAXModuleActivator {
         ImageUtility.setDispatcherPrefixService(getService(DispatcherPrefixService.class));
         {
             InlineImageDataSource inlineDataSource = InlineImageDataSource.getInstance();
-            inlineDataSource.setCryptoAwareMailAccessFactory(getOptionalService(CryptographicAwareMailAccessFactory.class));
+            inlineDataSource.setServiceLookup(this);
             Dictionary<String, Object> inlineProps = new Hashtable<String, Object>(1);
             inlineProps.put("identifier", inlineDataSource.getRegistrationName());
             registerService(DataSource.class, inlineDataSource, inlineProps);
