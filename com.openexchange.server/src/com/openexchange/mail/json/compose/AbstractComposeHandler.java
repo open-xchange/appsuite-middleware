@@ -97,6 +97,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -284,11 +285,14 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                 context.setTextPart(part);
             }
 
+            String cryptoAuth = request.getRequest().getParameter("cryptoAuth");
+            if (request.getJsonMail().has("cryptoAuth")) cryptoAuth = request.getJsonMail().getString("cryptoAuth");
+
             // Remaining attachments (if any) refer to existing parts from other messages in store
             if (attachmentArray.length() > 1) {
                 // Check for inline images (in case content is HTML)
                 Set<String> contentIds = extractContentIds(sContent);
-                parseAttachments(sourceMessage, attachmentArray, contentIds, context);
+                parseAttachments(sourceMessage, attachmentArray, contentIds, context, cryptoAuth);
             }
         } else {
             // There are no attachments at all; yield an empty text part
@@ -450,12 +454,12 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
      * @throws OXException If parsing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context) throws OXException, JSONException {
+    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context, String cryptoAuth) throws OXException, JSONException {
         // Get the identifier of the referenced message
         MailPath parentMsgRef = composeMessage.getMsgref();
 
         // Load & set referenced parts
-        Map<String, ReferencedMailPart> referencedParts = loadReferencedParts(jAttachments, contentIds, parentMsgRef, context);
+        Map<String, ReferencedMailPart> referencedParts = loadReferencedParts(jAttachments, contentIds, parentMsgRef, context, cryptoAuth);
 
         // Iterate attachments (once again)
         int len = jAttachments.length();
@@ -571,7 +575,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
      * @throws OXException If loading the parts fails
      * @throws JSONException If a JSON error occurred
      */
-    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, ComposeContext context) throws OXException, JSONException {
+    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, ComposeContext context, String cryptoAuth) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -598,6 +602,13 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = context.getConnectedMailAccess(parentMsgRef.getAccountId());
+            CryptographicAwareMailAccessFactory cryptoMailAccessFactory = MailJSONActivator.SERVICES.get().getOptionalService(CryptographicAwareMailAccessFactory.class);
+            if(cryptoMailAccessFactory != null) {
+                mailAccess = cryptoMailAccessFactory.createAccess(
+                    (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
+                    context.getSession(),
+                    cryptoAuth);
+            }
             return loadMultipleRefs(groupedSeqIDs, parentMsgRef, contentIds, mailAccess, context);
         } catch (OXException oe) {
             if (null == mailAccess || !shouldRetry(oe)) {
