@@ -91,6 +91,14 @@ public class TestContextPool {
         LOG.info("Added context {} to all time available context list.", context.getName());
     }
 
+    /**
+     * Returns an exclusive {@link TestContext} which means this context is currently not used by any other test.<br>
+     * <br>
+     * <b>Caution: After using the {@link TestContext} make sure it will be returned to pool by using {@link #backContext(TestContext)}!</b>
+     * 
+     * @param acquiredBy The name of the class that acquires the context (for logging purposes)
+     * @return {@link TestContext} to be used for tests.
+     */
     public static TestContext acquireContext(String acquiredBy) {
         try {
             TestContext context = contexts.take();
@@ -132,6 +140,21 @@ public class TestContextPool {
 
     public static void setOxAdminMaster(TestUser oxAdminMaster) {
         TestContextPool.oxAdminMaster = oxAdminMaster;
+    }
+
+    // the rest admin user is not handled to be acquired only by one party
+    private static TestUser restUser = null;
+
+    public static String getRestAuth() {
+        return restUser.getUser() + ":" + restUser.getPassword();
+    }
+
+    public static TestUser getRestUser() {
+        return restUser;
+    }
+
+    public static void setRestUser(TestUser restUser) {
+        TestContextPool.restUser = restUser;
     }
 
     public static void startWatcher() {
