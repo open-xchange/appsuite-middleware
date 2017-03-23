@@ -83,6 +83,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -561,6 +562,8 @@ public final class DownloadUtility {
         appendFilenameParameter(fileName, null, userAgent, appendTo);
     }
 
+    private static final PercentEscaper encoder = new PercentEscaper("", false);
+
     /**
      * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
      *
@@ -590,7 +593,7 @@ public final class DownloadUtility {
         fn = escapeBackslashAndQuote(fn);
         if (null != userAgent && BrowserDetector.detectorFor(userAgent).isMSIE()) {
             // InternetExplorer
-            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
+            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(FileNameTools.sanitizeFilename(fn), Charsets.UTF_8)).append('"');
             return;
         }
         /*-
@@ -609,17 +612,10 @@ public final class DownloadUtility {
                 foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
-            PercentEscaper encoder = new PercentEscaper("", false);
-            String encoded = encoder.escape(sanitizeFilename(fn));
+            String encoded = encoder.escape(FileNameTools.sanitizeFilename(fn));
             appendTo.append("; filename*=UTF-8''").append(encoded);
         }
         appendTo.append("; filename=\"").append(foo).append('"');
-    }
-
-    private static final Pattern FILENAME = Pattern.compile("[^\\p{L}0-9-_+ .]");
-    
-    public static String sanitizeFilename(String filename) {
-        return FILENAME.matcher(filename).replaceAll("_");
     }
 
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
