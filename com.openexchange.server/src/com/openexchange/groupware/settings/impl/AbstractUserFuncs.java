@@ -82,7 +82,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
         setValue(newUser, setting.getSingleValue().toString(), user);
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
         if (null != userService) {
-            userService.updateUser(user, ctx);
+            userService.updateUser(newUser, ctx);
         } else {
             org.slf4j.LoggerFactory.getLogger(AbstractUserFuncs.class).warn(
                 "Unable to access user service, updating directly via storage.", ServiceExceptionCode.absentService(UserService.class));
