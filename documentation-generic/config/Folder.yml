@@ -31,8 +31,8 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: foldercache.properties
-      tags: ["Permission"]
+      file: folder.properties
+      tags: ["Folder","Permission"]
     - key: com.openexchange.folderstorage.inheritParentPermissions
       description: |
         Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
@@ -41,5 +41,88 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
+      file: folder.properties
+      tags: ["Folder","Permission"]
+    - key: com.openexchange.folderstorage.inheritParentPermissions
+      description: |
+        Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
+      defaultValue: false
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: folder.properties
+      tags: ["Folder","Permission"]
+    - key: ENABLE_DB_GROUPING
+      description: |
+        Define where to perform folder grouping.
+        This filters the database results for duplicate folders in the where 
+        clause of the db statement or afterwards in the application. 
+        Possible values: TRUE / FALSE
+      defaultValue: TRUE
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
       file: foldercache.properties
-      tags: ["Permission"]
+      tags: ["Folder","Cache"]
+    - key: ENABLE_FOLDER_CACHE
+      description: |
+        Enable or disable folder caching. Possible values: TRUE / FALSE
+      defaultValue: TRUE
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: foldercache.properties
+      tags: ["Folder","Cache"]
+    - key: IGNORE_SHARED_ADDRESSBOOK
+      description: |
+        Determine whether to ignore 'shared addressbook' folder or not.
+        Possible values: TRUE / FALSE
+      defaultValue: TRUE
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: foldercache.properties
+      tags: ["Folder","Cache", "Contact"]
+    - key: ENABLE_INTERNAL_USER_EDIT
+      description: |
+        Define if users are allowed to edit their own contact object
+        contained in folder 'Global Address Book' aka 'Internal Users'.
+      defaultValue: TRUE
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: foldercache.properties
+      tags: ["Folder", "Contact"]
+    - key: com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore
+      description: |
+          Specifies whether a user's default InfoStore folder should appear below
+          InfoStore root folder:
+
+          - Infostore
+          -- My files
+          -- Public infostore
+          -- Userstore
+          -- Other infstore folders
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: foldercache.properties
+      tags: ["Folder"]
+    - key: com.openexchange.folderstorage.database.preferDisplayName
+      description: |
+        Specifies whether default InfoStore folders are labeled with owning user's display name
+        or name is read from folder storage (database).
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: foldercache.properties
+      tags: ["Folder", "Database"]
