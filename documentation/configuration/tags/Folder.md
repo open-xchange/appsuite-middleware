@@ -39,6 +39,25 @@ This page shows all properties with the tag: Folder
 | __File__ | mail.properties |
 
 ---
+| __Key__ | com.openexchange.folder.json.module |
+|:----------------|:--------|
+| __Description__ | Define the module which also serves as the appendix for registered servlet:<br>If module is set to "myfolders", the servlet path is changed to "/ajax/myfolders"<br>Default is "folders"<br> |
+| __Default__ | folders |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/JSON.html">JSON</a> |
+| __File__ | folderjson.properties |
+
+---
+| __Key__ | com.openexchange.folder.json.servletPath |
+|:----------------|:--------|
+| __Description__ | Define the path for registered servlet<br>If set, the complete path is set to specified value regardless of the value of "com.openexchange.folder.json.module" property<br>Default is empty to let path be: "/ajax/" + <module><br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/JSON.html">JSON</a> |
+| __File__ | folderjson.properties |
+
+---
 | __Key__ | SENT_MAILFOLDER_[language] |
 |:----------------|:--------|
 | __Description__ | Default sent mail folder fallback for a specific language if not sent by rmi client. <br>The [language] variable must be replaced by an upper case language identifier. E.g. SENT_MAILFOLDER_DE_DE<br>Default values:<br>  SENT_MAILFOLDER_DE_DE=Gesendete Objekte<br>  SENT_MAILFOLDER_EN_GB=Sent Mai<br>  SENT_MAILFOLDER_EN_US=Sent Items<br>  SENT_MAILFOLDER_FR_FR=Objets envoy\u00e9s<br>  SENT_MAILFOLDER_NL_NL=Verzonden items<br>  SENT_MAILFOLDER_SV_SV=Skickat<br>  SENT_MAILFOLDER_ES_ES=Elementos enviados<br>  SENT_MAILFOLDER_JA_JP=\u9001\u4FE1\u6E08\u30A2\u30A4\u30C6\u30E0<br>  SENT_MAILFOLDER_PL_PL=Elementy wys\u0142ane<br>  SENT_MAILFOLDER_IT_IT=Posta inviata<br>  SENT_MAILFOLDER_ZH_CN=\u5df2\u53d1\u9001\u90ae\u4ef6<br>  SENT_MAILFOLDER_CS_CZ=Odeslan\u00e9 polo\u017eky<br>  SENT_MAILFOLDER_HU_HU=Elk\u00fcld\u00f6tt elemek<br>  SENT_MAILFOLDER_SK_SK=Odoslan\u00e9 polo\u017eky<br>  SENT_MAILFOLDER_LV_LV=Nos\u016Bt\u012Bt\u0101s vien\u012Bbas<br> |
