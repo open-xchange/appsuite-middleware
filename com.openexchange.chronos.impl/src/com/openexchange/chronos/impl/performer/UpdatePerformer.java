@@ -64,7 +64,6 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.asList;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -152,7 +151,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The update result
      */
-    public CalendarResultImpl perform(int objectID, Event updatedEvent, long clientTimestamp) throws OXException {
+    public CalendarResultImpl perform(String objectID, Event updatedEvent, long clientTimestamp) throws OXException {
         /*
          * load original event data
          */
@@ -171,7 +170,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceID) throws OXException {
         if (isSeriesMaster(originalEvent)) {
             if (contains(originalEvent.getDeleteExceptionDates(), recurrenceID)) {
-                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getSeriesId()), recurrenceID);
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getSeriesId(), recurrenceID);
             }
             if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {
                 /*
@@ -191,7 +190,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  * take over all original attendees, attachments & alarms
                  */
                 storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalEvent.getAttendees());
-                storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), newExceptionEvent.getId(), originalEvent.getAttachments());
+                storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newExceptionEvent.getId(), originalEvent.getAttachments());
                 for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
                     storage.getAlarmStorage().insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue());
                 }
@@ -218,7 +217,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getId()), String.valueOf(recurrenceID));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceID));
         }
     }
 
@@ -515,7 +514,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             originalUserEvent = Utils.applyExceptionDates(storage, originalUserEvent, calendarUser.getId());
             SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (0 < exceptionDateUpdates.getRemovedItems().size() || null == userAttendee) {
-                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), EventField.DELETE_EXCEPTION_DATES);
+                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.DELETE_EXCEPTION_DATES);
             }
             if (0 < exceptionDateUpdates.getAddedItems().size()) {
                 for (RecurrenceId newDeleteException : exceptionDateUpdates.getAddedItems()) {
@@ -601,10 +600,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
         requireWritePermissions(originalEvent);
         if (0 < attachmentsToDelete.size()) {
-            storage.getAttachmentStorage().deleteAttachments(session.getSession(), i(folder), originalEvent.getId(), attachmentsToDelete);
+            storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), originalEvent.getId(), attachmentsToDelete);
         }
         if (0 < attachmentsToInsert.size()) {
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), originalEvent.getId(), attachmentsToInsert);
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), originalEvent.getId(), attachmentsToInsert);
         }
         return true;
     }
@@ -634,11 +633,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Resets the participation status of all individual attendees - excluding the current calendar user - to
      * {@link ParticipationStatus#NEEDS_ACTION} for a specific event.
      *
-     * @param objectID The identifier of the event to reste the participation status for
+     * @param objectID The identifier of the event to reset the participation status for
      * @param attendees The event's attendees
      * @return <code>true</code> if at least one attendee was updated, <code>false</code>, otherwise
      */
-    private boolean resetParticipationStatus(int objectID, List<Attendee> attendees) throws OXException {
+    private boolean resetParticipationStatus(String objectID, List<Attendee> attendees) throws OXException {
         List<Attendee> attendeesToUpdate = new ArrayList<Attendee>();
         for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
             if (calendarUser.getId() == attendee.getEntity() || ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
@@ -693,7 +692,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     Check.mandatoryFields(eventUpdate, EventField.CLASSIFICATION);
                     Check.classificationIsValid(eventUpdate.getClassification(), folder);
                     if (isSeriesException(originalEvent)) {
-                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(String.valueOf(eventUpdate.getClassification()), I(originalEvent.getSeriesId()), String.valueOf(originalEvent.getRecurrenceId()));
+                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(String.valueOf(eventUpdate.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
                     break;
                 case START_TIMEZONE:
@@ -731,14 +730,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         }
                         // TODO: better ignore? com.openexchange.ajax.appointment.recurrence.UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
                         //       vs. com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExceptions.testShouldNotAllowTurningAChangeExceptionIntoASeries()
-                        throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                        throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                     }
                     if (isSeriesMaster(originalEvent) && null == eventUpdate.getRecurrenceRule()) {
                         /*
                          * series to single event, remove recurrence & ensure all necessary recurrence data is present in passed event update
                          */
                         EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
-                        eventUpdate.setSeriesId(0);
+                        eventUpdate.setSeriesId(null);
                         eventUpdate.setChangeExceptionDates(null);
                         eventUpdate.setDeleteExceptionDates(null);
                         break;
@@ -751,7 +750,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     /*
                      * single event to series, assign new recurrence id
                      */
-                    if (0 >= originalEvent.getSeriesId()) {
+                    if (null == originalEvent.getSeriesId()) {
                         eventUpdate.setSeriesId(originalEvent.getId());
                     }
                     break;
@@ -768,20 +767,20 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         // ignore neutral value
                         break;
                     }
-                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 case DELETE_EXCEPTION_DATES:
                     if (isNullOrEmpty(eventUpdate.getDeleteExceptionDates()) && isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
                         // ignore neutral value
                         break;
                     }
                     if (false == isSeriesMaster(originalEvent)) {
-                        throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                        throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                     }
                     if (null != eventUpdate.getDeleteExceptionDates()) {
                         Check.recurrenceIdsExist(session.getRecurrenceService(), originalEvent, eventUpdate.getDeleteExceptionDates());
                         SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
                         if (0 < exceptionDateUpdates.getRemovedItems().size()) {
-                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                         }
                     }
                     break;
@@ -790,7 +789,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         // ignore neutral value
                         break;
                     }
-                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 case ORGANIZER:
                     Organizer organizer = eventUpdate.getOrganizer();
                     if (null == organizer) {
@@ -799,7 +798,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     } else {
                         organizer = session.getEntityResolver().prepare(organizer, CalendarUserType.INDIVIDUAL);
                         if (false == CalendarUtils.matches(originalEvent.getOrganizer(), organizer)) {
-                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                         }
                         eventUpdate.removeOrganizer();
                     }
@@ -827,7 +826,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 case UID:
                 case SERIES_ID:
                 case PUBLIC_FOLDER_ID:
-                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(I(originalEvent.getId()), field);
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 default:
                     break;
             }

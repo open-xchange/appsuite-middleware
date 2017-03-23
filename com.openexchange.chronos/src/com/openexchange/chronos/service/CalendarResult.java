@@ -89,7 +89,7 @@ public interface CalendarResult {
      *
      * @return The folder identifier
      */
-    int getFolderID();
+    String getFolderID();
 
     /**
      * Gets the delete results.

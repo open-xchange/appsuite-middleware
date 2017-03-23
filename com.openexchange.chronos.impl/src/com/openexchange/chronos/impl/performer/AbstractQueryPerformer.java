@@ -60,14 +60,12 @@ import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getUntil;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.chronos.impl.Utils.isExcluded;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.sortEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -111,7 +109,7 @@ public abstract class AbstractQueryPerformer {
         this.storage = storage;
     }
 
-    protected List<Event> readEventsInFolder(UserizedFolder folder, int[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
+    protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
@@ -121,11 +119,11 @@ public abstract class AbstractQueryPerformer {
             if (0 == objectIDs.length) {
                 return Collections.emptyList();
             } else if (1 == objectIDs.length) {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, I(objectIDs[0])));
+                searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectIDs[0]));
             } else {
                 CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                for (int objectID : objectIDs) {
-                    orTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, I(objectID)));
+                for (String objectID : objectIDs) {
+                    orTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectID));
                 }
                 searchTerm.addSearchTerm(orTerm);
             }
@@ -152,10 +150,10 @@ public abstract class AbstractQueryPerformer {
 
     protected List<Event> readAttendeeData(List<Event> events, Boolean internal) throws OXException {
         if (null != events && 0 < events.size()) {
-            int[] objectIDs = getObjectIDs(events);
-            Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs, Boolean.TRUE);
+            String[] objectIDs = getObjectIDs(events);
+            Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs, Boolean.TRUE);
             for (Event event : events) {
-                event.setAttendees(attendeesById.get(I(event.getId())));
+                event.setAttendees(attendeesById.get(event.getId()));
             }
         }
         return events;
@@ -203,7 +201,7 @@ public abstract class AbstractQueryPerformer {
             if (isExcluded(event, session, includeClassified)) {
                 continue;
             }
-            event.setFolderId(i(inFolder));
+            event.setFolderId(inFolder.getID());
             event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
                 if (isResolveOccurrences(session)) {

@@ -71,7 +71,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setId(int value) {
+    public void setId(String value) {
         throw new UnsupportedOperationException();
     }
 
@@ -81,7 +81,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setFolderId(int value) {
+    public void setFolderId(String value) {
         throw new UnsupportedOperationException();
     }
 
@@ -91,7 +91,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setPublicFolderId(int value) {
+    public void setPublicFolderId(String value) {
         throw new UnsupportedOperationException();
     }
 
@@ -281,7 +281,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setSeriesId(int value) {
+    public void setSeriesId(String value) {
         throw new UnsupportedOperationException();
     }
 

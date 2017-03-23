@@ -380,8 +380,8 @@ public class CalendarUtils {
      * @param events The events to get the identifiers for
      * @return The object identifiers
      */
-    public static int[] getObjectIDs(List<Event> events) {
-        int[] objectIDs = new int[events.size()];
+    public static String[] getObjectIDs(List<Event> events) {
+        String[] objectIDs = new String[events.size()];
         for (int i = 0; i < events.size(); i++) {
             objectIDs[i] = events.get(i).getId();
         }
@@ -394,13 +394,13 @@ public class CalendarUtils {
      * @param events The events to map
      * @return The mapped events
      */
-    public static Map<Integer, Event> getEventsByID(Collection<Event> events) {
+    public static Map<String, Event> getEventsByID(Collection<Event> events) {
         if (null == events) {
             return null;
         }
-        Map<Integer, Event> eventsByID = new HashMap<Integer, Event>(events.size());
+        Map<String, Event> eventsByID = new HashMap<String, Event>(events.size());
         for (Event event : events) {
-            eventsByID.put(I(event.getId()), event);
+            eventsByID.put(event.getId(), event);
         }
         return eventsByID;
     }
@@ -414,7 +414,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
      */
     public static boolean isSeriesMaster(Event event) {
-        return null != event && event.getId() == event.getSeriesId() && null == event.getRecurrenceId();
+        return null != event && null != event.getId() && event.getId().equals(event.getSeriesId()) && null == event.getRecurrenceId();
     }
 
     /**
@@ -425,7 +425,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
      */
     public static boolean isSeriesException(Event event) {
-        return null != event && 0 < event.getSeriesId() && event.getSeriesId() != event.getId();
+        return null != event && null != event.getSeriesId() && false == event.getSeriesId().equals(event.getId());
     }
 
     /**

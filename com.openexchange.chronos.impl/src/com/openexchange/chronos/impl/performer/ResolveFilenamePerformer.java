@@ -86,7 +86,7 @@ public class ResolveFilenamePerformer {
      * @param filename The filename to resolve
      * @return The identifier of the resolved event, or <code>0</code> if not found
      */
-    public int perform(String filename) throws OXException {
+    public String perform(String filename) throws OXException {
         /*
          * construct search term
          */
@@ -101,7 +101,7 @@ public class ResolveFilenamePerformer {
          * search for an event matching the filename
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
-        return 0 < events.size() ? events.get(0).getId() : 0;
+        return 0 < events.size() ? events.get(0).getId() : null;
     }
 
 }

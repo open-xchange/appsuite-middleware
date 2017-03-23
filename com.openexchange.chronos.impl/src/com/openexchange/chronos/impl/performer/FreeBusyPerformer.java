@@ -161,7 +161,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
                     continue;
                 }
-                int folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod) : -1;
+                String folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod) : null;
                 if (isSeriesMaster(eventInPeriod)) {
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
                     while (iterator.hasNext()) {
@@ -199,10 +199,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      *
      * @param masterEvent The event data to get the result for
      * @param recurrenceId The recurrence identifier of the occurrence
-     * @param folderID The folder identifier representing the user's view on the event, or <code>-1</code> if not accessible in any folder
+     * @param folderID The folder identifier representing the user's view on the event, or <code>null</code> if not accessible in any folder
      * @return The resulting event occurrence representing the free/busy slot
      */
-    private Event getResultingOccurrence(Event masterEvent, RecurrenceId recurrenceId, int folderID) throws OXException {
+    private Event getResultingOccurrence(Event masterEvent, RecurrenceId recurrenceId, String folderID) throws OXException {
         Event resultingOccurrence = getResultingEvent(masterEvent, folderID);
         resultingOccurrence.setRecurrenceRule(null);
         resultingOccurrence.removeSeriesId();
@@ -218,11 +218,11 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * over, and a folder identifier is applied optionally, depending on the user's access permissions for the actual event data.
      *
      * @param event The event data to get the result for
-     * @param folderID The folder identifier representing the user's view on the event, or <code>-1</code> if not accessible in any folder
+     * @param folderID The folder identifier representing the user's view on the event, or <code>null</code> if not accessible in any folder
      * @return The resulting event representing the free/busy slot
      */
-    private Event getResultingEvent(Event event, int folderID) throws OXException {
-        if (0 < folderID) {
+    private Event getResultingEvent(Event event, String folderID) throws OXException {
+        if (null != folderID) {
             Event resultingEvent = EventMapper.getInstance().copy(event, new Event(), FREEBUSY_FIELDS);
             resultingEvent.setFolderId(folderID);
             return anonymizeIfNeeded(session, resultingEvent);

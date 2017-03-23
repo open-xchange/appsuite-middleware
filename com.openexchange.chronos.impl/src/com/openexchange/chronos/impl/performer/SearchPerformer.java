@@ -54,7 +54,6 @@ import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.chronos.impl.Utils.sortEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -116,7 +115,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
      * @param pattern The pattern to search for
      * @return The found events
      */
-    public List<Event> perform(int[] folderIDs, String pattern) throws OXException {
+    public List<Event> perform(String[] folderIDs, String pattern) throws OXException {
         return perform(folderIDs, null, Collections.singletonList(pattern));
     }
 
@@ -128,7 +127,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
      * @param queries The queries to search for
      * @return The found events
      */
-    public List<Event> perform(int[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException {
+    public List<Event> perform(String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException {
         List<UserizedFolder> folders = getFolders(folderIDs);
         EventField[] fields = getFields(session);
         SortOptions sortOptions = new SortOptions(session);
@@ -165,7 +164,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
     }
 
-    private static SearchTerm<?> getPublicFolderIdsTerm(Set<Integer> folderIDs, boolean onlyOwn, int userID) {
+    private static SearchTerm<?> getPublicFolderIdsTerm(Set<String> folderIDs, boolean onlyOwn, int userID) {
         if (null == folderIDs || 0 == folderIDs.size()) {
             return null;
         }
@@ -174,7 +173,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
             searchTerm = getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folderIDs.iterator().next());
         } else {
             CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            for (Integer folderID : folderIDs) {
+            for (String folderID : folderIDs) {
                 orTerm.addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folderID));
             }
             searchTerm = orTerm;
@@ -187,8 +186,8 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return searchTerm;
     }
 
-    private static SearchTerm<?> getPersonalFolderIdsTerm(Entry<Integer, Set<Integer>> personalFolderIDs, boolean onlyOwn, int userID) {
-        Set<Integer> folderIDs = personalFolderIDs.getValue();
+    private static SearchTerm<?> getPersonalFolderIdsTerm(Entry<Integer, Set<String>> personalFolderIDs, boolean onlyOwn, int userID) {
+        Set<String> folderIDs = personalFolderIDs.getValue();
         Integer entityID = personalFolderIDs.getKey();
         if (null == folderIDs || 0 == folderIDs.size()) {
             return null;
@@ -198,7 +197,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
             folderTerm = getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folderIDs.iterator().next());
         } else {
             CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            for (Integer folderID : folderIDs) {
+            for (String folderID : folderIDs) {
                 orTerm.addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folderID));
             }
             folderTerm = orTerm;
@@ -221,13 +220,13 @@ public class SearchPerformer extends AbstractQueryPerformer {
         /*
          * distinguish between public / non-public folders, and "read all" / "read only own" permissions
          */
-        Set<Integer> publicFolders = new HashSet<Integer>();
-        Set<Integer> publicFoldersOnlyOwn = new HashSet<Integer>();
-        Map<Integer, Set<Integer>> personalFoldersPerEntity = new HashMap<Integer, Set<Integer>>();
-        Map<Integer, Set<Integer>> personalFoldersPerEntityOnlyOwn = new HashMap<Integer, Set<Integer>>();
+        Set<String> publicFolders = new HashSet<String>();
+        Set<String> publicFoldersOnlyOwn = new HashSet<String>();
+        Map<Integer, Set<String>> personalFoldersPerEntity = new HashMap<Integer, Set<String>>();
+        Map<Integer, Set<String>> personalFoldersPerEntityOnlyOwn = new HashMap<Integer, Set<String>>();
         for (UserizedFolder folder : folders) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-            Integer folderID = I(i(folder));
+            String folderID = folder.getID();
             if (PublicType.getInstance().equals(folder.getType())) {
                 if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
                     publicFoldersOnlyOwn.add(folderID);
@@ -237,16 +236,16 @@ public class SearchPerformer extends AbstractQueryPerformer {
             } else {
                 Integer entityID = I(folder.getCreatedBy());
                 if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
-                    Set<Integer> personalFolders = personalFoldersPerEntityOnlyOwn.get(entityID);
+                    Set<String> personalFolders = personalFoldersPerEntityOnlyOwn.get(entityID);
                     if (null == personalFolders) {
-                        personalFolders = new HashSet<Integer>();
+                        personalFolders = new HashSet<String>();
                         personalFoldersPerEntityOnlyOwn.put(entityID, personalFolders);
                     }
                     personalFolders.add(folderID);
                 } else {
-                    Set<Integer> personalFolders = personalFoldersPerEntity.get(entityID);
+                    Set<String> personalFolders = personalFoldersPerEntity.get(entityID);
                     if (null == personalFolders) {
-                        personalFolders = new HashSet<Integer>();
+                        personalFolders = new HashSet<String>();
                         personalFoldersPerEntity.put(entityID, personalFolders);
                     }
                     personalFolders.add(folderID);
@@ -263,22 +262,22 @@ public class SearchPerformer extends AbstractQueryPerformer {
         if (0 < publicFoldersOnlyOwn.size()) {
             compositeTerm.addSearchTerm(getPublicFolderIdsTerm(publicFoldersOnlyOwn, true, userID));
         }
-        for (Entry<Integer, Set<Integer>> entry : personalFoldersPerEntity.entrySet()) {
+        for (Entry<Integer, Set<String>> entry : personalFoldersPerEntity.entrySet()) {
             compositeTerm.addSearchTerm(getPersonalFolderIdsTerm(entry, false, userID));
         }
-        for (Entry<Integer, Set<Integer>> entry : personalFoldersPerEntityOnlyOwn.entrySet()) {
+        for (Entry<Integer, Set<String>> entry : personalFoldersPerEntityOnlyOwn.entrySet()) {
             compositeTerm.addSearchTerm(getPersonalFolderIdsTerm(entry, true, userID));
         }
         return 1 == compositeTerm.getOperands().length ? compositeTerm.getOperands()[0] : compositeTerm;
     }
 
-    private List<UserizedFolder> getFolders(int[] folderIDs) throws OXException {
+    private List<UserizedFolder> getFolders(String[] folderIDs) throws OXException {
         List<UserizedFolder> folders;
         if (null == folderIDs) {
             folders = getVisibleFolders(session);
         } else {
             folders = new ArrayList<UserizedFolder>(folderIDs.length);
-            for (int folderID : folderIDs) {
+            for (String folderID : folderIDs) {
                 folders.add(getFolder(session, folderID));
             }
         }

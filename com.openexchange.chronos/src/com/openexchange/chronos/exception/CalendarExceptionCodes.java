@@ -88,24 +88,24 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * <li>The requested event was not found.</li>
-     * <li>Event not found [id %1$d]</li>
+     * <li>Event not found [id %1$s]</li>
      */
-    EVENT_NOT_FOUND("Event not found [id %1$d]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4040),
+    EVENT_NOT_FOUND("Event not found [id %1$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4040),
     /**
      * <li>The requested event was not found.</li>
-     * <li>Event not found in folder [folder %1$d, id %2$d]</li>
+     * <li>Event not found in folder [folder %1$s, id %2$s]</li>
      */
-    EVENT_NOT_FOUND_IN_FOLDER("Event not found in folder [folder %1$d, id %2$d]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4041),
+    EVENT_NOT_FOUND_IN_FOLDER("Event not found in folder [folder %1$s, id %2$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4041),
     /**
      * <li>The requested event was not found.</li>
-     * <li>Event recurrence not found [series id %1$d, recurrence id %2$s]</li>
+     * <li>Event recurrence not found [series id %1$s, recurrence id %2$s]</li>
      */
-    EVENT_RECURRENCE_NOT_FOUND("Event recurrence not found [series id %1$d, recurrence id %2$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4042),
+    EVENT_RECURRENCE_NOT_FOUND("Event recurrence not found [series id %1$s, recurrence id %2$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4042),
     /**
      * <li>The requested attendee was not found.</li>
-     * <li>Attendee not found [attendee %1$s, event %2$d]</li>
+     * <li>Attendee not found [attendee %1$d, event %2$s]</li>
      */
-    ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$s, event %2$d]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
+    ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$d, event %2$s]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
     /**
      * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
      * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
@@ -118,24 +118,24 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     QUERY_TOO_SHORT("Query too short [minimum %1$d, query %2$s]", QUERY_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 4045),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
-     * <li>Insufficient read permissions in folder [folder %1$d]</li>
+     * <li>Insufficient read permissions in folder [folder %1$s]</li>
      */
-    NO_READ_PERMISSION("Insufficient read permissions in folder [folder %1$d]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4030),
+    NO_READ_PERMISSION("Insufficient read permissions in folder [folder %1$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4030),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
-     * <li>Insufficient write permissions in folder [folder %1$d]</li>
+     * <li>Insufficient write permissions in folder [folder %1$s]</li>
      */
-    NO_WRITE_PERMISSION("Insufficient write permissions in folder [folder %1$d]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4031),
+    NO_WRITE_PERMISSION("Insufficient write permissions in folder [folder %1$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4031),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
-     * <li>Insufficient delete permissions in folder [folder %1$d]</li>
+     * <li>Insufficient delete permissions in folder [folder %1$s]</li>
      */
-    NO_DELETE_PERMISSION("Insufficient delete permissions in folder [folder %1$d]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4032),
+    NO_DELETE_PERMISSION("Insufficient delete permissions in folder [folder %1$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4032),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
-     * <li>Forbidden attendee change [id %1$d, attendee %2$s, field %3$s]</li>
+     * <li>Forbidden attendee change [id %1$s, attendee %2$s, field %3$s]</li>
      */
-    FORBIDDEN_ATTENDEE_CHANGE("Forbidden attendee change [id %1$d, attendee %2$s, field %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4033),
+    FORBIDDEN_ATTENDEE_CHANGE("Forbidden attendee change [id %1$s, attendee %2$s, field %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4033),
     /**
      * <li>The calendar user \"%1$s\" is invalid.</li>
      * <li>Invalid calendar user [uri %1$s, id %2$d, type %3$s]</li>
@@ -143,9 +143,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     INVALID_CALENDAR_USER("Invalid calendar user [uri %1$s, id %2$d, type %3$s]", INVALID_CALENDAR_USER_MSG, Category.CATEGORY_USER_INPUT, 4034),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
-     * <li>Forbidden change [id %1$d, field %2$s]</li>
+     * <li>Forbidden change [id %1$s, field %2$s]</li>
      */
-    FORBIDDEN_CHANGE("Forbidden change [id %1$d, field %2$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4035),
+    FORBIDDEN_CHANGE("Forbidden change [id %1$s, field %2$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4035),
     /**
      * <li>The operation could not be completed due to insufficient capabilities.</li>
      * <li>Missing capability [%1$s]</li>
@@ -153,9 +153,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     MISSING_CAPABILITY("Missing capability [%1$s]", MISSING_CAPABILITY_MSG, Category.CATEGORY_PERMISSION_DENIED, 4036),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
-     * <li>Access to event restricted by classification [folder %1$d, id %2$d, classification %3$s]</li>
+     * <li>Access to event restricted by classification [folder %1$s, id %2$s, classification %3$s]</li>
      */
-    RESTRICTED_BY_CLASSIFICATION("Access to event restricted by classification [folder %1$d, id %2$d, classification %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4037),
+    RESTRICTED_BY_CLASSIFICATION("Access to event restricted by classification [folder %1$s, id %2$s, classification %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4037),
     /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
      * <li>Unsupported folder [id %1$s, content type %2$s]</li>
@@ -163,14 +163,14 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNSUPPORTED_FOLDER("Unsupported folder [id %1$s, content type %2$s]", UNSUPPORTED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4060),
     /**
      * <li>The operation could not be completed due to a concurrent modification. Please reload the data and try again.</li>
-     * <li>Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]</li>
+     * <li>Concurrent modification [id %1$s, client timestamp %2$d, actual timestamp %3$d]</li>
      */
-    CONCURRENT_MODIFICATION("Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]", CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 4120),
+    CONCURRENT_MODIFICATION("Concurrent modification [id %1$s, client timestamp %2$d, actual timestamp %3$d]", CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 4120),
     /**
      * <li>The event could not be created due to another conflicting event with the same unique identifier.</li>
-     * <li>UID conflict [uid %1$s, conflicting id %2$d]</li>
+     * <li>UID conflict [uid %1$s, conflicting id %2$s]</li>
      */
-    UID_CONFLICT("UID conflict [uid %1$s, conflicting id %2$d]", UID_CONFLICT_MSG, Category.CATEGORY_CONFLICT, 4090),
+    UID_CONFLICT("UID conflict [uid %1$s, conflicting id %2$s]", UID_CONFLICT_MSG, Category.CATEGORY_CONFLICT, 4090),
     /**
      * <li>The event conflicts with one or more other events.</li>
      * <li>Event conflicts detected [see problematics]</li>
@@ -203,24 +203,24 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNSUPPORTED_RRULE("Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]", UNSUPPORTED_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4223),
     /**
      * <li>Moving an event series into another folder is not supported.</li>
-     * <li>Unsupported series move [id %1$d, folder %2$d, target folder %3$d]</li>
+     * <li>Unsupported series move [id %1$s, folder %2$s, target folder %3$s]</li>
      */
-    MOVE_SERIES_NOT_SUPPORTED("Unsupported series move [id %1$d, folder %2$d, target folder %3$d]", MOVE_SERIES_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4224),
+    MOVE_SERIES_NOT_SUPPORTED("Unsupported series move [id %1$s, folder %2$s, target folder %3$s]", MOVE_SERIES_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4224),
     /**
      * <li>Moving an occurrence of an event series into another folder is not supported.</li>
-     * <li>Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]</li>
+     * <li>Unsupported occurrence move [id %1$s, folder %2$s, target folder %3$s]</li>
      */
-    MOVE_OCCURRENCE_NOT_SUPPORTED("Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]", MOVE_OCCURRENCE_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4225),
+    MOVE_OCCURRENCE_NOT_SUPPORTED("Unsupported occurrence move [id %1$s, folder %2$s, target folder %3$s]", MOVE_OCCURRENCE_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4225),
     /**
      * <li>Events classified as \"private\" or \"confidential\" cannot be moved to this type of folder.</li>
-     * <li>Unsupported classification for move [classification %1$s, folder %2$d, type %3$s, target folder %4$d, target type %5$s]</li>
+     * <li>Unsupported classification for move [classification %1$s, folder %2$s, type %3$s, target folder %4$s, target type %5$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_MOVE("Unsupported classification for move [classification %1$s, folder %2$d, type %3$s, target folder %4$d, target type %5$s]", UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG, Category.CATEGORY_USER_INPUT, 4226),
+    UNSUPPORTED_CLASSIFICATION_FOR_MOVE("Unsupported classification for move [classification %1$s, folder %2$s, type %3$s, target folder %4$s, target type %5$s]", UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG, Category.CATEGORY_USER_INPUT, 4226),
     /**
      * <li>Occurrences of event series must not be classified differently.</li>
-     * <li>Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]</li>
+     * <li>Unsupported classification for occurrence [classification %1$s, series id %2$s, recurrence id %3$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$d, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4227),
+    UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$s, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4227),
     /**
      * <li>The supplied timezone is invalid. Please select a valid timezone and try again.</li>
      * <li>Invalid timezone [timezone id %1$s]</li>

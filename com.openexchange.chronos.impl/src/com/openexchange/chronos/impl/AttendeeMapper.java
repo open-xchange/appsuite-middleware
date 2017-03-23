@@ -335,7 +335,7 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
                 object.removeRsvp();
             }
         });
-        mappings.put(AttendeeField.FOLDER_ID, new DefaultMapping<Integer, Attendee>() {
+        mappings.put(AttendeeField.FOLDER_ID, new DefaultMapping<String, Attendee>() {
 
             @Override
             public boolean isSet(Attendee object) {
@@ -343,13 +343,13 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
 
             @Override
-            public void set(Attendee object, Integer value) throws OXException {
-                object.setFolderID(null == value ? 0 : i(value));
+            public void set(Attendee object, String value) throws OXException {
+                object.setFolderID(value);
             }
 
             @Override
-            public Integer get(Attendee object) {
-                return I(object.getFolderID());
+            public String get(Attendee object) {
+                return object.getFolderID();
             }
 
             @Override

@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceData;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceID;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceIDs;
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -206,7 +207,7 @@ public class Compat {
             if (null != eventData.getRecurrenceId() && RecurrenceData.class.isInstance(eventData.getRecurrenceId())) {
                 recurrenceData = (RecurrenceData) eventData.getRecurrenceId();
             } else {
-                recurrenceData = RdbEventStorage.selectRecurrenceData(connection, contextID, eventData.getSeriesId(), false);
+                recurrenceData = RdbEventStorage.selectRecurrenceData(connection, contextID, asInt(eventData.getSeriesId()), false);
             }
             if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
                 // TODO really required to also store series pattern for exceptions?

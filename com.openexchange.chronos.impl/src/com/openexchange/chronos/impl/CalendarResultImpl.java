@@ -71,7 +71,7 @@ public class CalendarResultImpl implements CalendarResult {
 
     protected final CalendarSession session;
     protected final User calendarUser;
-    protected final int folderID;
+    protected final String folderID;
 
     protected Date timestamp;
     protected List<CreateResult> creations;
@@ -85,7 +85,7 @@ public class CalendarResultImpl implements CalendarResult {
      * @param calendarUser The actual calendar user
      * @param folderID The identifier of the folder the event has been created in.
      */
-    public CalendarResultImpl(CalendarSession session, User calendarUser, int folderID) {
+    public CalendarResultImpl(CalendarSession session, User calendarUser, String folderID) {
         super();
         this.session = session;
         this.calendarUser = calendarUser;
@@ -219,7 +219,7 @@ public class CalendarResultImpl implements CalendarResult {
     }
 
     @Override
-    public int getFolderID() {
+    public String getFolderID() {
         return folderID;
     }
 

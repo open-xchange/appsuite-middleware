@@ -74,7 +74,7 @@ public interface CalendarConfig {
      * @param userID The identifier of the user to retrieve the default calendar identifier for
      * @return The default calendar folder identifier
      */
-    int getDefaultFolderID(int userID) throws OXException;
+    String getDefaultFolderID(int userID) throws OXException;
 
     /**
      * Gets the initial participation status to use for new events in a specific folder.

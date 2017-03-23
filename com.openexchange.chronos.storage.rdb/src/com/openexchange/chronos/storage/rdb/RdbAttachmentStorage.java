@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.compat.Appointment2Event.asString;
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -111,12 +113,12 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public List<Attachment> loadAttachments(int objectID) throws OXException {
-        return loadAttachments(new int[] { objectID }).get(I(objectID));
+    public List<Attachment> loadAttachments(String objectID) throws OXException {
+        return loadAttachments(new String[] { objectID }).get(objectID);
     }
 
     @Override
-    public Map<Integer, List<Attachment>> loadAttachments(int[] objectIDs) throws OXException {
+    public Map<String, List<Attachment>> loadAttachments(String[] objectIDs) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
@@ -129,14 +131,14 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public void deleteAttachments(ServerSession session, int folderID, int eventID) throws OXException {
+    public void deleteAttachments(ServerSession session, String folderID, String eventID) throws OXException {
         checkSession(session);
         AttachmentBase attachmentBase = initAttachmentBase();
         try {
             attachmentBase.startTransaction();
             List<Integer> attachmentIDs = new ArrayList<Integer>();
             TimedResult<AttachmentMetadata> timedResult = attachmentBase.getAttachments(
-                session, folderID, eventID, MODULE_ID, new AttachmentField[] { AttachmentField.ID_LITERAL }, null, 0,
+                session, asInt(folderID), asInt(eventID), MODULE_ID, new AttachmentField[] { AttachmentField.ID_LITERAL }, null, 0,
                 context, session.getUser(), session.getUserConfiguration());
             SearchIterator<AttachmentMetadata> iterator = null;
             try {
@@ -151,7 +153,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                 SearchIterators.close(iterator);
             }
             if (0 < attachmentIDs.size()) {
-                attachmentBase.detachFromObject(folderID, eventID, MODULE_ID, I2i(attachmentIDs),
+                attachmentBase.detachFromObject(asInt(folderID), asInt(eventID), MODULE_ID, I2i(attachmentIDs),
                     session, context, session.getUser(), session.getUserConfiguration());
             }
             attachmentBase.commit();
@@ -161,7 +163,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public void deleteAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException {
+    public void deleteAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
         if (null == attachments || 0 == attachments.size()) {
             return;
         }
@@ -173,7 +175,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         AttachmentBase attachmentBase = initAttachmentBase();
         try {
             attachmentBase.startTransaction();
-            attachmentBase.detachFromObject(folderID, eventID, MODULE_ID, I2i(attachmentIDs),
+            attachmentBase.detachFromObject(asInt(folderID), asInt(eventID), MODULE_ID, I2i(attachmentIDs),
                 session, context, session.getUser(), session.getUserConfiguration());
             attachmentBase.commit();
         } finally {
@@ -182,7 +184,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public void insertAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException {
+    public void insertAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
         if (null == attachments || 0 == attachments.size()) {
             return;
         }
@@ -194,7 +196,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
              * store new binary attachments
              */
             for (Attachment attachment : filterBinary(attachments)) {
-                AttachmentMetadata metadata = getMetadata(attachment, folderID, eventID);
+                AttachmentMetadata metadata = getMetadata(attachment, asInt(folderID), asInt(eventID));
                 InputStream inputStream = null;
                 try {
                     inputStream = attachment.getData().getStream();
@@ -207,7 +209,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
              * copy over referenced managed attachments
              */
             for (Attachment attachment : filterManaged(attachments)) {
-                AttachmentMetadata metadata = getMetadata(attachment, folderID, eventID);
+                AttachmentMetadata metadata = getMetadata(attachment, asInt(folderID), asInt(eventID));
                 metadata.setId(AttachmentBase.NEW);
                 InputStream inputStream = null;
                 try {
@@ -258,8 +260,8 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return Attachments.getInstance(dbProvider, true);
     }
 
-    private static Map<Integer, List<Attachment>> selectAttachments(Connection connection, int contextID, int[] objectIDs) throws SQLException {
-        Map<Integer, List<Attachment>> attachmentsById = new HashMap<Integer, List<Attachment>>();
+    private static Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException {
+        Map<String, List<Attachment>> attachmentsById = new HashMap<String, List<Attachment>>();
         String sql = new StringBuilder()
             .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date FROM prg_attachment ")
             .append("WHERE cid=? AND attached IN (").append(getParameters(objectIDs.length)).append(") AND module=?;")
@@ -267,8 +269,8 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
+            for (String objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, asInt(objectID));
             }
             stmt.setInt(parameterIndex++, com.openexchange.groupware.Types.APPOINTMENT);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
@@ -280,7 +282,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                     attachment.setFilename(resultSet.getString("filename"));
                     //                    attachment.setContentId(resultSet.getString("file_id"));
                     attachment.setCreated(new Date(resultSet.getLong("creation_date")));
-                    put(attachmentsById, I(resultSet.getInt("attached")), attachment);
+                    put(attachmentsById, asString(resultSet.getInt("attached")), attachment);
                 }
             }
         }

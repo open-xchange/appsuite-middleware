@@ -218,7 +218,8 @@ public class Appointment2Event {
      * @return The categories list
      */
     public static List<String> getCategories(String categories) {
-        return Arrays.asList(Strings.splitByCommaNotInQuotes(categories));
+        String[] splitted = Strings.splitByCommaNotInQuotes(categories);
+        return null != splitted ? Arrays.asList(splitted) : null;
     }
 
     /**
@@ -335,6 +336,48 @@ public class Appointment2Event {
             }
         }
         throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence position " + recurrencePosition, recurrenceData.getRecurrenceRule());
+    }
+
+    /**
+     * Gets the string representation of the supplied numerical identifier.
+     *
+     * @param id The identifier to get the string representation for
+     * @return The string representation of the supplied numerical identifier.
+     */
+    public static String asString(int id) {
+        return String.valueOf(id);
+    }
+
+    /**
+     * Gets the string representation of the supplied numerical identifier.
+     *
+     * @param id The identifier to get the string representation for
+     * @return The string representation of the supplied numerical identifier.
+     */
+    public static String asString(Integer id) {
+        return null == id ? null : id.toString();
+    }
+
+    /**
+     * Gets the string representation of the supplied numerical identifier.
+     *
+     * @param id The identifier to get the string representation for
+     * @param zeroAsNull <code>true</code> to return <code>null</code> for the id <code>0</code>, <code>false</code>, otherwise
+     * @return The string representation of the supplied numerical identifier.
+     */
+    public static String asString(int id, boolean zeroAsNull) {
+        return zeroAsNull && 0 == id ? null : String.valueOf(id);
+    }
+
+    /**
+     * Gets the string representation of the supplied numerical identifier.
+     *
+     * @param id The identifier to get the string representation for
+     * @param zeroAsNull <code>true</code> to return <code>null</code> for the id <code>0</code>, <code>false</code>, otherwise
+     * @return The string representation of the supplied numerical identifier.
+     */
+    public static String asString(Integer id, boolean zeroAsNull) {
+        return null == id ? null : asString(id.intValue(), zeroAsNull);
     }
 
     /**

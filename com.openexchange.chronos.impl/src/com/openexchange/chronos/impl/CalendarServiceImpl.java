@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.HashMap;
@@ -112,7 +111,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<Event> getChangeExceptions(CalendarSession session, final int folderID, final int objectID) throws OXException {
+    public List<Event> getChangeExceptions(CalendarSession session, final String folderID, final String objectID) throws OXException {
         return new StorageOperation<List<Event>>(session) {
 
             @Override
@@ -123,7 +122,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public long getSequenceNumber(CalendarSession session, final int folderID) throws OXException {
+    public long getSequenceNumber(CalendarSession session, final String folderID) throws OXException {
         return new StorageOperation<Long>(session) {
 
             @Override
@@ -134,29 +133,29 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public int resolveByUID(CalendarSession session, final String uid) throws OXException {
-        return new StorageOperation<Integer>(session) {
+    public String resolveByUID(CalendarSession session, final String uid) throws OXException {
+        return new StorageOperation<String>(session) {
 
             @Override
-            protected Integer execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return I(new ResolveUidPerformer(storage).perform(uid));
+            protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ResolveUidPerformer(storage).perform(uid);
             }
-        }.executeQuery().intValue();
+        }.executeQuery();
     }
 
     @Override
-    public int resolveByFilename(CalendarSession session, final String filename) throws OXException {
-        return new StorageOperation<Integer>(session) {
+    public String resolveByFilename(CalendarSession session, final String filename) throws OXException {
+        return new StorageOperation<String>(session) {
 
             @Override
-            protected Integer execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return I(new ResolveFilenamePerformer(storage).perform(filename));
+            protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ResolveFilenamePerformer(storage).perform(filename);
             }
-        }.executeQuery().intValue();
+        }.executeQuery();
     }
 
     @Override
-    public List<Event> searchEvents(CalendarSession session, final int[] folderIDs, final String pattern) throws OXException {
+    public List<Event> searchEvents(CalendarSession session, final String[] folderIDs, final String pattern) throws OXException {
         return new StorageOperation<List<Event>>(session) {
 
             @Override
@@ -167,7 +166,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<Event> searchEvents(CalendarSession session, final int[] folderIDs, final List<SearchFilter> filters, final List<String> queries) throws OXException {
+    public List<Event> searchEvents(CalendarSession session, final String[] folderIDs, final List<SearchFilter> filters, final List<String> queries) throws OXException {
         return new StorageOperation<List<Event>>(session) {
 
             @Override
@@ -178,7 +177,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public Event getEvent(CalendarSession session, final int folderID, final int objectID) throws OXException {
+    public Event getEvent(CalendarSession session, final String folderID, final String objectID) throws OXException {
         return new StorageOperation<Event>(session) {
 
             @Override
@@ -200,7 +199,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<Event> getEventsInFolder(CalendarSession session, final int folderID) throws OXException {
+    public List<Event> getEventsInFolder(CalendarSession session, final String folderID) throws OXException {
         return new StorageOperation<List<Event>>(session) {
 
             @Override
@@ -222,7 +221,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(CalendarSession session, final int folderID, final Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(CalendarSession session, final String folderID, final Date updatedSince) throws OXException {
         return new StorageOperation<UpdatesResult>(session) {
 
             @Override
@@ -244,7 +243,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult createEvent(CalendarSession session, final int folderId, final Event event) throws OXException {
+    public CalendarResult createEvent(CalendarSession session, final String folderId, final Event event) throws OXException {
         /*
          * insert event & notify handlers
          */
@@ -276,7 +275,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult moveEvent(CalendarSession session, final EventID eventID, final int folderId) throws OXException {
+    public CalendarResult moveEvent(CalendarSession session, final EventID eventID, final String folderId) throws OXException {
         /*
          * move event & notify handlers
          */

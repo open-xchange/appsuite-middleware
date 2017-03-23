@@ -123,10 +123,10 @@ public final class GetAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
-        int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         session.set(RECURRENCE_MASTER, Boolean.TRUE);
-        Event event = session.getCalendarService().getEvent(session, folderID, objectID);
+        Event event = session.getCalendarService().getEvent(session, folderId, objectId);
         Appointment appointment = getEventConverter().getAppointment(session.getSession(), event);
         return new AJAXRequestResult(appointment, event.getLastModified(), "appointment");
     }

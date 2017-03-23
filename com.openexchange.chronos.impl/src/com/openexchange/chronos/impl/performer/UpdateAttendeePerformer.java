@@ -54,7 +54,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
@@ -64,7 +63,6 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
@@ -115,7 +113,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param clientTimestamp The client timestamp to catch concurrent modifications, or <code>null</code> to skip checks
      * @return The result
      */
-    public CalendarResultImpl perform(int objectID, RecurrenceId recurrenceID, Attendee attendee, Long clientTimestamp) throws OXException {
+    public CalendarResultImpl perform(String objectID, RecurrenceId recurrenceID, Attendee attendee, Long clientTimestamp) throws OXException {
         /*
          * load original event data & attendee
          */
@@ -135,7 +133,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         }
         if (0 < originalAttendee.getEntity() && calendarUser.getId() != originalAttendee.getEntity() && session.getUser().getId() != originalAttendee.getEntity()) {
             // TODO: even allowed for proxy user? calendarUser.getId() != originalAttendee.getEntity()
-            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(I(i(folder)));
+            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }
         if (null == recurrenceID) {
             updateAttendee(originalEvent, originalAttendee, attendee);
@@ -204,7 +202,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  * take over all original attendees, attachments & alarms
                  */
                 storage.getAttendeeStorage().insertAttendees(exceptionEvent.getId(), originalEvent.getAttendees());
-                storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), exceptionEvent.getId(), originalEvent.getAttachments());
+                storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), exceptionEvent.getId(), originalEvent.getAttachments());
                 for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
                     storage.getAlarmStorage().insertAlarms(exceptionEvent, entry.getKey().intValue(), entry.getValue());
                 }
@@ -227,7 +225,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getId()), String.valueOf(recurrenceID));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceID));
         }
     }
 
@@ -259,7 +257,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 case ENTITY:
                 case MEMBER:
                 case URI:
-                    throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, field);
+                    throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, field);
                 default:
                     break;
             }
@@ -274,22 +272,22 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         return attendeeUpdate;
     }
 
-    private void checkFolderUpdate(Event originalEvent, Attendee originalAttendee, int updatedFolderID) throws OXException {
-        if (originalAttendee.getFolderID() != i(folder)) {
-            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);
+    private void checkFolderUpdate(Event originalEvent, Attendee originalAttendee, String updatedFolderID) throws OXException {
+        if (false == originalAttendee.getFolderID().equals(folder.getID())) {
+            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
         if (isSeriesMaster(originalEvent)) {
-            throw CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create(I(originalEvent.getId()), I(i(folder)), I(updatedFolderID));
+            throw CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create(originalEvent.getId(), folder.getID(), updatedFolderID);
         }
         if (isSeriesException(originalEvent)) {
-            throw CalendarExceptionCodes.MOVE_OCCURRENCE_NOT_SUPPORTED.create(I(originalEvent.getId()), I(i(folder)), I(updatedFolderID));
+            throw CalendarExceptionCodes.MOVE_OCCURRENCE_NOT_SUPPORTED.create(originalEvent.getId(), folder.getID(), updatedFolderID);
         }
         if (PublicType.getInstance().equals(folder.getType())) {
-            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);
+            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
         UserizedFolder targetFolder = Utils.getFolder(session, updatedFolderID);
         if (folder.getCreatedBy() != targetFolder.getCreatedBy()) {
-            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);
+            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
         requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         if (session.getUser().getId() == originalEvent.getCreatedBy()) {

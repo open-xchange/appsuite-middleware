@@ -166,7 +166,7 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     protected int getId(Event object) {
-        return null != object ? object.getId() : null;
+        return null != object ? Integer.parseInt(object.getId()) : null;
     }
 
     @Override
@@ -591,14 +591,14 @@ public class EventResource extends DAVObjectResource<Event> {
          * get identifier of conflicting event
          */
         CalendarSession calendarSession = parent.getCalendarSession();
-        int conflictingId = 0;
-        if (null != e.getLogArgs() && 1 < e.getLogArgs().length && null != e.getLogArgs()[1] && Integer.class.isInstance(e.getLogArgs()[1])) {
-            conflictingId = (Integer) e.getLogArgs()[1];
+        String conflictingId = null;
+        if (null != e.getLogArgs() && 1 < e.getLogArgs().length && null != e.getLogArgs()[1] && String.class.isInstance(e.getLogArgs()[1])) {
+            conflictingId = (String) e.getLogArgs()[1];
         }
-        if (0 >= conflictingId) {
+        if (null == conflictingId) {
             conflictingId = calendarSession.getCalendarService().resolveByUID(calendarSession, caldavImport.getUID());
         }
-        if (0 < conflictingId) {
+        if (null != conflictingId) {
             /*
              * try to perform an update of the existing event with the imported data from the client
              */

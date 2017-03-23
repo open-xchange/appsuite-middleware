@@ -176,7 +176,7 @@ public final class NewAction extends ChronosAction {
         }
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
         Event event = getEventConverter().getEvent(session.getSession(), appointment, null);
-        int folderID = appointment.getParentFolderID();
+        String folderID = String.valueOf(appointment.getParentFolderID());
         CalendarResult result;
         try {
             result = session.getCalendarService().createEvent(session, folderID, event);

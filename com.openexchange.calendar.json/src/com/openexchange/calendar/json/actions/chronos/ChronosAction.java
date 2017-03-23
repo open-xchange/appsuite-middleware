@@ -327,18 +327,18 @@ public abstract class ChronosAction extends AppointmentAction {
     }
 
     protected EventID parseEventID(CalendarSession session, JSONObject jsonObject) throws OXException {
-        int folderID = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID);
-        int objectID = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
+        String folderId = DataParser.checkString(jsonObject, AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = DataParser.checkString(jsonObject, AJAXServlet.PARAMETER_ID);
         if (jsonObject.hasAndNotNull(CalendarFields.RECURRENCE_POSITION)) {
-            return eventConverter.getEventID(session, folderID, objectID, DataParser.checkInt(jsonObject, CalendarFields.RECURRENCE_POSITION));
+            return eventConverter.getEventID(session, folderId, objectId, DataParser.checkInt(jsonObject, CalendarFields.RECURRENCE_POSITION));
         }
         if (jsonObject.hasAndNotNull(CalendarFields.OLD_RECURRENCE_POSITION)) {
-            return eventConverter.getEventID(session, folderID, objectID, DataParser.checkInt(jsonObject, CalendarFields.OLD_RECURRENCE_POSITION));
+            return eventConverter.getEventID(session, folderId, objectId, DataParser.checkInt(jsonObject, CalendarFields.OLD_RECURRENCE_POSITION));
         }
         if (jsonObject.hasAndNotNull(CalendarFields.RECURRENCE_DATE_POSITION)) {
-            return eventConverter.getEventID(session, folderID, objectID, DataParser.checkDate(jsonObject, CalendarFields.RECURRENCE_DATE_POSITION));
+            return eventConverter.getEventID(session, folderId, objectId, DataParser.checkDate(jsonObject, CalendarFields.RECURRENCE_DATE_POSITION));
         }
-        return new EventID(folderID, objectID);
+        return new EventID(folderId, objectId);
     }
 
     /**

@@ -58,7 +58,6 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -99,13 +98,13 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
      * @param seriesID The series identifier to get the change exceptions for
      * @return The change exceptions
      */
-    public List<Event> perform(UserizedFolder folder, int seriesID) throws OXException {
+    public List<Event> perform(UserizedFolder folder, String seriesID) throws OXException {
         /*
          * load series master first
          */
         Event event = storage.getEventStorage().loadEvent(seriesID, getFields(session));
         if (null == event) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(seriesID));
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesID);
         }
         if (session.getUser().getId() != event.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
@@ -117,7 +116,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(folder))
-            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, I(seriesID)))
+            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesID))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
         ;
         /*

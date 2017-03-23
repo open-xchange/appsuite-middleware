@@ -206,7 +206,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
     protected EnumMap<EventField, ? extends Mapping<? extends Object, Event>> getMappings() {
         EnumMap<EventField, Mapping<? extends Object, Event>> mappings = new
             EnumMap<EventField, Mapping<? extends Object, Event>>(EventField.class);
-        mappings.put(EventField.ID, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.ID, new DefaultMapping<String, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -214,13 +214,13 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setId(null == value ? 0 : i(value));
+            public void set(Event object, String value) throws OXException {
+                object.setId(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getId());
+            public String get(Event object) {
+                return object.getId();
             }
 
             @Override
@@ -228,11 +228,11 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeId();
             }
         });
-        mappings.put(EventField.FOLDER_ID, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.FOLDER_ID, new DefaultMapping<String, Event>() {
 
             @Override
-            public void set(Event event, Integer value) {
-                event.setFolderId(null == value ? 0 : i(value));
+            public void set(Event event, String value) {
+                event.setFolderId(value);
             }
 
             @Override
@@ -241,8 +241,8 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public Integer get(Event event) {
-                return I(event.getFolderId());
+            public String get(Event event) {
+                return event.getFolderId();
             }
 
             @Override
@@ -250,7 +250,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 event.removeFolderId();
             }
         });
-        mappings.put(EventField.PUBLIC_FOLDER_ID, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.PUBLIC_FOLDER_ID, new DefaultMapping<String, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -258,13 +258,13 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setPublicFolderId(null == value ? 0 : i(value));
+            public void set(Event object, String value) throws OXException {
+                object.setPublicFolderId(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getPublicFolderId());
+            public String get(Event object) {
+                return object.getPublicFolderId();
             }
 
             @Override
@@ -705,7 +705,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeTransp();
             }
         });
-        mappings.put(EventField.SERIES_ID, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.SERIES_ID, new DefaultMapping<String, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -713,13 +713,13 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setSeriesId(null == value ? 0 : i(value));
+            public void set(Event object, String value) throws OXException {
+                object.setSeriesId(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getSeriesId());
+            public String get(Event object) {
+                return object.getSeriesId();
             }
 
             @Override

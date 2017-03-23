@@ -89,7 +89,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Reference;
 
 /**
@@ -106,7 +105,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
 
     private final Date today;
 
-    private Map<Integer, Permission> folderPermissions;
+    private Map<String, Permission> folderPermissions;
 
     /**
      * Initializes a new {@link ConflictCheckPerformer}.
@@ -182,7 +181,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             /*
              * skip checks with event itself or any other event from same series
              */
-            if (eventInPeriod.getId() == event.getId() || 0 < event.getSeriesId() && event.getSeriesId() == eventInPeriod.getSeriesId()) {
+            if (eventInPeriod.getId().equals(event.getId()) || null != event.getSeriesId() && event.getSeriesId().equals(eventInPeriod.getSeriesId())) {
                 continue;
             }
             /*
@@ -439,13 +438,13 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * details available based on folder permissions
          */
-        if (0 < conflictingEvent.getPublicFolderId()) {
-            Permission permission = getFolderPermissions().get(Autoboxing.I(conflictingEvent.getPublicFolderId()));
+        if (null != conflictingEvent.getPublicFolderId()) {
+            Permission permission = getFolderPermissions().get(conflictingEvent.getPublicFolderId());
             return null != permission && Permission.READ_ALL_OBJECTS <= permission.getReadPermission();
         } else {
             for (Attendee attendee : conflictingEvent.getAttendees()) {
                 if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
-                    Permission permission = getFolderPermissions().get(Autoboxing.I(attendee.getFolderID()));
+                    Permission permission = getFolderPermissions().get(attendee.getFolderID());
                     if (null != permission && Permission.READ_ALL_OBJECTS <= permission.getReadPermission()) {
                         return true;
                     }
@@ -455,12 +454,12 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         }
     }
 
-    private Map<Integer, Permission> getFolderPermissions() throws OXException {
+    private Map<String, Permission> getFolderPermissions() throws OXException {
         if (null == folderPermissions) {
             List<UserizedFolder> folders = getVisibleFolders();
-            folderPermissions = new HashMap<Integer, Permission>(folders.size());
+            folderPermissions = new HashMap<String, Permission>(folders.size());
             for (UserizedFolder folder : folders) {
-                folderPermissions.put(Integer.valueOf(folder.getID()), folder.getOwnPermission());
+                folderPermissions.put(folder.getID(), folder.getOwnPermission());
             }
         }
         return folderPermissions;

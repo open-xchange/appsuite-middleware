@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.json.actions;
 
+import static com.openexchange.chronos.compat.Appointment2Event.asString;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
 import java.util.Set;
@@ -169,7 +170,7 @@ public final class UpdateAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        EventID eventID = new EventID(request.checkInt(AJAXServlet.PARAMETER_INFOLDER), request.checkInt(AJAXServlet.PARAMETER_ID));
+        EventID eventID = new EventID(request.checkParameter(AJAXServlet.PARAMETER_INFOLDER), request.checkParameter(AJAXServlet.PARAMETER_ID));
         JSONObject jsonObject = request.getData();
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setContext(request.getSession().getContext());
@@ -180,11 +181,11 @@ public final class UpdateAction extends ChronosAction {
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
         Event event = getEventConverter().getEvent(session.getSession(), appointment, eventID);
-        if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID() && eventID.getFolderID() != appointment.getParentFolderID()) {
+        if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID() && false == eventID.getFolderID().equals(asString(appointment.getParentFolderID()))) {
             /*
              * move event first
              */
-            CalendarResult result = session.getCalendarService().moveEvent(session, eventID, appointment.getParentFolderID());
+            CalendarResult result = session.getCalendarService().moveEvent(session, eventID, asString(appointment.getParentFolderID()));
             if (1 == jsonObject.length() && CalendarFields.FOLDER_ID.equals(jsonObject.keys().next())) {
                 JSONObject resultObject = new JSONObject(1);
                 if (0 < result.getUpdates().size()) {
@@ -193,7 +194,7 @@ public final class UpdateAction extends ChronosAction {
                 return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
             }
             session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
-            eventID = new EventID(appointment.getParentFolderID(), eventID.getObjectID(), eventID.getRecurrenceID());
+            eventID = new EventID(asString(appointment.getParentFolderID()), eventID.getObjectID(), eventID.getRecurrenceID());
         }
         /*
          * update event & return result, preferring the identifier of a created change exception if present

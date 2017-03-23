@@ -86,7 +86,7 @@ public class ResolveUidPerformer {
      * @param uid The unique identifier to resolve
      * @return The identifier of the resolved event, or <code>0</code> if not found
      */
-    public int perform(String uid) throws OXException {
+    public String perform(String uid) throws OXException {
         /*
          * construct search term
          */
@@ -106,7 +106,7 @@ public class ResolveUidPerformer {
                 return foundEvent.getId();
             }
         }
-        return 0;
+        return null;
     }
 
 }

@@ -244,7 +244,7 @@ public class ICalExporter implements Exporter {
                         if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
                             exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
                         } else {
-                            exportEvents(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
+                            exportEvents(session, String.valueOf(folder.getObjectID()), String.valueOf(objectID), fieldsToBeExported, out);
                         }
                     } else if (FolderObject.TASK == folder.getModule()) {
                         exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
@@ -263,7 +263,7 @@ public class ICalExporter implements Exporter {
             if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
                 sink = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
             } else {
-                sink = exportEvents(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
+                sink = exportEvents(session, String.valueOf(folder.getObjectID()), String.valueOf(objectID), fieldsToBeExported, null);
             }
         } else if (FolderObject.TASK == folder.getModule()) {
             sink = exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
@@ -352,11 +352,11 @@ public class ICalExporter implements Exporter {
      *
      * @param session The session
      * @param folderID The source folder identifier
-     * @param objectID The object ID of the event to export, or <code>0</code> to export all events in the folder
+     * @param objectID The object ID of the event to export, or <code>null</code> to export all events in the folder
      * @param optOut The optional output stream
      * @return The exported iCalendar in a file holder, or <code>null</code> if directly written to the output stream
      */
-    private static ThresholdFileHolder exportEvents(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
+    private static ThresholdFileHolder exportEvents(ServerSession session, String folderID, String objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
         /*
          * initialize export
          */
@@ -376,7 +376,7 @@ public class ICalExporter implements Exporter {
         /*
          * perform export
          */
-        if (0 < objectID) {
+        if (null != objectID) {
             Event event = calendarService.getEvent(calendarSession, folderID, objectID);
             calendarExport.add(event);
             if (CalendarUtils.isSeriesMaster(event) && null != event.getChangeExceptionDates() && 0 < event.getChangeExceptionDates().size()) {
@@ -385,7 +385,7 @@ public class ICalExporter implements Exporter {
                 }
             }
         } else {
-            calendarExport.setName(getFolder(session, String.valueOf(folderID)).getFolderName());
+            calendarExport.setName(getFolder(session, folderID).getFolderName());
             for (Event event : calendarService.getEventsInFolder(calendarSession, folderID)) {
                 calendarExport.add(event);
             }

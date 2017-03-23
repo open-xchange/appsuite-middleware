@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.impl.Utils.i;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
@@ -83,16 +82,16 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
     protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
     }
-    
+
     /**
-     * Gets a value indicating whether a certain event is visible or <i>opaque to</i> free/busy results in the view of the current 
-     * session's user or not. 
-     * 
+     * Gets a value indicating whether a certain event is visible or <i>opaque to</i> free/busy results in the view of the current
+     * session's user or not.
+     *
      * @param event The event to check
-     * @return <code>true</code> if the event should be considered, <code>false</code>, otherwise 
+     * @return <code>true</code> if the event should be considered, <code>false</code>, otherwise
      */
     protected boolean considerForFreeBusy(Event event) {
-        if (Classification.PRIVATE.equals(event.getClassification()) && event.getCreatedBy() != session.getUser().getId() && 
+        if (Classification.PRIVATE.equals(event.getClassification()) && event.getCreatedBy() != session.getUser().getId() &&
             CalendarUtils.contains(event.getAttendees(), session.getUser().getId())) {
             return false; // exclude foreign events classified as 'private' (but keep 'confidential' ones)
         }
@@ -122,13 +121,13 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * </ul>
      *
      * @param event The event to choose the folder identifier for
-     * @return The chosen folder identifier, or <code>-1</code> if there is none
+     * @return The chosen folder identifier, or <code>null</code> if there is none
      */
-    protected int chooseFolderID(Event event) throws OXException {
+    protected String chooseFolderID(Event event) throws OXException {
         /*
          * check common folder permissions for events in public folders
          */
-        if (0 < event.getPublicFolderId()) {
+        if (null != event.getPublicFolderId()) {
             UserizedFolder folder = findFolder(getVisibleFolders(), event.getPublicFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
@@ -136,7 +135,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
                     return event.getPublicFolderId();
                 }
             }
-            return -1;
+            return null;
         }
         /*
          * prefer user's personal folder if user is attendee
@@ -158,7 +157,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
                 }
             }
         }
-        return null == chosenFolder ? -1 : i(chosenFolder);
+        return null == chosenFolder ? null : chosenFolder.getID();
     }
 
     /**
@@ -211,11 +210,10 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @param id The identifier of the folder to lookup
      * @return The matching folder, or <code>null</code> if not found
      */
-    private static UserizedFolder findFolder(Collection<UserizedFolder> folders, int id) {
+    private static UserizedFolder findFolder(Collection<UserizedFolder> folders, String id) {
         if (null != folders) {
-            String folderID = String.valueOf(id);
             for (UserizedFolder folder : folders) {
-                if (folderID.equals(folder.getID())) {
+                if (id.equals(folder.getID())) {
                     return folder;
                 }
             }

@@ -52,6 +52,8 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.compat.Appointment2Event.asString;
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.put;
@@ -103,13 +105,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void insertAttendees(int objectID, List<Attendee> attendees) throws OXException {
+    public void insertAttendees(String objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), objectID, attendees);
+            updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), asInt(objectID), attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -119,18 +121,18 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void updateAttendee(int objectID, Attendee attendee) throws OXException {
+    public void updateAttendee(String objectID, Attendee attendee) throws OXException {
         updateAttendees(objectID, Collections.singletonList(attendee));
     }
 
     @Override
-    public void updateAttendees(int objectID, List<Attendee> attendees) throws OXException {
+    public void updateAttendees(String objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += updateAttendees(connection, context.getContextId(), objectID, attendees);
+            updated += updateAttendees(connection, context.getContextId(), asInt(objectID), attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -140,18 +142,18 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void insertTombstoneAttendee(int objectID, Attendee attendee) throws OXException {
+    public void insertTombstoneAttendee(String objectID, Attendee attendee) throws OXException {
         insertTombstoneAttendees(objectID, Collections.singletonList(attendee));
     }
 
     @Override
-    public void insertTombstoneAttendees(int objectID, List<Attendee> attendees) throws OXException {
+    public void insertTombstoneAttendees(String objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += insertTombstoneAttendees(connection, context.getContextId(), objectID, attendees);
+            updated += insertTombstoneAttendees(connection, context.getContextId(), asInt(objectID), attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -161,27 +163,27 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public List<Attendee> loadAttendees(int objectID) throws OXException {
-        return loadAttendees(new int[] { objectID }).get(I(objectID));
+    public List<Attendee> loadAttendees(String objectID) throws OXException {
+        return loadAttendees(new String[] { objectID }).get(objectID);
     }
 
     @Override
-    public Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs) throws OXException {
+    public Map<String, List<Attendee>> loadAttendees(String[] objectIDs) throws OXException {
         return loadAttendees(objectIDs, null);
     }
 
     @Override
-    public Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs, Boolean internal) throws OXException {
-        Map<Integer, List<Attendee>> attendeesById = new HashMap<Integer, List<Attendee>>(objectIDs.length);
+    public Map<String, List<Attendee>> loadAttendees(String[] objectIDs, Boolean internal) throws OXException {
+        Map<String, List<Attendee>> attendeesById = new HashMap<String, List<Attendee>>(objectIDs.length);
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
             /*
              * select raw attendee data & pre-fetch referenced internal entities
              */
-            Map<Integer, List<Attendee>> userAttendeeData;
-            Map<Integer, List<Attendee>> internalAttendeeData;
-            Map<Integer, List<Attendee>> externalAttendeeData;
+            Map<String, List<Attendee>> userAttendeeData;
+            Map<String, List<Attendee>> internalAttendeeData;
+            Map<String, List<Attendee>> externalAttendeeData;
             if (false == Boolean.FALSE.equals(internal)) {
                 userAttendeeData = selectUserAttendeeData(connection, context.getContextId(), objectIDs);
                 internalAttendeeData = selectInternalAttendeeData(connection, context.getContextId(), objectIDs);
@@ -198,8 +200,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             /*
              * generate resulting attendee lists per object ID
              */
-            for (int objectID : objectIDs) {
-                Integer key = I(objectID);
+            for (String objectID : objectIDs) {
+                String key = objectID;
                 attendeesById.put(key, getAttendees(
                     null != internalAttendeeData ? internalAttendeeData.get(key) : null,
                     null != userAttendeeData ? userAttendeeData.get(key) : null,
@@ -215,13 +217,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void deleteAttendees(int objectID, List<Attendee> attendees) throws OXException {
+    public void deleteAttendees(String objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteAttendees(connection, context.getContextId(), objectID, attendees);
+            updated = deleteAttendees(connection, context.getContextId(), asInt(objectID), attendees);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -231,13 +233,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void deleteAttendees(int objectID) throws OXException {
+    public void deleteAttendees(String objectID) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteAttendees(connection, context.getContextId(), objectID);
+            updated = deleteAttendees(connection, context.getContextId(), asInt(objectID));
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -456,7 +458,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             stmt.setInt(parameterIndex++, attendee.getEntity());
             stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
             stmt.setString(parameterIndex++, attendee.getComment());
-            stmt.setInt(parameterIndex++, attendee.getFolderID());
+            stmt.setInt(parameterIndex++, asInt(attendee.getFolderID()));
             stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
             stmt.setInt(parameterIndex++, contextID);
             return logExecuteUpdate(stmt);
@@ -521,8 +523,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static Map<Integer, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
-        Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
+    private static Map<String, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException, OXException {
+        Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         String sql;
         if (1 == objectIDs.length) {
             sql = "SELECT object_id,id,type,ma,dn FROM prg_date_rights WHERE cid=? AND object_id=? AND type IN (1,2,3);";
@@ -535,8 +537,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
+            for (String objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, asInt(objectID));
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
@@ -545,15 +547,15 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
                     attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
                     attendee.setCn(resultSet.getString("dn"));
-                    put(attendeesByObjectId, I(resultSet.getInt("object_id")), attendee);
+                    put(attendeesByObjectId, asString(resultSet.getInt("object_id")), attendee);
                 }
             }
         }
         return attendeesByObjectId;
     }
 
-    private static Map<Integer, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
-        Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
+    private static Map<String, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException, OXException {
+        Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         String sql;
         if (1 == objectIDs.length) {
             sql = "SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members WHERE cid=? AND object_id=?;";
@@ -566,8 +568,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
+            for (String objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, asInt(objectID));
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
@@ -576,16 +578,16 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     attendee.setCuType(CalendarUserType.INDIVIDUAL);
                     attendee.setPartStat(Appointment2Event.getParticipationStatus(resultSet.getInt("confirm")));
                     attendee.setComment(resultSet.getString("reason"));
-                    attendee.setFolderID(resultSet.getInt("pfid"));
-                    put(attendeesByObjectId, I(resultSet.getInt("object_id")), attendee);
+                    attendee.setFolderID(asString(resultSet.getInt("pfid")));
+                    put(attendeesByObjectId, asString(resultSet.getInt("object_id")), attendee);
                 }
             }
         }
         return attendeesByObjectId;
     }
 
-    private static Map<Integer, List<Attendee>> selectExternalAttendeeData(Connection connection, int contextID, int objectIDs[]) throws SQLException, OXException {
-        Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
+    private static Map<String, List<Attendee>> selectExternalAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException, OXException {
+        Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         String sql;
         if (1 == objectIDs.length) {
             sql = "SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId=?;";
@@ -598,8 +600,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
+            for (String objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, asInt(objectID));
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
@@ -609,7 +611,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     attendee.setCn(resultSet.getString("displayName"));
                     attendee.setPartStat(Appointment2Event.getParticipationStatus(resultSet.getInt("confirm")));
                     attendee.setComment(resultSet.getString("reason"));
-                    put(attendeesByObjectId, I(resultSet.getInt("objectId")), attendee);
+                    put(attendeesByObjectId, asString(resultSet.getInt("objectId")), attendee);
                 }
             }
         }

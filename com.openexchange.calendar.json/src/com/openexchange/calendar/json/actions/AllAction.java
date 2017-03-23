@@ -359,10 +359,11 @@ public final class AllAction extends ChronosAction {
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
         }
         List<Event> events;
-        if (0 < request.getFolderId()) {
-            events = session.getCalendarService().getEventsInFolder(session, request.getFolderId());
-        } else {
+        String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        if (null == folderId || "0".equals(folderId)) {
             events = session.getCalendarService().getEventsOfUser(session);
+        } else {
+            events = session.getCalendarService().getEventsInFolder(session, folderId);
         }
         return getAppointmentResultWithTimestamp(session, events);
     }

@@ -101,8 +101,8 @@ public final class ResolveUIDAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         String uid = request.checkParameter(AJAXServlet.PARAMETER_UID);
-        int objectID = session.getCalendarService().resolveByUID(session, uid);
-        if (0 == objectID) {
+        String objectID = session.getCalendarService().resolveByUID(session, uid);
+        if (null == objectID) {
             throw OXException.notFound("");
         }
         return new AJAXRequestResult(new JSONObject().put("id", objectID), "json");

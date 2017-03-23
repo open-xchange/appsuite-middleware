@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.service.EntityResolver;
@@ -179,11 +181,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public Event loadEvent(int objectID, EventField[] fields) throws OXException {
+    public Event loadEvent(String objectID, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectEvent(connection, context.getContextId(), objectID, fields);
+            return selectEvent(connection, context.getContextId(), asInt(objectID), fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -192,7 +194,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public Event loadException(int seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException {
+    public Event loadException(String seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException {
         long recurrenceDatePosition;
         if (PositionAwareRecurrenceId.class.isInstance(recurrenceID)) {
             recurrenceDatePosition = ((PositionAwareRecurrenceId) recurrenceID).getRecurrenceDatePosition().getTime();
@@ -202,7 +204,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectException(connection, context.getContextId(), seriesID, recurrenceDatePosition, fields);
+            return selectException(connection, context.getContextId(), asInt(seriesID), recurrenceDatePosition, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -211,14 +213,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public int nextObjectID() throws OXException {
+    public String nextObjectID() throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             if (connection.getAutoCommit()) {
                 throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
             }
-            return IDGenerator.getId(context, Types.APPOINTMENT, connection);
+            return Appointment2Event.asString(IDGenerator.getId(context, Types.APPOINTMENT, connection));
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -249,7 +251,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = updateEvent(connection, context.getContextId(), event.getId(), event);
+            updated = updateEvent(connection, context.getContextId(), asInt(event.getId()), event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e, EventMapper.getInstance(), event, connection, "prg_dates");
@@ -275,13 +277,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public void deleteEvent(int objectID) throws OXException {
+    public void deleteEvent(String objectID) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteEvent(connection, context.getContextId(), objectID);
+            updated = deleteEvent(connection, context.getContextId(), asInt(objectID));
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e, EventMapper.getInstance(), null, connection, "prg_dates");

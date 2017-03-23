@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
@@ -122,11 +121,11 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         storage.getEventStorage().insertEvent(newEvent);
         storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
-            newEvent.setFolderId(i(folder));
+            newEvent.setFolderId(folder.getID());
             storage.getAlarmStorage().insertAlarms(newEvent, calendarUser.getId(), event.getAlarms());
         }
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), i(folder), newEvent.getId(), event.getAttachments());
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
         }
         result.addCreation(new CreateResultImpl(loadEventData(newEvent.getId())));
         return result;
@@ -142,7 +141,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * identifiers
          */
         event.setId(storage.nextObjectID());
-        event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? i(folder) : 0);
+        event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
         event.setSequence(0);
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
             event.setUid(UUID.randomUUID().toString());

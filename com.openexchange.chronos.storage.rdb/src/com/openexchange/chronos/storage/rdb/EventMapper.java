@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.compat.Appointment2Event.asString;
+import static com.openexchange.chronos.compat.Event2Appointment.asInteger;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
@@ -162,7 +164,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setId(null == value ? 0 : i(value));
+                event.setId(asString(value, true));
             }
 
             @Override
@@ -172,7 +174,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getId());
+                return asInteger(event.getId(), true);
             }
 
             @Override
@@ -184,7 +186,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setPublicFolderId(null == value ? 0 : i(value));
+                event.setPublicFolderId(asString(value, true));
             }
 
             @Override
@@ -194,7 +196,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getPublicFolderId());
+                return asInteger(event.getPublicFolderId(), true);
             }
 
             @Override
@@ -622,7 +624,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setSeriesId(null == value ? 0 : i(value));
+                event.setSeriesId(asString(value, true));
             }
 
             @Override
@@ -632,7 +634,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return 0 == event.getSeriesId() ? null : I(event.getSeriesId());
+                return asInteger(event.getSeriesId(), false);
             }
 
             @Override

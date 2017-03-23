@@ -52,9 +52,6 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.find;
-import static com.openexchange.chronos.impl.Utils.i;
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -98,13 +95,13 @@ public class ListPerformer extends AbstractQueryPerformer {
      */
     public List<Event> perform(List<EventID> eventIDs) throws OXException {
         Map<UserizedFolder, List<EventID>> idsPerFolder = getIdsPerFolder(eventIDs);
-        Map<Integer, List<Event>> eventsPerFolderId = new HashMap<Integer, List<Event>>(idsPerFolder.size());
+        Map<String, List<Event>> eventsPerFolderId = new HashMap<String, List<Event>>(idsPerFolder.size());
         for (Map.Entry<UserizedFolder, List<EventID>> entry : idsPerFolder.entrySet()) {
-            eventsPerFolderId.put(I(i(entry.getKey())), readEventsInFolder(entry.getKey(), entry.getValue()));
+            eventsPerFolderId.put(entry.getKey().getID(), readEventsInFolder(entry.getKey(), entry.getValue()));
         }
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
-            List<Event> eventsInFolder = eventsPerFolderId.get(I(eventID.getFolderID()));
+            List<Event> eventsInFolder = eventsPerFolderId.get(eventID.getFolderID());
             Event event = find(eventsInFolder, eventID.getObjectID(), eventID.getRecurrenceID());
             if (null == event) {
                 org.slf4j.LoggerFactory.getLogger(ListPerformer.class).debug("Event with {} not found, skipping.", eventID);
@@ -115,33 +112,32 @@ public class ListPerformer extends AbstractQueryPerformer {
     }
 
     private List<Event> readEventsInFolder(UserizedFolder folder, List<EventID> eventIDs) throws OXException {
-        Set<Integer> objectIDs = new HashSet<Integer>(eventIDs.size());
-        int folderID = i(folder);
+        Set<String> objectIDs = new HashSet<String>(eventIDs.size());
         for (EventID eventID : eventIDs) {
-            if (folderID == eventID.getFolderID()) {
-                objectIDs.add(I(eventID.getObjectID()));
+            if (folder.getID().equals(eventID.getFolderID())) {
+                objectIDs.add(eventID.getObjectID());
             }
         }
-        List<Event> events = readEventsInFolder(folder, I2i(objectIDs), false, null);
+        List<Event> events = readEventsInFolder(folder, objectIDs.toArray(new String[objectIDs.size()]), false, null);
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
             Event event = find(events, eventID.getObjectID());
             if (null == event) {
                 continue;
             }
-            event.setFolderId(i(folder));
+            event.setFolderId(folder.getID());
             event = anonymizeIfNeeded(session, event);
             if (null != eventID.getRecurrenceID()) {
                 if (isSeriesMaster(event)) {
                     Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(eventID.getRecurrenceID().getValue()), null);
                     if (false == iterator.hasNext()) {
-                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(eventID.getObjectID()), eventID.getRecurrenceID());
+                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
                     }
                     orderedEvents.add(iterator.next());
                 } else if (eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
                     orderedEvents.add(event);
                 } else {
-                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(eventID.getObjectID()), eventID.getRecurrenceID());
+                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
                 }
             } else {
                 orderedEvents.add(event);
@@ -151,13 +147,13 @@ public class ListPerformer extends AbstractQueryPerformer {
     }
 
     private Map<UserizedFolder, List<EventID>> getIdsPerFolder(List<EventID> eventIDs) throws OXException {
-        Map<Integer, List<EventID>> idsPerFolderId = new HashMap<Integer, List<EventID>>();
+        Map<String, List<EventID>> idsPerFolderId = new HashMap<String, List<EventID>>();
         for (EventID eventID : eventIDs) {
-            com.openexchange.tools.arrays.Collections.put(idsPerFolderId, I(eventID.getFolderID()), eventID);
+            com.openexchange.tools.arrays.Collections.put(idsPerFolderId, eventID.getFolderID(), eventID);
         }
         Map<UserizedFolder, List<EventID>> idsPerFolder = new HashMap<UserizedFolder, List<EventID>>(idsPerFolderId.size());
-        for (Map.Entry<Integer, List<EventID>> entry : idsPerFolderId.entrySet()) {
-            idsPerFolder.put(Utils.getFolder(session, entry.getKey().intValue()), entry.getValue());
+        for (Map.Entry<String, List<EventID>> entry : idsPerFolderId.entrySet()) {
+            idsPerFolder.put(Utils.getFolder(session, entry.getKey()), entry.getValue());
         }
         return idsPerFolder;
     }

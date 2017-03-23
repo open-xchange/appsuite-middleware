@@ -293,9 +293,10 @@ public final class UpdatesAction extends ChronosAction {
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
         }
         Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
         UpdatesResult result;
-        if (0 < request.getFolderId()) {
-            result = session.getCalendarService().getUpdatedEventsInFolder(session, request.getFolderId(), since);
+        if (null != folderId) {
+            result = session.getCalendarService().getUpdatedEventsInFolder(session, folderId, since);
         } else {
             if (false == session.contains(CalendarParameters.PARAMETER_RANGE_START)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_START);

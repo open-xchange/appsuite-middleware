@@ -157,14 +157,14 @@ public final class ConfirmAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
-        int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         int recurrencePosition = request.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
         EventID eventID;
         if (AppointmentAJAXRequest.NOT_FOUND == recurrencePosition) {
-            eventID = new EventID(folderID, objectID);
+            eventID = new EventID(folderId, objectId);
         } else {
-            eventID = getEventConverter().getEventID(session, folderID, objectID, recurrencePosition);
+            eventID = getEventConverter().getEventID(session, folderId, objectId, recurrencePosition);
         }
         JSONObject jsonObject = request.getData();
         ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);

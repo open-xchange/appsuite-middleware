@@ -259,7 +259,7 @@ public class ICalImporter extends AbstractImporter {
     					appointmentInterface, parser, ctx, defaultTz, list, errors,
     					warnings);
 		    } else {
-		        list.addAll(importEvents(session, is, optionalParams, appointmentFolderId));
+                list.addAll(importEvents(session, is, optionalParams, String.valueOf(appointmentFolderId)));
 		    }
 		}
 		if (taskFolderId != -1) {
@@ -367,7 +367,7 @@ public class ICalImporter extends AbstractImporter {
      * @param folderId The identifier of the target folder for the import
      * @return The import results
      */
-    private List<ImportResult> importEvents(ServerSession session, InputStream inputStream, Map<String, String[]> optionalParameters, int folderId) throws OXException {
+    private List<ImportResult> importEvents(ServerSession session, InputStream inputStream, Map<String, String[]> optionalParameters, String folderId) throws OXException {
         /*
          * initialize import
          */
@@ -419,7 +419,7 @@ public class ICalImporter extends AbstractImporter {
              * create further events as change exceptions
              */
             if (1 < events.size() && false == result.hasError()) {
-                EventID masterEventID = new EventID(folderId, Integer.parseInt(result.getObjectId()));
+                EventID masterEventID = new EventID(folderId, result.getObjectId());
                 for (int i = 1; i < events.size(); i++) {
                     importResults.add(createEventException(calendarSession, masterEventID, events.get(i)));
                 }
@@ -803,7 +803,7 @@ public class ICalImporter extends AbstractImporter {
         return importResult;
     }
 
-    private static ImportResult createEvent(CalendarSession session, int folderId, Event importedEvent) {
+    private static ImportResult createEvent(CalendarSession session, String folderId, Event importedEvent) {
         final int MAX_RETRIES = 5;
         ImportResult importResult = prepareResult(importedEvent);
         for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
@@ -814,8 +814,8 @@ public class ICalImporter extends AbstractImporter {
                 if (result.getCreations().isEmpty()) {
                     importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
                 } else {
-                    importResult.setFolder(String.valueOf(result.getCreations().get(0).getCreatedEvent().getFolderId()));
-                    importResult.setObjectId(String.valueOf(result.getCreations().get(0).getCreatedEvent().getId()));
+                    importResult.setFolder(result.getCreations().get(0).getCreatedEvent().getFolderId());
+                    importResult.setObjectId(result.getCreations().get(0).getCreatedEvent().getId());
                 }
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(session, e, importedEvent)) {

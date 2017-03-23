@@ -81,9 +81,9 @@ public interface CalendarService {
      *
      * @param session The calendar session
      * @param uid The UID to resolve
-     * @return The identifier of the resolved event, or <code>0</code> if not found
+     * @return The identifier of the resolved event, or <code>null</code> if not found
      */
-    int resolveByUID(CalendarSession session, String uid) throws OXException;
+    String resolveByUID(CalendarSession session, String uid) throws OXException;
 
     /**
      * Resolves a resource filename to the identifier of an existing event. The lookup is performed context-wise, independently of the
@@ -92,9 +92,9 @@ public interface CalendarService {
      *
      * @param session The calendar session
      * @param filename The filename to resolve
-     * @return The identifier of the resolved event, or <code>0</code> if not found
+     * @return The identifier of the resolved event, or <code>null</code> if not found
      */
-    int resolveByFilename(CalendarSession session, String filename) throws OXException;
+    String resolveByFilename(CalendarSession session, String filename) throws OXException;
 
     /**
      * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
@@ -104,7 +104,7 @@ public interface CalendarService {
      * @param folderID The identifier of the folder to get the sequence number for
      * @return The sequence number
      */
-    long getSequenceNumber(CalendarSession session, int folderID) throws OXException;
+    long getSequenceNumber(CalendarSession session, String folderID) throws OXException;
 
     /**
      * Searches for events by pattern in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
@@ -126,7 +126,7 @@ public interface CalendarService {
      * @param pattern The pattern to search for
      * @return The found events, or an empty list if there are none
      */
-    List<Event> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
+    List<Event> searchEvents(CalendarSession session, String[] folderIDs, String pattern) throws OXException;
 
     /**
      * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
@@ -149,7 +149,7 @@ public interface CalendarService {
      * @param queries The queries to search for, or <code>null</code> if not specified
      * @return The found events, or an empty list if there are none
      */
-    List<Event> searchEvents(CalendarSession session, int[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException;
+    List<Event> searchEvents(CalendarSession session, String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException;
 
     /**
      * Gets all change exceptions of a recurring event series.
@@ -164,7 +164,7 @@ public interface CalendarService {
      * @param seriesID The identifier of the series to get the change exceptions for
      * @return The change exceptions, or an empty list if there are none
      */
-    List<Event> getChangeExceptions(CalendarSession session, int folderID, int seriesID) throws OXException;
+    List<Event> getChangeExceptions(CalendarSession session, String folderID, String seriesID) throws OXException;
 
     /**
      * Gets a specific event.
@@ -179,7 +179,7 @@ public interface CalendarService {
      * @param objectID The identifier of the event to get
      * @return The event
      */
-    Event getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
+    Event getEvent(CalendarSession session, String folderID, String objectID) throws OXException;
 
     /**
      * Gets a list of events.
@@ -214,7 +214,7 @@ public interface CalendarService {
      * @param folderID The identifier of the folder to get the events from
      * @return The events
      */
-    List<Event> getEventsInFolder(CalendarSession session, int folderID) throws OXException;
+    List<Event> getEventsInFolder(CalendarSession session, String folderID) throws OXException;
 
     /**
      * Gets all events of the session's user.
@@ -250,7 +250,7 @@ public interface CalendarService {
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(CalendarSession session, String folderID, Date updatedSince) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
@@ -284,7 +284,7 @@ public interface CalendarService {
      * @param event The event data to create
      * @return The create result
      */
-    CalendarResult createEvent(CalendarSession session, int folderId, Event event) throws OXException;
+    CalendarResult createEvent(CalendarSession session, String folderId, Event event) throws OXException;
 
     /**
      * Updates an existing event.
@@ -318,7 +318,7 @@ public interface CalendarService {
      * @param folderId The identifier of the folder to move the event to
      * @return The move result
      */
-    CalendarResult moveEvent(CalendarSession session, EventID eventID, int folderId) throws OXException;
+    CalendarResult moveEvent(CalendarSession session, EventID eventID, String folderId) throws OXException;
 
     /**
      * Updates a specific attendee of an existing event.

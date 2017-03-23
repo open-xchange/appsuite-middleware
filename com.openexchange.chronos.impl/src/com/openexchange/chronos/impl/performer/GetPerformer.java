@@ -55,12 +55,10 @@ import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -96,10 +94,10 @@ public class GetPerformer extends AbstractQueryPerformer {
      * @param objectID The identifier if the event to get
      * @return The loaded event
      */
-    public Event perform(UserizedFolder folder, int objectID) throws OXException {
+    public Event perform(UserizedFolder folder, String objectID) throws OXException {
         Event event = storage.getEventStorage().loadEvent(objectID, getFields(session));
         if (null == event) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(objectID));
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(objectID);
         }
         if (session.getUser().getId() != event.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
@@ -108,7 +106,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         }
         readAdditionalEventData(Collections.singletonList(event), getCalendarUser(folder).getId(), getFields(session, EventField.ATTENDEES));
         Check.eventIsInFolder(event, folder);
-        event.setFolderId(i(folder));
+        event.setFolderId(folder.getID());
         if (isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, getCalendarUser(folder).getId());
         }

@@ -158,17 +158,17 @@ public final class CopyAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(request.getParameter(AppointmentFields.IGNORE_CONFLICTS)));
-        int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
-        int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         JSONObject jsonObject = request.getData();
-        int targetFolderID = DataParser.checkInt(jsonObject, FolderChildFields.FOLDER_ID);
-        Event event = session.getCalendarService().getEvent(session, folderID, objectID);
+        String targetFolderID = DataParser.checkString(jsonObject, FolderChildFields.FOLDER_ID);
+        Event event = session.getCalendarService().getEvent(session, folderId, objectId);
         event.removeId();
         event.removeUid();
         event.removePublicFolderId();
         CalendarResult result = session.getCalendarService().createEvent(session, targetFolderID, event);
         if (null != result.getCreations() && 0 < result.getCreations().size()) {
-            int id = result.getCreations().get(0).getCreatedEvent().getId();
+            String id = result.getCreations().get(0).getCreatedEvent().getId();
             return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
         }
         return null; //TODO: conflicts

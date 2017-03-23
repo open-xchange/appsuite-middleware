@@ -54,7 +54,6 @@ import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,7 +79,7 @@ import com.openexchange.groupware.ldap.User;
 public class AttendeeHelper {
 
     /** The constant used to indicate a common "public" parent folder for internal user attendees */
-    public static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
+    public static final String ATTENDEE_PUBLIC_FOLDER_ID = String.valueOf(-2);
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
 
@@ -366,7 +365,7 @@ public class AttendeeHelper {
         User calendarUser = getCalendarUser(folder);
         Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUser.getId());
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
-        defaultAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : i(folder));
+        defaultAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : folder.getID());
         if (session.getUser().getId() != calendarUser.getId()) {
             defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUser().getId()));
         }

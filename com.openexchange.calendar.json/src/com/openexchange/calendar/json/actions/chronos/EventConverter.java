@@ -55,6 +55,8 @@ import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
+import static com.openexchange.chronos.compat.Appointment2Event.asString;
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -268,7 +270,7 @@ public class EventConverter {
      * @param recurrencePosition The recurrence position, or a value <code>< 0</code> if not set
      * @return The event identifier
      */
-    public EventID getEventID(CalendarSession session, int folderID, int objectID, int recurrencePosition) throws OXException {
+    public EventID getEventID(CalendarSession session, String folderID, String objectID, int recurrencePosition) throws OXException {
         EventID eventID = new EventID(folderID, objectID);
         if (0 >= recurrencePosition) {
             return eventID;
@@ -287,7 +289,7 @@ public class EventConverter {
      * @param recurrenceDatePosition The recurrence date position, or <code>null</code> if not set
      * @return The event identifier
      */
-    public EventID getEventID(CalendarSession session, int folderID, int objectID, Date recurrenceDatePosition) throws OXException {
+    public EventID getEventID(CalendarSession session, String folderID, String objectID, Date recurrenceDatePosition) throws OXException {
         EventID eventID = new EventID(folderID, objectID);
         if (null == recurrenceDatePosition) {
             return eventID;
@@ -308,7 +310,7 @@ public class EventConverter {
         Event event = new Event();
         RecurrenceData recurrenceData = null;
         if (appointment.containsObjectID()) {
-            event.setId(appointment.getObjectID());
+            event.setId(asString(appointment.getObjectID()));
         }
         if (appointment.containsCreatedBy()) {
             event.setCreatedBy(appointment.getCreatedBy());
@@ -349,7 +351,7 @@ public class EventConverter {
             event.setDescription(appointment.getNote());
         }
         if (appointment.containsRecurrenceID()) {
-            event.setSeriesId(appointment.getRecurrenceID());
+            event.setSeriesId(asString(appointment.getRecurrenceID()));
         }
         if (appointment.containsRecurrenceDatePosition()) {
             if (null == appointment.getRecurrenceDatePosition()) {
@@ -450,7 +452,7 @@ public class EventConverter {
         CalendarDataObject appointment = new CalendarDataObject();
         RecurrenceData recurrenceData = null;
         if (event.containsId()) {
-            appointment.setObjectID(event.getId());
+            appointment.setObjectID(asInt(event.getId()));
         }
         if (event.containsCreatedBy()) {
             appointment.setCreatedBy(event.getCreatedBy());
@@ -465,7 +467,7 @@ public class EventConverter {
             appointment.setLastModified(event.getLastModified());
         }
         if (event.containsFolderId()) {
-            appointment.setParentFolderID(event.getFolderId());
+            appointment.setParentFolderID(asInt(event.getFolderId()));
             //        appointment.setParentFolderID(event.getPublicFolderId());
             //        appointment.setPersonalFolderID(event.getFolderId());
         }
@@ -519,7 +521,7 @@ public class EventConverter {
             }
         }
         if (event.containsSeriesId()) {
-            appointment.setRecurrenceID(event.getSeriesId());
+            appointment.setRecurrenceID(asInt(event.getSeriesId()));
         }
         if (event.containsRecurrenceId()) {
             if (null == event.getRecurrenceId()) {
@@ -927,7 +929,7 @@ public class EventConverter {
         };
         Event event = getEvent(session, eventID, recurrenceFields);
         if (event.getSeriesId() != event.getId()) {
-            if (0 == event.getSeriesId()) {
+            if (null == event.getSeriesId()) {
                 // no recurrence (yet)
                 return new DefaultRecurrenceData(null, event.isAllDay(), event.getStartTimeZone(), event.getStartDate().getTime());
             }

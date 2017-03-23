@@ -51,7 +51,6 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
@@ -138,16 +137,16 @@ public class Check {
         }
         Permission ownPermission = folder.getOwnPermission();
         if (ownPermission.getFolderPermission() < requiredFolderPermission) {
-            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(i(folder)));
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folder.getID());
         }
         if (ownPermission.getReadPermission() < requiredReadPermission) {
-            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(i(folder)));
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folder.getID());
         }
         if (ownPermission.getWritePermission() < requiredWritePermission) {
-            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(I(i(folder)));
+            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }
         if (ownPermission.getDeletePermission() < requiredDeletePermission) {
-            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(I(i(folder)));
+            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
         }
     }
 
@@ -184,7 +183,7 @@ public class Check {
      */
     public static Event requireUpToDateTimestamp(Event event, long clientTimestamp) throws OXException {
         if (null != event.getLastModified() && event.getLastModified().getTime() > clientTimestamp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(event.getId()), L(clientTimestamp), L(event.getLastModified().getTime()));
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(event.getId(), L(clientTimestamp), L(event.getLastModified().getTime()));
         }
         return event;
     }
@@ -199,7 +198,7 @@ public class Check {
      */
     public static void eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
         if (false == Utils.isInFolder(event, folder)) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(event.getId()));
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folder.getID(), event.getId());
         }
     }
 
@@ -247,7 +246,7 @@ public class Check {
      */
     public static Classification classificationIsValid(Classification classification, UserizedFolder folder) throws OXException {
         if (false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), I(i(folder)), PublicType.getInstance());
+            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), folder.getID(), PublicType.getInstance());
         }
         return classification;
     }
@@ -269,7 +268,7 @@ public class Check {
         if (null != classification && false == Classification.PUBLIC.equals(classification)) {
             if (PublicType.getInstance().equals(targetFolder.getType()) || getCalendarUser(folder).getId() != getCalendarUser(targetFolder).getId()) {
                 throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_MOVE.create(
-                    String.valueOf(classification), I(i(folder)), folder.getType(), I(i(targetFolder)), targetFolder.getType());
+                    String.valueOf(classification), folder.getID(), folder.getType(), targetFolder.getID(), targetFolder.getType());
             }
         }
         return classification;
@@ -287,7 +286,7 @@ public class Check {
         if (null != classification && false == Classification.PUBLIC.equals(classification)) {
             int userID = folder.getUser().getId();
             if (originalEvent.getCreatedBy() != userID && false == contains(originalEvent.getAttendees(), userID)) {
-                throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(I(i(folder)), I(originalEvent.getId()), String.valueOf(classification));
+                throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(folder.getID(), originalEvent.getId(), String.valueOf(classification));
             }
         }
     }
@@ -356,9 +355,9 @@ public class Check {
     public static String uidIsUnique(CalendarStorage storage, Event event) throws OXException {
         String uid = event.getUid();
         if (Strings.isNotEmpty(uid)) {
-            int existingId = new ResolveUidPerformer(storage).perform(uid);
-            if (0 < existingId) {
-                throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(existingId));
+            String existingId = new ResolveUidPerformer(storage).perform(uid);
+            if (null != existingId) {
+                throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
             }
         }
         return uid;
@@ -376,7 +375,7 @@ public class Check {
     public static Attendee attendeeExists(Event event, Attendee attendee) throws OXException {
         Attendee matchingAttendee = CalendarUtils.find(event.getAttendees(), attendee);
         if (null == matchingAttendee) {
-            throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(attendee, I(event.getId()));
+            throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(attendee, event.getId());
         }
         return matchingAttendee;
     }

@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
@@ -96,14 +97,14 @@ public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
     }
 
     @Override
-    public int nextObjectID() throws OXException {
+    public String nextObjectID() throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             if (connection.getAutoCommit()) {
                 throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
             }
-            return IDGenerator.getId(context, Types.APPOINTMENT, connection);
+            return Appointment2Event.asString(IDGenerator.getId(context, Types.APPOINTMENT, connection));
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {

@@ -57,12 +57,10 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
@@ -106,7 +104,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The result
      */
-    public CalendarResultImpl perform(int objectID, RecurrenceId recurrenceID, long clientTimestamp) throws OXException {
+    public CalendarResultImpl perform(String objectID, RecurrenceId recurrenceID, long clientTimestamp) throws OXException {
         /*
          * load original event data & attendees
          */
@@ -158,7 +156,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * no delete permissions, otherwise
          */
-        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(I(i(folder)));
+        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
     }
 
     /**
@@ -198,7 +196,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getId()), String.valueOf(recurrenceID));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceID));
         }
         Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
         if (null != userAttendee) {
@@ -231,12 +229,12 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getId()), String.valueOf(recurrenceID));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceID));
         }
         /*
          * no delete permissions, otherwise
          */
-        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(I(i(folder)));
+        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
     }
 
     /**
@@ -305,7 +303,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * delete the exception
          */
-        int seriesID = originalExceptionEvent.getSeriesId();
+        String seriesID = originalExceptionEvent.getSeriesId();
         RecurrenceId recurrenceID = originalExceptionEvent.getRecurrenceId();
         delete(originalExceptionEvent);
         /*
@@ -325,7 +323,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * delete the attendee in the exception
          */
-        int seriesID = originalExceptionEvent.getSeriesId();
+        String seriesID = originalExceptionEvent.getSeriesId();
         delete(originalExceptionEvent, originalAttendee);
         /*
          * 'touch' the series master accordingly

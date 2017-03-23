@@ -77,7 +77,7 @@ public interface AttachmentStorage {
      * @param eventID The identifier of the event to add the attachments for
      * @param attachments The attachments to add
      */
-    void insertAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException;
+    void insertAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException;
 
     /**
      * Loads metadata for all attachments of specific events.
@@ -85,7 +85,7 @@ public interface AttachmentStorage {
      * @param eventIDs The identifiers of the event to get the attachment metadata for
      * @return The metadata for all attachments of each event, mapped to the corresponding event's identifier
      */
-    Map<Integer, List<Attachment>> loadAttachments(int[] eventIDs) throws OXException;
+    Map<String, List<Attachment>> loadAttachments(String[] eventIDs) throws OXException;
 
     /**
      * Loads metadata for all attachments of a specific event.
@@ -93,7 +93,7 @@ public interface AttachmentStorage {
      * @param eventID The identifier of the event to get the attachment metadata for
      * @return The metadata for all attachments of the event, or <code>null</code> if there are none
      */
-    List<Attachment> loadAttachments(int eventID) throws OXException;
+    List<Attachment> loadAttachments(String eventID) throws OXException;
 
     /**
      * Deletes all attachments of a specific event.
@@ -104,7 +104,7 @@ public interface AttachmentStorage {
      * @param folderID The identifier of the parent folder where the event appears for the acting user
      * @param eventID The identifier of the event to delete the attachments for
      */
-    void deleteAttachments(ServerSession session, int folderID, int eventID) throws OXException;
+    void deleteAttachments(ServerSession session, String folderID, String eventID) throws OXException;
 
     /**
      * Deletes certain attachments of a specific event.
@@ -116,6 +116,6 @@ public interface AttachmentStorage {
      * @param attachments The attachments to delete
      * @param eventID The identifier of the event to delete the attachments for
      */
-    void deleteAttachments(ServerSession session, int folderID, int eventID, List<Attachment> attachments) throws OXException;
+    void deleteAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException;
 
 }

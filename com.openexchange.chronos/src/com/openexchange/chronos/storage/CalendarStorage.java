@@ -69,7 +69,7 @@ public interface CalendarStorage {
      *
      * @return The next object identifier
      */
-    int nextObjectID() throws OXException;
+    String nextObjectID() throws OXException;
 
     /**
      * Gets the context the storage is operating on.

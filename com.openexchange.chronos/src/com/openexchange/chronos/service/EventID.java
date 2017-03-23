@@ -59,8 +59,8 @@ import com.openexchange.chronos.RecurrenceId;
  */
 public class EventID {
 
-    private final int folderID;
-    private final int objectID;
+    private final String folderID;
+    private final String objectID;
     private final RecurrenceId recurrenceID;
 
     /**
@@ -69,7 +69,7 @@ public class EventID {
      * @param folderID The folder ID
      * @param objectID The object ID
      */
-    public EventID(int folderID, int objectID) {
+    public EventID(String folderID, String objectID) {
         this(folderID, objectID, null);
     }
 
@@ -80,18 +80,18 @@ public class EventID {
      * @param objectID The object ID
      * @param recurrenceID The recurrence ID
      */
-    public EventID(int folderID, int objectID, RecurrenceId recurrenceID) {
+    public EventID(String folderID, String objectID, RecurrenceId recurrenceID) {
         super();
         this.folderID = folderID;
         this.objectID = objectID;
         this.recurrenceID = recurrenceID;
     }
 
-    public int getFolderID() {
+    public String getFolderID() {
         return folderID;
     }
 
-    public int getObjectID() {
+    public String getObjectID() {
         return objectID;
     }
 
@@ -103,8 +103,8 @@ public class EventID {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + folderID;
-        result = prime * result + objectID;
+        result = prime * result + ((folderID == null) ? 0 : folderID.hashCode());
+        result = prime * result + ((objectID == null) ? 0 : objectID.hashCode());
         result = prime * result + ((recurrenceID == null) ? 0 : recurrenceID.hashCode());
         return result;
     }
@@ -118,9 +118,15 @@ public class EventID {
         if (getClass() != obj.getClass())
             return false;
         EventID other = (EventID) obj;
-        if (folderID != other.folderID)
+        if (folderID == null) {
+            if (other.folderID != null)
+                return false;
+        } else if (!folderID.equals(other.folderID))
             return false;
-        if (objectID != other.objectID)
+        if (objectID == null) {
+            if (other.objectID != null)
+                return false;
+        } else if (!objectID.equals(other.objectID))
             return false;
         if (recurrenceID == null) {
             if (other.recurrenceID != null)

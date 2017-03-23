@@ -120,7 +120,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     };
 
     protected final GroupwareCaldavFactory factory;
-    protected final int folderID;
+    protected final String folderID;
 
     private CalendarSession calendarSession;
     private MinDateTime minDateTime;
@@ -149,7 +149,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     public EventCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        this.folderID = null != folder ? Tools.parse(folder.getID()) : 0;
+        this.folderID = null != folder ? folder.getID() : null;
         this.minDateTime = new MinDateTime(factory);
         this.maxDateTime = new MaxDateTime(factory);
         includeProperties(new SupportedReportSet(), minDateTime, maxDateTime, new Invite(factory, this),
@@ -300,11 +300,11 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         /*
          * by default, try to resolve object by UID and filename
          */
-        int objectID = calendarSession.getCalendarService().resolveByUID(calendarSession, resourceName);
-        if (1 > objectID) {
+        String objectID = calendarSession.getCalendarService().resolveByUID(calendarSession, resourceName);
+        if (null == objectID) {
             objectID = calendarSession.getCalendarService().resolveByFilename(calendarSession, resourceName);
         }
-        if (0 < objectID) {
+        if (null != objectID) {
             try {
                 return calendarSession.getCalendarService().getEvent(calendarSession, folderID, objectID);
             } catch (OXException e) {

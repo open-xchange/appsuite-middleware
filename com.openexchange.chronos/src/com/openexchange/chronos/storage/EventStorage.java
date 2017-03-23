@@ -76,7 +76,7 @@ public interface EventStorage {
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The event
      */
-    Event loadEvent(int objectID, EventField[] fields) throws OXException;
+    Event loadEvent(String objectID, EventField[] fields) throws OXException;
 
     /**
      * Loads a specific exception from a recurring event series.
@@ -86,7 +86,7 @@ public interface EventStorage {
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The event exception
      */
-    Event loadException(int seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException;
+    Event loadException(String seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException;
 
     /**
      * Searches for events.
@@ -131,7 +131,7 @@ public interface EventStorage {
      *
      * @return The next object identifier
      */
-    int nextObjectID() throws OXException;
+    String nextObjectID() throws OXException;
 
     /**
      * Inserts a new event into the database.
@@ -142,7 +142,7 @@ public interface EventStorage {
 
     void updateEvent(Event event) throws OXException;
 
-    void deleteEvent(int objectID) throws OXException;
+    void deleteEvent(String objectID) throws OXException;
 
     void insertTombstoneEvent(Event event) throws OXException;
 

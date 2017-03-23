@@ -63,9 +63,9 @@ import java.util.SortedSet;
  */
 public class Event {
 
-    private int id;
-    private int folderId;
-    private int publicFolderId;
+    private String id;
+    private String folderId;
+    private String publicFolderId;
     private String uid;
     private String filename;
 
@@ -89,7 +89,7 @@ public class Event {
     private boolean allDay;
     private Transp transp;
 
-    private int seriesId;
+    private String seriesId;
     private String recurrenceRule;
     private RecurrenceId recurrenceId;
     private SortedSet<RecurrenceId> changeExceptionDates;
@@ -127,7 +127,7 @@ public class Event {
      *
      * @return The object identifier
      */
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -136,7 +136,7 @@ public class Event {
      *
      * @param value The object identifier to set
      */
-    public void setId(int value) {
+    public void setId(String value) {
         id = value;
         setFields.add(EventField.ID);
     }
@@ -145,7 +145,7 @@ public class Event {
      * Removes the object identifier of the event.
      */
     public void removeId() {
-        id = 0;
+        id = null;
         setFields.remove(EventField.ID);
     }
 
@@ -163,7 +163,7 @@ public class Event {
      *
      * @return The folder identifier
      */
-    public int getFolderId() {
+    public String getFolderId() {
         return folderId;
     }
 
@@ -172,7 +172,7 @@ public class Event {
      *
      * @param value The folder identifier to set
      */
-    public void setFolderId(int value) {
+    public void setFolderId(String value) {
         folderId = value;
         setFields.add(EventField.FOLDER_ID);
     }
@@ -181,7 +181,7 @@ public class Event {
      * Removes the folder identifier of the event.
      */
     public void removeFolderId() {
-        folderId = 0;
+        folderId = null;
         setFields.remove(EventField.FOLDER_ID);
     }
 
@@ -199,7 +199,7 @@ public class Event {
      *
      * @return The public folder identifier
      */
-    public int getPublicFolderId() {
+    public String getPublicFolderId() {
         return publicFolderId;
     }
 
@@ -208,7 +208,7 @@ public class Event {
      *
      * @param value The public folder identifier to set
      */
-    public void setPublicFolderId(int value) {
+    public void setPublicFolderId(String value) {
         publicFolderId = value;
         setFields.add(EventField.PUBLIC_FOLDER_ID);
     }
@@ -217,7 +217,7 @@ public class Event {
      * Removes the public folder identifier of the event.
      */
     public void removePublicFolderId() {
-        publicFolderId = 0;
+        publicFolderId = null;
         setFields.remove(EventField.PUBLIC_FOLDER_ID);
     }
 
@@ -928,7 +928,7 @@ public class Event {
      *
      * @return The series identifier
      */
-    public int getSeriesId() {
+    public String getSeriesId() {
         return seriesId;
     }
 
@@ -937,7 +937,7 @@ public class Event {
      *
      * @param value The series identifier to set
      */
-    public void setSeriesId(int value) {
+    public void setSeriesId(String value) {
         seriesId = value;
         setFields.add(EventField.SERIES_ID);
     }
@@ -946,7 +946,7 @@ public class Event {
      * Removes the series identifier of the event.
      */
     public void removeSeriesId() {
-        seriesId = 0;
+        seriesId = null;
         setFields.remove(EventField.SERIES_ID);
     }
 

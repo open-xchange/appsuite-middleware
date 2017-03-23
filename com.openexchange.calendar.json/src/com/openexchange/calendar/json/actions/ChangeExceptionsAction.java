@@ -71,7 +71,6 @@ import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
-
 /**
  * {@link ChangeExceptionsAction}
  *
@@ -119,9 +118,9 @@ public class ChangeExceptionsAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
-        List<Event> events = session.getCalendarService().getChangeExceptions(session, folderID, objectID);
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
+        List<Event> events = session.getCalendarService().getChangeExceptions(session, folderId, objectId);
         return getAppointmentResultWithTimestamp(session, events);
     }
 

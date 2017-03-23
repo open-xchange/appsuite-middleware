@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.compat;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -71,6 +70,7 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 
@@ -287,7 +287,7 @@ public class Event2Appointment {
                     if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
                         if (Strings.isNotEmpty(trigger.getDuration())) {
                             long triggerDuration = AlarmUtils.getTriggerDuration(trigger.getDuration());
-                            return I((int) TimeUnit.MILLISECONDS.toMinutes(triggerDuration * -1));
+                            return Autoboxing.I((int) TimeUnit.MILLISECONDS.toMinutes(triggerDuration * -1));
                         }
                     }
                 }
@@ -365,6 +365,56 @@ public class Event2Appointment {
             recurrenceDatePositions.add(getRecurrenceDatePosition(recurrenceID));
         }
         return recurrenceDatePositions;
+    }
+
+    /**
+     * Parses the supplied identifier to its numerical integer value.
+     *
+     * @param id The identifier to get the integer value for
+     * @return The integer value of the supplied identifier.
+     * @throws NumberFormatException
+     */
+    public static int asInt(String id) {
+        return Integer.parseInt(id);
+    }
+
+    /**
+     * Parses the supplied identifier to its numerical integer value.
+     *
+     * @param id The identifier to get the integer value for
+     * @return The integer value of the supplied identifier.
+     * @throws NumberFormatException
+     */
+    public static Integer asInteger(String id) {
+        return null != id ? Integer.valueOf(id) : null;
+    }
+
+    /**
+     * Parses the supplied identifier to its numerical integer value.
+     *
+     * @param id The identifier to get the integer value for
+     * @param zeroForNull <code>true</code> to return the value <code>0</code> for an id <code>null</code>, <code>false</code>, otherwise
+     * @return The integer value of the supplied identifier.
+     * @throws NumberFormatException
+     */
+    public static int asInt(String id, boolean zeroForNull) {
+        return null == id && zeroForNull ? 0 : Integer.parseInt(id);
+    }
+
+    /**
+     * Parses the supplied identifier to its numerical integer value.
+     *
+     * @param id The identifier to get the integer value for
+     * @param zeroForNull <code>true</code> to return the value <code>0</code> for an id <code>null</code>, <code>false</code>, otherwise
+     * @return The integer value of the supplied identifier.
+     * @throws NumberFormatException
+     */
+    public static Integer asInteger(String id, boolean zeroForNull) {
+        if (null == id) {
+            return zeroForNull ? Integer.valueOf(0) : null;
+        } else {
+            return Integer.valueOf(id);
+        }
     }
 
     /**

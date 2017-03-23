@@ -95,8 +95,8 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
-    public int getDefaultFolderID(int userID) throws OXException {
-        return getFolderAccess().getDefaultFolderID(userID, FolderObject.CALENDAR);
+    public String getDefaultFolderID(int userID) throws OXException {
+        return String.valueOf(getFolderAccess().getDefaultFolderID(userID, FolderObject.CALENDAR));
     }
 
     @Override

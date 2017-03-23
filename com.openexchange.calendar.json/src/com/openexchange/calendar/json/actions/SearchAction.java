@@ -216,7 +216,7 @@ public final class SearchAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         JSONObject jsonObject = request.getData();
-        int[] folderIDs = jsonObject.has(AJAXServlet.PARAMETER_INFOLDER) ? new int[] { jsonObject.getInt(AJAXServlet.PARAMETER_INFOLDER) } : null;
+        String[] folderIDs = jsonObject.has(AJAXServlet.PARAMETER_INFOLDER) ? new String[] { jsonObject.getString(AJAXServlet.PARAMETER_INFOLDER) } : null;
         String pattern = jsonObject.optString(SearchFields.PATTERN);
         List<Event> events = session.getCalendarService().searchEvents(session, folderIDs, pattern);
         return getAppointmentResultWithTimestamp(session, events);

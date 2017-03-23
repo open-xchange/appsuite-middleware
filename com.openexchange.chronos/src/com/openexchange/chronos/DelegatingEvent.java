@@ -79,12 +79,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public int getId() {
+    public String getId() {
         return delegate.getId();
     }
 
     @Override
-    public void setId(int value) {
+    public void setId(String value) {
         delegate.setId(value);
     }
 
@@ -99,12 +99,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public int getFolderId() {
+    public String getFolderId() {
         return delegate.getFolderId();
     }
 
     @Override
-    public void setFolderId(int value) {
+    public void setFolderId(String value) {
         delegate.setFolderId(value);
     }
 
@@ -119,12 +119,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public int getPublicFolderId() {
+    public String getPublicFolderId() {
         return delegate.getPublicFolderId();
     }
 
     @Override
-    public void setPublicFolderId(int value) {
+    public void setPublicFolderId(String value) {
         delegate.setPublicFolderId(value);
     }
 
@@ -504,12 +504,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public int getSeriesId() {
+    public String getSeriesId() {
         return delegate.getSeriesId();
     }
 
     @Override
-    public void setSeriesId(int value) {
+    public void setSeriesId(String value) {
         delegate.setSeriesId(value);
     }
 

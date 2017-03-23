@@ -68,7 +68,7 @@ public interface AttendeeStorage {
      * @param objectID The identifier of the event to load the attendees for
      * @return The attendees
      */
-    List<Attendee> loadAttendees(int objectID) throws OXException;
+    List<Attendee> loadAttendees(String objectID) throws OXException;
 
     /**
      * Loads the attendees for specific events.
@@ -76,7 +76,7 @@ public interface AttendeeStorage {
      * @param objectIDs The identifiers of the events to load the attendees for
      * @return The attendees, mapped to the identifiers of the corresponding events
      */
-    Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs) throws OXException;
+    Map<String, List<Attendee>> loadAttendees(String[] objectIDs) throws OXException;
 
     /**
      * Loads the attendees for specific events.
@@ -86,20 +86,20 @@ public interface AttendeeStorage {
      *            or <code>null</code> to not filter by internal/external
      * @return The attendees, mapped to the identifiers of the corresponding events
      */
-    Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs, Boolean internal) throws OXException;
+    Map<String, List<Attendee>> loadAttendees(String[] objectIDs, Boolean internal) throws OXException;
 
-    void deleteAttendees(int objectID) throws OXException;
+    void deleteAttendees(String objectID) throws OXException;
 
-    void deleteAttendees(int objectID, List<Attendee> attendees) throws OXException;
+    void deleteAttendees(String objectID, List<Attendee> attendees) throws OXException;
 
-    void insertAttendees(int objectID, List<Attendee> attendees) throws OXException;
+    void insertAttendees(String objectID, List<Attendee> attendees) throws OXException;
 
-    void updateAttendees(int objectID, List<Attendee> attendees) throws OXException;
+    void updateAttendees(String objectID, List<Attendee> attendees) throws OXException;
 
-    void updateAttendee(int objectID, Attendee attendee) throws OXException;
+    void updateAttendee(String objectID, Attendee attendee) throws OXException;
 
-    void insertTombstoneAttendees(int objectID, List<Attendee> attendees) throws OXException;
+    void insertTombstoneAttendees(String objectID, List<Attendee> attendees) throws OXException;
 
-    void insertTombstoneAttendee(int objectID, Attendee attendee) throws OXException;
+    void insertTombstoneAttendee(String objectID, Attendee attendee) throws OXException;
 
 }

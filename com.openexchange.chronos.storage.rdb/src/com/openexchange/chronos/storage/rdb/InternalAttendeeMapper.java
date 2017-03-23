@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.compat.Appointment2Event.asString;
+import static com.openexchange.chronos.compat.Event2Appointment.asInteger;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.EnumMap;
@@ -150,7 +152,7 @@ public class InternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
 
             @Override
             public void set(Attendee attendee, Integer value) {
-                attendee.setFolderID(null == value ? 0 : i(value));
+                attendee.setFolderID(asString(value));
             }
 
             @Override
@@ -160,7 +162,7 @@ public class InternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
 
             @Override
             public Integer get(Attendee attendee) {
-                return I(attendee.getFolderID());
+                return asInteger(attendee.getFolderID());
             }
 
             @Override

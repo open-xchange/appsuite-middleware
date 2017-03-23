@@ -65,7 +65,7 @@ public class Attendee extends CalendarUser {
     private ParticipationStatus partStat;
     private String comment;
     private Boolean rsvp;
-    private int folderId;
+    private String folderId;
     private String member;
 
     private final EnumSet<AttendeeField> setFields;
@@ -434,7 +434,7 @@ public class Attendee extends CalendarUser {
      *
      * @return The identifier of the folder where the event is located in
      */
-    public int getFolderID() {
+    public String getFolderID() {
         return folderId;
     }
 
@@ -443,7 +443,7 @@ public class Attendee extends CalendarUser {
      *
      * @param value The identifier of the folder where the event is located in to set
      */
-    public void setFolderID(int value) {
+    public void setFolderID(String value) {
         folderId = value;
         setFields.add(AttendeeField.FOLDER_ID);
     }
@@ -452,7 +452,7 @@ public class Attendee extends CalendarUser {
      * Removes the identifier of the folder where the event is located in of the attendee.
      */
     public void removeFolderID() {
-        folderId = 0;
+        folderId = null;
         setFields.remove(AttendeeField.FOLDER_ID);
     }
 

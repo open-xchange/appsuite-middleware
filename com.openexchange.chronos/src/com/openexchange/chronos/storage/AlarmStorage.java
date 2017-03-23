@@ -69,7 +69,7 @@ public interface AlarmStorage {
 
     List<Alarm> loadAlarms(Event event, int userID) throws OXException;
 
-    Map<Integer, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException;
+    Map<String, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException;
 
     void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException;
 
@@ -78,7 +78,7 @@ public interface AlarmStorage {
      *
      * @param objectID The identifier of the event to remove the alarms for
      */
-    void deleteAlarms(int objectID) throws OXException;
+    void deleteAlarms(String objectID) throws OXException;
 
     /**
      * Deletes all alarms of a user stored for a specific event.
@@ -86,7 +86,7 @@ public interface AlarmStorage {
      * @param objectID The identifier of the event to remove the alarms for
      * @param userID The identifier of the user to remove the alarms for
      */
-    void deleteAlarms(int objectID, int userID) throws OXException;
+    void deleteAlarms(String objectID, int userID) throws OXException;
 
     /**
      * Deletes all alarms of multiple users stored for a specific event.
@@ -94,6 +94,6 @@ public interface AlarmStorage {
      * @param objectID The identifier of the event to remove the alarms for
      * @param userIDs The identifiers of the users to remove the alarms for
      */
-    void deleteAlarms(int objectID, int[] userIDs) throws OXException;
+    void deleteAlarms(String objectID, int[] userIDs) throws OXException;
 
 }

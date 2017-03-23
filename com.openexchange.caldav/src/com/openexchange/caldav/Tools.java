@@ -196,7 +196,7 @@ public class Tools {
             metadata.setFolderId(parse(eventResource.getParent().getFolder().getID()));
         }
         if (null != event) {
-            metadata.setAttachedId(event.getId());
+            metadata.setAttachedId(parse(event.getId()));
         }
         if (null != attachment.getFormatType()) {
             metadata.setFileMIMEType(attachment.getFormatType());

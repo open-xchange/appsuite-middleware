@@ -52,6 +52,8 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.chronos.common.AlarmUtils.filter;
 import static com.openexchange.chronos.common.AlarmUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.compat.Appointment2Event.asString;
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
@@ -116,7 +118,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public List<Alarm> loadAlarms(Event event, int userID) throws OXException {
-        return loadAlarms(Collections.singletonList(event), userID).get(I(event.getId()));
+        return loadAlarms(Collections.singletonList(event), userID).get(event.getId());
     }
 
     @Override
@@ -125,7 +127,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            Map<Integer, ReminderData> remindersByUserID = selectReminders(connection, context.getContextId(), event.getId());
+            Map<Integer, ReminderData> remindersByUserID = selectReminders(connection, context.getContextId(), asInt(event.getId()));
             for (Map.Entry<Integer, ReminderData> entry : remindersByUserID.entrySet()) {
                 List<Alarm> alarms = getAlarms(event, i(entry.getKey()), entry.getValue());
                 if (null != alarms) {
@@ -141,14 +143,14 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public Map<Integer, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException {
-        Map<Integer, Event> eventsByID = CalendarUtils.getEventsByID(events);
-        Map<Integer, List<Alarm>> alarmsByEventID = new HashMap<Integer, List<Alarm>>(eventsByID.size());
+    public Map<String, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException {
+        Map<String, Event> eventsByID = CalendarUtils.getEventsByID(events);
+        Map<String, List<Alarm>> alarmsByEventID = new HashMap<String, List<Alarm>>(eventsByID.size());
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            Map<Integer, ReminderData> remindersByID = selectReminders(connection, context.getContextId(), eventsByID.keySet(), userID);
-            for (Map.Entry<Integer, ReminderData> entry : remindersByID.entrySet()) {
+            Map<String, ReminderData> remindersByID = selectReminders(connection, context.getContextId(), eventsByID.keySet(), userID);
+            for (Map.Entry<String, ReminderData> entry : remindersByID.entrySet()) {
                 List<Alarm> alarms = getAlarms(eventsByID.get(entry.getKey()), userID, entry.getValue());
                 if (null != alarms) {
                     alarmsByEventID.put(entry.getKey(), alarms);
@@ -189,11 +191,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            ReminderData originalReminder = selectReminder(connection, context.getContextId(), event.getId(), userID);
+            ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
             ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
             if (null == updatedReminder) {
-                updated += deleteReminderMinutes(connection, context.getContextId(), event.getId(), new int[] { userID });
-                updated += deleteReminderTriggers(connection, context.getContextId(), event.getId(), new int[] { userID });
+                updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
             } else {
                 updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
                 updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
@@ -207,12 +209,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void deleteAlarms(int eventID, int userID) throws OXException {
+    public void deleteAlarms(String eventID, int userID) throws OXException {
         deleteAlarms(eventID, new int[] { userID });
     }
 
     @Override
-    public void deleteAlarms(int eventID, int[] userIDs) throws OXException {
+    public void deleteAlarms(String eventID, int[] userIDs) throws OXException {
         if (null == userIDs || 0 == userIDs.length) {
             return;
         }
@@ -221,8 +223,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += deleteReminderMinutes(connection, context.getContextId(), eventID, userIDs);
-            updated += deleteReminderTriggers(connection, context.getContextId(), eventID, userIDs);
+            updated += deleteReminderMinutes(connection, context.getContextId(), asInt(eventID), userIDs);
+            updated += deleteReminderTriggers(connection, context.getContextId(), asInt(eventID), userIDs);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -232,14 +234,14 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void deleteAlarms(int eventID) throws OXException {
+    public void deleteAlarms(String eventID) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += deleteReminderMinutes(connection, context.getContextId(), eventID);
-            updated += deleteReminderTriggers(connection, context.getContextId(), eventID);
+            updated += deleteReminderMinutes(connection, context.getContextId(), asInt(eventID));
+            updated += deleteReminderTriggers(connection, context.getContextId(), asInt(eventID));
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -378,8 +380,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static Map<Integer, ReminderData> selectReminders(Connection connection, int contextID, Collection<Integer> eventIDs, int userID) throws SQLException, OXException {
-        Map<Integer, ReminderData> remindersByID = new HashMap<Integer, ReminderData>(eventIDs.size());
+    private static Map<String, ReminderData> selectReminders(Connection connection, int contextID, Collection<String> eventIDs, int userID) throws SQLException, OXException {
+        Map<String, ReminderData> remindersByID = new HashMap<String, ReminderData>(eventIDs.size());
         String sql = new StringBuilder()
             .append("SELECT m.object_id,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
             .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
@@ -389,12 +391,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, userID);
-            for (Integer eventID : eventIDs) {
-                stmt.setInt(parameterIndex++, i(eventID));
+            for (String eventID : eventIDs) {
+                stmt.setInt(parameterIndex++, asInt(eventID));
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    Integer eventID = I(resultSet.getInt("m.object_id"));
+                    String eventID = asString(resultSet.getInt("m.object_id"));
                     ReminderData reminder = readReminder(resultSet);
                     if (null != reminder) {
                         remindersByID.put(eventID, reminder);
@@ -436,18 +438,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(1, contextID);
             stmt.setInt(2, IDGenerator.getId(contextID, Types.REMINDER, connection));
             stmt.setLong(3, System.currentTimeMillis());
-            stmt.setInt(4, event.getId());
+            stmt.setInt(4, asInt(event.getId()));
             stmt.setInt(5, Types.APPOINTMENT);
             stmt.setInt(6, userID);
             stmt.setTimestamp(7, new Timestamp(reminder.nextTriggerTime));
             stmt.setInt(8, isSeriesMaster(event) ? 1 : 0);
-            stmt.setInt(9, event.getFolderId());
+            stmt.setInt(9, asInt(event.getFolderId()));
             updated += logExecuteUpdate(stmt);
         }
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
             stmt.setInt(1, reminder.reminderMinutes);
             stmt.setInt(2, contextID);
-            stmt.setInt(3, event.getId());
+            stmt.setInt(3, asInt(event.getId()));
             stmt.setInt(4, userID);
             updated += logExecuteUpdate(stmt);
         }
@@ -462,16 +464,16 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(1, contextID);
             stmt.setInt(2, IDGenerator.getId(contextID, Types.REMINDER, connection));
             stmt.setLong(3, System.currentTimeMillis());
-            stmt.setInt(4, event.getId());
+            stmt.setInt(4, asInt(event.getId()));
             stmt.setInt(5, REMINDER_MODULE);
             stmt.setInt(6, userID);
             stmt.setTimestamp(7, new Timestamp(triggerTime));
             stmt.setInt(8, isSeriesMaster(event) ? 1 : 0);
-            stmt.setInt(9, event.getFolderId());
+            stmt.setInt(9, asInt(event.getFolderId()));
             stmt.setLong(10, System.currentTimeMillis());
             stmt.setTimestamp(11, new Timestamp(triggerTime));
             stmt.setInt(12, isSeriesMaster(event) ? 1 : 0);
-            stmt.setInt(13, event.getFolderId());
+            stmt.setInt(13, asInt(event.getFolderId()));
             return logExecuteUpdate(stmt);
         }
     }
@@ -480,7 +482,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
             stmt.setInt(1, reminderMinutes);
             stmt.setInt(2, contextID);
-            stmt.setInt(3, event.getId());
+            stmt.setInt(3, asInt(event.getId()));
             stmt.setInt(4, userID);
             return logExecuteUpdate(stmt);
         }

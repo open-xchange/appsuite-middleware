@@ -349,7 +349,7 @@ public class Utils {
      * @return The folder identifier
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}
      */
-    public static int i(UserizedFolder folder) throws OXException {
+    private static int i(UserizedFolder folder) throws OXException {
         try {
             return Integer.parseInt(folder.getID());
         } catch (NumberFormatException e) {
@@ -435,7 +435,7 @@ public class Utils {
          */
         if (isClassifiedFor(event, session.getUser().getId())) {
             if (false == includeClassified || Classification.PRIVATE.equals(event.getClassification())) {
-                return true; // exclude foreign events classified as 'confidential' as requested  
+                return true; // exclude foreign events classified as 'confidential' as requested
             }
             if (Classification.PRIVATE.equals(event.getClassification())) {
                 return true; // always exclude foreign events classified as 'private'
@@ -506,14 +506,14 @@ public class Utils {
      * @return The folder identifier
      * @throws OXException - {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND} in case there's no static parent folder and the supplied user is no attendee
      */
-    public static int getFolderView(CalendarStorage storage, Event event, int calendarUser) throws OXException {
-        if (0 < event.getPublicFolderId()) {
+    public static String getFolderView(CalendarStorage storage, Event event, int calendarUser) throws OXException {
+        if (null != event.getPublicFolderId()) {
             return event.getPublicFolderId();
         } else {
             Attendee userAttendee = CalendarUtils.find(
                 event.containsAttendees() ? event.getAttendees() : storage.getAttendeeStorage().loadAttendees(event.getId()), calendarUser);
-            if (null == userAttendee || 0 >= userAttendee.getFolderID()) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), I(event.getId()));
+            if (null == userAttendee || null == userAttendee.getFolderID()) {
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
             }
             return userAttendee.getFolderID();
         }
@@ -526,10 +526,10 @@ public class Utils {
      * @param objectID The object identifier of the event to search
      * @return The event, or <code>null</code> if not found
      */
-    public static Event find(Collection<Event> events, int objectID) {
+    public static Event find(Collection<Event> events, String objectID) {
         if (null != events) {
             for (Event event : events) {
-                if (event.getId() == objectID) {
+                if (objectID.equals(event.getId())) {
                     return event;
                 }
             }
@@ -545,10 +545,10 @@ public class Utils {
      * @param recurrenceID The rcurrence identifier of the event to search
      * @return The event, or <code>null</code> if not found
      */
-    public static Event find(Collection<Event> events, int objectID, RecurrenceId recurrenceID) {
+    public static Event find(Collection<Event> events, String objectID, RecurrenceId recurrenceID) {
         if (null != events) {
             for (Event event : events) {
-                if (event.getId() == objectID) {
+                if (objectID.equals(event.getId())) {
                     if (null == recurrenceID || recurrenceID.equals(event.getRecurrenceId())) {
                         return event;
                     }
@@ -609,10 +609,10 @@ public class Utils {
      */
     public static boolean isInFolder(Event event, UserizedFolder folder) throws OXException {
         if (PublicType.getInstance().equals(folder.getType())) {
-            return event.getPublicFolderId() == i(folder);
+            return folder.getID().equals(event.getPublicFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            return null != userAttendee && userAttendee.getFolderID() == i(folder);
+            return null != userAttendee && folder.getID().equals(userAttendee.getFolderID());
         }
     }
 
@@ -623,13 +623,13 @@ public class Utils {
      * @param folderID The identifier of the folder to get
      * @return The folder
      */
-    public static UserizedFolder getFolder(CalendarSession session, int folderID) throws OXException {
+    public static UserizedFolder getFolder(CalendarSession session, String folderID) throws OXException {
         try {
-            return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), initDecorator(session));
+            return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, folderID, session.getSession(), initDecorator(session));
         } catch (OXException e) {
             if ("FLD-0003".equals(e.getErrorCode())) {
                 // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
-                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, I(folderID));
+                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderID);
             }
             throw e;
         }
@@ -651,23 +651,23 @@ public class Utils {
      */
     public static List<Event> loadAdditionalEventData(CalendarStorage storage, int userID, List<Event> events, EventField[] fields) throws OXException {
         if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS) || contains(fields, EventField.ALARMS))) {
-            int[] objectIDs = getObjectIDs(events);
+            String[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
-                Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs);
+                Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs);
                 for (Event event : events) {
-                    event.setAttendees(attendeesById.get(I(event.getId())));
+                    event.setAttendees(attendeesById.get(event.getId()));
                 }
             }
             if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
-                Map<Integer, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
+                Map<String, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
                 for (Event event : events) {
-                    event.setAttachments(attachmentsById.get(I(event.getId())));
+                    event.setAttachments(attachmentsById.get(event.getId()));
                 }
             }
             if (0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
-                Map<Integer, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(events, userID);
+                Map<String, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(events, userID);
                 for (Event event : events) {
-                    event.setAlarms(alarmsById.get(I(event.getId())));
+                    event.setAlarms(alarmsById.get(event.getId()));
                 }
             }
         }
@@ -723,7 +723,7 @@ public class Utils {
             return seriesMaster;
         }
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, I(seriesMaster.getSeriesId())))
+            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesMaster.getSeriesId()))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
         ;
         List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, getFields((EventField[]) null));
