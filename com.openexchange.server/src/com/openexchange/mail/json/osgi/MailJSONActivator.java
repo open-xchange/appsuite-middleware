@@ -246,7 +246,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(), properties);
+            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(this), properties);
         }
 
         {

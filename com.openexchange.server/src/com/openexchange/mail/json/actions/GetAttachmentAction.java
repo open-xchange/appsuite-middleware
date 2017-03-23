@@ -529,6 +529,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             // Get attachment storage
             MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
 
+
             if (!session.getUserPermissionBits().hasInfostore()) {
                 throw MailExceptionCode.NO_MAIL_ACCESS.create();
             }
@@ -586,6 +587,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 String description = parsedFile.getDescription();
                 if (null != description) {
                     storeProps.put("description", description);
+                }
+            }
+
+            {
+                //Check for encryption
+                final boolean encrypt = req.optBool("encrypt");
+                if(encrypt) {
+                    storeProps.put("encrypt", true);
                 }
             }
 
