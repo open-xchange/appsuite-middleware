@@ -146,6 +146,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     changeExceptions[i] = patch(changeExceptions[i]);
                 }
             }
+            anonymizeAsNeeded(changeExceptions);
         }
         return changeExceptions;
     }
@@ -162,6 +163,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             CalendarDataObject cdo = 0 < appointment.getParentFolderID() ?
                 factory.getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
                     factory.getAppointmentInterface().getObjectById(appointment.getObjectID());
+            anonymizeAsNeeded(cdo);
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
             throw protocolException(e);
