@@ -2,28 +2,7 @@
 title: Hazelcast
 ---
 
-This page shows a basic set of properties needed to set up a
-cluster of multiple backend nodes based on the underlying hazelcast library.
-Unless otherwise mentioned, all nodes in the cluster should be configured
-equally.
-
-If this is a single-node installation, there's  no need to change anything
-and the default configuration can be used. When setting up a cluster of
-multiple backend nodes, at least the following parameters should be
-configured additionally:
-- com.openexchange.hazelcast.group.name
-- com.openexchange.hazelcast.group.password
-- com.openexchange.hazelcast.network.join (including join-specific options)
-- com.openexchange.hazelcast.network.interfaces
-
-For more advanced configurations, one may additionally place a file named
-"hazelcast.xml" into the "hazelcast" subfolder that will be used as a basis
-for all further configurations applied.
-See http://www.hazelcast.com/docs/2.6/manual/single_html/ for details.
-
-The distributed data structures should be configured separately in their own
-configuration files in the "hazelcast" subfolder.
-
+This page shows all properties with the tag: Hazelcast
 
 | __Key__ | com.openexchange.hazelcast.enabled |
 |:----------------|:--------|

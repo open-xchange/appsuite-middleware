@@ -31,6 +31,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Dropbox.html">Dropbox</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/EAS.html">EAS</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Find.html">Find</a>
@@ -39,6 +40,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Group.html">Group</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Halo.html">Halo</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/JSON.html">JSON</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>
@@ -55,6 +57,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Provisioning.html">Provisioning</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Reseller.html">Reseller</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Rest.html">Rest</a>

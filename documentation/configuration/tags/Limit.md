@@ -243,6 +243,16 @@ This page shows all properties with the tag: Limit
 | __File__ | attachment.properties |
 
 ---
+| __Key__ | com.openexchange.hazelcast.maxOperationTimeout |
+|:----------------|:--------|
+| __Description__ | Specifies the implicit maximum operation timeout in milliseconds for<br>operations on distributed data structures, if no explicit timeout is<br>specified for an operation.<br> |
+| __Default__ | 30000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | hazelcast.properties |
+
+---
 | __Key__ | MAX_PRE_FETCH |
 |:----------------|:--------|
 | __Description__ | By enabling the option CACHED_ITERATOR_FAST_FETCH you<br>can define the numbers of pre fetched results with<br>the parameter MAX_PRE_FETCH.<br><br>This means that MAX_PRE_FETCH results are gathered in one<br>SQL query instead of MAX_PRE_FETCH single SQL queries.<br>Normally higher values result in more performance if this<br>option is enabled.<br> |
