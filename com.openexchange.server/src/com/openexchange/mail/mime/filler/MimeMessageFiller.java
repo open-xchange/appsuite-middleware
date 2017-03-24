@@ -1751,6 +1751,7 @@ public class MimeMessageFiller {
                                 ImageLocation il;
                                 try {
                                     il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                                    if (mail.hasSecuritySettings()) il.setAuth(mail.getSecuritySettings().getAuthentication());
                                 } catch (final IllegalArgumentException e) {
                                     final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
                                     srcMatcher.appendReplacement(bblankImageTag, "");
