@@ -47,48 +47,26 @@
  *
  */
 
-package com.openexchange.client.onboarding.eas.osgi;
+package com.openexchange.client.onboarding.carddav.custom;
 
-import com.openexchange.client.onboarding.OnboardingProvider;
-import com.openexchange.client.onboarding.eas.EASOnboardingProvider;
-import com.openexchange.client.onboarding.eas.custom.CustomLoginSource;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link OnboardingEASActivator}
+ * {@link CustomLoginSource} provides the CardDAV login name to use for the CardDAV client on-boarding provider.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class OnboardingEASActivator extends HousekeepingActivator {
+public interface CustomLoginSource {
 
     /**
-     * Initializes a new {@link OnboardingEASActivator}.
+     * Provides the CardDAV login.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The CardDAV login
+     * @throws OXException If the CardDAV login cannot be returned
      */
-    public OnboardingEASActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<CustomLoginSource> loginSources = new RankingAwareNearRegistryServiceTracker<>(context, CustomLoginSource.class);
-        rememberTracker(loginSources);
-        openTrackers();
-
-        registerService(OnboardingProvider.class, new EASOnboardingProvider(loginSources, this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-    }
+    String getCardDAVLogin(int userId, int contextId) throws OXException;
 
 }
