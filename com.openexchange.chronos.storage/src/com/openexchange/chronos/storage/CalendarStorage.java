@@ -51,7 +51,6 @@ package com.openexchange.chronos.storage;
 
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link CalendarStorage}
@@ -70,13 +69,6 @@ public interface CalendarStorage {
      * @return The next object identifier
      */
     String nextObjectID() throws OXException;
-
-    /**
-     * Gets the context the storage is operating on.
-     *
-     * @return The context
-     */
-    Context getContext();
 
     /**
      * Gets the event storage.

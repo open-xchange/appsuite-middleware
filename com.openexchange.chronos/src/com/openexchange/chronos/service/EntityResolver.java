@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -120,9 +121,17 @@ public interface EntityResolver {
      * Gets the default timezone configured for a specific user.
      *
      * @param userID The identifier of the user to get the timezone for
-     * @return The timezonee
+     * @return The timezone
      */
     TimeZone getTimeZone(int userID) throws OXException;;
+
+    /**
+     * Gets the locale configured for a specific user.
+     *
+     * @param userID The identifier of the user to get the locale for
+     * @return The locale
+     */
+    Locale getLocale(int userID) throws OXException;
 
     /**
      * Tracks newly added attendees from creations and updates found in the supplied calendar result.

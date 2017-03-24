@@ -60,6 +60,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link StorageOperation}
@@ -75,15 +77,17 @@ public abstract class StorageOperation<T> {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageOperation.class);
 
     private final CalendarSession session;
+    private final Context context;
 
     /**
      * Initializes a new {@link StorageOperation}.
      *
      * @param session The server session
      */
-    public StorageOperation(CalendarSession session) {
+    public StorageOperation(CalendarSession session) throws OXException {
         super();
         this.session = session;
+        this.context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
     }
 
     /**
@@ -97,11 +101,11 @@ public abstract class StorageOperation<T> {
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         Connection writeConnection = null;
         try {
-            writeConnection = dbService.getWritable(session.getContext());
+            writeConnection = dbService.getWritable(context);
             writeConnection.setAutoCommit(false);
             SimpleDBProvider dbProvider = new SimpleDBProvider(writeConnection, writeConnection);
             session.set(PARAM_CONNECTION, writeConnection);
-            CalendarStorage storage = storageFactory.create(session.getContext(), session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+            CalendarStorage storage = storageFactory.create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
             T result = execute(session, storage);
             writeConnection.commit();
             committed = true;
@@ -114,10 +118,10 @@ public abstract class StorageOperation<T> {
                 if (false == committed) {
                     rollback(writeConnection);
                     autocommit(writeConnection);
-                    dbService.backWritableAfterReading(session.getContext(), writeConnection);
+                    dbService.backWritableAfterReading(context, writeConnection);
                 } else {
                     autocommit(writeConnection);
-                    dbService.backWritable(session.getContext(), writeConnection);
+                    dbService.backWritable(context, writeConnection);
                 }
             }
         }
@@ -133,15 +137,15 @@ public abstract class StorageOperation<T> {
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         Connection readConnection = null;
         try {
-            readConnection = dbService.getReadOnly(session.getContext());
+            readConnection = dbService.getReadOnly(context);
             SimpleDBProvider dbProvider = new SimpleDBProvider(readConnection, null);
             session.set(PARAM_CONNECTION, readConnection);
-            CalendarStorage storage = storageFactory.create(session.getContext(), session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+            CalendarStorage storage = storageFactory.create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
             return execute(session, storage);
         } finally {
             session.set(PARAM_CONNECTION, null);
             if (null != readConnection) {
-                dbService.backReadOnly(session.getContext(), readConnection);
+                dbService.backReadOnly(context, readConnection);
             }
         }
     }

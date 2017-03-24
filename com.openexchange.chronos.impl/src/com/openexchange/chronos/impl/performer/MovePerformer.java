@@ -134,7 +134,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
          */
         Check.eventIsInFolder(originalEvent, folder);
         requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
+        if (session.getUserId() == originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, DELETE_OWN_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
@@ -236,7 +236,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
             }
             updateAttendeeFolderId(originalEvent.getId(), originalAttendee, targetFolder.getID());
             updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), targetFolder.getID());
-        } else if (calendarUser.getId() == session.getUser().getId()) {
+        } else if (calendarUser.getId() == session.getUserId()) {
             /*
              * move from user's own calendar to another one ("reassign"), remove the original default user and
              * ensure that the target calendar user becomes attendee

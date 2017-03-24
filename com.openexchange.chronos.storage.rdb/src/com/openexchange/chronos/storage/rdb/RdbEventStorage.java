@@ -70,7 +70,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.service.EntityResolver;
@@ -82,9 +81,7 @@ import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.search.SearchTerm;
 
@@ -209,22 +206,6 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
-        }
-    }
-
-    @Override
-    public String nextObjectID() throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            if (connection.getAutoCommit()) {
-                throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
-            }
-            return Appointment2Event.asString(IDGenerator.getId(context, Types.APPOINTMENT, connection));
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(connection, 1);
         }
     }
 

@@ -61,11 +61,11 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CalendarConfigImpl}
@@ -100,17 +100,17 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
-    public ParticipationStatus getInitialPartStat(Type folderType, int userID) {
+    public ParticipationStatus getInitialPartStat(int userID, boolean inPublicFolder) {
         Integer defaultStatus = null;
         try {
-            if (PublicType.getInstance().equals(folderType)) {
-                defaultStatus = getUserSettings().getDefaultStatusPublic(session.getContext().getContextId(), userID);
+            if (inPublicFolder) {
+                defaultStatus = getUserSettings().getDefaultStatusPublic(session.getContextId(), userID);
             } else {
-                defaultStatus = getUserSettings().getDefaultStatusPrivate(session.getContext().getContextId(), userID);
+                defaultStatus = getUserSettings().getDefaultStatusPrivate(session.getContextId(), userID);
             }
         } catch (OXException e) {
-            LOG.warn("Error getting default participation status for user {}, type {}, falling back to \"{}\"",
-                I(userID), folderType, ParticipationStatus.NEEDS_ACTION);
+            LOG.warn("Error getting default participation status for user {}, falling back to \"{}\"",
+                I(userID), ParticipationStatus.NEEDS_ACTION);
         }
         return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
     }
@@ -155,9 +155,10 @@ public class CalendarConfigImpl implements CalendarConfig {
         return getConfigValue("com.openexchange.chronos.skipExternalAttendeeURIChecks", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
-    private OXFolderAccess getFolderAccess() {
+    private OXFolderAccess getFolderAccess() throws OXException {
         Connection connection = optConnection();
-        return null != connection ? new OXFolderAccess(connection, session.getContext()) : new OXFolderAccess(session.getContext());
+        Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
+        return null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
     }
 
     private ServerUserSetting getUserSettings() {
@@ -171,7 +172,7 @@ public class CalendarConfigImpl implements CalendarConfig {
 
     private <T> T getConfigValue(String property, Class<T> coerceTo, T defaultValue) {
         try {
-            ConfigView configView = Services.getService(ConfigViewFactory.class, true).getView(session.getUser().getId(), session.getContext().getContextId());
+            ConfigView configView = Services.getService(ConfigViewFactory.class, true).getView(session.getUserId(), session.getContextId());
             return configView.opt(property, coerceTo, defaultValue);
         } catch (OXException e) {
             LOG.warn("Error getting \"{}\", falling back to \"{}\"", property, defaultValue);

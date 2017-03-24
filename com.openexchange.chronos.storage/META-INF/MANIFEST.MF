@@ -1,13 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The chronos API bundle
-Bundle-SymbolicName: com.openexchange.chronos
+Bundle-Name: The API bundle for the chronos storage
+Bundle-SymbolicName: com.openexchange.chronos.storage
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax.fileholder,
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.service,
+ com.openexchange.database.provider,
  com.openexchange.exception,
- com.openexchange.groupware.notify.hostname,
+ com.openexchange.groupware.contexts,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,
@@ -17,12 +19,8 @@ Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.search,
  com.openexchange.search.internal.operands,
  com.openexchange.session,
- com.openexchange.tools.arrays,
- com.openexchange.tools.id,
  javax.mail.internet,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
-Export-Package: com.openexchange.chronos,
- com.openexchange.chronos.exception,
- com.openexchange.chronos.service
+Export-Package: com.openexchange.chronos.storage

@@ -79,11 +79,11 @@ public interface CalendarConfig {
     /**
      * Gets the initial participation status to use for new events in a specific folder.
      *
-     * @param folderType The folder type where the new event is located in
      * @param userID The identifier of the user to get the participation status for
+     * @param inPublicFolder <code>true</code> if the event is located in a <i>public</i> folder, <code>false</code>, otherwise
      * @return The initial participation status, or {@link ParticipationStatus#NEEDS_ACTION} if not defined
      */
-    ParticipationStatus getInitialPartStat(com.openexchange.folderstorage.Type folderType, int userID);
+    ParticipationStatus getInitialPartStat(int userID, boolean inPublicFolder);
 
     /**
      * Gets the configured minimum search pattern length.

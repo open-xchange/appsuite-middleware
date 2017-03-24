@@ -51,7 +51,6 @@ package com.openexchange.chronos.service;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link CalendarResult}
@@ -72,9 +71,9 @@ public interface CalendarResult {
      * Gets the the actual target calendar user based on the folder view the action has been performed in. This is either the current
      * session's user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
      *
-     * @return The actual calendar user
+     * @return The identifier of the actual calendar user
      */
-    User getCalendarUser();
+    int getCalendarUser();
 
     /**
      * Gets the updated server timestamp as used as new/updated last-modification date of the modified data in storage, which is usually

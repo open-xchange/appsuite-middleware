@@ -57,7 +57,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SortOptions;
-import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
 
@@ -122,16 +121,6 @@ public interface EventStorage {
     List<Event> searchOverlappingEvents(Date from, Date until, List<Attendee> attendees, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws OXException;
 
     List<Event> searchOverlappingEvents(Date from, Date until, Attendee attendee, boolean includeTransparent, boolean includeDeclined, SortOptions sortOptions, EventField[] fields) throws OXException;
-
-    /**
-     * Generates the next object unique identifier for inserting new event data.
-     * <p/>
-     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
-     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
-     *
-     * @return The next object identifier
-     */
-    String nextObjectID() throws OXException;
 
     /**
      * Inserts a new event into the database.

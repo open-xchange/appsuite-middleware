@@ -53,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link AttachmentStorage}
@@ -77,7 +77,7 @@ public interface AttachmentStorage {
      * @param eventID The identifier of the event to add the attachments for
      * @param attachments The attachments to add
      */
-    void insertAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException;
+    void insertAttachments(Session session, String folderID, String eventID, List<Attachment> attachments) throws OXException;
 
     /**
      * Loads metadata for all attachments of specific events.
@@ -104,7 +104,7 @@ public interface AttachmentStorage {
      * @param folderID The identifier of the parent folder where the event appears for the acting user
      * @param eventID The identifier of the event to delete the attachments for
      */
-    void deleteAttachments(ServerSession session, String folderID, String eventID) throws OXException;
+    void deleteAttachments(Session session, String folderID, String eventID) throws OXException;
 
     /**
      * Deletes certain attachments of a specific event.
@@ -116,6 +116,6 @@ public interface AttachmentStorage {
      * @param attachments The attachments to delete
      * @param eventID The identifier of the event to delete the attachments for
      */
-    void deleteAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException;
+    void deleteAttachments(Session session, String folderID, String eventID, List<Attachment> attachments) throws OXException;
 
 }

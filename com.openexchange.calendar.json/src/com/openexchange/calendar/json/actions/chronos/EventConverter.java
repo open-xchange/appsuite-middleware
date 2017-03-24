@@ -99,7 +99,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link EventConverter}
@@ -306,7 +306,7 @@ public class EventConverter {
      * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknwon
      * @return The event
      */
-    public Event getEvent(ServerSession session, Appointment appointment, EventID originalEventID) throws OXException {
+    public Event getEvent(Session session, Appointment appointment, EventID originalEventID) throws OXException {
         Event event = new Event();
         RecurrenceData recurrenceData = null;
         if (appointment.containsObjectID()) {
@@ -448,7 +448,7 @@ public class EventConverter {
      * @param event The event to convert
      * @return The appointment
      */
-    public CalendarDataObject getAppointment(ServerSession session, Event event) throws OXException {
+    public CalendarDataObject getAppointment(Session session, Event event) throws OXException {
         CalendarDataObject appointment = new CalendarDataObject();
         RecurrenceData recurrenceData = null;
         if (event.containsId()) {
@@ -752,7 +752,7 @@ public class EventConverter {
      * @param originalPattern The original pattern, or <code>null</code> if not available
      * @return The series pattern, or <code>null</code> if not set
      */
-    private RecurrenceData getRecurrenceData(ServerSession session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
+    private RecurrenceData getRecurrenceData(Session session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
         return getRecurrenceData(services.getService(CalendarService.class).init(session), appointment, originalRecurrenceData);
     }
 
@@ -815,7 +815,7 @@ public class EventConverter {
         if (null == timeZone) {
             timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
             if (null == timeZone) {
-                timeZone = optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
+                timeZone = session.getEntityResolver().getTimeZone(session.getUserId());
             }
         }
 
@@ -945,7 +945,7 @@ public class EventConverter {
      * @param eventID The identifier of the event to get the recurrence data for
      * @return The series pattern, or <code>null</code> if not set
      */
-    private RecurrenceData loadRecurrenceData(ServerSession session, EventID eventID) throws OXException {
+    private RecurrenceData loadRecurrenceData(Session session, EventID eventID) throws OXException {
         return loadRecurrenceData(services.getService(CalendarService.class).init(session), eventID);
     }
 

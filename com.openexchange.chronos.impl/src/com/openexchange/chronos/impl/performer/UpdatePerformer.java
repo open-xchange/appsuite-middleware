@@ -280,7 +280,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * perform update
              */
-            Consistency.setModified(timestamp, eventUpdate.getUpdate(), session.getUser().getId());
+            Consistency.setModified(timestamp, eventUpdate.getUpdate(), session.getUserId());
             storage.getEventStorage().updateEvent(eventUpdate.getUpdate());
             wasUpdated |= true;
         }
@@ -620,7 +620,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = Utils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (false == alarmUpdates.isEmpty()) {
-            if (session.getUser().getId() != calendarUser.getId()) {
+            if (session.getUserId() != calendarUser.getId()) {
                 requireWritePermissions(event);
             }
             storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), updatedAlarms);
@@ -835,12 +835,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             return null;
         }
         EventMapper.getInstance().copy(originalEvent, eventUpdate, EventField.ID);
-        Consistency.setModified(timestamp, eventUpdate, session.getUser().getId());
+        Consistency.setModified(timestamp, eventUpdate, session.getUserId());
         return new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, eventUpdate);
     }
 
     private void requireWritePermissions(Event originalEvent) throws OXException {
-        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
+        if (session.getUserId() == originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
@@ -849,7 +849,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     private void requireWritePermissions(Event originalEvent, List<Attendee> updatedAttendees) throws OXException {
-        if (null != updatedAttendees && (1 < updatedAttendees.size() || session.getUser().getId() != updatedAttendees.get(0).getEntity())) {
+        if (null != updatedAttendees && (1 < updatedAttendees.size() || session.getUserId() != updatedAttendees.get(0).getEntity())) {
             requireWritePermissions(originalEvent);
         }
     }

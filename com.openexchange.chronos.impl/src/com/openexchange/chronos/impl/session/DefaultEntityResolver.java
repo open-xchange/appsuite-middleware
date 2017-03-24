@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -190,6 +191,11 @@ public class DefaultEntityResolver implements EntityResolver {
     @Override
     public TimeZone getTimeZone(int userID) throws OXException {
         return optTimeZone(getUser(userID).getTimeZone(), TimeZones.UTC);
+    }
+
+    @Override
+    public Locale getLocale(int userID) throws OXException {
+        return getUser(userID).getLocale();
     }
 
     @Override

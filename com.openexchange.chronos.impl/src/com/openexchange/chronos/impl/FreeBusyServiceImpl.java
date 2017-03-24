@@ -85,7 +85,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
             @Override
             protected boolean[] execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new HasPerformer(session, storage).perform(session.getUser().getId(), from, until);
+                return new HasPerformer(session, storage).perform(session.getUserId(), from, until);
             }
         }.executeQuery();
     }

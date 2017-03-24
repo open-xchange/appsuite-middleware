@@ -101,14 +101,14 @@ public class AllPerformer extends AbstractQueryPerformer {
          * construct search term
          */
         CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUser().getId()))));
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId()))));
         /*
          * perform search & userize the results for the current session's user
          */
         EventField[] fields = getFields(session, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
-        readAdditionalEventData(events, session.getUser().getId(), fields);
-        return postProcess(events, session.getUser().getId(), true);
+        readAdditionalEventData(events, session.getUserId(), fields);
+        return postProcess(events, session.getUserId(), true);
     }
 
     /**

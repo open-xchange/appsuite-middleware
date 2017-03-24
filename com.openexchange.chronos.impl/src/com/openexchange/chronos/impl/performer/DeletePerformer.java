@@ -334,7 +334,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     }
 
     private void requireDeletePermissions(Event originalEvent) throws OXException {
-        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
+        if (session.getUserId() == originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);

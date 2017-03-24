@@ -232,10 +232,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_RRULE("Invalid recurrence rule [rule %1$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4002),
     /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>Unexpected error [%1$s]</li>
+     */
+    UNEXPECTED_ERROR("Unexpected error [%1$s]", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 5000),
+    /**
      * <li>Error while reading/writing data from/to the database.</li>
      * <li>Unexpected database error [%1$s]</li>
      */
-    DB_ERROR("Unexpected database error [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5000),
+    DB_ERROR("Unexpected database error [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5001),
     /**
      * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>

@@ -83,7 +83,7 @@ public class CacheCalendarHandler implements CalendarHandler {
             if (needsInvalidation(result)) {
                 Cache cache = cacheService.getCache(REGION);
                 if (null != cache) {
-                    cache.invalidateGroup(String.valueOf(result.getSession().getContext().getContextId()));
+                    cache.invalidateGroup(String.valueOf(result.getSession().getContextId()));
                 }
             }
         } catch (Exception e) {

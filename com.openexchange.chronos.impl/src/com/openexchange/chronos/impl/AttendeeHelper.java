@@ -282,16 +282,17 @@ public class AttendeeHelper {
         /*
          * add internal user attendees
          */
+        boolean inPublicFolder = PublicType.getInstance().equals(folder.getType());
         for (Attendee userAttendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
             if (contains(existingAttendees, userAttendee) || contains(attendees, userAttendee)) {
                 LOG.debug("Skipping duplicate user attendee {}", userAttendee);
                 continue;
             }
             userAttendee = session.getEntityResolver().applyEntityData(userAttendee, AttendeeField.ROLE, AttendeeField.RSVP);
-            userAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
+            userAttendee.setFolderID(inPublicFolder ?
                 ATTENDEE_PUBLIC_FOLDER_ID : session.getConfig().getDefaultFolderID(userAttendee.getEntity()));
             if (false == userAttendee.containsPartStat() || null == userAttendee.getPartStat()) {
-                userAttendee.setPartStat(session.getConfig().getInitialPartStat(folder.getType(), userAttendee.getEntity()));
+                userAttendee.setPartStat(session.getConfig().getInitialPartStat(userAttendee.getEntity(), inPublicFolder));
             }
             attendees.add(userAttendee);
         }
@@ -318,7 +319,7 @@ public class AttendeeHelper {
                 Attendee memberAttendee = session.getEntityResolver().prepareUserAttendee(memberID);
                 memberAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
                     ATTENDEE_PUBLIC_FOLDER_ID : session.getConfig().getDefaultFolderID(memberID));
-                memberAttendee.setPartStat(session.getConfig().getInitialPartStat(folder.getType(), memberID));
+                memberAttendee.setPartStat(session.getConfig().getInitialPartStat(memberID, inPublicFolder));
                 if (false == resolveGroupAttendees) {
                     memberAttendee.setMember(groupAttendee.getUri());
                 }
@@ -366,8 +367,8 @@ public class AttendeeHelper {
         Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUser.getId());
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
         defaultAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : folder.getID());
-        if (session.getUser().getId() != calendarUser.getId()) {
-            defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUser().getId()));
+        if (session.getUserId() != calendarUser.getId()) {
+            defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         /*
          * take over additional properties from corresponding requested attendee

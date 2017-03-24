@@ -214,8 +214,8 @@ public class CalendarResultImpl implements CalendarResult {
     }
 
     @Override
-    public User getCalendarUser() {
-        return calendarUser;
+    public int getCalendarUser() {
+        return calendarUser.getId();
     }
 
     @Override

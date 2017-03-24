@@ -204,7 +204,7 @@ public final class UpdateAction extends ChronosAction {
             result = session.getCalendarService().updateEvent(session, eventID, event);
         } catch (OXException e) {
             if (CalendarExceptionCodes.EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e)) {
-                return getAppointmentConflictResult(session, CalendarUtils.extractEventConflicts(e));
+                return getAppointmentConflictResult(request.getSession(), session, CalendarUtils.extractEventConflicts(e));
             }
             throw e;
         }

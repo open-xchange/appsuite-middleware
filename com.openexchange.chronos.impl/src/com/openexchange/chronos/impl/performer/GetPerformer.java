@@ -99,7 +99,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(objectID);
         }
-        if (session.getUser().getId() != event.getCreatedBy()) {
+        if (session.getUserId() != event.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);

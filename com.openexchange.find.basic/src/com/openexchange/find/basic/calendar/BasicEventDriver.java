@@ -79,7 +79,6 @@ import com.openexchange.find.basic.calendar.sort.RankedEventComparator;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -118,10 +117,10 @@ public class BasicEventDriver extends BasicCalendarDriver {
         if (null != searchRequest.getOptions().getTimeZone()) {
             calendarSession.set(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.getTimeZone(searchRequest.getOptions().getTimeZone()));
         }
-        List<Integer> folderIDs = Folders.getIDs(searchRequest, Module.CALENDAR, session);
+        List<String> folderIDs = Folders.getStringIDs(searchRequest, Module.CALENDAR, session);
         List<SearchFilter> filters = getFilters(session, searchRequest.getFilters());
         List<Event> events = calendarSession.getCalendarService().searchEvents(
-            calendarSession, null != folderIDs ? Autoboxing.I2i(folderIDs) : null, filters, searchRequest.getQueries());
+            calendarSession, null != folderIDs ? folderIDs.toArray(new String[folderIDs.size()]) : null, filters, searchRequest.getQueries());
         /*
          * select suitable occurrences for series events
          */

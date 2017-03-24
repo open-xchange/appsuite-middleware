@@ -66,8 +66,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -147,13 +145,13 @@ public class DefaultCalendarSession implements CalendarSession {
     }
 
     @Override
-    public User getUser() {
-        return session.getUser();
+    public int getUserId() {
+        return session.getUserId();
     }
 
     @Override
-    public Context getContext() {
-        return session.getContext();
+    public int getContextId() {
+        return session.getContextId();
     }
 
     @Override

@@ -113,11 +113,6 @@ public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
     }
 
     @Override
-    public Context getContext() {
-        return context;
-    }
-
-    @Override
     public EventStorage getEventStorage() {
         return eventStorage;
     }

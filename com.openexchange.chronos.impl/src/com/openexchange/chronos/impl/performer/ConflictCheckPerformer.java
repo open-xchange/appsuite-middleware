@@ -422,7 +422,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * @return <code>true</code> if details are available, <code>false</code>, otherwise
      */
     private boolean detailsVisible(Event conflictingEvent) throws OXException {
-        int userID = session.getUser().getId();
+        int userID = session.getUserId();
         /*
          * details available if user is creator or attendee
          */

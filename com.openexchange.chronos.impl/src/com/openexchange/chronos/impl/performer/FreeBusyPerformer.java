@@ -85,6 +85,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FreeBusyPerformer}
@@ -130,7 +131,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         /*
          * prepare & filter internal attendees for lookup
          */
-        Check.hasFreeBusy(session.getSession());
+        Check.hasFreeBusy(ServerSessionAdapter.valueOf(session.getSession()));
         attendees = session.getEntityResolver().prepare(attendees);
         attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE, CalendarUserType.GROUP);
         if (0 == attendees.size()) {

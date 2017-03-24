@@ -221,8 +221,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * apply "sent-by" property if someone is acting on behalf of the calendar user
          */
-        if (calendarUser.getId() != session.getUser().getId()) {
-            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUser().getId()));
+        if (calendarUser.getId() != session.getUserId()) {
+            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return organizer;
     }

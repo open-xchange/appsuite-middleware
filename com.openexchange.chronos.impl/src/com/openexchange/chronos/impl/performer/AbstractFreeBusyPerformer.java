@@ -91,8 +91,8 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if the event should be considered, <code>false</code>, otherwise
      */
     protected boolean considerForFreeBusy(Event event) {
-        if (Classification.PRIVATE.equals(event.getClassification()) && event.getCreatedBy() != session.getUser().getId() &&
-            CalendarUtils.contains(event.getAttendees(), session.getUser().getId())) {
+        if (Classification.PRIVATE.equals(event.getClassification()) && event.getCreatedBy() != session.getUserId() &&
+            CalendarUtils.contains(event.getAttendees(), session.getUserId())) {
             return false; // exclude foreign events classified as 'private' (but keep 'confidential' ones)
         }
         return true;
@@ -131,7 +131,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
             UserizedFolder folder = findFolder(getVisibleFolders(), event.getPublicFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
-                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUser().getId()) {
+                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUserId()) {
                     return event.getPublicFolderId();
                 }
             }
@@ -140,7 +140,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
         /*
          * prefer user's personal folder if user is attendee
          */
-        Attendee ownAttendee = find(event.getAttendees(), session.getUser().getId());
+        Attendee ownAttendee = find(event.getAttendees(), session.getUserId());
         if (null != ownAttendee) {
             return ownAttendee.getFolderID();
         }
@@ -152,7 +152,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
             UserizedFolder folder = findFolder(getVisibleFolders(), attendee.getFolderID());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
-                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUser().getId()) {
+                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUserId()) {
                     chosenFolder = chooseFolder(chosenFolder, folder);
                 }
             }

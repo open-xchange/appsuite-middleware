@@ -105,7 +105,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
          * construct search term
          */
         CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUser().getId())))
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId())))
             .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since))
         );
         /*
@@ -116,14 +116,14 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
-            readAdditionalEventData(events, session.getUser().getId(), fields);
-            newAndModifiedEvents = postProcess(events, session.getUser().getId(), true);
+            readAdditionalEventData(events, session.getUserId(), fields);
+            newAndModifiedEvents = postProcess(events, session.getUserId(), true);
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
-            readAdditionalEventData(events, session.getUser().getId(), fields);
-            deletedEvents = postProcess(events, session.getUser().getId(), true);
+            readAdditionalEventData(events, session.getUserId(), fields);
+            deletedEvents = postProcess(events, session.getUserId(), true);
         }
         return getResult(newAndModifiedEvents, deletedEvents);
     }

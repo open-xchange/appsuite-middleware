@@ -85,9 +85,11 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link RdbAttachmentStorage}
@@ -131,15 +133,15 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public void deleteAttachments(ServerSession session, String folderID, String eventID) throws OXException {
-        checkSession(session);
+    public void deleteAttachments(Session session, String folderID, String eventID) throws OXException {
+        ServerSession serverSession = checkSession(session);
         AttachmentBase attachmentBase = initAttachmentBase();
         try {
             attachmentBase.startTransaction();
             List<Integer> attachmentIDs = new ArrayList<Integer>();
             TimedResult<AttachmentMetadata> timedResult = attachmentBase.getAttachments(
                 session, asInt(folderID), asInt(eventID), MODULE_ID, new AttachmentField[] { AttachmentField.ID_LITERAL }, null, 0,
-                context, session.getUser(), session.getUserConfiguration());
+                context, serverSession.getUser(), serverSession.getUserConfiguration());
             SearchIterator<AttachmentMetadata> iterator = null;
             try {
                 iterator = timedResult.results();
@@ -154,7 +156,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             }
             if (0 < attachmentIDs.size()) {
                 attachmentBase.detachFromObject(asInt(folderID), asInt(eventID), MODULE_ID, I2i(attachmentIDs),
-                    session, context, session.getUser(), session.getUserConfiguration());
+                    session, context, serverSession.getUser(), serverSession.getUserConfiguration());
             }
             attachmentBase.commit();
         } finally {
@@ -163,11 +165,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public void deleteAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
+    public void deleteAttachments(Session session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
         if (null == attachments || 0 == attachments.size()) {
             return;
         }
-        checkSession(session);
+        ServerSession serverSession = checkSession(session);
         List<Integer> attachmentIDs = new ArrayList<Integer>(attachments.size());
         for (Attachment attachment : attachments) {
             attachmentIDs.add(I(attachment.getManagedId()));
@@ -176,7 +178,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         try {
             attachmentBase.startTransaction();
             attachmentBase.detachFromObject(asInt(folderID), asInt(eventID), MODULE_ID, I2i(attachmentIDs),
-                session, context, session.getUser(), session.getUserConfiguration());
+                session, context, serverSession.getUser(), serverSession.getUserConfiguration());
             attachmentBase.commit();
         } finally {
             attachmentBase.finish();
@@ -184,11 +186,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
-    public void insertAttachments(ServerSession session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
+    public void insertAttachments(Session session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
         if (null == attachments || 0 == attachments.size()) {
             return;
         }
-        checkSession(session);
+        ServerSession serverSession = checkSession(session);
         AttachmentBase attachmentBase = initAttachmentBase();
         try {
             attachmentBase.startTransaction();
@@ -200,7 +202,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                 InputStream inputStream = null;
                 try {
                     inputStream = attachment.getData().getStream();
-                    attachmentBase.attachToObject(metadata, inputStream, session, context, session.getUser(), session.getUserConfiguration());
+                    attachmentBase.attachToObject(metadata, inputStream, session, context, serverSession.getUser(), serverSession.getUserConfiguration());
                 } finally {
                     Streams.close(inputStream);
                 }
@@ -214,7 +216,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                 InputStream inputStream = null;
                 try {
                     inputStream = loadAttachmentData(attachment.getManagedId());
-                    attachmentBase.attachToObject(metadata, inputStream, session, context, session.getUser(), session.getUserConfiguration());
+                    attachmentBase.attachToObject(metadata, inputStream, session, context, serverSession.getUser(), serverSession.getUserConfiguration());
                 } finally {
                     Streams.close(inputStream);
                 }
@@ -250,10 +252,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return storageService.getQuotaFileStorage(context.getContextId(), Info.general());
     }
 
-    private void checkSession(ServerSession session) {
+    private ServerSession checkSession(Session session) throws OXException {
         if (null == session || session.getContextId() != context.getContextId()) {
             throw new UnsupportedOperationException();
         }
+        return ServerSessionAdapter.valueOf(session);
     }
 
     private AttachmentBase initAttachmentBase() {

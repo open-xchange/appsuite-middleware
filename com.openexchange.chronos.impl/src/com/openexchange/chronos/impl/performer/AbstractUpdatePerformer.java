@@ -129,7 +129,7 @@ public abstract class AbstractUpdatePerformer {
         exceptionEvent.setStartDate(new Date(recurrenceID.getValue()));
         exceptionEvent.setEndDate(new Date(recurrenceID.getValue() + new Period(originalMasterEvent).getDuration()));
         Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
-        Consistency.setModified(timestamp, exceptionEvent, session.getUser().getId());
+        Consistency.setModified(timestamp, exceptionEvent, session.getUserId());
         return exceptionEvent;
     }
 
@@ -142,7 +142,7 @@ public abstract class AbstractUpdatePerformer {
     protected void touch(String id) throws OXException {
         Event eventUpdate = new Event();
         eventUpdate.setId(id);
-        Consistency.setModified(timestamp, eventUpdate, session.getUser().getId());
+        Consistency.setModified(timestamp, eventUpdate, session.getUserId());
         storage.getEventStorage().updateEvent(eventUpdate);
     }
 

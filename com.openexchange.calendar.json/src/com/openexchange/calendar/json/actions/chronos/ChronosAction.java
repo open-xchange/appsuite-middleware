@@ -249,9 +249,9 @@ public abstract class ChronosAction extends AppointmentAction {
         return new AJAXRequestResult(appointments, timestamp, "appointment");
     }
 
-    protected AJAXRequestResult getAppointmentConflictResult(CalendarSession session, List<EventConflict> conflicts) throws OXException, JSONException {
-        TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
-        AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session.getSession());
+    protected AJAXRequestResult getAppointmentConflictResult(ServerSession serverSession, CalendarSession session, List<EventConflict> conflicts) throws OXException, JSONException {
+        TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, session.getEntityResolver().getTimeZone(session.getUserId()));
+        AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(serverSession);
         JSONArray jsonArray = new JSONArray(conflicts.size());
         for (EventConflict conflict : conflicts) {
             JSONObject jsonObject = new JSONObject();

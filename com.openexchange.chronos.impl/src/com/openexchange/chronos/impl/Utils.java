@@ -53,7 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.sql.Connection;
@@ -104,7 +103,6 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -186,9 +184,9 @@ public class Utils {
      * @see CalendarParameters#PARAMETER_TIMEZONE
      * @see User#getTimeZone()
      */
-    public static TimeZone getTimeZone(CalendarSession session) {
+    public static TimeZone getTimeZone(CalendarSession session) throws OXException {
         TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
-        return null != timeZone ? timeZone : optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
+        return null != timeZone ? timeZone : session.getEntityResolver().getTimeZone(session.getUserId());
     }
 
     /**
@@ -343,21 +341,6 @@ public class Utils {
     }
 
     /**
-     * Parses a folder's numerical folder identifier.
-     *
-     * @param folder The folder to get the identifier for
-     * @return The folder identifier
-     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}
-     */
-    private static int i(UserizedFolder folder) throws OXException {
-        try {
-            return Integer.parseInt(folder.getID());
-        } catch (NumberFormatException e) {
-            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folder.getID(), String.valueOf(folder.getContentType()));
-        }
-    }
-
-    /**
      * <i>Anonymizes</i> an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
      * attendee of the event.
      * <p/>
@@ -369,11 +352,11 @@ public class Utils {
      * @return The potentially anonymized event
      */
     public static Event anonymizeIfNeeded(CalendarSession session, Event event) throws OXException {
-        if (false == isClassifiedFor(event, session.getUser().getId())) {
+        if (false == isClassifiedFor(event, session.getUserId())) {
             return event;
         }
         Event anonymizedEvent = EventMapper.getInstance().copy(event, new Event(), NON_CLASSIFIED_FIELDS);
-        anonymizedEvent.setSummary(StringHelper.valueOf(session.getUser().getLocale()).getString(CalendarStrings.SUMMARY_PRIVATE));
+        anonymizedEvent.setSummary(StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.SUMMARY_PRIVATE));
         return anonymizedEvent;
     }
 
@@ -433,7 +416,7 @@ public class Utils {
         /*
          * excluded if "classified" for user (and such events are requested to be excluded)
          */
-        if (isClassifiedFor(event, session.getUser().getId())) {
+        if (isClassifiedFor(event, session.getUserId())) {
             if (false == includeClassified || Classification.PRIVATE.equals(event.getClassification())) {
                 return true; // exclude foreign events classified as 'confidential' as requested
             }
@@ -873,13 +856,13 @@ public class Utils {
         return visibleFolders;
     }
 
-    private static FolderServiceDecorator initDecorator(CalendarSession session) {
+    private static FolderServiceDecorator initDecorator(CalendarSession session) throws OXException {
         FolderServiceDecorator decorator = new FolderServiceDecorator();
         Connection connection = session.get(StorageOperation.PARAM_CONNECTION, Connection.class, null);
         if (null != connection) {
             decorator.put(Connection.class.getName(), connection);
         }
-        decorator.setLocale(session.getUser().getLocale());
+        decorator.setLocale(session.getEntityResolver().getLocale(session.getUserId()));
         decorator.setTimeZone(Utils.getTimeZone(session));
         return decorator;
     }
