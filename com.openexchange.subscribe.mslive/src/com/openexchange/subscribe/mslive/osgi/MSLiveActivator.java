@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.mslive.osgi;
 
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -67,7 +68,7 @@ public class MSLiveActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class };
+        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class };
     }
 
     @Override
