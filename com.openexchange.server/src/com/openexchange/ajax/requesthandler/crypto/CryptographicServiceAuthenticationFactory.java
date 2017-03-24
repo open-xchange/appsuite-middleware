@@ -81,4 +81,11 @@ public interface CryptographicServiceAuthenticationFactory {
     String createAuthenticationFrom(AJAXRequestData requestData) throws OXException;
 
     String getAuthTokenFromSession(Session session) throws OXException;
+
+    /**
+     * Get token value from full authToken String
+     * @param string
+     * @return
+     */
+    String getTokenValueFromString(String string);
 }
