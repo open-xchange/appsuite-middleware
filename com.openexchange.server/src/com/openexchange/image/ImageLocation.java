@@ -130,7 +130,7 @@ public final class ImageLocation {
     private final String imageId;
     private final String timestamp;
     private final String optImageHost;
-    private final String auth;
+    private String auth;
     private final ConcurrentMap<String, Object> properties;
 
     /**
@@ -277,6 +277,10 @@ public final class ImageLocation {
     public String getAuth() {
         if (auth == null || auth.isEmpty()) return null;
         return auth;
+    }
+
+    public void setAuth (String auth) {
+        this.auth = auth;
     }
     /**
      * Gets the registration name
