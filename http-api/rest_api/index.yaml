@@ -5,13 +5,9 @@ info:
 # API host and basePath for testing requests
 host: example.com
 schemes:
+  - http
   - https
 basePath: /
-# Usally OX REST API produces JSON objects as responses and consumes from data in request body
-produces:
-  - application/json
-consumes:
-  - application/x-www-form-urlencoded
 # The list of modules and their short descriptions
 tags:
   - name: Userfeedback
