@@ -41,6 +41,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Group.html">Group</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Halo.html">Halo</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/I18N.html">I18N</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/JSON.html">JSON</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>
@@ -60,11 +61,11 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Reseller.html">Reseller</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Rest.html">Rest</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMS.html">SMS</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SSL.html">SSL</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sanitizing.html">Sanitizing</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a>
