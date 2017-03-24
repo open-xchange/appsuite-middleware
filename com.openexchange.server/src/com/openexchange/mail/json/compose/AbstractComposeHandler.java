@@ -285,14 +285,16 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                 context.setTextPart(part);
             }
 
-            String cryptoAuth = request.getRequest().getParameter("cryptoAuth");
-            if (request.getJsonMail().has("cryptoAuth")) cryptoAuth = request.getJsonMail().getString("cryptoAuth");
-
             // Remaining attachments (if any) refer to existing parts from other messages in store
             if (attachmentArray.length() > 1) {
                 // Check for inline images (in case content is HTML)
                 Set<String> contentIds = extractContentIds(sContent);
-                parseAttachments(sourceMessage, attachmentArray, contentIds, context, cryptoAuth);
+                parseAttachments(sourceMessage,
+                    attachmentArray,
+                    contentIds,
+                    context,
+                    // If forwarding a previously encrypted message, needs attachments decrypted with authentication
+                    (sourceMessage.getSecuritySettings() == null ? null : sourceMessage.getSecuritySettings().getAuthentication()));
             }
         } else {
             // There are no attachments at all; yield an empty text part

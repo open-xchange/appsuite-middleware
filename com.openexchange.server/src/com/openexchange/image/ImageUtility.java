@@ -60,9 +60,12 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.image.osgi.ImageActivator;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -225,7 +228,14 @@ public final class ImageUtility {
         final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
         final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
         final String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
-        final String auth = requestData.getParameter(AJAXServlet.PARAMETER_AUTH_TOKEN);
+        String auth = null;
+        CryptographicServiceAuthenticationFactory cryptoService = ImageActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+        try {
+            if (cryptoService != null) auth = cryptoService.createAuthenticationFrom(requestData);
+        } catch (OXException e) {
+            LOGGER.error("Problem creating authentication token ", e);
+            auth = null;
+        }
         String registrationName = requestData.getParameter("source");
 
         final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).auth(auth).build();
