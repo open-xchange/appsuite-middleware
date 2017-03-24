@@ -300,6 +300,10 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     private <R> R accessMailStorage(AbstractFindRequest request, ServerSession session, MailServletClosure<R> closure) throws OXException {
         long start = System.currentTimeMillis();
         String folderId = request.getFolderId();
+        if (null == folderId) {
+            throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
+        }
+
         FullnameArgument fullnameArgument = determineFolder(session, folderId);
         MailServletInterface mailServletInterface = MailServletInterface.getInstance(session);
         try {
