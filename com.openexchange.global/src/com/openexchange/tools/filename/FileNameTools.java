@@ -68,6 +68,9 @@ public class FileNameTools {
      * @return Sanitized file name
      */
     public static String sanitizeFilename(String fileName) {
+        if (fileName == null) {
+            return fileName;
+        }
         return FILENAME.matcher(fileName).replaceAll("_");
     }
 

@@ -221,6 +221,17 @@ properties:
       related: 
       file: client-onboarding-caldav.properties
       tags: ["Onboarding", "CalDAV"]
+    - key: com.openexchange.client.onboarding.caldav.login.customsource
+      description: |
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
+        If available, then the login string is taken from such a custom login source
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: client-onboarding-caldav.properties
+      tags: ["Onboarding", "CalDAV"]
     - key: com.openexchange.client.onboarding.carddav.url
       description: |
         Specifies the URL to the CardDAV end-point; e.g. "dav.open-xchange.invalid" or "http://dav.open-xchange.invalid".
@@ -232,6 +243,17 @@ properties:
         The administrator has ensure that end-point is reachable by a well-known path;
         E.g. "PROPFIND /dav.example.com%3A8843/.well-known/carddav HTTP/1.1"
       defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: client-onboarding-carddav.properties
+      tags: ["Onboarding", "CardDAV"]
+    - key: com.openexchange.client.onboarding.carddav.login.customsource
+      description: |
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
+        If available, then the login string is taken from such a custom login source
+      defaultValue: false
       version:
       reloadable: true
       configcascadeAware: true
@@ -278,6 +300,17 @@ properties:
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
         The administrator has ensure that end-point is reachable by a well-known path.
       defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: client-onboarding-eas.properties
+      tags: ["Onboarding", "EAS"]
+    - key: com.openexchange.client.onboarding.eas.login.customsource
+      description: |
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
+        If available, then the login string is taken from such a custom login source
+      defaultValue: false
       version:
       reloadable: true
       configcascadeAware: true
