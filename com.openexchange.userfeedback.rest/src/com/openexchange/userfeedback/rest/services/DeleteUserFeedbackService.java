@@ -85,7 +85,7 @@ public class DeleteUserFeedbackService extends JAXRSService {
 
     @DELETE
     @Path("/{context-group}/{type}")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM + ";charset=utf-8")
+    @Produces(MediaType.TEXT_PLAIN)
     public Response delete(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         FeedbackService service = getService(FeedbackService.class);
         FeedbackFilter filter = new FeedbackFilter() {
