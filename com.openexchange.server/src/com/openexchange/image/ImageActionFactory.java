@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -64,6 +65,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
+@OAuthModule
 public class ImageActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
