@@ -1198,6 +1198,11 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     }
 
     @Override
+    public boolean hasSecuritySettings() {
+        return delegate.getSecuritySettings() != null;
+    }
+
+    @Override
     public void setSecuritySettings(SecuritySettings securitySettings) {
         delegate.setSecuritySettings(securitySettings);
     }
