@@ -329,33 +329,44 @@ public class LoginServlet extends AJAXServlet {
                     return;
                 }
                 try {
-                    final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
-                    if (session != null) {
-                        SessionUtility.checkIP(session, req.getRemoteAddr());
-                        String[] additionalsForHash;
-                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                            /*
-                             * inject context- and user-id to allow parallel guest sessions
-                             */
-                            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
-                        } else {
-                            additionalsForHash = null;
-                        }
-
-                        LoginConfiguration conf = getLoginConfiguration(session);
-                        String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
-                        if (secret == null || !session.getSecret().equals(secret)) {
-                            LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
-                            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                            return;
-                        }
-
-                        LoginPerformer.getInstance().doLogout(sessionId);
-                        // Drop relevant cookies
-                        SessionUtility.removeOXCookies(session, req, resp);
-                        SessionUtility.removeJSESSIONID(req, resp);
+                    Session session = LoginPerformer.getInstance().lookupSession(sessionId);
+                    if (session == null) {
+                        LOG.info("Status code 403 (FORBIDDEN): No such session.");
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
                     }
-                } catch (final OXException e) {
+
+                    SessionUtility.checkIP(session, req.getRemoteAddr());
+                    String[] additionalsForHash;
+                    if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                        /*
+                         * inject context- and user-id to allow parallel guest sessions
+                         */
+                        additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+                    } else {
+                        additionalsForHash = null;
+                    }
+
+                    LoginConfiguration conf = getLoginConfiguration(session);
+                    String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
+                    if (secret == null || !session.getSecret().equals(secret)) {
+                        LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+
+                    LoginPerformer.getInstance().doLogout(sessionId);
+                    // Drop relevant cookies
+                    SessionUtility.removeOXCookies(session, req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
+                } catch (OXException e) {
+                    if (SessionUtility.isIpCheckError(e)) {
+                        LOG.info("Status code 403 (FORBIDDEN): Wrong client IP address.");
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                    LOG.error("Logout failed", e);
+                } catch (RuntimeException e) {
                     LOG.error("Logout failed", e);
                 }
             }
