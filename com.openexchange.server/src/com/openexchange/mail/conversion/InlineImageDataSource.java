@@ -181,17 +181,22 @@ public final class InlineImageDataSource implements ImageDataSource {
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
         // append auth to sb here
         CryptographicServiceAuthenticationFactory crypto = ImageActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
-        if (crypto != null) {
+        if (crypto != null) {  // Images may be encrypted within an Email
             try {
-                String auth = crypto.getAuthTokenFromSession(session);
+                String auth = null;
+                // Try to get authentication from Image URL, else from session
+                if (imageLocation.getAuth() != null) {
+                    auth = crypto.getTokenValueFromString(imageLocation.getAuth());
+                } else {
+                    auth = crypto.getAuthTokenFromSession(session);
+                }
                 if (auth != null) {
-                    sb.append("&auth=");
+                    sb.append("&cryptoAuth=");
                     sb.append(URLEncoder.encode(auth, "UTF-8"));
                 }
             } catch (OXException | UnsupportedEncodingException ex) {
 
             }
-
         }
 
         return sb.toString();
