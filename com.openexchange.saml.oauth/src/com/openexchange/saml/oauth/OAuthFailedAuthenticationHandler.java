@@ -50,11 +50,14 @@
 package com.openexchange.saml.oauth;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
+import com.openexchange.lock.ReentrantLockAccessControl;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
@@ -88,16 +91,16 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         this.services = services;
     }
 
-    private Lock getLockFor(Session session) {
+    private AccessControl getLockFor(Session session) {
         LockService lockService = services.getOptionalService(LockService.class);
         if (null == lockService) {
-            return (Lock) session.getParameter(Session.PARAM_LOCK);
+            return new ReentrantLockAccessControl((ReentrantLock) session.getParameter(Session.PARAM_LOCK));
         }
 
         int userId = session.getUserId();
         int contextId = session.getContextId();
         try {
-            return lockService.getSelfCleaningLockFor(new StringBuilder(32).append("oauthfah-").append(contextId).append('-').append(userId).toString());
+            return lockService.getAccessControlFor(new StringBuilder(32).append("oauthfah-").append(contextId).append('-').append(userId).toString(), 1, userId, contextId);
         } catch (Exception e) {
             LOG.warn("Failed to acquire lock for user {} in context {}. Using global lock instead.", I(userId), I(contextId), e);
             return null;
@@ -114,18 +117,21 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         String oldRefreshToken = (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN);
         if (null != oldRefreshToken) {
             // Try to refresh the access token
-            Lock lock = getLockFor(session);
+            AccessControl lock = getLockFor(session);
             if (null == lock) {
                 synchronized (session) {
                     return doHandleAuthFailed(session, oldRefreshToken, mailConfig, sessiondService);
                 }
             }
 
-            lock.lock();
             try {
+                lock.acquireGrant();
                 return doHandleAuthFailed(session, oldRefreshToken, mailConfig, sessiondService);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw OXException.general("Interrupted", e);
             } finally {
-                lock.unlock();
+                Streams.close(lock);
             }
         }
 

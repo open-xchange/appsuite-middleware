@@ -71,16 +71,19 @@ import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
  */
 public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenService {
 
-    private final CloseableHttpClient httpClient;
-    private final ConfigViewFactory configViewFactory;
-    private final OAuthAccessTokenRequest accessTokenRequest;
-    private final OAuthRefreshTokenRequest refreshTokenRequest;
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAccessTokenService.class);
 
     private static final String MAX_CONNECTIONS = "com.openexchange.saml.oauth.maxConnections";
     private static final String MAX_CONNECTIONS_PER_HOST = "com.openexchange.saml.oauth.maxConnectionsPerHost";
     private static final String CONNECTION_TIMEOUT = "com.openexchange.saml.oauth.connectionTimeout";
     private static final String SOCKET_READ_TIMEOUT = "com.openexchange.saml.oauth.socketReadTimeout";
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private final CloseableHttpClient httpClient;
+    private final ConfigViewFactory configViewFactory;
+    private final OAuthAccessTokenRequest accessTokenRequest;
+    private final OAuthRefreshTokenRequest refreshTokenRequest;
 
     /**
      * Initializes a new {@link HttpClientOAuthAccessTokenService}.
@@ -104,14 +107,16 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
     }
 
     private void init(ClientConfig config, ConfigView view) throws OXException{
-        int maxConnections = view.opt(MAX_CONNECTIONS, Integer.class, 100);
-        int maxConnectionsPerHost = view.opt(MAX_CONNECTIONS_PER_HOST, Integer.class, 100);
-        int connectionTimeout = view.opt(CONNECTION_TIMEOUT, Integer.class, 3000);
-        int socketReadTimeout = view.opt(SOCKET_READ_TIMEOUT, Integer.class, 6000);
-
+        int maxConnections = view.opt(MAX_CONNECTIONS, Integer.class, Integer.valueOf(100)).intValue();
         config.setMaxTotalConnections(maxConnections);
+
+        int maxConnectionsPerHost = view.opt(MAX_CONNECTIONS_PER_HOST, Integer.class, Integer.valueOf(100)).intValue();
         config.setMaxConnectionsPerRoute(maxConnectionsPerHost);
+
+        int connectionTimeout = view.opt(CONNECTION_TIMEOUT, Integer.class, Integer.valueOf(3000)).intValue();
         config.setConnectionTimeout(connectionTimeout);
+
+        int socketReadTimeout = view.opt(SOCKET_READ_TIMEOUT, Integer.class, Integer.valueOf(6000)).intValue();
         config.setSocketReadTimeout(socketReadTimeout);
     }
 
@@ -134,14 +139,14 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
         switch (type) {
             case SAML:
                 OAuthAccessToken result = accessTokenRequest.requestAccessToken(data, userId, contextId, scope);
-                LOG.debug("Successfully traded a saml assertion for an access token.");
+                LOG.debug("Successfully handled a SAML assertion for an access token.");
                 return result;
             case REFRESH_TOKEN:
                 return refreshTokenRequest.requestAccessToken(data, userId, contextId, scope);
         }
 
         // Should never occur
-        throw new OXException(new IllegalArgumentException("Unknown grant type: " + type));
+        throw OXException.general("Unknown grant type: " + type);
     }
 
     @Override
