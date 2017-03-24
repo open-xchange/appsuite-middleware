@@ -4,6 +4,8 @@
     tags:
       - Userfeedback
     summary: Deletes user feedback
+    produces:
+      - text/plain
     parameters:
       - in: path
         name: context-group
@@ -31,7 +33,9 @@
         format: int64
     responses:
       200:
-        description: Blank in case of success, error message from server in case of error.
+        schema:
+          type: string
+        description: Info message when successfull, error message from server in case of error.
       400:
         description: Bad request, response contains error message.
       401:

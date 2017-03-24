@@ -95,6 +95,7 @@ public class ExportUserFeedbackService extends JAXRSService {
 
     @GET
     @Path("/{context-group}/{type}")
+    @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_PLAIN })
     public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         Response response = export(start, end, type, contextGroup, ExportType.CSV);
         return response;
@@ -102,6 +103,7 @@ public class ExportUserFeedbackService extends JAXRSService {
 
     @GET
     @Path("/{context-group}/{type}/raw")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response exportRaw(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         Response response = export(start, end, type, contextGroup, ExportType.RAW);
         return response;

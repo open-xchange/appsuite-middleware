@@ -6,6 +6,8 @@
     tags:
       - Userfeedback
     summary: Exports user feedback
+    produces:
+      - application/json
     parameters:
 
       - in: path

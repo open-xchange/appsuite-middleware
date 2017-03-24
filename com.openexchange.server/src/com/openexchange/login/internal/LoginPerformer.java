@@ -115,19 +115,21 @@ public final class LoginPerformer {
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 
     /**
-     * Initializes a new {@link LoginPerformer}.
-     */
-    private LoginPerformer() {
-        super();
-    }
-
-    /**
      * Gets the {@link LoginPerformer} instance.
      *
      * @return The instance
      */
     public static LoginPerformer getInstance() {
         return SINGLETON;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link LoginPerformer}.
+     */
+    private LoginPerformer() {
+        super();
     }
 
     /**

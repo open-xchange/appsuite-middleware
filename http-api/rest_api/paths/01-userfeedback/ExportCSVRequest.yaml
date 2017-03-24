@@ -6,6 +6,9 @@
     tags:
       - Userfeedback
     summary: Exports user feedback as CSV
+    produces:
+      - application/octet-stream
+      - text/plain
     parameters:
 
       - in: path
