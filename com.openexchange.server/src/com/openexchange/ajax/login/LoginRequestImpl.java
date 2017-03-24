@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.login;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.authentication.Cookie;
@@ -167,7 +168,7 @@ public class LoginRequestImpl implements LoginRequest {
     private final String httpSessionID;
     private boolean tranzient;
     private final String language;
-    private boolean storeLanguage;
+    private final boolean storeLanguage;
 
     /**
      * Initializes a new {@link LoginRequestImpl}.
@@ -186,7 +187,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.hash = builder.hash;
         this.iface = builder.iface;
         this.headers = builder.headers;
-        this.requestParameters = builder.requestParameters;
+        this.requestParameters = null == builder.requestParameters ? Collections.<String, String[]> emptyMap() : Collections.unmodifiableMap(builder.requestParameters);
         this.cookies = builder.cookies;
         this.secure = builder.secure;
         this.serverName = builder.serverName;
@@ -229,7 +230,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.hash = hash;
         this.iface = iface;
         this.headers = headers;
-        this.requestParameters = requestParameters;
+        this.requestParameters = null == requestParameters ? Collections.<String, String[]> emptyMap() : Collections.unmodifiableMap(requestParameters);
         this.cookies = cookies;
         this.secure = secure;
         this.serverName = serverName;
@@ -310,7 +311,7 @@ public class LoginRequestImpl implements LoginRequest {
     public Map<String, List<String>> getHeaders() {
         return headers;
     }
-    
+
     @Override
     public Map<String, String[]> getRequestParameter() {
         return requestParameters;
