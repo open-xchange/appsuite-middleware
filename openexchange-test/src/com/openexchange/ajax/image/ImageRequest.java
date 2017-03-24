@@ -50,6 +50,9 @@
 package com.openexchange.ajax.image;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.Header;
@@ -58,14 +61,77 @@ import com.openexchange.ajax.framework.Header;
  * {@link ImageRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ImageRequest implements AJAXRequest<ImageResponse> {
 
+    /**
+     * Parses the appropriate image request from given image URI
+     *
+     * @param imageUri The image UIR to parse
+     * @return The image request
+     */
+    public static ImageRequest parseFrom(String imageUri) {
+        if (null == imageUri) {
+            return null;
+        }
+
+        // "/ajax/image/user/picture?id=273&timestamp=1468497596841"
+        int pos = imageUri.indexOf('?');
+        String path = imageUri.substring(0, pos);
+
+        ImageRequest imageRequest = new ImageRequest(null);
+        imageRequest.setPath(path);
+
+        String query = imageUri.substring(pos + 1);
+        int i;
+        while ((i = query.indexOf('&')) > 0) {
+            String nvp = query.substring(0, i);
+            int delim = nvp.indexOf('=');
+            imageRequest.addParameter(URLDecoder.decode(nvp.substring(0, delim)), URLDecoder.decode(nvp.substring(delim + 1)));
+
+            query = query.substring(i + 1);
+        }
+        {
+            int delim = query.indexOf('=');
+            imageRequest.addParameter(URLDecoder.decode(query.substring(0, delim)), URLDecoder.decode(query.substring(delim + 1)));
+        }
+        return imageRequest;
+    }
+
+    // --------------------------------------------------------------------
+
     private final String uid;
+    private String path;
+    private List<Parameter> params;
 
     public ImageRequest(final String uid) {
         super();
         this.uid = uid;
+    }
+
+    /**
+     * Sets the path; e.g <code>"/ajax/image/user/picture"</code>
+     *
+     * @param path The path to set
+     */
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    /**
+     * Adds specified parameter
+     *
+     * @param name The name
+     * @param value The value
+     */
+    public void addParameter(String name, String value) {
+        List<Parameter> params = this.params;
+        if (null == params) {
+            params = new ArrayList<>();
+            this.params = params;
+        }
+        params.add(new Parameter(name, value));
     }
 
     @Override
@@ -75,15 +141,21 @@ public class ImageRequest implements AJAXRequest<ImageResponse> {
 
     @Override
     public String getServletPath() {
-        return "/ajax/image";
+        return null == path ? "/ajax/image" : path;
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        Parameter[] parameters = new Parameter[] { new Parameter("uid", uid)
-        };
+        List<Parameter> params = new ArrayList<>();
 
-        return parameters;
+        if (null != uid) {
+            params.add(new Parameter("uid", uid));
+        }
+        if (null != this.params) {
+            params.addAll(this.params);
+        }
+
+        return params.toArray(new Parameter[params.size()]);
     }
 
     @Override
