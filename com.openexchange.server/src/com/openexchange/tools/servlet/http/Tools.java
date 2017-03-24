@@ -100,6 +100,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.systemname.SystemNameService;
@@ -1141,15 +1142,19 @@ public final class Tools {
     public static void setConfigurationService(final ConfigurationService configurationService) {
         CONFIG_SERVICE_REF.set(configurationService);
     }
-    
+
     public static boolean validateDomainRegardingSharding(String serverName) {
         return null != serverName && useShardingForHost(serverName) && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName));
     }
-    
+
     public static boolean useShardingForHost(String serverName) {
         boolean result = false;
-        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
         try {
+            ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+            if (null == serverConfigService) {
+                throw ServiceExceptionCode.absentService(ServerConfigService.class);
+            }
+
             List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
             if (customHostConfigurations != null) {
                 result = areShardingHostsAvailable(customHostConfigurations);
@@ -1159,7 +1164,7 @@ public final class Tools {
         }
         return result;
     }
-    
+
     private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
         List<String> shardingSubdomains = new ArrayList<>();
         for (Map<String, Object> map : customHostConfigurations) {
