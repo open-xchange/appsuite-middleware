@@ -9,7 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: malpoll.properties
-      tags: ["MAL POLL", "Mail", "Push"]
+      tags: ["MAL Poll", "Mail", "Push"]
     - key: com.openexchange.push.malpoll.global
       description: |
         Whether a global timer is set or a timer per user.
@@ -20,7 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: malpoll.properties
-      tags: ["MAL POLL", "Mail", "Push"]
+      tags: ["MAL Poll", "Mail", "Push"]
     - key: com.openexchange.push.malpoll.concurrentglobal
       description: |
         Whether the tasks executed by global timer are executed concurrently
@@ -33,7 +33,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.push.malpoll.global
       file: malpoll.properties
-      tags: ["MAL POLL", "Mail", "Push"]
+      tags: ["MAL Poll", "Mail", "Push"]
     - key: com.openexchange.push.malpoll.folder
       description: |
         Define the folder to look-up for new mails in each mailbox.
@@ -43,4 +43,4 @@ properties:
       configcascadeAware: false
       related:
       file: malpoll.properties
-      tags: ["MAL POLL", "Mail", "Push", "Folder"]
+      tags: ["MAL Poll", "Mail", "Push", "Folder"]
