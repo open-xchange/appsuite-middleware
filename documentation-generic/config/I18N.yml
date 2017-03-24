@@ -10,5 +10,5 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: html-sanitizer.properties
+      file: i18n.properties
       tags: ["I18N"]
