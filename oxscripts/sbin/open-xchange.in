@@ -107,7 +107,8 @@ fi
 # On distros without systemd we might get called via su which might have
 # applied limits from /etc/security/limits.* depending on the distro. Assure
 # that user configured limits are used
-if ! pidof systemd > /dev/null 2>&1
+read the_init < /proc/1/comm
+if [[ ! "${the_init}" == systemd ]]
 then
   NRFILES=${NRFILES:-65536}
   NPROC=${NPROC:-65536}
