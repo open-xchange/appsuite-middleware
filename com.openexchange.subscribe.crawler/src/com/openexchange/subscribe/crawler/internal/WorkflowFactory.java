@@ -78,8 +78,8 @@ public class WorkflowFactory {
         }
     }
 
-    public static Workflow createWorkflowByString(final String string) throws OXException {
-        return Yaml.loadType(string, Workflow.class);
+    public static Workflow createWorkflowByString(final String yamlText) throws OXException {
+        return Yaml.loadType(yamlText, Workflow.class);
     }
 
     private static void checkSanity(final Workflow workflow) throws OXException {
