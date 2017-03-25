@@ -51,9 +51,10 @@ package com.openexchange.subscribe.crawler.osgi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,28 +132,34 @@ public class CrawlersActivator implements BundleActivator {
     }
 
     public synchronized List<CrawlerDescription> getCrawlersFromFilesystem(final ConfigurationService config) {
-        final List<CrawlerDescription> crawlers = new LinkedList<CrawlerDescription>();
         String dirName = config.getProperty(DIR_NAME_PROPERTY);
         File directory = config.getDirectory(dirName);
         if (directory == null) {
             LOG.warn(DIR_NAME_PROPERTY + " not set or crawler configuration directory not found. Skipping crawler initialisation");
-            return crawlers;
+            return Collections.emptyList();
         }
-        final File[] files = directory.listFiles();
+
+        File[] files = directory.listFiles();
         if (files == null) {
             LOG.warn("Could not find crawler descriptions in {}. Skipping crawler initialisation.", directory);
-            return crawlers;
+            return Collections.emptyList();
         }
+
         LOG.info("Loading crawler descriptions from directory : {}", directory.getName());
-        for (final File file : files) {
+        List<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>(files.length);
+        for (File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
-                    final CrawlerDescription crawlerDescription = Yaml.loadType(file, CrawlerDescription.class);
-                    // Only add if not explicitly disabled as per file 'crawler.properties'
-                    if (config.getBoolProperty(crawlerDescription.getId(), true)) {
-                        crawlers.add(crawlerDescription);
+                    CrawlerDescription crawlerDescription = Yaml.loadType(file, CrawlerDescription.class);
+                    if (null == crawlerDescription) {
+                        LOG.warn("Could not parse crawler description from file {}", file);
                     } else {
-                        LOG.info("Ignoring crawler description \"{}\" as per 'crawler.properties' file.", crawlerDescription.getId());
+                        // Only add if not explicitly disabled as per file 'crawler.properties'
+                        if (config.getBoolProperty(crawlerDescription.getId(), true)) {
+                            crawlers.add(crawlerDescription);
+                        } else {
+                            LOG.info("Ignoring crawler description \"{}\" as per 'crawler.properties' file.", crawlerDescription.getId());
+                        }
                     }
                 }
             } catch (final FileNotFoundException e) {
@@ -163,25 +170,35 @@ public class CrawlersActivator implements BundleActivator {
     }
 
     public synchronized boolean removeCrawlerFromFilesystem(final ConfigurationService config, final String crawlerIdToDelete) {
-        final String dirName = config.getProperty(DIR_NAME_PROPERTY);
-        if (dirName != null) {
-            final File directory = config.getDirectory(dirName);
-            if (null != directory) {
-                final File[] files = directory.listFiles();
-                if (files != null) {
-                    for (final File file : files) {
-                        try {
-                            if (file.isFile() && file.getPath().endsWith(".yml")) {
-                                final CrawlerDescription crawler = Yaml.loadType(file, CrawlerDescription.class);
-                                if (crawler.getId().equals(crawlerIdToDelete)) {
-                                    return file.delete();
-                                }
-                            }
-                        } catch (final FileNotFoundException e) {
-                            // Should not appear because file existence is checked before.
+        String dirName = config.getProperty(DIR_NAME_PROPERTY);
+        if (dirName == null) {
+            return false;
+        }
+
+        File directory = config.getDirectory(dirName);
+        if (null == directory) {
+            return false;
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return false;
+        }
+
+        for (File file : files) {
+            try {
+                if (file.isFile() && file.getPath().endsWith(".yml")) {
+                    CrawlerDescription crawler = Yaml.loadType(file, CrawlerDescription.class);
+                    if (null == crawler) {
+                        LOG.warn("Could not parse crawler description from file {}", file);
+                    } else {
+                        if (crawler.getId().equals(crawlerIdToDelete)) {
+                            return file.delete();
                         }
                     }
                 }
+            } catch (final FileNotFoundException e) {
+                // Should not appear because file existence is checked before.
             }
         }
         return false;
