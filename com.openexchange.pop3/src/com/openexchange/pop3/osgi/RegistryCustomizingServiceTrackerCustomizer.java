@@ -53,48 +53,43 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link SessiondServiceServiceTrackerCustomizer} - Service tracker customizer for {@link SessiondService}.
+ * {@link RegistryCustomizingServiceTrackerCustomizer} - Service tracker customizer that puts/removes the tracked/untracked service in/from registry.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCustomizer<SessiondService,SessiondService> {
-
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(SessiondServiceServiceTrackerCustomizer.class);
+public class RegistryCustomizingServiceTrackerCustomizer<S> implements ServiceTrackerCustomizer<S, S> {
 
     private final BundleContext context;
+    private final Class<S> serviceClass;
 
     /**
-     * Initializes a new {@link SessiondServiceServiceTrackerCustomizer}.
+     * Initializes a new {@link RegistryCustomizingServiceTrackerCustomizer}.
      */
-    public SessiondServiceServiceTrackerCustomizer(final BundleContext context) {
+    public RegistryCustomizingServiceTrackerCustomizer(Class<S> serviceClass, BundleContext context) {
         super();
+        this.serviceClass = serviceClass;
         this.context = context;
     }
 
     @Override
-    public SessiondService addingService(final ServiceReference<SessiondService> reference) {
-        final SessiondService addedService = context.getService(reference);
-        if (null == addedService) {
-            LOG.warn("Added service is null!", new Throwable());
-        }
-        POP3ServiceRegistry.getServiceRegistry().addService(SessiondService.class, addedService);
+    public S addingService(final ServiceReference<S> reference) {
+        S addedService = context.getService(reference);
+        POP3ServiceRegistry.getServiceRegistry().addService(serviceClass, addedService);
         return addedService;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<SessiondService> reference, final SessiondService service) {
+    public void modifiedService(final ServiceReference<S> reference, final S service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference<SessiondService> reference, final SessiondService service) {
+    public void removedService(final ServiceReference<S> reference, final S service) {
         if (null != service) {
             try {
-                POP3ServiceRegistry.getServiceRegistry().removeService(SessiondService.class);
+                POP3ServiceRegistry.getServiceRegistry().removeService(serviceClass);
             } finally {
                 context.ungetService(reference);
             }
