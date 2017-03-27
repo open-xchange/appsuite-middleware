@@ -128,6 +128,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     AdvertisementTestSuite.class,
     OAuthProviderTests.class,
+    com.openexchange.ajax.userfeedback.StoreTest.class,
 })
 public final class MainInterfaceTests {
 
