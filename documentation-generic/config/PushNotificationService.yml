@@ -147,3 +147,26 @@ properties:
       related: com.openexchange.websockets.enabled
       file: pns.properties
       tags: ["Push"]
+    - key: com.openexchange.push.ms.delayDuration
+      description: |
+        Time in milliseconds after which a queued object object is pushed to clients
+        unless it got delayed again due to modifications of the push object within the
+        delayDuration or modifications within the folder of the push object.
+      defaultValue: 120000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-ms.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.ms.maxDelayDuration
+      description: |
+        The maximum time in milliseconds a push object may be delayed before finally
+        pushing it to the clients
+      defaultValue: 600000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-ms.properties
+      tags: ["Push"]
