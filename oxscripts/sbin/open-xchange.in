@@ -108,7 +108,7 @@ fi
 # applied limits from /etc/security/limits.* depending on the distro. Assure
 # that user configured limits are used
 read the_init < /proc/1/comm
-if [[ ! "${the_init}" == systemd ]]
+if [[ -n "${the_init}" && "${the_init}" != systemd ]]
 then
   NRFILES=${NRFILES:-65536}
   NPROC=${NPROC:-65536}
