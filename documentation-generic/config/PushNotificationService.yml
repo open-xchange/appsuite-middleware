@@ -161,12 +161,134 @@ properties:
       tags: ["Push"]
     - key: com.openexchange.push.ms.maxDelayDuration
       description: |
-        The maximum time in milliseconds a push object may be delayed before finally
-        pushing it to the clients
+        The maximum time in milliseconds a push object may be delayed before finally pushing it to the clients.
       defaultValue: 600000
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: push-ms.properties
+      tags: ["Push", "Limit"]
+    - key: com.openexchange.push.udp.pushEnabled
+      description: |
+        Defines if server push port gets opened or not.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.remoteHost
+      description: |
+        List of open-xchange servers that should be connected when multicast is disabled.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.registerTimeout
+      description: |
+        Time in milliseconds a client registration is kept.
+      defaultValue: 3600000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.registerPort
+      description: |
+        Port where the clients send the push registration request to.
+      defaultValue: 44335
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.registerDistributionEnabled
+      description: |
+        Only one of registerDistribution or eventDistribution can be enabled at the same time.
+        If set to true, registrations are distributed to all ox servers.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.eventDistributionEnabled
+      description: |
+        If set to true, events will be distributed to all Open-Xchange servers.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push", "Event"]
+    - key: com.openexchange.push.udp.outputQueueDelay
+      description: |
+        Time in milliseconds after which queued "push" packages are sent to clients.
+      defaultValue: 120000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.hostname
+      description: |
+        If empty, then the output of the java function getHostName will be used. 
+        This name is used for internal communication.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.senderAddress
+      description: |
+        Address used as the sender address when UDP packages are sent to the clients 
+        (should be the IP address of the load balancer in front of the Open-Xchange server farm)
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastEnabled
+      description: |
+        Speciefies whether to send register information per multicast.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastAddress
+      description: |
+        Specifies the ip multicast address.
+      defaultValue: 224.0.0.1
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastPort
+      description: |
+        Specifies the multicast port.
+      defaultValue: 9982
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
       tags: ["Push"]
