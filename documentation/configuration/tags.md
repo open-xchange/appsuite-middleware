@@ -107,7 +107,6 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Snippets.html">Snippets</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Soap.html">Soap</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SpamHandler.html">SpamHandler</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamassassin.html">Spamassassin</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sync_App.html">Sync App</a>
