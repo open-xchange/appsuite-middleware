@@ -59,7 +59,7 @@ properties:
       defaultValue: 1
       version:
       reloadable: true
-      configcascadeAware: trues
+      configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
       tags: ["Spamassassin", "Timeout"] 
