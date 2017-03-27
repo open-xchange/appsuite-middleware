@@ -71,6 +71,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
@@ -102,6 +103,7 @@ public class PluginHostingActivator extends HousekeepingActivator {
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(DatabaseService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), DatabaseService.class));
+        track(SessiondService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), SessiondService.class));
 
         // Register and track
         registerService(OXContextGroupStorageInterface.class, new OXContextGroupMySQLStorage());
