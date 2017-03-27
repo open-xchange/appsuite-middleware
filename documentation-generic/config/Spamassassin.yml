@@ -1,0 +1,65 @@
+feature_name: Spamassassin
+properties:
+    - key: com.openexchange.spamhandler.spamassassin.spamd
+      description: |
+        Choose if a mail should be send to spamd afterwards. If set to true, the related properties have to be set also.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.spamhandler.spamassassin.hostname, com.openexchange.spamhandler.spamassassin.port
+      file: spamassassin.properties
+      tags: ["Spamassassin"]
+    - key: com.openexchange.spamhandler.spamassassin.hostname
+      description: |
+        If the mail should be send to spamd specify the hostname of the spamassassin daemon here
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.spamhandler.spamassassin.spamd
+      file: spamassassin.properties
+      tags: ["Spamassassin", "Host"]
+    - key: com.openexchange.spamhandler.spamassassin.port
+      description: |
+        If the mail should be send to spamd specify the port of the spamassassin
+        daemon here
+      defaultValue: 783
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.spamhandler.spamassassin.spamd
+      file: spamassassin.properties
+      tags: ["Spamassassin", "Host"]
+    - key: com.openexchange.spamhandler.spamassassin.timeout
+      description: |
+        If the mail should be send to spamd specify the timeout after which the
+        try to connect is aborted here
+      defaultValue: 10
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.spamhandler.spamassassin.spamd
+      file: spamassassin.properties
+      tags: ["Spamassassin", "Timeout"]
+    - key: com.openexchange.spamhandler.spamassassin.retries
+      description: |
+        If the mail should be send to spamd specify the connect retries here. 
+      defaultValue: 1
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.spamhandler.spamassassin.spamd
+      file: spamassassin.properties
+      tags: ["Spamassassin", "Timeout"]
+    - key: com.openexchange.spamhandler.spamassassin.retrysleep
+      description: |
+        If the mail should be send to spamd specify the connect retries sleep here.
+        This is how log should be waited between the different tries. 
+      defaultValue: 1
+      version:
+      reloadable: true
+      configcascadeAware: trues
+      related: com.openexchange.spamhandler.spamassassin.spamd
+      file: spamassassin.properties
+      tags: ["Spamassassin", "Timeout"] 
