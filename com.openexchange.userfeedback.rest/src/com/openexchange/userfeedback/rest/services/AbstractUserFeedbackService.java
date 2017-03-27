@@ -69,6 +69,7 @@ import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 public abstract class AbstractUserFeedbackService extends JAXRSService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractUserFeedbackService.class);
+    protected static final String DEFAULT_EXPORT_ERROR_MESSAGE = "An error occurred while retrieving user feedback.";
 
     protected AbstractUserFeedbackService(ServiceLookup services) {
         super(services);

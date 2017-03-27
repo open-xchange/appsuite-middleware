@@ -144,14 +144,13 @@ public class SendMailService extends AbstractUserFeedbackService {
             builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
             return builder.build();
         } catch (JSONException e) {
-            LOG.error(e.getMessage());
             ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
             builder.entity(e.getMessage());
             return builder.build();
         } catch (OXException e) {
-            LOG.error("An error occurred while retrieving user feedback.", e);
             JSONObject errorJson = generateError(e);
             if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+                LOG.error(DEFAULT_EXPORT_ERROR_MESSAGE, e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
@@ -164,6 +163,7 @@ public class SendMailService extends AbstractUserFeedbackService {
                 builder.entity(errorJson);
                 return builder.build();
             } else if (e.similarTo(FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION)) {
+                LOG.error("An error occured while sending user feedback.", e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();

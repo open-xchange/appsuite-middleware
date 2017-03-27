@@ -80,6 +80,8 @@ import com.openexchange.userfeedback.filter.DateOnlyFilter;
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/export")
 public class ExportUserFeedbackService extends AbstractUserFeedbackService {
+    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class);
 
     public ExportUserFeedbackService(ServiceLookup services) {
         super(services);
@@ -114,9 +116,9 @@ public class ExportUserFeedbackService extends AbstractUserFeedbackService {
             builder.entity(export.getResult());
             return builder.build();
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
             JSONObject errorJson = generateError(e);
             if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+                LOG.error(DEFAULT_EXPORT_ERROR_MESSAGE, e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
