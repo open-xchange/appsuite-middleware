@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.Part;
@@ -74,7 +73,6 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -163,7 +161,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String VIRTUAL = "___VIRTUAL___";
     private static final String MULTIPART_ID = "___MP-ID___";
 
-//    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
+    //    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
 
     private static final class PlainTextContent {
 
@@ -383,7 +381,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
                 this.initialiserSequenceId = mail.getSequenceId();
 
-
                 String originalId = null;
                 if (mail.containsOriginalId()) {
                     originalId = mail.getOriginalId();
@@ -415,7 +412,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @return The JSON representation of security result
      * @throws JSONException If JSON cannot be returned
      */
-    public JSONObject securityResultToJSON (SecurityResult result) throws JSONException {
+    public JSONObject securityResultToJSON(SecurityResult result) throws JSONException {
         JSONObject json = new JSONObject(10);
         json.put("decrypted", result.getSuccess());
         json.put("type", result.getType().toString());
@@ -600,7 +597,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     if (part.containsSize()) {
                         String transferEncoding = Strings.asciiLowerCase(part.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC));
                         if ("base64".equals(transferEncoding)) {
-                            jsonObject.put(SIZE, (int)(0.75 * part.getSize()));
+                            jsonObject.put(SIZE, (int) (0.75 * part.getSize()));
                             checkSize = false;
                         }
                     }
@@ -706,10 +703,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * These headers are covered by fields of {@link MailMessage}
      */
-    private static final Set<HeaderName> COVERED_HEADER_NAMES = ImmutableSet.of(
-        MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC, MessageHeaders.CC,
-        MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT,
-        MessageHeaders.TO);
+    private static final Set<HeaderName> COVERED_HEADER_NAMES = ImmutableSet.of(MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC, MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT, MessageHeaders.TO);
 
     @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
@@ -1193,17 +1187,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private String getHtmlDisplayVersion(final ContentType contentType, final String src) throws OXException {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
-            return HtmlProcessing.formatHTMLForDisplay(
-                ENRCONV.convert(src),
-                contentType.getCharsetParameter(),
-                session,
-                mailPath,
-                originalMailPath,
-                usm,
-                modified,
-                displayMode,
-                embedded,
-                asMarkup);
+            return HtmlProcessing.formatHTMLForDisplay(ENRCONV.convert(src), contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, asMarkup);
         }
         return HtmlProcessing.formatTextForDisplay(src, usm, displayMode);
     }
@@ -1219,9 +1203,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
                 contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
             } catch (final Exception e) {
-                final Throwable t =
-                    new Throwable(
-                        new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
+                final Throwable t = new Throwable(new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn("", t);
             }
             jsonObject.put(CONTENT_TYPE, contentType);
