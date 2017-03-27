@@ -1,7 +1,8 @@
 feature_name: Report client
 feature_description: |
-  This defines if a proxy server should be used to establish the http connection
+  The first part defines if a proxy server should be used to establish the http connection
   to the Open-Xchange report server, and if which server and proxy details to use.
+  The second part configures report serialization.
 properties:
     - key: com.openexchange.report.client.proxy.useproxy
       description: |
@@ -53,7 +54,7 @@ properties:
       related: com.openexchange.report.client.proxy.password
       file: reportclient.properties
       tags: ["Report", "Proxy"]
-    - key: com.openexchange.report.client.proxy.authrequired
+    - key: com.openexchange.report.client.proxy.password
       description: |
         The password that should be used to autherise on the proxy server.
       defaultValue:
@@ -63,3 +64,43 @@ properties:
       related: com.openexchange.report.client.proxy.username
       file: reportclient.properties
       tags: ["Report", "Proxy"]
+    - key: com.openexchange.report.appsuite.fileStorage
+      description: |
+        Where should parts of the report be stored.
+      defaultValue: /tmp
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: reportclient.properties
+      tags: ["Report", "Serialization"]
+    - key: com.openexchange.report.appsuite.maxChunkSize
+      description: |
+        How many capability-Sets should be hold in memory before writing them into a file.
+      defaultValue: 200
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: reportclient.properties
+      tags: ["Report", "Serialization"]
+    - key: com.openexchange.report.appsuite.maxThreadPoolSize
+      description: |
+        How many threads can be used for report processing.
+      defaultValue: 20
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: reportclient.properties
+      tags: ["Report", "Serialization"]
+    - key: com.openexchange.report.appsuite.threadPriority
+      description: |
+        Which thread priority do the processing threads have.
+      defaultValue: 1
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: reportclient.properties
+      tags: ["Report", "Serialization"]
