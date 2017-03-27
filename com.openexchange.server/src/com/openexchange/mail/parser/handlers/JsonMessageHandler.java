@@ -592,6 +592,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         checkSize = false;
                     } catch (final Exception e) {
                         // Failed counting part's content
+                        LOG.debug("{}", e.getMessage(), e);
                     }
                 } else if (SizePolicy.ESTIMATE == sizePolicy) {
                     if (part.containsSize()) {
