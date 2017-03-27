@@ -37,3 +37,13 @@ This page shows all properties with the tag: MSLiveConnect
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Boxcom.html">Boxcom</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Dropbox.html">Dropbox</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MSLiveConnect.html">MSLiveConnect</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Yahoo.html">Yahoo</a> |
 
 ---
+| __Key__ | com.openexchange.subscribe.mslive.contact.autorunInterval |
+|:----------------|:--------|
+| __Description__ | Defines the subscription refresh autorun interval for MS Live.<br> |
+| __Default__ | 1d |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MSLiveConnect.html">MSLiveConnect</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __File__ | mslivesubscribe.properties |
+
+---

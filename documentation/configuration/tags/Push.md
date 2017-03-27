@@ -189,6 +189,47 @@ This page shows all properties with the tag: Push
 | __File__ | drive.properties |
 
 ---
+| __Key__ | com.openexchange.push.malpoll.period |
+|:----------------|:--------|
+| __Description__ | Define the amount of time in milliseconds when to periodically check for new mails.<br> |
+| __Default__ | 300000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.push.malpoll.global |
+|:----------------|:--------|
+| __Description__ | Whether a global timer is set or a timer per user.<br>Or in other words: Do you want a global heartbeat or a heartbeat per user?<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.push.malpoll.concurrentglobal |
+|:----------------|:--------|
+| __Description__ | Whether the tasks executed by global timer are executed concurrently<br>or by calling timer's thread.<br>Note: This property only has effect if "com.openexchange.push.malpoll.global"<br>is set to "true"<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.push.malpoll.global |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.push.malpoll.folder |
+|:----------------|:--------|
+| __Description__ | Define the folder to look-up for new mails in each mailbox.<br> |
+| __Default__ | INBOX |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | malpoll.properties |
+
+---
 | __Key__ | com.openexchange.caldav.push.apsd.enabled |
 |:----------------|:--------|
 | __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
@@ -353,6 +394,143 @@ This page shows all properties with the tag: Push
 | __Related__ | com.openexchange.websockets.enabled |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | pns.properties |
+
+---
+| __Key__ | com.openexchange.push.ms.delayDuration |
+|:----------------|:--------|
+| __Description__ | Time in milliseconds after which a queued object object is pushed to clients<br>unless it got delayed again due to modifications of the push object within the<br>delayDuration or modifications within the folder of the push object.<br> |
+| __Default__ | 120000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-ms.properties |
+
+---
+| __Key__ | com.openexchange.push.ms.maxDelayDuration |
+|:----------------|:--------|
+| __Description__ | The maximum time in milliseconds a push object may be delayed before finally pushing it to the clients.<br> |
+| __Default__ | 600000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | push-ms.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.pushEnabled |
+|:----------------|:--------|
+| __Description__ | Defines if server push port gets opened or not.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.remoteHost |
+|:----------------|:--------|
+| __Description__ | List of open-xchange servers that should be connected when multicast is disabled.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.registerTimeout |
+|:----------------|:--------|
+| __Description__ | Time in milliseconds a client registration is kept.<br> |
+| __Default__ | 3600000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.registerPort |
+|:----------------|:--------|
+| __Description__ | Port where the clients send the push registration request to.<br> |
+| __Default__ | 44335 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.registerDistributionEnabled |
+|:----------------|:--------|
+| __Description__ | Only one of registerDistribution or eventDistribution can be enabled at the same time.<br>If set to true, registrations are distributed to all ox servers.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.eventDistributionEnabled |
+|:----------------|:--------|
+| __Description__ | If set to true, events will be distributed to all Open-Xchange servers.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.outputQueueDelay |
+|:----------------|:--------|
+| __Description__ | Time in milliseconds after which queued "push" packages are sent to clients.<br> |
+| __Default__ | 120000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.hostname |
+|:----------------|:--------|
+| __Description__ | If empty, then the output of the java function getHostName will be used. <br>This name is used for internal communication.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.senderAddress |
+|:----------------|:--------|
+| __Description__ | Address used as the sender address when UDP packages are sent to the clients <br>(should be the IP address of the load balancer in front of the Open-Xchange server farm)<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.multicastEnabled |
+|:----------------|:--------|
+| __Description__ | Speciefies whether to send register information per multicast.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.multicastAddress |
+|:----------------|:--------|
+| __Description__ | Specifies the ip multicast address.<br> |
+| __Default__ | 224.0.0.1 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.udp.multicastPort |
+|:----------------|:--------|
+| __Description__ | Specifies the multicast port.<br> |
+| __Default__ | 9982 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push-udp.properties |
 
 ---
 | __Key__ | com.openexchange.carddav.push.apsd.enabled |

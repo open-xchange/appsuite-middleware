@@ -45,3 +45,13 @@ This page shows all properties with the tag: Event
 | __File__ | event.properties |
 
 ---
+| __Key__ | com.openexchange.push.udp.eventDistributionEnabled |
+|:----------------|:--------|
+| __Description__ | If set to true, events will be distributed to all Open-Xchange servers.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a> |
+| __File__ | push-udp.properties |
+
+---

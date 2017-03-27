@@ -4,6 +4,16 @@ title: Database
 
 This page shows all properties with the tag: Database
 
+| __Key__ | com.openexchange.apps.tzdata |
+|:----------------|:--------|
+| __Description__ | Path to the zoneinfo database.<br> |
+| __Default__ | /usr/share/zoneinfo |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Manifests.html">Manifests</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __File__ | manifests.properties.in |
+
+---
 | __Key__ | readDriverClass |
 |:----------------|:--------|
 | __Description__ | The read driver class.<br> |

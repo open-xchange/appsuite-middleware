@@ -4,6 +4,16 @@ title: Reseller
 
 This page shows all properties with the tag: Reseller
 
+| __Key__ | RESELLER_STORAGE |
+|:----------------|:--------|
+| __Description__ | Specifies the reseller storage class.<br> |
+| __Default__ | com.openexchange.admin.reseller.storage.mysqlStorage.OXResellerMySQLStorage |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Reseller.html">Reseller</a> |
+| __File__ | reseller.properties |
+
+---
 | __Key__ | com.openexchange.advertisement.[reseller].packageScheme |
 |:----------------|:--------|
 | __Description__ | Defines which package scheme is used for the reseller. [reseller] can be replaced with either the reseller name or the reseller id.<br>Use 'OX_ALL' for the default reseller. Available package schemes are:<br>Global - always uses the default reseller and default package.<br>AccessCombinations - Using access combination names to retrieve the package.<br>TaxonomyTypes - Using taxonomy types to retrieve the package.<br> |

@@ -4,26 +4,6 @@ title: Calendar
 
 This page shows all properties with the tag: Calendar
 
-| __Key__ | com.openexchange.subscribe.google.calendar.pageSize |
-|:----------------|:--------|
-| __Description__ | Defines the amount of events to fetch in a single request.<br> |
-| __Default__ | 25 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
-| __File__ | googlesubscribe.properties |
-
----
-| __Key__ | com.openexchange.subscribe.google.calendar.autorunInterval |
-|:----------------|:--------|
-| __Description__ | Defines the subscription refresh autorun interval for Google calendars.<br> |
-| __Default__ | 1d |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
-| __File__ | googlesubscribe.properties |
-
----
 | __Key__ | CACHED_ITERATOR_FAST_FETCH |
 |:----------------|:--------|
 | __Description__ | By enabling the option CACHED_ITERATOR_FAST_FETCH you<br>can define the numbers of pre fetched results with<br>the parameter MAX_PRE_FETCH.<br><br>This means that MAX_PRE_FETCH results are gathered in one<br>SQL query instead of MAX_PRE_FETCH single SQL queries.<br>Normally higher values result in more performance if this<br>option is enabled.<br> |
@@ -94,5 +74,25 @@ This page shows all properties with the tag: Calendar
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a> |
 | __File__ | calendar.properties |
+
+---
+| __Key__ | com.openexchange.subscribe.google.calendar.pageSize |
+|:----------------|:--------|
+| __Description__ | Defines the amount of events to fetch in a single request.<br> |
+| __Default__ | 25 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __File__ | googlesubscribe.properties |
+
+---
+| __Key__ | com.openexchange.subscribe.google.calendar.autorunInterval |
+|:----------------|:--------|
+| __Description__ | Defines the subscription refresh autorun interval for Google calendars.<br> |
+| __Default__ | 1d |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __File__ | googlesubscribe.properties |
 
 ---

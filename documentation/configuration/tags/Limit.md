@@ -4,6 +4,36 @@ title: Limit
 
 This page shows all properties with the tag: Limit
 
+| __Key__ | com.openexchange.import.ical.limit |
+|:----------------|:--------|
+| __Description__ | Sets a limit on how many entries a single import of ical data may contain.<br>Note that this limit applies for each type, so you can have, for example, 10000 VEVENTS and 10000 VFREEBUSY entries in a single file. <br>-1 means unlimited.<br> |
+| __Default__ | 10000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Import.html">Import</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | import.properties.in |
+
+---
+| __Key__ | com.openexchange.import.contacts.limit |
+|:----------------|:--------|
+| __Description__ | Sets the limit on how many contacts can be imported at once.<br>-1 means unlimited.<br> |
+| __Default__ | -1 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Import.html">Import</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | import.properties.in |
+
+---
+| __Key__ | com.openexchange.snippet.quota.limit |
+|:----------------|:--------|
+| __Description__ | Specify the maximum number of snippets that are allowed being created by a single user.<br>A value of less than 0 (zero) means unlimited.<br> |
+| __Default__ | -1 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Snippets.html">Snippets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | snippets.properties |
+
+---
 | __Key__ | com.openexchange.mailaccount.failedAuth.limit |
 |:----------------|:--------|
 | __Description__ | Specifies the max. number of failed authentication attempts until the associated mail account is disabled.<br> |
@@ -152,6 +182,46 @@ This page shows all properties with the tag: Limit
 | __File__ | grizzly.properties |
 
 ---
+| __Key__ | com.openexchange.threadpool.maximumPoolSize |
+|:----------------|:--------|
+| __Description__ | The maximum number of threads to allow in the pool.<br>The max. integer value of 2^31 - 1 is considered as unlimited max. number of threads.<br> |
+| __Default__ | 2147483647 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | threadpool.properties |
+
+---
+| __Key__ | com.openexchange.threadpool.keepAliveTime |
+|:----------------|:--------|
+| __Description__ | When the number of threads is greater than the core, this is the maximum<br>time (in milliseconds) that excess idle threads will wait for new tasks before terminating.<br> |
+| __Default__ | 60000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | threadpool.properties |
+
+---
+| __Key__ | com.openexchange.mail.transport.referencedPartLimit |
+|:----------------|:--------|
+| __Description__ | Define the limit in bytes for keeping an internal copy of a referenced<br>MIME message's part when sending a mail. If a part exceeds this limit<br>a temporary file is created holding part's copy.<br> |
+| __Default__ | 1048576 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | transport.properties |
+
+---
+| __Key__ | com.openexchange.user.maxClientCount |
+|:----------------|:--------|
+| __Description__ | Specify the max. allowed number of client identifiers stored/tracked per user.<br>A value equal to or less than zero means unlimited.<br> |
+| __Default__ | -1 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | user.properties |
+
+---
 | __Key__ | com.openexchange.websockets.grizzly.remote.maxDelayDuration |
 |:----------------|:--------|
 | __Description__ | The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)<br>is at max. queued in buffer to await & aggregate equal messages that arrive during that time.<br>So, even if there was an equal message recently, message is flushed from queue to avoid holding back<br>a message forever in case there are frequent equal messages.<br> |
@@ -161,6 +231,56 @@ This page shows all properties with the tag: Limit
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | websockets.properties |
+
+---
+| __Key__ | com.openexchange.quota.calendar |
+|:----------------|:--------|
+| __Description__ | Specifies the quota for the number of appointments that are allowed being created within a single context (tenant-wise scope).<br><br>The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.<br>Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),<br>but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate<br>exception being thrown, denying to further create any appointment in affected context.<br> |
+| __Default__ | 250000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Appointment.html">Appointment</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | quota.properties |
+
+---
+| __Key__ | com.openexchange.quota.task |
+|:----------------|:--------|
+| __Description__ | Specifies the quota for the number of tasks that are allowed being created within a single context (tenant-wise scope).<br><br>The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.<br>Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),<br>but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate<br>exception being thrown, denying to further create any task in affected context.<br> |
+| __Default__ | 250000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Task.html">Task</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | quota.properties |
+
+---
+| __Key__ | com.openexchange.quota.contact |
+|:----------------|:--------|
+| __Description__ | Specifies the quota for the number of contacts that are allowed being created within a single context (tenant-wise scope).<br><br>The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.<br>Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),<br>but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate<br>exception being thrown, denying to further create any contact in affected context.<br> |
+| __Default__ | 250000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | quota.properties |
+
+---
+| __Key__ | com.openexchange.quota.infostore |
+|:----------------|:--------|
+| __Description__ | Specifies the quota for the number of documents that are allowed being created within a single context (tenant-wise scope).<br><br>The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.<br>Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),<br>but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate<br>exception being thrown, denying to further create any document in affected context.<br> |
+| __Default__ | 250000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | quota.properties |
+
+---
+| __Key__ | com.openexchange.quota.attachment |
+|:----------------|:--------|
+| __Description__ | Specifies the quota for the number of attachments bound to PIM objects that are allowed being created within a single context (tenant-wise scope).<br><br>The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.<br>Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),<br>but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate<br>exception being thrown, denying to further create any attachment in affected context.<br> |
+| __Default__ | 250000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Attachment.html">Attachment</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | quota.properties |
 
 ---
 | __Key__ | com.openexchange.drive.cleaner.maxAge |
@@ -231,6 +351,46 @@ This page shows all properties with the tag: Limit
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
 | __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.jolokia.maxDepth |
+|:----------------|:--------|
+| __Description__ | Maximum depth when traversing bean properties. If set to 0, depth checking is disabled.<br> |
+| __Default__ | 0 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Jolokia.html">Jolokia</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | jolokia.properties |
+
+---
+| __Key__ | com.openexchange.jolokia.maxObjects |
+|:----------------|:--------|
+| __Description__ | Maximum number of objects which are traversed when serializing a single response.<br>Use this as an airbag to avoid boosting your memory and network traffic. Nevertheless, when set to 0 no limit is imposed.<br> |
+| __Default__ | 100000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Jolokia.html">Jolokia</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | jolokia.properties |
+
+---
+| __Key__ | com.openexchange.soap.cxf.entityExpansionLimit |
+|:----------------|:--------|
+| __Description__ | Java platform limits the number of entity expansions that are allowed for a single XML document.<br>Default is 128000, which is considered to be a pretty large number for any real life application.<br><br>However, if any application does need to have a higher limit, this property (which maps to 'entityExpansionLimit' system property)<br>can be increased to the desired size. Setting it to 0 (zero) means unlimited.<br> |
+| __Default__ | 128000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Soap.html">Soap</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | soap-cxf.properties |
+
+---
+| __Key__ | com.openexchange.soap.cxf.disableAddressUpdates |
+|:----------------|:--------|
+| __Description__ | This is a workaround for the known side-effect in CXF 2.7.x described in CXF-5737 issue (https://issues.apache.org/jira/browse/CXF-5737)<br>The endpoint address gets manipulating after accessing it via multiple aliases.<br>This is disabled by default in the upcoming versions of CXF.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Soap.html">Soap</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | soap-cxf.properties |
 
 ---
 | __Key__ | MAX_UPLOAD_SIZE |
@@ -332,6 +492,16 @@ This page shows all properties with the tag: Limit
 | __File__ | cassandra.properties |
 
 ---
+| __Key__ | com.openexchange.messaging.rss.feed.size |
+|:----------------|:--------|
+| __Description__ | Defines the maximum feed size for an RSS feed in bytes.<br> |
+| __Default__ | 4194304 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/RSS.html">RSS</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | rssmessaging.properties |
+
+---
 | __Key__ | com.openexchange.caldav.interval.start |
 |:----------------|:--------|
 | __Description__ | Appointments and tasks are available via the CalDAV interface if they fall <br>into a configurable timeframe. This value specifies the start time of this <br>interval, i.e. how far past appointments should be considered. More formal, <br>this value defines the negative offset relative to the current date <br>representing the minimum end time of appointments to be synchronized.<br>Possible values are "one_month", "one_year" and "six_months". <br> |
@@ -363,6 +533,26 @@ This page shows all properties with the tag: Limit
 | __File__ | pns.properties |
 
 ---
+| __Key__ | com.openexchange.push.ms.maxDelayDuration |
+|:----------------|:--------|
+| __Description__ | The maximum time in milliseconds a push object may be delayed before finally pushing it to the clients.<br> |
+| __Default__ | 600000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | push-ms.properties |
+
+---
+| __Key__ | com.openexchange.sms.sipgate.maxlength |
+|:----------------|:--------|
+| __Description__ | Max message length. 460 characters is sipgate's maximum.<br> |
+| __Default__ | 460 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sipgate.html">Sipgate</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMS.html">SMS</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | sipgate.properties |
+
+---
 | __Key__ | com.openexchange.audit.logging.AuditFileHandler.limit |
 |:----------------|:--------|
 | __Description__ | The maximum file size.<br> |
@@ -371,5 +561,27 @@ This page shows all properties with the tag: Limit
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Audit.html">Audit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | audit.properties |
+
+---
+| __Key__ | com.openexchange.log.audit.slf4j.file.size |
+|:----------------|:--------|
+| __Description__ | Specifies the max. file size to use.<br> |
+| __Default__ | 2097152 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.log.audit.slf4j.file.location |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Audit.html">Audit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Logging.html">Logging</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | slf4j-auditlog.properties |
+
+---
+| __Key__ | com.openexchange.log.audit.slf4j.file.count |
+|:----------------|:--------|
+| __Description__ | Specifies the max. number of files to use for rotation.<br> |
+| __Default__ | 99 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.log.audit.slf4j.file.location |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Audit.html">Audit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Logging.html">Logging</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | slf4j-auditlog.properties |
 
 ---

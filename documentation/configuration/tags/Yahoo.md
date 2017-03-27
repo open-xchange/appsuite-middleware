@@ -45,3 +45,23 @@ This page shows all properties with the tag: Yahoo
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/OAuth.html">OAuth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Dropbox.html">Dropbox</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Google.html">Google</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Yahoo.html">Yahoo</a> |
 
 ---
+| __Key__ | com.openexchange.subscribe.socialplugin.yahoo |
+|:----------------|:--------|
+| __Description__ | Enable/disable Yahoo subscribe service.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Yahoo.html">Yahoo</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __File__ | yahoosubscribe.properties |
+
+---
+| __Key__ | com.openexchange.subscribe.socialplugin.yahoo.autorunInterval |
+|:----------------|:--------|
+| __Description__ | Defines the subscription refresh autorun interval for Yahoo.<br> |
+| __Default__ | 1d |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Yahoo.html">Yahoo</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __File__ | yahoosubscribe.properties |
+
+---

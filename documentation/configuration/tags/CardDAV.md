@@ -13,6 +13,16 @@ This page shows all properties with the tag: CardDAV
 | __File__ | client-onboarding-carddav.properties |
 
 ---
+| __Key__ | com.openexchange.client.onboarding.carddav.login.customsource |
+|:----------------|:--------|
+| __Description__ | Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered<br>If available, then the login string is taken from such a custom login source<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a> |
+| __File__ | client-onboarding-carddav.properties |
+
+---
 | __Key__ | com.openexchange.carddav.enabled |
 |:----------------|:--------|
 | __Description__ | Whether CardDAV is enabled or not<br> |
