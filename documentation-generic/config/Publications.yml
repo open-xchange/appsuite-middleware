@@ -2,7 +2,7 @@ feature_name: Publications
 properties:
     - key: com.openexchange.publish.microformats.usesWhitelisting
       description: |
-        if set to true, the contents of a microformatted publication will
+        If set to true, the contents of a microformatted publication will
         be processed through a whitelisting filter that removes elements
         that are considered potentially unsafe. We recommend you use this
         in case you do not have publications on a different subdomain.
@@ -15,7 +15,7 @@ properties:
       tags: ["Publications"]
     - key: com.openexchange.publish.domain
       description: |
-        if enabled, this allows you to have a different domain as
+        If enabled, this allows you to have a different domain as
         part of the URI for publications.
         NOTE: If you enable both the domain and the subdomain option,
         domain takes precedence.
@@ -28,7 +28,7 @@ properties:
       tags: ["Publications"]  
     - key: com.openexchange.publish.subdomain
       description: |
-        if enabled, this allows you to use a different subdomain as
+        If enabled, this allows you to use a different subdomain as
         part of the URI for publications. This subdomain will be
         prepended to the domain of the server you are currently using.
         No need to end the subdomain name with a dot, btw.
