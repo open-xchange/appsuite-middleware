@@ -158,7 +158,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.spamhandler.name
       file: imap.properties
-      tags: ["Mail","IMAP","SpamHandler"]
+      tags: ["Mail","IMAP","Spam Handler"]
     - key: com.openexchange.imap[.primary].propagateClientIPAddress
       description: |
         Whether client's IP address should be propagated by a NOOP command; e.g. "A01 NOOP <CLIENT_IP>"
