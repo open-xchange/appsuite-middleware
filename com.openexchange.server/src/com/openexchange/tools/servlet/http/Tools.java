@@ -100,7 +100,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.systemname.SystemNameService;
@@ -1148,13 +1147,14 @@ public final class Tools {
     }
 
     public static boolean useShardingForHost(String serverName) {
+        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+        if (null == serverConfigService) {
+            LOG.info("Server configuration service unavailable. Assuming no sharding for hosts.");
+            return false;
+        }
+
         boolean result = false;
         try {
-            ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-            if (null == serverConfigService) {
-                throw ServiceExceptionCode.absentService(ServerConfigService.class);
-            }
-
             List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
             if (customHostConfigurations != null) {
                 result = areShardingHostsAvailable(customHostConfigurations);
