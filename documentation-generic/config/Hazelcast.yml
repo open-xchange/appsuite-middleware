@@ -384,3 +384,13 @@ properties:
       related:
       file: hazelcast.properties
       tags: ["Hazelcast"]
+    - key: com.openexchange.sessionstorage.hazelcast.enabled
+      description: |
+        Enabled/disable Hazelcast-based session storage.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: sessionstorage-hazelcast.properties
+      tags: ["Hazelcast", "Session"]
