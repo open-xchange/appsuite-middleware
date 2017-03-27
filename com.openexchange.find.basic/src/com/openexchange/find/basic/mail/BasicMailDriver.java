@@ -307,7 +307,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         FullnameArgument fullnameArgument = determineFolder(session, folderId);
         MailServletInterface mailServletInterface = MailServletInterface.getInstance(session);
         try {
-            mailServletInterface.openFor(folderId);
+            mailServletInterface.openFor(MailFolderUtility.prepareFullname(fullnameArgument.getAccountId(), fullnameArgument.getFullname()));
             IMailFolderStorage folderStorage = mailServletInterface.getMailAccess().getFolderStorage();
             MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
             return closure.call(mailServletInterface, folder);
