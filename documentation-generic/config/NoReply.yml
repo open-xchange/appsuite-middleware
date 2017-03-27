@@ -1,0 +1,73 @@
+feature_name: No-Reply
+feature_description: |
+  The properties for the special "no-reply" SMTP account used for system-initiated messages.
+  All properties are config-cascade-enabled and can be overridden for the scopes "Server",
+  "ContextSet" and "Context".
+properties:
+    - key: com.openexchange.noreply.address
+      description: |
+        Specifies the E-Mail address for the no-reply account that is used as "From" header for
+        system-initiated messages. Values must apply to the syntax defined in RFC 822, section 6.
+        Examples:
+          - noreply@example.com
+          - OX App Suite <noreply@example.com>
+          - "App Suite, OX" <noreply@example.com>
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      tags: ["No-Reply", "Mail"]
+    - key: com.openexchange.noreply.login
+      description: |
+        Specifies the login for the no-reply account.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      tags: ["No-Reply", "Mail"]
+    - key: com.openexchange.noreply.password
+      description: |
+        Specifies the password for the no-reply account.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      tags: ["No-Reply", "Mail"]
+    - key: com.openexchange.noreply.server
+      description: |
+        Specifies the SMTP server address for the no-reply account. The value must be an IP address
+        or a full qualified domain name.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      tags: ["No-Reply", "Mail"]
+    - key: com.openexchange.noreply.port
+      description: |
+        Specifies the SMTP server port for the no-reply account.
+      defaultValue: 25
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      tags: ["No-Reply", "Mail"]
+    - key: com.openexchange.noreply.secureMode
+      description: |
+        Specifies the secure mode for the no-reply account;
+        supported values are either "SSL", "TLS" or "plain".
+      defaultValue: plain
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      tags: ["No-Reply", "Mail"]
