@@ -66,6 +66,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -1166,12 +1167,14 @@ public final class Tools {
     }
 
     private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
-        List<String> shardingSubdomains = new ArrayList<>();
-        for (Map<String, Object> map : customHostConfigurations) {
-            if (map.containsKey("shardingSubdomains")) {
-                shardingSubdomains = (List<String>) map.get("shardingSubdomains");
+        List<String> shardingSubdomains = null;
+        for (Iterator<Map<String, Object>> iter = customHostConfigurations.iterator(); null == shardingSubdomains && iter.hasNext();) {
+            Map<String, Object> config = iter.next();
+            Object object = config.get("shardingSubdomains");
+            if (null != object) {
+                shardingSubdomains = (List<String>) object;
             }
         }
-        return shardingSubdomains.isEmpty() ? false : true;
+        return null == shardingSubdomains || shardingSubdomains.isEmpty() ? false : true;
     }
 }
