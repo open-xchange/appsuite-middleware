@@ -139,28 +139,26 @@ public class AuditEventHandler implements EventHandler {
         List<Status> statuses = context.getStatusManager().getCopyOfStatusList();
         if (null != statuses && false == statuses.isEmpty()) {
             for (Status status : statuses) {
-                if (status instanceof ErrorStatus) {
+                if (rollingFileAppender.equals(status.getOrigin()) && (status instanceof ErrorStatus)) {
                     ErrorStatus errorStatus = (ErrorStatus) status;
-                    if (rollingFileAppender.equals(errorStatus.getOrigin())) {
-                        Throwable throwable = errorStatus.getThrowable();
-                        if (null == throwable) {
-                            class FastThrowable extends Throwable {
+                    Throwable throwable = errorStatus.getThrowable();
+                    if (null == throwable) {
+                        class FastThrowable extends Throwable {
 
-                                private static final long serialVersionUID = -6877996474956999361L;
+                            private static final long serialVersionUID = -6877996474956999361L;
 
-                                FastThrowable(String msg) {
-                                    super(msg);
-                                }
-
-                                @Override
-                                public synchronized Throwable fillInStackTrace() {
-                                    return this;
-                                }
+                            FastThrowable(String msg) {
+                                super(msg);
                             }
-                            throwable = new FastThrowable(errorStatus.getMessage());
+
+                            @Override
+                            public synchronized Throwable fillInStackTrace() {
+                                return this;
+                            }
                         }
-                        throw new OXException(OXExceptionConstants.CODE_DEFAULT, OXExceptionStrings.MESSAGE, throwable, new Object[0]).setLogMessage(throwable.getMessage());
+                        throwable = new FastThrowable(errorStatus.getMessage());
                     }
+                    throw new OXException(OXExceptionConstants.CODE_DEFAULT, OXExceptionStrings.MESSAGE, throwable, new Object[0]).setLogMessage(throwable.getMessage());
                 }
             }
         }
