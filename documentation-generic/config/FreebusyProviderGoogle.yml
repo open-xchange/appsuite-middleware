@@ -28,7 +28,7 @@ properties:
         (e.g. domain parts like "@googlemail.com") that are used to pre-filter the 
         requested participants before passing them to Google. Optional, but strongly 
         recommended to reduce the amount of transferred data.
-      defaultValue: @gmail.com,@googlemail.com
+      defaultValue: "@gmail.com,@googlemail.com"
       version:
       reloadable: true
       configcascadeAware: false
