@@ -241,7 +241,7 @@ properties:
        when this is set. Use this flag to indicate that HTTPS termination happens elsewhere.
     defaultValue: false
     version: 
-    reloadable: false
+    reloadable: true
     configcascadeAware: false
     related: 
     file: Server.properties
@@ -251,7 +251,7 @@ properties:
        Default is 250.000 HTTP sessions
     defaultValue: 250000
     version: 
-    reloadable: false
+    reloadable: true
     configcascadeAware: false
     related: 
     file: Server.properties
