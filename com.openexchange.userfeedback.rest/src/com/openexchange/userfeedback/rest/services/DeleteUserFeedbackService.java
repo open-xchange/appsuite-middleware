@@ -81,6 +81,8 @@ import com.openexchange.userfeedback.filter.FeedbackFilter;
 @Path("/userfeedback/v1/delete")
 public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteUserFeedbackService.class);
+    
     public DeleteUserFeedbackService(ServiceLookup services) {
         super(services);
     }
@@ -140,9 +142,9 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
             builder.entity(new GenericEntity<String>(getPositiveRespone(filter, contextGroup), String.class));
             resp = builder.build();
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
             JSONObject errorJson = generateError(e);
             if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+                LOG.error("A configuration error occurred.", e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
