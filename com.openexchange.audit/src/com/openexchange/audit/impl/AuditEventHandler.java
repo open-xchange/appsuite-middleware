@@ -132,6 +132,7 @@ public class AuditEventHandler implements EventHandler {
         rollingPolicy.setParent(rollingFileAppender);
 
         encoder.start();
+        triggeringPolicy.start();
         rollingPolicy.start();
         rollingFileAppender.start();
 
@@ -140,24 +141,26 @@ public class AuditEventHandler implements EventHandler {
             for (Status status : statuses) {
                 if (status instanceof ErrorStatus) {
                     ErrorStatus errorStatus = (ErrorStatus) status;
-                    Throwable throwable = errorStatus.getThrowable();
-                    if (null == throwable) {
-                        class FastThrowable extends Throwable {
+                    if (rollingFileAppender.equals(errorStatus.getOrigin())) {
+                        Throwable throwable = errorStatus.getThrowable();
+                        if (null == throwable) {
+                            class FastThrowable extends Throwable {
 
-                            private static final long serialVersionUID = -6877996474956999361L;
+                                private static final long serialVersionUID = -6877996474956999361L;
 
-                            FastThrowable(String msg) {
-                                super(msg);
+                                FastThrowable(String msg) {
+                                    super(msg);
+                                }
+
+                                @Override
+                                public synchronized Throwable fillInStackTrace() {
+                                    return this;
+                                }
                             }
-
-                            @Override
-                            public synchronized Throwable fillInStackTrace() {
-                                return this;
-                            }
+                            throwable = new FastThrowable(errorStatus.getMessage());
                         }
-                        throwable = new FastThrowable(errorStatus.getMessage());
+                        throw new OXException(OXExceptionConstants.CODE_DEFAULT, OXExceptionStrings.MESSAGE, throwable, new Object[0]).setLogMessage(throwable.getMessage());
                     }
-                    throw new OXException(OXExceptionConstants.CODE_DEFAULT, OXExceptionStrings.MESSAGE, throwable, new Object[0]).setLogMessage(throwable.getMessage());
                 }
             }
         }
