@@ -142,7 +142,7 @@ public class DeleteUserFeedbackService extends JAXRSService {
     }
 
     private String getPositiveRespone(FeedbackFilter filter, String contextGroup) {
-        String result = "Feedback data deleted for type: " + filter.getType() + " ,context group: " + contextGroup + (filter.start() != Long.MIN_VALUE ? (" ,start time: " + filter.start()) : "" ) + (filter.end() != Long.MAX_VALUE ? (" ,end time: " + filter.end()) : "");
+        String result = "Feedback data deleted for type: " + filter.getType() + ", context group: " + contextGroup + (filter.start() != Long.MIN_VALUE ? (", start time: " + filter.start()) : "") + (filter.end() != Long.MAX_VALUE ? (", end time: " + filter.end()) : "");
         return result;
     }
 
