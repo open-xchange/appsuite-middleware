@@ -1,0 +1,14 @@
+feature_name: Jump
+properties:
+    - key: com.openexchange.jump.endpoint.[system-name]
+      description: |
+        Specifies a list jump end-points.
+        [system-name] must be replaced with the name of the system. 
+        E.g. com.openexchange.jump.endpoint.mysystem=http://my.host.invalid/identities?action=receiveIdentity
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: tokens.properties
+      tags: ["Jump"]
