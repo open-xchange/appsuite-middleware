@@ -118,7 +118,7 @@ public class ExportUserFeedbackService extends AbstractUserFeedbackService {
         } catch (OXException e) {
             JSONObject errorJson = generateError(e);
             if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
-                LOG.error(DEFAULT_EXPORT_ERROR_MESSAGE, e);
+                LOG.error(DEFAULT_CONFIG_ERROR_MESSAGE, e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
