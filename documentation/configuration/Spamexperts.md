@@ -8,6 +8,7 @@ title: Spamexperts
 | __Default__ | /ajax/spamexperts/panel |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -17,6 +18,7 @@ title: Spamexperts
 | __Default__ | http://demo1.spambrand.com/api/authticket/create/username/ |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -26,6 +28,7 @@ title: Spamexperts
 | __Default__ | admin |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -35,6 +38,7 @@ title: Spamexperts
 | __Default__ | demo |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -44,6 +48,7 @@ title: Spamexperts
 | __Default__ | mail |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -53,6 +58,7 @@ title: Spamexperts
 | __Default__ | http://demo1.spambrand.com/?authticket= |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -62,6 +68,7 @@ title: Spamexperts
 | __Default__ | empty |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -71,6 +78,7 @@ title: Spamexperts
 | __Default__ | empty |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -80,6 +88,7 @@ title: Spamexperts
 | __Default__ | empty |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -89,6 +98,7 @@ title: Spamexperts
 | __Default__ | Spam |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -98,6 +108,7 @@ title: Spamexperts
 | __Default__ | Not Spam |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
 | __File__ | spamexperts.properties |
 
 ---

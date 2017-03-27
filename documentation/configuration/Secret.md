@@ -8,6 +8,7 @@ title: Secret
 | __Default__ | <password> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a> |
 | __File__ | secret.properties |
 
 ---
@@ -16,6 +17,7 @@ title: Secret
 | __Description__ | The random secret token |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a> |
 | __File__ | secret.properties |
 
 ---
@@ -25,6 +27,7 @@ title: Secret
 | __Default__ | true |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a> |
 | __File__ | secret.properties |
 
 ---

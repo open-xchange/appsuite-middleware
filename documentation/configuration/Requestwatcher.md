@@ -8,6 +8,7 @@ title: Requestwatcher
 | __Default__ | true |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
 
 ---
@@ -17,6 +18,7 @@ title: Requestwatcher
 | __Default__ | 30000 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
 
 ---
@@ -26,6 +28,7 @@ title: Requestwatcher
 | __Default__ | 60000 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
 
 ---
@@ -35,6 +38,7 @@ title: Requestwatcher
 | __Default__ | false |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
 
 ---
@@ -44,6 +48,7 @@ title: Requestwatcher
 | __Default__ | sync,ping |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
 
 ---
@@ -53,6 +58,7 @@ title: Requestwatcher
 | __Default__ | /syncUpdate |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
 
 ---

@@ -4,6 +4,16 @@ title: Session
 
 This page shows all properties with the tag: Session
 
+| __Key__ | com.openexchange.share.transientSessions |
+|:----------------|:--------|
+| __Description__ | Specifies whether guest sessions are treated as transient or not. Transient<br>sessions are only held in the short-term session containers, and are not put<br>into the distributed session storage. <br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
+| __File__ | share.properties |
+
+---
 | __Key__ | com.openexchange.http.grizzly.sessionExpiryCheckInterval |
 |:----------------|:--------|
 | __Description__ | Specifies the interval in seconds when to check for expired/invalid HTTP sessions<br>This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"<br>that defines how long (in seconds) a HTTP session may stay idle/inactive until considered<br>as invalid<br> |

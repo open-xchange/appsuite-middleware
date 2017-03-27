@@ -4,6 +4,16 @@ title: Encryption
 
 This page shows all properties with the tag: Encryption
 
+| __Key__ | com.openexchange.share.cryptKey |
+|:----------------|:--------|
+| __Description__ | Defines a key that is used to encrypt the password/pin of anonymously <br>accessible shares in the database.  <br>Defaults to "erE2e8OhAo71", and should be changed before the creation of the<br>first share on the system.<br> |
+| __Default__ | erE2e8OhAo71 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
+| __File__ | share.properties |
+
+---
 | __Key__ | com.openexchange.hazelcast.network.symmetricEncryption |
 |:----------------|:--------|
 | __Description__ | Enables or disables symmetric encryption. When enabled, the entire<br>communication between the hazelcast members is encrypted at socket level.<br>Ensure that all symmetric encryption settings are equal on all<br>participating nodes in the cluster. More advanced options (including<br>asymmetric encryption and SSL) may still be configured via the<br>"hazelcast.xml" file, see instructions on top of this file.<br><br> /!\ ---==== Additional note ====--- /!\<br>If symmetric encryption is enabled, it might have impact on Hazelcast<br>cluster stability. Hazelcast nodes start loosing cluster connectivity under<br>high load scenarios<br> |

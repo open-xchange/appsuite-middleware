@@ -8,6 +8,7 @@ title: Sms-tools
 | __Default__ | true |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/sms-tools.html">sms-tools</a> |
 | __File__ | sms-tools.properties |
 
 ---
@@ -17,6 +18,7 @@ title: Sms-tools
 | __Default__ | 5 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/sms-tools.html">sms-tools</a> |
 | __File__ | sms-tools.properties |
 
 ---
@@ -26,6 +28,7 @@ title: Sms-tools
 | __Default__ | 1440 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/sms-tools.html">sms-tools</a> |
 | __File__ | sms-tools.properties |
 
 ---
