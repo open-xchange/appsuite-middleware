@@ -27,6 +27,17 @@ This page shows all properties with the tag: Spam Handler
 | __File__ | spamhandler.properties |
 
 ---
+| __Key__ | com.openexchange.imap.spamHandler |
+|:----------------|:--------|
+| __Description__ | Define the registration name of the appropriate spam handler to use<br>Note: This value gets overwritten by "com.openexchange.spamhandler.name" property<br> |
+| __Default__ | DefaultSpamHandler |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.spamhandler.name |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a> |
+| __File__ | imap.properties |
+
+---
 | __Key__ | com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam |
 |:----------------|:--------|
 | __Description__ | Indicates whether to create the confirmed-spam folder during check for default mail folders<br>during login if spam is enabled for logged-in user.<br> |
