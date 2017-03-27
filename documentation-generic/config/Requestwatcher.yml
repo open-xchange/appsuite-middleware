@@ -9,6 +9,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.frequency
     description: |
       Define the requestwatcher's frequency in milliseconds
@@ -18,6 +19,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.maxRequestAge
     description: |
       Define the requestwatcher's frequency in milliseconds
@@ -27,6 +29,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.restartPermission
     description: |
       Permission to stop & re-init system (works only for the ajp connector)
@@ -36,6 +39,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.eas.ignore.cmd
     description: |
       Define a comma separated list of EAS commands that will be ignored by the
@@ -46,6 +50,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.usm.ignore.path
     description: |
       "Define a comma separated list of USM paths that will be ignored by the
@@ -56,3 +61,4 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    tags: ["Requestwatcher"] 

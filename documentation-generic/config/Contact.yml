@@ -11,6 +11,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    tags: ["Contact"]
   - key: validate_contact_email
     description: |
       Check the entered email address from a new contact for correctness
@@ -21,6 +22,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    tags: ["Contact"]
   - key: max_image_size
     description: |
      "The maximum size in bytes for the upload of contact images. Remember: If you decrease the size after some images where uploaded already, 
@@ -31,6 +33,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    tags: ["Contact"]
   - key: com.openexchange.contact.mailAddressAutoSearch
     description: |
       Determines if a search is triggered if the dialog for searching for emailable
@@ -41,7 +44,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties    
+    file: contact.properties 
+    tags: ["Contact"]   
   - key: com.openexchange.contact.singleFolderSearch
     description: |
       Searching for contacts can be done in a single folder or globally across all folders. Searching across all folders can cause high server
@@ -53,7 +57,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    tags: ["Contact"] 
   - key: com.openexchange.contacts.characterSearch
     description: |
       Enables/Disables the start letter based quick select of contacts
@@ -62,7 +67,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    tags: ["Contact"] 
   - key: com.openexchange.contacts.allFoldersForAutoComplete
     description: |
       "The auto complete search for email addresses may be triggered easily and quite often if a new email is written and a part of a recipients
@@ -77,6 +83,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    tags: ["Contact"]
   - key: com.openexchange.contact.scaleVCardImages
     description: |
       Enables/Disables the start letter based quick select of contacts
@@ -86,6 +93,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    tags: ["Contact"]
   - key: com.openexchange.contact.storeVCards
     description: |
       Specifies whether the original files are persisted during vCard import or 
@@ -99,6 +107,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    tags: ["Contact"]
   - key: com.openexchange.contact.maxVCardSize
     description: |
       Configures the maximum allowed size of a (single) vCard file in bytes. 
@@ -110,6 +119,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    tags: ["Contact"]
   - key: com.openexchange.contact.image.scaleImages
     description: |
       Enables/Disables the scaling of contact images to a smaller size. 
@@ -119,6 +129,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    tags: ["Contact"]
   - key: com.openexchange.contact.image.maxWidth
     description: |
       Defines the width of scaled contact images
@@ -128,6 +139,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    tags: ["Contact"]
   - key: com.openexchange.contact.image.maxHeight
     description: |
       Defines the height of scaled contact images
@@ -137,6 +149,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    tags: ["Contact"]
   - key: com.openexchange.contact.image.scaleType
     description: |
       Defines the scale type
@@ -149,6 +162,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    tags: ["Contact"]
   - key: com.openexchange.contact.fulltextAutocomplete
     description: |
       Configures if a FULLTEXT index dedicated for auto-completion can be used or
@@ -166,6 +180,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    tags: ["Contact"]
   - key: com.openexchange.contact.fulltextIndexFields
     description: |
       "Specifies the contact fields for which a FULLTEXT index is supposed to be created
@@ -196,6 +211,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties  
+    tags: ["Contact"]
   - key: com.openexchange.contact.autocomplete.fields
     description: |
       "Defines the fields considered within the autocomplete search operation.
@@ -207,6 +223,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    tags: ["Contact"]
   - key: com.openexchange.contact.search.fields
     description: |
       "Defines the fields considered within the normal search operation.
@@ -239,7 +256,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties   
+    file: contact.properties  
+    tags: ["Contact"] 
   - key: com.openexchange.contactcollector.enabled
     description: |
       Whether enabled or disabled regardless of bundle start-up
@@ -250,6 +268,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contactcollector.properties  
+    tags: ["Contact"]
   - key: com.openexchange.contactcollector.folder.deleteDenied
     description: |
       Whether deletion of contact collector folder will be denied
@@ -258,4 +277,5 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contactcollector.properties     
+    file: contactcollector.properties  
+    tags: ["Contact"]   

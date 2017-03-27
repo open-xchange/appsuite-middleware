@@ -31,6 +31,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: UPLOAD_DIRECTORY
     description: |
       Upload Parameter. All uploads that are done by a client are temporarily saved
@@ -41,6 +42,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: MAX_UPLOAD_SIZE
     description: |
       If the sum of all uploaded files in one request is greater than this value, the upload will be rejected.
@@ -55,6 +57,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: MAX_UPLOAD_IDLE_TIME_MILLIS
     description: |
       The max. idle time in milliseconds for an uploaded file temporary stored in
@@ -76,6 +79,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.defaultMaxConcurrentAJAXRequests
     description: |
       The default max. number of allowed concurrent requests per user
@@ -87,6 +91,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: DefaultEncoding
     description: |
       DEFAULT ENCODING FOR INCOMING HTTP REQUESTS
@@ -97,6 +102,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.MinimumSearchCharacters
     description: |
       Minimum number of characters a search pattern must contain. 0 means no minimum.
@@ -108,6 +114,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: PUBLISH_REVOKE
     description: |
       e-mail address of a person that can be called if data has been published
@@ -119,6 +126,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.IPCheck
     description: |
       On session validation of every request the client IP address is compared with the client IP address used for the login request. If this
@@ -133,6 +141,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.IPMaskV4
     description: |
       Subnet mask for accepting IP-ranges.
@@ -147,6 +156,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.IPMaskV6
     description: |
       Subnet mask for accepting IP-ranges.
@@ -161,6 +171,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.IPCheckWhitelist
     description: |
       Specify a comma-separated list of client patterns that do bypass IP check
@@ -171,6 +182,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.UIWebPath
     description: |
       Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The default
@@ -183,6 +195,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.dispatcher.prefix
     description: |
       Specify the prefix for Central Dispatcher framework (the Open-Xchange AJAX interface)
@@ -192,6 +205,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.cookie.ttl
     description: |
        Special identifier "web-browser" to let the Cookie(s) be deleted when the Web browser exits
@@ -201,6 +215,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.cookie.httpOnly
     description: |
        Whether the "; HttpOnly" should be appended to server cookies exits
@@ -210,6 +225,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.cookie.hash
     description: |
        Whether the hash value for the cookie name should be calculated or remembered from the session for each request.
@@ -223,6 +239,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.cookie.hash.salt
     description: |
        Cookie hash salt to avoid a potential brute force attack to cookie hashes.
@@ -233,6 +250,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.forceHTTPS
     description: |
        If an HTTPS connection is detected the cookie is automatically marked as secure. This tells the browser only to send the cookie over
@@ -245,6 +263,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxActiveSessions
     description: |
        The maximum number of active sessions that will be created by this Manager, or -1 for no limit.
@@ -255,6 +274,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxInactiveInterval
     description: |
        The initial maximum time interval, in seconds, between client requests before a HTTP session is invalidated.
@@ -267,6 +287,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxBodySize
     description: |
        Specify the maximum body size allowed being transferred via PUT or POST method
@@ -279,6 +300,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.echoHeaderName
     description: |
        Specify the name of the echo header whose value is echoed for each request providing that header
@@ -288,6 +310,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.contentSecurityPolicy
     description: |
        The value of Content-Security-Policy header
@@ -299,6 +322,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateTimeWindow
     description: |
       Specify the rate limit' time window in which to track incoming HTTP requests
@@ -309,6 +333,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxRate
     description: |
       Specify the rate limit that applies to incoming HTTP requests
@@ -324,6 +349,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientModules
     description: |
       Specify those AJAX-accessible modules which are excluded from the rate limit checks
@@ -333,6 +359,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientClients
     description: |
       Specify (wildcard notation supported) those User-Agents which are excluded from the rate limit checks
@@ -343,6 +370,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientRemoteAddresses
     description: |
       Specify (wildcard notation supported) those remote addresses/IPs which are excluded from the rate limit checks
@@ -352,6 +380,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientRemoteAddresses
     description: |
       Specify how to associate a rate limit with a HTTP request
@@ -370,6 +399,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateKeyPartProviders
     description: |
       Default is empty; meaning only remote-address and user-agent are considered
@@ -379,6 +409,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.log.maxMessageLength
     description: |
       Specifies max. message length to log. Messages that exceed that limit are split.
@@ -390,6 +421,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
+    tags: ["Server"] 
   - key: com.openexchange.json.maxSize
     description: |
       Specify the max. number of allowed attributes for a JSON object
@@ -399,6 +431,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
+    tags: ["Server"] 
   - key: com.openexchange.webdav.disabled
     description: |
       Setting this to true means that the WebDav XML servlets for attachments, calendar, contacts and tasks will be disabled.
@@ -410,6 +443,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.ajax.response.includeStackTraceOnError
     description: |
       Whether the JSON response object should provide the stack trace of the associated exception
@@ -419,6 +453,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties  
+    tags: ["Server"] 
   - key: com.openexchange.ajax.response.includeArguments
     description: |
       Whether the JSON response object in case of an error should include the exception arguments or not
@@ -427,7 +462,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties  
+    file: Server.properties
+    tags: ["Server"]  
   - key: com.openexchange.connector.networkListenerHost
     description: |
       The host for the connector's http network listener. Set to "*" if you
@@ -439,6 +475,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
+    tags: ["Server"] 
   - key: com.openexchange.connector.networkListenerPort
     description: |
       The default port for the connector's http network listener
@@ -447,7 +484,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties   
+    file: Server.properties 
+    tags: ["Server"]   
   - key: com.openexchange.connector.networkSslListenerPort
     description: |
       The default port for the connector's https network listener
@@ -457,6 +495,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.connector.maxRequestParameters
     description: |
       Specify the max. number of allowed request parameters for the connector http
@@ -466,6 +505,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties  
+    tags: ["Server"] 
   - key: com.openexchange.connector.shutdownFast
     description: |
       Controls the shut-down behavior of the HTTP connector.
@@ -481,6 +521,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
+    tags: ["Server"] 
   - key: com.openexchange.connector.awaitShutDownSeconds
     description: |
       Specify the number of seconds to await an orderly shut-down
@@ -494,6 +535,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
+    tags: ["Server"] 
   - key: com.openexchange.server.backendRoute
     description: |
       To enable proper load balancing and request routing from {client1, client2 ..
@@ -509,6 +551,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties  
+    tags: ["Server"] 
   - key: com.openexchange.server.considerXForwards
     description: |
       Decides if we should consider X-Forward-Headers that reach the backend.
@@ -520,6 +563,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties   
+    tags: ["Server"] 
   - key: com.openexchange.server.forHeader
     description: |
       The name of the protocolHeader used to identify the originating IP address of
@@ -532,7 +576,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    tags: ["Server"]  
   - key: com.openexchange.server.knownProxies
     description: |
       A list of know proxies in front of our httpserver/balancer as comma separated IPs e.g: 192.168.1.50, 192.168.1.51
@@ -542,6 +587,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
+    tags: ["Server"] 
   - key: com.openexchange.html.css.parse.timeout
     description: |
       Specify the amount of seconds to wait for a CSS content being parsed
@@ -552,6 +598,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
+    tags: ["Server"] 
   - key: com.openexchange.log.suppressedCategories
     description: |
       Specify the OXException categories (comma separated) that shall not be logged.
@@ -563,6 +610,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.rest.services.basic-auth.login
     description: |
       Specify the user name used for HTTP basic auth by internal REST servlet
@@ -574,6 +622,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties  
+    tags: ["Server"] 
   - key: com.openexchange.rest.services.basic-auth.password
     description: |
       Specify the password used for HTTP basic auth by internal REST servlet
@@ -585,6 +634,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.preview.thumbnail.blockingWorker
     description: |
       The backend either delivers a thumbnail when it's available from cache or fails fast while initiating the thumbnail creation/caching in
@@ -602,6 +652,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.webdav.recursiveMarshallingLimit
     description: |
       Defines a hard limit when marshalling elements in WebDAV responses
@@ -616,6 +667,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.maxSize
     description: |
       Specifies the max. size (in bytes) for an image that is allowed to be transformed
@@ -627,6 +679,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.maxResolution
     description: |
       Specifies the max. resolution (in pixels) for an image that is allowed to be transformed
@@ -638,6 +691,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.waitTimeoutSeconds
     description: |
       Specifies the max. time (in seconds) to await an image transformation computation to complete.
@@ -648,6 +702,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.preferThumbnailThreshold
     description: |
       Configures up to which factor of the requested image's size an embedded 
@@ -664,6 +719,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 
   - key: com.openexchange.ical.updateTimezones
     description: |
       Configures whether timezone definitions for interpreting iCalendar files 
@@ -676,3 +732,4 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    tags: ["Server"] 

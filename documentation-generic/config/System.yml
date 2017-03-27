@@ -9,6 +9,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: serviceUsageInspection
     description: |
       Enabled/disable service usage inspection. If enabled, all services
@@ -21,6 +22,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: serviceUsageTimeout
     description: |
       The service usage timeout in milliseconds. This property only has
@@ -31,6 +33,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: MimeTypeFileName
     description: |
       Name of the MIME type file
@@ -40,6 +43,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: UserConfigurationStorage
     description: |
       Name of the class implementing the UserConfigurationStorage.
@@ -50,6 +54,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: Cache
     description: |
       Switch for enabling caching in the groupware. Normally this should be set to
@@ -60,6 +65,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: CalendarSQL
     description: |
       IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml
@@ -69,6 +75,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: SERVER_NAME
     description: |
       Server name registered by registerserver in the configuration database
@@ -79,6 +86,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 
   - key: com.openexchange.config.cascade.scopes
     description: |
       The scopes to use in the config cascade, and their precedence
@@ -88,3 +96,4 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
+    tags: ["System"] 

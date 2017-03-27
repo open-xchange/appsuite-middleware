@@ -8,7 +8,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties
+      tags: ["SAML"]       
     - key: com.openexchange.saml.enableMetadataService
       description: |
         Whether the SPs metadata XML shall be made available via HTTP. The according
@@ -18,7 +19,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties
+      tags: ["SAML"]       
     - key: com.openexchange.saml.enableSingleLogout
       description: |
           Whether the single logout profile is enabled.
@@ -27,7 +29,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties 
+      tags: ["SAML"]      
     - key: com.openexchange.saml.entityID
       description: |
           Sets the entity ID of the service provider. This property is mandatory.
@@ -36,7 +39,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties
+      tags: ["SAML"]       
     - key: com.openexchange.saml.providerName
       description: |
           Sets the human-readable name of the service provider. This property is mandatory.
@@ -45,7 +49,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties
+      tags: ["SAML"]       
     - key: com.openexchange.saml.acsURL
       description: |
         Sets the URL of the local assertion consumer service (ACS). This value is used within
@@ -61,7 +66,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties 
+      tags: ["SAML"]      
     - key: com.openexchange.saml.slsURL
       description: |
         Sets the URL of the local single logout service. This value is compared against Destination
@@ -76,7 +82,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties  
+      file: saml.properties
+      tags: ["SAML"]   
     - key: com.openexchange.saml.logoutResponseBinding
       description: |
         The binding via which logout responses shall be sent to the IdP on IdP-initiated single
@@ -89,6 +96,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      tags: ["SAML"] 
     - key: com.openexchange.saml.logoutResponseTemplate
       description: |
         The HTML template to use when logout responses are sent to the IdP via HTTP POST.
@@ -101,7 +109,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties  
+      file: saml.properties 
+      tags: ["SAML"]  
     - key: com.openexchange.saml.idpEntityID
       description: |
         The entity ID of the IdP. It will be used to validate the 'Issuer' elements of SAML responses.
@@ -113,6 +122,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      tags: ["SAML"] 
     - key: com.openexchange.saml.idpAuthnURL
       description: |
         The URL of the IdP endpoint where authentication requests are to be sent to.
@@ -123,7 +133,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties 
+      tags: ["SAML"]      
     - key: com.openexchange.saml.idpLogoutURL
       description: |
         The URL of the IdP endpoint where logout requests are to be sent to.
@@ -134,7 +145,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties      
+      file: saml.properties  
+      tags: ["SAML"]     
     - key: com.openexchange.saml.enableAutoLogin
       description: |
         It is possible to enable a special kind of auto login mechanism that allows user agents to
@@ -157,7 +169,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties       
+      file: saml.properties 
+      tags: ["SAML"]      
     - key: com.openexchange.saml.allowUnsolicitedResponses
       description: |
         Whether unsolicited responses will be accepted or not.
@@ -166,7 +179,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties         
+      file: saml.properties  
+      tags: ["SAML"]        
     - key: com.openexchange.saml.enableSessionIndexAutoLogin
       description: |
         Specifies whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.

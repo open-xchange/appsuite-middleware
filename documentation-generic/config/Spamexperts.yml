@@ -9,6 +9,7 @@ properties:
     configcascadeAware: false
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.panel.api_interface_url
     description: |
       URL of spamexperts Interface to generate new sessions
@@ -18,6 +19,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.panel.admin_user
     description: |
       This property defines the username which should be used as basic auth
@@ -27,6 +29,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.panel.admin_password
     description: |
       This property defines the password which should be used as basic auth
@@ -36,6 +39,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.panel.api_auth_attribute
     description: |
       Which user attribute should be used for authentication against panel API
@@ -51,6 +55,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.panel.web_ui_url
     description: |
       Defines the URL where the panel is available
@@ -60,6 +65,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.imapurl
     description: |
       the imap url to the spamexperts imap server
@@ -75,6 +81,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.imapuser
     description: |
       username to authenticate against the imap server
@@ -84,6 +91,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.imappassword
     description: |
       password to authenticate against the imap server
@@ -93,6 +101,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.trainspamfolder
     description: |
       Foldername of folder to place spam mails in order to train the system
@@ -102,6 +111,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"] 
   - key: com.openexchange.custom.spamexperts.trainhamfolder
     description: |
       Foldername of folder to place ham mails in order to train the system
@@ -111,6 +121,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
+    tags: ["Spamexperts"]
     
     
     

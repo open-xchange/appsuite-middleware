@@ -1,0 +1,60 @@
+feature_name: Spamhandler_cloudmark
+properties:
+  - key: com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress
+    description: |
+      Defines the eMail address to which the selected eMails will be bounced. If no
+      address is specified the bounce will be skipped, but moving the selected mails
+      to the target folder will still be processed (if configured)
+    defaultValue: empty
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamhandler_cloudmark.properties
+    tags: ["spamhandler", "cloudmark"] 
+  - key: com.openexchange.spamhandler.cloudmark.targetHamEmailAddress
+    description: |
+      Defines the eMail address to which the selected eMails will be bounced, if they
+      are marked as Ham. If no address is specified the bounce will be skipped,
+      but moving the selected mails back to the Inbox will still be processed (if configured).
+      "Privacy note:" This will send private mails of users to that address when marked as Ham
+    defaultValue: empty
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamhandler_cloudmark.properties
+    tags: ["spamhandler", "cloudmark"] 
+  - key: com.openexchange.spamhandler.cloudmark.targetSpamFolder
+    description: |
+      Defines to which folder the selected mails should be moved to after they have
+      been bounced to the target eMail address. If no option is configured the
+      selected mails will be moved to the users trash folder. "Possible options are:"
+      
+      0 = Do not move the message at all
+      1 = User's trash folder (Default)
+      2 = User's SPAM folder
+      3 = Subscribed confirmed-spam folder (experimental)
+    defaultValue: 2
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamhandler_cloudmark.properties
+    tags: ["spamhandler", "cloudmark"] 
+  - key: com.openexchange.spamhandler.cloudmark.wrapMessage
+    description: |
+      Defines if the spam/ham message is passed as a nested message to the target address
+      
+      ----------------------------------== /!\ ==----------------------------------------
+      "Note:" This option needs to be clarified with your running Cloudmark service that
+            passing the spam/ham message as a nested message is accepted and properly
+            handled!
+      -----------------------------------------------------------------------------------
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamhandler_cloudmark.properties
+    tags: ["spamhandler", "cloudmark"] 

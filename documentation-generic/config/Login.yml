@@ -13,6 +13,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"]
   - key: com.openexchange.ajax.login.http-auth.client
     description: |
       Every client tells the backend through the client parameter on the login request his identity. This is not possible when using the HTTP
@@ -26,6 +27,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.http-auth.version
     description: |
       The version of the client when using the HTTP Authorization Header based login. This should not be the normal web frontend version because
@@ -36,6 +38,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.insecure
     description: |
       Configures whether an insecure login is allowed. Meaning if local IP and/or user-agent strings are replaced in associated user session on
@@ -49,6 +52,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.redirect.changeIPAllowed
     description: |
       This option has only an effect if com.openexchange.ajax.login.insecure is configured to true.
@@ -62,6 +66,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.randomToken
     description: |
       The Random-Token is a one time token with a limited lifetime, which is used to initiate sessions through 3rd party applications or
@@ -74,6 +79,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.checkPunyCodeLoginString
     description: |
       Checks if specified login string appears to be in ACE/puny-code notation (see RFC3490 section 4.1); e.g. "someone@xn--mller-kva.de". If
@@ -84,6 +90,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.formatstring.login
     description: |
       Specifies the format for a logged login.
@@ -106,6 +113,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.formatstring.logout
     description: |
       Specifies the format for a logged logout.
@@ -122,6 +130,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.maxRateTimeWindow
     description: |
       Specify the rate limit' time window in which to track incoming login requests
@@ -133,6 +142,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
   - key: com.openexchange.ajax.login.maxRate
     description: |
       Specify the rate limit that applies to incoming login requests
@@ -153,3 +163,4 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    tags: ["Login"] 
