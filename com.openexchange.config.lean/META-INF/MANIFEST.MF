@@ -10,6 +10,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  org.osgi.framework,
  org.slf4j
