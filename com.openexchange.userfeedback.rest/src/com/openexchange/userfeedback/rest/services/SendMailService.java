@@ -69,10 +69,8 @@ import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
@@ -89,7 +87,7 @@ import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
  */
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/mail")
-public class SendMailService extends JAXRSService {
+public class SendMailService extends AbstractUserFeedbackService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendMailService.class);
 
@@ -109,6 +107,8 @@ public class SendMailService extends JAXRSService {
     private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, String json) {
         JSONArray array = null;
         try {
+            validateParams(start, end);
+
             array = new JSONArray(json);
             ResponseBuilder builder = null;
             if (null == subject || Strings.isEmpty(subject)) {
@@ -173,15 +173,4 @@ public class SendMailService extends JAXRSService {
             return builder.build();
         }
     }
-
-    private JSONObject generateError(OXException ex) {
-        JSONObject main = new JSONObject();
-        try {
-            ResponseWriter.addException(main, ex);
-        } catch (JSONException e) {
-            LOG.error("Error while generating error for client.", e);
-        }
-        return main;
-    }
-
 }

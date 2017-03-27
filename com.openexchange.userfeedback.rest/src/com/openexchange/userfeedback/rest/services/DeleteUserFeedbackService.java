@@ -58,14 +58,16 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
 
 
@@ -77,7 +79,7 @@ import com.openexchange.userfeedback.filter.FeedbackFilter;
  */
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/delete")
-public class DeleteUserFeedbackService extends JAXRSService {
+public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
 
     public DeleteUserFeedbackService(ServiceLookup services) {
         super(services);
@@ -131,12 +133,27 @@ public class DeleteUserFeedbackService extends JAXRSService {
         };
         Response resp = null;
         try {
+            validateParams(start, end);
+
             service.delete(contextGroup, filter);
             ResponseBuilder builder = Response.ok();
             builder.entity(new GenericEntity<String>(getPositiveRespone(filter, contextGroup), String.class));
             resp = builder.build();
         } catch (OXException e) {
-            resp = Response.serverError().entity(e.getMessage()).build();
+            org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class).error("An error occurred while retrieving user feedback.", e);
+            JSONObject errorJson = generateError(e);
+            if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
+            } else if (e.similarTo(FeedbackExceptionCodes.INVALID_PARAMETER_VALUE)) {
+                ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
+            }
+            ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON);
+            builder.entity(errorJson);
+            return builder.build();
         }
         return resp;
     }

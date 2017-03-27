@@ -49,8 +49,6 @@
 
 package com.openexchange.userfeedback.rest.services;
 
-import java.util.HashSet;
-import java.util.Set;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -60,12 +58,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.rest.services.JAXRSService;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
@@ -85,9 +79,7 @@ import com.openexchange.userfeedback.filter.DateOnlyFilter;
  */
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/export")
-public class ExportUserFeedbackService extends JAXRSService {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class);
+public class ExportUserFeedbackService extends AbstractUserFeedbackService {
 
     public ExportUserFeedbackService(ServiceLookup services) {
         super(services);
@@ -137,32 +129,5 @@ public class ExportUserFeedbackService extends JAXRSService {
             builder.entity(errorJson);
             return builder.build();
         }
-    }
-
-    protected void validateParams(long start, long end) throws OXException {
-        Set<String> badParams = new HashSet<>(2);
-        if (start < 0L) {
-            badParams.add("start");
-        }
-        if (end < 0L) {
-            badParams.add("end");
-        }
-        if (end < start) {
-            badParams.add("start");
-            badParams.add("end");
-        }
-        if (!badParams.isEmpty()) {
-            throw FeedbackExceptionCodes.INVALID_PARAMETER_VALUE.create(Strings.concat(",", badParams));
-        }
-    }
-
-    private JSONObject generateError(OXException ex) {
-        JSONObject main = new JSONObject();
-        try {
-            ResponseWriter.addException(main, ex);
-        } catch (JSONException e) {
-            LOG.error("Error while generating error for client.", e);
-        }
-        return main;
     }
 }
