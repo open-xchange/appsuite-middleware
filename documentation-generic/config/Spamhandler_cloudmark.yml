@@ -11,7 +11,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
-    tags: ["spamhandler", "cloudmark"] 
+    tags: ["Spam Handler", "Cloudmark"] 
   - key: com.openexchange.spamhandler.cloudmark.targetHamEmailAddress
     description: |
       Defines the eMail address to which the selected eMails will be bounced, if they
@@ -24,7 +24,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
-    tags: ["spamhandler", "cloudmark"] 
+    tags: ["Spam Handler", "Cloudmark"] 
   - key: com.openexchange.spamhandler.cloudmark.targetSpamFolder
     description: |
       Defines to which folder the selected mails should be moved to after they have
@@ -41,7 +41,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
-    tags: ["spamhandler", "cloudmark"] 
+    tags: ["Spam Handler", "Cloudmark"] 
   - key: com.openexchange.spamhandler.cloudmark.wrapMessage
     description: |
       Defines if the spam/ham message is passed as a nested message to the target address
@@ -57,4 +57,4 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
-    tags: ["spamhandler", "cloudmark"] 
+    tags: ["Spam Handler", "Cloudmark"] 
