@@ -172,7 +172,7 @@ properties:
       configcascadeAware: true
       related: 
       file: xingsubscribe.properties
-      tags: ["XING", "Contact", "Subscribe"]
+      tags: ["Xing", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.xing.autorunInterval
       description: |
         Defines the subscription refresh autorun interval for XING.
@@ -182,4 +182,4 @@ properties:
       configcascadeAware: true
       related: 
       file: xingsubscribe.properties
-      tags: ["XING", "Contact", "Subscribe"]
+      tags: ["Xing", "Contact", "Subscribe"]

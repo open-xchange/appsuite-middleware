@@ -157,7 +157,7 @@ properties:
       configcascadeAware: false
       related: 
       file: share.properties
-      tags: ["Share", "Ical"]
+      tags: ["Share", "Ical", "Appointment"]
 
     - key: com.openexchange.share.handler.iCal.pastInterval
       description: |
@@ -171,7 +171,7 @@ properties:
       configcascadeAware: false
       related: 
       file: share.properties
-      tags: ["Share", "Ical"]
+      tags: ["Share", "Ical", "Appointment"]
 
     - key: com.openexchange.share.loginLink
       description: |

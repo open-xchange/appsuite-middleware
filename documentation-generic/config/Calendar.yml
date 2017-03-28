@@ -87,7 +87,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
-      tags: ["Calendar","Limit"]
+      tags: ["Calendar","Limit", "Appointments"]
     - key: com.openexchange.calendar.undefinedstatusconflict
       description: |
         This boolean option switches on/off, if an appointment

@@ -12,4 +12,4 @@ properties:
       configcascadeAware: false
       related: 
       file: attachment.properties
-      tags: ["Attachment", "Contacts", "Tasks", "Appointments", "Limit"]
+      tags: ["Attachment", "Contacts", "Tasks", "Appointment", "Limit"]

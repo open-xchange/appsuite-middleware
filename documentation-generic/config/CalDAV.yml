@@ -34,7 +34,7 @@ properties:
       configcascadeAware: false
       related:
       file: caldav.properties
-      tags: ["CalDAV", "Limit"]
+      tags: ["CalDAV", "Limit", "Appointment"]
     - key: com.openexchange.caldav.interval.end
       description: |
         Appointments and tasks are available via the CalDAV interface if they fall 
@@ -49,7 +49,7 @@ properties:
       configcascadeAware: false
       related:
       file: caldav.properties
-      tags: ["CalDAV", "Limit"]
+      tags: ["CalDAV", "Limit", "Appointment"]
     - key: com.openexchange.caldav.url
       description: |
         Tells users where to find a caldav folder. This can be displayed in frontends.
