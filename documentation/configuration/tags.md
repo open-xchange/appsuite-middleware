@@ -8,7 +8,6 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Android.html">Android</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Appointment.html">Appointment</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Appointments.html">Appointments</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Attachment.html">Attachment</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Audit.html">Audit</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>
@@ -21,6 +20,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cloudmark.html">Cloudmark</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Config_DB.html">Config DB</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Configjump.html">Configjump</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>
@@ -119,6 +119,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tasks.html">Tasks</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Template.html">Template</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timezone.html">Timezone</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tokenlogin.html">Tokenlogin</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>
@@ -128,10 +129,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Windows.html">Windows</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/XING.html">XING</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Xing.html">Xing</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Yahoo.html">Yahoo</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/cloudmark.html">cloudmark</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/eM-Client.html">eM-Client</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/sms-tools.html">sms-tools</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/spamhandler.html">spamhandler</a>

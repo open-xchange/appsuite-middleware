@@ -80,7 +80,7 @@ This page shows all properties with the tag: Quota
 | __Default__ | 10485760 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Preview.html">Preview</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Preview.html">Preview</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
 | __File__ | preview.properties |
 
 ---
@@ -90,7 +90,7 @@ This page shows all properties with the tag: Quota
 | __Default__ | 524288 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Preview.html">Preview</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Preview.html">Preview</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
 | __File__ | preview.properties |
 
 ---
@@ -100,7 +100,7 @@ This page shows all properties with the tag: Quota
 | __Default__ | false |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Preview.html">Preview</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Preview.html">Preview</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
 | __File__ | preview.properties |
 
 ---

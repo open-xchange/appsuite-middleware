@@ -1,6 +1,8 @@
 ---
-title: Spamhandler_cloudmark
+title: Cloudmark
 ---
+
+This page shows all properties with the tag: Cloudmark
 
 | __Key__ | com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress |
 |:----------------|:--------|
