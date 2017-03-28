@@ -111,18 +111,16 @@ public class SendMailService extends AbstractUserFeedbackService {
             ResponseBuilder builder = null;
             if (null == subject || Strings.isEmpty(subject)) {
                 StringBuilder sb = new StringBuilder();
-                if (start > 0L && end > 0L) {
+                sb.append("User Feedback Report");
+                if (start > 0L || end > 0L) {
                     SimpleDateFormat df = new SimpleDateFormat();
                     df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    sb.append("User Feedback Report");
                     if (start > 0L) {
                         sb.append(" from ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start))));
                     }
                     if (end > 0L) {
                         sb.append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
                     }
-                } else {
-                    sb.append("User Feedback Report");
                 }
                 subject = sb.toString();
             }
