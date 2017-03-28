@@ -12,7 +12,7 @@ properties:
       configcascadeAware: false
       related: 
       file: publications.properties
-      tags: ["Publications"]
+      tags: ["Publications", "White List"]
     - key: com.openexchange.publish.domain
       description: |
         If enabled, this allows you to have a different domain as

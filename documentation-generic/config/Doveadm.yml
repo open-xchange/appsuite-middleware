@@ -2,7 +2,7 @@ feature_name: Doveadm
 properties:
     - key: com.openexchange.dovecot.doveadm.enabled
       description: |
-        Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not
+        Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not.
       defaultValue: false
       version: 7.8.3
       reloadable: false
