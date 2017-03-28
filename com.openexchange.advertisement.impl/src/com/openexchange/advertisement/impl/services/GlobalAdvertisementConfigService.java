@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.advertisement.impl.services;
 
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.exception.OXException;

@@ -49,7 +49,8 @@
 
 package com.openexchange.advertisement.json;
 
-import org.json.JSONObject;
+import org.json.JSONValue;
+
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.json.osgi.Services;
@@ -84,7 +85,7 @@ public class GetConfigAction implements AJAXActionService {
         if (configService == null) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to retrieve AdvertisementConfigService");
         }
-        JSONObject result = configService.getConfig(session);
+        JSONValue result = configService.getConfig(session);
         return new AJAXRequestResult(result);
     }
 

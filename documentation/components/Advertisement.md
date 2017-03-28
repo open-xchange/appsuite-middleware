@@ -40,7 +40,7 @@ PUT /advertisement/v1/config/user
 
 | Name   | Description                 |
 |:-------|:----------------------------|
-| ctxId  | The context id of the user. |
+| contextId  | The context id of the user. |
 | userId | The user id of the user.    |
 
 **Body:**
@@ -61,7 +61,7 @@ PUT /advertisement/v1/config/name
 
 | Name  | Description                 |
 |:------|:----------------------------|
-| ctxId | The context id of the user. |
+| contextId | The context id of the user. |
 | name  | The user name.              |
 
 **Body:**
@@ -134,7 +134,7 @@ DELETE /advertisement/v1/config/user
 
 | Name   | Description                 |
 |:-------|:----------------------------|
-| ctxId  | The context id of the user. |
+| contextId  | The context id of the user. |
 | userId | The user id of the user.    |
 
 **Response:**
@@ -149,7 +149,7 @@ DELETE /advertisement/v1/config/name
 
 | Name  | Description                 |
 |:------|:----------------------------|
-| ctxId | The context id of the user. |
+| contextId | The context id of the user. |
 | name  | The user name.              |
 
 **Response:**

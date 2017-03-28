@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.advertisement.osgi;
+package com.openexchange.advertisement.impl.osgi;
 
 import java.io.ByteArrayInputStream;
 import java.rmi.Remote;
@@ -55,11 +55,11 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.RemoteAdvertisementService;
-import com.openexchange.advertisement.rmi.impl.RemoteAdvertisementServiceImpl;
-import com.openexchange.advertisement.services.AbstractAdvertisementConfigService;
-import com.openexchange.advertisement.services.AccessCombinationAdvertisementConfigService;
-import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
-import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
+import com.openexchange.advertisement.impl.rmi.RemoteAdvertisementServiceImpl;
+import com.openexchange.advertisement.impl.services.AbstractAdvertisementConfigService;
+import com.openexchange.advertisement.impl.services.AccessCombinationAdvertisementConfigService;
+import com.openexchange.advertisement.impl.services.GlobalAdvertisementConfigService;
+import com.openexchange.advertisement.impl.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -122,8 +122,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
         super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

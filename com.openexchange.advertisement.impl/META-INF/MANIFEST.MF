@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.advertisement.impl
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software AG
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Activator: com.openexchange.advertisement.osgi.Activator
+Bundle-Activator: com.openexchange.advertisement.impl.osgi.Activator
 Import-Package: com.openexchange.advertisement,
  com.openexchange.caching,
  com.openexchange.config,

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.advertisement.rmi.impl;
+package com.openexchange.advertisement.impl.rmi;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,8 +58,8 @@ import java.util.List;
 import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.RemoteAdvertisementService;
-import com.openexchange.advertisement.osgi.Services;
-import com.openexchange.advertisement.services.AbstractAdvertisementConfigService;
+import com.openexchange.advertisement.impl.osgi.Services;
+import com.openexchange.advertisement.impl.services.AbstractAdvertisementConfigService;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.DatabaseService;
