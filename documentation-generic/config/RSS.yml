@@ -50,7 +50,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
-      tags: ["RSS"]
+      tags: ["RSS", "Black List"]
     - key: com.openexchange.messaging.rss.feed.whitelist.ports
       description: |
         Specifies a white-list for such ports that are allowed to connect against when adding/updating a RSS feed.
@@ -62,4 +62,4 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
-      tags: ["RSS"]      
+      tags: ["RSS", "White List"]      

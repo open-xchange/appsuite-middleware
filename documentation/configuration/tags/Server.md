@@ -31,7 +31,7 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | "Enable or disable SearchIterator prefetch. If prefetch is enabled the underlying<br>ResultSet data is completely stored and all related resources are released<br>immediately when creating a SearchIterator. Possible values: TRUE / FALSE"<br> |
 | __Default__ | true |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
 | __File__ | Server.properties |
@@ -111,7 +111,7 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | On session validation of every request the client IP address is compared with the client IP address used for the login request. If this<br>configuration parameter is set to true and the client IP addresses do not match the request will be denied and the denied request is<br>logged with level info. Setting this parameter to false will only log the different client IP addresses with debug level.<br><br>WARNING! This should be only set to false if you know what you are doing and if all requests are secure - requests are always encrypted<br>by using HTTPS.<br> |
 | __Default__ | true |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
 | __File__ | Server.properties |
@@ -131,7 +131,7 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | Subnet mask for accepting IP-ranges.<br>Using CIDR-Notation for v4 and v6 or dotted decimal only for v4.<br>"Examples:"<br>com.openexchange.IPMaskV4=255.255.255.0<br>com.openexchange.IPMaskV4=/24<br>com.openexchange.IPMaskV6=/60<br> |
 | __Default__ | empty |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
 | __File__ | Server.properties |
@@ -141,9 +141,9 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | Specify a comma-separated list of client patterns that do bypass IP check<br>E.g. com.openexchange.IPCheckWhitelist="Mobile App\*", "Foo\*"<br> |
 | __Default__ | open-xchange-mailapp, open-xchange-mobile-api-facade |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a> |
 | __File__ | Server.properties |
 
 ---
@@ -151,7 +151,7 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The default<br>conforms to the path where the UI is installed by the standard packages on the web server. This path is used for the [uiwebpath].<br>For the Open-Xchange 6 frontend the path needs to be configured to "/ox6/index.html".<br>For the App Suite frontend the path needs to be configured to "/appsuite/" which is the default.<br> |
 | __Default__ | /appsuite/ |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
 | __File__ | Server.properties |
@@ -171,7 +171,7 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | Special identifier "web-browser" to let the Cookie(s) be deleted when the Web browser exits<br> |
 | __Default__ | 1W |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
 | __File__ | Server.properties |
@@ -211,7 +211,7 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | If an HTTPS connection is detected the cookie is automatically marked as secure. This tells the browser only to send the cookie over<br>encrypted connections. If HTTPS is terminated in front by some load balancer only HTTP is detected. Then this parameter can force to set<br>the secure flag for cookies. Additionally all links generated inside the groupware to point at itself will use the https:// protocol prefix<br>when this is set. Use this flag to indicate that HTTPS termination happens elsewhere.<br> |
 | __Default__ | false |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
 | __File__ | Server.properties |
@@ -221,7 +221,7 @@ This page shows all properties with the tag: Server
 |:----------------|:--------|
 | __Description__ | The maximum number of active sessions that will be created by this Manager, or -1 for no limit.<br>Default is 250.000 HTTP sessions<br> |
 | __Default__ | 250000 |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
 | __File__ | Server.properties |

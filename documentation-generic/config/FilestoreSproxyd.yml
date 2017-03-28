@@ -86,7 +86,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Black List"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].socketReadTimeout
       description: |
@@ -100,7 +100,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Black List"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].heartbeatInterval
       description: |
@@ -117,4 +117,4 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Black List"]

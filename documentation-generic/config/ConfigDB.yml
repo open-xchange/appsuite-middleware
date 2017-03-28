@@ -34,7 +34,7 @@ properties:
       configcascadeAware: false
       related: 
       file: configdb.properties
-      tags: ["Config DB", "Database"]
+      tags: ["Config DB", "Database", "Credential"]
     - key: readProperty.2
       description: |
         The database password.
@@ -44,7 +44,7 @@ properties:
       configcascadeAware: false
       related: 
       file: configdb.properties
-      tags: ["Config DB", "Database"]
+      tags: ["Config DB", "Database", "Credential"]
     - key: readProperty.3
       description: |
         A property of the db read connection. Should be kept at its default.
@@ -165,7 +165,7 @@ properties:
       configcascadeAware: false
       related: 
       file: configdb.properties
-      tags: ["Config DB", "Database"]
+      tags: ["Config DB", "Database", "Credential"]
     - key: writeProperty.3
       description: |
         A property of the db write connection. Should be kept at its default.

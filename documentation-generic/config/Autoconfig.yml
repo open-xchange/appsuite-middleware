@@ -46,7 +46,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.autoconfig.http.proxy.password, com.openexchange.mail.autoconfig.http.proxy
       file: autoconfig.properties
-      tags: ["Autoconfig", "Mail"]
+      tags: ["Autoconfig", "Mail", "Credential"]
     - key: com.openexchange.mail.autoconfig.http.proxy.password
       description: |
         Specifies the password to use in case specified proxy in property "com.openexchange.mail.autoconfig.http.proxy"
@@ -57,7 +57,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.autoconfig.http.proxy.login, com.openexchange.mail.autoconfig.http.proxy
       file: autoconfig.properties
-      tags: ["Autoconfig", "Mail"]
+      tags: ["Autoconfig", "Mail", "Credential"]
     - key: com.openexchange.mail.autoconfig.allowGuess
       description: |
         Specifies whether it is allowed to "guess" the mail/transport settings.

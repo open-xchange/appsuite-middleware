@@ -107,7 +107,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.caldav.push.apsd.enabled
       file: caldav.properties
-      tags: ["CalDAV","Push"]
+      tags: ["CalDAV","Push", "Credential"]
     - key: com.openexchange.caldav.push.apsd.production
       description: |
         Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. 
