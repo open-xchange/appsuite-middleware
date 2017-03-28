@@ -47,9 +47,9 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.advertisement.impl.services;
 
-import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.impl.osgi.Services;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;

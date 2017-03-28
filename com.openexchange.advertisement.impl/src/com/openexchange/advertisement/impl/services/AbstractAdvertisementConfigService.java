@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.advertisement.impl.services;
 
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,15 +58,18 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.json.ImmutableJSONArray;
 import org.json.ImmutableJSONObject;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.ConfigResult;
-import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.impl.osgi.Services;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -141,11 +145,11 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     }
 
     @Override
-    public JSONObject getConfig(Session session) throws OXException {
+    public JSONValue getConfig(Session session) throws OXException {
         CacheService cacheService = Services.getService(CacheService.class);
         if (cacheService == null) {
             // get config without cache
-            JSONObject result = getConfigByUserInternal(session);
+        	JSONValue result = getConfigByUserInternal(session);
             if (result == null) {
                 String reseller = null;
                 String pack = null;
@@ -175,13 +179,17 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         Cache cache = cacheService.getCache(CACHING_REGION);
         CacheKey key = cache.newCacheKey(session.getContextId(), session.getUserId());
         Object object = cache.get(key);
-        if (object instanceof JSONObject) {
-            return (JSONObject) object;
+        if (object instanceof JSONValue) {
+            return (JSONValue) object;
         }
 
-        JSONObject result = getConfigByUserInternal(session);
+        JSONValue result = getConfigByUserInternal(session);
         if (result != null) {
-            cache.put(key, ImmutableJSONObject.immutableFor(result), false);
+        	if (result.isObject()) {
+        		cache.put(key, ImmutableJSONObject.immutableFor(result.toObject()), false);
+        	} else {
+        		cache.put(key, ImmutableJSONArray.immutableFor(result.toArray()), false);
+        	}
             return result;
         }
         //  ------
@@ -210,16 +218,20 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
 
         key = cache.newCacheKey(-1, reseller, pack);
         object = cache.get(key);
-        if (object instanceof JSONObject) {
-            return (JSONObject) object;
+        if (object instanceof JSONValue) {
+            return (JSONValue) object;
         }
 
         result = getConfigInternal(session, reseller, pack);
-        cache.put(key, ImmutableJSONObject.immutableFor(result), false);
+        if (result.isObject()) {
+    		cache.put(key, ImmutableJSONObject.immutableFor(result.toObject()), false);
+    	} else {
+    		cache.put(key, ImmutableJSONArray.immutableFor(result.toArray()), false);
+    	}
         return result;
     }
 
-    private JSONObject getConfigByUserInternal(Session session) throws OXException {
+    private JSONValue getConfigByUserInternal(Session session) throws OXException {
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
         String id = view.get(PREVIEW_CONFIG, String.class);
@@ -235,7 +247,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 stmt.setInt(1, configId);
                 result = stmt.executeQuery();
                 if (result.next()) {
-                    return new JSONObject(result.getString(1));
+                	return JSONObject.parse(new StringReader(result.getString(1)));
                 }
             } catch (SQLException e) {
                 throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
@@ -251,7 +263,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         return null;
     }
 
-    private JSONObject getConfigInternal(Session session, String reseller, String pack) throws OXException {
+    private JSONValue getConfigInternal(Session session, String reseller, String pack) throws OXException {
         DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection con = dbService.getReadOnly();
         PreparedStatement stmt = null;
@@ -271,7 +283,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     stmt.setInt(1, configId);
                     result = stmt.executeQuery();
                     if (result.next()) {
-                        return new JSONObject(result.getString(1));
+                    	return JSONObject.parse(new StringReader(result.getString(1)));
                     }
                 } catch (JSONException e) {
                     LOG.error("Invalid advertisement configuration data for reseller {} and package {}", reseller, pack);

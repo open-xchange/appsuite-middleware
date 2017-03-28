@@ -52,6 +52,8 @@ package com.openexchange.advertisement;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
+import org.json.JSONValue;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -84,7 +86,7 @@ public interface AdvertisementConfigService {
      * @return The JSON representation for the configuration
      * @throws OXException If configuration cannot be returned
      */
-    public JSONObject getConfig(Session session) throws OXException;
+    public JSONValue getConfig(Session session) throws OXException;
 
     /**
      * Sets an advertisement configuration for a given user by name. This is for testing purpose only.
