@@ -218,7 +218,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
-      tags: ["Drive"]
+      tags: ["Drive", "Host"]
     - key: com.openexchange.drive.directLinkHelp
       description: |
         Configures the pattern for a direct link to the online help. This serves as
@@ -241,7 +241,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
-      tags: ["Drive"]
+      tags: ["Drive", "Host"]
     - key: com.openexchange.drive.events.apn.ios.enabled
       description: |
         Enables or disables push event notifications to clients using the Apple Push

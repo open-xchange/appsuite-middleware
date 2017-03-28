@@ -64,7 +64,7 @@ properties:
       configcascadeAware: false
       related:
       file: caldav.properties
-      tags: ["CalDAV", "Folder"]
+      tags: ["CalDAV", "Folder", "Host"]
     - key: com.openexchange.caldav.push.apsd.enabled
       description: |
         Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.

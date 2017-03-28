@@ -131,7 +131,7 @@ properties:
       configcascadeAware: false
       related: 
       file: microformatSubscription.properties
-      tags: ["Microformats", "Subscribe"]
+      tags: ["Microformats", "Subscribe", "White List"]
     - key: com.openexchange.subscribe.microformats.createModifyEnabled
       description: |
         Enabled/disables the possibility to create/modify subscriptions.

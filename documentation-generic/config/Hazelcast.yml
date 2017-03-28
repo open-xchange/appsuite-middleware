@@ -95,7 +95,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.network.join
       file: hazelcast.properties
-      tags: ["Hazelcast"]
+      tags: ["Hazelcast", "Host"]
     - key: com.openexchange.hazelcast.network.join.multicast.group
       description: |
         Configures the multicast address used to discover other nodes in the cluster
@@ -120,7 +120,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.network.join
       file: hazelcast.properties
-      tags: ["Hazelcast"]
+      tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.merge.firstRunDelay
       description: |
         Configures the time until the first check if the cluster needs to merge is
@@ -172,7 +172,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
-      tags: ["Hazelcast"]
+      tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.network.portAutoIncrement
       description: |
         Configures if automatically the next port should be tried if the incoming
@@ -183,7 +183,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
-      tags: ["Hazelcast"]
+      tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.network.outboundPortDefinitions
       description: |
         By default, Hazelcast lets the system to pick up an ephemeral port during
@@ -198,7 +198,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
-      tags: ["Hazelcast"]
+      tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.network.enableIPv6Support
       description: |
         Enables or disables support for IPv6.  IPv6 support is switched off by

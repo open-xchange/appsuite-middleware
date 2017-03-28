@@ -37,14 +37,14 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
-      tags: ["Mail","REST"]
+      tags: ["Mail","REST", "Host"]
     - key: com.openexchange.dovecot.doveadm.apiSecret
       description: |
-        Specifies the API secret to communicate with the Dovecot DoveAdm REST interface
+        Specifies the API secret to communicate with the Dovecot DoveAdm REST interface.
       defaultValue: 
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
       related: 
       file: doveadm.properties
-      tags: ["Mail","REST"]
+      tags: ["Mail","REST", "Credential"]

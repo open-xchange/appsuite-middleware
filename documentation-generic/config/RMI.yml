@@ -9,7 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rmi.properties
-      tags: ["RMI"]
+      tags: ["RMI", "Host"]
     - key: com.openexchange.rmi.port
       description: |
         Specifies the rmi port.
@@ -19,4 +19,4 @@ properties:
       configcascadeAware: false
       related: 
       file: rmi.properties
-      tags: ["RMI"]
+      tags: ["RMI", "Port"]

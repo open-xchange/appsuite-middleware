@@ -12,24 +12,24 @@ properties:
       tags: ["Twitter"]
     - key: com.openexchange.twitter.http.proxyHost
       description: |
-        The HTTP proxy host
+        The HTTP proxy host.
       defaultValue:
       version:
       reloadable: false
       configcascadeAware: false
       related: com.openexchange.twitter.http.proxyPort
       file: twitter.properties
-      tags: ["Twitter"]
+      tags: ["Twitter", "Host"]
     - key: com.openexchange.twitter.http.proxyPort
       description: |
-        The HTTP proxy port
+        The HTTP proxy port.
       defaultValue:
       version:
       reloadable: false
       configcascadeAware: false
       related: com.openexchange.twitter.http.proxyHost
       file: twitter.properties
-      tags: ["Twitter"]
+      tags: ["Twitter", "Port"]
     - key: com.openexchange.twitter.http.connectionTimeout
       description: |
         Connection time out

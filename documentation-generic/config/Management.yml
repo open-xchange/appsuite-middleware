@@ -9,7 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
-      tags: ["Management", "RMI"]
+      tags: ["Management", "RMI", "Port"]
     - key: JMXServerPort
       description: |
         Define the JMX RMI Connector Server port. Typically chosen randomly by JVM.
@@ -20,7 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
-      tags: ["Management", "RMI"]
+      tags: ["Management", "RMI", "Port"]
     - key: JMXBindAddress
       description: |
         Define the bind address for JMX agent.
@@ -31,7 +31,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
-      tags: ["Management", "Monitoring"]
+      tags: ["Management", "Monitoring", "Host"]
     - key: JMXLogin
       description: |
         Define the JMX login for authentication.

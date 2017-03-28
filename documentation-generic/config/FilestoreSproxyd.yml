@@ -33,7 +33,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Host", "Port"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].path
       description: |
@@ -47,7 +47,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Host"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].maxConnections
       description: |

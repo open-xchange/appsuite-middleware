@@ -29,7 +29,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
-      tags: ["Univention", "Authentication", "LDAP"]
+      tags: ["Univention", "Authentication", "LDAP", "Host"]
     - key: com.openexchange.authentication.ucs.mailAttribute
       description: |
         Specifies the attribute containing the email address from which domain part will be used to identify the context.

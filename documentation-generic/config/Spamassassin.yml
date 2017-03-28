@@ -19,7 +19,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin"]
+      tags: ["Spamassassin", "Host"]
     - key: com.openexchange.spamhandler.spamassassin.port
       description: |
         If the mail should be send to spamd specify the port of the spamassassin
@@ -30,7 +30,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin"]
+      tags: ["Spamassassin", "Port"]
     - key: com.openexchange.spamhandler.spamassassin.timeout
       description: |
         If the mail should be send to spamd specify the timeout after which the

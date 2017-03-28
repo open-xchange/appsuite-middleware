@@ -21,7 +21,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
-      tags: ["Mail","SMTP"]
+      tags: ["Mail","SMTP", "Host"]
     - key: com.openexchange.smtp[.primary].smtpAuthEnc
       description: |
         Define the encoding for SMTP authentication

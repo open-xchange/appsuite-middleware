@@ -11,4 +11,4 @@ properties:
       configcascadeAware: false
       related: 
       file: tokens.properties
-      tags: ["Jump"]
+      tags: ["Jump", "Host"]

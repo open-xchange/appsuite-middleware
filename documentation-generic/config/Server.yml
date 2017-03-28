@@ -475,7 +475,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
-    tags: ["Server"] 
+    tags: ["Server", "Host"] 
   - key: com.openexchange.connector.networkListenerPort
     description: |
       The default port for the connector's http network listener
@@ -485,7 +485,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
-    tags: ["Server"]   
+    tags: ["Server", "Port"]   
   - key: com.openexchange.connector.networkSslListenerPort
     description: |
       The default port for the connector's https network listener
@@ -495,7 +495,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
-    tags: ["Server"] 
+    tags: ["Server", "Port"] 
   - key: com.openexchange.connector.maxRequestParameters
     description: |
       Specify the max. number of allowed request parameters for the connector http

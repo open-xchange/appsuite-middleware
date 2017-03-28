@@ -178,7 +178,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP", "Host"]
     - key: com.openexchange.imap[.primary].maxNumConnections
       description: |
         The max. number of connection allowed being established for a user to an IMAP server. Less than or equal to zero means infinite.
@@ -415,17 +415,6 @@ properties:
       related: 
       file: imap.properties
       tags: ["Mail","IMAP"]
-
-
-
-
-
-
-
-
-
-
-
     - key: com.openexchange.imap.greeting.host.regex
       description: |
         Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary

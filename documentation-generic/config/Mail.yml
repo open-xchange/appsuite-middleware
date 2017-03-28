@@ -78,7 +78,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
-      tags: ["Mail"]
+      tags: ["Mail", "Host"]
     - key: com.openexchange.mail.transportServer
       description: |
         Primary transport server: e.g. 192.168.178.32:125 or smtp://192.168.178.32:225
@@ -541,7 +541,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
-      tags: ["Mail", "MailAccount"]
+      tags: ["Mail", "Host"]
     - key: com.openexchange.mail.signature.maxImageSize
       description: |
         Specifies the maximum size (in MB) for one image contained in the HTML mail signature

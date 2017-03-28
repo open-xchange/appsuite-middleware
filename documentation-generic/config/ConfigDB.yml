@@ -24,7 +24,7 @@ properties:
       configcascadeAware: false
       related: 
       file: configdb.properties
-      tags: ["Config DB", "Database"]
+      tags: ["Config DB", "Database", "Host"]
     - key: readProperty.1
       description: |
         The db user name.
@@ -145,7 +145,7 @@ properties:
       configcascadeAware: false
       related: 
       file: configdb.properties
-      tags: ["Config DB", "Database"]
+      tags: ["Config DB", "Database", "Host"]
     - key: writeProperty.1
       description: |
         The db user name.

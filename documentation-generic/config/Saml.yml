@@ -67,7 +67,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties 
-      tags: ["SAML"]      
+      tags: ["SAML", "Host"]      
     - key: com.openexchange.saml.slsURL
       description: |
         Sets the URL of the local single logout service. This value is compared against Destination
@@ -83,7 +83,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
-      tags: ["SAML"]   
+      tags: ["SAML", "Host"]   
     - key: com.openexchange.saml.logoutResponseBinding
       description: |
         The binding via which logout responses shall be sent to the IdP on IdP-initiated single
@@ -134,7 +134,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties 
-      tags: ["SAML"]      
+      tags: ["SAML", "Host"]      
     - key: com.openexchange.saml.idpLogoutURL
       description: |
         The URL of the IdP endpoint where logout requests are to be sent to.
@@ -146,7 +146,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties  
-      tags: ["SAML"]     
+      tags: ["SAML", "Host"]     
     - key: com.openexchange.saml.enableAutoLogin
       description: |
         It is possible to enable a special kind of auto login mechanism that allows user agents to

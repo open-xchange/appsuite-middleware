@@ -220,7 +220,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-caldav.properties
-      tags: ["Onboarding", "CalDAV"]
+      tags: ["Onboarding", "CalDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.caldav.login.customsource
       description: |
         Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
@@ -248,7 +248,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-carddav.properties
-      tags: ["Onboarding", "CardDAV"]
+      tags: ["Onboarding", "CardDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.carddav.login.customsource
       description: |
         Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
@@ -305,7 +305,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-eas.properties
-      tags: ["Onboarding", "EAS"]
+      tags: ["Onboarding", "EAS", "Host", "Port"]
     - key: com.openexchange.client.onboarding.eas.login.customsource
       description: |
         Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
@@ -337,7 +337,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
-      tags: ["Onboarding", "Mail"]
+      tags: ["Onboarding", "Mail", "Host"]
     - key: com.openexchange.client.onboarding.mail.imap.port
       description: |
         Specifies the IMAP port.
@@ -348,7 +348,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
-      tags: ["Onboarding", "Mail"]
+      tags: ["Onboarding", "Mail", "Port"]
     - key: com.openexchange.client.onboarding.mail.imap.secure
       description: |
         Specifies whether a secure connection is supposed to established to access the IMAP server.
@@ -372,7 +372,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
-      tags: ["Onboarding", "Mail"]
+      tags: ["Onboarding", "Mail", "Host"]
     - key: com.openexchange.client.onboarding.mail.smtp.port
       description: |
         Specifies the SMTP port.
@@ -383,7 +383,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
-      tags: ["Onboarding", "Mail"]
+      tags: ["Onboarding", "Mail", "Port"]
     - key: com.openexchange.client.onboarding.mail.smtp.secure
       description: |
         Specifies whether a secure connection is supposed to established to access the SMTP server.

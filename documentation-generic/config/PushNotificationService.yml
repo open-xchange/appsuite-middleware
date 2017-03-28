@@ -188,7 +188,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
-      tags: ["Push"]
+      tags: ["Push", "Host"]
     - key: com.openexchange.push.udp.registerTimeout
       description: |
         Time in milliseconds a client registration is kept.
@@ -208,7 +208,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
-      tags: ["Push"]
+      tags: ["Push", "Port"]
     - key: com.openexchange.push.udp.registerDistributionEnabled
       description: |
         Only one of registerDistribution or eventDistribution can be enabled at the same time.
@@ -250,7 +250,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
-      tags: ["Push"]
+      tags: ["Push", "Host"]
     - key: com.openexchange.push.udp.senderAddress
       description: |
         Address used as the sender address when UDP packages are sent to the clients 
@@ -291,4 +291,4 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
-      tags: ["Push"]
+      tags: ["Push", "Port"]

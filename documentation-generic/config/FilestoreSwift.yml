@@ -32,7 +32,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Host"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].path
       description: |

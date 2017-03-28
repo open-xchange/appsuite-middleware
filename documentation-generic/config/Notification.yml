@@ -51,7 +51,7 @@ properties:
       configcascadeAware: false
       related: 
       file: notification.properties
-      tags: ["Notification", "Task", "Appointment"]
+      tags: ["Notification", "Task", "Appointment", "Host"]
     - key: imipForInternalUsers
       description: |
         Enables/Disables imip-mails for internal users.

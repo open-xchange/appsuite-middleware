@@ -54,7 +54,7 @@ properties:
       configcascadeAware: false
       related: 
       file: share.properties
-      tags: ["Share"]
+      tags: ["Share", "Host"]
 
     - key: com.openexchange.share.cleanup.guestExpiry
       description: |
