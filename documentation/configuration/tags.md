@@ -24,7 +24,6 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Config_DB.html">Config DB</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Configjump.html">Configjump</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contacts.html">Contacts</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Crawler.html">Crawler</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Data_Retention.html">Data Retention</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>
