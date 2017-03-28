@@ -19,7 +19,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin", "Host"]
+      tags: ["Spamassassin"]
     - key: com.openexchange.spamhandler.spamassassin.port
       description: |
         If the mail should be send to spamd specify the port of the spamassassin
@@ -30,7 +30,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin", "Host"]
+      tags: ["Spamassassin"]
     - key: com.openexchange.spamhandler.spamassassin.timeout
       description: |
         If the mail should be send to spamd specify the timeout after which the
@@ -41,7 +41,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin", "Timeout"]
+      tags: ["Spamassassin"]
     - key: com.openexchange.spamhandler.spamassassin.retries
       description: |
         If the mail should be send to spamd specify the connect retries here. 
@@ -51,7 +51,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin", "Timeout"]
+      tags: ["Spamassassin"]
     - key: com.openexchange.spamhandler.spamassassin.retrysleep
       description: |
         If the mail should be send to spamd specify the connect retries sleep here.
@@ -62,4 +62,4 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin", "Timeout"] 
+      tags: ["Spamassassin"] 
