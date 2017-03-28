@@ -287,7 +287,7 @@ This page shows all properties with the tag: Folder
 | __Description__ | Allows to exclude specific root folders from OX Drive synchronization explicitly. <br>Excluded folders may not be used as root folder for the synchronization, <br>however, this does not apply to their subfolders automatically.<br>Excluded folders should be specified in a comma-separated list of their unique identifiers.<br>Typical candidates for the blacklist would be folder 15 (the "public folders" root) <br>or folder 10 (the "shared folders" root) in large enterprise installations.      <br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Black_List.html">Black List</a> |
 | __File__ | drive.properties |
 
 ---

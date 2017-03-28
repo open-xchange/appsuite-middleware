@@ -27,7 +27,7 @@ properties:
       immediately when creating a SearchIterator. Possible values: TRUE / FALSE"
     defaultValue: true
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties
@@ -137,7 +137,7 @@ properties:
       by using HTTPS.
     defaultValue: true
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties
@@ -167,7 +167,7 @@ properties:
       com.openexchange.IPMaskV6=/60
     defaultValue: empty
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties
@@ -178,11 +178,11 @@ properties:
       E.g. com.openexchange.IPCheckWhitelist="Mobile App*", "Foo*"
     defaultValue: open-xchange-mailapp, open-xchange-mobile-api-facade
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties
-    tags: ["Server"] 
+    tags: ["Server", "White List"] 
   - key: com.openexchange.UIWebPath
     description: |
       Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The default
@@ -191,7 +191,7 @@ properties:
       For the App Suite frontend the path needs to be configured to "/appsuite/" which is the default.
     defaultValue: /appsuite/
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties
@@ -211,7 +211,7 @@ properties:
        Special identifier "web-browser" to let the Cookie(s) be deleted when the Web browser exits
     defaultValue: 1W
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties
@@ -259,7 +259,7 @@ properties:
        when this is set. Use this flag to indicate that HTTPS termination happens elsewhere.
     defaultValue: false
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties
@@ -270,7 +270,7 @@ properties:
        Default is 250.000 HTTP sessions
     defaultValue: 250000
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: Server.properties

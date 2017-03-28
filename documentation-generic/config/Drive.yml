@@ -196,7 +196,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
-      tags: ["Drive", "Folder"]
+      tags: ["Drive", "Folder", "Black List"]
     - key: com.openexchange.drive.directLinkQuota
       description: |
         Configures the pattern for a direct link to manage a user's quota. 
