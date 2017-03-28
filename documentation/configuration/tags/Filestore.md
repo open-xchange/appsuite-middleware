@@ -19,7 +19,7 @@ This page shows all properties with the tag: Filestore
 | __Description__ | Specifies the API end-point pairs to be used. At least one host must be provided.<br>Multiple hosts can be specified as comma-separated list; e.g. "my1.clouddrive.invalid, my2.clouddrive.invalid"<br>Required.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | filestore-swift.properties |
 
 ---
@@ -258,7 +258,7 @@ This page shows all properties with the tag: Filestore
 | __Description__ | Specifies the hosts as <hostname>:<port> pairs to be used for network communication.<br>At least one host must be provided, multiple hosts can be specified as comma-separated<br>list.<br>Required.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | filestore-sproxyd.properties |
 
 ---
@@ -267,7 +267,7 @@ This page shows all properties with the tag: Filestore
 | __Description__ | The path under which sproxyd is available. The path must lead to the namespace under<br>which OX related files shall be stored. It is expected that the namespace configuration<br>is available under <protocol>://<host>/<path>/.conf.<br>Required.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | filestore-sproxyd.properties |
 
 ---

@@ -41,21 +41,21 @@ This page shows all properties with the tag: Twitter
 ---
 | __Key__ | com.openexchange.twitter.http.proxyHost |
 |:----------------|:--------|
-| __Description__ | The HTTP proxy host<br> |
+| __Description__ | The HTTP proxy host.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.twitter.http.proxyPort |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | twitter.properties |
 
 ---
 | __Key__ | com.openexchange.twitter.http.proxyPort |
 |:----------------|:--------|
-| __Description__ | The HTTP proxy port<br> |
+| __Description__ | The HTTP proxy port.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.twitter.http.proxyHost |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | twitter.properties |
 
 ---

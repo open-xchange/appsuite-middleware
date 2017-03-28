@@ -125,7 +125,7 @@ title: Subscribe
 | __Description__ | Optionally specifies the list of accepted host names allowed being subscribed.<br>If property is empty, there is no restriction for such subscriptions.<br>Otherwise non-matching host names are rejected. <br> |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Microformats.html">Microformats</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Microformats.html">Microformats</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a> |
 | __File__ | microformatSubscription.properties |
 
 ---

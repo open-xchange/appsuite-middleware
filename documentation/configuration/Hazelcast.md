@@ -80,7 +80,7 @@ configuration files in the "hazelcast" subfolder.
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.hazelcast.network.join |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | hazelcast.properties |
 
 ---
@@ -102,7 +102,7 @@ configuration files in the "hazelcast" subfolder.
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.hazelcast.network.join |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | hazelcast.properties |
 
 ---
@@ -142,7 +142,7 @@ configuration files in the "hazelcast" subfolder.
 | __Default__ | 5701 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | hazelcast.properties |
 
 ---
@@ -152,7 +152,7 @@ configuration files in the "hazelcast" subfolder.
 | __Default__ | true |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | hazelcast.properties |
 
 ---
@@ -161,7 +161,7 @@ configuration files in the "hazelcast" subfolder.
 | __Description__ | By default, Hazelcast lets the system to pick up an ephemeral port during<br>socket bind operation. But security policies/firewalls may require to<br>restrict outbound ports to be used by Hazelcast enabled applications. To<br>fulfill this requirement, you can configure Hazelcast to use only defined<br>outbound ports. You can use port ranges and/or comma separated ports, e.g.<br>"35000-35100" or "36001, 36002, 36003".<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | hazelcast.properties |
 
 ---

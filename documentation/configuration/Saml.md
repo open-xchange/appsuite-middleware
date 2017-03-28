@@ -55,7 +55,7 @@ title: Saml
 | __Description__ | Sets the URL of the local assertion consumer service (ACS). This value is used within<br>authentication requests, compared against Destination attributes in IdP responses<br>and will be contained in the service providers metadata XML. The according endpoint<br>is always registered with '{prefix}/saml/acs' as servlet alias.<br><br>This property is mandatory.<br>Default: <empty><br>Example: https://appsuite.example.com/appsuite/api/saml/acs<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | saml.properties |
 
 ---
@@ -64,7 +64,7 @@ title: Saml
 | __Description__ | Sets the URL of the local single logout service. This value is compared against Destination<br>attributes in IdP responses and will be contained in the service providers metadata XML.<br>The according endpoint is always registered with '{prefix}/saml/sls' as servlet alias.<br><br>This property is mandatory if 'com.openexchange.saml.enableSingleLogout' is 'true'.<br>"Default: <empty>"<br>"Example: 'https://appsuite.example.com/appsuite/api/saml/sls'"<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | saml.properties |
 
 ---
@@ -102,7 +102,7 @@ title: Saml
 | __Description__ | The URL of the IdP endpoint where authentication requests are to be sent to.<br><br>This property is mandatory.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | saml.properties |
 
 ---
@@ -111,7 +111,7 @@ title: Saml
 | __Description__ | The URL of the IdP endpoint where logout requests are to be sent to.<br><br>This property is mandatory if 'com.openexchange.saml.enableSingleLogout' is 'true'.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | saml.properties |
 
 ---

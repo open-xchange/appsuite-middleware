@@ -41,7 +41,7 @@ title: Share
 | __Description__ | Configures a separate hostname to use for guest users. This hostname is used <br>when generating external share links, as well as at other locations where <br>hyperlinks are constructed in the context of guest users.<br>Usually, the guest hostname refers to a separate subdomain of the <br>installation like "share.example.com", and is defined as an additional named<br>virtual host pointing to the web client's document root in the webserver's <br>configuration.<br>This property may defined statically here, overridden via config cascade, or<br>be provided through an additionally installed hostname service.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | share.properties |
 
 ---

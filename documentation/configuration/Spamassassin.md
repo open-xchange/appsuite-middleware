@@ -20,7 +20,7 @@ title: Spamassassin
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.spamhandler.spamassassin.spamd |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamassassin.html">Spamassassin</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamassassin.html">Spamassassin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | spamassassin.properties |
 
 ---
@@ -31,7 +31,7 @@ title: Spamassassin
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
 | __Related__ | com.openexchange.spamhandler.spamassassin.spamd |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamassassin.html">Spamassassin</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamassassin.html">Spamassassin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | spamassassin.properties |
 
 ---

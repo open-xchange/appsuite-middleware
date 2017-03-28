@@ -44,6 +44,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Group.html">Group</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Halo.html">Halo</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/I18N.html">I18N</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Ical.html">Ical</a>
@@ -77,6 +78,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Participant.html">Participant</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Preview.html">Preview</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Probe.html">Probe</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Provisioning.html">Provisioning</a>

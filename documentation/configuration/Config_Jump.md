@@ -11,7 +11,7 @@ Properties for the generic Config Jump implementation.
 | __Default__ | http://localhost/?cid=%c&login=%u&pass=%p |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Configjump.html">Configjump</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Configjump.html">Configjump</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | configjump.properties |
 
 ---

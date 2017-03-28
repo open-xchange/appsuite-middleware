@@ -27,7 +27,7 @@ replacing [filestoreID] with the actual identifier.
 | __Description__ | Specifies the API end-point pairs to be used. At least one host must be provided.<br>Multiple hosts can be specified as comma-separated list; e.g. "my1.clouddrive.invalid, my2.clouddrive.invalid"<br>Required.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | filestore-swift.properties |
 
 ---
