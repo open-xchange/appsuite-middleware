@@ -1,4 +1,4 @@
-Cfeature_name: IMAP
+feature_name: IMAP
 feature_description: |
   To differentiate between settings that apply all IMAP accounts or settings that only apply to the primary account
   each property containing the "[.primary]" suffix allows to specify a value only applicable to the primary account
