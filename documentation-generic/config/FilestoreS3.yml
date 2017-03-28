@@ -130,7 +130,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].signerOverride
       description: |

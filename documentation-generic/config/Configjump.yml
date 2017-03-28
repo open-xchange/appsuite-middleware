@@ -12,4 +12,4 @@ properties:
       configcascadeAware: false
       related: 
       file: configjump.properties
-      tags: ["Configjump"]
+      tags: ["Configjump", "Credential"]

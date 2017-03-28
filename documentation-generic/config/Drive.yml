@@ -282,7 +282,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.ios.enabled
       file: drive.properties
-      tags: ["Drive", "Push", "Apple"]
+      tags: ["Drive", "Push", "Apple", "Credential"]
     - key: com.openexchange.drive.events.apn.ios.production
       description: |
         Indicates which APNS service is used when sending push notifications to iOS
@@ -350,7 +350,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
-      tags: ["Drive", "Push", "Apple"]
+      tags: ["Drive", "Push", "Apple", "Credential"]
     - key: com.openexchange.drive.events.apn.macos.production
       description: |
         Indicates which APNS service is used when sending push notifications to Mac
