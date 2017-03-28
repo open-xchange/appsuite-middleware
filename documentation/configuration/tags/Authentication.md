@@ -4,6 +4,25 @@ title: Authentication
 
 This page shows all properties with the tag: Authentication
 
+| __Key__ | JMXLogin |
+|:----------------|:--------|
+| __Description__ | Define the JMX login for authentication.<br>Leaving this property empty means not to use authentication.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | management.properties |
+
+---
+| __Key__ | JMXPassword |
+|:----------------|:--------|
+| __Description__ | Define the JMX password in SHA hashed version.<br>This property only has effect if property "JMXLogin" is set.<br><br>======================================================================<br>             Using Perl to generate the SHA hash<br>======================================================================<br><br>The following Perl command can be used to generate such a password:<br>(requires to install the Digest::SHA1 Perl module)<br><br>  perl -M'Digest::SHA1 qw(sha1_base64)' -e 'print sha1_base64("YOURSECRET")."=\n";'<br><br>NOTE:<br>Since Debian Wheezy and Ubuntu 12.04 the corresponding Perl module has been replaced with "Digest::SHA" (and "Digest::SHA1" is no longer maintained)<br><br>======================================================================<br>             Using ruby to generate the SHA hash<br>======================================================================<br><br>Alternatively, ruby can be used to generate the appropriate SHA1 hash:<br><br>  ruby -rdigest -e 'puts Digest::SHA1.base64digest("YOURSECRET")'<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | JMXLogin |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | management.properties |
+
+---
 | __Key__ | com.openexchange.authentication.ucs.useLdapPool |
 |:----------------|:--------|
 | __Description__ | Specifies whether to se ldap pooling or not.<br> |
@@ -101,6 +120,83 @@ This page shows all properties with the tag: Authentication
 | __Related__ | com.openexchange.authentication.ucs.bindDn |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Univention.html">Univention</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/LDAP.html">LDAP</a> |
 | __File__ | authplugin.properties |
+
+---
+| __Key__ | mail.smtp.auth |
+|:----------------|:--------|
+| __Description__ | If true, attempt to authenticate the user using the AUTH command.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.smtp.saslrealm |
+|:----------------|:--------|
+| __Description__ | The realm to use with DIGEST-MD5 authentication.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.auth.login.disable |
+|:----------------|:--------|
+| __Description__ | If true, prevents use of the non-standard AUTHENTICATE LOGIN command, instead using the plain LOGIN command.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.auth.plain.disable |
+|:----------------|:--------|
+| __Description__ | If true, prevents use of the AUTHENTICATE PLAIN command.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.sasl.enable |
+|:----------------|:--------|
+| __Description__ | If set to true, attempt to use the javax.security.sasl package to choose an authentication mechanism for login.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.sasl.mechanisms |
+|:----------------|:--------|
+| __Description__ | A space or comma separated list of SASL mechanism names to try to use.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.sasl.authorizationid |
+|:----------------|:--------|
+| __Description__ | The authorization ID to use in the SASL authentication. If not set, the authentication ID (user name) is used.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.pop3.apop.enable |
+|:----------------|:--------|
+| __Description__ | If set to true, use APOP instead of USER/PASS to login to the POP3 server, if the POP3 server supports APOP.<br>APOP sends a digest of the password rather than the clear text password.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
 
 ---
 | __Key__ | com.openexchange.kerberos.moduleName |
@@ -357,101 +453,5 @@ This page shows all properties with the tag: Authentication
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
 | __File__ | AdminDaemon.properties |
-
----
-| __Key__ | mail.smtp.auth |
-|:----------------|:--------|
-| __Description__ | If true, attempt to authenticate the user using the AUTH command.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.smtp.saslrealm |
-|:----------------|:--------|
-| __Description__ | The realm to use with DIGEST-MD5 authentication.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.auth.login.disable |
-|:----------------|:--------|
-| __Description__ | If true, prevents use of the non-standard AUTHENTICATE LOGIN command, instead using the plain LOGIN command.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.auth.plain.disable |
-|:----------------|:--------|
-| __Description__ | If true, prevents use of the AUTHENTICATE PLAIN command.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.sasl.enable |
-|:----------------|:--------|
-| __Description__ | If set to true, attempt to use the javax.security.sasl package to choose an authentication mechanism for login.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.sasl.mechanisms |
-|:----------------|:--------|
-| __Description__ | A space or comma separated list of SASL mechanism names to try to use.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.sasl.authorizationid |
-|:----------------|:--------|
-| __Description__ | The authorization ID to use in the SASL authentication. If not set, the authentication ID (user name) is used.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.pop3.apop.enable |
-|:----------------|:--------|
-| __Description__ | If set to true, use APOP instead of USER/PASS to login to the POP3 server, if the POP3 server supports APOP.<br>APOP sends a digest of the password rather than the clear text password.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | JMXLogin |
-|:----------------|:--------|
-| __Description__ | Define the JMX login for authentication.<br>Leaving this property empty means not to use authentication.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | management.properties |
-
----
-| __Key__ | JMXPassword |
-|:----------------|:--------|
-| __Description__ | Define the JMX password in SHA hashed version.<br>This property only has effect if property "JMXLogin" is set.<br><br>======================================================================<br>             Using Perl to generate the SHA hash<br>======================================================================<br><br>The following Perl command can be used to generate such a password:<br>(requires to install the Digest::SHA1 Perl module)<br><br>  perl -M'Digest::SHA1 qw(sha1_base64)' -e 'print sha1_base64("YOURSECRET")."=\n";'<br><br>NOTE:<br>Since Debian Wheezy and Ubuntu 12.04 the corresponding Perl module has been replaced with "Digest::SHA" (and "Digest::SHA1" is no longer maintained)<br><br>======================================================================<br>             Using ruby to generate the SHA hash<br>======================================================================<br><br>Alternatively, ruby can be used to generate the appropriate SHA1 hash:<br><br>  ruby -rdigest -e 'puts Digest::SHA1.base64digest("YOURSECRET")'<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | JMXLogin |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | management.properties |
 
 ---

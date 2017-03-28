@@ -4,366 +4,247 @@ title: Mail
 
 This page shows all properties with the tag: Mail
 
-| __Key__ | com.openexchange.spamhandler.name |
+| __Key__ | com.openexchange.mail.categories |
 |:----------------|:--------|
-| __Description__ | Specifies the name of the spam handler to use for the primary mail account. The special name "NoSpamHandler" explicitly sets no spam handler<br>If such a setting is not specified, the spam handler as configured through the mail bundle is used;<br>e.g. "com.openexchange.imap.spamHandler" in file 'imap.properties'<br> |
+| __Description__ | General capability to enable/disable mail categories for primary inbox<br> |
 | __Default__ | false |
-| __Version__ | 7.8.4 |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | spamhandler.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.spamhandler.enabled |
+| __Key__ | com.openexchange.mail.categories.enabled |
 |:----------------|:--------|
-| __Description__ | Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).<br>If no configuration is available (for the mentioned property) the previously configured user setting mail permission bit will be taken into account. If there is a configuration for "com.openexchange.spamhandler.enabled" available these will be used for the defined scope <br><b>Caution:</b> if the property has been set via ConfigCascade only these source will be used. Changing the user configuration afterwards via /opt/open-xchange/sbin/changeuser ... --gui_spam_filter_capabilities_enabled true/false will have no effect! You can change it for instance on a user base as described here: http://oxpedia.org/wiki/index.php?title=ConfigCascade . If you remove the property from ConfigCascade sources the formerly overwritten permission bit will be used.<br> |
-| __Default__ | UserSettingMail permission bit from database |
-| __Version__ | 7.8.4 |
+| __Description__ | Switch to show or hide mail categories feature during the first start. <br>Notice that this property only influence the starting value. <br>Changing this value will probably have no effect on users with already have "com.openexchange.mail.categories" set to true.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.spamhandler.name |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | spamhandler.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.dovecot.doveadm.enabled |
+| __Key__ | com.openexchange.mail.categories.forced |
 |:----------------|:--------|
-| __Description__ | Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not<br> |
+| __Description__ | Switch to force showing the mail categories feature. <br>If set to true, the com.openexchange.mail.categories.enabled property is always true and can't be changed.<br> |
 | __Default__ | false |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a> |
-| __File__ | doveadm.properties |
-
----
-| __Key__ | com.openexchange.dovecot.doveadm.endpoints |
-|:----------------|:--------|
-| __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds (default is 10sec)<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds (default is 3sec)<br>com.openexchange.dovecot.doveadm.endpoints.checkInterval           The time interval in milliseconds when to check if a previously black-listed end-point is re-available again (default is 60sec)<br><br>Full example :<br>com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections=100<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout=3000<br>com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a> |
-| __File__ | doveadm.properties |
-
----
-| __Key__ | com.openexchange.dovecot.doveadm.apiSecret |
-|:----------------|:--------|
-| __Description__ | Specifies the API secret to communicate with the Dovecot DoveAdm REST interface<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a> |
-| __File__ | doveadm.properties |
-
----
-| __Key__ | com.openexchange.imap[.primary].imapSort |
-|:----------------|:--------|
-| __Description__ | Define where to sort emails: Value "imap" to let the  IMAP Server sort (faster but less reliable).<br>Leave blank or fill in value "application" to sort within application (slower but good quality).<br>The sorting is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in<br>mail.properties.<br>NOTE:<br>This value is going to be set to "application" if IMAP server capabilities do not contain string "SORT".<br>Moreover, please also refer to property "com.openexchange.imap.fallbackOnFailedSORT" to specify how to react to a possible "NO" response.<br>Default is "imap"<br> |
-| __Default__ | imap |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].imapSearch |
+| __Key__ | com.openexchange.mail.categories.general.name.fallback |
 |:----------------|:--------|
-| __Description__ | Define where to search for emails:<br>- Use value "imap" to let the IMAP Server search. The search is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in mail.properties.<br>- Use value "force-imap" to let the IMAP Server search in every case.<br>- Leave blank or fill in value "application" to search within application.<br>Default is "force-imap"<br> |
-| __Default__ | force-imap |
+| __Description__ | The fallback name of the default general category.<br> |
+| __Default__ | General |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap.umlautFilterThreshold |
+| __Key__ | com.openexchange.mail.categories.general.name.[locale] |
 |:----------------|:--------|
-| __Description__ | Specify the threshold for number of search results returned by IMAP server for which manual umlauts-filtering<br>will be applied. If less than or equal to zero, no manual filtering will be applied.<br>Default value is 50.<br> |
-| __Default__ | 50 |
+| __Description__ | For each language which should be supported a translated name for the general category should be defined.<br>For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO-3166 country code (e.g. de_DE or en_US)<br><br>NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].imapFastFetch |
+| __Key__ | com.openexchange.mail.categories.identifiers |
 |:----------------|:--------|
-| __Description__ | This property determines whether a fast fetch is performed on large mail<br>folders or not. Although the fetch is fast on IMAP side, a lot of data is<br>transfered during reading response which cause a temporary memory peak.<br>If disabled only the necessary fields are used as command arguments,<br>which is slower but needs less memory.<br>NOTE: See property "imapMessageFetchLimit" to know which mail folders are<br>treated as large mail folders<br> |
-| __Default__ | true |
+| __Description__ | Specifies a comma separated list of system category identifiers ([category]).<br><br>System categories can be forced but not renamed.<br>Please note that the use of "general" is prohibited!<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].imapSupportsACL |
+| __Key__ | com.openexchange.mail.user.categories.identifiers |
 |:----------------|:--------|
-| __Description__ | Define if IMAP server supports ACLs. Possible values: true/false/auto<br>NOTE: Value "auto" means to use server-defined ACL support as indicated<br>through response to IMAP command "CAPABILITY"<br> |
-| __Default__ | auto |
+| __Description__ | Specifies a comma separated list of user category identifiers ([category]). E.g.: "uc1,uc2,uc3"<br><br>User categories can be renamed but not be forced.<br>Please note that the use of "general" is prohibited!<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].imapTimeout |
+| __Key__ | com.openexchange.mail.categories.[category].flag |
 |:----------------|:--------|
-| __Description__ | Define the socket read timeout value in milliseconds. A value less than<br>or equal to zero is infinite timeout. See also mail.imap.timeout<br> |
-| __Default__ | 50000 |
+| __Description__ | Specifies the category's flag name that is supposed to be used for filter/search expressions executed by mail back-end;<br>e.g. "com.openexchange.mail.categories.offers.flag=$offers"<br>Required. <br>[category] must be replaced with the actual category identifier.<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].imapConnectionTimeout |
+| __Key__ | com.openexchange.mail.categories.[category].force |
 |:----------------|:--------|
-| __Description__ | Define the socket connect timeout value in milliseconds. A value less than<br>or equal to zero is infinite timeout. See also mail.imap.connectiontimeout<br> |
-| __Default__ | 20000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap[.primary].imapTemporaryDown |
-|:----------------|:--------|
-| __Description__ | Define the amount of time in milliseconds an IMAP server is treated as being temporary down.<br>An IMAP server is treated as being temporary down if a socket connect fails. Further requests to<br>the affected IMAP server are going to be denied for the specified amount of time.<br>A value less or equal to zero disables this setting.<br> |
-| __Default__ | 10000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap[.primary].imapAuthEnc |
-|:----------------|:--------|
-| __Description__ | Define the encoding for IMAP authentication<br> |
-| __Default__ | UTF-8 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.User2ACLImpl |
-|:----------------|:--------|
-| __Description__ | Name of the class that implements User2ACL, their alias or "auto" to use auto-detection.<br>Currently known aliases: Cyrus, Courier, Dovecot, and Sun (Sun Java(tm) System Messaging Server)<br> |
-| __Default__ | auto |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap[.primary].blockSize |
-|:----------------|:--------|
-| __Description__ | IMAP operations which shall be applied to a number of messages which exceeds the block size<br>are performed in blocks. Example: A folder containing thousands of messages shall be cleared.<br>To avoid the risk of an IMAP timeout when trying to delete all messages at once, the messages<br>are deleted in block size portions.<br>A block size equal to or less than zero means no block size.<br> |
-| __Default__ | 1000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.spamHandler |
-|:----------------|:--------|
-| __Description__ | Define the registration name of the appropriate spam handler to use<br>Note: This value gets overwritten by "com.openexchange.spamhandler.name" property<br> |
-| __Default__ | DefaultSpamHandler |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.spamhandler.name |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap[.primary].propagateClientIPAddress |
-|:----------------|:--------|
-| __Description__ | Whether client's IP address should be propagated by a NOOP command; e.g. "A01 NOOP <CLIENT_IP>"<br> |
+| __Description__ | Specifies whether the category is forced; meaning a user is not allowed to disable the category.<br>Required. Only for system categories.<br>[category] must be replaced with the actual category identifier.<br> |
 | __Default__ | false |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].propagateHostNames |
+| __Key__ | com.openexchange.mail.categories.[category].active |
 |:----------------|:--------|
-| __Description__ | Configure a comma-separated list of external IMAP server's host names which should receive client's IP address by a NOOP command, too<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap[.primary].maxNumConnections |
-|:----------------|:--------|
-| __Description__ | The max. number of connection allowed being established for a user to an IMAP server. Less than or equal to zero means infinite.<br>Please also consider "com.openexchange.imap.storeContainerType".<br><br>Note: This setting overrides possibles restrictions specified through property "com.openexchange.imap.maxNumExternalConnections" if<br>this property's value is less than the other one.<br> |
-| __Default__ | 0 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.imap.storeContainerType |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.storeContainerType |
-|:----------------|:--------|
-| __Description__ | An IMAP connection cache acts a temporary keep-alive cache for already connected resources to an IMAP server's account.<br>Meaning it keeps a resource open/connected for a short amount of time (see "com.openexchange.mail.mailAccessCacheIdleSeconds")<br>and performs a "close elapsed ones" run periodically (see "com.openexchange.mail.mailAccessCacheShrinkerSeconds").<br><br>In addition to that behavior there are two modes of operation - bounded and unbounded.<br><br>For an unbounded cache, set this property to "unbounded".<br>Thus a user is allowed to establish as many connections to his IMAP account as demanded by his active clients (Web UI, EAS, Outlook OXtender, etc.).<br><br>A bounded cache allows only as many concurrently opened resources as specified through "com.openexchange.imap.maxNumConnections" property.<br>Taking the wording "resource" was chosen by intention, since two types of resource abstractions exist:<br>IMAP store and IMAP protocol (an authenticated login's socket connection).<br><br>The default setting "boundary-aware" considers an "IMAP store" as limited resources to an IMAP server.<br>The vague thing about IMAP store is that it maintains a connection pool internally by itself.<br>Thus it is possible that there are actually more active socket connections open than specified,<br>because an IMAP store is allowed to open further connections when needed;<br>e.g. when accessing another IMAP folder while INBOX has been opened, too.<br>Practical experience showed that there will be at max.: "com.openexchange.imap.maxNumConnections" + 1<br><br>The setting "non-caching" does an exact mapping of resource to an established/authenticated socket connection to the IMAP account.<br>It is named "non-caching" as it does no caching on its own, but delegates it to a custom queuing 'com.sun.mail.imap.IMAPStore' class.<br>Thus an exact limitation of connected socket connections ('com.sun.mail.imap.protocol.IMAPProtocol' instances) is achieved.<br>Specifying a quite small limitation - let's say "1" - arises the possibility that JavaMail gets dead-locked by itself.<br>E.g. an IMAP store attempts to create a second connection. That attempt may get stalled as it waits for itself to free the already<br>acquired connection which never happens.<br>So, please use this exact mapping only if you specify a reasonable limitation.<br> |
-| __Default__ | boundary-aware |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.maxNumExternalConnections |
-|:----------------|:--------|
-| __Description__ | Configure the max. number of concurrent connections which are allowed being established to a subscribed/external IMAP account.<br>Notation is a comma-separated list of: <host> + ':' + <max-count>; e.g.:<br>    com.openexchange.imap.maxNumExternalConnections=imap.host1.com:4, imap.host2.com:6<br>For convenience a max-count can be specified which applies to all subscribed/external IMAP accounts; e.g.:<br>    com.openexchange.imap.maxNumExternalConnections=4<br>Zero or less is interpreted as unlimited.<br>If not set, unlimited concurrent connections are allowed.<br> |
-| __Default__ | imap.gmail.com:2,imap.googlemail.com:2 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap[.primary].enableTls |
-|:----------------|:--------|
-| __Description__ | Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.<br>Note: This property is statically used in IMAP authentication bundle<br> |
+| __Description__ | Specifies whether the category is activated/deactivate for a user. Only effective if "force" is set to "false".<br>This setting can be set by a user.<br>Required.<br>[category] must be replaced with the actual category identifier.<br> |
 | __Default__ | true |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap.invalidMailboxNameCharacters |
+| __Key__ | com.openexchange.mail.categories.[category].name.fallback |
 |:----------------|:--------|
-| __Description__ | Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;<br>e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . &#124; \\"<<<br>Default is empty.<br> |
+| __Description__ | Specifies the category's fall-back name.<br>Required.<br>[category] must be replaced with the actual category identifier.<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].allowFolderCaches |
+| __Key__ | com.openexchange.mail.categories.[category].name.[locale] |
 |:----------------|:--------|
-| __Description__ | Enables/disables caching of IMAP folders.<br>Default is true.<br>Note: Only disable IMAP folder cache if you certainly know what you are doing.<br>Disabling that cache may result in noticeable performance decrease.<br> |
-| __Default__ | true |
+| __Description__ | For each language which should be supported a translated name for the category should be defined.<br>For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).<br>[category] must be replaced with the actual category identifier.<br><br>NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].ssl.protocols |
+| __Key__ | com.openexchange.mail.categories.[category].description |
 |:----------------|:--------|
-| __Description__ | Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.<br>Default is empty<br><br>Note: This property is statically used in IMAP authentication bundle<br> |
-| __Default__ | true |
+| __Description__ | Specifies an optional system category description.<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].ssl.ciphersuites |
+| __Key__ | com.openexchange.mail.categories.[category].description.[locale] |
 |:----------------|:--------|
-| __Description__ | Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.<br>Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.<br>Default value is empty (fall-back to current JVM's default SSL cipher suite)<br><br>Note: This property is statically used in IMAP authentication bundle<br> |
-| __Default__ | true |
+| __Description__ | For each language which should be supported a translated description for the category should be defined.<br>For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).<br>[category] must be replaced with the actual category identifier.<br><br>NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap.maxMailboxNameLength |
+| __Key__ | com.openexchange.mail.categories.apply.ox.rules |
 |:----------------|:--------|
-| __Description__ | The max. length of a mailbox name<br> |
-| __Default__ | 60 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.invalidMailboxNameCharacters |
-|:----------------|:--------|
-| __Description__ | Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;<br>e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . &#124; \\"<<<br>Default is empty.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.namespacePerUser |
-|:----------------|:--------|
-| __Description__ | This option controls whether there it is expected to have a dedicated NAMESPACE per user or not.<br>In case of "true" each mailbox account on associated IMAP server is allowed to have its own NAMESPACE set; might be "" (root) or "INBOX.".<br>Otherwise for "false" every mailbox is assumed to have the same NAMESPACE set.<br><br>This influences the way Open-Xchange Server detects & caches NAMESPACE information; either on a per user basis (more IMAP traffic) or<br>globally (only requested once).<br><br>Do not touch unless you certainly know IMAP sever's behavior.<br><br>Default is "true"<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.rootSubfoldersAllowed |
-|:----------------|:--------|
-| __Description__ | If either "true" or "false" set, it enforces whether to assume root sub-folder capability for primary account.<br>If not set, root sub-folder capability is probed through creating a temporary folder.<br><br>Default is empty (probe through temp. folder)<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
-
----
-| __Key__ | com.openexchange.imap.allowSORTDISPLAY |
-|:----------------|:--------|
-| __Description__ | Specifies if "SORT=DISPLAY" IMAP extension is supposed to be considered when returning a mail listing sorted by From/To<br><br>Default is "false"<br> |
+| __Description__ | It is possible to create some predefined rules for the system categories (see com.openexchange.mail.categories.rules.[category]).<br>This rules will be added for each user which has the mail_categories capability and has the mail_categories feature enabled.<br>This property enables/disables this feature. Nevertheless it is strongly recommended to use system wide rules instead.<br>Please notice that these rules must only be used instead of system wide rules! Don't use this feature if there are already system wide rules defined!       <br> |
 | __Default__ | false |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Related__ | com.openexchange.mail.categories.rules.[category] |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap.fallbackOnFailedSORT |
+| __Key__ | com.openexchange.mail.categories.rules.[category] |
 |:----------------|:--------|
-| __Description__ | Specifies if a fall-back to in-application sort is supposed to be performed in case the IMAP server quits with a "NO" response for the<br>issued SORT command.<br>Note: Doing in-application sort contains the danger of utilizing too much memory (especially for big mailboxes).<br><br>Default is "false"<br> |
-| __Default__ | false |
+| __Description__ | For each system category a comma separated list of mail addresses can be defined. <br>This addresses will be used to create a starting rule for this category if com.openexchange.mail.categories.apply.ox.rules is set to 'true'.  <br>It is also possible to use mail address parts here. For example "@amazon.com".<br> |
+| __Version__ | 7.8.2 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Related__ | com.openexchange.mail.categories.apply.ox.rules |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail-categories.properties |
 
 ---
-| __Key__ | com.openexchange.imap[.primary].auditLog.enabled |
+| __Key__ | com.openexchange.client.onboarding.mail.imap.host |
 |:----------------|:--------|
-| __Description__ | Enables the audit log for issued IMAP commands via 'com.sun.mail.imap.AuditLog' class.<br><br>Accepts the "primary." suffix to only enable for primary account;<br>e.g. "com.openexchange.imap.primary.auditLog.enabled=true"<br><br>Default is "false"<br> |
-| __Default__ | false |
+| __Description__ | Specifies the IMAP host name.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | client-onboarding-mail.properties |
 
 ---
-| __Key__ | com.openexchange.imap.initWithSpecialUse |
+| __Key__ | com.openexchange.client.onboarding.mail.imap.port |
 |:----------------|:--------|
-| __Description__ | Specifies whether the primary mail account should be initialized with special-use folders from the imap server in case no standard folder names are configured.<br><br>Default is 'true'<br> |
-| __Default__ | true |
+| __Description__ | Specifies the IMAP port.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | client-onboarding-mail.properties |
 
 ---
-| __Key__ | com.openexchange.imap.greeting.host.regex |
+| __Key__ | com.openexchange.client.onboarding.mail.imap.secure |
 |:----------------|:--------|
-| __Description__ | Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary<br>IMAP server. Only applicable for primary IMAP server! Default is empty.<br><br>The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html<br><br>Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.<br>I.e. "Dovecot at ([0-9a-zA-Z._-]\*) is ready", then the capturing group is supposed to extract the host name/IP addres information<br> |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imap.properties |
+| __Description__ | Specifies whether a secure connection is supposed to established to access the IMAP server.<br>If not set, falls-back to internal settings for accessing the primary account.<br><br>Possible values: true&#124;false<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
+| __File__ | client-onboarding-mail.properties |
+
+---
+| __Key__ | com.openexchange.client.onboarding.mail.smtp.host |
+|:----------------|:--------|
+| __Description__ | Specifies the SMTP host name.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | client-onboarding-mail.properties |
+
+---
+| __Key__ | com.openexchange.client.onboarding.mail.smtp.port |
+|:----------------|:--------|
+| __Description__ | Specifies the SMTP port.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | client-onboarding-mail.properties |
+
+---
+| __Key__ | com.openexchange.client.onboarding.mail.smtp.secure |
+|:----------------|:--------|
+| __Description__ | Specifies whether a secure connection is supposed to established to access the SMTP server.<br>If not set, falls-back to internal settings for accessing the primary account.<br><br>Possible values: true&#124;false<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
+| __File__ | client-onboarding-mail.properties |
+
+---
+| __Key__ | com.openexchange.client.onboarding.mailapp.store.google.playstore |
+|:----------------|:--------|
+| __Description__ | Specifies the URL to Google Play Store for the Mail App.<br> |
+| __Default__ | https://play.google.com/store/apps/details?id=com.openexchange.mobile.mailapp.enterprise |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Android.html">Android</a> |
+| __File__ | client-onboarding-mailapp.properties |
+
+---
+| __Key__ | com.openexchange.client.onboarding.mailapp.store.apple.appstore |
+|:----------------|:--------|
+| __Description__ | Specifies the URL to Apple App Store for the Mail App.<br> |
+| __Default__ | https://itunes.apple.com/us/app/ox-mail/id1008644994 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
+| __File__ | client-onboarding-mailapp.properties |
 
 ---
 | __Key__ | com.openexchange.mail.loginSource |
@@ -965,6 +846,53 @@ This page shows all properties with the tag: Mail
 | __File__ | mailresolver.properties |
 
 ---
+| __Key__ | com.openexchange.spamhandler.name |
+|:----------------|:--------|
+| __Description__ | Specifies the name of the spam handler to use for the primary mail account. The special name "NoSpamHandler" explicitly sets no spam handler<br>If such a setting is not specified, the spam handler as configured through the mail bundle is used;<br>e.g. "com.openexchange.imap.spamHandler" in file 'imap.properties'<br> |
+| __Default__ | false |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | spamhandler.properties |
+
+---
+| __Key__ | com.openexchange.spamhandler.enabled |
+|:----------------|:--------|
+| __Description__ | Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).<br>If no configuration is available (for the mentioned property) the previously configured user setting mail permission bit will be taken into account. If there is a configuration for "com.openexchange.spamhandler.enabled" available these will be used for the defined scope <br><b>Caution:</b> if the property has been set via ConfigCascade only these source will be used. Changing the user configuration afterwards via /opt/open-xchange/sbin/changeuser ... --gui_spam_filter_capabilities_enabled true/false will have no effect! You can change it for instance on a user base as described here: http://oxpedia.org/wiki/index.php?title=ConfigCascade . If you remove the property from ConfigCascade sources the formerly overwritten permission bit will be used.<br> |
+| __Default__ | UserSettingMail permission bit from database |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.spamhandler.name |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | spamhandler.properties |
+
+---
+| __Key__ | com.openexchange.mailaccount.failedAuth.limit |
+|:----------------|:--------|
+| __Description__ | Specifies the max. number of failed authentication attempts until the associated mail account is disabled.<br> |
+| __Default__ | 5 |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.mailaccount.failedAuth.span |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | mailaccount.properties |
+
+---
+| __Key__ | com.openexchange.mailaccount.failedAuth.span |
+|:----------------|:--------|
+| __Description__ | Specifies the time span in which the failed authentication attempts are tracked.<br>The value accepts known time span syntax like "1W" or "5m"<br> |
+| __Default__ | 30m |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.mailaccount.failedAuth.limit |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mailaccount.properties |
+
+---
 | __Key__ | notify_participants_on_delete |
 |:----------------|:--------|
 | __Description__ | If set to 'true' all participants will be notified when the appointment or task is deleted <br>with the exception of the person deleting the appointment/task.<br> |
@@ -1003,781 +931,6 @@ This page shows all properties with the tag: Mail
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Notification.html">Notification</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Task.html">Task</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Appointment.html">Appointment</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | notification.properties |
-
----
-| __Key__ | com.openexchange.capability.archive_emails |
-|:----------------|:--------|
-| __Description__ | Enables/disables the archive functionalities that is to move on demand older mails from any selected folder to a special archive folder.<br>If disabled the server will reject to perform archive requests.<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
-| __File__ | permissions.properties |
-
----
-| __Key__ | com.openexchange.share.notification.usePersonalEmailAddress |
-|:----------------|:--------|
-| __Description__ | Specifies whether the user's personal E-Mail address (true) or the configured no-reply address (false) is supposed to be used in case a user<br>without mail permission sends out a sharing invitation<br> |
-| __Default__ | false |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | share.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.enabled |
-|:----------------|:--------|
-| __Description__ | The main switch to enable/disable to send composed share messages<br>Note: In order to effectively enable composed share messages, the "infostore" and "share_links" capabilities need also to be available<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.name |
-|:----------------|:--------|
-| __Description__ | Specifies the naming for the feature to send composed share messages<br> |
-| __Default__ | Drive Mail |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.threshold |
-|:----------------|:--------|
-| __Description__ | Specifies the threshold in bytes when the client is supposed to send a share compose message.<br>Setting this option to 0 (zero) disables "forced" switch to a share compose message.<br> |
-| __Default__ | 0 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.externalRecipientsLocale |
-|:----------------|:--------|
-| __Description__ | Defines the locale to use when sending a composed share message to an external recipient.<br>Expects a locale identifier compliant to RFC 2798 and 2068; such as "en_US".<br>Special value "user-defined" means to select the sending user's locale.<br> |
-| __Default__ | user-defined |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.requiredExpiration |
-|:----------------|:--------|
-| __Description__ | Defines whether an expiration date is required to be set, which applied to<br>the folder/files that were shared via a share compose message.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.forceAutoDelete |
-|:----------------|:--------|
-| __Description__ | Defines whether shared folder/files get automatically cleansed if an expiration date is exceeded<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.preview.timeout |
-|:----------------|:--------|
-| __Description__ | Defines default timeout in milliseconds for preview image creation.<br> |
-| __Default__ | 1000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.documentPreviewEnabled |
-|:----------------|:--------|
-| __Description__ | If set to true, preview images for documents are generated. Needs readerengine.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mailaccount.failedAuth.limit |
-|:----------------|:--------|
-| __Description__ | Specifies the max. number of failed authentication attempts until the associated mail account is disabled.<br> |
-| __Default__ | 5 |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mailaccount.failedAuth.span |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | mailaccount.properties |
-
----
-| __Key__ | com.openexchange.mailaccount.failedAuth.span |
-|:----------------|:--------|
-| __Description__ | Specifies the time span in which the failed authentication attempts are tracked.<br>The value accepts known time span syntax like "1W" or "5m"<br> |
-| __Default__ | 30m |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mailaccount.failedAuth.limit |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mailaccount.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.badge.enabled |
-|:----------------|:--------|
-| __Description__ | Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.<br>These get displayed on the app icon.<br> |
-| __Default__ | true |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.enabled |
-|:----------------|:--------|
-| __Description__ | Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.<br> |
-| __Default__ | true |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.filename |
-|:----------------|:--------|
-| __Description__ | Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.<br>This file needs to be included in the app, otherwise a default sound is played. the string 'default' also causes<br>the default iOS sound to be played.<br> |
-| __Default__ | default |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.authentication.ucs.mailAttribute |
-|:----------------|:--------|
-| __Description__ | Specifies the attribute containing the email address from which domain part will be used to identify the context.<br> |
-| __Default__ | mailPrimaryAddress |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Univention.html">Univention</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | authplugin.properties |
-
----
-| __Key__ | com.openexchange.noreply.address |
-|:----------------|:--------|
-| __Description__ | Specifies the E-Mail address for the no-reply account that is used as "From" header for<br>system-initiated messages. Values must apply to the syntax defined in RFC 822, section 6.<br>Examples:<br>  - noreply@example.com<br>  - OX App Suite <noreply@example.com><br>  - "App Suite, OX" <noreply@example.com><br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | noreply.properties |
-
----
-| __Key__ | com.openexchange.noreply.login |
-|:----------------|:--------|
-| __Description__ | Specifies the login for the no-reply account.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | noreply.properties |
-
----
-| __Key__ | com.openexchange.noreply.password |
-|:----------------|:--------|
-| __Description__ | Specifies the password for the no-reply account.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | noreply.properties |
-
----
-| __Key__ | com.openexchange.noreply.server |
-|:----------------|:--------|
-| __Description__ | Specifies the SMTP server address for the no-reply account. The value must be an IP address<br>or a full qualified domain name.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | noreply.properties |
-
----
-| __Key__ | com.openexchange.noreply.port |
-|:----------------|:--------|
-| __Description__ | Specifies the SMTP server port for the no-reply account.<br> |
-| __Default__ | 25 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | noreply.properties |
-
----
-| __Key__ | com.openexchange.noreply.secureMode |
-|:----------------|:--------|
-| __Description__ | Specifies the secure mode for the no-reply account;<br>supported values are either "SSL", "TLS" or "plain".<br> |
-| __Default__ | plain |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | noreply.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mail.imap.host |
-|:----------------|:--------|
-| __Description__ | Specifies the IMAP host name.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | client-onboarding-mail.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mail.imap.port |
-|:----------------|:--------|
-| __Description__ | Specifies the IMAP port.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | client-onboarding-mail.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mail.imap.secure |
-|:----------------|:--------|
-| __Description__ | Specifies whether a secure connection is supposed to established to access the IMAP server.<br>If not set, falls-back to internal settings for accessing the primary account.<br><br>Possible values: true&#124;false<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
-| __File__ | client-onboarding-mail.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mail.smtp.host |
-|:----------------|:--------|
-| __Description__ | Specifies the SMTP host name.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | client-onboarding-mail.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mail.smtp.port |
-|:----------------|:--------|
-| __Description__ | Specifies the SMTP port.<br>If not set, falls-back to internal settings for accessing the primary account.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | client-onboarding-mail.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mail.smtp.secure |
-|:----------------|:--------|
-| __Description__ | Specifies whether a secure connection is supposed to established to access the SMTP server.<br>If not set, falls-back to internal settings for accessing the primary account.<br><br>Possible values: true&#124;false<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
-| __File__ | client-onboarding-mail.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mailapp.store.google.playstore |
-|:----------------|:--------|
-| __Description__ | Specifies the URL to Google Play Store for the Mail App.<br> |
-| __Default__ | https://play.google.com/store/apps/details?id=com.openexchange.mobile.mailapp.enterprise |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Android.html">Android</a> |
-| __File__ | client-onboarding-mailapp.properties |
-
----
-| __Key__ | com.openexchange.client.onboarding.mailapp.store.apple.appstore |
-|:----------------|:--------|
-| __Description__ | Specifies the URL to Apple App Store for the Mail App.<br> |
-| __Default__ | https://itunes.apple.com/us/app/ox-mail/id1008644994 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a> |
-| __File__ | client-onboarding-mailapp.properties |
-
----
-| __Key__ | com.openexchange.mail.transport.referencedPartLimit |
-|:----------------|:--------|
-| __Description__ | Define the limit in bytes for keeping an internal copy of a referenced<br>MIME message's part when sending a mail. If a part exceeds this limit<br>a temporary file is created holding part's copy.<br> |
-| __Default__ | 1048576 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | transport.properties |
-
----
-| __Key__ | com.openexchange.mail.defaultTransportProvider |
-|:----------------|:--------|
-| __Description__ | The transport provider fallback if an URL does not contain/define a protocol.<br> |
-| __Default__ | smtp |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | transport.properties |
-
----
-| __Key__ | com.openexchange.mail.transport.removeMimeVersionInSubParts |
-|:----------------|:--------|
-| __Description__ | Specify whether to strictly obey suggestion in RFC 2045.<br>The MIME-Version header field is required at the top level of a message, but is _not_ required for each body part of a multipart entity.<br>If set to "true", each message is processed to not contain a MIME-Version header in sub-parts.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | transport.properties |
-
----
-| __Key__ | PRIMARY_MAIL_UNCHANGEABLE |
-|:----------------|:--------|
-| __Description__ | Here you can set whether the primary mail address can be changed or not.<br>If set to false, it is possible to change the primary mail address.<br>Only change, if you know what you are doing (Outlook might<br>not work anymore under certain circumstances)<br> |
-| __Default__ | false |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | AdminUser.properties |
-
----
-| __Key__ | SENT_MAILFOLDER_[language] |
-|:----------------|:--------|
-| __Description__ | Default sent mail folder fallback for a specific language if not sent by rmi client. <br>The [language] variable must be replaced by an upper case language identifier. E.g. SENT_MAILFOLDER_DE_DE<br>Default values:<br>  SENT_MAILFOLDER_DE_DE=Gesendete Objekte<br>  SENT_MAILFOLDER_EN_GB=Sent Mai<br>  SENT_MAILFOLDER_EN_US=Sent Items<br>  SENT_MAILFOLDER_FR_FR=Objets envoy\u00e9s<br>  SENT_MAILFOLDER_NL_NL=Verzonden items<br>  SENT_MAILFOLDER_SV_SV=Skickat<br>  SENT_MAILFOLDER_ES_ES=Elementos enviados<br>  SENT_MAILFOLDER_JA_JP=\u9001\u4FE1\u6E08\u30A2\u30A4\u30C6\u30E0<br>  SENT_MAILFOLDER_PL_PL=Elementy wys\u0142ane<br>  SENT_MAILFOLDER_IT_IT=Posta inviata<br>  SENT_MAILFOLDER_ZH_CN=\u5df2\u53d1\u9001\u90ae\u4ef6<br>  SENT_MAILFOLDER_CS_CZ=Odeslan\u00e9 polo\u017eky<br>  SENT_MAILFOLDER_HU_HU=Elk\u00fcld\u00f6tt elemek<br>  SENT_MAILFOLDER_SK_SK=Odoslan\u00e9 polo\u017eky<br>  SENT_MAILFOLDER_LV_LV=Nos\u016Bt\u012Bt\u0101s vien\u012Bbas<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | AdminUser.properties |
-
----
-| __Key__ | TRASH_MAILFOLDER_[language] |
-|:----------------|:--------|
-| __Description__ | Default trash mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. TRASH_MAILFOLDER_DE_DE<br>Default values:<br>  TRASH_MAILFOLDER_DE_DE=Papierkorb<br>  TRASH_MAILFOLDER_EN_GB=Trash<br>  TRASH_MAILFOLDER_EN_US=Trash<br>  TRASH_MAILFOLDER_FR_FR=Corbeille<br>  TRASH_MAILFOLDER_NL_NL=Prullenbak<br>  TRASH_MAILFOLDER_SV_SV=Papperskorgen<br>  TRASH_MAILFOLDER_ES_ES=Papelera<br>  TRASH_MAILFOLDER_JA_JP=\u524A\u9664\u6E08\u307F\u30A2\u30A4\u30C6\u30E0<br>  TRASH_MAILFOLDER_PL_PL=Kosz<br>  TRASH_MAILFOLDER_IT_IT=Cestino<br>  TRASH_MAILFOLDER_ZH_CN=\u5783\u573e\u7b52<br>  TRASH_MAILFOLDER_CS_CZ=Ko\u0161<br>  TRASH_MAILFOLDER_HU_HU=T\u00f6r\u00f6lt elemek<br>  TRASH_MAILFOLDER_SK_SK=K\u00f4\u0161<br>  TRASH_MAILFOLDER_LV_LV=Atkritumi<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | AdminUser.properties |
-
----
-| __Key__ | DRAFTS_MAILFOLDER_[language] |
-|:----------------|:--------|
-| __Description__ | Default drafts mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. DRAFTS_MAILFOLDER_DE_DE<br>Default values:<br>  DRAFTS_MAILFOLDER_DE_DE=Entw\u00fcrfe<br>  DRAFTS_MAILFOLDER_EN_GB=Drafts<br>  DRAFTS_MAILFOLDER_EN_US=Drafts<br>  DRAFTS_MAILFOLDER_FR_FR=Brouillons<br>  DRAFTS_MAILFOLDER_NL_NL=Concepten<br>  DRAFTS_MAILFOLDER_SV_SV=Utkast<br>  DRAFTS_MAILFOLDER_ES_ES=Borradores<br>  DRAFTS_MAILFOLDER_JA_JP=\u4E0B\u66F8\u304D<br>  DRAFTS_MAILFOLDER_PL_PL=Szkice<br>  DRAFTS_MAILFOLDER_IT_IT=Bozze<br>  DRAFTS_MAILFOLDER_ZH_CN=\u8349\u7a3f<br>  DRAFTS_MAILFOLDER_CS_CZ=Koncepty<br>  DRAFTS_MAILFOLDER_HU_HU=Piszkozatok<br>  DRAFTS_MAILFOLDER_SK_SK=Rozp\u00edsan\u00e9<br>  DRAFTS_MAILFOLDER_LV_LV=Melnraksti<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | AdminUser.properties |
-
----
-| __Key__ | SPAM_MAILFOLDER_[language] |
-|:----------------|:--------|
-| __Description__ | Default spam mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. SPAM_MAILFOLDER_DE_DE<br>Default values:<br>  SPAM_MAILFOLDER_DE_DE=Spam<br>  SPAM_MAILFOLDER_EN_GB=Spam<br>  SPAM_MAILFOLDER_EN_US=Spam<br>  SPAM_MAILFOLDER_FR_FR=Pourriel<br>  SPAM_MAILFOLDER_NL_NL=Spam<br>  SPAM_MAILFOLDER_SV_SV=Skr\u00E4ppost<br>  SPAM_MAILFOLDER_ES_ES=Correo no deseado<br>  SPAM_MAILFOLDER_JA_JP=\u8FF7\u60D1\u30E1\u30FC\u30EB<br>  SPAM_MAILFOLDER_PL_PL=Spam<br>  SPAM_MAILFOLDER_IT_IT=Posta Indesiderata<br>  SPAM_MAILFOLDER_ZH_CN=\u5783\u573e\u90ae\u4ef6<br>  SPAM_MAILFOLDER_CS_CZ=Spam<br>  SPAM_MAILFOLDER_HU_HU=Lev\u00e9lszem\u00e9t<br>  SPAM_MAILFOLDER_SK_SK=Spam<br>  SPAM_MAILFOLDER_LV_LV=M\u0113stules<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | AdminUser.properties |
-
----
-| __Key__ | CONFIRMED_SPAM_MAILFOLDER_[language] |
-|:----------------|:--------|
-| __Description__ | Default confirmed spam mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. CONFIRMED_SPAM_MAILFOLDER_DE_DE<br>Default values: <br>  CONFIRMED_SPAM_MAILFOLDER_DE_DE=confirmed-spam<br>  CONFIRMED_SPAM_MAILFOLDER_EN_GB=confirmed-spam<br>  CONFIRMED_SPAM_MAILFOLDER_EN_US=confirmed-spam<br>  CONFIRMED_SPAM_MAILFOLDER_FR_FR=pourriel-confirme<br>  CONFIRMED_SPAM_MAILFOLDER_NL_NL=bevestigde spam<br>  CONFIRMED_SPAM_MAILFOLDER_SV_SV=bekr\u00E4ftad-skr\u00E4ppost<br>  CONFIRMED_SPAM_MAILFOLDER_ES_ES=correo basura confirmado<br>  CONFIRMED_SPAM_MAILFOLDER_JA_JP=\u8FF7\u60D1\u30E1\u30FC\u30EB\uFF08\u78BA\u8A8D\u6E08\uFF09<br>  CONFIRMED_SPAM_MAILFOLDER_PL_PL=Potwierdzony spam<br>  CONFIRMED_SPAM_MAILFOLDER_IT_IT=Posta indesiderata accertata<br>  CONFIRMED_SPAM_MAILFOLDER_ZH_CN=\u5df2\u786e\u8ba4\u7684\u5783\u573e\u90ae\u4ef6<br>  CONFIRMED_SPAM_MAILFOLDER_CS_CZ=Potvrzen\u00fd spam<br>  CONFIRMED_SPAM_MAILFOLDER_HU_HU=Elfogadott k\u00e9retlen<br>  CONFIRMED_SPAM_MAILFOLDER_SK_SK=Potvrden\u00fd spam<br>  CONFIRMED_SPAM_MAILFOLDER_LV_LV=Apstiprin\u0101ta "m\u0113stule"<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | AdminUser.properties |
-
----
-| __Key__ | CONFIRMED_HAM_MAILFOLDER_[language] |
-|:----------------|:--------|
-| __Description__ | Default confirmed ham mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. CONFIRMED_HAM_MAILFOLDER__DE_DE<br>Default values: <br>  CONFIRMED_HAM_MAILFOLDER_DE_DE=confirmed-ham<br>  CONFIRMED_HAM_MAILFOLDER_EN_GB=confirmed-ham<br>  CONFIRMED_HAM_MAILFOLDER_EN_US=confirmed-ham<br>  CONFIRMED_HAM_MAILFOLDER_FR_FR=non-pourriel-confirme<br>  CONFIRMED_HAM_MAILFOLDER_NL_NL=bevestigde ham<br>  CONFIRMED_HAM_MAILFOLDER_SV_SV=felaktigt-bekr\u00E4ftad-spam<br>  CONFIRMED_HAM_MAILFOLDER_ES_ES=correo leg\u00EDtimo confirmado<br>  CONFIRMED_HAM_MAILFOLDER_JA_JP=\u4E00\u822C\u30E1\u30FC\u30EB\uFF08\u78BA\u8A8D\u6E08\uFF09<br>  CONFIRMED_HAM_MAILFOLDER_PL_PL=Potwierdzony nie-spam<br>  CONFIRMED_HAM_MAILFOLDER_IT_IT=Posta attendibile accertata<br>  CONFIRMED_HAM_MAILFOLDER_ZH_CN=\u5df2\u786e\u8ba4\u7684\u6b63\u5e38\u90ae\u4ef6<br>  CONFIRMED_HAM_MAILFOLDER_CS_CZ=Potvrzen\u00e1 norm\u00e1ln\u00ed po\u0161ta<br>  CONFIRMED_HAM_MAILFOLDER_HU_HU=Elfogadott \u00e1l-k\u00e9retlen<br>  CONFIRMED_HAM_MAILFOLDER_SK_SK=Potvrden\u00e9 ako nie spam<br>  CONFIRMED_HAM_MAILFOLDER_LV_LV=Apstiprin\u0101ts "ham"<br> |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | AdminUser.properties |
-
----
-| __Key__ | com.openexchange.user.contactCollectOnMailAccess |
-|:----------------|:--------|
-| __Description__ | Define the default behavior whether to collect contacts on mail access.<br>Note: Appropriate user access permission still needs to be granted in order to take effect.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
-| __File__ | user.properties |
-
----
-| __Key__ | com.openexchange.user.contactCollectOnMailTransport |
-|:----------------|:--------|
-| __Description__ | Define the default behavior whether to collect contacts on mail transport.<br>Note: Appropriate user access permission still needs to be granted in order to take effect.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a> |
-| __File__ | user.properties |
-
----
-| __Key__ | com.openexchange.find.basic.mail.allMessagesFolder |
-|:----------------|:--------|
-| __Description__ | Some mail backends provide a virtual folder that contains all messages of<br>a user to enable cross-folder mail search. Open-Xchange can make use of<br>this feature to improve the search experience.<br>Set the value to the name of the virtual mail folder containing all messages.<br>Leave blank if no such folder exists.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Find.html">Find</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | findbasic.properties |
-
----
-| __Key__ | com.openexchange.find.basic.mail.searchmailbody |
-|:----------------|:--------|
-| __Description__ | Denotes if mail search queries should be matched against mail bodies.<br>This improves the search experience within the mail module, if your mail<br>backend supports fast full text search. Otherwise it can slow down the<br>search requests significantly.<br>Change the value to 'true', if fast full text search is supported.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Find.html">Find</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | findbasic.properties |
-
----
-| __Key__ | com.openexchange.pop3.pop3Timeout |
-|:----------------|:--------|
-| __Description__ | Define the socket read timeout value in milliseconds. A value less than<br>or equal to zero is infinite timeout. See also mail.smtp.timeout<br>Default is 50000<br> |
-| __Default__ | 50000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.pop3ConnectionTimeout |
-|:----------------|:--------|
-| __Description__ | Define the socket connect timeout value in milliseconds. A value less<br>or equal to zero is infinite timeout. See also mail.smtp.connectiontimeout<br>Default is 20000<br> |
-| __Default__ | 20000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.pop3TemporaryDown |
-|:----------------|:--------|
-| __Description__ | Define the amount of time in milliseconds a POP3 server is treated as being temporary down.<br>A POP3 server is treated as being temporary down if a socket connect fails. Further requests to<br>the affected POP3 server are going to be denied for the specified amount of time.<br>A value less or equal to zero disables this setting.<br> |
-| __Default__ | 10000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.pop3AuthEnc |
-|:----------------|:--------|
-| __Description__ | Define the encoding for POP3 authentication<br> |
-| __Default__ | UTF-8 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.spamHandler |
-|:----------------|:--------|
-| __Description__ | Define the registration name of the appropriate spam handler to use<br>Note: This value gets overwritten by "com.openexchange.spamhandler.name" property<br> |
-| __Default__ | DefaultSpamHandler |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.spamhandler.name |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.pop3ConnectionIdleTime |
-|:----------------|:--------|
-| __Description__ | Define the amount of time in milliseconds an established POP3 connection is kept<br>open although being idle. Since some POP3 servers limit the time period in which<br>connections may be opened/closed, this property allows to keep the connection open<br>to avoid an error on a subsequent login.<br>This property overwrites default connection idle time specified through property<br>"com.openexchange.mail.mailAccessCacheIdleSeconds".<br> |
-| __Default__ | 300000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.pop3BlockSize |
-|:----------------|:--------|
-| __Description__ | Specify the number of messages (positive integer!) which are allowed to be processed at once.<br>Default is 100.<br>Zero or negative value is defaulted to 100.<br> |
-| __Default__ | 100 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.allowPing |
-|:----------------|:--------|
-| __Description__ | Whether ping operation is allowed for POP3 account<br>Many POP3 account limit number of allowed login attempts in a certain time interval<br>Default is false<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.logDeniedPing |
-|:----------------|:--------|
-| __Description__ | Whether denied ping operation shall be indicated as a warning to client<br>Only effective if "com.openexchange.pop3.allowPing" is set to false.<br>Default is true<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.ssl.protocols |
-|:----------------|:--------|
-| __Description__ | Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.<br>Default is empty<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.pop3.ssl.ciphersuites |
-|:----------------|:--------|
-| __Description__ | Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens<br><br>Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.<br><br>Default value is empty (fall-back to current JVM's default SSL cipher suite)<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
-| __File__ | pop3.properties |
-
----
-| __Key__ | com.openexchange.mail.autoconfig.path |
-|:----------------|:--------|
-| __Description__ | Path to the local configuration files for mail domains.<br>See https://developer.mozilla.org/en/Thunderbird/Autoconfiguration<br> |
-| __Default__ | /opt/open-xchange/ispdb |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | autoconfig.properties |
-
----
-| __Key__ | com.openexchange.mail.autoconfig.ispdb |
-|:----------------|:--------|
-| __Description__ | The ISPDB is a central database, currently hosted by Mozilla Messaging, but free to use for any client.<br>It contains settings for the world's largest ISPs.<br>We hope that the database will soon have enough information to autoconfigure approximately 50% of our user's email accounts.<br> |
-| __Default__ | https://live.mozillamessaging.com/autoconfig/v1.1/ |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | autoconfig.properties |
-
----
-| __Key__ | com.openexchange.mail.autoconfig.http.proxy |
-|:----------------|:--------|
-| __Description__ | Provides the possibility to specify a proxy that is used to access any HTTP end-points. If empty, no proxy is used.<br>Notation is: <optional-protocol> + "://" + <proxy-host> + ":" + <proxy-port><br>             With "http" as fall-back protocol<br>E.g. "67.177.104.230:58720" (using HTTP protocol) or "https://78.0.25.45:8345" (using HTTPS protocol)<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | autoconfig.properties |
-
----
-| __Key__ | com.openexchange.mail.autoconfig.http.proxy.login |
-|:----------------|:--------|
-| __Description__ | Specifies the login/username to use in case specified proxy in property "com.openexchange.mail.autoconfig.http.proxy"<br>requires authentication.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mail.autoconfig.http.proxy.password, com.openexchange.mail.autoconfig.http.proxy |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | autoconfig.properties |
-
----
-| __Key__ | com.openexchange.mail.autoconfig.http.proxy.password |
-|:----------------|:--------|
-| __Description__ | Specifies the password to use in case specified proxy in property "com.openexchange.mail.autoconfig.http.proxy"<br>requires authentication.<br> |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mail.autoconfig.http.proxy.login, com.openexchange.mail.autoconfig.http.proxy |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | autoconfig.properties |
-
----
-| __Key__ | com.openexchange.mail.autoconfig.allowGuess |
-|:----------------|:--------|
-| __Description__ | Specifies whether it is allowed to "guess" the mail/transport settings.<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | autoconfig.properties |
-
----
-| __Key__ | com.openexchange.mail.categories |
-|:----------------|:--------|
-| __Description__ | General capability to enable/disable mail categories for primary inbox<br> |
-| __Default__ | false |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.enabled |
-|:----------------|:--------|
-| __Description__ | Switch to show or hide mail categories feature during the first start. <br>Notice that this property only influence the starting value. <br>Changing this value will probably have no effect on users with already have "com.openexchange.mail.categories" set to true.<br> |
-| __Default__ | true |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.forced |
-|:----------------|:--------|
-| __Description__ | Switch to force showing the mail categories feature. <br>If set to true, the com.openexchange.mail.categories.enabled property is always true and can't be changed.<br> |
-| __Default__ | false |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.general.name.fallback |
-|:----------------|:--------|
-| __Description__ | The fallback name of the default general category.<br> |
-| __Default__ | General |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.general.name.[locale] |
-|:----------------|:--------|
-| __Description__ | For each language which should be supported a translated name for the general category should be defined.<br>For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO-3166 country code (e.g. de_DE or en_US)<br><br>NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.identifiers |
-|:----------------|:--------|
-| __Description__ | Specifies a comma separated list of system category identifiers ([category]).<br><br>System categories can be forced but not renamed.<br>Please note that the use of "general" is prohibited!<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.user.categories.identifiers |
-|:----------------|:--------|
-| __Description__ | Specifies a comma separated list of user category identifiers ([category]). E.g.: "uc1,uc2,uc3"<br><br>User categories can be renamed but not be forced.<br>Please note that the use of "general" is prohibited!<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.[category].flag |
-|:----------------|:--------|
-| __Description__ | Specifies the category's flag name that is supposed to be used for filter/search expressions executed by mail back-end;<br>e.g. "com.openexchange.mail.categories.offers.flag=$offers"<br>Required. <br>[category] must be replaced with the actual category identifier.<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.[category].force |
-|:----------------|:--------|
-| __Description__ | Specifies whether the category is forced; meaning a user is not allowed to disable the category.<br>Required. Only for system categories.<br>[category] must be replaced with the actual category identifier.<br> |
-| __Default__ | false |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.[category].active |
-|:----------------|:--------|
-| __Description__ | Specifies whether the category is activated/deactivate for a user. Only effective if "force" is set to "false".<br>This setting can be set by a user.<br>Required.<br>[category] must be replaced with the actual category identifier.<br> |
-| __Default__ | true |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.[category].name.fallback |
-|:----------------|:--------|
-| __Description__ | Specifies the category's fall-back name.<br>Required.<br>[category] must be replaced with the actual category identifier.<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.[category].name.[locale] |
-|:----------------|:--------|
-| __Description__ | For each language which should be supported a translated name for the category should be defined.<br>For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).<br>[category] must be replaced with the actual category identifier.<br><br>NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.[category].description |
-|:----------------|:--------|
-| __Description__ | Specifies an optional system category description.<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.[category].description.[locale] |
-|:----------------|:--------|
-| __Description__ | For each language which should be supported a translated description for the category should be defined.<br>For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).<br>[category] must be replaced with the actual category identifier.<br><br>NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.apply.ox.rules |
-|:----------------|:--------|
-| __Description__ | It is possible to create some predefined rules for the system categories (see com.openexchange.mail.categories.rules.[category]).<br>This rules will be added for each user which has the mail_categories capability and has the mail_categories feature enabled.<br>This property enables/disables this feature. Nevertheless it is strongly recommended to use system wide rules instead.<br>Please notice that these rules must only be used instead of system wide rules! Don't use this feature if there are already system wide rules defined!       <br> |
-| __Default__ | false |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mail.categories.rules.[category] |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.mail.categories.rules.[category] |
-|:----------------|:--------|
-| __Description__ | For each system category a comma separated list of mail addresses can be defined. <br>This addresses will be used to create a starting rule for this category if com.openexchange.mail.categories.apply.ox.rules is set to 'true'.  <br>It is also possible to use mail address parts here. For example "@amazon.com".<br> |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Related__ | com.openexchange.mail.categories.apply.ox.rules |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
-| __File__ | mail-categories.properties |
 
 ---
 | __Key__ | com.openexchange.smtp[.primary].smtpLocalhost |
@@ -1867,24 +1020,112 @@ This page shows all properties with the tag: Mail
 | __File__ | imap.properties |
 
 ---
-| __Key__ | CHECK_AND_REMOVE_PAST_REMINDERS |
+| __Key__ | com.openexchange.mail.autoconfig.path |
 |:----------------|:--------|
-| __Description__ | If this option is enabled no event is triggered<br>and no mail will be sent if the reminder is in<br>the past relative to the start date.<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a> |
-| __File__ | calendar.properties |
+| __Description__ | Path to the local configuration files for mail domains.<br>See https://developer.mozilla.org/en/Thunderbird/Autoconfiguration<br> |
+| __Default__ | /opt/open-xchange/ispdb |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | autoconfig.properties |
 
 ---
-| __Key__ | CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS |
+| __Key__ | com.openexchange.mail.autoconfig.ispdb |
 |:----------------|:--------|
-| __Description__ | This option prevents the trigger and mail sending<br>if only a reminder has been changed. If the application<br>should inform about each change no matter what has been<br>changed in the object this option should be disabled.<br> |
+| __Description__ | The ISPDB is a central database, currently hosted by Mozilla Messaging, but free to use for any client.<br>It contains settings for the world's largest ISPs.<br>We hope that the database will soon have enough information to autoconfigure approximately 50% of our user's email accounts.<br> |
+| __Default__ | https://live.mozillamessaging.com/autoconfig/v1.1/ |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | autoconfig.properties |
+
+---
+| __Key__ | com.openexchange.mail.autoconfig.http.proxy |
+|:----------------|:--------|
+| __Description__ | Provides the possibility to specify a proxy that is used to access any HTTP end-points. If empty, no proxy is used.<br>Notation is: <optional-protocol> + "://" + <proxy-host> + ":" + <proxy-port><br>             With "http" as fall-back protocol<br>E.g. "67.177.104.230:58720" (using HTTP protocol) or "https://78.0.25.45:8345" (using HTTPS protocol)<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | autoconfig.properties |
+
+---
+| __Key__ | com.openexchange.mail.autoconfig.http.proxy.login |
+|:----------------|:--------|
+| __Description__ | Specifies the login/username to use in case specified proxy in property "com.openexchange.mail.autoconfig.http.proxy"<br>requires authentication.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.mail.autoconfig.http.proxy.password, com.openexchange.mail.autoconfig.http.proxy |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | autoconfig.properties |
+
+---
+| __Key__ | com.openexchange.mail.autoconfig.http.proxy.password |
+|:----------------|:--------|
+| __Description__ | Specifies the password to use in case specified proxy in property "com.openexchange.mail.autoconfig.http.proxy"<br>requires authentication.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.mail.autoconfig.http.proxy.login, com.openexchange.mail.autoconfig.http.proxy |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | autoconfig.properties |
+
+---
+| __Key__ | com.openexchange.mail.autoconfig.allowGuess |
+|:----------------|:--------|
+| __Description__ | Specifies whether it is allowed to "guess" the mail/transport settings.<br> |
 | __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Autoconfig.html">Autoconfig</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | autoconfig.properties |
+
+---
+| __Key__ | com.openexchange.find.basic.mail.allMessagesFolder |
+|:----------------|:--------|
+| __Description__ | Some mail backends provide a virtual folder that contains all messages of<br>a user to enable cross-folder mail search. Open-Xchange can make use of<br>this feature to improve the search experience.<br>Set the value to the name of the virtual mail folder containing all messages.<br>Leave blank if no such folder exists.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Find.html">Find</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | findbasic.properties |
+
+---
+| __Key__ | com.openexchange.find.basic.mail.searchmailbody |
+|:----------------|:--------|
+| __Description__ | Denotes if mail search queries should be matched against mail bodies.<br>This improves the search experience within the mail module, if your mail<br>backend supports fast full text search. Otherwise it can slow down the<br>search requests significantly.<br>Change the value to 'true', if fast full text search is supported.<br> |
+| __Default__ | false |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a> |
-| __File__ | calendar.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Find.html">Find</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | findbasic.properties |
+
+---
+| __Key__ | com.openexchange.mail.transport.referencedPartLimit |
+|:----------------|:--------|
+| __Description__ | Define the limit in bytes for keeping an internal copy of a referenced<br>MIME message's part when sending a mail. If a part exceeds this limit<br>a temporary file is created holding part's copy.<br> |
+| __Default__ | 1048576 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | transport.properties |
+
+---
+| __Key__ | com.openexchange.mail.defaultTransportProvider |
+|:----------------|:--------|
+| __Description__ | The transport provider fallback if an URL does not contain/define a protocol.<br> |
+| __Default__ | smtp |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | transport.properties |
+
+---
+| __Key__ | com.openexchange.mail.transport.removeMimeVersionInSubParts |
+|:----------------|:--------|
+| __Description__ | Specify whether to strictly obey suggestion in RFC 2045.<br>The MIME-Version header field is required at the top level of a message, but is _not_ required for each body part of a multipart entity.<br>If set to "true", each message is processed to not contain a MIME-Version header in sub-parts.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | transport.properties |
 
 ---
 | __Key__ | com.openexchange.push.malpoll.period |
@@ -1926,6 +1167,80 @@ This page shows all properties with the tag: Mail
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
 | __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.share.notification.usePersonalEmailAddress |
+|:----------------|:--------|
+| __Description__ | Specifies whether the user's personal E-Mail address (true) or the configured no-reply address (false) is supposed to be used in case a user<br>without mail permission sends out a sharing invitation<br> |
+| __Default__ | false |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | share.properties |
+
+---
+| __Key__ | com.openexchange.authentication.ucs.mailAttribute |
+|:----------------|:--------|
+| __Description__ | Specifies the attribute containing the email address from which domain part will be used to identify the context.<br> |
+| __Default__ | mailPrimaryAddress |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Univention.html">Univention</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | authplugin.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.badge.enabled |
+|:----------------|:--------|
+| __Description__ | Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.<br>These get displayed on the app icon.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.enabled |
+|:----------------|:--------|
+| __Description__ | Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.filename |
+|:----------------|:--------|
+| __Description__ | Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.<br>This file needs to be included in the app, otherwise a default sound is played. the string 'default' also causes<br>the default iOS sound to be played.<br> |
+| __Default__ | default |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | CHECK_AND_REMOVE_PAST_REMINDERS |
+|:----------------|:--------|
+| __Description__ | If this option is enabled no event is triggered<br>and no mail will be sent if the reminder is in<br>the past relative to the start date.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a> |
+| __File__ | calendar.properties |
+
+---
+| __Key__ | CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS |
+|:----------------|:--------|
+| __Description__ | This option prevents the trigger and mail sending<br>if only a reminder has been changed. If the application<br>should inform about each change no matter what has been<br>changed in the object this option should be disabled.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Calendar.html">Calendar</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a> |
+| __File__ | calendar.properties |
 
 ---
 | __Key__ | mail.debug |
@@ -2801,5 +2116,690 @@ This page shows all properties with the tag: Mail
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a> |
 | __File__ | javamail.properties |
+
+---
+| __Key__ | com.openexchange.user.contactCollectOnMailAccess |
+|:----------------|:--------|
+| __Description__ | Define the default behavior whether to collect contacts on mail access.<br>Note: Appropriate user access permission still needs to be granted in order to take effect.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
+| __File__ | user.properties |
+
+---
+| __Key__ | com.openexchange.user.contactCollectOnMailTransport |
+|:----------------|:--------|
+| __Description__ | Define the default behavior whether to collect contacts on mail transport.<br>Note: Appropriate user access permission still needs to be granted in order to take effect.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a> |
+| __File__ | user.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.enabled |
+|:----------------|:--------|
+| __Description__ | The main switch to enable/disable to send composed share messages<br>Note: In order to effectively enable composed share messages, the "infostore" and "share_links" capabilities need also to be available<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.name |
+|:----------------|:--------|
+| __Description__ | Specifies the naming for the feature to send composed share messages<br> |
+| __Default__ | Drive Mail |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.threshold |
+|:----------------|:--------|
+| __Description__ | Specifies the threshold in bytes when the client is supposed to send a share compose message.<br>Setting this option to 0 (zero) disables "forced" switch to a share compose message.<br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.externalRecipientsLocale |
+|:----------------|:--------|
+| __Description__ | Defines the locale to use when sending a composed share message to an external recipient.<br>Expects a locale identifier compliant to RFC 2798 and 2068; such as "en_US".<br>Special value "user-defined" means to select the sending user's locale.<br> |
+| __Default__ | user-defined |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.requiredExpiration |
+|:----------------|:--------|
+| __Description__ | Defines whether an expiration date is required to be set, which applied to<br>the folder/files that were shared via a share compose message.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.forceAutoDelete |
+|:----------------|:--------|
+| __Description__ | Defines whether shared folder/files get automatically cleansed if an expiration date is exceeded<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.preview.timeout |
+|:----------------|:--------|
+| __Description__ | Defines default timeout in milliseconds for preview image creation.<br> |
+| __Default__ | 1000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.documentPreviewEnabled |
+|:----------------|:--------|
+| __Description__ | If set to true, preview images for documents are generated. Needs readerengine.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.noreply.address |
+|:----------------|:--------|
+| __Description__ | Specifies the E-Mail address for the no-reply account that is used as "From" header for<br>system-initiated messages. Values must apply to the syntax defined in RFC 822, section 6.<br>Examples:<br>  - noreply@example.com<br>  - OX App Suite <noreply@example.com><br>  - "App Suite, OX" <noreply@example.com><br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | noreply.properties |
+
+---
+| __Key__ | com.openexchange.noreply.login |
+|:----------------|:--------|
+| __Description__ | Specifies the login for the no-reply account.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | noreply.properties |
+
+---
+| __Key__ | com.openexchange.noreply.password |
+|:----------------|:--------|
+| __Description__ | Specifies the password for the no-reply account.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | noreply.properties |
+
+---
+| __Key__ | com.openexchange.noreply.server |
+|:----------------|:--------|
+| __Description__ | Specifies the SMTP server address for the no-reply account. The value must be an IP address<br>or a full qualified domain name.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | noreply.properties |
+
+---
+| __Key__ | com.openexchange.noreply.port |
+|:----------------|:--------|
+| __Description__ | Specifies the SMTP server port for the no-reply account.<br> |
+| __Default__ | 25 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | noreply.properties |
+
+---
+| __Key__ | com.openexchange.noreply.secureMode |
+|:----------------|:--------|
+| __Description__ | Specifies the secure mode for the no-reply account;<br>supported values are either "SSL", "TLS" or "plain".<br> |
+| __Default__ | plain |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/No-Reply.html">No-Reply</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | noreply.properties |
+
+---
+| __Key__ | com.openexchange.pop3.pop3Timeout |
+|:----------------|:--------|
+| __Description__ | Define the socket read timeout value in milliseconds. A value less than<br>or equal to zero is infinite timeout. See also mail.smtp.timeout<br>Default is 50000<br> |
+| __Default__ | 50000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.pop3ConnectionTimeout |
+|:----------------|:--------|
+| __Description__ | Define the socket connect timeout value in milliseconds. A value less<br>or equal to zero is infinite timeout. See also mail.smtp.connectiontimeout<br>Default is 20000<br> |
+| __Default__ | 20000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.pop3TemporaryDown |
+|:----------------|:--------|
+| __Description__ | Define the amount of time in milliseconds a POP3 server is treated as being temporary down.<br>A POP3 server is treated as being temporary down if a socket connect fails. Further requests to<br>the affected POP3 server are going to be denied for the specified amount of time.<br>A value less or equal to zero disables this setting.<br> |
+| __Default__ | 10000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.pop3AuthEnc |
+|:----------------|:--------|
+| __Description__ | Define the encoding for POP3 authentication<br> |
+| __Default__ | UTF-8 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.spamHandler |
+|:----------------|:--------|
+| __Description__ | Define the registration name of the appropriate spam handler to use<br>Note: This value gets overwritten by "com.openexchange.spamhandler.name" property<br> |
+| __Default__ | DefaultSpamHandler |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.spamhandler.name |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.pop3ConnectionIdleTime |
+|:----------------|:--------|
+| __Description__ | Define the amount of time in milliseconds an established POP3 connection is kept<br>open although being idle. Since some POP3 servers limit the time period in which<br>connections may be opened/closed, this property allows to keep the connection open<br>to avoid an error on a subsequent login.<br>This property overwrites default connection idle time specified through property<br>"com.openexchange.mail.mailAccessCacheIdleSeconds".<br> |
+| __Default__ | 300000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.pop3BlockSize |
+|:----------------|:--------|
+| __Description__ | Specify the number of messages (positive integer!) which are allowed to be processed at once.<br>Default is 100.<br>Zero or negative value is defaulted to 100.<br> |
+| __Default__ | 100 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.allowPing |
+|:----------------|:--------|
+| __Description__ | Whether ping operation is allowed for POP3 account<br>Many POP3 account limit number of allowed login attempts in a certain time interval<br>Default is false<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.logDeniedPing |
+|:----------------|:--------|
+| __Description__ | Whether denied ping operation shall be indicated as a warning to client<br>Only effective if "com.openexchange.pop3.allowPing" is set to false.<br>Default is true<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.ssl.protocols |
+|:----------------|:--------|
+| __Description__ | Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.<br>Default is empty<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.pop3.ssl.ciphersuites |
+|:----------------|:--------|
+| __Description__ | Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens<br><br>Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.<br><br>Default value is empty (fall-back to current JVM's default SSL cipher suite)<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a> |
+| __File__ | pop3.properties |
+
+---
+| __Key__ | com.openexchange.capability.archive_emails |
+|:----------------|:--------|
+| __Description__ | Enables/disables the archive functionalities that is to move on demand older mails from any selected folder to a special archive folder.<br>If disabled the server will reject to perform archive requests.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
+| __File__ | permissions.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapSort |
+|:----------------|:--------|
+| __Description__ | Define where to sort emails: Value "imap" to let the  IMAP Server sort (faster but less reliable).<br>Leave blank or fill in value "application" to sort within application (slower but good quality).<br>The sorting is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in<br>mail.properties.<br>NOTE:<br>This value is going to be set to "application" if IMAP server capabilities do not contain string "SORT".<br>Moreover, please also refer to property "com.openexchange.imap.fallbackOnFailedSORT" to specify how to react to a possible "NO" response.<br>Default is "imap"<br> |
+| __Default__ | imap |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapSearch |
+|:----------------|:--------|
+| __Description__ | Define where to search for emails:<br>- Use value "imap" to let the IMAP Server search. The search is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in mail.properties.<br>- Use value "force-imap" to let the IMAP Server search in every case.<br>- Leave blank or fill in value "application" to search within application.<br>Default is "force-imap"<br> |
+| __Default__ | force-imap |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.umlautFilterThreshold |
+|:----------------|:--------|
+| __Description__ | Specify the threshold for number of search results returned by IMAP server for which manual umlauts-filtering<br>will be applied. If less than or equal to zero, no manual filtering will be applied.<br>Default value is 50.<br> |
+| __Default__ | 50 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapFastFetch |
+|:----------------|:--------|
+| __Description__ | This property determines whether a fast fetch is performed on large mail<br>folders or not. Although the fetch is fast on IMAP side, a lot of data is<br>transfered during reading response which cause a temporary memory peak.<br>If disabled only the necessary fields are used as command arguments,<br>which is slower but needs less memory.<br>NOTE: See property "imapMessageFetchLimit" to know which mail folders are<br>treated as large mail folders<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapSupportsACL |
+|:----------------|:--------|
+| __Description__ | Define if IMAP server supports ACLs. Possible values: true/false/auto<br>NOTE: Value "auto" means to use server-defined ACL support as indicated<br>through response to IMAP command "CAPABILITY"<br> |
+| __Default__ | auto |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapTimeout |
+|:----------------|:--------|
+| __Description__ | Define the socket read timeout value in milliseconds. A value less than<br>or equal to zero is infinite timeout. See also mail.imap.timeout<br> |
+| __Default__ | 50000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapConnectionTimeout |
+|:----------------|:--------|
+| __Description__ | Define the socket connect timeout value in milliseconds. A value less than<br>or equal to zero is infinite timeout. See also mail.imap.connectiontimeout<br> |
+| __Default__ | 20000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapTemporaryDown |
+|:----------------|:--------|
+| __Description__ | Define the amount of time in milliseconds an IMAP server is treated as being temporary down.<br>An IMAP server is treated as being temporary down if a socket connect fails. Further requests to<br>the affected IMAP server are going to be denied for the specified amount of time.<br>A value less or equal to zero disables this setting.<br> |
+| __Default__ | 10000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].imapAuthEnc |
+|:----------------|:--------|
+| __Description__ | Define the encoding for IMAP authentication<br> |
+| __Default__ | UTF-8 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.User2ACLImpl |
+|:----------------|:--------|
+| __Description__ | Name of the class that implements User2ACL, their alias or "auto" to use auto-detection.<br>Currently known aliases: Cyrus, Courier, Dovecot, and Sun (Sun Java(tm) System Messaging Server)<br> |
+| __Default__ | auto |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].blockSize |
+|:----------------|:--------|
+| __Description__ | IMAP operations which shall be applied to a number of messages which exceeds the block size<br>are performed in blocks. Example: A folder containing thousands of messages shall be cleared.<br>To avoid the risk of an IMAP timeout when trying to delete all messages at once, the messages<br>are deleted in block size portions.<br>A block size equal to or less than zero means no block size.<br> |
+| __Default__ | 1000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.spamHandler |
+|:----------------|:--------|
+| __Description__ | Define the registration name of the appropriate spam handler to use<br>Note: This value gets overwritten by "com.openexchange.spamhandler.name" property<br> |
+| __Default__ | DefaultSpamHandler |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.spamhandler.name |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].propagateClientIPAddress |
+|:----------------|:--------|
+| __Description__ | Whether client's IP address should be propagated by a NOOP command; e.g. "A01 NOOP <CLIENT_IP>"<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].propagateHostNames |
+|:----------------|:--------|
+| __Description__ | Configure a comma-separated list of external IMAP server's host names which should receive client's IP address by a NOOP command, too<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].maxNumConnections |
+|:----------------|:--------|
+| __Description__ | The max. number of connection allowed being established for a user to an IMAP server. Less than or equal to zero means infinite.<br>Please also consider "com.openexchange.imap.storeContainerType".<br><br>Note: This setting overrides possibles restrictions specified through property "com.openexchange.imap.maxNumExternalConnections" if<br>this property's value is less than the other one.<br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.imap.storeContainerType |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.storeContainerType |
+|:----------------|:--------|
+| __Description__ | An IMAP connection cache acts a temporary keep-alive cache for already connected resources to an IMAP server's account.<br>Meaning it keeps a resource open/connected for a short amount of time (see "com.openexchange.mail.mailAccessCacheIdleSeconds")<br>and performs a "close elapsed ones" run periodically (see "com.openexchange.mail.mailAccessCacheShrinkerSeconds").<br><br>In addition to that behavior there are two modes of operation - bounded and unbounded.<br><br>For an unbounded cache, set this property to "unbounded".<br>Thus a user is allowed to establish as many connections to his IMAP account as demanded by his active clients (Web UI, EAS, Outlook OXtender, etc.).<br><br>A bounded cache allows only as many concurrently opened resources as specified through "com.openexchange.imap.maxNumConnections" property.<br>Taking the wording "resource" was chosen by intention, since two types of resource abstractions exist:<br>IMAP store and IMAP protocol (an authenticated login's socket connection).<br><br>The default setting "boundary-aware" considers an "IMAP store" as limited resources to an IMAP server.<br>The vague thing about IMAP store is that it maintains a connection pool internally by itself.<br>Thus it is possible that there are actually more active socket connections open than specified,<br>because an IMAP store is allowed to open further connections when needed;<br>e.g. when accessing another IMAP folder while INBOX has been opened, too.<br>Practical experience showed that there will be at max.: "com.openexchange.imap.maxNumConnections" + 1<br><br>The setting "non-caching" does an exact mapping of resource to an established/authenticated socket connection to the IMAP account.<br>It is named "non-caching" as it does no caching on its own, but delegates it to a custom queuing 'com.sun.mail.imap.IMAPStore' class.<br>Thus an exact limitation of connected socket connections ('com.sun.mail.imap.protocol.IMAPProtocol' instances) is achieved.<br>Specifying a quite small limitation - let's say "1" - arises the possibility that JavaMail gets dead-locked by itself.<br>E.g. an IMAP store attempts to create a second connection. That attempt may get stalled as it waits for itself to free the already<br>acquired connection which never happens.<br>So, please use this exact mapping only if you specify a reasonable limitation.<br> |
+| __Default__ | boundary-aware |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.maxNumExternalConnections |
+|:----------------|:--------|
+| __Description__ | Configure the max. number of concurrent connections which are allowed being established to a subscribed/external IMAP account.<br>Notation is a comma-separated list of: <host> + ':' + <max-count>; e.g.:<br>    com.openexchange.imap.maxNumExternalConnections=imap.host1.com:4, imap.host2.com:6<br>For convenience a max-count can be specified which applies to all subscribed/external IMAP accounts; e.g.:<br>    com.openexchange.imap.maxNumExternalConnections=4<br>Zero or less is interpreted as unlimited.<br>If not set, unlimited concurrent connections are allowed.<br> |
+| __Default__ | imap.gmail.com:2,imap.googlemail.com:2 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].enableTls |
+|:----------------|:--------|
+| __Description__ | Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.<br>Note: This property is statically used in IMAP authentication bundle<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.invalidMailboxNameCharacters |
+|:----------------|:--------|
+| __Description__ | Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;<br>e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . &#124; \\"<<<br>Default is empty.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].allowFolderCaches |
+|:----------------|:--------|
+| __Description__ | Enables/disables caching of IMAP folders.<br>Default is true.<br>Note: Only disable IMAP folder cache if you certainly know what you are doing.<br>Disabling that cache may result in noticeable performance decrease.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].ssl.protocols |
+|:----------------|:--------|
+| __Description__ | Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.<br>Default is empty<br><br>Note: This property is statically used in IMAP authentication bundle<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].ssl.ciphersuites |
+|:----------------|:--------|
+| __Description__ | Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.<br>Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.<br>Default value is empty (fall-back to current JVM's default SSL cipher suite)<br><br>Note: This property is statically used in IMAP authentication bundle<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.maxMailboxNameLength |
+|:----------------|:--------|
+| __Description__ | The max. length of a mailbox name<br> |
+| __Default__ | 60 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.invalidMailboxNameCharacters |
+|:----------------|:--------|
+| __Description__ | Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;<br>e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . &#124; \\"<<<br>Default is empty.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.namespacePerUser |
+|:----------------|:--------|
+| __Description__ | This option controls whether there it is expected to have a dedicated NAMESPACE per user or not.<br>In case of "true" each mailbox account on associated IMAP server is allowed to have its own NAMESPACE set; might be "" (root) or "INBOX.".<br>Otherwise for "false" every mailbox is assumed to have the same NAMESPACE set.<br><br>This influences the way Open-Xchange Server detects & caches NAMESPACE information; either on a per user basis (more IMAP traffic) or<br>globally (only requested once).<br><br>Do not touch unless you certainly know IMAP sever's behavior.<br><br>Default is "true"<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.rootSubfoldersAllowed |
+|:----------------|:--------|
+| __Description__ | If either "true" or "false" set, it enforces whether to assume root sub-folder capability for primary account.<br>If not set, root sub-folder capability is probed through creating a temporary folder.<br><br>Default is empty (probe through temp. folder)<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.allowSORTDISPLAY |
+|:----------------|:--------|
+| __Description__ | Specifies if "SORT=DISPLAY" IMAP extension is supposed to be considered when returning a mail listing sorted by From/To<br><br>Default is "false"<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.fallbackOnFailedSORT |
+|:----------------|:--------|
+| __Description__ | Specifies if a fall-back to in-application sort is supposed to be performed in case the IMAP server quits with a "NO" response for the<br>issued SORT command.<br>Note: Doing in-application sort contains the danger of utilizing too much memory (especially for big mailboxes).<br><br>Default is "false"<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].auditLog.enabled |
+|:----------------|:--------|
+| __Description__ | Enables the audit log for issued IMAP commands via 'com.sun.mail.imap.AuditLog' class.<br><br>Accepts the "primary." suffix to only enable for primary account;<br>e.g. "com.openexchange.imap.primary.auditLog.enabled=true"<br><br>Default is "false"<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.initWithSpecialUse |
+|:----------------|:--------|
+| __Description__ | Specifies whether the primary mail account should be initialized with special-use folders from the imap server in case no standard folder names are configured.<br><br>Default is 'true'<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | com.openexchange.imap.greeting.host.regex |
+|:----------------|:--------|
+| __Description__ | Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary<br>IMAP server. Only applicable for primary IMAP server! Default is empty.<br><br>The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html<br><br>Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.<br>I.e. "Dovecot at ([0-9a-zA-Z._-]\*) is ready", then the capturing group is supposed to extract the host name/IP addres information<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imap.properties |
+
+---
+| __Key__ | PRIMARY_MAIL_UNCHANGEABLE |
+|:----------------|:--------|
+| __Description__ | Here you can set whether the primary mail address can be changed or not.<br>If set to false, it is possible to change the primary mail address.<br>Only change, if you know what you are doing (Outlook might<br>not work anymore under certain circumstances)<br> |
+| __Default__ | false |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | SENT_MAILFOLDER_[language] |
+|:----------------|:--------|
+| __Description__ | Default sent mail folder fallback for a specific language if not sent by rmi client. <br>The [language] variable must be replaced by an upper case language identifier. E.g. SENT_MAILFOLDER_DE_DE<br>Default values:<br>  SENT_MAILFOLDER_DE_DE=Gesendete Objekte<br>  SENT_MAILFOLDER_EN_GB=Sent Mai<br>  SENT_MAILFOLDER_EN_US=Sent Items<br>  SENT_MAILFOLDER_FR_FR=Objets envoy\u00e9s<br>  SENT_MAILFOLDER_NL_NL=Verzonden items<br>  SENT_MAILFOLDER_SV_SV=Skickat<br>  SENT_MAILFOLDER_ES_ES=Elementos enviados<br>  SENT_MAILFOLDER_JA_JP=\u9001\u4FE1\u6E08\u30A2\u30A4\u30C6\u30E0<br>  SENT_MAILFOLDER_PL_PL=Elementy wys\u0142ane<br>  SENT_MAILFOLDER_IT_IT=Posta inviata<br>  SENT_MAILFOLDER_ZH_CN=\u5df2\u53d1\u9001\u90ae\u4ef6<br>  SENT_MAILFOLDER_CS_CZ=Odeslan\u00e9 polo\u017eky<br>  SENT_MAILFOLDER_HU_HU=Elk\u00fcld\u00f6tt elemek<br>  SENT_MAILFOLDER_SK_SK=Odoslan\u00e9 polo\u017eky<br>  SENT_MAILFOLDER_LV_LV=Nos\u016Bt\u012Bt\u0101s vien\u012Bbas<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | TRASH_MAILFOLDER_[language] |
+|:----------------|:--------|
+| __Description__ | Default trash mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. TRASH_MAILFOLDER_DE_DE<br>Default values:<br>  TRASH_MAILFOLDER_DE_DE=Papierkorb<br>  TRASH_MAILFOLDER_EN_GB=Trash<br>  TRASH_MAILFOLDER_EN_US=Trash<br>  TRASH_MAILFOLDER_FR_FR=Corbeille<br>  TRASH_MAILFOLDER_NL_NL=Prullenbak<br>  TRASH_MAILFOLDER_SV_SV=Papperskorgen<br>  TRASH_MAILFOLDER_ES_ES=Papelera<br>  TRASH_MAILFOLDER_JA_JP=\u524A\u9664\u6E08\u307F\u30A2\u30A4\u30C6\u30E0<br>  TRASH_MAILFOLDER_PL_PL=Kosz<br>  TRASH_MAILFOLDER_IT_IT=Cestino<br>  TRASH_MAILFOLDER_ZH_CN=\u5783\u573e\u7b52<br>  TRASH_MAILFOLDER_CS_CZ=Ko\u0161<br>  TRASH_MAILFOLDER_HU_HU=T\u00f6r\u00f6lt elemek<br>  TRASH_MAILFOLDER_SK_SK=K\u00f4\u0161<br>  TRASH_MAILFOLDER_LV_LV=Atkritumi<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | DRAFTS_MAILFOLDER_[language] |
+|:----------------|:--------|
+| __Description__ | Default drafts mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. DRAFTS_MAILFOLDER_DE_DE<br>Default values:<br>  DRAFTS_MAILFOLDER_DE_DE=Entw\u00fcrfe<br>  DRAFTS_MAILFOLDER_EN_GB=Drafts<br>  DRAFTS_MAILFOLDER_EN_US=Drafts<br>  DRAFTS_MAILFOLDER_FR_FR=Brouillons<br>  DRAFTS_MAILFOLDER_NL_NL=Concepten<br>  DRAFTS_MAILFOLDER_SV_SV=Utkast<br>  DRAFTS_MAILFOLDER_ES_ES=Borradores<br>  DRAFTS_MAILFOLDER_JA_JP=\u4E0B\u66F8\u304D<br>  DRAFTS_MAILFOLDER_PL_PL=Szkice<br>  DRAFTS_MAILFOLDER_IT_IT=Bozze<br>  DRAFTS_MAILFOLDER_ZH_CN=\u8349\u7a3f<br>  DRAFTS_MAILFOLDER_CS_CZ=Koncepty<br>  DRAFTS_MAILFOLDER_HU_HU=Piszkozatok<br>  DRAFTS_MAILFOLDER_SK_SK=Rozp\u00edsan\u00e9<br>  DRAFTS_MAILFOLDER_LV_LV=Melnraksti<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | SPAM_MAILFOLDER_[language] |
+|:----------------|:--------|
+| __Description__ | Default spam mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. SPAM_MAILFOLDER_DE_DE<br>Default values:<br>  SPAM_MAILFOLDER_DE_DE=Spam<br>  SPAM_MAILFOLDER_EN_GB=Spam<br>  SPAM_MAILFOLDER_EN_US=Spam<br>  SPAM_MAILFOLDER_FR_FR=Pourriel<br>  SPAM_MAILFOLDER_NL_NL=Spam<br>  SPAM_MAILFOLDER_SV_SV=Skr\u00E4ppost<br>  SPAM_MAILFOLDER_ES_ES=Correo no deseado<br>  SPAM_MAILFOLDER_JA_JP=\u8FF7\u60D1\u30E1\u30FC\u30EB<br>  SPAM_MAILFOLDER_PL_PL=Spam<br>  SPAM_MAILFOLDER_IT_IT=Posta Indesiderata<br>  SPAM_MAILFOLDER_ZH_CN=\u5783\u573e\u90ae\u4ef6<br>  SPAM_MAILFOLDER_CS_CZ=Spam<br>  SPAM_MAILFOLDER_HU_HU=Lev\u00e9lszem\u00e9t<br>  SPAM_MAILFOLDER_SK_SK=Spam<br>  SPAM_MAILFOLDER_LV_LV=M\u0113stules<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | CONFIRMED_SPAM_MAILFOLDER_[language] |
+|:----------------|:--------|
+| __Description__ | Default confirmed spam mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. CONFIRMED_SPAM_MAILFOLDER_DE_DE<br>Default values: <br>  CONFIRMED_SPAM_MAILFOLDER_DE_DE=confirmed-spam<br>  CONFIRMED_SPAM_MAILFOLDER_EN_GB=confirmed-spam<br>  CONFIRMED_SPAM_MAILFOLDER_EN_US=confirmed-spam<br>  CONFIRMED_SPAM_MAILFOLDER_FR_FR=pourriel-confirme<br>  CONFIRMED_SPAM_MAILFOLDER_NL_NL=bevestigde spam<br>  CONFIRMED_SPAM_MAILFOLDER_SV_SV=bekr\u00E4ftad-skr\u00E4ppost<br>  CONFIRMED_SPAM_MAILFOLDER_ES_ES=correo basura confirmado<br>  CONFIRMED_SPAM_MAILFOLDER_JA_JP=\u8FF7\u60D1\u30E1\u30FC\u30EB\uFF08\u78BA\u8A8D\u6E08\uFF09<br>  CONFIRMED_SPAM_MAILFOLDER_PL_PL=Potwierdzony spam<br>  CONFIRMED_SPAM_MAILFOLDER_IT_IT=Posta indesiderata accertata<br>  CONFIRMED_SPAM_MAILFOLDER_ZH_CN=\u5df2\u786e\u8ba4\u7684\u5783\u573e\u90ae\u4ef6<br>  CONFIRMED_SPAM_MAILFOLDER_CS_CZ=Potvrzen\u00fd spam<br>  CONFIRMED_SPAM_MAILFOLDER_HU_HU=Elfogadott k\u00e9retlen<br>  CONFIRMED_SPAM_MAILFOLDER_SK_SK=Potvrden\u00fd spam<br>  CONFIRMED_SPAM_MAILFOLDER_LV_LV=Apstiprin\u0101ta "m\u0113stule"<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | CONFIRMED_HAM_MAILFOLDER_[language] |
+|:----------------|:--------|
+| __Description__ | Default confirmed ham mail folder fallback if not sent by rmi client.<br>The [language] variable must be replaced by an upper case language identifier. E.g. CONFIRMED_HAM_MAILFOLDER__DE_DE<br>Default values: <br>  CONFIRMED_HAM_MAILFOLDER_DE_DE=confirmed-ham<br>  CONFIRMED_HAM_MAILFOLDER_EN_GB=confirmed-ham<br>  CONFIRMED_HAM_MAILFOLDER_EN_US=confirmed-ham<br>  CONFIRMED_HAM_MAILFOLDER_FR_FR=non-pourriel-confirme<br>  CONFIRMED_HAM_MAILFOLDER_NL_NL=bevestigde ham<br>  CONFIRMED_HAM_MAILFOLDER_SV_SV=felaktigt-bekr\u00E4ftad-spam<br>  CONFIRMED_HAM_MAILFOLDER_ES_ES=correo leg\u00EDtimo confirmado<br>  CONFIRMED_HAM_MAILFOLDER_JA_JP=\u4E00\u822C\u30E1\u30FC\u30EB\uFF08\u78BA\u8A8D\u6E08\uFF09<br>  CONFIRMED_HAM_MAILFOLDER_PL_PL=Potwierdzony nie-spam<br>  CONFIRMED_HAM_MAILFOLDER_IT_IT=Posta attendibile accertata<br>  CONFIRMED_HAM_MAILFOLDER_ZH_CN=\u5df2\u786e\u8ba4\u7684\u6b63\u5e38\u90ae\u4ef6<br>  CONFIRMED_HAM_MAILFOLDER_CS_CZ=Potvrzen\u00e1 norm\u00e1ln\u00ed po\u0161ta<br>  CONFIRMED_HAM_MAILFOLDER_HU_HU=Elfogadott \u00e1l-k\u00e9retlen<br>  CONFIRMED_HAM_MAILFOLDER_SK_SK=Potvrden\u00e9 ako nie spam<br>  CONFIRMED_HAM_MAILFOLDER_LV_LV=Apstiprin\u0101ts "ham"<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/User.html">User</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | AdminUser.properties |
+
+---
+| __Key__ | com.openexchange.dovecot.doveadm.enabled |
+|:----------------|:--------|
+| __Description__ | Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not<br> |
+| __Default__ | false |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a> |
+| __File__ | doveadm.properties |
+
+---
+| __Key__ | com.openexchange.dovecot.doveadm.endpoints |
+|:----------------|:--------|
+| __Description__ | Specifies the URIs to the Dovecot DoveAdm REST interface end-points. <br>e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"<br><br>Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds (default is 10sec)<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds (default is 3sec)<br>com.openexchange.dovecot.doveadm.endpoints.checkInterval           The time interval in milliseconds when to check if a previously black-listed end-point is re-available again (default is 60sec)<br><br>Full example :<br>com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081<br>com.openexchange.dovecot.doveadm.endpoints.totalConnections=100<br>com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)<br>com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000<br>com.openexchange.dovecot.doveadm.endpoints.connectTimeout=3000<br>com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000<br><br>The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a> |
+| __File__ | doveadm.properties |
+
+---
+| __Key__ | com.openexchange.dovecot.doveadm.apiSecret |
+|:----------------|:--------|
+| __Description__ | Specifies the API secret to communicate with the Dovecot DoveAdm REST interface<br> |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a> |
+| __File__ | doveadm.properties |
 
 ---

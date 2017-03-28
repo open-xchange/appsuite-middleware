@@ -2,73 +2,25 @@
 title: Tokenlogin
 ---
 
-| __Key__ | com.openexchange.twitter.clientVersion |
+| __Key__ | com.openexchange.tokenlogin |
 |:----------------|:--------|
-| __Description__ | The client version string<br> |
-| __Default__ | 2.2.3 |
+| __Description__ | Enable or disable token-login<br> |
+| __Default__ | true |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
-| __File__ | twitter.properties |
+| __Related__ | com.openexchange.tokenlogin.maxIdleTime |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tokenlogin.html">Tokenlogin</a> |
+| __File__ | tokenlogin.properties |
 
 ---
-| __Key__ | com.openexchange.twitter.http.proxyHost |
+| __Key__ | com.openexchange.tokenlogin.maxIdleTime |
 |:----------------|:--------|
-| __Description__ | The HTTP proxy host<br> |
+| __Description__ | Specify the maximum time (in milliseconds) a token may be idle before it is evicted<br> |
+| __Default__ | 300000 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.twitter.http.proxyPort |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
-| __File__ | twitter.properties |
-
----
-| __Key__ | com.openexchange.twitter.http.proxyPort |
-|:----------------|:--------|
-| __Description__ | The HTTP proxy port<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.twitter.http.proxyHost |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
-| __File__ | twitter.properties |
-
----
-| __Key__ | com.openexchange.twitter.http.connectionTimeout |
-|:----------------|:--------|
-| __Description__ | Connection time out<br> |
-| __Default__ | 20000 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
-| __File__ | twitter.properties |
-
----
-| __Key__ | com.openexchange.twitter.http.readTimeout |
-|:----------------|:--------|
-| __Description__ | Read time out<br> |
-| __Default__ | 120000 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
-| __File__ | twitter.properties |
-
----
-| __Key__ | com.openexchange.twitter.http.retryCount |
-|:----------------|:--------|
-| __Description__ | Retry count<br> |
-| __Default__ | 3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
-| __File__ | twitter.properties |
-
----
-| __Key__ | com.openexchange.twitter.http.retryIntervalSecs |
-|:----------------|:--------|
-| __Description__ | Retry interval seconds<br> |
-| __Default__ | 10 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Twitter.html">Twitter</a> |
-| __File__ | twitter.properties |
+| __Related__ | com.openexchange.tokenlogin |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tokenlogin.html">Tokenlogin</a> |
+| __File__ | tokenlogin.properties |
 
 ---
