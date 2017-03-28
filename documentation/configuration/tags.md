@@ -44,7 +44,6 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Group.html">Group</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Halo.html">Halo</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/I18N.html">I18N</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Ical.html">Ical</a>
@@ -120,7 +119,6 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tasks.html">Tasks</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Template.html">Template</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timezone.html">Timezone</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Tokenlogin.html">Tokenlogin</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Transport.html">Transport</a>
