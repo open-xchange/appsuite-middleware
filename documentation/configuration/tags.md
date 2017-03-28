@@ -25,6 +25,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Configjump.html">Configjump</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Crawler.html">Crawler</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Data_Retention.html">Data Retention</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Dovecot_Mail_Push.html">Dovecot Mail Push</a>
