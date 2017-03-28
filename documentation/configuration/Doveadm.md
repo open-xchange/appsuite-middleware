@@ -4,7 +4,7 @@ title: Doveadm
 
 | __Key__ | com.openexchange.dovecot.doveadm.enabled |
 |:----------------|:--------|
-| __Description__ | Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not<br> |
+| __Description__ | Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not.<br> |
 | __Default__ | false |
 | __Version__ | 7.8.3 |
 | __Reloadable__ | false |
