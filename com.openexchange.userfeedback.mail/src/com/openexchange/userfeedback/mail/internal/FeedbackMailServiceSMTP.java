@@ -140,6 +140,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         Properties smtpProperties = getSMTPProperties(leanConfig);
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
+        StringBuilder result = new StringBuilder();
 
         try {
             MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
@@ -154,7 +155,9 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 } else {
                     pgpMail = pgpMimeService.encrypt(mail, new ArrayList<>(pgpRecipients.values()));
                 }
-                transport.sendMessage(pgpMail, pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]));
+                Address[] pgpAddresses = pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]);
+                transport.sendMessage(pgpMail, pgpAddresses);
+                appendPositiveSendingResult(pgpAddresses, result, true);
             }
             recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
             if (recipients.length == 0) {
@@ -167,8 +170,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 transport.sendMessage(mail, recipients);
             }
 
-            StringBuilder result = new StringBuilder();
-            appendPositiveSendingResult(recipients, result);
+            appendPositiveSendingResult(recipients, result, false);
             appendWarnings(result);
             return result.toString();
         } catch (MessagingException e) {
@@ -184,9 +186,14 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
      *
      * @param recipients The recipients
      * @param builder The {@link StringBuilder}
+     * @param pgp If PGP was used to encrypt/sign the feedback mail
      */
-    private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder) {
-        builder.append("An email with user feedback was send to \n");
+    private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder, boolean pgp) {
+        if (pgp) {
+            builder.append("An PGP-signed/encrypted email with user feedback was send to \n");
+        } else {
+            builder.append("An email with user feedback was send to \n");
+        }
         for (int i = 0; i < recipients.length; i++) {
             InternetAddress address = (InternetAddress) recipients[i];
             String personalPart = address.getPersonal();
