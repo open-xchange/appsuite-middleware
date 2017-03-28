@@ -78,7 +78,6 @@ import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 
-
 /**
  * {@link SendMailService}
  *
@@ -99,8 +98,7 @@ public class SendMailService extends AbstractUserFeedbackService {
     @Path("/{context-group}/{type}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup,
-        @QueryParam("subject") String subject, @QueryParam("body") String body, String json) {
+    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("subject") String subject, @QueryParam("body") String body, String json) {
         return send(contextGroup, type, start, end, subject, body, json);
     }
 
@@ -113,9 +111,19 @@ public class SendMailService extends AbstractUserFeedbackService {
             ResponseBuilder builder = null;
             if (null == subject || Strings.isEmpty(subject)) {
                 StringBuilder sb = new StringBuilder();
-                SimpleDateFormat df = new SimpleDateFormat();
-                df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                sb.append("User Feedback Report: ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start)))).append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
+                if (start > 0L && end > 0L) {
+                    SimpleDateFormat df = new SimpleDateFormat();
+                    df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    sb.append("User Feedback Report");
+                    if (start > 0L) {
+                        sb.append(" from ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start))));
+                    }
+                    if (end > 0L) {
+                        sb.append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
+                    }
+                } else {
+                    sb.append("User Feedback Report");
+                }
                 subject = sb.toString();
             }
             if (null == mailBody) {
