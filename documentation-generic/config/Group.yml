@@ -10,7 +10,7 @@ properties:
       related: 
       file: Group.properties
       tags: ["Group"]
-    - key: v
+    - key: CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS
       description: |
         If set to true this will check the group name using the check defined in CHECK_GROUP_UID_REGEXP.
       defaultValue: true

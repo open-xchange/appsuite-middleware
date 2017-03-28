@@ -157,4 +157,4 @@ properties:
       reloadable: false
       configcascadeAware: false
       file: grizzly.properties
-      tags: ["Grizzly", "SSL"]
+      tags: ["Grizzly", "SSL" , "Credential"]

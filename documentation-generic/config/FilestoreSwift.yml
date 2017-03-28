@@ -56,7 +56,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].tenantName
       description: |
@@ -68,7 +68,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].authType
       description: |
@@ -94,7 +94,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
-      tags: ["Filestore"]
+      tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].identityUrl
       description: |

@@ -158,7 +158,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
-      tags: ["LDAP", "Authentication"]
+      tags: ["LDAP", "Authentication", "Credential"]
     - key: referral
       description: |
         This option configures how to handle the chasing of referrals in LDAP 
@@ -180,7 +180,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
-      tags: ["LDAP", "Authentication"]
+      tags: ["LDAP", "Authentication", "Credential"]
     - key: proxyDelimiter
       description: |
         Define a delimiter to be used to seperate Proxy from Userlogin

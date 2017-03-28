@@ -128,7 +128,7 @@ properties:
       configcascadeAware: false
       related: mail.user
       file: javamail.properties
-      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Credential"]
 
     - key: mail.mime.charset
       description: |
@@ -183,7 +183,7 @@ properties:
       configcascadeAware: false
       related: mail.user
       file: javamail.properties
-      tags: ["Mail", "SMTP"]
+      tags: ["Mail", "SMTP", "Credential"]
 
     - key: mail.smtp.host
       description: |
@@ -622,7 +622,7 @@ properties:
       configcascadeAware: false
       related: mail.user
       file: javamail.properties
-      tags: ["Mail", "POP3"]
+      tags: ["Mail", "POP3", "Credential"]
 
     - key: mail.pop3.host
       description: |
@@ -730,7 +730,7 @@ properties:
     - key: mail.pop3.disabletop
       description: |
         If set to true, the POP3 TOP command will not be used to fetch message headers. This is useful for POP3 servers that don't properly implement the TOP command,
-## or that provide incorrect information in the TOP command results.
+        or that provide incorrect information in the TOP command results.
       defaultValue: false
       version: 
       reloadable: false

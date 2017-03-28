@@ -66,7 +66,7 @@ properties:
       configcascadeAware: false
       related:
       file: hazelcast.properties
-      tags: ["Hazelcast"]
+      tags: ["Hazelcast", "Credential"]
     - key: com.openexchange.hazelcast.network.join
       description: |
         Specifies which mechanism is used to discover other backend nodes in the
