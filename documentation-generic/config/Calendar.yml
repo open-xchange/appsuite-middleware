@@ -16,7 +16,7 @@ properties:
       configcascadeAware: false
       related: MAX_PRE_FETCH
       file: calendar.properties
-      tags: ["Calendar"]
+      tags: ["Calendar", "Cache"]
     - key: MAX_PRE_FETCH
       description: |
         By enabling the option CACHED_ITERATOR_FAST_FETCH you
@@ -33,7 +33,7 @@ properties:
       configcascadeAware: false
       related: CACHED_ITERATOR_FAST_FETCH
       file: calendar.properties
-      tags: ["Calendar","Limit"]
+      tags: ["Calendar","Limit", "Cache"]
     - key: CHECK_AND_REMOVE_PAST_REMINDERS
       description: |
         If this option is enabled no event is triggered
@@ -87,7 +87,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
-      tags: ["Calendar","Limit", "Appointments"]
+      tags: ["Calendar","Limit", "Appointment"]
     - key: com.openexchange.calendar.undefinedstatusconflict
       description: |
         This boolean option switches on/off, if an appointment

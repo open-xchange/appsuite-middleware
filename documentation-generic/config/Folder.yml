@@ -65,7 +65,7 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
-      tags: ["Folder","Cache"]
+      tags: ["Folder","Caching"]
     - key: ENABLE_FOLDER_CACHE
       description: |
         Enable or disable folder caching. Possible values: TRUE / FALSE
@@ -75,7 +75,7 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
-      tags: ["Folder","Cache"]
+      tags: ["Folder","Caching"]
     - key: IGNORE_SHARED_ADDRESSBOOK
       description: |
         Determine whether to ignore 'shared addressbook' folder or not.
@@ -86,7 +86,7 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
-      tags: ["Folder","Cache", "Contact"]
+      tags: ["Folder","Caching", "Contact"]
     - key: ENABLE_INTERNAL_USER_EDIT
       description: |
         Define if users are allowed to edit their own contact object

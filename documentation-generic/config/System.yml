@@ -9,7 +9,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
-    tags: ["System"] 
+    tags: ["System", "Caching"] 
   - key: serviceUsageInspection
     description: |
       Enabled/disable service usage inspection. If enabled, all services
@@ -65,7 +65,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
-    tags: ["System"] 
+    tags: ["System", "Caching"] 
   - key: CalendarSQL
     description: |
       IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml

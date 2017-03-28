@@ -471,7 +471,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP", "Cache"]
+      tags: ["Mail", "IMAP", "Caching", "Timeout"]
 
     - key: mail.imap.appendbuffersize
       description: |
@@ -773,7 +773,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP", "POP3"]
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Folder"]
 
     - key: mail.store.maildir.checkmessagesizebeforeappend
       description: |
@@ -840,7 +840,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP", "POP3"]
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Folder"]
 
     - key: mail.store.maildir.maxnumofheadercaches
       description: |
@@ -851,7 +851,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP", "POP3"]
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Folder"]
 
     - key: mail.store.maildir.headercacheexpire
       description: |
@@ -862,7 +862,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP", "POP3"]
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Timeout"]
 
     - key: mail.mime.address.strict
       description: |
