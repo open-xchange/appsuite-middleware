@@ -12,7 +12,7 @@ title: Group
 | __File__ | Group.properties |
 
 ---
-| __Key__ | v |
+| __Key__ | CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS |
 |:----------------|:--------|
 | __Description__ | If set to true this will check the group name using the check defined in CHECK_GROUP_UID_REGEXP.<br> |
 | __Default__ | true |

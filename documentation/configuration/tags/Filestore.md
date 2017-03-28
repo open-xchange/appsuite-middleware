@@ -37,7 +37,7 @@ This page shows all properties with the tag: Filestore
 | __Description__ | Specifies the user name to use for authentication.<br>Required.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | filestore-swift.properties |
 
 ---
@@ -46,7 +46,7 @@ This page shows all properties with the tag: Filestore
 | __Description__ | Specifies the tenant name to use for authentication.<br>Required.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | filestore-swift.properties |
 
 ---
@@ -64,7 +64,7 @@ This page shows all properties with the tag: Filestore
 | __Description__ | Specifies the authentication value to use for authentication against Identity API v2.0;<br>see (http://developer.openstack.org/api-ref-identity-v2.html)<br>Required.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | filestore-swift.properties |
 
 ---
