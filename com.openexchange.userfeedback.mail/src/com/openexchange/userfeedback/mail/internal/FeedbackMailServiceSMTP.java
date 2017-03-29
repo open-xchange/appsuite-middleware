@@ -159,7 +159,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 }
                 Address[] pgpAddresses = pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]);
                 transport.sendMessage(pgpMail, pgpAddresses);
-                appendPositiveSendingResult(pgpAddresses, result, true);
+                appendPositiveSendingResult(pgpAddresses, result, sign, true);
             }
             recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
             if (recipients.length == 0) {
@@ -172,7 +172,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 transport.sendMessage(mail, recipients);
             }
 
-            appendPositiveSendingResult(recipients, result, false);
+            appendPositiveSendingResult(recipients, result, sign, false);
             appendWarnings(result);
             return result.toString();
         } catch (MessagingException e) {
@@ -188,11 +188,16 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
      *
      * @param recipients The recipients
      * @param builder The {@link StringBuilder}
-     * @param pgp If PGP was used to encrypt/sign the feedback mail
+     * @param pgpSign If PGP was used to sign the feedback mail
+     * @param pgpEncrypt If PGP was used to encrypt the feedback mail
      */
-    private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder, boolean pgp) {
-        if (pgp) {
+    private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder, boolean pgpSign, boolean pgpEncrypt) {
+        if (pgpSign && pgpEncrypt) {
             builder.append("An PGP-signed/encrypted email with user feedback was send to \n");
+        } else if (pgpSign && !pgpEncrypt) {
+            builder.append("An PGP-signed email with user feedback was send to \n");
+        } else if (!pgpSign && pgpEncrypt) {
+            builder.append("An PGP-encrypted email with user feedback was send to \n");
         } else {
             builder.append("An email with user feedback was send to \n");
         }
