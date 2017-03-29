@@ -57,7 +57,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +102,6 @@ import com.openexchange.userfeedback.mail.osgi.Services;
 public class FeedbackMimeMessageUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMimeMessageUtility.class);
-    private static final String FILENAME = "feedback";
     private static final String FILE_TYPE = ".csv";
 
     /**
@@ -128,6 +129,10 @@ public class FeedbackMimeMessageUtility {
 
     private MimeMessage getNotEncryptedUnsignedMail(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
         MimeMessage email = new MimeMessage(session);
+        LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
+        String exportPrefix = configService.getProperty(UserFeedbackMailProperty.exportPrefix);
+        SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-DD");
+        String file = new StringBuilder().append(exportPrefix).append("-").append(df.format(new Date())).append(FILE_TYPE).toString();
 
         try {
             email.setSubject(filter.getSubject());
@@ -139,6 +144,7 @@ public class FeedbackMimeMessageUtility {
             Multipart completeMailContent = new MimeMultipart(messageBody);
             MimeBodyPart attachment = new MimeBodyPart();
             attachment.attachFile(feedbackFile);
+            attachment.setFileName(file);
             completeMailContent.addBodyPart(attachment);
             email.setContent(completeMailContent);
         } catch (MessagingException e) {
@@ -175,7 +181,7 @@ public class FeedbackMimeMessageUtility {
     }
 
     private File getFileFromStream(InputStream stream) throws OXException, IOException {
-        File tempFile = File.createTempFile(FILENAME, FILE_TYPE);
+        File tempFile = File.createTempFile("export", FILE_TYPE);
         try (FileOutputStream out = new FileOutputStream(tempFile)) {
             IOUtils.copy(stream, out);
         } catch (FileNotFoundException e) {

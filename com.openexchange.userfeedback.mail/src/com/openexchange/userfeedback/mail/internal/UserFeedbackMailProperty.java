@@ -60,6 +60,7 @@ import com.openexchange.config.lean.Property;
 public enum UserFeedbackMailProperty implements Property {
     senderName(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "mail"),
     senderAddress(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "mail."),
+    exportPrefix(UserFeedbackMailProperty.EXPORT_PREFIX, UserFeedbackMailProperty.PREFIX + "mail."),
     hostname(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
     port(587, UserFeedbackMailProperty.PREFIX + "smtp."),
     timeout(50000, UserFeedbackMailProperty.PREFIX + "smtp."),
@@ -72,6 +73,7 @@ public enum UserFeedbackMailProperty implements Property {
 
     private static final String EMPTY = "";
     private static final String PREFIX = "com.openexchange.userfeedback.";
+    private static final String EXPORT_PREFIX = "OX_App_Suite_Feedback_Report";
     private final String fqn;
     private final Object defaultValue;
 
@@ -84,7 +86,7 @@ public enum UserFeedbackMailProperty implements Property {
 
     /**
      * Initialises a new {@link UserFeedbackMailProperty}.
-     * 
+     *
      * @param defaultValue The default value of the property
      */
     private UserFeedbackMailProperty(Object defaultValue) {
@@ -93,7 +95,7 @@ public enum UserFeedbackMailProperty implements Property {
 
     /**
      * Initialises a new {@link UserFeedbackMailProperty}.
-     * 
+     *
      * @param defaultValue The default value of the property
      * @param optional Whether the property is optional
      */
