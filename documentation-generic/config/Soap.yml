@@ -10,7 +10,7 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
-      tags: ["Soap"]
+      tags: ["SOAP"]
     - key: com.openexchange.soap.cxf.hideServiceListPage
       description: |
         Specifies whether to hice service list page.
@@ -20,7 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
-      tags: ["Soap"]
+      tags: ["SOAP"]
     - key: com.openexchange.soap.cxf.entityExpansionLimit
       description: |
         Java platform limits the number of entity expansions that are allowed for a single XML document.
@@ -34,7 +34,7 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
-      tags: ["Soap", "Limit"]
+      tags: ["SOAP", "Limit"]
     - key: com.openexchange.soap.cxf.disableAddressUpdates
       description: |
         This is a workaround for the known side-effect in CXF 2.7.x described in CXF-5737 issue (https://issues.apache.org/jira/browse/CXF-5737)
@@ -46,4 +46,4 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
-      tags: ["Soap", "Limit"]
+      tags: ["SOAP", "Limit"]
