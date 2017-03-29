@@ -1720,32 +1720,56 @@ public final class MailProperties implements IMailProperties {
         return userFlagsEnabled;
     }
 
-    @Override
+    /**
+     * Indicates if watcher is enabled.
+     *
+     * @return <code>true</code> if watcher is enabled; otherwise <code>false</code>
+     */
     public boolean isWatcherEnabled() {
         return watcherEnabled;
     }
 
-    @Override
+    /**
+     * Gets the watcher frequency.
+     *
+     * @return The watcher frequency
+     */
     public int getWatcherFrequency() {
         return watcherFrequency;
     }
 
-    @Override
+    /**
+     * Indicates if watcher is allowed to close exceeded connections.
+     *
+     * @return <code>true</code> if watcher is allowed to close exceeded connections; otherwise <code>false</code>
+     */
     public boolean isWatcherShallClose() {
         return watcherShallClose;
     }
 
-    @Override
+    /**
+     * Gets the watcher time.
+     *
+     * @return The watcher time
+     */
     public int getWatcherTime() {
         return watcherTime;
     }
 
-    @Override
+    /**
+     * Gets the mail access cache shrinker-interval seconds.
+     *
+     * @return The mail access cache shrinker-interval seconds
+     */
     public int getMailAccessCacheShrinkerSeconds() {
         return mailAccessCacheShrinkerSeconds;
     }
 
-    @Override
+    /**
+     * Gets the mail access cache idle seconds.
+     *
+     * @return The mail access cache idle seconds.
+     */
     public int getMailAccessCacheIdleSeconds() {
         return mailAccessCacheIdleSeconds;
     }

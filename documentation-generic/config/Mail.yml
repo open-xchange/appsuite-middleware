@@ -173,8 +173,8 @@ properties:
         Define the interval seconds of the mail access cache's shrinker thread
       defaultValue: 3
       version: 
-      reloadable: true
-      configcascadeAware: true
+      reloadable: false
+      configcascadeAware: false
       related: 
       file: mail.properties
       tags: ["Mail", "Thread"]
@@ -183,8 +183,8 @@ properties:
         Define the idle seconds a mail access may reside in mail access cache before it is removed by shrinker thread.
       defaultValue: 4
       version: 
-      reloadable: true
-      configcascadeAware: true
+      reloadable: false
+      configcascadeAware: false
       related: 
       file: mail.properties
       tags: ["Mail", "Thread"]

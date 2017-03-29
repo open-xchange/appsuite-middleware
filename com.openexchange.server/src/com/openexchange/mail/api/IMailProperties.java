@@ -109,48 +109,6 @@ public interface IMailProperties {
     boolean isUserFlagsEnabled();
 
     /**
-     * Indicates if watcher is enabled.
-     *
-     * @return <code>true</code> if watcher is enabled; otherwise <code>false</code>
-     */
-    boolean isWatcherEnabled();
-
-    /**
-     * Gets the watcher frequency.
-     *
-     * @return The watcher frequency
-     */
-    int getWatcherFrequency();
-
-    /**
-     * Indicates if watcher is allowed to close exceeded connections.
-     *
-     * @return <code>true</code> if watcher is allowed to close exceeded connections; otherwise <code>false</code>
-     */
-    boolean isWatcherShallClose();
-
-    /**
-     * Gets the watcher time.
-     *
-     * @return The watcher time
-     */
-    int getWatcherTime();
-
-    /**
-     * Gets the mail access cache shrinker-interval seconds.
-     *
-     * @return The mail access cache shrinker-interval seconds
-     */
-    int getMailAccessCacheShrinkerSeconds();
-
-    /**
-     * Gets the mail access cache idle seconds.
-     *
-     * @return The mail access cache idle seconds.
-     */
-    int getMailAccessCacheIdleSeconds();
-
-    /**
      * Waits for loading this properties.
      *
      * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for loading the properties.

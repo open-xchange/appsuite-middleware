@@ -108,28 +108,8 @@ public final class UnifiedInboxProperties extends AbstractProtocolProperties imp
     }
 
     @Override
-    public int getMailAccessCacheIdleSeconds() {
-        return mailProperties.getMailAccessCacheIdleSeconds();
-    }
-
-    @Override
-    public int getMailAccessCacheShrinkerSeconds() {
-        return mailProperties.getMailAccessCacheShrinkerSeconds();
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return mailProperties.getMailFetchLimit();
-    }
-
-    @Override
-    public int getWatcherFrequency() {
-        return mailProperties.getWatcherFrequency();
-    }
-
-    @Override
-    public int getWatcherTime() {
-        return mailProperties.getWatcherTime();
     }
 
     @Override
@@ -150,16 +130,6 @@ public final class UnifiedInboxProperties extends AbstractProtocolProperties imp
     @Override
     public boolean isUserFlagsEnabled() {
         return mailProperties.isUserFlagsEnabled();
-    }
-
-    @Override
-    public boolean isWatcherEnabled() {
-        return mailProperties.isWatcherEnabled();
-    }
-
-    @Override
-    public boolean isWatcherShallClose() {
-        return mailProperties.isWatcherShallClose();
     }
 
 }
