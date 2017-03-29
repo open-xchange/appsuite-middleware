@@ -71,7 +71,7 @@ import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.filter.DateOnlyFilter;
 
 /**
- * 
+ *
  * {@link ExportUserFeedbackService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -80,7 +80,7 @@ import com.openexchange.userfeedback.filter.DateOnlyFilter;
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/export")
 public class ExportUserFeedbackService extends AbstractUserFeedbackService {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExportUserFeedbackService.class);
 
     public ExportUserFeedbackService(ServiceLookup services) {
@@ -117,12 +117,12 @@ public class ExportUserFeedbackService extends AbstractUserFeedbackService {
             return builder.build();
         } catch (OXException e) {
             JSONObject errorJson = generateError(e);
-            if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+            if (FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.equals(e)) {
                 LOG.error(DEFAULT_CONFIG_ERROR_MESSAGE, e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
-            } else if (e.similarTo(FeedbackExceptionCodes.INVALID_PARAMETER_VALUE)) {
+            } else if (FeedbackExceptionCodes.INVALID_PARAMETER_VALUE.equals(e)) {
                 ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();

@@ -134,12 +134,12 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
             resp = builder.build();
         } catch (OXException e) {
             JSONObject errorJson = generateError(e);
-            if (e.similarTo(FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED)) {
+            if (FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.equals(e)) {
                 LOG.error(DEFAULT_CONFIG_ERROR_MESSAGE, e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
-            } else if (e.similarTo(FeedbackExceptionCodes.INVALID_PARAMETER_VALUE)) {
+            } else if (FeedbackExceptionCodes.INVALID_PARAMETER_VALUE.equals(e)) {
                 ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
