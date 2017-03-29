@@ -29,7 +29,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
-    tags: ["Spamexperts"] 
+    tags: ["Spamexperts", "Credential"] 
   - key: com.openexchange.custom.spamexperts.panel.admin_password
     description: |
       This property defines the password which should be used as basic auth
@@ -39,7 +39,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
-    tags: ["Spamexperts"] 
+    tags: ["Spamexperts", "Credential"] 
   - key: com.openexchange.custom.spamexperts.panel.api_auth_attribute
     description: |
       Which user attribute should be used for authentication against panel API
@@ -91,7 +91,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
-    tags: ["Spamexperts"] 
+    tags: ["Spamexperts", "Credential"] 
   - key: com.openexchange.custom.spamexperts.imappassword
     description: |
       password to authenticate against the imap server
@@ -101,7 +101,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamexperts.properties
-    tags: ["Spamexperts"] 
+    tags: ["Spamexperts", "Credential"] 
   - key: com.openexchange.custom.spamexperts.trainspamfolder
     description: |
       Foldername of folder to place spam mails in order to train the system

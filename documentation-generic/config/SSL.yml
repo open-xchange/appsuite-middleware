@@ -45,7 +45,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
       file: ssl.properties
-      tags: ["SSL"]
+      tags: ["SSL", "Credential"]
     - key: com.openexchange.net.ssl.hostname.verification.enabled
       description: |
         Defines if the name of the host should be checked while SSL handshaking. If the host name verification fails,

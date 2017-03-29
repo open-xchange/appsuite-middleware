@@ -53,7 +53,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.report.client.proxy.password
       file: reportclient.properties
-      tags: ["Report", "Proxy"]
+      tags: ["Report", "Proxy", "Credential"]
     - key: com.openexchange.report.client.proxy.password
       description: |
         The password that should be used to autherise on the proxy server.
@@ -63,7 +63,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.report.client.proxy.username
       file: reportclient.properties
-      tags: ["Report", "Proxy"]
+      tags: ["Report", "Proxy", "Credential"]
     - key: com.openexchange.report.appsuite.fileStorage
       description: |
         Where should parts of the report be stored.

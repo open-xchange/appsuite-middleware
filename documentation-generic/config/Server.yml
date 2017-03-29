@@ -622,7 +622,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties  
-    tags: ["Server"] 
+    tags: ["Server", "Credential"] 
   - key: com.openexchange.rest.services.basic-auth.password
     description: |
       Specify the password used for HTTP basic auth by internal REST servlet
@@ -634,7 +634,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
-    tags: ["Server"] 
+    tags: ["Server", "Credential"] 
   - key: com.openexchange.preview.thumbnail.blockingWorker
     description: |
       The backend either delivers a thumbnail when it's available from cache or fails fast while initiating the thumbnail creation/caching in

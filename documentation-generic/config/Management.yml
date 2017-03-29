@@ -42,7 +42,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
-      tags: ["Management", "Authentication"]
+      tags: ["Management", "Authentication", "Credential"]
     - key: JMXPassword
       description: |
         Define the JMX password in SHA hashed version.
@@ -73,4 +73,4 @@ properties:
       configcascadeAware: false
       related: JMXLogin
       file: management.properties
-      tags: ["Management", "Authentication"]
+      tags: ["Management", "Authentication", "Credential"]

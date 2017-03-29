@@ -9,7 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: sipgate.properties
-      tags: ["Sipgate", "SMS"]
+      tags: ["Sipgate", "SMS", "Credential"]
     - key: com.openexchange.sms.sipgate.password
       description: |
         The sipgate password.
@@ -19,7 +19,7 @@ properties:
       configcascadeAware: false
       related: 
       file: sipgate.properties
-      tags: ["Sipgate", "SMS"]
+      tags: ["Sipgate", "SMS", "Credential"]
     - key: com.openexchange.sms.sipgate.maxlength
       description: |
         Max message length. 460 characters is sipgate's maximum.

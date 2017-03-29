@@ -161,7 +161,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
-      tags: ["Onboarding", "Apple", "PList"]
+      tags: ["Onboarding", "Apple", "PList", "Credential"]
     - key: com.openexchange.client.onboarding.plist.signkey.alias
       description: |
         The key alias inside the keystore.

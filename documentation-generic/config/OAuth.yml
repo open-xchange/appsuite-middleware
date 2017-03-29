@@ -52,7 +52,7 @@ properties:
       configcascadeAware: true
       related:
       file: 
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MSLiveConnect", "Twitter", "Xing", "Yahoo"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MSLiveConnect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].apiSecret
       description: |
         The api secret of your [serviceId] application.
@@ -64,7 +64,7 @@ properties:
       configcascadeAware: true
       related: 
       file: 
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MSLiveConnect", "Twitter", "Xing", "Yahoo"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MSLiveConnect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].redirectUrl
       description: |
         The redirect url of your [serviceId] application.
@@ -99,7 +99,7 @@ properties:
       configcascadeAware: true
       related:
       file: 
-      tags: ["OAuth", "Xing"]
+      tags: ["OAuth", "Xing", "Credential"]
     - key: com.openexchange.oauth.xing.consumerSecret
       description: |
         The consumer secret (for upsell)
@@ -109,4 +109,4 @@ properties:
       configcascadeAware: true
       related:
       file: 
-      tags: ["OAuth", "Xing"]
+      tags: ["OAuth", "Xing", "Credential"]

@@ -28,7 +28,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
-      tags: ["No-Reply", "Mail"]
+      tags: ["No-Reply", "Mail", "Credential"]
     - key: com.openexchange.noreply.password
       description: |
         Specifies the password for the no-reply account.
@@ -38,7 +38,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
-      tags: ["No-Reply", "Mail"]
+      tags: ["No-Reply", "Mail", "Credential"]
     - key: com.openexchange.noreply.server
       description: |
         Specifies the SMTP server address for the no-reply account. The value must be an IP address

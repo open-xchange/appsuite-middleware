@@ -67,7 +67,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
-      tags: ["Mail"]
+      tags: ["Mail", "Credential"]
     - key: com.openexchange.mail.mailServer
       description: |
         Primary mail server: e.g. 192.168.178.32:8143 or imap://192.168.178.32:7143

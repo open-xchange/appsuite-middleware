@@ -102,4 +102,4 @@ properties:
       configcascadeAware: false
       related: com.openexchange.authentication.ucs.bindDn
       file: authplugin.properties
-      tags: ["Univention", "Authentication", "LDAP"]
+      tags: ["Univention", "Authentication", "LDAP", "Credential"]
