@@ -104,42 +104,56 @@ public class FileNameTools {
             } else {
                 if (i + 1 < len) {
                     char nc = fileName.charAt(i + 1);
-                    if (false == Character.isSurrogatePair(ch, nc)) {
-                        if (EmojiRegistry.getInstance().isEmoji(ch)) { // Emojis
-                            if (null != sb) {
-                                sb.append(ch);
-                            }
-                        } else { // Deny other
-                            if (null == sb) {
-                                sb = new StringBuilder(len);
-                                if (i > 0) {
-                                    sb.append(fileName, 0, i);
-                                }
-                            }
-                            sb.append('_');
-                        }
-                    } else {
+                    if (Character.isSurrogatePair(ch, nc)) {
                         i++;
                         int codePoint = Character.toCodePoint(ch, nc);
-                        if (EmojiRegistry.getInstance().isEmoji(codePoint)) { // Emojis
-                            if (null != sb) {
-                                sb.appendCodePoint(codePoint);
-                            }
-                        } else { // Deny other
-                            if (null == sb) {
-                                sb = new StringBuilder(len);
-                                if (i > 0) {
-                                    sb.append(fileName, 0, i);
-                                }
-                            }
-                            sb.append('_');
-                        }
+                        sb = appendOrReplaceCodePoint(codePoint, len, fileName, i, sb);
+                    } else {
+                        sb = appendOrReplaceCharacter(ch, len, fileName, i, sb);
                     }
+                } else {
+                    sb = appendOrReplaceCharacter(ch, len, fileName, i, sb);
                 }
             }
         }
 
         return null == sb ? fileName : sb.toString();
+    }
+
+    private static StringBuilder appendOrReplaceCharacter(char ch, int len, String fileName, int index, StringBuilder builder) {
+        StringBuilder sb = builder;
+        if (EmojiRegistry.getInstance().isEmoji(ch)) { // Emojis
+            if (null != sb) {
+                sb.append(ch);
+            }
+        } else { // Deny other
+            if (null == sb) {
+                sb = new StringBuilder(len);
+                if (index > 0) {
+                    sb.append(fileName, 0, index);
+                }
+            }
+            sb.append('_');
+        }
+        return sb;
+    }
+
+    private static StringBuilder appendOrReplaceCodePoint(int codePoint, int len, String fileName, int index, StringBuilder builder) {
+        StringBuilder sb = builder;
+        if (EmojiRegistry.getInstance().isEmoji(codePoint)) { // Emojis
+            if (null != sb) {
+                sb.appendCodePoint(codePoint);
+            }
+        } else { // Deny other
+            if (null == sb) {
+                sb = new StringBuilder(len);
+                if (index > 0) {
+                    sb.append(fileName, 0, index);
+                }
+            }
+            sb.append('_');
+        }
+        return sb;
     }
 
 }
