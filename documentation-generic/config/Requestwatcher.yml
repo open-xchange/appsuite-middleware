@@ -25,7 +25,7 @@ properties:
       Define the requestwatcher's frequency in milliseconds
     defaultValue: 60000
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
@@ -46,7 +46,7 @@ properties:
       request watcher.
     defaultValue: sync,ping
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
@@ -57,7 +57,7 @@ properties:
       request watcher. Hint: each path has to start with a '/'"
     defaultValue: /syncUpdate
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: requestwatcher.properties

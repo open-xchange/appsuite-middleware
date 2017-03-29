@@ -79,7 +79,7 @@ properties:
       if that is enabled for the user."
     defaultValue: true
     version: 
-    reloadable: false
+    reloadable: true
     configcascadeAware: false
     related: 
     file: contact.properties 
@@ -103,7 +103,7 @@ properties:
       when exporting the vCard again. 
     defaultValue: true
     version: 
-    reloadable: true
+    reloadable: false
     configcascadeAware: false
     related: 
     file: contact.properties 
