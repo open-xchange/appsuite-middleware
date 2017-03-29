@@ -202,7 +202,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database".html">Database"</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
 | __File__ | cassandra.properties |
 
 ---

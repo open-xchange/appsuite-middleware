@@ -30,7 +30,6 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Data_Retention.html">Data Retention</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Data_Retrieval.html">Data Retrieval</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>
-* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database".html">Database"</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Dovecot_Mail_Push.html">Dovecot Mail Push</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Download.html">Download</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>
