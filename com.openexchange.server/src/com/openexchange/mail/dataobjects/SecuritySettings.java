@@ -173,7 +173,7 @@ public class SecuritySettings {
     private final boolean decrypt;
     private final boolean sign;
     private final boolean pgpInline;
-    private final String authentication;
+    private String authentication;
     private final String guest_language;
     private final String guest_message;
     private final String pin;
@@ -249,6 +249,14 @@ public class SecuritySettings {
      */
     public String getAuthentication() {
         return authentication;
+    }
+
+    /**
+     * Sets the authentication string for the message
+     * @param authentication
+     */
+    public void setAuthentication(String authentication) {
+        this.authentication = authentication;
     }
 
     /**
