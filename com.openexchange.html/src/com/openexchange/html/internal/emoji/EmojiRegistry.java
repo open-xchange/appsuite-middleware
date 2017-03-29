@@ -837,29 +837,29 @@ public class EmojiRegistry {
         emojis.put(9201, "\u23F1"); // stopwatch
         emojis.put(9202, "\u23F2"); // timer clock
         emojis.put(128368, "\u1F570"); // mantelpiece clock
-        emojis.put(128347, "\u1F55B"); // twelve o’clock
+        emojis.put(128347, "\u1F55B"); // twelve o'clock
         emojis.put(128359, "\u1F567"); // twelve-thirty
-        emojis.put(128336, "\u1F550"); // one o’clock
+        emojis.put(128336, "\u1F550"); // one o'clock
         emojis.put(128348, "\u1F55C"); // one-thirty
-        emojis.put(128337, "\u1F551"); // two o’clock
+        emojis.put(128337, "\u1F551"); // two o'clock
         emojis.put(128349, "\u1F55D"); // two-thirty
-        emojis.put(128338, "\u1F552"); // three o’clock
+        emojis.put(128338, "\u1F552"); // three o'clock
         emojis.put(128350, "\u1F55E"); // three-thirty
-        emojis.put(128339, "\u1F553"); // four o’clock
+        emojis.put(128339, "\u1F553"); // four o'clock
         emojis.put(128351, "\u1F55F"); // four-thirty
-        emojis.put(128340, "\u1F554"); // five o’clock
+        emojis.put(128340, "\u1F554"); // five o'clock
         emojis.put(128352, "\u1F560"); // five-thirty
-        emojis.put(128341, "\u1F555"); // six o’clock
+        emojis.put(128341, "\u1F555"); // six o'clock
         emojis.put(128353, "\u1F561"); // six-thirty
-        emojis.put(128342, "\u1F556"); // seven o’clock
+        emojis.put(128342, "\u1F556"); // seven o'clock
         emojis.put(128354, "\u1F562"); // seven-thirty
-        emojis.put(128343, "\u1F557"); // eight o’clock
+        emojis.put(128343, "\u1F557"); // eight o'clock
         emojis.put(128355, "\u1F563"); // eight-thirty
-        emojis.put(128344, "\u1F558"); // nine o’clock
+        emojis.put(128344, "\u1F558"); // nine o'clock
         emojis.put(128356, "\u1F564"); // nine-thirty
-        emojis.put(128345, "\u1F559"); // ten o’clock
+        emojis.put(128345, "\u1F559"); // ten o'clock
         emojis.put(128357, "\u1F565"); // ten-thirty
-        emojis.put(128346, "\u1F55A"); // eleven o’clock
+        emojis.put(128346, "\u1F55A"); // eleven o'clock
         emojis.put(128358, "\u1F566"); // eleven-thirty
         emojis.put(127761, "\u1F311"); // new moon
         emojis.put(127762, "\u1F312"); // waxing crescent moon
@@ -1124,8 +1124,8 @@ public class EmojiRegistry {
         emojis.put(128686, "\u1F6AE"); // litter in bin sign
         emojis.put(128688, "\u1F6B0"); // potable water
         emojis.put(9855, "\u267F"); // wheelchair symbol
-        emojis.put(128697, "\u1F6B9"); // men’s room
-        emojis.put(128698, "\u1F6BA"); // women’s room
+        emojis.put(128697, "\u1F6B9"); // men's room
+        emojis.put(128698, "\u1F6BA"); // women's room
         emojis.put(128699, "\u1F6BB"); // restroom
         emojis.put(128700, "\u1F6BC"); // baby symbol
         emojis.put(128702, "\u1F6BE"); // water closet
