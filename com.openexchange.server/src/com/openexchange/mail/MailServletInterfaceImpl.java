@@ -2960,7 +2960,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (composedMail.getSecuritySettings()!= null && composedMail.getSecuritySettings().anythingSet()) {
             EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
             if (encryptor != null) {
-                composedMail = encryptor.encryptDraftEmail(composedMail, session);
+                composedMail = encryptor.encryptDraftEmail(composedMail, session, cryptoAuthentication);
             }
         }
         return (composedMail);

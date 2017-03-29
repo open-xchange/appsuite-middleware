@@ -67,5 +67,5 @@ public interface EncryptedMailService {
      * @return a ComposedMailMessage containing the encrypted message
      * @throws OXException
      */
-    public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, Session session) throws OXException;
+    public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, Session session, String cryptoAuthentication) throws OXException;
 }
