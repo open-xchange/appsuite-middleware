@@ -8,7 +8,7 @@ This page shows all properties with the tag: Secret
 |:----------------|:--------|
 | __Description__ | Specifies the source for secret (used to decrypt/encrypt user passwords) <password>    Denotes the session's password (also the fall-back to previous handling) <user-id>     Denotes the user identifier <context-id>  Denotes the context identifier <random>      Denotes the value specified in property 'com.openexchange.secret.secretRandom' <list>        Step-wise trial-and-error with tokens specified in file 'secrets' Literals are surrounded by single-quotes E.g. com.openexchange.secret.secretSource="<user-id> + '@' + <context-id>" |
 | __Default__ | <password> |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a> |
 | __File__ | secret.properties |
@@ -17,7 +17,7 @@ This page shows all properties with the tag: Secret
 | __Key__ | com.openexchange.secret.secretRandom |
 |:----------------|:--------|
 | __Description__ | The random secret token |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | secret.properties |

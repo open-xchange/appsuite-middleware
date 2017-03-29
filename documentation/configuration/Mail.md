@@ -147,7 +147,7 @@ title: Mail
 | __Description__ | Specifies the maximum size for message bodies that are allowed to be displayed.<br>Default is 10485760 (10 MB)<br> |
 | __Default__ | 10485760 |
 | __Reloadable__ | true |
-| __Configcascade Aware__ | true |
+| __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
 

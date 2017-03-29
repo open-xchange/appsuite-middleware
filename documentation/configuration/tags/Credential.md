@@ -391,7 +391,7 @@ This page shows all properties with the tag: Credential
 | __Key__ | com.openexchange.secret.secretRandom |
 |:----------------|:--------|
 | __Description__ | The random secret token |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | secret.properties |

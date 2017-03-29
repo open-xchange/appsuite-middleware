@@ -237,7 +237,7 @@ This page shows all properties with the tag: Contact
 |:----------------|:--------|
 | __Description__ | "The auto complete search for email addresses may be triggered easily and quite often if a new email is written and a part of a recipients<br>address is written. This can lead to high load on the database system if a context has a lot of users and a lot of contacts. Therefore the<br>scope if this search can be configured. Set this parameter to true and the auto complete search looks in every readable contact folder for<br>contacts with emails addresses matching the already typed letters. If this parameter is configured to false, only three folders are<br>considered for the search: the users private default contact folder, his contact folder for collected contacts and the global address book<br>if that is enabled for the user."<br> |
 | __Default__ | true |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
 | __File__ | contact.properties |
@@ -257,7 +257,7 @@ This page shows all properties with the tag: Contact
 |:----------------|:--------|
 | __Description__ | Specifies whether the original files are persisted during vCard import or <br>CardDAV synchronization. If enabled, the original vCard files will be stored <br>in the appropriate filestore and are considered during export again. If <br>disabled, all not mapped information is discarded and is no longer available<br>when exporting the vCard again. <br> |
 | __Default__ | true |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Contact.html">Contact</a> |
 | __File__ | contact.properties |

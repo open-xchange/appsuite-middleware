@@ -28,7 +28,7 @@ This page shows all properties with the tag: Requestwatcher
 |:----------------|:--------|
 | __Description__ | Define the requestwatcher's frequency in milliseconds<br> |
 | __Default__ | 60000 |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
@@ -48,7 +48,7 @@ This page shows all properties with the tag: Requestwatcher
 |:----------------|:--------|
 | __Description__ | Define a comma separated list of EAS commands that will be ignored by the<br>request watcher.<br> |
 | __Default__ | sync,ping |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
@@ -58,7 +58,7 @@ This page shows all properties with the tag: Requestwatcher
 |:----------------|:--------|
 | __Description__ | "Define a comma separated list of USM paths that will be ignored by the<br>request watcher. Hint: each path has to start with a '/'"<br> |
 | __Default__ | /syncUpdate |
-| __Reloadable__ | true |
+| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Requestwatcher.html">Requestwatcher</a> |
 | __File__ | requestwatcher.properties |
