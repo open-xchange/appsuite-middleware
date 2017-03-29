@@ -22,6 +22,17 @@ title: Feedback Mail SMTP-Service
 | __File__ | userfeedbackmail.properties |
 
 ---
+| __Key__ | com.openexchange.userfeedback.mail.exportPrefix |
+|:----------------|:--------|
+| __Description__ | Prefix for mail attachment<br> |
+| __Default__ | OX_App_Suite_Feedback_Report |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | userfeedbackmail.properties |
+
+---
 | __Key__ | com.openexchange.userfeedback.smtp.hostname |
 |:----------------|:--------|
 | __Description__ | The SMTP server to connect to<br> |
