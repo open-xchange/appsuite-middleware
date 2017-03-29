@@ -70,7 +70,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.userfeedback.AbstractFeedbackType;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.Feedback;
@@ -114,7 +113,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
         } catch (final SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -169,14 +168,14 @@ public class StarRatingV1 extends AbstractFeedbackType {
         } catch (final SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return createExportObject(feedbacks.values());
     }
 
     /**
      * Adds required export fields to content.
-     * 
+     *
      * @param asciiReader The initial content
      * @param current The feedback object to update
      * @throws JSONException
@@ -210,7 +209,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
