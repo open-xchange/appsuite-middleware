@@ -12,7 +12,7 @@ properties:
       configcascadeAware: false
       related: 
       file: publications.properties
-      tags: ["Publications", "White List"]
+      tags: ["Publication", "White List"]
     - key: com.openexchange.publish.domain
       description: |
         If enabled, this allows you to have a different domain as
@@ -25,7 +25,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.publish.subdomain
       file: publications.properties
-      tags: ["Publications"]  
+      tags: ["Publication"]  
     - key: com.openexchange.publish.subdomain
       description: |
         If enabled, this allows you to use a different subdomain as
@@ -40,7 +40,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.publish.domain
       file: publications.properties
-      tags: ["Publications"]
+      tags: ["Publication"]
     - key: com.openexchange.publish.legalHosterName
       description: |
         The legal name of the company that will be displayed in the
@@ -53,7 +53,7 @@ properties:
       configcascadeAware: false
       related:
       file: publications.properties
-      tags: ["Publications"]  
+      tags: ["Publication"]  
     - key: com.openexchange.publish.createModifyEnabled
       description: |
         Enabled/disables the possibility to create/modify publications
@@ -64,4 +64,4 @@ properties:
       configcascadeAware: false
       related:
       file: publications.properties
-      tags: ["Publications"]
+      tags: ["Publication"]
