@@ -391,7 +391,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR = "includeStackTraceOnError";
 
-    public static final String PARAMETER_AUTH_TOKEN = "auth";
+    public static final String PARAMETER_AUTH_TOKEN = "cryptoauth";
 
     /**
      * The <code><b>&quot;delivery&quot;</b></code> parameter specifies how to deliver binary data; e.g. <code>&quot;view&quot;</code> for
