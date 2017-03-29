@@ -839,7 +839,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             if (null == effectiveSortField) {
                                 effectiveSortField = MailSortField.RECEIVED_DATE;
                             }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -1029,7 +1029,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Sort root elements
             {
                 MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
-                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale(), mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                 Collections.sort(list, listComparator);
             }
             // Check for index range
@@ -1169,7 +1169,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             if (null == effectiveSortField) {
                                 effectiveSortField = MailSortField.RECEIVED_DATE;
                             }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -1334,7 +1334,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Sort root elements
             {
                 MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
-                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale(), mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                 Collections.sort(list, listComparator);
             }
             // Check for index range
@@ -1393,8 +1393,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     }
 
-    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, Locale locale, boolean userFlagsEnabled) {
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, userFlagsEnabled);
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override

@@ -842,7 +842,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             IMAPFolderWorker.checkFailFast(imapStore, parentFullName);
             if (DEFAULT_FOLDER_ID.equals(parentFullName)) {
                 final IMAPFolder parent = (IMAPFolder) imapStore.getDefaultFolder();
-                final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
+                final boolean subscribed = (!getImapConfig().getIMAPProperties().isIgnoreSubscription() && !all);
                 /*
                  * Request subfolders the usual way
                  */
@@ -1011,7 +1011,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException, OXException {
-        final boolean subscribed = !MailProperties.getInstance().isIgnoreSubscription() && !all;
+        final boolean subscribed = !getImapConfig().getIMAPProperties().isIgnoreSubscription() && !all;
         final List<ListLsubEntry> subfolders;
         {
             ListLsubEntry entry = subscribed ? getLSUBEntry(parent) : getLISTEntry(parent);
@@ -1329,7 +1329,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * Subscribe
                      */
-                    if (!MailProperties.getInstance().isSupportSubscription()) {
+                    if (!getImapConfig().getIMAPProperties().isSupportSubscription()) {
                         subscribed = true;
                     } else if (toCreate.containsSubscribed()) {
                         subscribed = toCreate.isSubscribed();
@@ -1972,7 +1972,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SPAM)) ) {
                     defaultFolder = true;
                 }
-                boolean performSubscription = MailProperties.getInstance().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMeEntry);
+                boolean performSubscription = getImapConfig().getIMAPProperties().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMeEntry);
                 if (performSubscription && defaultFolder && !toUpdate.isSubscribed()) {
                     OXException warning = IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
                     warning.setCategory(OXException.CATEGORY_WARNING);

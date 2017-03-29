@@ -142,7 +142,6 @@ import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -1786,11 +1785,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private boolean searchViaIMAP(MailFields fields) throws MessagingException {
         int msgCount = imapFolder.getMessageCount();
         if (fields.contains(MailField.BODY) || fields.contains(MailField.FULL)) {
-            if (imapConfig.forceImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
+            if (imapConfig.forceImapSearch() || (msgCount >= getIMAPProperties().getMailFetchLimit())) {
                 return true;
             }
         } else {
-            return imapConfig.isImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit());
+            return imapConfig.isImapSearch() || (msgCount >= getIMAPProperties().getMailFetchLimit());
         }
 
         return false;
@@ -2042,7 +2041,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             // Sort
-            Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+            Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled()));
 
             // Return
             MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
@@ -3845,7 +3844,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return;
         }
         try {
-            if (!MailProperties.getInstance().isUserFlagsEnabled()) {
+            if (!getIMAPProperties().isUserFlagsEnabled()) {
                 /*
                  * User flags are disabled
                  */
@@ -3907,7 +3906,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return;
         }
         try {
-            if (!MailProperties.getInstance().isUserFlagsEnabled()) {
+            if (!getIMAPProperties().isUserFlagsEnabled()) {
                 /*
                  * User flags are disabled
                  */
@@ -3973,7 +3972,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return;
         }
         try {
-            if (!MailProperties.getInstance().isUserFlagsEnabled()) {
+            if (!getIMAPProperties().isUserFlagsEnabled()) {
                 /*
                  * User flags are disabled
                  */

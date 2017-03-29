@@ -156,6 +156,7 @@ public final class MailProperties implements IMailProperties {
             boolean forwardUnquoted;
             long maxMailSize;
             int maxForwardCount;
+            int mailFetchLimit;
 
             Params() {
                 super();
@@ -187,6 +188,7 @@ public final class MailProperties implements IMailProperties {
         final boolean forwardUnquoted;
         final long maxMailSize;
         final int maxForwardCount;
+        final int mailFetchLimit;
 
         PrimaryMailProps(Params params) {
             super();
@@ -213,6 +215,7 @@ public final class MailProperties implements IMailProperties {
             this.forwardUnquoted = params.forwardUnquoted;
             this.maxMailSize = params.maxMailSize;
             this.maxForwardCount = params.maxForwardCount;
+            this.mailFetchLimit = params.mailFetchLimit;
         }
 
     }
@@ -512,13 +515,23 @@ public final class MailProperties implements IMailProperties {
                 writer.println(params.maxForwardCount);
             }
 
+            {
+                try {
+                    params.mailFetchLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.mailFetchLimit", 1000, view);
+                } catch (final NumberFormatException e) {
+                    LOG.debug("", e);
+                    params.mailFetchLimit = 1000;
+                }
+
+                writer.print("  Mail Fetch Limit: ");
+                writer.println(params.mailFetchLimit);
+            }
+
             PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
             LOG.info(logMessageBuilder.toString());
             return primaryMailProps;
         } finally {
-            if (writer != null) {
-                writer.close();
-            }
+            Streams.close(writer);
         }
     }
 
@@ -1698,6 +1711,8 @@ public final class MailProperties implements IMailProperties {
     /**
      * Gets the default days when archiving messages.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The default days
      */
     public int getDefaultArchiveDays(int userId, int contextId) {
@@ -1707,6 +1722,23 @@ public final class MailProperties implements IMailProperties {
         } catch (Exception e) {
             LOG.error("Failed to get default days when archiving messages for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
             return defaultArchiveDays;
+        }
+    }
+
+    /**
+     * Gets the mail fetch limit.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The mail fetch limit
+     */
+    public int getMailFetchLimit(int userId, int contextId) {
+        try {
+            PrimaryMailProps primaryMailProps = getPrimaryMailProps(userId, contextId);
+            return primaryMailProps.mailFetchLimit;
+        } catch (Exception e) {
+            LOG.error("Failed to get mail fetch limit for user {} in context {}. Using default instead.", I(userId), I(contextId), e);
+            return mailFetchLimit;
         }
     }
 

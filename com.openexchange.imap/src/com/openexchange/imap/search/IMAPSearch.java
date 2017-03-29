@@ -106,7 +106,7 @@ public final class IMAPSearch {
 
         MailFields mailFields = new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm));
         if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
-            if (imapConfig.forceImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
+            if (imapConfig.forceImapSearch() || (msgCount >= imapConfig.getIMAPProperties().getMailFetchLimit())) {
                 // Too many messages in IMAP folder or IMAP-based search should be forced.
                 // Fall-back to IMAP-based search and accept a non-type-sensitive search.
                 int[] seqNums = issueIMAPSearch(imapFolder, searchTerm, session.getUserId(), session.getContextId());

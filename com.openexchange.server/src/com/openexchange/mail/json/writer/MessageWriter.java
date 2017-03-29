@@ -70,7 +70,6 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -800,7 +799,7 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     int colorLabel;
-                    if (MailProperties.getInstance().isUserFlagsEnabled() && mail.containsColorLabel()) {
+                    if (mail.containsColorLabel()) {
                         colorLabel = mail.getColorLabel();
                     } else {
                         colorLabel = 0;
