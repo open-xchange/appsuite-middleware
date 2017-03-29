@@ -49,8 +49,12 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import static com.openexchange.java.Autoboxing.*;
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -168,8 +172,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     public OXContextMySQLStorage() {
         super();
-        this.prop = cache.getProperties();;
-        contextCommon = new OXContextMySQLStorageCommon();
+        this.prop = cache.getProperties();
+        this.contextCommon = new OXContextMySQLStorageCommon();
         try {
             this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
             if (this.CONTEXTS_PER_SCHEMA <= 0) {
@@ -302,7 +306,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 try {
-                    cacheService.getCache("MailAccount").clear();;
+                    cacheService.getCache("MailAccount").clear();
                 } catch (final Exception e) {
                     LOG.error("", e);
                 }
@@ -1144,8 +1148,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException(e.getMessage(), e);
             } catch (StorageException e) {
                 LOG.error(e.getMessage(), e);
-                throw new StorageException("Unable to create context: "+e.getMessage());
-//                throw new StorageException(e.getMessage());
+                throw new StorageException("Unable to create context: " + e.getMessage());
+                //                throw new StorageException(e.getMessage());
             }
 
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
@@ -1388,10 +1392,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             }
+
+            // Invalidate caches
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    cacheService.getCache("UserSettingMail").clear();
+                } catch (final Exception e) {
+                    LOG.error("", e);
+                }
+            }
         } finally {
             Databases.closeSQLStuff(stmtupdateattribute, stmtinsertattribute, stmtdelattribute);
         }
-
     }
 
     /**
@@ -1739,27 +1752,32 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 to = new TableObject();
                 to.setName(table_name);
                 // fetch all columns from table and see if it contains matching column
-                final ResultSet columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
+                ResultSet columns_res = null;
+                try {
+                    columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
 
-                boolean table_matches = false;
-                while (columns_res.next()) {
+                    boolean table_matches = false;
+                    while (columns_res.next()) {
 
-                    final TableColumnObject tco = new TableColumnObject();
-                    final String column_name = columns_res.getString("COLUMN_NAME");
-                    tco.setName(column_name);
-                    tco.setType(columns_res.getInt("DATA_TYPE"));
-                    tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
+                        final TableColumnObject tco = new TableColumnObject();
+                        final String column_name = columns_res.getString("COLUMN_NAME");
+                        tco.setName(column_name);
+                        tco.setType(columns_res.getInt("DATA_TYPE"));
+                        tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
 
-                    // if table has our criteria column, we should fetch data from it
-                    if (column_name.equals(this.selectionCriteria)) {
-                        table_matches = true;
+                        // if table has our criteria column, we should fetch data from it
+                        if (column_name.equals(this.selectionCriteria)) {
+                            table_matches = true;
+                        }
+                        // add column to table
+                        to.addColumn(tco);
                     }
-                    // add column to table
-                    to.addColumn(tco);
-                }
-                columns_res.close();
-                if (table_matches) {
-                    tableObjects.add(to);
+
+                    if (table_matches) {
+                        tableObjects.add(to);
+                    }
+                } finally {
+                    closeSQLStuff(columns_res);
                 }
             }
         } finally {
