@@ -100,6 +100,16 @@ This page shows all properties with the tag: Host
 | __File__ | spamassassin.properties |
 
 ---
+| __Key__ | com.openexchange.userfeedback.smtp.hostname |
+|:----------------|:--------|
+| __Description__ | The SMTP server to connect to<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a> |
+| __File__ | userfeedbackmail.properties |
+
+---
 | __Key__ | com.openexchange.authentication.ucs.ldapUrl |
 |:----------------|:--------|
 | __Description__ | The ldap url; use ldaps:// for ssl.<br> |

@@ -39,7 +39,7 @@ properties:
       configcascadeAware: false
       related:
       file: twitter.properties
-      tags: ["Twitter"]
+      tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.readTimeout
       description: |
         Read time out
@@ -49,7 +49,7 @@ properties:
       configcascadeAware: false
       related:
       file: twitter.properties
-      tags: ["Twitter"]
+      tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.retryCount
       description: |
         Retry count

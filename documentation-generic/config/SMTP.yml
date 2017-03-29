@@ -57,7 +57,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
-      tags: ["Mail","SMTP"]
+      tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp[.primary].smtpConnectionTimeout
       description: |
         Define the socket connect timeout value in milliseconds. A value less
@@ -69,7 +69,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
-      tags: ["Mail","SMTP"]
+      tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp.logTransport
       description: |
         Specifies whether a transported message shall be logged providing "Message-Id" header, login, and SMTP server information

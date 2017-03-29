@@ -11,7 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: snippets.properties
-      tags: ["Snippets", "Attachment"]
+      tags: ["Snippet", "Attachment"]
     - key: com.openexchange.snippet.quota.limit
       description: |
         Specify the maximum number of snippets that are allowed being created by a single user.
@@ -22,4 +22,4 @@ properties:
       configcascadeAware: true
       related: 
       file: snippets.properties
-      tags: ["Snippets", "Limit"]
+      tags: ["Snippet", "Limit"]

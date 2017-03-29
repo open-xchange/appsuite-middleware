@@ -510,7 +510,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
-      tags: ["Mail", "MailAccount", "Black List"]
+      tags: ["Mail", "Mail Account", "Black List"]
     - key: com.openexchange.mail.account.whitelist.ports
       description: |
         Specifies a white-list for such ports that are allowed to connect against when setting up/validating an external mail account
@@ -522,7 +522,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
-      tags: ["Mail", "MailAccount", "White List"]
+      tags: ["Mail", "Mail Account", "White List"]
     - key: com.openexchange.mail.imageHost
       description: |
         Specifies the host/domain from which to load inlined images contained in message content

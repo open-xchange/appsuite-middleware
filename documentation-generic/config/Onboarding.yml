@@ -361,7 +361,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
-      tags: ["Onboarding", "Mail", "Secure"]
+      tags: ["Onboarding", "Mail", "Security"]
     - key: com.openexchange.client.onboarding.mail.smtp.host
       description: |
         Specifies the SMTP host name.
@@ -396,7 +396,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
-      tags: ["Onboarding", "Mail", "Secure"]
+      tags: ["Onboarding", "Mail", "Security"]
     - key: com.openexchange.client.onboarding.mailapp.store.google.playstore
       description: |
         Specifies the URL to Google Play Store for the Mail App.

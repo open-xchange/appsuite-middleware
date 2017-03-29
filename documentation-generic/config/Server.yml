@@ -590,7 +590,7 @@ properties:
     tags: ["Server"] 
   - key: com.openexchange.html.css.parse.timeout
     description: |
-      Specify the amount of seconds to wait for a CSS content being parsed
+      Specify the amount of seconds to wait for a CSS content being parsed.
       This property influences parsing of HTML messages. If CSS could not be parsed in time, CSS is stripped from message's content.
     defaultValue: 4
     version: 
@@ -598,7 +598,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties 
-    tags: ["Server"] 
+    tags: ["Server", "Timeout"] 
   - key: com.openexchange.log.suppressedCategories
     description: |
       Specify the OXException categories (comma separated) that shall not be logged.

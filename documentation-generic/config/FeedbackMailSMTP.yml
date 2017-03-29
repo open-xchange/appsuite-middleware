@@ -1,14 +1,17 @@
 feature_name: Feedback Mail SMTP-Service
 properties:
+
   - key: com.openexchange.userfeedback.mail.senderName
     description: |
       The sender name, that should be displayed to the recepients.
     defaultValue: 
     version: 7.8.4
     reloadable: true
-    configcascadeAware: false
+    configcascadeAware: true
     related: 
     file: userfeedbackmail.properties
+    tags: ["Mail"]
+
   - key: com.openexchange.userfeedback.mail.senderAddress
     description: |
       The address that should be displayed for the recepients.
@@ -18,15 +21,19 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    tags: ["Mail"]
+
   - key: com.openexchange.userfeedback.smtp.hostname
     description: |
-      The SMTP server to connect to.
+      The SMTP server to connect to
     defaultValue: 
     version: 7.8.4
     reloadable: true
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    tags: ["Mail", "Host", "SMTP"]
+
   - key: com.openexchange.userfeedback.smtp.port
     description: |
       The SMTP server port to connect to.
@@ -35,7 +42,9 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: userfeedbackmail.properties              
+    file: userfeedbackmail.properties
+    tags: ["Mail", "Port", "SMTP"]
+
   - key: com.openexchange.userfeedback.smtp.timeout
     description: |
       Socket read timeout value in milliseconds.
@@ -45,6 +54,8 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    tags: ["Mail", "SMTP", "Timeout"]
+
   - key: com.openexchange.userfeedback.smtp.connectionTimeout
     description: |
       Socket connection timeout value in milliseconds.
@@ -53,7 +64,9 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: userfeedbackmail.properties    
+    file: userfeedbackmail.properties
+    tags: ["Mail", "SMTP", "Timeout"]
+
   - key: com.openexchange.userfeedback.smtp.username
     description: |
       Default username for SMTP.
@@ -63,6 +76,8 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    tags: ["Mail", "Credential", "SMTP"]
+
   - key: com.openexchange.userfeedback.smtp.password
     description: |
       Password for the provided username
@@ -72,3 +87,26 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    tags: ["Mail", "Credential", "SMTP"]
+
+  - key: com.openexchange.userfeedback.pgp.signKeyFile
+    description: |
+      Path to PGP secret key used to sign mails
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    tags: ["Mail", "Encryption"]
+
+  - key: com.openexchange.userfeedback.pgp.signKeyPassword
+    description: |
+      Password for PGP secret key used to sign mails
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    tags: ["Mail", "Encryption"]

@@ -9,7 +9,7 @@ properties:
     configcascadeAware: true
     related: 
     file: sms-tools.properties
-    tags: ["sms-tools"] 
+    tags: ["Sms-tools"] 
   - key: com.openexchange.sms.userlimit
     description: |
       Defines the maximum number of sms messages a user can send
@@ -19,7 +19,7 @@ properties:
     configcascadeAware: true
     related: 
     file: sms-tools.properties
-    tags: ["sms-tools"] 
+    tags: ["Sms-tools"] 
   - key: com.openexchange.sms.userlimit.refreshInterval
     description: |
       Defines the time in minutes after that the user sms limits are refreshed.
@@ -31,4 +31,4 @@ properties:
     configcascadeAware: true
     related: 
     file: sms-tools.properties
-    tags: ["sms-tools"] 
+    tags: ["Sms-tools"] 

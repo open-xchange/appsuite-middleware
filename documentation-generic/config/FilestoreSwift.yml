@@ -146,7 +146,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
-      tags: ["Filestore", "Black List"]
+      tags: ["Filestore", "Black List", "Timeout"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].socketReadTimeout
       description: |
@@ -160,7 +160,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
-      tags: ["Filestore", "Black List"]
+      tags: ["Filestore", "Black List", "Timeout"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].heartbeatInterval
       description: |

@@ -216,7 +216,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "SMTP"]
+      tags: ["Mail", "SMTP", "Timeout"]
 
     - key: mail.smtp.timeout
       description: |
@@ -227,7 +227,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "SMTP"]
+      tags: ["Mail", "SMTP", "Timeout"]
 
     - key: mail.smtp.from
       description: |
@@ -449,7 +449,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP"]
+      tags: ["Mail", "IMAP", "Timeout"]
 
     - key: mail.imap.timeout
       description: |
@@ -460,7 +460,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP"]
+      tags: ["Mail", "IMAP", "Timeout"]
 
     - key: mail.imap.statuscachetimeout
       description: |
@@ -508,7 +508,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "IMAP"]
+      tags: ["Mail", "IMAP", "Timeout"]
 
     - key: mail.imap.seperatestoreconnection
       description: |
@@ -655,7 +655,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "POP3"]
+      tags: ["Mail", "POP3", "Timeout"]
 
     - key: mail.pop3.timeout
       description: |
@@ -666,7 +666,7 @@ properties:
       configcascadeAware: false
       related: 
       file: javamail.properties
-      tags: ["Mail", "POP3"]
+      tags: ["Mail", "POP3", "Timeout"]
 
     - key: mail.pop3.rsetbeforequit
       description: |

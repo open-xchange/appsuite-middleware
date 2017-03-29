@@ -1284,23 +1284,23 @@ public class EmojiRegistry {
         emojis.put(127384, "\u1F198"); // SOS button
         emojis.put(127385, "\u1F199"); // UP! button
         emojis.put(127386, "\u1F19A"); // VS button
-        emojis.put(127489, "\u1F201"); // Japanese “here” button
-        emojis.put(127490, "\u1F202"); // Japanese “service charge” button
-        emojis.put(127543, "\u1F237"); // Japanese “monthly amount” button
-        emojis.put(127542, "\u1F236"); // Japanese “not free of charge” button
-        emojis.put(127535, "\u1F22F"); // Japanese “reserved” button
-        emojis.put(127568, "\u1F250"); // Japanese “bargain” button
-        emojis.put(127545, "\u1F239"); // Japanese “discount” button
-        emojis.put(127514, "\u1F21A"); // Japanese “free of charge” button
-        emojis.put(127538, "\u1F232"); // Japanese “prohibited” button
-        emojis.put(127569, "\u1F251"); // Japanese “acceptable” button
-        emojis.put(127544, "\u1F238"); // Japanese “application” button
-        emojis.put(127540, "\u1F234"); // Japanese “passing grade” button
-        emojis.put(127539, "\u1F233"); // Japanese “vacancy” button
-        emojis.put(12951, "\u3297"); // Japanese “congratulations” button
-        emojis.put(12953, "\u3299"); // Japanese “secret” button
-        emojis.put(127546, "\u1F23A"); // Japanese “open for business” button
-        emojis.put(127541, "\u1F235"); // Japanese “no vacancy” button
+        emojis.put(127489, "\u1F201"); // Japanese 'here' button
+        emojis.put(127490, "\u1F202"); // Japanese 'service charge' button
+        emojis.put(127543, "\u1F237"); // Japanese 'monthly amount' button
+        emojis.put(127542, "\u1F236"); // Japanese 'not free of charge' button
+        emojis.put(127535, "\u1F22F"); // Japanese 'reserved' button
+        emojis.put(127568, "\u1F250"); // Japanese 'bargain' button
+        emojis.put(127545, "\u1F239"); // Japanese 'discount' button
+        emojis.put(127514, "\u1F21A"); // Japanese 'free of charge' button
+        emojis.put(127538, "\u1F232"); // Japanese 'prohibited' button
+        emojis.put(127569, "\u1F251"); // Japanese 'acceptable' button
+        emojis.put(127544, "\u1F238"); // Japanese 'application' button
+        emojis.put(127540, "\u1F234"); // Japanese 'passing grade' button
+        emojis.put(127539, "\u1F233"); // Japanese 'vacancy' button
+        emojis.put(12951, "\u3297"); // Japanese 'congratulations' button
+        emojis.put(12953, "\u3299"); // Japanese 'secret' button
+        emojis.put(127546, "\u1F23A"); // Japanese 'open for business' button
+        emojis.put(127541, "\u1F235"); // Japanese 'no vacancy' button
         emojis.put(9642, "\u25AA"); // black small square
         emojis.put(9643, "\u25AB"); // white small square
         emojis.put(9723, "\u25FB"); // white medium square

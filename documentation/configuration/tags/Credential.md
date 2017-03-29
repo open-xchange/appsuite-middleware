@@ -41,6 +41,26 @@ This page shows all properties with the tag: Credential
 | __File__ | filestore-swift.properties |
 
 ---
+| __Key__ | com.openexchange.userfeedback.smtp.username |
+|:----------------|:--------|
+| __Description__ | Default username for SMTP.<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a> |
+| __File__ | userfeedbackmail.properties |
+
+---
+| __Key__ | com.openexchange.userfeedback.smtp.password |
+|:----------------|:--------|
+| __Description__ | Password for the provided username<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a> |
+| __File__ | userfeedbackmail.properties |
+
+---
 | __Key__ | readProperty.1 |
 |:----------------|:--------|
 | __Description__ | The db user name.<br> |

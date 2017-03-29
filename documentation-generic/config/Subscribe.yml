@@ -81,7 +81,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mslivesubscribe.properties
-      tags: ["MSLiveConnect", "Contact", "Subscribe"]
+      tags: ["MS Live Connect", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.contacts.http
       description:
       defaultValue: true
