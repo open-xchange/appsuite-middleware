@@ -677,7 +677,7 @@ quote_s_re () {
 #   root@host:~$ 512M
 #
 ox_get_max_heap() {
-  local config_file=$1
+  local config_file="${1}"
   test -z "${config_file}" && die "ox_get_max_heap: missing config file argument (arg 1)"
   if [ -r "${config_file}" ]
   then
@@ -696,9 +696,73 @@ ox_get_max_heap() {
           exit
         }
       }
-    }' ${config_file})
+    }' "${config_file}")
   fi
   local max_heap=${max_heap:-"n/a"}
-  echo ${max_heap}
+  echo "${max_heap}"
 }
 
+# Scans the file given as parameter1 for uncommentented lines starting with
+# either the old style JAVA_XTRAOPTS or the post RM-177 style JAVA_OPTS_MEM for
+# the JVM max heap size configuration option given as either -Xmx or
+# -XX:MaxHeapSize and sets it to the new value given as parameter2
+#
+# Param1: The file to set the maximum heap size in
+# Param2: The new maximum heap size e.g. 768M or 2G
+# Return: 0 if the new value was set, 1 otherwise
+# Example:
+#
+#   root@host:~$ $(ox_set_max_heap /opt/open-xchange/etc/ox-scriptconf.sh 2G)
+#   && echo set new value
+#   set new value
+#   root@host:~$ 
+#
+ox_set_max_heap() {
+  local config_file="${1}"
+  local new_value="${2}"
+  test -z "${config_file}" && die "ox_set_max_heap: missing config file argument (arg 1)"
+  test -z "${new_value}" && die "ox_set_max_heap: missing new value argument (arg 2)"
+
+  # read
+  local opts_line=$(ox_read_property JAVA_XTRAOPTS "${config_file}")
+  if [[ -z "${opts_line}" ]]
+  then
+    opts_line=$(ox_read_property JAVA_OPTS_MEM "${config_file}")
+    local new_style=1
+  fi
+  [[ -z "${opts_line}" ]] && return 1
+
+  # unquote
+  local opts=($(sed -e 's/\"//g' <<< "${opts_line}"))
+
+  # modify
+  local num_opts=${#opts[@]}
+  for ((i=0; i < num_opts; i++))
+  do
+    if [[ "${opts[$i]}" =~ -XX:MaxHeapSize ]]
+    then
+      opts[$i]="-XX:MaxHeapSize=${new_value}"
+      local modified=1
+      break
+    elif [[ "${opts[${i}]}" =~ -Xmx ]]
+    then
+      opts[$i]="-Xmx${new_value}"
+      local modified=1
+      break
+    fi
+  done
+  
+  ((modified)) || return 1
+
+  # quote
+  new_opts_line=\"${opts[*]}\"
+  
+  # persist
+  if ((new_style))
+  then
+    ox_set_property JAVA_OPTS_MEM "${new_opts_line}" "${config_file}"
+  else
+    ox_set_property JAVA_XTRAOPTS "${new_opts_line}" "${config_file}"
+  fi
+  return $?
+}
