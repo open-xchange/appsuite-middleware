@@ -174,7 +174,7 @@ properties:
       defaultValue: 10485760
       version: 
       reloadable: true
-      configcascadeAware: true
+      configcascadeAware: false
       related: 
       file: mail.properties
       tags: ["Mail"]
