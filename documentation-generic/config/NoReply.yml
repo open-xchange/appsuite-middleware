@@ -59,7 +59,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
-      tags: ["No-Reply", "Mail"]
+      tags: ["No-Reply", "Mail", "Port"]
     - key: com.openexchange.noreply.secureMode
       description: |
         Specifies the secure mode for the no-reply account;

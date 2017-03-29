@@ -75,17 +75,17 @@ properties:
       
       "Example2:" imaps:myserver.example.com:993
       connect to port 993 using a secure connection directly
-    defaultValue: empty
+    defaultValue:
     version: 
     reloadable: true
     configcascadeAware: true
     related: 
     file: spamexperts.properties
-    tags: ["Spamexperts"] 
+    tags: ["Spamexperts", "Host", "Port"] 
   - key: com.openexchange.custom.spamexperts.imapuser
     description: |
       username to authenticate against the imap server
-    defaultValue: empty
+    defaultValue:
     version: 
     reloadable: true
     configcascadeAware: true
@@ -95,7 +95,7 @@ properties:
   - key: com.openexchange.custom.spamexperts.imappassword
     description: |
       password to authenticate against the imap server
-    defaultValue: empty
+    reloadable:
     version: 
     reloadable: true
     configcascadeAware: true

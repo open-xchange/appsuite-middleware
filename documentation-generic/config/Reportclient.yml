@@ -33,7 +33,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.report.client.proxy.address
       file: reportclient.properties
-      tags: ["Report", "Proxy"]
+      tags: ["Report", "Proxy", "Port"]
     - key: com.openexchange.report.client.proxy.authrequired
       description: |
         Is authorisation required to use the proxy. If set to true, the related properties have to be set also.
