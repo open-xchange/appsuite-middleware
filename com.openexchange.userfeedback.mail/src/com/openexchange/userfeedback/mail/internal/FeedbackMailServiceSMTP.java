@@ -193,11 +193,11 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
      */
     private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder, boolean pgpSign, boolean pgpEncrypt) {
         if (pgpSign && pgpEncrypt) {
-            builder.append("An PGP-signed/encrypted email with user feedback was send to \n");
+            builder.append("A PGP-signed/encrypted email with user feedback was send to \n");
         } else if (pgpSign && !pgpEncrypt) {
-            builder.append("An PGP-signed email with user feedback was send to \n");
+            builder.append("A PGP-signed email with user feedback was send to \n");
         } else if (!pgpSign && pgpEncrypt) {
-            builder.append("An PGP-encrypted email with user feedback was send to \n");
+            builder.append("A PGP-encrypted email with user feedback was send to \n");
         } else {
             builder.append("An email with user feedback was send to \n");
         }
