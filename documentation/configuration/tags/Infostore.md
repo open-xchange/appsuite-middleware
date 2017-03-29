@@ -4,6 +4,16 @@ title: Infostore
 
 This page shows all properties with the tag: Infostore
 
+| __Key__ | com.openexchange.quota.infostore |
+|:----------------|:--------|
+| __Description__ | Specifies the quota for the number of documents that are allowed being created within a single context (tenant-wise scope).<br><br>The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.<br>Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),<br>but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate<br>exception being thrown, denying to further create any document in affected context.<br> |
+| __Default__ | 250000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __File__ | quota.properties |
+
+---
 | __Key__ | com.openexchange.mail.transport.publishingPublicInfostoreFolder |
 |:----------------|:--------|
 | __Description__ | Specify the name of the publishing infostore folder which is created below public infostore folder.<br>The denoted folder is created if absent only if "com.openexchange.mail.transport.enablePublishOnExceededQuota" is enabled.<br>The special identifier "i18n-defined" indicates to use translation of text "E-Mail attachments".<br> |
@@ -15,14 +25,23 @@ This page shows all properties with the tag: Infostore
 | __File__ | transport.properties |
 
 ---
-| __Key__ | com.openexchange.quota.infostore |
+| __Key__ | com.openexchange.subscribe.microformats.infostore.http |
 |:----------------|:--------|
-| __Description__ | Specifies the quota for the number of documents that are allowed being created within a single context (tenant-wise scope).<br><br>The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.<br>Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),<br>but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate<br>exception being thrown, denying to further create any document in affected context.<br> |
-| __Default__ | 250000 |
+| __Default__ | true |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quota.html">Quota</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
-| __File__ | quota.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Microformats.html">Microformats</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __File__ | microformatSubscription.properties |
+
+---
+| __Key__ | com.openexchange.subscribe.microformats.infostore.http.autorunInterval |
+|:----------------|:--------|
+| __Description__ | Defines the subscription refresh autorun interval for the microformats infostore.<br> |
+| __Default__ | 1d |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Microformats.html">Microformats</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
+| __File__ | microformatSubscription.properties |
 
 ---
 | __Key__ | MAX_UPLOAD_SIZE |
@@ -54,24 +73,5 @@ This page shows all properties with the tag: Infostore
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a> |
 | __File__ | infostore.properties |
-
----
-| __Key__ | com.openexchange.subscribe.microformats.infostore.http |
-|:----------------|:--------|
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Microformats.html">Microformats</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
-| __File__ | microformatSubscription.properties |
-
----
-| __Key__ | com.openexchange.subscribe.microformats.infostore.http.autorunInterval |
-|:----------------|:--------|
-| __Description__ | Defines the subscription refresh autorun interval for the microformats infostore.<br> |
-| __Default__ | 1d |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Microformats.html">Microformats</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Infostore.html">Infostore</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Subscribe.html">Subscribe</a> |
-| __File__ | microformatSubscription.properties |
 
 ---

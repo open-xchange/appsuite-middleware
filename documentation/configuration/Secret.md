@@ -17,7 +17,7 @@ title: Secret
 | __Description__ | The random secret token |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secret.html">Secret</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | secret.properties |
 
 ---

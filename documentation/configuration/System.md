@@ -28,7 +28,7 @@ title: System
 | __Default__ | 10000 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/System.html">System</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/System.html">System</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
 | __File__ | system.properties |
 
 ---

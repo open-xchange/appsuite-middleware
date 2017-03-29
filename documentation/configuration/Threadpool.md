@@ -8,7 +8,7 @@ title: Threadpool
 | __Default__ | 3 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---
@@ -18,7 +18,7 @@ title: Threadpool
 | __Default__ | true |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---
@@ -28,7 +28,7 @@ title: Threadpool
 | __Default__ | 2147483647 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---
@@ -38,7 +38,7 @@ title: Threadpool
 | __Default__ | 60000 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---
@@ -49,7 +49,7 @@ title: Threadpool
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.threadpool.maximumPoolSize |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---
@@ -60,7 +60,7 @@ title: Threadpool
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.threadpool.workQueue |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---
@@ -70,7 +70,7 @@ title: Threadpool
 | __Default__ | false |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---
@@ -80,7 +80,7 @@ title: Threadpool
 | __Default__ | abort |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Threadpool.html">Threadpool</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | threadpool.properties |
 
 ---

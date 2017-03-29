@@ -18,7 +18,7 @@ title: Quartz
 | __Default__ | 5 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quartz.html">Quartz</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quartz.html">Quartz</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | quartz.properties |
 
 ---

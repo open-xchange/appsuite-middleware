@@ -7,7 +7,7 @@ title: Soap
 | __Description__ | Specifies the base address for published end points; e.g. "http://www.myserver.com/myservices"<br>An empty value means that the running machine's address is used.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Soap.html">Soap</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SOAP.html">SOAP</a> |
 | __File__ | soap-cxf.properties |
 
 ---
@@ -17,7 +17,7 @@ title: Soap
 | __Default__ | false |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Soap.html">Soap</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SOAP.html">SOAP</a> |
 | __File__ | soap-cxf.properties |
 
 ---
@@ -27,7 +27,7 @@ title: Soap
 | __Default__ | 128000 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Soap.html">Soap</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SOAP.html">SOAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | soap-cxf.properties |
 
 ---
@@ -37,7 +37,7 @@ title: Soap
 | __Default__ | true |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Soap.html">Soap</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SOAP.html">SOAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | soap-cxf.properties |
 
 ---

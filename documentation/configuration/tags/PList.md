@@ -29,7 +29,7 @@ This page shows all properties with the tag: PList
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.client.onboarding.plist.pkcs12store.filename |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/PList.html">PList</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/PList.html">PList</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | client-onboarding.properties |
 
 ---

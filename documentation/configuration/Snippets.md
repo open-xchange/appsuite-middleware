@@ -11,7 +11,7 @@ Properties for snippet module.
 | __Default__ | false |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Snippets.html">Snippets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Attachment.html">Attachment</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Snippet.html">Snippet</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Attachment.html">Attachment</a> |
 | __File__ | snippets.properties |
 
 ---
@@ -21,7 +21,7 @@ Properties for snippet module.
 | __Default__ | -1 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Snippets.html">Snippets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Snippet.html">Snippet</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | snippets.properties |
 
 ---

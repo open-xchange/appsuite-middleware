@@ -4,57 +4,70 @@ title: Push
 
 This page shows all properties with the tag: Push
 
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.badge.enabled |
+| __Key__ | com.openexchange.carddav.push.apsd.enabled |
 |:----------------|:--------|
-| __Description__ | Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.<br>These get displayed on the app icon.<br> |
-| __Default__ | true |
+| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
+| __Default__ | false |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.enabled |
-|:----------------|:--------|
-| __Description__ | Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.<br> |
-| __Default__ | true |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.filename |
-|:----------------|:--------|
-| __Description__ | Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.<br>This file needs to be included in the app, otherwise a default sound is played. the string 'default' also causes<br>the default iOS sound to be played.<br> |
-| __Default__ | default |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | pns-mobile-api-facade.properties |
-
----
-| __Key__ | com.openexchange.http.grizzly.hasCometEnabled |
-|:----------------|:--------|
-| __Description__ | Comet is an umbrella term used to describe a technique allowing web browser to<br>receive almost real time updates from the server. The two most common<br>approaches are long polling and streaming. Long polling differs from streaming<br>in that each update from the server ultimately results in another follow up<br>request from the client.<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | grizzly.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
-| __Key__ | com.openexchange.http.grizzly.hasWebSocketsEnabled |
+| __Key__ | com.openexchange.carddav.push.apsd.bundleId |
 |:----------------|:--------|
-| __Description__ | Bi-directional, full-duplex communications channels over a single TCP connection.<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
+| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.contact.XServer.a5243d3e-b635-11e6-80f5-76304dec7eb7". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".<br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
-| __File__ | grizzly.properties |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.push.apsd.keystore |
+|:----------------|:--------|
+| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.contact.p12". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.push.apsd.password |
+|:----------------|:--------|
+| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.carddav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.push.apsd.production |
+|:----------------|:--------|
+| __Description__ | Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. <br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
+
+---
+| __Key__ | com.openexchange.carddav.push.apsd.refreshInterval |
+|:----------------|:--------|
+| __Description__ | Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. <br> |
+| __Default__ | 172800 |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | carddav.properties |
 
 ---
 | __Key__ | com.openexchange.drive.events.apn.ios.enabled |
@@ -187,113 +200,6 @@ This page shows all properties with the tag: Push
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
 | __File__ | drive.properties |
-
----
-| __Key__ | com.openexchange.push.malpoll.period |
-|:----------------|:--------|
-| __Description__ | Define the amount of time in milliseconds when to periodically check for new mails.<br> |
-| __Default__ | 300000 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | malpoll.properties |
-
----
-| __Key__ | com.openexchange.push.malpoll.global |
-|:----------------|:--------|
-| __Description__ | Whether a global timer is set or a timer per user.<br>Or in other words: Do you want a global heartbeat or a heartbeat per user?<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | malpoll.properties |
-
----
-| __Key__ | com.openexchange.push.malpoll.concurrentglobal |
-|:----------------|:--------|
-| __Description__ | Whether the tasks executed by global timer are executed concurrently<br>or by calling timer's thread.<br>Note: This property only has effect if "com.openexchange.push.malpoll.global"<br>is set to "true"<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.push.malpoll.global |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | malpoll.properties |
-
----
-| __Key__ | com.openexchange.push.malpoll.folder |
-|:----------------|:--------|
-| __Description__ | Define the folder to look-up for new mails in each mailbox.<br> |
-| __Default__ | INBOX |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
-| __File__ | malpoll.properties |
-
----
-| __Key__ | com.openexchange.caldav.push.apsd.enabled |
-|:----------------|:--------|
-| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
-| __Default__ | false |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
-
----
-| __Key__ | com.openexchange.caldav.push.apsd.bundleId |
-|:----------------|:--------|
-| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.calendar.XServer.934668ca-125e-4246-afee-8cf2df37aab8". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".<br> |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.caldav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
-
----
-| __Key__ | com.openexchange.caldav.push.apsd.keystore |
-|:----------------|:--------|
-| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.calendar.p12". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.caldav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
-
----
-| __Key__ | com.openexchange.caldav.push.apsd.password |
-|:----------------|:--------|
-| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.caldav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
-| __File__ | caldav.properties |
-
----
-| __Key__ | com.openexchange.caldav.push.apsd.production |
-|:----------------|:--------|
-| __Description__ | Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. <br> |
-| __Default__ | true |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
-
----
-| __Key__ | com.openexchange.caldav.push.apsd.refreshInterval |
-|:----------------|:--------|
-| __Description__ | Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. <br> |
-| __Default__ | 172800 |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | caldav.properties |
 
 ---
 | __Key__ | com.openexchange.pns.delayDuration |
@@ -441,7 +347,7 @@ This page shows all properties with the tag: Push
 | __Default__ | 3600000 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
 | __File__ | push-udp.properties |
 
 ---
@@ -533,69 +439,273 @@ This page shows all properties with the tag: Push
 | __File__ | push-udp.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.enabled |
+| __Key__ | com.openexchange.push.imapidle.folder |
 |:----------------|:--------|
-| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Contacts client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
+| __Description__ | Define the folder to look-up for new mails<br> |
+| __Default__ | INBOX |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.delay |
+|:----------------|:--------|
+| __Description__ | Waiting time in milliseconds before a reconnect is performed<br> |
+| __Default__ | 5000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.clusterLock |
+|:----------------|:--------|
+| __Description__ | Specifies what system to use to manage a cluster-lock<br>Possible values:<br>- "db" for database-based locking<br>- "hz" for Hazelcast-based locking<br>- "local" for node-local locking; each node may spawn an IMAP-IDLE listener for a user (default)<br>- "none" for no cluster lock mechanism<br> |
+| __Default__ | local |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.pushMode |
+|:----------------|:--------|
+| __Description__ | when to fire push events?<br>possible values: newmail,always<br><br>Explanation:<br>newmail means to only send a push event in case of at least one<br>        new mail has arrived. NOTE: Using dovecot this does only<br>        work when only ONE concurrent session of the same user<br>        is active.<br>always  send a push event for every changes to the users mailbox.<br> |
+| __Default__ | always |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.supportsPermanentListeners |
+|:----------------|:--------|
+| __Description__ | Controls whether IMAP IDLE based mail push implementation is supposed to also<br>support permanent listeners.<br><br>Note: IMAP IDLE based mail push implementation is not recommended for operating<br>with permanent listeners due its nature to maintain a permanent IMAP connection<br>and its drawbacks to determine if a IDLE callback is due to a new message delivery.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.udp_listen_multicast |
+|:----------------|:--------|
+| __Description__ | Define if the listener should receive multicast messages<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.udp_listen_host |
+|:----------------|:--------|
+| __Description__ | Define the hostname or interface/multicast group where the udp server should listen<br> |
+| __Default__ | localhost |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.udp_listen_port |
+|:----------------|:--------|
+| __Description__ | Define the port where the udp server should listen<br> |
+| __Default__ | 23420 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.use_ox_login |
+|:----------------|:--------|
+| __Description__ | Whether to use the ox login name to check for a valid push event.<br>The default is to only check the users aliases.<br>If mailboxname@example.com is not contained in the list of aliases,<br>set this to true.<br>Warning: This won't work in multidomain setups where the same login<br>might exist in different contexts!<br> |
+| __Default__ | 23420 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.use_full_email_address |
+|:----------------|:--------|
+| __Description__ | Whether to use the full email address from aliases or just use the<br>localpart.<br>When using a multidomain setup where the imap login is an email address,<br>this should be set to true.<br>If not, login might not be unique because foo@example.com and foo@example.net<br>might be different users.<br>Note: Do NOT set com.openexchange.push.mail.notify.imap_login_delimiter in this case!<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.delay_millis |
+|:----------------|:--------|
+| __Description__ | Specifies the delay time frame in which incoming UDP events are collected<br>and send out as one push event to the OX cluster<br> |
+| __Default__ | 5000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.malpoll.period |
+|:----------------|:--------|
+| __Description__ | Define the amount of time in milliseconds when to periodically check for new mails.<br> |
+| __Default__ | 300000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.push.malpoll.global |
+|:----------------|:--------|
+| __Description__ | Whether a global timer is set or a timer per user.<br>Or in other words: Do you want a global heartbeat or a heartbeat per user?<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.push.malpoll.concurrentglobal |
+|:----------------|:--------|
+| __Description__ | Whether the tasks executed by global timer are executed concurrently<br>or by calling timer's thread.<br>Note: This property only has effect if "com.openexchange.push.malpoll.global"<br>is set to "true"<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.push.malpoll.global |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
+| __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.push.malpoll.folder |
+|:----------------|:--------|
+| __Description__ | Define the folder to look-up for new mails in each mailbox.<br> |
+| __Default__ | INBOX |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
+| __File__ | malpoll.properties |
+
+---
+| __Key__ | com.openexchange.caldav.push.apsd.enabled |
+|:----------------|:--------|
+| __Description__ | Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.<br> |
 | __Default__ | false |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.bundleId |
+| __Key__ | com.openexchange.caldav.push.apsd.bundleId |
 |:----------------|:--------|
-| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.contact.XServer.a5243d3e-b635-11e6-80f5-76304dec7eb7". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".<br> |
+| __Description__ | Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.calendar.XServer.934668ca-125e-4246-afee-8cf2df37aab8". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".<br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.carddav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.keystore |
+| __Key__ | com.openexchange.caldav.push.apsd.keystore |
 |:----------------|:--------|
-| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.contact.p12". <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Description__ | Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.calendar.p12". <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.carddav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.password |
+| __Key__ | com.openexchange.caldav.push.apsd.password |
 |:----------------|:--------|
-| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.carddav.push.apsd.enabled is "true".   <br> |
+| __Description__ | Specifies the password used when creating the referenced keystore containing the APNS certificate.  <br>Required if com.openexchange.caldav.push.apsd.enabled is "true".   <br> |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.carddav.push.apsd.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
-| __File__ | carddav.properties |
+| __Related__ | com.openexchange.caldav.push.apsd.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.production |
+| __Key__ | com.openexchange.caldav.push.apsd.production |
 |:----------------|:--------|
 | __Description__ | Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. <br> |
 | __Default__ | true |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
 
 ---
-| __Key__ | com.openexchange.carddav.push.apsd.refreshInterval |
+| __Key__ | com.openexchange.caldav.push.apsd.refreshInterval |
 |:----------------|:--------|
 | __Description__ | Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. <br> |
 | __Default__ | 172800 |
 | __Version__ | 7.8.4 |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CardDAV.html">CardDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
-| __File__ | carddav.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/CalDAV.html">CalDAV</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | caldav.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.badge.enabled |
+|:----------------|:--------|
+| __Description__ | Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.<br>These get displayed on the app icon.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.enabled |
+|:----------------|:--------|
+| __Description__ | Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.pns.mobile.api.facade.apn.sound.filename |
+|:----------------|:--------|
+| __Description__ | Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.<br>This file needs to be included in the app, otherwise a default sound is played. the string 'default' also causes<br>the default iOS sound to be played.<br> |
+| __Default__ | default |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | pns-mobile-api-facade.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.hasCometEnabled |
+|:----------------|:--------|
+| __Description__ | Comet is an umbrella term used to describe a technique allowing web browser to<br>receive almost real time updates from the server. The two most common<br>approaches are long polling and streaming. Long polling differs from streaming<br>in that each update from the server ultimately results in another follow up<br>request from the client.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | grizzly.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.hasWebSocketsEnabled |
+|:----------------|:--------|
+| __Description__ | Bi-directional, full-duplex communications channels over a single TCP connection.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
+| __File__ | grizzly.properties |
 
 ---

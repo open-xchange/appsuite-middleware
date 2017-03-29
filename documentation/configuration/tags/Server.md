@@ -489,11 +489,11 @@ This page shows all properties with the tag: Server
 ---
 | __Key__ | com.openexchange.html.css.parse.timeout |
 |:----------------|:--------|
-| __Description__ | Specify the amount of seconds to wait for a CSS content being parsed<br>This property influences parsing of HTML messages. If CSS could not be parsed in time, CSS is stripped from message's content.<br> |
+| __Description__ | Specify the amount of seconds to wait for a CSS content being parsed.<br>This property influences parsing of HTML messages. If CSS could not be parsed in time, CSS is stripped from message's content.<br> |
 | __Default__ | 4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
 | __File__ | Server.properties |
 
 ---
@@ -513,7 +513,7 @@ This page shows all properties with the tag: Server
 | __Default__ | empty |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | Server.properties |
 
 ---
@@ -523,7 +523,7 @@ This page shows all properties with the tag: Server
 | __Default__ | USER_INPUT |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Server.html">Server</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | Server.properties |
 
 ---

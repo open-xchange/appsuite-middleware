@@ -160,7 +160,7 @@ This pages describes the properties of the onboarding module.
 | __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.client.onboarding.plist.pkcs12store.filename |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/PList.html">PList</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Apple.html">Apple</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/PList.html">PList</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | client-onboarding.properties |
 
 ---
@@ -326,7 +326,7 @@ This pages describes the properties of the onboarding module.
 | __Description__ | Specifies whether a secure connection is supposed to established to access the IMAP server.<br>If not set, falls-back to internal settings for accessing the primary account.<br><br>Possible values: true&#124;false<br> |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
 | __File__ | client-onboarding-mail.properties |
 
 ---
@@ -353,7 +353,7 @@ This pages describes the properties of the onboarding module.
 | __Description__ | Specifies whether a secure connection is supposed to established to access the SMTP server.<br>If not set, falls-back to internal settings for accessing the primary account.<br><br>Possible values: true&#124;false<br> |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Onboarding.html">Onboarding</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
 | __File__ | client-onboarding-mail.properties |
 
 ---

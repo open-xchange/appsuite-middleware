@@ -7,7 +7,7 @@ title: Sipgate
 | __Description__ | The sipgate username.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sipgate.html">Sipgate</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMS.html">SMS</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sipgate.html">Sipgate</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMS.html">SMS</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | sipgate.properties |
 
 ---
@@ -16,7 +16,7 @@ title: Sipgate
 | __Description__ | The sipgate password.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sipgate.html">Sipgate</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMS.html">SMS</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Sipgate.html">Sipgate</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMS.html">SMS</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | sipgate.properties |
 
 ---

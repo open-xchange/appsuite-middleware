@@ -28,7 +28,7 @@ title: Spamexperts
 | __Default__ | admin |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -38,7 +38,7 @@ title: Spamexperts
 | __Default__ | demo |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | spamexperts.properties |
 
 ---
@@ -65,30 +65,27 @@ title: Spamexperts
 | __Key__ | com.openexchange.custom.spamexperts.imapurl |
 |:----------------|:--------|
 | __Description__ | the imap url to the spamexperts imap server<br><br>"Example1:" imap://myserver.example.com<br>if the imap server offers STARTTLS, communication will be encrypted<br><br>"Example2:" imaps:myserver.example.com:993<br>connect to port 993 using a secure connection directly<br> |
-| __Default__ | empty |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | spamexperts.properties |
 
 ---
 | __Key__ | com.openexchange.custom.spamexperts.imapuser |
 |:----------------|:--------|
 | __Description__ | username to authenticate against the imap server<br> |
-| __Default__ | empty |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | spamexperts.properties |
 
 ---
 | __Key__ | com.openexchange.custom.spamexperts.imappassword |
 |:----------------|:--------|
 | __Description__ | password to authenticate against the imap server<br> |
-| __Default__ | empty |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spamexperts.html">Spamexperts</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | spamexperts.properties |
 
 ---

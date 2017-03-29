@@ -147,7 +147,7 @@ title: PushNotificationService
 | __Default__ | 3600000 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
 | __File__ | push-udp.properties |
 
 ---
@@ -237,5 +237,115 @@ title: PushNotificationService
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | push-udp.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.folder |
+|:----------------|:--------|
+| __Description__ | Define the folder to look-up for new mails<br> |
+| __Default__ | INBOX |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.delay |
+|:----------------|:--------|
+| __Description__ | Waiting time in milliseconds before a reconnect is performed<br> |
+| __Default__ | 5000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.clusterLock |
+|:----------------|:--------|
+| __Description__ | Specifies what system to use to manage a cluster-lock<br>Possible values:<br>- "db" for database-based locking<br>- "hz" for Hazelcast-based locking<br>- "local" for node-local locking; each node may spawn an IMAP-IDLE listener for a user (default)<br>- "none" for no cluster lock mechanism<br> |
+| __Default__ | local |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.pushMode |
+|:----------------|:--------|
+| __Description__ | when to fire push events?<br>possible values: newmail,always<br><br>Explanation:<br>newmail means to only send a push event in case of at least one<br>        new mail has arrived. NOTE: Using dovecot this does only<br>        work when only ONE concurrent session of the same user<br>        is active.<br>always  send a push event for every changes to the users mailbox.<br> |
+| __Default__ | always |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.imapidle.supportsPermanentListeners |
+|:----------------|:--------|
+| __Description__ | Controls whether IMAP IDLE based mail push implementation is supposed to also<br>support permanent listeners.<br><br>Note: IMAP IDLE based mail push implementation is not recommended for operating<br>with permanent listeners due its nature to maintain a permanent IMAP connection<br>and its drawbacks to determine if a IDLE callback is due to a new message delivery.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_imapidle.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.udp_listen_multicast |
+|:----------------|:--------|
+| __Description__ | Define if the listener should receive multicast messages<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.udp_listen_host |
+|:----------------|:--------|
+| __Description__ | Define the hostname or interface/multicast group where the udp server should listen<br> |
+| __Default__ | localhost |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.udp_listen_port |
+|:----------------|:--------|
+| __Description__ | Define the port where the udp server should listen<br> |
+| __Default__ | 23420 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.use_ox_login |
+|:----------------|:--------|
+| __Description__ | Whether to use the ox login name to check for a valid push event.<br>The default is to only check the users aliases.<br>If mailboxname@example.com is not contained in the list of aliases,<br>set this to true.<br>Warning: This won't work in multidomain setups where the same login<br>might exist in different contexts!<br> |
+| __Default__ | 23420 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.use_full_email_address |
+|:----------------|:--------|
+| __Description__ | Whether to use the full email address from aliases or just use the<br>localpart.<br>When using a multidomain setup where the imap login is an email address,<br>this should be set to true.<br>If not, login might not be unique because foo@example.com and foo@example.net<br>might be different users.<br>Note: Do NOT set com.openexchange.push.mail.notify.imap_login_delimiter in this case!<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
+
+---
+| __Key__ | com.openexchange.push.mail.notify.delay_millis |
+|:----------------|:--------|
+| __Description__ | Specifies the delay time frame in which incoming UDP events are collected<br>and send out as one push event to the OX cluster<br> |
+| __Default__ | 5000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a> |
+| __File__ | push_mailnotify.properties |
 
 ---

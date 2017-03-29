@@ -48,7 +48,7 @@ title: Mail
 | __Default__ | secret |
 | __Reloadable__ | true |
 | __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | mail.properties |
 
 ---
@@ -96,8 +96,8 @@ title: Mail
 |:----------------|:--------|
 | __Description__ | The mail provider fallback if an URL does not contain/define a protocol<br> |
 | __Default__ | imap |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
 
@@ -106,8 +106,8 @@ title: Mail
 |:----------------|:--------|
 | __Description__ | Define the default MIME charset used for character encoding. This setting will then be<br>accessible through system property "mail.mime.charset". This parameter takes<br>effect for the complete mail module where no charset is given.<br> |
 | __Default__ | UTF-8 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
 
@@ -146,19 +146,19 @@ title: Mail
 |:----------------|:--------|
 | __Description__ | Define the interval seconds of the mail access cache's shrinker thread<br> |
 | __Default__ | 3 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | mail.properties |
 
 ---
 | __Key__ | com.openexchange.mail.mailAccessCacheIdleSeconds |
 |:----------------|:--------|
-| __Description__ | Define the idle seconds a mail access may reside in mail access cache before it is removed by shrinker thread<br> |
+| __Description__ | Define the idle seconds a mail access may reside in mail access cache before it is removed by shrinker thread.<br> |
 | __Default__ | 4 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | mail.properties |
 
 ---
@@ -434,7 +434,7 @@ title: Mail
 | __Default__ | 127.0.0.1-127.255.255.255,localhost |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MailAccount.html">MailAccount</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Black_List.html">Black List</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Account.html">Mail Account</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Black_List.html">Black List</a> |
 | __File__ | mail.properties |
 
 ---
@@ -444,7 +444,7 @@ title: Mail
 | __Default__ | 143,993, 25,465,587, 110,995 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MailAccount.html">MailAccount</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Account.html">Mail Account</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a> |
 | __File__ | mail.properties |
 
 ---

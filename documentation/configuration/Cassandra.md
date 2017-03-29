@@ -9,7 +9,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -19,7 +19,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -30,7 +30,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -41,7 +41,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -52,7 +52,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -63,7 +63,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -74,7 +74,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -85,7 +85,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -96,7 +96,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -107,7 +107,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -119,7 +119,7 @@ title: Cassandra
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -131,7 +131,7 @@ title: Cassandra
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -143,7 +143,7 @@ title: Cassandra
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.nosql.cassandra.minimumLocalConnectionsPerNode |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -155,7 +155,7 @@ title: Cassandra
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.nosql.cassandra.idleConnectionTrashTimeout |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -167,7 +167,7 @@ title: Cassandra
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.nosql.cassandra.maximumRequestsPerLocalConnection |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -179,7 +179,7 @@ title: Cassandra
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.nosql.cassandra.maximumRequestsPerRemoteConnection |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -191,7 +191,7 @@ title: Cassandra
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.nosql.cassandra.acquistionQueueMaxSize |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -202,7 +202,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database".html">Database"</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
 | __File__ | cassandra.properties |
 
 ---
@@ -213,7 +213,7 @@ title: Cassandra
 | __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Cassandra.html">Cassandra</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a> |
 | __File__ | cassandra.properties |
 
 ---

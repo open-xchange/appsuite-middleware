@@ -32,7 +32,7 @@ This page shows all properties with the tag: Proxy
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.report.client.proxy.address |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Proxy.html">Proxy</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Proxy.html">Proxy</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
 | __File__ | reportclient.properties |
 
 ---
@@ -53,7 +53,7 @@ This page shows all properties with the tag: Proxy
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.report.client.proxy.password |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Proxy.html">Proxy</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Proxy.html">Proxy</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | reportclient.properties |
 
 ---
@@ -63,7 +63,7 @@ This page shows all properties with the tag: Proxy
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.report.client.proxy.username |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Proxy.html">Proxy</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Proxy.html">Proxy</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | reportclient.properties |
 
 ---

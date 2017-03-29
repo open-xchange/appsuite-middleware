@@ -8,7 +8,7 @@ title: Publications
 | __Default__ | true |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publications.html">Publications</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publication.html">Publication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a> |
 | __File__ | publications.properties |
 
 ---
@@ -18,7 +18,7 @@ title: Publications
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.publish.subdomain |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publications.html">Publications</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publication.html">Publication</a> |
 | __File__ | publications.properties |
 
 ---
@@ -28,7 +28,7 @@ title: Publications
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.publish.domain |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publications.html">Publications</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publication.html">Publication</a> |
 | __File__ | publications.properties |
 
 ---
@@ -37,7 +37,7 @@ title: Publications
 | __Description__ | The legal name of the company that will be displayed in the<br>disclaimer of the default publication template.<br>NOTE: If no value is set or the property is commented out, the<br>default will be the generic wording 'the hoster'.<br> |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publications.html">Publications</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publication.html">Publication</a> |
 | __File__ | publications.properties |
 
 ---
@@ -47,7 +47,7 @@ title: Publications
 | __Default__ | false |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publications.html">Publications</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Publication.html">Publication</a> |
 | __File__ | publications.properties |
 
 ---

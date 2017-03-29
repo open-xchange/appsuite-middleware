@@ -44,7 +44,7 @@ title: SSL
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
 | __Related__ | com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SSL.html">SSL</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SSL.html">SSL</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | ssl.properties |
 
 ---

@@ -4,26 +4,6 @@ title: Share
 
 This page shows all properties with the tag: Share
 
-| __Key__ | com.openexchange.capability.share_links |
-|:----------------|:--------|
-| __Description__ | Allows users to create share links to share files or folders.<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
-| __File__ | permissions.properties |
-
----
-| __Key__ | com.openexchange.capability.invite_guests |
-|:----------------|:--------|
-| __Description__ | Allows users to share files or folder with guest users.<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
-| __File__ | permissions.properties |
-
----
 | __Key__ | com.openexchange.share.notification.usePersonalEmailAddress |
 |:----------------|:--------|
 | __Description__ | Specifies whether the user's personal E-Mail address (true) or the configured no-reply address (false) is supposed to be used in case a user<br>without mail permission sends out a sharing invitation<br> |
@@ -122,7 +102,7 @@ This page shows all properties with the tag: Share
 | __Default__ | erE2e8OhAo71 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Secure.html">Secure</a> |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
 | __File__ | share.properties |
 
 ---
@@ -224,86 +204,6 @@ This page shows all properties with the tag: Share
 | __File__ | share.properties |
 
 ---
-| __Key__ | com.openexchange.mail.compose.share.enabled |
-|:----------------|:--------|
-| __Description__ | The main switch to enable/disable to send composed share messages<br>Note: In order to effectively enable composed share messages, the "infostore" and "share_links" capabilities need also to be available<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.name |
-|:----------------|:--------|
-| __Description__ | Specifies the naming for the feature to send composed share messages<br> |
-| __Default__ | Drive Mail |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.threshold |
-|:----------------|:--------|
-| __Description__ | Specifies the threshold in bytes when the client is supposed to send a share compose message.<br>Setting this option to 0 (zero) disables "forced" switch to a share compose message.<br> |
-| __Default__ | 0 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.externalRecipientsLocale |
-|:----------------|:--------|
-| __Description__ | Defines the locale to use when sending a composed share message to an external recipient.<br>Expects a locale identifier compliant to RFC 2798 and 2068; such as "en_US".<br>Special value "user-defined" means to select the sending user's locale.<br> |
-| __Default__ | user-defined |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.requiredExpiration |
-|:----------------|:--------|
-| __Description__ | Defines whether an expiration date is required to be set, which applied to<br>the folder/files that were shared via a share compose message.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.forceAutoDelete |
-|:----------------|:--------|
-| __Description__ | Defines whether shared folder/files get automatically cleansed if an expiration date is exceeded<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.preview.timeout |
-|:----------------|:--------|
-| __Description__ | Defines default timeout in milliseconds for preview image creation.<br> |
-| __Default__ | 1000 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
-| __Key__ | com.openexchange.mail.compose.share.documentPreviewEnabled |
-|:----------------|:--------|
-| __Description__ | If set to true, preview images for documents are generated. Needs readerengine.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
-| __File__ | mail-compose.properties |
-
----
 | __Key__ | com.openexchange.download.limit.enabled |
 |:----------------|:--------|
 | __Description__ | If the feature is disabled (in general or for guests/links) no downloads will be tracked which means after<br>activation each guest/link starts with used counts/size 0.<br> |
@@ -372,5 +272,105 @@ This page shows all properties with the tag: Share
 | __Configcascade Aware__ | true |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Download.html">Download</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Limit.html">Limit</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a> |
 | __File__ | download.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.enabled |
+|:----------------|:--------|
+| __Description__ | The main switch to enable/disable to send composed share messages<br>Note: In order to effectively enable composed share messages, the "infostore" and "share_links" capabilities need also to be available<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.name |
+|:----------------|:--------|
+| __Description__ | Specifies the naming for the feature to send composed share messages<br> |
+| __Default__ | Drive Mail |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.threshold |
+|:----------------|:--------|
+| __Description__ | Specifies the threshold in bytes when the client is supposed to send a share compose message.<br>Setting this option to 0 (zero) disables "forced" switch to a share compose message.<br> |
+| __Default__ | 0 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.externalRecipientsLocale |
+|:----------------|:--------|
+| __Description__ | Defines the locale to use when sending a composed share message to an external recipient.<br>Expects a locale identifier compliant to RFC 2798 and 2068; such as "en_US".<br>Special value "user-defined" means to select the sending user's locale.<br> |
+| __Default__ | user-defined |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.requiredExpiration |
+|:----------------|:--------|
+| __Description__ | Defines whether an expiration date is required to be set, which applied to<br>the folder/files that were shared via a share compose message.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.forceAutoDelete |
+|:----------------|:--------|
+| __Description__ | Defines whether shared folder/files get automatically cleansed if an expiration date is exceeded<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.preview.timeout |
+|:----------------|:--------|
+| __Description__ | Defines default timeout in milliseconds for preview image creation.<br> |
+| __Default__ | 1000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.mail.compose.share.documentPreviewEnabled |
+|:----------------|:--------|
+| __Description__ | If set to true, preview images for documents are generated. Needs readerengine.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a> |
+| __File__ | mail-compose.properties |
+
+---
+| __Key__ | com.openexchange.capability.share_links |
+|:----------------|:--------|
+| __Description__ | Allows users to create share links to share files or folders.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
+| __File__ | permissions.properties |
+
+---
+| __Key__ | com.openexchange.capability.invite_guests |
+|:----------------|:--------|
+| __Description__ | Allows users to share files or folder with guest users.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
+| __File__ | permissions.properties |
 
 ---
