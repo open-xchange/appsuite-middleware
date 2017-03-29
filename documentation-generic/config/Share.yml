@@ -143,7 +143,7 @@ properties:
       configcascadeAware: false
       related: 
       file: share.properties
-      tags: ["Share", "Encryption", "Secure"]
+      tags: ["Share", "Encryption", "Security"]
 
     - key: com.openexchange.share.handler.iCal.futureInterval
       description: |
