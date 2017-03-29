@@ -101,7 +101,6 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -283,7 +282,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                 if (contentType.startsWith("multipart/related") && ("application/smil".equals(asciiLowerCase(contentType.getParameter("type"))))) {
                     origMsg = MimeSmilFixer.getInstance().process(originalMsg);
                 } else {
-                    origMsg = ManagedMimeMessage.clone(originalMsg);
+                    origMsg = originalMsg;
                 }
             }
             Context ctx = ContextStorage.getStorageContext(session.getContextId());

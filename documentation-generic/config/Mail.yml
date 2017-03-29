@@ -134,6 +134,27 @@ properties:
       related: 
       file: mail.properties
       tags: ["Mail"]
+    - key: com.openexchange.mail.saneLogin
+      description: |
+        Controls whether a login string is supposed to be converted to its ACE representation in case it is an E-Mail address;
+        e.g. "someone@m&uuml;ller.de" is converted to "someone@xn--mller-kva.de"
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      tags: ["Mail"]
+    - key: com.openexchange.mail.replaceWithComma
+      description: |
+        Controls a possibly semi-colon-separated address list should be converted to comma-separated one
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      tags: ["Mail"]
     - key: com.openexchange.mail.mailFetchLimit
       description: |
         Define the max. fetch limit; meaning all mails whose count is less than or equal to
@@ -537,7 +558,7 @@ properties:
             - Check a mail with an inline image
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: mail.properties

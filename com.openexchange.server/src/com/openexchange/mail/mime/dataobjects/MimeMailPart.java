@@ -68,16 +68,11 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -92,7 +87,6 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
@@ -110,48 +104,6 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private static final long serialVersionUID = -1142595512657302179L;
 
     static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMailPart.class);
-
-    /**
-     * The max. in-memory size in bytes.
-     */
-    // TODO: Make configurable
-    private static final int MAX_INMEMORY_SIZE = 131072; // 128KB
-
-    private static volatile Boolean useMimeMultipartMailPart;
-
-    private static boolean useMimeMultipartMailPart() {
-        Boolean tmp = useMimeMultipartMailPart;
-        if (null == tmp) {
-            synchronized (MimeMailPart.class) {
-                tmp = useMimeMultipartMailPart;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final boolean defaultValue = false;
-                    if (null == service) {
-                        return defaultValue;
-                    }
-                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.mime.useMimeMultipartMailPart", defaultValue));
-                    useMimeMultipartMailPart = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                useMimeMultipartMailPart = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.mime.useMimeMultipartMailPart");
-            }
-        });
-    }
 
     private static final String ERR_NULL_PART = "Underlying part is null";
 
@@ -1033,15 +985,16 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     try {
                         Part part = this.part;
                         final int size;
-                        if (useMimeMultipartMailPart() && ((size = part.getSize()) > 0) && (size <= MAX_INMEMORY_SIZE)) {
-                            /*
-                             * If size is less than or equal to 1MB, use the in-memory implementation
-                             */
+                        /*-
+                         *
+                        if (false && ((size = part.getSize()) > 0) && (size <= MAX_INMEMORY_SIZE)) {
+                            // If size is less than or equal to 1MB, use the in-memory implementation
                             final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(size);
                             part.writeTo(out);
                             multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
                             this.multipart = multipart;
                         } else {
+                         */
                             /*
                              * If size is unknown or exceeds 1MB, use the stream-based implementation
                              */
@@ -1072,7 +1025,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                                 multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
                                 this.multipart = multipart;
                             }
-                        }
+                       // }
                     } catch (final MessageRemovedException e) {
                         throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
                     } catch (final MessagingException e) {

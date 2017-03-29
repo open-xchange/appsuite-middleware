@@ -54,7 +54,6 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -89,15 +88,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedFileInputStream;
-import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.parser.ContentHandler;
-import org.apache.james.mime4j.parser.MimeStreamParser;
-import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -107,7 +98,6 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
@@ -140,7 +130,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.util.MessageRemovedIOException;
 
@@ -2400,38 +2389,6 @@ public final class MimeMessageConverter {
 
     private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
-    private static volatile Boolean enableMime4j;
-
-    private static boolean useMime4j() {
-        Boolean tmp = enableMime4j;
-        if (null == tmp) {
-            synchronized (MimeMessageConverter.class) {
-                tmp = enableMime4j;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
-                    enableMime4j = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                enableMime4j = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.mime.enableMime4j");
-            }
-        });
-    }
-
     private static void setHeaders(final Part part, final MailPart mailPart) throws OXException {
         /*
          * HEADERS
@@ -2439,7 +2396,9 @@ public final class MimeMessageConverter {
         HeaderCollection headers = null;
         try {
             headers = new HeaderCollection(128);
-            if (useMime4j() && (part instanceof IMAPMessage)) {
+            /*-
+             *
+            if (false && (part instanceof IMAPMessage)) {
                 final ContentHandler handler = new HeaderContentHandler(headers);
                 final MimeConfig config = new MimeConfig();
                 config.setMaxLineLen(-1);
@@ -2462,6 +2421,7 @@ public final class MimeMessageConverter {
                     }
                 }
             } else {
+             */
                 for (final Enumeration<?> e = part.getAllHeaders(); e.hasMoreElements();) {
                     final Header h = (Header) e.nextElement();
                     final String value = h.getValue();
@@ -2471,7 +2431,7 @@ public final class MimeMessageConverter {
                         headers.addHeader(h.getName(), unfold(value));
                     }
                 }
-            }
+            //}
         } catch (final MessageRemovedException e) {
             final String[] sa = part instanceof MimeMessage ? getFolderAndIdSafe((MimeMessage) part) : null;
             final String folder = null == sa ? null : sa[0];
