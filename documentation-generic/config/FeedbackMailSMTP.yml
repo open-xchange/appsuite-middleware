@@ -23,6 +23,17 @@ properties:
     file: userfeedbackmail.properties
     tags: ["Mail"]
 
+  - key: com.openexchange.userfeedback.mail.exportPrefix
+    description: |
+      Prefix for mail attachment
+    defaultValue: OX_App_Suite_Feedback_Report
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    tags: ["Mail"]
+
   - key: com.openexchange.userfeedback.smtp.hostname
     description: |
       The SMTP server to connect to
