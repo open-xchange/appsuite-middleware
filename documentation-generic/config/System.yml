@@ -33,7 +33,7 @@ properties:
     configcascadeAware: false
     related: 
     file: system.properties
-    tags: ["System"] 
+    tags: ["System", "Timeout"] 
   - key: MimeTypeFileName
     description: |
       Name of the MIME type file

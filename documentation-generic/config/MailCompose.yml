@@ -80,7 +80,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-compose.properties
-      tags: ["Mail", "Share", "Drive"]
+      tags: ["Mail", "Share", "Drive", "Timeout"]
 
     - key: com.openexchange.mail.compose.share.documentPreviewEnabled
       description: |

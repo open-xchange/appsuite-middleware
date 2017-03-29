@@ -54,7 +54,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "SMTP"]
+    tags: ["Mail", "SMTP", "Timeout"]
 
   - key: com.openexchange.userfeedback.smtp.connectionTimeout
     description: |
@@ -65,7 +65,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "SMTP"]
+    tags: ["Mail", "SMTP", "Timeout"]
 
   - key: com.openexchange.userfeedback.smtp.username
     description: |
