@@ -61,6 +61,12 @@ public enum MailFilterExtensionCapabilities {
     copy,
     subaddress,
     regex,
-    relational
+    relational,
+    body,
+    fileinto,
+    imap4flags,
+    vacation,
+    date,
+    envelope
 
 }
