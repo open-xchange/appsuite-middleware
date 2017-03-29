@@ -40,7 +40,7 @@ properties:
       configcascadeAware: true
       related: 
       file: 
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MSLiveConnect", "Twitter", "Xing", "Yahoo"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
     - key: com.openexchange.oauth.[serviceId].apiKey
       description: |
         The api key of your [serviceId] application.
@@ -52,7 +52,7 @@ properties:
       configcascadeAware: true
       related:
       file: 
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MSLiveConnect", "Twitter", "Xing", "Yahoo"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
     - key: com.openexchange.oauth.[serviceId].apiSecret
       description: |
         The api secret of your [serviceId] application.
@@ -64,7 +64,7 @@ properties:
       configcascadeAware: true
       related: 
       file: 
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MSLiveConnect", "Twitter", "Xing", "Yahoo"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
     - key: com.openexchange.oauth.[serviceId].redirectUrl
       description: |
         The redirect url of your [serviceId] application.
@@ -77,7 +77,7 @@ properties:
       configcascadeAware: true
       related:
       file: 
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MSLiveConnect", "Yahoo"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MS Live Connect", "Yahoo"]
     - key: com.openexchange.oauth.[serviceId].productName
       description: |
         The product name of your [serviceId] application.
