@@ -93,7 +93,7 @@ properties:
       configcascadeAware: false
       related:
       file: reportclient.properties
-      tags: ["Report", "Serialization"]
+      tags: ["Report", "Serialization", "Thread"]
     - key: com.openexchange.report.appsuite.threadPriority
       description: |
         Which thread priority do the processing threads have.
@@ -103,4 +103,4 @@ properties:
       configcascadeAware: false
       related:
       file: reportclient.properties
-      tags: ["Report", "Serialization"]
+      tags: ["Report", "Serialization", "Thread"]
