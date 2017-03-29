@@ -83,7 +83,6 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
-import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -593,7 +592,7 @@ public final class DownloadUtility {
         fn = escapeBackslashAndQuote(fn);
         if (null != userAgent && BrowserDetector.detectorFor(userAgent).isMSIE()) {
             // InternetExplorer
-            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(FileNameTools.sanitizeFilename(fn), Charsets.UTF_8)).append('"');
+            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
             return;
         }
         /*-
@@ -612,7 +611,7 @@ public final class DownloadUtility {
                 foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
-            String encoded = encoder.escape(FileNameTools.sanitizeFilename(fn));
+            String encoded = encoder.escape(fn);
             appendTo.append("; filename*=UTF-8''").append(encoded);
         }
         appendTo.append("; filename=\"").append(foo).append('"');

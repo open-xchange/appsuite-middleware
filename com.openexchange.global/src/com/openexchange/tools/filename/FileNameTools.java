@@ -49,7 +49,8 @@
 
 package com.openexchange.tools.filename;
 
-import java.util.regex.Pattern;
+import com.openexchange.emoji.EmojiRegistry;
+import com.openexchange.java.Strings;
 
 /**
  * {@link FileNameTools} - A utility class for file names.
@@ -59,19 +60,86 @@ import java.util.regex.Pattern;
  */
 public class FileNameTools {
 
-    private static final Pattern FILENAME = Pattern.compile("[^\\p{L}0-9-_+ .()]");
-
     /**
-     * Replaces all non-digit, non-character, non-whitespace and non-(-, _, +, .) with underscores ('_');
+     * Sanitizes specified file name.
+     * <p>
+     * Allows
+     * <ul>
+     * <li>Space characters</li>
+     * <li>Alphanumeric characters</li>
+     * <li>Punctuation characters</li>
+     * <li>Any letter characters</li>
+     * <li>Emoji code points</li>
+     * </ul>
+     * All other characters are replaced with an underscore (<code>"_"</code>).
      *
      * @param fileName Raw file name
      * @return Sanitized file name
      */
     public static String sanitizeFilename(String fileName) {
-        if (fileName == null) {
+        if (Strings.isEmpty(fileName)) {
             return fileName;
         }
-        return FILENAME.matcher(fileName).replaceAll("_");
+
+        StringBuilder sb = null;
+        int len = fileName.length();
+        for (int i = 0; i < len; i++) {
+            char ch = fileName.charAt(i);
+            if (' ' == ch) { // Space
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            } else if (Strings.isAsciiLetterOrDigit(ch)) { // [a-zA-Z0-9]
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            } else if (Character.isLetter(ch)) { // Any letter
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            } else if (Strings.isPunctuation(ch)) { // Punctuations
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            } else {
+                if (i + 1 < len) {
+                    char nc = fileName.charAt(i + 1);
+                    if (false == Character.isSurrogatePair(ch, nc)) {
+                        if (EmojiRegistry.getInstance().isEmoji(ch)) { // Emojis
+                            if (null != sb) {
+                                sb.append(ch);
+                            }
+                        } else { // Deny other
+                            if (null == sb) {
+                                sb = new StringBuilder(len);
+                                if (i > 0) {
+                                    sb.append(fileName, 0, i);
+                                }
+                            }
+                            sb.append('_');
+                        }
+                    } else {
+                        i++;
+                        int codePoint = Character.toCodePoint(ch, nc);
+                        if (EmojiRegistry.getInstance().isEmoji(codePoint)) { // Emojis
+                            if (null != sb) {
+                                sb.appendCodePoint(codePoint);
+                            }
+                        } else { // Deny other
+                            if (null == sb) {
+                                sb = new StringBuilder(len);
+                                if (i > 0) {
+                                    sb.append(fileName, 0, i);
+                                }
+                            }
+                            sb.append('_');
+                        }
+                    }
+                }
+            }
+        }
+
+        return null == sb ? fileName : sb.toString();
     }
 
 }
