@@ -54,12 +54,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
@@ -132,11 +135,13 @@ public class FeedbackServiceImpl implements FeedbackService {
             }
         }
 
-        Connection writeCon = null;
+        Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
+        boolean rollback = false;
         try {
-            writeCon = dbService.getWritableForGlobal(contextGroupId);
             // Store feedback and feedback metadata
             writeCon.setAutoCommit(false);
+            rollback = true;
+
             long fid = feedBackType.storeFeedback(feedback, writeCon);
             if (fid <= 0) {
                 writeCon.rollback();
@@ -147,14 +152,15 @@ public class FeedbackServiceImpl implements FeedbackService {
 
             saveFeedBackInternal(writeCon, builder.build(), contextGroupId == null ? "default" : contextGroupId);
             writeCon.commit();
+            rollback = false;
         } catch (SQLException e) {
             LOG.error("Unable to store feedback data.", e);
-            DBUtils.rollback(writeCon);
         } finally {
-            if (writeCon != null) {
-                DBUtils.autocommit(writeCon);
-                dbService.backWritableForGlobal(contextGroupId, writeCon);
+            if (rollback) {
+                Databases.rollback(writeCon);
             }
+            Databases.autocommit(writeCon);
+            dbService.backWritableForGlobal(contextGroupId, writeCon);
         }
     }
 
@@ -209,9 +215,8 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.create();
         }
 
-        Connection readCon = null;
+        Connection readCon = dbService.getReadOnlyForGlobal(ctxGroup);
         try {
-            readCon = dbService.getReadOnlyForGlobal(ctxGroup);
 
             List<FeedbackMetaData> metaDataList = loadFeedbackMetaData(readCon, filter, ctxGroup);
 
@@ -226,9 +231,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         } finally {
-            if (readCon != null) {
-                dbService.backReadOnlyForGlobal(ctxGroup, readCon);
-            }
+            dbService.backReadOnlyForGlobal(ctxGroup, readCon);
         }
     }
 
@@ -270,42 +273,50 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.create();
         }
 
-        Connection writeCon = null;
+        Connection writeCon = dbService.getWritableForGlobal(ctxGroup);
+        boolean rollback = false;
         try {
-            writeCon = dbService.getWritableForGlobal(ctxGroup);
             writeCon.setAutoCommit(false);
+            rollback = true;
+
             List<Long> typeIdsToDelete = getTypeIds(ctxGroup, filter, writeCon);
             if (typeIdsToDelete.size() > 0) {
                 feedBackType.deleteFeedbacks(typeIdsToDelete, writeCon);
                 deleteFeedback(writeCon, feedBackType, filter, ctxGroup);
             }
+
             writeCon.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(writeCon);
             throw FeedbackExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
-            if (null != writeCon) {
-                DBUtils.autocommit(writeCon);
-                dbService.backWritableForGlobal(ctxGroup, writeCon);
+            if (rollback) {
+                DBUtils.rollback(writeCon);
             }
+            DBUtils.autocommit(writeCon);
+            dbService.backWritableForGlobal(ctxGroup, writeCon);
         }
     }
 
     private List<Long> getTypeIds(String ctxGroup, FeedbackFilter filter, Connection con) throws SQLException {
-        List<Long> result = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement(TYPEID_FEEDBACK_SQL);
             stmt.setString(1, ctxGroup);
             stmt.setString(2, filter.getType());
-            stmt.setLong(3, filter.start());
-            stmt.setLong(4, filter.end());
+            stmt.setLong(3, filter.start().longValue());
+            stmt.setLong(4, filter.end().longValue());
             rs = stmt.executeQuery();
-            while (rs.next()) {
-                result.add(rs.getLong("typeId"));
+            if (false == rs.next()) {
+                return Collections.emptyList();
             }
-            return result;
+
+            List<Long> results = new LinkedList<>();
+            do {
+                results.add(Long.valueOf(rs.getLong("typeId")));
+            } while (rs.next());
+            return results;
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
