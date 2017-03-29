@@ -1393,13 +1393,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
 
-            // Invalidate caches
-            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                try {
-                    cacheService.getCache("UserSettingMail").clear();
-                } catch (final Exception e) {
-                    LOG.error("", e);
+            {
+                // Invalidate caches
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        Cache lCache = cacheService.getCache("UserSettingMail");
+                        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+                        int[] contextUserIds = oxu.getAll(ctx);
+                        for (int userId : contextUserIds) {
+                            lCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), userId));
+                        }
+                    } catch (final Exception e) {
+                        LOG.error("", e);
+                    }
                 }
             }
         } finally {
