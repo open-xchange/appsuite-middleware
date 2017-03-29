@@ -103,14 +103,12 @@ public class FeedbackMimeMessageUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMimeMessageUtility.class);
     private static final String FILE_TYPE = ".csv";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("YYYY-MM-dd");
 
     /**
      * Initializes a new {@link FeedbackMimeMessageUtility}.
-     *
-     * @param isPGPEncrypted
-     * @param isSigned
      */
-    public FeedbackMimeMessageUtility() {
+    private FeedbackMimeMessageUtility() {
         super();
     }
 
@@ -123,16 +121,23 @@ public class FeedbackMimeMessageUtility {
      * @return a MimeMessage with the gathered user feedback, which can be send
      * @throws OXException
      */
-    public MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
+    public static MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
         return getNotEncryptedUnsignedMail(feedbackFile, filter, session);
     }
 
-    private MimeMessage getNotEncryptedUnsignedMail(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
+    private static MimeMessage getNotEncryptedUnsignedMail(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
         MimeMessage email = new MimeMessage(session);
         LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
         String exportPrefix = configService.getProperty(UserFeedbackMailProperty.exportPrefix);
-        SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-dd");
-        String file = new StringBuilder().append(exportPrefix).append("-").append(df.format(new Date())).append(FILE_TYPE).toString();
+
+        String file;
+        {
+            StringBuilder fileBuilder = new StringBuilder(32).append(exportPrefix).append('-');
+            synchronized (DATE_FORMAT) {
+                fileBuilder.append(DATE_FORMAT.format(new Date()));
+            }
+            file = fileBuilder.append(FILE_TYPE).toString();
+        }
 
         try {
             email.setSubject(filter.getSubject());
@@ -166,7 +171,7 @@ public class FeedbackMimeMessageUtility {
      * @return a file with all user feedback for the given filter
      * @throws OXException, when something during the export goes wrong
      */
-    public File getFeedbackfile(FeedbackMailFilter filter) throws OXException {
+    public static File getFeedbackfile(FeedbackMailFilter filter) throws OXException {
         FeedbackService feedbackService = Services.getService(FeedbackService.class);
         ExportResultConverter feedbackProvider = feedbackService.export(filter.getCtxGroup(), filter);
         ExportResult feedbackResult = feedbackProvider.get(ExportType.CSV);
@@ -180,7 +185,7 @@ public class FeedbackMimeMessageUtility {
         return result;
     }
 
-    private File getFileFromStream(InputStream stream) throws OXException, IOException {
+    private static File getFileFromStream(InputStream stream) throws OXException, IOException {
         File tempFile = File.createTempFile("export", FILE_TYPE);
         try (FileOutputStream out = new FileOutputStream(tempFile)) {
             IOUtils.copy(stream, out);
@@ -200,7 +205,7 @@ public class FeedbackMimeMessageUtility {
      * @param invalidAddresses, the list where all invalid email addresses should be stored
      * @return an Array with {@link InternetAddress}s
      */
-    public Address[] extractValidRecipients(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) {
+    public static Address[] extractValidRecipients(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) {
         Map<String, String> recipients = filter.getRecipients();
         List<InternetAddress> validRecipients = new ArrayList<>();
         for (Entry<String, String> recipient : recipients.entrySet()) {
@@ -219,7 +224,7 @@ public class FeedbackMimeMessageUtility {
         return validRecipients.toArray(new InternetAddress[validRecipients.size()]);
     }
 
-    public Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) throws OXException {
+    public static Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) throws OXException {
         Map<String, String> pgpKeys = filter.getPgpKeys();
         Map<Address, PGPPublicKey> result = new HashMap<>();
         for (Map.Entry<String, String> addr2Key : pgpKeys.entrySet()) {
@@ -248,7 +253,7 @@ public class FeedbackMimeMessageUtility {
         return result;
     }
 
-    private PGPPublicKey parsePublicKey(String ascPgpPublicKey) throws OXException {
+    private static PGPPublicKey parsePublicKey(String ascPgpPublicKey) throws OXException {
         PGPKeyRingParser parser = Services.getService(PGPKeyRingParser.class);
         ByteArrayInputStream in = null;
         try {
@@ -262,7 +267,7 @@ public class FeedbackMimeMessageUtility {
         }
     }
 
-    public PGPSecretKey parsePrivateKey(String file) throws OXException {
+    public static PGPSecretKey parsePrivateKey(String file) throws OXException {
         PGPKeyRingParser parser = Services.getService(PGPKeyRingParser.class);
         FileInputStream in = null;
         try {

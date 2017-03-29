@@ -43,8 +43,7 @@ public class FeedbackMimeMessageUtilityTest {
 
     @Test
     public void createMailMessageTest_NoSecurity() throws OXException, IOException, MessagingException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
-        MimeMessage mimeMessage = messageUtility.createMailMessage(new File(TESTFILES_PATH + "feedback.csv"), getDefaultFilter(), null);
+        MimeMessage mimeMessage = FeedbackMimeMessageUtility.createMailMessage(new File(TESTFILES_PATH + "feedback.csv"), getDefaultFilter(), null);
         // Check if message has a multipart body with a plain text part and a file attachment
         Multipart content = (Multipart) mimeMessage.getContent();
         assertTrue(content.getCount() == 2);
@@ -62,20 +61,18 @@ public class FeedbackMimeMessageUtilityTest {
 
     @Test
     public void extractRecipientsTest_NoneNotNullResult() throws UnsupportedEncodingException, OXException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
         FeedbackMailFilter filter = getDefaultFilter();
-        Address[] extractRecipients = messageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
+        Address[] extractRecipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         assertTrue(extractRecipients != null);
     }
 
     @Test
     public void extractRecipientsTest_AdressNoPrivate() throws UnsupportedEncodingException, OXException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
         recipients.put(recipient, "");
         FeedbackMailFilter filter = new FeedbackMailFilter("1", recipients, "subject", "Mail body", 0l, 0l, "");
-        InternetAddress[] extractRecipients = (InternetAddress[]) messageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
+        InternetAddress[] extractRecipients = (InternetAddress[]) FeedbackMimeMessageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         // created adress with empty personal information
         assertTrue(extractRecipients.length == 1);
         assertTrue(!extractRecipients[0].getAddress().isEmpty());
@@ -84,14 +81,13 @@ public class FeedbackMimeMessageUtilityTest {
 
     @Test
     public void extractRecipientsTest_MultipleAdresses() throws UnsupportedEncodingException, OXException {
-        FeedbackMimeMessageUtility messageUtility = new FeedbackMimeMessageUtility();
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
         recipients.put(recipient, "");
         final String recipient2 = "recipient2@ox.de";
         recipients.put(recipient2, "recipient2");
         FeedbackMailFilter filter = new FeedbackMailFilter("1", recipients, "subject", "Mail body", 0l, 0l, "");
-        InternetAddress[] extractRecipients = (InternetAddress[]) messageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
+        InternetAddress[] extractRecipients = (InternetAddress[]) FeedbackMimeMessageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         // created adress with empty personal information
         assertTrue(extractRecipients.length == 2);
         assertTrue(!extractRecipients[0].getAddress().isEmpty());

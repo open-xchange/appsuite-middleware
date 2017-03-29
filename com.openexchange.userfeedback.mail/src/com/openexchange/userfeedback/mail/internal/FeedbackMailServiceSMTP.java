@@ -84,11 +84,9 @@ import com.openexchange.userfeedback.mail.osgi.Services;
 public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMailServiceSMTP.class);
+
     public static final String FILENAME = "feedback";
     public static final String FILE_TYPE = ".csv";
-    private List<InternetAddress> invalidAddresses;
-    private List<InternetAddress> pgpFailedAddresses;
-    private FeedbackMimeMessageUtility messageUtility;
 
     /**
      * Initialises a new {@link FeedbackMailServiceSMTP}.
@@ -99,11 +97,8 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
-        invalidAddresses = new ArrayList<>();
-        pgpFailedAddresses = new ArrayList<>();
-        messageUtility = new FeedbackMimeMessageUtility();
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
-        File feedbackfile = messageUtility.getFeedbackfile(filter);
+        File feedbackfile = FeedbackMimeMessageUtility.getFeedbackfile(filter);
         if (feedbackfile != null) {
             try {
                 result = sendMail(feedbackfile, filter);
@@ -132,7 +127,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
             secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
             if (Strings.isNotEmpty(secretKeyFile) && Strings.isNotEmpty(secretKeyPassword)) {
-                signingKey = messageUtility.parsePrivateKey(secretKeyFile);
+                signingKey = FeedbackMimeMessageUtility.parsePrivateKey(secretKeyFile);
                 sign = true;
             }
             if (null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
@@ -145,12 +140,16 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         StringBuilder result = new StringBuilder();
 
         try {
-            MimeMessage mail = messageUtility.createMailMessage(feedbackFile, filter, smtpSession);
+            MimeMessage mail = FeedbackMimeMessageUtility.createMailMessage(feedbackFile, filter, smtpSession);
             Address[] recipients = null;
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
+
+            List<InternetAddress> invalidAddresses = new ArrayList<>();
+            List<InternetAddress> pgpFailedAddresses = new ArrayList<>();
+
             if (encrypt) {
-                Map<Address, PGPPublicKey> pgpRecipients = messageUtility.extractRecipientsForPgp(filter, invalidAddresses, pgpFailedAddresses);
+                Map<Address, PGPPublicKey> pgpRecipients = FeedbackMimeMessageUtility.extractRecipientsForPgp(filter, invalidAddresses, pgpFailedAddresses);
                 MimeMessage pgpMail = null;
                 if (sign) {
                     pgpMail = pgpMimeService.encryptSigned(mail, signingKey, secretKeyPassword.toCharArray(), new ArrayList<>(pgpRecipients.values()));
@@ -161,7 +160,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 transport.sendMessage(pgpMail, pgpAddresses);
                 appendPositiveSendingResult(pgpAddresses, result, sign, true);
             }
-            recipients = this.messageUtility.extractValidRecipients(filter, this.invalidAddresses);
+            recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
             if (recipients.length == 0) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
@@ -173,7 +172,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             }
 
             appendPositiveSendingResult(recipients, result, sign, false);
-            appendWarnings(result);
+            appendWarnings(result, invalidAddresses, pgpFailedAddresses);
             return result.toString();
         } catch (MessagingException e) {
             LOG.error(e.getMessage(), e);
@@ -241,7 +240,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
      *
      * @param builder The {@link StringBuilder} to append the warnings to
      */
-    private void appendWarnings(StringBuilder builder) {
+    private void appendWarnings(StringBuilder builder, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) {
         if (invalidAddresses.size() > 0) {
             builder.append("\nThe following addresses are invalid and therefore ignored\n=======================\n");
             for (InternetAddress internetAddress : invalidAddresses) {
