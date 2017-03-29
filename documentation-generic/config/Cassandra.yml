@@ -227,7 +227,7 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
-      tags: ["Cassandra", Database", "Timeout"]
+      tags: ["Cassandra", "Database", "Timeout"]
     - key: com.openexchange.nosql.cassandra.readTimeout
       description: |
         Specifies the read timeout in milliseconds
