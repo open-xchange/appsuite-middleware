@@ -493,21 +493,21 @@ public class EmojiRegistry {
         emojis.put(128087, "\u1F457"); // dress
         emojis.put(128088, "\u1F458"); // kimono
         emojis.put(128089, "\u1F459"); // bikini
-        emojis.put(128090, "\u1F45A"); // woman’s clothes
+        emojis.put(128090, "\u1F45A"); // womans clothes
         emojis.put(128091, "\u1F45B"); // purse
         emojis.put(128092, "\u1F45C"); // handbag
         emojis.put(128093, "\u1F45D"); // clutch bag
         emojis.put(128717, "\u1F6CD"); // shopping bags
         emojis.put(127890, "\u1F392"); // school backpack
-        emojis.put(128094, "\u1F45E"); // man’s shoe
+        emojis.put(128094, "\u1F45E"); // mans shoe
         emojis.put(128095, "\u1F45F"); // running shoe
         emojis.put(128096, "\u1F460"); // high-heeled shoe
-        emojis.put(128097, "\u1F461"); // woman’s sandal
-        emojis.put(128098, "\u1F462"); // woman’s boot
+        emojis.put(128097, "\u1F461"); // womans sandal
+        emojis.put(128098, "\u1F462"); // womans boot
         emojis.put(128081, "\u1F451"); // crown
-        emojis.put(128082, "\u1F452"); // woman’s hat
+        emojis.put(128082, "\u1F452"); // womans hat
         emojis.put(127913, "\u1F3A9"); // top hat
-        emojis.put(9937, "\u26D1"); // rescue worker’s helmet
+        emojis.put(9937, "\u26D1"); // rescue workers helmet
         emojis.put(128255, "\u1F4FF"); // prayer beads
         emojis.put(128132, "\u1F484"); // lipstick
         emojis.put(128141, "\u1F48D"); // ring
@@ -837,29 +837,29 @@ public class EmojiRegistry {
         emojis.put(9201, "\u23F1"); // stopwatch
         emojis.put(9202, "\u23F2"); // timer clock
         emojis.put(128368, "\u1F570"); // mantelpiece clock
-        emojis.put(128347, "\u1F55B"); // twelve o'clock
+        emojis.put(128347, "\u1F55B"); // twelve oclock
         emojis.put(128359, "\u1F567"); // twelve-thirty
-        emojis.put(128336, "\u1F550"); // one o'clock
+        emojis.put(128336, "\u1F550"); // one oclock
         emojis.put(128348, "\u1F55C"); // one-thirty
-        emojis.put(128337, "\u1F551"); // two o'clock
+        emojis.put(128337, "\u1F551"); // two oclock
         emojis.put(128349, "\u1F55D"); // two-thirty
-        emojis.put(128338, "\u1F552"); // three o'clock
+        emojis.put(128338, "\u1F552"); // three oclock
         emojis.put(128350, "\u1F55E"); // three-thirty
-        emojis.put(128339, "\u1F553"); // four o'clock
+        emojis.put(128339, "\u1F553"); // four oclock
         emojis.put(128351, "\u1F55F"); // four-thirty
-        emojis.put(128340, "\u1F554"); // five o'clock
+        emojis.put(128340, "\u1F554"); // five oclock
         emojis.put(128352, "\u1F560"); // five-thirty
-        emojis.put(128341, "\u1F555"); // six o'clock
+        emojis.put(128341, "\u1F555"); // six oclock
         emojis.put(128353, "\u1F561"); // six-thirty
-        emojis.put(128342, "\u1F556"); // seven o'clock
+        emojis.put(128342, "\u1F556"); // seven oclock
         emojis.put(128354, "\u1F562"); // seven-thirty
-        emojis.put(128343, "\u1F557"); // eight o'clock
+        emojis.put(128343, "\u1F557"); // eight oclock
         emojis.put(128355, "\u1F563"); // eight-thirty
-        emojis.put(128344, "\u1F558"); // nine o'clock
+        emojis.put(128344, "\u1F558"); // nine oclock
         emojis.put(128356, "\u1F564"); // nine-thirty
-        emojis.put(128345, "\u1F559"); // ten o'clock
+        emojis.put(128345, "\u1F559"); // ten oclock
         emojis.put(128357, "\u1F565"); // ten-thirty
-        emojis.put(128346, "\u1F55A"); // eleven o'clock
+        emojis.put(128346, "\u1F55A"); // eleven oclock
         emojis.put(128358, "\u1F566"); // eleven-thirty
         emojis.put(127761, "\u1F311"); // new moon
         emojis.put(127762, "\u1F312"); // waxing crescent moon
@@ -1124,8 +1124,8 @@ public class EmojiRegistry {
         emojis.put(128686, "\u1F6AE"); // litter in bin sign
         emojis.put(128688, "\u1F6B0"); // potable water
         emojis.put(9855, "\u267F"); // wheelchair symbol
-        emojis.put(128697, "\u1F6B9"); // men's room
-        emojis.put(128698, "\u1F6BA"); // women's room
+        emojis.put(128697, "\u1F6B9"); // mens room
+        emojis.put(128698, "\u1F6BA"); // womens room
         emojis.put(128699, "\u1F6BB"); // restroom
         emojis.put(128700, "\u1F6BC"); // baby symbol
         emojis.put(128702, "\u1F6BE"); // water closet
@@ -1284,23 +1284,23 @@ public class EmojiRegistry {
         emojis.put(127384, "\u1F198"); // SOS button
         emojis.put(127385, "\u1F199"); // UP! button
         emojis.put(127386, "\u1F19A"); // VS button
-        emojis.put(127489, "\u1F201"); // Japanese 'here' button
-        emojis.put(127490, "\u1F202"); // Japanese 'service charge' button
-        emojis.put(127543, "\u1F237"); // Japanese 'monthly amount' button
-        emojis.put(127542, "\u1F236"); // Japanese 'not free of charge' button
-        emojis.put(127535, "\u1F22F"); // Japanese 'reserved' button
-        emojis.put(127568, "\u1F250"); // Japanese 'bargain' button
-        emojis.put(127545, "\u1F239"); // Japanese 'discount' button
-        emojis.put(127514, "\u1F21A"); // Japanese 'free of charge' button
-        emojis.put(127538, "\u1F232"); // Japanese 'prohibited' button
-        emojis.put(127569, "\u1F251"); // Japanese 'acceptable' button
-        emojis.put(127544, "\u1F238"); // Japanese 'application' button
-        emojis.put(127540, "\u1F234"); // Japanese 'passing grade' button
-        emojis.put(127539, "\u1F233"); // Japanese 'vacancy' button
-        emojis.put(12951, "\u3297"); // Japanese 'congratulations' button
-        emojis.put(12953, "\u3299"); // Japanese 'secret' button
-        emojis.put(127546, "\u1F23A"); // Japanese 'open for business' button
-        emojis.put(127541, "\u1F235"); // Japanese 'no vacancy' button
+        emojis.put(127489, "\u1F201"); // Japanese here button
+        emojis.put(127490, "\u1F202"); // Japanese service charge button
+        emojis.put(127543, "\u1F237"); // Japanese monthly amount button
+        emojis.put(127542, "\u1F236"); // Japanese not free of charge button
+        emojis.put(127535, "\u1F22F"); // Japanese reserved button
+        emojis.put(127568, "\u1F250"); // Japanese bargain button
+        emojis.put(127545, "\u1F239"); // Japanese discount button
+        emojis.put(127514, "\u1F21A"); // Japanese free of charge button
+        emojis.put(127538, "\u1F232"); // Japanese prohibited button
+        emojis.put(127569, "\u1F251"); // Japanese acceptable button
+        emojis.put(127544, "\u1F238"); // Japanese application button
+        emojis.put(127540, "\u1F234"); // Japanese passing grade button
+        emojis.put(127539, "\u1F233"); // Japanese vacancy button
+        emojis.put(12951, "\u3297"); // Japanese congratulations button
+        emojis.put(12953, "\u3299"); // Japanese secret button
+        emojis.put(127546, "\u1F23A"); // Japanese open for business button
+        emojis.put(127541, "\u1F235"); // Japanese no vacancy button
         emojis.put(9642, "\u25AA"); // black small square
         emojis.put(9643, "\u25AB"); // white small square
         emojis.put(9723, "\u25FB"); // white medium square
