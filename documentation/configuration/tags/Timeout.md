@@ -258,6 +258,26 @@ This page shows all properties with the tag: Timeout
 | __File__ | javamail.properties |
 
 ---
+| __Key__ | com.openexchange.mail.filter.connectionTimeout |
+|:----------------|:--------|
+| __Description__ | Specifies when the connection should time out (value in milliseconds).<br> |
+| __Default__ | 30000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Filter.html">Mail Filter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SIEVE.html">SIEVE</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
+| __File__ | mailfilter.properties |
+
+---
+| __Key__ | com.openexchange.mail.filter.authTimeout |
+|:----------------|:--------|
+| __Description__ | Specifies when the connection should time out (value in milliseconds) when performing SASL authentication against Sieve end-point.<br> |
+| __Default__ | 6000 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Filter.html">Mail Filter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SIEVE.html">SIEVE</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
+| __File__ | mailfilter.properties |
+
+---
 | __Key__ | com.sun.jndi.ldap.connect.timeout |
 |:----------------|:--------|
 | __Description__ | Timeouts are useful to get quick responses for login requests. <br>This timeout is used if a new connection is established.<br> |

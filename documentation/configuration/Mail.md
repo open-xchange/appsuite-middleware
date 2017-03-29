@@ -112,6 +112,26 @@ title: Mail
 | __File__ | mail.properties |
 
 ---
+| __Key__ | com.openexchange.mail.saneLogin |
+|:----------------|:--------|
+| __Description__ | Controls whether a login string is supposed to be converted to its ACE representation in case it is an E-Mail address;<br>e.g. "someone@m&uuml;ller.de" is converted to "someone@xn--mller-kva.de"<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail.properties |
+
+---
+| __Key__ | com.openexchange.mail.replaceWithComma |
+|:----------------|:--------|
+| __Description__ | Controls a possibly semi-colon-separated address list should be converted to comma-separated one<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail.properties |
+
+---
 | __Key__ | com.openexchange.mail.mailFetchLimit |
 |:----------------|:--------|
 | __Description__ | Define the max. fetch limit; meaning all mails whose count is less than or equal to<br>this value are going to be fetched with all attributes set. Thus these mails can be<br>put into message cache for subsequent list requests.<br> |
@@ -451,7 +471,7 @@ title: Mail
 | __Key__ | com.openexchange.mail.imageHost |
 |:----------------|:--------|
 | __Description__ | Specifies the host/domain from which to load inlined images contained in message content<br>Example "com.openexchange.mail.imageHost=http://my.imagehost.org".<br>In case no protocol/schema is specified, "http" is assumed by default<br>Default is empty; meaning to load from originating host<br>Exemplary setup:<br>- Artificially add a host name to /etc/hosts:<br>  127.0.0.1     imageserver.open-xchange.com<br>  - Enable the "com.openexchange.mail.imageHost" property in mail.properties:<br>    com.openexchange.mail.imageHost=http://imageserver.open-xchange.com<br>    - Check a mail with an inline image<br> |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
 | __File__ | mail.properties |

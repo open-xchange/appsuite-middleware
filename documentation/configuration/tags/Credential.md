@@ -226,6 +226,16 @@ This page shows all properties with the tag: Credential
 | __File__ | javamail.properties |
 
 ---
+| __Key__ | com.openexchange.mail.filter.masterPassword |
+|:----------------|:--------|
+| __Description__ | The master password for mail/transport server. Only takes effect when property<br>"com.openexchange.mail.filter.passwordSource" is set to "global".<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Related__ | com.openexchange.mail.filter.passwordSource |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Filter.html">Mail Filter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SIEVE.html">SIEVE</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __File__ | mailfilter.properties |
+
+---
 | __Key__ | com.openexchange.report.client.proxy.username |
 |:----------------|:--------|
 | __Description__ | The username that should be used to autherise on the proxy server.<br> |

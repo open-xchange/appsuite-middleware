@@ -72,6 +72,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Account.html">Mail Account</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Drive.html">Mail Drive</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Filter.html">Mail Filter</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Manifests.html">Manifests</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Messaging.html">Messaging</a>
@@ -104,6 +105,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Reseller.html">Reseller</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Resource.html">Resource</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SAML.html">SAML</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SIEVE.html">SIEVE</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMS.html">SMS</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SOAP.html">SOAP</a>

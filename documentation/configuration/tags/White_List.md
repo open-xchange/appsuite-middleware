@@ -55,6 +55,15 @@ This page shows all properties with the tag: White List
 | __File__ | publications.properties |
 
 ---
+| __Key__ | com.openexchange.mail.filter.redirectWhitelist |
+|:----------------|:--------|
+| __Description__ | Specifies a comma-separated list of domains (wild-card syntax supported) that are allowed for redirect rules.<br> |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Filter.html">Mail Filter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SIEVE.html">SIEVE</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/White_List.html">White List</a> |
+| __File__ | mailfilter.properties |
+
+---
 | __Key__ | com.openexchange.subscribe.microformats.allowedHosts |
 |:----------------|:--------|
 | __Description__ | Optionally specifies the list of accepted host names allowed being subscribed.<br>If property is empty, there is no restriction for such subscriptions.<br>Otherwise non-matching host names are rejected. <br> |

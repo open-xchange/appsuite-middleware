@@ -42,3 +42,13 @@ This page shows all properties with the tag: Security
 | __File__ | share.properties |
 
 ---
+| __Key__ | com.openexchange.mail.filter.tls |
+|:----------------|:--------|
+| __Description__ | Whether to use TLS if available.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Filter.html">Mail Filter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SIEVE.html">SIEVE</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
+| __File__ | mailfilter.properties |
+
+---

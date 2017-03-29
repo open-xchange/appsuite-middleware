@@ -227,6 +227,16 @@ This page shows all properties with the tag: Port
 | __File__ | javamail.properties |
 
 ---
+| __Key__ | com.openexchange.mail.filter.port |
+|:----------------|:--------|
+| __Description__ | Specifies the SIEVE port<br>-----------------------------------------------------------<br>NOTE: 2000 is the deprecated port number for SIEVE (now assigned to some Cisco SCCP protocol by the IANA)<br>      4190 is the new one used with most recent Linux and IMAP implementations.<br>Please check your system's default port defined at /etc/services.<br>-----------------------------------------------------------<br> |
+| __Default__ | 4190 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Filter.html">Mail Filter</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SIEVE.html">SIEVE</a> |
+| __File__ | mailfilter.properties |
+
+---
 | __Key__ | com.openexchange.report.client.proxy.port |
 |:----------------|:--------|
 | __Description__ | The port of the proxy, that should be used.<br> |
