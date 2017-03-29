@@ -82,7 +82,7 @@ import com.openexchange.userfeedback.filter.FeedbackFilter;
 public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteUserFeedbackService.class);
-    
+
     public DeleteUserFeedbackService(ServiceLookup services) {
         super(services);
     }
@@ -96,26 +96,17 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
 
             @Override
             public Long start() {
-                if (start <= 0) {
-                    return Long.MIN_VALUE;
-                }
-                return start;
+                return Long.valueOf(start <= 0 ? Long.MIN_VALUE : start);
             }
 
             @Override
             public String getType() {
-                if (null == type || Strings.isEmpty(type)) {
-                    return "star-rating-v1";
-                }
-                return type;
+                return null == type || Strings.isEmpty(type) ? "star-rating-v1" : type;
             }
 
             @Override
             public Long end() {
-                if (end <= 0) {
-                    return Long.MAX_VALUE;
-                }
-                return end;
+                return Long.valueOf(end <= 0 ? Long.MAX_VALUE : end);
             }
 
             @Override
