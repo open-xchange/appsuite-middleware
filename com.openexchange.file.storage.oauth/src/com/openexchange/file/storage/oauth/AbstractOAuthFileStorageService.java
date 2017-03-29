@@ -71,6 +71,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -100,7 +101,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * Initializes a new {@link AbstractOAuthFileStorageService}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param api The {@link API}
+     * @param api The {@link KnownApi}
      * @param displayName The display name of the service
      * @param serviceId The service identifier
      * @param compositeFileStorageAccountManagerProvider The {@link CompositeFileStorageAccountManagerProvider}
@@ -114,7 +115,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * Initializes a new {@link AbstractOAuthFileStorageService}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param api The {@link API}
+     * @param api The {@link KnownApi}
      * @param displayName The display name of the service
      * @param serviceId The service identifier
      */
@@ -127,7 +128,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
-        oauthAccount.setOption("type", api.getFullName());
+        oauthAccount.setOption("type", api.getServiceId());
         tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
@@ -186,18 +187,18 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             // Acquire account manager
             FileStorageAccountManager accountManager = getAccountManager();
             OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-            OAuthAccessRegistry registry = registryService.get(api.getFullName());
+            OAuthAccessRegistry registry = registryService.get(api.getServiceId());
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
-                LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getShortName(), deleteMe.getId(), user, cid);
+                LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getName(), deleteMe.getId(), user, cid);
                 boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId());
                 if (purged) {
-                    LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getShortName(), deleteMe.getId(), user, cid);
+                    LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getName(), deleteMe.getId(), user, cid);
                 }
             }
 
         } catch (Exception e) {
-            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getShortName(), id, user, cid, e);
+            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getName(), id, user, cid, e);
         }
     }
 

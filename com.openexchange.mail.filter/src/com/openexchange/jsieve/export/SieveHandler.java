@@ -160,6 +160,8 @@ public class SieveHandler {
     private long mStart;
     private long mEnd;
     private boolean useSIEVEResponseCodes = false;
+    private Long connectTimeout = null;
+    private Long readTimeout = null;
 
     /**
      * SieveHandler use socket-connection to manage sieve-scripts.<br>
@@ -219,6 +221,56 @@ public class SieveHandler {
     }
 
     /**
+     * Sets the connect timeout in milliseconds, which is used when connecting the socket to the server. A timeout of zero is interpreted as an infinite timeout.
+     * A value of less than zero lets <code>"com.openexchange.mail.filter.connectionTimeout"</code> kick in.
+     * <p>
+     * If not set the configured value from property <code>"com.openexchange.mail.filter.connectionTimeout"</code> is used.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Note: Timeout is required to be set prior to {@link #initializeConnection()} is invoked to become effective</div>
+     *
+     * @param connectTimeout The connect timeout to set
+     */
+    public void setConnectTimeout(long connectTimeout) {
+        this.connectTimeout = connectTimeout < 0 ? null : Long.valueOf(connectTimeout);
+    }
+
+    /**
+     * Sets the read timeout in milliseconds, which enables/disables SO_TIMEOUT. A timeout of zero is interpreted as an infinite timeout.
+     * A value of less than zero lets <code>"com.openexchange.mail.filter.connectionTimeout"</code> kick in.
+     * <p>
+     * If not set the configured value from property <code>"com.openexchange.mail.filter.connectionTimeout"</code> is used.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Note: Timeout is required to be set prior to {@link #initializeConnection()} is invoked to become effective</div>
+     *
+     * @param readTimeout The read timeout to set
+     */
+    public void setReadTimeout(long readTimeout) {
+        this.readTimeout = readTimeout < 0 ? null : Long.valueOf(readTimeout);
+    }
+
+    /**
+     * Gets the connect timeout in milliseconds to use, which is used when connecting the socket to the server.
+     *
+     * @param configuredTimeout The configured timeout through property <code>"com.openexchange.mail.filter.connectionTimeout"</code>
+     * @return The connect timeout
+     */
+    private int getEffectiveConnectTimeout(int configuredTimeout) {
+        Long connectTimeout = this.connectTimeout;
+        return null == connectTimeout ? configuredTimeout : connectTimeout.intValue();
+    }
+
+    /**
+     * Gets the read timeout in milliseconds used to enable/disable SO_TIMEOUT.
+     *
+     * @param configuredTimeout The configured timeout through property <code>"com.openexchange.mail.filter.connectionTimeout"</code>
+     * @return The read timeout
+     */
+    private int getEffectiveReadTimeout(int configuredTimeout) {
+        Long readTimeout = this.readTimeout;
+        return null == readTimeout ? configuredTimeout : readTimeout.intValue();
+    }
+
+    /**
      * Use this function to initialize the connection. It will get the welcome messages from the server, parse the capabilities and login
      * the user.
      *
@@ -235,19 +287,19 @@ public class SieveHandler {
 
         s_sieve = new Socket();
         /*
-         * Connect with the connect-timeout of the config file
+         * Connect with the connect-timeout of the config file or the one which was explicitly set
          */
-        final int timeout = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
+        int configuredTimeout = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
         try {
-            s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), timeout);
+            s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), getEffectiveConnectTimeout(configuredTimeout));
         } catch (final java.net.ConnectException e) {
             // Connection refused
             throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
         }
         /*
-         * Set timeout to the one specified in the config file
+         * Set timeout to the one specified in the config file or the one which was explicitly set
          */
-        s_sieve.setSoTimeout(timeout);
+        s_sieve.setSoTimeout(getEffectiveReadTimeout(configuredTimeout));
         bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.smtp;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
@@ -134,7 +135,6 @@ import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -706,10 +706,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     } else {
                         try {
                             OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-                            String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
                             API api = oAuthAccount.getAPI();
                             Throwable cause = e.getCause();
-                            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                         } catch (Exception x) {
                             LOG.warn("Failed to handle failed OAuth authentication", x);
                         }

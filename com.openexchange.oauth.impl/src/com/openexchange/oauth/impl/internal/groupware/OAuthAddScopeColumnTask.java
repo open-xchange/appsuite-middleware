@@ -66,7 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.oauth.API;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
@@ -147,15 +147,15 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
     }
 
     private enum Scope {
-        BOXCOM(API.BOX_COM.getFullName(), OXScope.drive),
-        DROPBOX(API.DROPBOX.getFullName(), OXScope.drive),
-        GOOGLE(API.GOOGLE.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
-        MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
-        LINKEDIN(API.LINKEDIN.getFullName(), OXScope.contacts_ro),
-        VKONTAKTE(API.VKONTAKTE.getFullName(), OXScope.contacts_ro),
-        XING(API.XING.getFullName(), OXScope.contacts_ro),
-        YAHOO(API.YAHOO.getFullName(), OXScope.contacts_ro),
-        TWITTER(API.TWITTER.getFullName(), OXScope.generic),
+        BOXCOM(KnownApi.BOX_COM.getFullName(), OXScope.drive),
+        DROPBOX(KnownApi.DROPBOX.getFullName(), OXScope.drive),
+        GOOGLE(KnownApi.GOOGLE.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
+        MSLIVE_CONNECT(KnownApi.MS_LIVE_CONNECT.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
+        LINKEDIN(KnownApi.LINKEDIN.getFullName(), OXScope.contacts_ro),
+        VKONTAKTE(KnownApi.VKONTAKTE.getFullName(), OXScope.contacts_ro),
+        XING(KnownApi.XING.getFullName(), OXScope.contacts_ro),
+        YAHOO(KnownApi.YAHOO.getFullName(), OXScope.contacts_ro),
+        TWITTER(KnownApi.TWITTER.getFullName(), OXScope.generic),
         ;
 
         private String scope;

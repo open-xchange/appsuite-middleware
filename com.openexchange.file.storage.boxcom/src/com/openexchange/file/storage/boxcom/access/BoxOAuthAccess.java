@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.boxcom.access;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,8 +69,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
@@ -218,7 +219,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
                             if (null != error) {
                                 if ("invalid_grant".equals(error)) {
                                     API api = oAuthAccount.getAPI();
-                                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId());
+                                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                                 }
 
                                 throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, oAuthAccount.getDisplayName(), oAuthAccount.getId());
