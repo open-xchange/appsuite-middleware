@@ -95,7 +95,7 @@ properties:
   - key: com.openexchange.custom.spamexperts.imappassword
     description: |
       password to authenticate against the imap server
-    reloadable:
+    defaultValue:
     version: 
     reloadable: true
     configcascadeAware: true
