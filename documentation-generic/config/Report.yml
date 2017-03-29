@@ -30,7 +30,7 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
-    tags: ["Report","Limit"]
+    tags: ["Report","Limit", "Thread"]
   - key: com.openexchange.report.appsuite.threadPriority
     description: |
       The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
@@ -40,4 +40,4 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
-    tags: ["Report"]           
+    tags: ["Report", "Thread"]           

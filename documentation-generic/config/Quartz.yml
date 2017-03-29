@@ -20,4 +20,4 @@ properties:
       configcascadeAware: false
       related: 
       file: quartz.properties
-      tags: ["Quartz"]
+      tags: ["Quartz", "Thread"]

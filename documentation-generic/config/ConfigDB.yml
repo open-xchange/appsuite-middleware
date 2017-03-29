@@ -257,7 +257,7 @@ properties:
       configcascadeAware: false
       related: 
       file: configdb.properties
-      tags: ["Config DB", "Database"]
+      tags: ["Config DB", "Database", "Thread"]
     - key: maxIdle
       description: |
         Number of maximum idle connections. More connections aren't pooled and closed.
@@ -302,7 +302,7 @@ properties:
       configcascadeAware: false
       related: exhaustedAction
       file: configdb.properties
-      tags: ["Config DB", "Database", "Limit"]
+      tags: ["Config DB", "Database", "Limit", "Thread"]
     - key: maxLifeTime
       description: |
         Maximum time in milliseconds a connection will be used. After this time
@@ -370,7 +370,7 @@ properties:
       configcascadeAware: false
       related:
       file: configdb.properties
-      tags: ["Config DB", "Database", "Logging"]
+      tags: ["Config DB", "Database", "Logging", "Thread"]
     - key: com.openexchange.database.replicationMonitor
       description: |
         This property allows to disable the replication monitor. This option is only useful if you have a MySQL master and slave setup.

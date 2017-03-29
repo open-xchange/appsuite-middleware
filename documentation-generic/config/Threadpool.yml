@@ -10,7 +10,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
-      tags: ["Threadpool"]
+      tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.prestartAllCoreThreads
       description: |
         Starts all core threads, causing them to idly wait for work.
@@ -21,7 +21,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
-      tags: ["Threadpool"]
+      tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.maximumPoolSize
       description: |
         The maximum number of threads to allow in the pool.
@@ -32,7 +32,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
-      tags: ["Threadpool", "Limit"]
+      tags: ["Threadpool", "Limit", "Thread"]
     - key: com.openexchange.threadpool.keepAliveTime
       description: |
         When the number of threads is greater than the core, this is the maximum
@@ -43,7 +43,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
-      tags: ["Threadpool", "Limit"]
+      tags: ["Threadpool", "Limit", "Thread"]
     - key: com.openexchange.threadpool.workQueue
       description: |
         The queue type to use for holding tasks before they are executed. This queue will
@@ -62,7 +62,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.threadpool.maximumPoolSize
       file: threadpool.properties
-      tags: ["Threadpool"]
+      tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.workQueueSize
       description: |
         The size of the work queue. Zero means unlimited size.
@@ -74,7 +74,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.threadpool.workQueue
       file: threadpool.properties
-      tags: ["Threadpool"]
+      tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.blocking
       description: |
         Enable/disable blocking behavior. A blocking behavior means that caller is blocked until space becomes available in working queue.
@@ -85,7 +85,7 @@ properties:
       configcascadeAware: false
       related:
       file: threadpool.properties
-      tags: ["Threadpool"]
+      tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.refusedExecutionBehavior
       description: |
         The default behavior to obey when execution is blocked because the thread bounds and queue
@@ -100,4 +100,4 @@ properties:
       configcascadeAware: false
       related:
       file: threadpool.properties
-      tags: ["Threadpool"]
+      tags: ["Threadpool", "Thread"]

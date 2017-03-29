@@ -177,17 +177,17 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
-      tags: ["Mail"]
+      tags: ["Mail", "Thread"]
     - key: com.openexchange.mail.mailAccessCacheIdleSeconds
       description: |
-        Define the idle seconds a mail access may reside in mail access cache before it is removed by shrinker thread
+        Define the idle seconds a mail access may reside in mail access cache before it is removed by shrinker thread.
       defaultValue: 4
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: mail.properties
-      tags: ["Mail"]
+      tags: ["Mail", "Thread"]
     - key: com.openexchange.mail.quoteLineColors
       description: |
         Comma-separated hex values of colors for displaying quoted text emails
