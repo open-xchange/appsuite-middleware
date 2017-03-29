@@ -131,7 +131,7 @@ public class FeedbackMimeMessageUtility {
         MimeMessage email = new MimeMessage(session);
         LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
         String exportPrefix = configService.getProperty(UserFeedbackMailProperty.exportPrefix);
-        SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-DD");
+        SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-dd");
         String file = new StringBuilder().append(exportPrefix).append("-").append(df.format(new Date())).append(FILE_TYPE).toString();
 
         try {
