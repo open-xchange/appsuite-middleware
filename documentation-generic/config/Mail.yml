@@ -117,8 +117,8 @@ properties:
         The mail provider fallback if an URL does not contain/define a protocol
       defaultValue: imap
       version: 
-      reloadable: true
-      configcascadeAware: true
+      reloadable: false
+      configcascadeAware: false
       related: 
       file: mail.properties
       tags: ["Mail"]
@@ -129,8 +129,8 @@ properties:
         effect for the complete mail module where no charset is given.
       defaultValue: UTF-8
       version: 
-      reloadable: true
-      configcascadeAware: true
+      reloadable: false
+      configcascadeAware: false
       related: 
       file: mail.properties
       tags: ["Mail"]
