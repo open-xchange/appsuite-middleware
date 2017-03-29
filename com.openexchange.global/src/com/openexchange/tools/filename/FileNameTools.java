@@ -52,18 +52,18 @@ package com.openexchange.tools.filename;
 import java.util.regex.Pattern;
 
 /**
- * {@link FileNameTools}
+ * {@link FileNameTools} - A utility class for file names.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.8.0
+ * @since v7.8.4
  */
 public class FileNameTools {
 
-    private static final Pattern FILENAME = Pattern.compile("[^\\p{L}0-9-_+ .]");
+    private static final Pattern FILENAME = Pattern.compile("[^\\p{L}0-9-_+ .()]");
 
     /**
      * Replaces all non-digit, non-character, non-whitespace and non-(-, _, +, .) with underscores ('_');
-     * 
+     *
      * @param fileName Raw file name
      * @return Sanitized file name
      */
