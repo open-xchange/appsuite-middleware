@@ -31,7 +31,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
-      tags: ["LDAP", "Authentication"]
+      tags: ["LDAP", "Authentication", "Timeout"]
     - key: com.sun.jndi.ldap.read.timeout
       description: |
         This timeout only works since Java 6 SE to time out waiting for a response.
@@ -41,7 +41,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
-      tags: ["LDAP", "Authentication"]
+      tags: ["LDAP", "Authentication", "Timeout"]
     - key: useFullLoginInfo
       description: |
         Set to true to authenticate with the string entered in the login name field, e.g.

@@ -315,7 +315,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
-      tags: ["Hazelcast", "Limit"]
+      tags: ["Hazelcast", "Limit", "Timeout"]
     - key: com.openexchange.hazelcast.jmx
       description: |
         Enables or disables JMX monitoring for hazelcast components such as

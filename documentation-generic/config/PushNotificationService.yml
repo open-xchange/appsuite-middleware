@@ -198,7 +198,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
-      tags: ["Push"]
+      tags: ["Push", "Timeout"]
     - key: com.openexchange.push.udp.registerPort
       description: |
         Port where the clients send the push registration request to.

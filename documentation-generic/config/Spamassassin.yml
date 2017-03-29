@@ -41,7 +41,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
-      tags: ["Spamassassin"]
+      tags: ["Spamassassin", "Timeout"]
     - key: com.openexchange.spamhandler.spamassassin.retries
       description: |
         If the mail should be send to spamd specify the connect retries here. 

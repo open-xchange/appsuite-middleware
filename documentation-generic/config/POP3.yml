@@ -11,7 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: pop3.properties
-      tags: ["Mail","POP3"]
+      tags: ["Mail","POP3", "Timeout"]
     - key: com.openexchange.pop3.pop3ConnectionTimeout
       description: |
         Define the socket connect timeout value in milliseconds. A value less
@@ -23,7 +23,7 @@ properties:
       configcascadeAware: true
       related: 
       file: pop3.properties
-      tags: ["Mail","POP3"]
+      tags: ["Mail","POP3", "Timeout"]
     - key: com.openexchange.pop3.pop3TemporaryDown
       description: |
         Define the amount of time in milliseconds a POP3 server is treated as being temporary down.
