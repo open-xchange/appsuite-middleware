@@ -69,7 +69,7 @@ import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 public abstract class AbstractUserFeedbackService extends JAXRSService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractUserFeedbackService.class);
-    protected static final String DEFAULT_CONFIG_ERROR_MESSAGE = "A configuration error occurred. Look in the server logs for more details.";
+    protected static final String DEFAULT_CONFIG_ERROR_MESSAGE = "A configuration error occurred.";
 
     protected AbstractUserFeedbackService(ServiceLookup services) {
         super(services);
