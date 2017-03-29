@@ -87,6 +87,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     public static final String FILENAME = "feedback";
     public static final String FILE_TYPE = ".csv";
     private List<InternetAddress> invalidAddresses;
+    private List<InternetAddress> pgpFailedAddresses;
     private FeedbackMimeMessageUtility messageUtility;
 
     /**
@@ -99,6 +100,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
         invalidAddresses = new ArrayList<>();
+        pgpFailedAddresses = new ArrayList<>();
         messageUtility = new FeedbackMimeMessageUtility();
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
         File feedbackfile = messageUtility.getFeedbackfile(filter);
@@ -148,7 +150,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
             if (encrypt) {
-                Map<Address, PGPPublicKey> pgpRecipients = messageUtility.extractRecipientsForPgp(filter, invalidAddresses);
+                Map<Address, PGPPublicKey> pgpRecipients = messageUtility.extractRecipientsForPgp(filter, invalidAddresses, pgpFailedAddresses);
                 MimeMessage pgpMail = null;
                 if (sign) {
                     pgpMail = pgpMimeService.encryptSigned(mail, signingKey, secretKeyPassword.toCharArray(), new ArrayList<>(pgpRecipients.values()));
@@ -238,6 +240,12 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         if (invalidAddresses.size() > 0) {
             builder.append("\nThe following addresses are invalid and therefore ignored\n=======================\n");
             for (InternetAddress internetAddress : invalidAddresses) {
+                builder.append(internetAddress.getAddress()).append("\n");
+            }
+        }
+        if (pgpFailedAddresses.size() > 0) {
+            builder.append("\nThe following addresses are linked with an invalid PGP key and therefore ignored\n=======================\n");
+            for (InternetAddress internetAddress : pgpFailedAddresses) {
                 builder.append(internetAddress.getAddress()).append("\n");
             }
         }

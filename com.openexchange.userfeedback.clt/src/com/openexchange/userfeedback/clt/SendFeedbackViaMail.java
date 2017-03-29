@@ -181,13 +181,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
         JSONArray array = new JSONArray();
         if (recipients.startsWith("@")) {
             recipients = recipients.substring(1, recipients.length());
-            try {
-                array = extractRecipientsFromFile(recipients);
-            } catch (IOException e) {
-                System.err.println("File not found: " + cmd.getOptionValue(RECIPIENTS_SHORT));
-                System.exit(1);
-                return null;
-            }
+            array = extractRecipientsFromFile(recipients);
         } else {
             array.add(0, extractSingleRecipient(recipients));
         }
@@ -223,12 +217,13 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
                         pgp = new String(Files.readAllBytes(Paths.get(pgp)));
                         json.put("pgpKey", pgp);
                     } catch (IOException e) {
-                        System.err.println("Could not load PGP key " + pgp);
+                        exitWithError("Could not load PGP key " + pgp);
                     }
                 }
                 array.add(0, json);
             }
-
+        } catch (IOException e) {
+            exitWithError("Could not load CSV file " + filename);
         } finally {
             if (null != parser) {
                 parser.close();
@@ -279,6 +274,11 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     @Override
     protected String getHeader() {
         return "senduserfeedback -s 1487348317 -r \"Displayname <email@example.com>\"";
+    }
+
+    private void exitWithError(String message) {
+        System.err.println(message);
+        System.exit(1);
     }
 
 }

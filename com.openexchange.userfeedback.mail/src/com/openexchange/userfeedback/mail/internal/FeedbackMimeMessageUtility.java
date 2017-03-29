@@ -213,23 +213,30 @@ public class FeedbackMimeMessageUtility {
         return validRecipients.toArray(new InternetAddress[validRecipients.size()]);
     }
 
-    public Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) throws OXException {
+    public Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) throws OXException {
         Map<String, String> pgpKeys = filter.getPgpKeys();
         Map<Address, PGPPublicKey> result = new HashMap<>();
         for (Map.Entry<String, String> addr2Key : pgpKeys.entrySet()) {
             String mailAddress = addr2Key.getKey();
-            PGPPublicKey key = parsePublicKey(addr2Key.getValue());
-            String displayName = filter.getRecipients().remove(mailAddress);
             InternetAddress address = null;
             try {
+                String displayName = filter.getRecipients().remove(mailAddress);
                 address = new InternetAddress(mailAddress, displayName);
                 address.validate();
+                PGPPublicKey key = parsePublicKey(addr2Key.getValue());
+                if (null == key) {
+                    IOException e = new IOException("Unable to parse PGP public key for " + mailAddress);
+                    LOG.warn(e.getMessage());
+                    throw e;
+                }
                 result.put(address, key);
             } catch (UnsupportedEncodingException e) {
                 LOG.error(e.getMessage(), e);
             } catch (@SuppressWarnings("unused") AddressException e) {
                 invalidAddresses.add(address);
                 // validation exception does not trigger any logging
+            } catch (IOException e) {
+                pgpFailedAddresses.add(address);
             }
         }
         return result;
