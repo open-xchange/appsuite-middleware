@@ -47,7 +47,7 @@ properties:
       description: |
         Specifies how many concurrent connections/accesses to IMAP store are allowed to be established for a single user.
         A request exceeding that limitation will be paused until an acquired connection is released.
-      defaultValue:
+      defaultValue: 4
       version:
       reloadable: true
       configcascadeAware: true
