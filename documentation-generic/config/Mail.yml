@@ -370,7 +370,7 @@ properties:
         as custom header "X-Originating-IP"
       defaultValue: false
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: mail.properties
