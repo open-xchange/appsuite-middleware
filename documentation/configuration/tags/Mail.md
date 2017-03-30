@@ -460,7 +460,7 @@ This page shows all properties with the tag: Mail
 |:----------------|:--------|
 | __Description__ | The mail provider fallback if an URL does not contain/define a protocol<br> |
 | __Default__ | imap |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
@@ -470,7 +470,7 @@ This page shows all properties with the tag: Mail
 |:----------------|:--------|
 | __Description__ | Define the default MIME charset used for character encoding. This setting will then be<br>accessible through system property "mail.mime.charset". This parameter takes<br>effect for the complete mail module where no charset is given.<br> |
 | __Default__ | UTF-8 |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
@@ -659,7 +659,7 @@ This page shows all properties with the tag: Mail
 |:----------------|:--------|
 | __Description__ | JavaMail Properties<br> |
 | __Default__ | javamail.properties |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
@@ -678,7 +678,7 @@ This page shows all properties with the tag: Mail
 |:----------------|:--------|
 | __Description__ | Define whether a context admin is allowed to login to mail system or not.<br>Note that a mail account is supposed to exist if set to true; if not an<br>authentication error will occur.<br> |
 | __Default__ | false |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
@@ -688,7 +688,18 @@ This page shows all properties with the tag: Mail
 |:----------------|:--------|
 | __Description__ | Set whether client's IP address should be added to mail headers on delivery<br>as custom header "X-Originating-IP"<br> |
 | __Default__ | false |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail.properties |
+
+---
+| __Key__ | com.openexchange.mail.clientIPAddressPattern |
+|:----------------|:--------|
+| __Description__ | Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary<br>IMAP server. Only applicable for primary IMAP server! Default is empty.<br><br>The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html<br><br>Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.<br>I.e. "Dovecot at ([0-9a-zA-Z._-]\*) is ready", then the capturing group is supposed to extract the host name/IP address information<br> |
+| __Default__ | false |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
@@ -757,7 +768,7 @@ This page shows all properties with the tag: Mail
 |:----------------|:--------|
 | __Description__ | Define if MSISDN addresses are supported or not.<br> |
 | __Default__ | false |
-| __Reloadable__ | false |
+| __Reloadable__ | true |
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
