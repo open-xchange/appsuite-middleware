@@ -49,8 +49,12 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import static com.openexchange.java.Autoboxing.*;
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -168,8 +172,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     public OXContextMySQLStorage() {
         super();
-        this.prop = cache.getProperties();;
-        contextCommon = new OXContextMySQLStorageCommon();
+        this.prop = cache.getProperties();
+        this.contextCommon = new OXContextMySQLStorageCommon();
         try {
             this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
             if (this.CONTEXTS_PER_SCHEMA <= 0) {
@@ -302,7 +306,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 try {
-                    cacheService.getCache("MailAccount").clear();;
+                    cacheService.getCache("MailAccount").clear();
                 } catch (final Exception e) {
                     LOG.error("", e);
                 }
@@ -1144,8 +1148,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException(e.getMessage(), e);
             } catch (StorageException e) {
                 LOG.error(e.getMessage(), e);
-                throw new StorageException("Unable to create context: "+e.getMessage());
-//                throw new StorageException(e.getMessage());
+                throw new StorageException("Unable to create context: " + e.getMessage());
+                //                throw new StorageException(e.getMessage());
             }
 
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
@@ -1388,10 +1392,26 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             }
+
+            {
+                // Invalidate caches
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        Cache lCache = cacheService.getCache("UserSettingMail");
+                        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+                        int[] contextUserIds = oxu.getAll(ctx);
+                        for (int userId : contextUserIds) {
+                            lCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), userId));
+                        }
+                    } catch (final Exception e) {
+                        LOG.error("", e);
+                    }
+                }
+            }
         } finally {
             Databases.closeSQLStuff(stmtupdateattribute, stmtinsertattribute, stmtdelattribute);
         }
-
     }
 
     /**
@@ -1759,7 +1779,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         // add column to table
                         to.addColumn(tco);
                     }
-                    
+
                     if (table_matches) {
                         tableObjects.add(to);
                     }
