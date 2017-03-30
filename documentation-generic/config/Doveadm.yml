@@ -48,3 +48,14 @@ properties:
       related: 
       file: doveadm.properties
       tags: ["Mail","REST", "Credential"]
+    - key: com.openexchange.dovecot.doveadm.proxyDelimiter
+      description: |
+        Specifies the proxy delimiter to use in case created users use login names for proxy authentication; e.g. "user1@domain.com*master@super.net"
+        Default is empty (no proxy delimiter is used) 
+      defaultValue: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: doveadm.properties
+      tags: ["Mail","REST", "Credential"]

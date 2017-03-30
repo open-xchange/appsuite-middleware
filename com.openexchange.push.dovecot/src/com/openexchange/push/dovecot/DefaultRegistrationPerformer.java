@@ -61,7 +61,6 @@ import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPFolderStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -112,7 +111,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         return 0;
     }
 
-    private String getLoginFor(RegistrationContext registrationContext) throws OXException {
+    private String getLoginFor(RegistrationContext registrationContext, DoveAdmClient doveAdmClient) throws OXException {
         int userId = registrationContext.getUserId();
         int contextId = registrationContext.getContextId();
 
@@ -134,16 +133,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         }
 
         String login = MailConfig.getMailLogin(defaultMailAccount, user.getLoginInfo(), userId, contextId);
-
-        String proxyDelim = Utility.getValueFromProperty("com.openexchange.push.dovecot.proxyDelimiter", null, userId, contextId, services);
-        if (false == Strings.isEmpty(proxyDelim)) {
-            int pos = login.indexOf(proxyDelim);
-            if (pos > 0) {
-                login = login.substring(0, pos);
-            }
-        }
-
-        return login;
+        return doveAdmClient.checkUser(login, userId, contextId);
     }
 
     private String generateIdFor(RegistrationContext registrationContext) {
@@ -157,7 +147,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
             return initateRegistration(registrationContext.getSession());
         }
 
-        String user = getLoginFor(registrationContext);
+        String user = getLoginFor(registrationContext, doveAdmClient);
         String userInfo = generateIdFor(registrationContext);
         DoveAdmCommand command = craftMailboxMetadataSetCommandUsing("user=" + userInfo, "reg-" + userInfo, user);
         DoveAdmResponse response = doveAdmClient.executeCommand(command);
@@ -232,7 +222,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
             return;
         }
 
-        String user = getLoginFor(registrationContext);
+        String user = getLoginFor(registrationContext, doveAdmClient);
         DoveAdmCommand command = craftMailboxMetadataUnsetCommandUsing("unreg-" + generateIdFor(registrationContext), user);
         DoveAdmResponse response = doveAdmClient.executeCommand(command);
         if (response.isError()) {
