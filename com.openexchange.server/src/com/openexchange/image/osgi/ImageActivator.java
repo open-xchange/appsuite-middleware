@@ -51,7 +51,10 @@ package com.openexchange.image.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -61,7 +64,13 @@ import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.image.Mp3ImageDataSource;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.conversion.InlineImageDataSource;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
+import com.openexchange.mail.service.EncryptedMailService;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ImageActivator}
@@ -69,6 +78,11 @@ import com.openexchange.mail.conversion.InlineImageDataSource;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ImageActivator extends AJAXModuleActivator {
+
+    /**
+     * The {@link ServiceLookup} reference.
+     */
+    public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     public ImageActivator() {
         super();
@@ -80,7 +94,15 @@ public class ImageActivator extends AJAXModuleActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { CryptographicServiceAuthenticationFactory.class, CryptographicAwareMailAccessFactory.class, EncryptedMailService.class, PGPMailRecognizer.class };
+    }
+
+    @Override
     protected void startBundle() throws Exception {
+        final ServiceLookup serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
+        SERVICES.set(serviceLookup);
+
         ImageUtility.setDispatcherPrefixService(getService(DispatcherPrefixService.class));
         {
             InlineImageDataSource inlineDataSource = InlineImageDataSource.getInstance();

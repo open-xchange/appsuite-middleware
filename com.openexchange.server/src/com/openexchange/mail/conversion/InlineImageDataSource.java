@@ -52,7 +52,10 @@ package com.openexchange.mail.conversion;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -63,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.image.osgi.ImageActivator;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -105,7 +109,7 @@ public final class InlineImageDataSource implements ImageDataSource {
      * </ul>
      */
     private static final String[] ARGS = {
-        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid" };
+        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid", "com.openexchange.mail.conversion.auth" };
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
@@ -118,7 +122,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         super();
     }
 
-    private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session) throws OXException {
+    private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session, final String auth) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -175,6 +179,21 @@ public final class InlineImageDataSource implements ImageDataSource {
          * Nothing special...
          */
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
+        // append auth to sb here
+        CryptographicServiceAuthenticationFactory crypto = ImageActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+        if (crypto != null) {
+            try {
+                String auth = crypto.getAuthTokenFromSession(session);
+                if (auth != null) {
+                    sb.append("&auth=");
+                    sb.append(URLEncoder.encode(auth, "UTF-8"));
+                }
+            } catch (OXException | UnsupportedEncodingException ex) {
+
+            }
+
+        }
+
         return sb.toString();
     }
 
@@ -184,6 +203,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         dataArguments.put(ARGS[0], imageLocation.getFolder());
         dataArguments.put(ARGS[1], imageLocation.getId());
         dataArguments.put(ARGS[2], imageLocation.getImageId());
+        dataArguments.put(ARGS[3], imageLocation.getAuth());
         return dataArguments;
     }
 
@@ -254,7 +274,8 @@ public final class InlineImageDataSource implements ImageDataSource {
             if (null == cid) {
                 throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[2]);
             }
-            mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session);
+            String auth = dataArguments.get(ARGS[3]);
+            mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session, auth);
             if (null == mailPart) {
                 throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(cid, mailId, fullname);
             }

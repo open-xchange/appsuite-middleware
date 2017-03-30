@@ -142,6 +142,14 @@ public final class ImageUtility {
             }
         });
 
+        map.put(AJAXServlet.PARAMETER_AUTH_TOKEN, new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.auth(value);
+            }
+        });
+
         map.put("source", new ValueHandler() {
 
             @Override
@@ -217,9 +225,10 @@ public final class ImageUtility {
         final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
         final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
         final String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
+        final String auth = requestData.getParameter(AJAXServlet.PARAMETER_AUTH_TOKEN);
         String registrationName = requestData.getParameter("source");
 
-        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).build();
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).auth(auth).build();
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(requestData.getSerlvetRequestURI());
             if (null == registrationName) {

@@ -75,6 +75,7 @@ public final class ImageLocation {
         protected String timestamp;
         protected String optImageHost;
         protected String registrationName;
+        protected String auth;
 
         public Builder() {
             super();
@@ -111,9 +112,13 @@ public final class ImageLocation {
         public Builder registrationName(final String registrationName) {
             this.registrationName = registrationName; return this;
         }
+        public Builder auth(final String auth) {
+            this.auth = auth; return this;
+        }
         public String getRegistrationName() {
             return registrationName;
         }
+
         public ImageLocation build() {
             return new ImageLocation(this);
         }
@@ -125,6 +130,7 @@ public final class ImageLocation {
     private final String imageId;
     private final String timestamp;
     private final String optImageHost;
+    private final String auth;
     private final ConcurrentMap<String, Object> properties;
 
     /**
@@ -141,6 +147,7 @@ public final class ImageLocation {
         this.imageId = builder.imageId;
         this.timestamp = builder.timestamp;
         this.optImageHost = builder.optImageHost;
+        this.auth = builder.auth;
     }
 
     /**
@@ -264,6 +271,14 @@ public final class ImageLocation {
     }
 
     /**
+     * Return any authentication token for an encrypted image
+     * @return
+     */
+    public String getAuth() {
+        if (auth == null || auth.isEmpty()) return null;
+        return auth;
+    }
+    /**
      * Gets the registration name
      *
      * @return The registration name
@@ -302,6 +317,9 @@ public final class ImageLocation {
         }
         if (properties != null && !properties.isEmpty()) {
             builder.append("properties=").append(properties);
+        }
+        if (auth != null && !auth.isEmpty()) {
+            builder.append("auth=").append(auth);
         }
         builder.append(']');
         return builder.toString();
