@@ -1,3 +1,9 @@
+open-xchange-hostname-config-cascade (7.8.2-30) stable; urgency=medium
+
+  * Build for patch 2017-04-03 (4049)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Mar 2017 14:15:40 +0200
+
 open-xchange-hostname-config-cascade (7.8.2-29) stable; urgency=medium
 
   * Build for patch 2017-03-23 (4046)
