@@ -54,7 +54,6 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
@@ -68,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
-import com.openexchange.image.osgi.Services;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -135,7 +133,7 @@ public final class InlineImageDataSource implements ImageDataSource {
                 CryptographicAwareMailAccessFactory cryptoMailAccessFactory = serviceLookup.getOptionalService(CryptographicAwareMailAccessFactory.class);
                 if(cryptoMailAccessFactory != null) {
                     //Handling for encrypted mails if a cryptographic aware service is available.
-                    mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session);
+                    mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session, auth);
                 }
             }
             mailAccess.connect();
@@ -186,7 +184,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
 
         // Append authentication token to StringBuilder here
-        CryptographicServiceAuthenticationFactory crypto = Services.optService(CryptographicServiceAuthenticationFactory.class);
+        CryptographicServiceAuthenticationFactory crypto = serviceLookup.getOptionalService(CryptographicServiceAuthenticationFactory.class);
         if (crypto != null) {  // Images may be encrypted within an Email
             try {
                 String auth = null;

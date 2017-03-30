@@ -231,7 +231,7 @@ public final class ImageUtility {
 
         String auth = null;
         {
-            CryptographicServiceAuthenticationFactory cryptoService = Services.optService(CryptographicServiceAuthenticationFactory.class);
+            CryptographicServiceAuthenticationFactory cryptoService = Services.getServiceLookup().getOptionalService(CryptographicServiceAuthenticationFactory.class);
             if (cryptoService != null) {
                 try {
                     auth = cryptoService.createAuthenticationFrom(requestData);
