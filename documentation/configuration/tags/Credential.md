@@ -34,6 +34,16 @@ This page shows all properties with the tag: Credential
 | __File__ | doveadm.properties |
 
 ---
+| __Key__ | com.openexchange.dovecot.doveadm.proxyDelimiter |
+|:----------------|:--------|
+| __Description__ | Specifies the proxy delimiter to use in case created users use login names for proxy authentication; e.g. "user1@domain.com\*master@super.net"<br>Default is empty (no proxy delimiter is used) <br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __File__ | doveadm.properties |
+
+---
 | __Key__ | com.openexchange.mail.masterPassword |
 |:----------------|:--------|
 | __Description__ | The master password for primary mail/transport server. Only takes effect when property<br>"com.openexchange.mail.passwordSource" is set to "global"<br> |

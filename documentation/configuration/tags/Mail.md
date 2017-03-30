@@ -58,6 +58,16 @@ This page shows all properties with the tag: Mail
 | __File__ | doveadm.properties |
 
 ---
+| __Key__ | com.openexchange.dovecot.doveadm.proxyDelimiter |
+|:----------------|:--------|
+| __Description__ | Specifies the proxy delimiter to use in case created users use login names for proxy authentication; e.g. "user1@domain.com\*master@super.net"<br>Default is empty (no proxy delimiter is used) <br> |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/REST.html">REST</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __File__ | doveadm.properties |
+
+---
 | __Key__ | com.openexchange.imap[.primary].imapSort |
 |:----------------|:--------|
 | __Description__ | Define where to sort emails: Value "imap" to let the  IMAP Server sort (faster but less reliable).<br>Leave blank or fill in value "application" to sort within application (slower but good quality).<br>The sorting is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in<br>mail.properties.<br>NOTE:<br>This value is going to be set to "application" if IMAP server capabilities do not contain string "SORT".<br>Moreover, please also refer to property "com.openexchange.imap.fallbackOnFailedSORT" to specify how to react to a possible "NO" response.<br>Default is "imap"<br> |
