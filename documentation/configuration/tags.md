@@ -39,6 +39,7 @@ This page lists all available tags.
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encoding.html">Encoding</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Event.html">Event</a>
+* <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Feedback.html">Feedback</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestorage.html">Filestorage</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Filestore.html">Filestore</a>
 * <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Find.html">Find</a>

@@ -1,6 +1,8 @@
 ---
-title: Feedback Mail SMTP-Service
+title: Feedback
 ---
+
+This page shows all properties with the tag: Feedback
 
 | __Key__ | com.openexchange.userfeedback.mail.senderName |
 |:----------------|:--------|
@@ -114,5 +116,27 @@ title: Feedback Mail SMTP-Service
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Feedback.html">Feedback</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a> |
 | __File__ | userfeedbackmail.properties |
+
+---
+| __Key__ | com.openexchange.userfeedback.enabled |
+|:----------------|:--------|
+| __Description__ | Enables the feedback feature for all users.<br> |
+| __Default__ | true |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Feedback.html">Feedback</a> |
+| __File__ | userfeedback.properties |
+
+---
+| __Key__ | com.openexchange.userfeedback.mode |
+|:----------------|:--------|
+| __Description__ | Determine which feedback mode should be used.<br> |
+| __Default__ | star-rating-v1 |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Feedback.html">Feedback</a> |
+| __File__ | userfeedback.properties |
 
 ---
