@@ -1,3 +1,9 @@
+open-xchange-file-storage-googledrive (7.8.3-20) stable; urgency=medium
+
+  * Build for patch 2017-04-03 (4050)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 30 Mar 2017 11:59:19 +0200
+
 open-xchange-file-storage-googledrive (7.8.3-19) stable; urgency=medium
 
   * Build for patch 2017-03-27 (4066)

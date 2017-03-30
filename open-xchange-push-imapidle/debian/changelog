@@ -1,3 +1,9 @@
+open-xchange-push-imapidle (7.8.3-20) stable; urgency=medium
+
+  * Build for patch 2017-04-03 (4050)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 30 Mar 2017 11:59:47 +0200
+
 open-xchange-push-imapidle (7.8.3-19) stable; urgency=medium
 
   * Build for patch 2017-03-27 (4066)

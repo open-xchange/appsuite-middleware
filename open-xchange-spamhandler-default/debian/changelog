@@ -1,3 +1,9 @@
+open-xchange-spamhandler-default (7.8.3-20) stable; urgency=medium
+
+  * Build for patch 2017-04-03 (4050)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Mar 2017 11:59:58 +0200
+
 open-xchange-spamhandler-default (7.8.3-19) stable; urgency=medium
 
   * Build for patch 2017-03-27 (4066)

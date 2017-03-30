@@ -17,7 +17,7 @@ BuildRequires: open-xchange-admin
 BuildRequires: systemd-rpm-macros
 %endif
 Version:       @OXVERSION@
-%define        ox_release 23
+%define        ox_release 24
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -81,6 +81,8 @@ install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/open-xchange-imageserver
 %endif
 
 %changelog
+* Thu Mar 30 2017 Kai Ahrens <kai.ahrens@open-xchange.com>
+Build for patch 2017-04-03 (4050)
 * Tue Mar 28 2017 Kai Ahrens <kai.ahrens@open-xchange.com>
 Build for patch 2017-03-27 (4066)
 * Thu Mar 16 2017 Kai Ahrens <kai.ahrens@open-xchange.com>
