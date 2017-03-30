@@ -96,6 +96,10 @@ public class StoreAction implements AJAXActionService {
         Map<String, String> params = new HashMap<>();
         params.put("type", type);
         params.put("hostname", hostname);
+        String uiVersion = requestData.getParameter("client_version");
+        if (uiVersion != null) {
+            params.put("uiVersion", uiVersion);
+        }
 
         service.store(session, dataObject, params);
 

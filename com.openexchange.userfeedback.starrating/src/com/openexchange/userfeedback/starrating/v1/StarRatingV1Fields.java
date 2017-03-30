@@ -72,8 +72,8 @@ public enum StarRatingV1Fields {
     screen_resolution("Screen Resolution"),
     language("Language"),
     user("User"), // only for export
-    server_version("Server Version"), // only for expor
-    client_version("Client Version"), // only for expor
+    server_version("Server Version"), // only for export
+    client_version("Client Version"), // only for export
     ;
 
     private static final Set<String> INTERNAL_KEYS = new HashSet<String>();

@@ -124,16 +124,16 @@ public class FeedbackServiceImpl implements FeedbackService {
         String hostname = params.get("hostname");
         hostname = hostname != null ? hostname : "";
 
-        String uiVersion = "";
         String serverVersion = "";
         if (Strings.isNotEmpty(hostname)) {
             ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
             ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, session);
             if (serverConfig != null) {
-                uiVersion = serverConfig.getUIVersion();
                 serverVersion = serverConfig.getServerVersion();
             }
         }
+        String uiVersion = params.get("uiVersion");
+        uiVersion = uiVersion != null ? uiVersion : "";
 
         Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
         boolean rollback = false;
