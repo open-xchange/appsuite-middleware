@@ -57,16 +57,19 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.userfeedback.FeedbackMode;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
-import com.openexchange.userfeedback.UserFeedbackProperty;
 import com.openexchange.userfeedback.internal.FeedbackServiceImpl;
 import com.openexchange.userfeedback.internal.FeedbackTypeRegistryImpl;
+import com.openexchange.userfeedback.internal.UserFeedbackProperty;
 
 /**
  * {@link Activator}
@@ -110,6 +113,10 @@ public class Activator extends HousekeepingActivator{
 
             getService(CapabilityService.class).declareCapability(sCapability);
         }
+        
+        FeedbackMode feedbackMode = new FeedbackMode();
+        registerService(PreferencesItemService.class, feedbackMode);
+        registerService(ConfigTreeEquivalent.class, feedbackMode);
     }
 
     @Override

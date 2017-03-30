@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.internal;
 
 import com.openexchange.config.lean.Property;
 
