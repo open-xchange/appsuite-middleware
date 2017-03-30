@@ -62,12 +62,14 @@ import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationServi
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
@@ -85,8 +87,9 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private final Connection connection;
     private final HandlerParameters parameters;
     private final OXFolderAccess folderAccess;
+	private ServiceListing<FolderHandlerModuleExtension> folderExtensions;
 
-    public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleHandlerRegistry handlers) throws OXException {
+    public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleHandlerRegistry handlers, ServiceListing<FolderHandlerModuleExtension> folderExtensions) throws OXException {
         super(services, handlers);
         this.contextID = contextID;
         this.connection = writeCon;
@@ -95,6 +98,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
         parameters.setContext(context);
         parameters.setWriteCon(writeCon);
         folderAccess = new OXFolderAccess(connection, context);
+        this.folderExtensions = folderExtensions;
     }
 
     @Override
@@ -165,24 +169,37 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     }
 
     private Map<String, FolderObject> loadFolderTargets(List<ShareTarget> folderTargets, Map<ShareTarget, TargetProxy> proxies) throws OXException {
-        Map<String, FolderObject> foldersById = new HashMap<>();
+        Map<String, FolderObject> foldersById = new HashMap<String, FolderObject>(folderTargets.size());
         for (ShareTarget folderTarget : folderTargets) {
-            if (null != Module.getForFolderConstant(folderTarget.getModule())) {
+            TargetProxy proxy = optExtendedProxy(folderTarget);
+            if (null != proxy) {
+                proxies.put(folderTarget, proxy);
+            } else if (null != Module.getForFolderConstant(folderTarget.getModule())) {
                 FolderObject folder;
                 try {
                     folder = folderAccess.getFolderObject(Integer.parseInt(folderTarget.getFolder()));
                 } catch (NumberFormatException e) {
                     throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
-                AdministrativeFolderTargetProxy proxy = new AdministrativeFolderTargetProxy(folder);
                 foldersById.put(folderTarget.getFolder(), folder);
-                proxies.put(folderTarget, proxy);
+                proxies.put(folderTarget, new AdministrativeFolderTargetProxy(folder));
             } else {
                 proxies.put(folderTarget, new VirtualTargetProxy(folderTarget));
             }
         }
-
         return foldersById;
+    }
+
+    private TargetProxy optExtendedProxy(ShareTarget folderTarget) throws OXException {
+        for (FolderHandlerModuleExtension folderExtension : folderExtensions) {
+            if (folderExtension.isApplicableFor(folderTarget.getFolder())) {
+                TargetProxy proxy = folderExtension.resolveTarget(folderTarget);
+                if (null != proxy) {
+                    return proxy;
+                }
+            }
+        }
+        return null;
     }
 
     private ContextService getContextService() throws OXException {
