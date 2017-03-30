@@ -946,11 +946,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public char getDefaultSeparator() {
-        return mailProperties.getDefaultSeparator();
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return mailProperties.getMailFetchLimit();
     }

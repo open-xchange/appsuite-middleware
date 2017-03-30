@@ -103,11 +103,6 @@ public final class UnifiedInboxProperties extends AbstractProtocolProperties imp
     }
 
     @Override
-    public char getDefaultSeparator() {
-        return mailProperties.getDefaultSeparator();
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return mailProperties.getMailFetchLimit();
     }

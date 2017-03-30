@@ -94,11 +94,6 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
     }
 
     @Override
-    public char getDefaultSeparator() {
-        return lookUpCharProperty("com.openexchange.mail.defaultSeparator", MailProperties.getInstance().getDefaultSeparator());
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return lookUpIntProperty("com.openexchange.mail.mailFetchLimit", MailProperties.getInstance().getMailFetchLimit());
     }

@@ -1253,7 +1253,11 @@ public final class MailProperties implements IMailProperties {
         return adminMailLoginEnabled;
     }
 
-    @Override
+    /**
+     * Gets the default separator character for specified user.
+     *
+     * @return The default separator character
+     */
     public char getDefaultSeparator() {
         return defaultSeparator;
     }

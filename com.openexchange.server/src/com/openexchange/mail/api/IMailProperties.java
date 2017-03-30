@@ -74,13 +74,6 @@ public interface IMailProperties {
     int getAttachDisplaySize();
 
     /**
-     * Gets the default separator character.
-     *
-     * @return The default separator character
-     */
-    char getDefaultSeparator();
-
-    /**
      * Indicates whether subscription shall be ignored or not.
      *
      * @return <code>true</code> if subscription shall be ignored; otherwise <code>false</code>

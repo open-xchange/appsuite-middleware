@@ -282,7 +282,7 @@ properties:
       defaultValue: /
       version: 
       reloadable: true
-      configcascadeAware: true
+      configcascadeAware: false
       related: 
       file: mail.properties
       tags: ["Mail"]
