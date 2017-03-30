@@ -344,7 +344,7 @@ public class LoginServlet extends AJAXServlet {
                         /*
                          * inject context- and user-id to allow parallel guest sessions
                          */
-                        additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+                        additionalsForHash = new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) };
                     } else {
                         additionalsForHash = null;
                     }
