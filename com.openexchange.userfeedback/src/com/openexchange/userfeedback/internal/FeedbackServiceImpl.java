@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -132,8 +133,14 @@ public class FeedbackServiceImpl implements FeedbackService {
                 serverVersion = serverConfig.getServerVersion();
             }
         }
-        String uiVersion = params.get("uiVersion");
-        uiVersion = uiVersion != null ? uiVersion : "";
+        String uiVersion = "";
+        if (feedback.has("client_version")) {
+            try {
+                uiVersion = feedback.getString("client_version");
+            } catch (JSONException e) {
+                LOG.warn("Unable to retrieve client version.", e);
+            }
+        }
 
         Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
         boolean rollback = false;
