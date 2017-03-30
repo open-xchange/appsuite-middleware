@@ -478,7 +478,7 @@ specific field data of single or multiple objects.
 |711 | number_of_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |
 |7010 | com.openexchange.share.extendedObjectPermissions | Array | Each element is an object described in [Extended object permission object](#extended-object-permission-object). Read Only, Since 7.8.0.|
 |7020 | com.openexchange.realtime.resourceID | String | The resource identifier for the infoitem for usage within the realtime component. Read Only, Since 7.8.0. |
-|7030 | com.openexchange.file.sanitizedFilename | String | A sanitized version of the filename. Which prevents end users from being confused by special characters, e.g. RTLO (0x202E). Read Only. |
+|7040 | com.openexchange.file.sanitizedFilename | String | A sanitized version of the filename. Which prevents end users from being confused by special characters, e.g. RTLO (0x202E). Read Only. |
 
 
 ### Object Permission object

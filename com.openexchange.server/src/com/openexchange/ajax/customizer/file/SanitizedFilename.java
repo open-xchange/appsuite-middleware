@@ -67,7 +67,7 @@ public class SanitizedFilename implements AdditionalFileField {
 
     @Override
     public int getColumnID() {
-        return 7030;
+        return 7040;
     }
 
     @Override
