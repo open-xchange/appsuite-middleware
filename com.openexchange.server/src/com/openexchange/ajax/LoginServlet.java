@@ -329,8 +329,6 @@ public class LoginServlet extends AJAXServlet {
                     return;
                 }
 
-                LOG.debug("LOGOUT: Performing LOGOUT for session: {}", sessionId);
-
                 try {
                     Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session == null) {
@@ -340,7 +338,6 @@ public class LoginServlet extends AJAXServlet {
                     }
 
                     SessionUtility.checkIP(session, req.getRemoteAddr());
-                    LOG.debug("LOGOUT: IP check passed on LOGOUT for session: {}", sessionId);
 
                     String[] additionalsForHash;
                     if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
@@ -360,19 +357,12 @@ public class LoginServlet extends AJAXServlet {
                         return;
                     }
 
-                    LOG.debug("LOGOUT: Secret ({}) successfully looked-up on LOGOUT for session: {}", secret, sessionId);
-
-                    Session loggedOutSession = LoginPerformer.getInstance().doLogout(sessionId);
-                    if (null == loggedOutSession) {
-                        LOG.debug("LOGOUT: Failed LOGOUT for session: {}. No such session found.", sessionId);
-                    } else {
-                        LOG.debug("LOGOUT: Performed LOGOUT for session: {}", sessionId);
-                    }
+                    // Do the logout
+                    LoginPerformer.getInstance().doLogout(sessionId);
 
                     // Drop relevant cookies
                     SessionUtility.removeOXCookies(session, req, resp);
                     SessionUtility.removeJSESSIONID(req, resp);
-                    LOG.debug("LOGOUT: Removed Cookies on LOGOUT for session: {}", sessionId);
                 } catch (OXException e) {
                     if (SessionUtility.isIpCheckError(e)) {
                         LOG.info("Status code 403 (FORBIDDEN): Wrong client IP address.");
