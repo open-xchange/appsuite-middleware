@@ -246,7 +246,7 @@ title: Mail
 | __Description__ | Define the separator within folder full names if not available from mail server<br> |
 | __Default__ | / |
 | __Reloadable__ | true |
-| __Configcascade Aware__ | true |
+| __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
 | __File__ | mail.properties |
 
