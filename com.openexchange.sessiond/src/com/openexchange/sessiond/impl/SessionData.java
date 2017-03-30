@@ -130,7 +130,7 @@ final class SessionData {
         this.randomTokenTimeout = randomTokenTimeout;
         this.autoLogin = autoLogin;
 
-        randoms = new ConcurrentHashMap<String, String>();
+        randoms = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
 
         ReadWriteLock shortTermLock = new ReentrantReadWriteLock(true);
         rlock = shortTermLock.readLock();
@@ -855,18 +855,20 @@ final class SessionData {
     }
 
     SessionControl clearSession(final String sessionId) {
-        // A write access
+        // A read-write access
         wlock.lock();
         try {
-            for (final SessionContainer container : sessionList) {
-                if (container.containsSessionId(sessionId)) {
-                    final SessionControl sessionControl = container.removeSessionById(sessionId);
-                    final Session session = sessionControl.getSession();
-                    final String random = session.getRandomToken();
+            for (SessionContainer container : sessionList) {
+                SessionControl sessionControl = container.removeSessionById(sessionId);
+                if (null != sessionControl) {
+                    Session session = sessionControl.getSession();
+
+                    String random = session.getRandomToken();
                     if (null != random) {
                         // If session is accessed through random token, random token is removed in the session.
                         randoms.remove(random);
                     }
+
                     unscheduleTask2MoveSession2FirstContainer(sessionId);
                     return sessionControl;
                 }
@@ -878,7 +880,7 @@ final class SessionData {
     }
 
     List<SessionControl> getShortTermSessions() {
-        // A read.only access
+        // A read-only access
         final List<SessionControl> retval = new LinkedList<SessionControl>();
         rlock.lock();
         try {
@@ -892,7 +894,7 @@ final class SessionData {
     }
 
     List<String> getShortTermSessionIDs() {
-        // A read.only access
+        // A read-only access
         List<String> retval = new LinkedList<String>();
         rlock.lock();
         try {
@@ -906,6 +908,7 @@ final class SessionData {
     }
 
     List<SessionControl> getLongTermSessions() {
+        // A read-only access
         final List<SessionControl> retval = new LinkedList<SessionControl>();
         rlongTermLock.lock();
         try {

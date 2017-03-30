@@ -51,11 +51,8 @@ package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
 
 /**
@@ -65,9 +62,8 @@ import com.openexchange.session.Session;
  */
 public final class SessionMap {
 
-    private final ReadWriteLock rwLock;
-    private final Map<String, SessionControl> sessionIdMap;
-    private final Map<String, SessionControl> alternativeIdMap;
+    private final ConcurrentMap<String, SessionControl> sessionIdMap;
+    private final ConcurrentMap<String, SessionControl> alternativeIdMap;
 
     /**
      * Initializes a new {@link SessionMap}.
@@ -83,9 +79,8 @@ public final class SessionMap {
      */
     public SessionMap(final int initialCapacity) {
         super();
-        rwLock = new ReentrantReadWriteLock();
-        sessionIdMap = new HashMap<String, SessionControl>(initialCapacity);
-        alternativeIdMap = new HashMap<String, SessionControl>(initialCapacity);
+        sessionIdMap = new ConcurrentHashMap<String, SessionControl>(initialCapacity, 0.75f, 1);
+        alternativeIdMap = new ConcurrentHashMap<String, SessionControl>(initialCapacity, 0.75f, 1);
     }
 
     // -------------------------------------------------------------------------------
@@ -96,13 +91,7 @@ public final class SessionMap {
      * @return The size
      */
     public int size() {
-        final Lock rlock = rwLock.readLock();
-        rlock.lock();
-        try {
-            return sessionIdMap.size();
-        } finally {
-            rlock.unlock();
-        }
+        return sessionIdMap.size();
     }
 
     // -------------------------------------------------------------------------------
@@ -114,13 +103,7 @@ public final class SessionMap {
      * @return <code>true</code> if such a session is present; otherwise <code>false</code>
      */
     public boolean containsBySessionId(final String sessionId) {
-        final Lock rlock = rwLock.readLock();
-        rlock.lock();
-        try {
-            return sessionIdMap.containsKey(sessionId);
-        } finally {
-            rlock.unlock();
-        }
+        return sessionIdMap.containsKey(sessionId);
     }
 
     /**
@@ -130,13 +113,7 @@ public final class SessionMap {
      * @return <code>true</code> if such a session is present; otherwise <code>false</code>
      */
     public boolean containsByAlternativeId(final String altId) {
-        final Lock rlock = rwLock.readLock();
-        rlock.lock();
-        try {
-            return alternativeIdMap.containsKey(altId);
-        } finally {
-            rlock.unlock();
-        }
+        return alternativeIdMap.containsKey(altId);
     }
 
     // -------------------------------------------------------------------------------
@@ -148,13 +125,7 @@ public final class SessionMap {
      * @return The associated session or <code>null</code> if absent
      */
     public SessionControl getBySessionId(final String sessionId) {
-        final Lock rlock = rwLock.readLock();
-        rlock.lock();
-        try {
-            return sessionIdMap.get(sessionId);
-        } finally {
-            rlock.unlock();
-        }
+        return sessionIdMap.get(sessionId);
     }
 
     /**
@@ -164,37 +135,33 @@ public final class SessionMap {
      * @return The associated session or <code>null</code> if absent
      */
     public SessionControl getByAlternativeId(final String altId) {
-        final Lock rlock = rwLock.readLock();
-        rlock.lock();
-        try {
-            return alternativeIdMap.get(altId);
-        } finally {
-            rlock.unlock();
-        }
+        return alternativeIdMap.get(altId);
     }
 
  // -------------------------------------------------------------------------------
 
     /**
-     * Puts specified session into this map if no session is already associated with given session identifier.
+     * Puts specified session into this map.
      *
      * @param sessionId The session identifier
      * @param session The session to put
-     * @return The session already associated with given session identifier or <code>null</code> on successful put
+     * @return The session already associated with given session identifier that has been replaced or <code>null</code> if nothing replaced
      */
     public SessionControl putBySessionId(final String sessionId, final SessionControl session) {
-        final Lock wlock = rwLock.writeLock();
-        wlock.lock();
-        try {
-            final SessionControl prev = sessionIdMap.put(sessionId, session);
-            final String altId = (String) session.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
-            if (null != altId) {
-                alternativeIdMap.put(altId, session);
+        SessionControl prev = sessionIdMap.put(sessionId, session);
+        if (null != prev) {
+            String prevAltId = (String) prev.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
+            if (null != prevAltId) {
+                alternativeIdMap.remove(prevAltId);
             }
-            return prev;
-        } finally {
-            wlock.unlock();
         }
+
+        String altId = (String) session.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null != altId) {
+            alternativeIdMap.put(altId, session);
+        }
+
+        return prev;
     }
 
     // -------------------------------------------------------------------------------
@@ -207,47 +174,17 @@ public final class SessionMap {
      * @return The session already associated with given session identifier or <code>null</code> on successful put
      */
     public SessionControl putIfAbsentBySessionId(final String sessionId, final SessionControl session) {
-        final Lock wlock = rwLock.writeLock();
-        wlock.lock();
-        try {
-            final SessionControl prev = putIfAbsent(sessionId, session, sessionIdMap);
-            if (null != prev) {
-                return prev;
-            }
-            final String altId = (String) session.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
-            if (null != altId) {
-                alternativeIdMap.put(altId, session);
-            }
-            return null;
-        } finally {
-            wlock.unlock();
+        SessionControl prev = sessionIdMap.putIfAbsent(sessionId, session);
+        if (null != prev) {
+            return prev;
         }
-    }
 
-    /**
-     * Puts specified session into this map if no session is already associated with given alternative identifier.
-     *
-     * @param altId The alternative identifier
-     * @param session The session to put
-     * @return The session already associated with given alternative identifier or <code>null</code> on successful put
-     */
-    public SessionControl putIfAbsentByAlternativeId(final String altId, final SessionControl session) {
-        final Lock wlock = rwLock.writeLock();
-        wlock.lock();
-        try {
-            final SessionControl prev = putIfAbsent(altId, session, alternativeIdMap);
-            if (null != prev) {
-                return prev;
-            }
-            final SessionControl otherPrev = putIfAbsent(session.getSession().getSessionID(), session, sessionIdMap);
-            if (null != otherPrev) {
-                alternativeIdMap.remove(altId);
-                return otherPrev;
-            }
-            return null;
-        } finally {
-            wlock.unlock();
+        String altId = (String) session.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null != altId) {
+            alternativeIdMap.put(altId, session);
         }
+
+        return null;
     }
 
     // -------------------------------------------------------------------------------
@@ -259,45 +196,14 @@ public final class SessionMap {
      * @return The possibly removed session or <code>null</code>
      */
     public SessionControl removeBySessionId(final String sessionId) {
-        final Lock wlock = rwLock.writeLock();
-        wlock.lock();
-        try {
-            final SessionControl session = sessionIdMap.remove(sessionId);
-            if (null != session) {
-                final String altId = (String) session.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
-                if (null != altId) {
-                    alternativeIdMap.remove(altId);
-                }
+        SessionControl session = sessionIdMap.remove(sessionId);
+        if (null != session) {
+            final String altId = (String) session.getSession().getParameter(Session.PARAM_ALTERNATIVE_ID);
+            if (null != altId) {
+                alternativeIdMap.remove(altId);
             }
-            return session;
-        } finally {
-            wlock.unlock();
         }
-    }
-
-    /**
-     * Removes the session associated with specified alternative identifier.
-     *
-     * @param altId The alternative identifier
-     * @param altOnly <code>true</code> to only remove from alternative identifier mappings; otherwise <code>false</code> to also consider
-     *            session identifier mappings.
-     * @return The possibly removed session or <code>null</code>
-     */
-    public SessionControl removeByAlternativeId(final String altId, final boolean altOnly) {
-        final Lock wlock = rwLock.writeLock();
-        wlock.lock();
-        try {
-            if (altOnly) {
-                return alternativeIdMap.remove(altId);
-            }
-            final SessionControl sessionControl = alternativeIdMap.remove(altId);
-            if (null != sessionControl) {
-                sessionIdMap.remove(sessionControl.getSession().getSessionID());
-            }
-            return sessionControl;
-        } finally {
-            wlock.unlock();
-        }
+        return session;
     }
 
     // -------------------------------------------------------------------------------
@@ -310,13 +216,7 @@ public final class SessionMap {
      * @return The {@link Collection} view of the sessions contained in this map
      */
     public Collection<SessionControl> values() {
-        final Lock rlock = rwLock.readLock();
-        rlock.lock();
-        try {
-            return new ArrayList<SessionControl>(sessionIdMap.values());
-        } finally {
-            rlock.unlock();
-        }
+        return new ArrayList<SessionControl>(sessionIdMap.values());
     }
 
     /**
@@ -327,19 +227,7 @@ public final class SessionMap {
      * @return The {@link Collection} view of the sessions identifiers contained in this map
      */
     public ArrayList<String> keys() {
-        final Lock rlock = rwLock.readLock();
-        rlock.lock();
-        try {
-            return new ArrayList<String>(sessionIdMap.keySet());
-        } finally {
-            rlock.unlock();
-        }
-    }
-
-    // -------------------------------------------------------------------------------
-
-    private static <K, V> V putIfAbsent(final K key, final V value, final Map<K, V> map) {
-        return map.containsKey(key) ? map.get(key) : map.put(key, value);
+        return new ArrayList<String>(sessionIdMap.keySet());
     }
 
 }
