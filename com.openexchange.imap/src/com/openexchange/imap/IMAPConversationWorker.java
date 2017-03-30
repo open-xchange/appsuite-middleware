@@ -1191,7 +1191,7 @@ public final class IMAPConversationWorker {
                 /*
                  * Sort according to order direction
                  */
-                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale()));
+                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
                 /*
                  * Output as flat list
                  */
@@ -1272,7 +1272,7 @@ public final class IMAPConversationWorker {
             /*
              * Sort according to order direction
              */
-            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale()));
+            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
             /*
              * Output as flat list
              */

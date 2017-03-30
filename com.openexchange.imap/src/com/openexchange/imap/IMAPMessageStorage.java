@@ -2067,7 +2067,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         // Sort them
-        Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+        Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled()));
 
         // Apply index range
         list = applyIndexRange(list, indexRange);
@@ -2487,7 +2487,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     setAccountInfo(mails);
                 }
                 final List<MailMessage> msgList = Arrays.asList(mails);
-                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
+                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled()));
                 mails = msgList.toArray(mails);
             }
             /*
