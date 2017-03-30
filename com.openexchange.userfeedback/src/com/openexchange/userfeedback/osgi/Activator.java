@@ -64,9 +64,9 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
+import com.openexchange.userfeedback.UserFeedbackProperty;
 import com.openexchange.userfeedback.internal.FeedbackServiceImpl;
 import com.openexchange.userfeedback.internal.FeedbackTypeRegistryImpl;
-import com.openexchange.userfeedback.internal.UserFeedbackProperty;
 
 /**
  * {@link Activator}

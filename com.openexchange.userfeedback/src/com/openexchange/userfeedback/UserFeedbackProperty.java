@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.userfeedback.internal;
+package com.openexchange.userfeedback;
 
 import com.openexchange.config.lean.Property;
 
@@ -58,7 +58,8 @@ import com.openexchange.config.lean.Property;
  * @since v7.8.4
  */
 public enum UserFeedbackProperty implements Property{
-    enabled(true, UserFeedbackProperty.PREFIX);
+    enabled(true, UserFeedbackProperty.PREFIX),
+    mode("star-rating-v1", UserFeedbackProperty.PREFIX);
 
     private static final String EMPTY = "";
     private static final String PREFIX = "com.openexchange.userfeedback.";

@@ -10,7 +10,7 @@ properties:
     configcascadeAware: true
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail"]
+    tags: ["Feedback", "Mail"]
 
   - key: com.openexchange.userfeedback.mail.senderAddress
     description: |
@@ -21,7 +21,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail"]
+    tags: ["Feedback", "Mail"]
 
   - key: com.openexchange.userfeedback.mail.exportPrefix
     description: |
@@ -32,7 +32,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail"]
+    tags: ["Feedback", "Mail"]
 
   - key: com.openexchange.userfeedback.smtp.hostname
     description: |
@@ -43,7 +43,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "Host", "SMTP"]
+    tags: ["Feedback", "Mail", "Host", "SMTP"]
 
   - key: com.openexchange.userfeedback.smtp.port
     description: |
@@ -54,7 +54,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "Port", "SMTP"]
+    tags: ["Feedback", "Mail", "Port", "SMTP"]
 
   - key: com.openexchange.userfeedback.smtp.timeout
     description: |
@@ -65,7 +65,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "SMTP", "Timeout"]
+    tags: ["Feedback", "Mail", "SMTP", "Timeout"]
 
   - key: com.openexchange.userfeedback.smtp.connectionTimeout
     description: |
@@ -76,7 +76,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "SMTP", "Timeout"]
+    tags: ["Feedback", "Mail", "SMTP", "Timeout"]
 
   - key: com.openexchange.userfeedback.smtp.username
     description: |
@@ -87,7 +87,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "Credential", "SMTP"]
+    tags: ["Feedback", "Mail", "Credential", "SMTP"]
 
   - key: com.openexchange.userfeedback.smtp.password
     description: |
@@ -98,7 +98,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "Credential", "SMTP"]
+    tags: ["Feedback", "Mail", "Credential", "SMTP"]
 
   - key: com.openexchange.userfeedback.pgp.signKeyFile
     description: |
@@ -109,7 +109,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "Encryption"]
+    tags: ["Feedback", "Mail", "Encryption"]
 
   - key: com.openexchange.userfeedback.pgp.signKeyPassword
     description: |
@@ -120,4 +120,4 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
-    tags: ["Mail", "Encryption"]
+    tags: ["Feedback", "Mail", "Encryption"]
