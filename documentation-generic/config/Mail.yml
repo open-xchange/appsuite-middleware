@@ -721,7 +721,7 @@ properties:
       tags: ["Mail","Folder"]
     - key: com.openexhange.mail.authType
       description: |
-        Specifies the authentication type which should be used for mail access. Known values: 'login', 'xoauth2', and "oauthbearer"
+        Specifies the authentication type which should be used for mail access of the primary account. Known values: 'login', 'xoauth2', and "oauthbearer"
       defaultValue: login
       version: 7.8.4
       reloadable: true
@@ -731,7 +731,7 @@ properties:
       tags: ["Mail"]
     - key: com.openexhange.mail.transport.authType
       description: |
-        Specifies the authentication type which should be used for mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"
+        Specifies the authentication type which should be used for mail transport of the primary account. Known values: 'login', 'xoauth2', and "oauthbearer"
       defaultValue: login
       version: 7.8.4
       reloadable: true
