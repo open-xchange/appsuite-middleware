@@ -62,6 +62,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.MoveActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
+import com.openexchange.mail.filter.json.v2.mapper.parser.action.simplified.SimplifiedActions;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.server.ServiceLookup;
@@ -88,7 +89,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
         Boolean copy = jsonObject.optBoolean(MoveActionField.copy.name(), false);
-        if (copy) {
+        if (copy || jsonObject.getString("id").equals(SimplifiedActions.Copy.getCommandName())) {
             argList.add(ArgumentUtil.createTagArgument(MoveActionField.copy.name()));
         }
 
@@ -103,7 +104,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
 
         argList.add(CommandParserJSONUtil.stringToList(folderName));
         ActionCommand result = new ActionCommand(Commands.FILEINTO, argList);
-        if (copy) {
+        if (copy || jsonObject.getString("id").equals(SimplifiedActions.Copy.getCommandName())) {
             result.addOptionalRequired(MoveActionField.copy.name());
         }
         return result;
@@ -113,7 +114,6 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         ArrayList<Object> arguments = actionCommand.getArguments();
-
         jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
 
         final String folderName;
@@ -127,7 +127,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         } else {
             String copyCommandString = ArgumentUtil.createTagArgument(MoveActionField.copy.name()).toString();
             if (actionCommand.getTagArguments().get(copyCommandString) != null) {
-                jsonObject.put(MoveActionField.copy.name(), true);
+                jsonObject.put(GeneralField.id.name(), SimplifiedActions.Copy.getCommandName());
             }
             if (useUTF7Encoding()) {
                 folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(1)).get(0));
@@ -144,7 +144,6 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
      * @return The value of the 'com.openexchange.mail.filter.useUTF7FolderEncoding' property
      */
     private boolean useUTF7Encoding() {
-        // TODO: get for user?
         LeanConfigurationService config = services.getService(LeanConfigurationService.class);
         return config.getBooleanProperty(MailFilterProperty.useUTF7FolderEncoding);
     }
