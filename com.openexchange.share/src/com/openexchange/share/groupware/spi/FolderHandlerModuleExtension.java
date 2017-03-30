@@ -1,6 +1,7 @@
 package com.openexchange.share.groupware.spi;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
@@ -66,4 +67,15 @@ public interface FolderHandlerModuleExtension {
      * @throws OXException If resolving specified target fails
      */
     TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException;
+
+    /**
+     * <p>
+     * Resolves the underlying groupware item for the given share target and returns an according {@link TargetProxy} instance. The item
+     * is loaded using administrative access to the underlying module services. This method must only be used for administrative tasks
+     * when no session object is available.
+     *
+     * @param folderTarget The share target
+     * @throws OXException If resolving specified target fails
+     */
+    TargetProxy resolveTarget(ShareTarget folderTarget) throws OXException;
 }
