@@ -75,6 +75,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -118,6 +119,7 @@ import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
@@ -844,12 +846,13 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Security settings
              */
             {
-                final CryptographicServiceAuthenticationFactory authenticationFactory =
-                    MailJSONActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                ServiceLookup services = MailJSONActivator.SERVICES.get();
+                CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
                 String authentication = null;
-                if(authenticationFactory != null) {
-                    if(composeRequest.getRequest() != null) {
-                        authentication = authenticationFactory.createAuthenticationFrom(composeRequest.getRequest());
+                if (authenticationFactory != null) {
+                    AJAXRequestData request = composeRequest.getRequest();
+                    if (request != null) {
+                        authentication = authenticationFactory.createAuthenticationFrom(request);
                     }
                 }
                 JSONObject jSecuritySettings = jMail.optJSONObject("security");

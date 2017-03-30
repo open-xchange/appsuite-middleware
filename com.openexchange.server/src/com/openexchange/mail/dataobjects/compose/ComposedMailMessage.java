@@ -133,10 +133,6 @@ public abstract class ComposedMailMessage extends MailMessage {
         this.securitySettings = securitySettings;
     }
 
-    public boolean hasSecuritySettings() {
-        return securitySettings != null;
-    }
-
     /**
      * Gets the security settings
      *

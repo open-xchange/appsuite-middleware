@@ -52,6 +52,8 @@ package com.openexchange.image;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ImageLocation} - An image location description.
@@ -130,7 +132,7 @@ public final class ImageLocation {
     private final String imageId;
     private final String timestamp;
     private final String optImageHost;
-    private String auth;
+    private final AtomicReference<String> authRef;
     private final ConcurrentMap<String, Object> properties;
 
     /**
@@ -147,7 +149,7 @@ public final class ImageLocation {
         this.imageId = builder.imageId;
         this.timestamp = builder.timestamp;
         this.optImageHost = builder.optImageHost;
-        this.auth = builder.auth;
+        this.authRef = new AtomicReference<String>(builder.auth);
     }
 
     /**
@@ -271,17 +273,24 @@ public final class ImageLocation {
     }
 
     /**
-     * Return any authentication token for an encrypted image
-     * @return
+     * Gets any authentication token for an encrypted image
+     *
+     * @return The authentication token or <code>null</code>
      */
     public String getAuth() {
-        if (auth == null || auth.isEmpty()) return null;
-        return auth;
+        String auth = authRef.get();
+        return Strings.isEmpty(auth) ? null : auth;
     }
 
+    /**
+     * Sets the authentication token for an encrypted image
+     *
+     * @param auth The authentication token
+     */
     public void setAuth (String auth) {
-        this.auth = auth;
+        this.authRef.set(auth);
     }
+
     /**
      * Gets the registration name
      *
@@ -322,7 +331,8 @@ public final class ImageLocation {
         if (properties != null && !properties.isEmpty()) {
             builder.append("properties=").append(properties);
         }
-        if (auth != null && !auth.isEmpty()) {
+        String auth = authRef.get();
+        if (false == Strings.isEmpty(auth)) {
             builder.append("auth=").append(auth);
         }
         builder.append(']');

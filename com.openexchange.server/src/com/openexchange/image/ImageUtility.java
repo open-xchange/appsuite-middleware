@@ -65,7 +65,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.image.osgi.ImageActivator;
+import com.openexchange.image.osgi.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -228,13 +228,17 @@ public final class ImageUtility {
         final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
         final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
         final String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
+
         String auth = null;
-        CryptographicServiceAuthenticationFactory cryptoService = ImageActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
-        try {
-            if (cryptoService != null) auth = cryptoService.createAuthenticationFrom(requestData);
-        } catch (OXException e) {
-            LOGGER.error("Problem creating authentication token ", e);
-            auth = null;
+        {
+            CryptographicServiceAuthenticationFactory cryptoService = Services.optService(CryptographicServiceAuthenticationFactory.class);
+            if (cryptoService != null) {
+                try {
+                    auth = cryptoService.createAuthenticationFrom(requestData);
+                } catch (OXException e) {
+                    LOGGER.error("Problem creating authentication token ", e);
+                }
+            }
         }
         String registrationName = requestData.getParameter("source");
 

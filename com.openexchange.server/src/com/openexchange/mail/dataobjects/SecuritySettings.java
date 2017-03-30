@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.dataobjects;
 
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -173,7 +174,7 @@ public class SecuritySettings {
     private final boolean decrypt;
     private final boolean sign;
     private final boolean pgpInline;
-    private String authentication;
+    private final AtomicReference<String> authenticationRef;
     private final String guest_language;
     private final String guest_message;
     private final String pin;
@@ -184,7 +185,7 @@ public class SecuritySettings {
         this.decrypt = decrypt;
         this.pgpInline = pgpInline;
         this.sign = sign;
-        this.authentication = authentication;
+        this.authenticationRef = new AtomicReference<String>(authentication);
         this.guest_language = guest_language;
         this.guest_message = guest_message;
         this.pin = pin;
@@ -202,6 +203,7 @@ public class SecuritySettings {
         if (sign) {
             return true;
         }
+        String authentication = authenticationRef.get();
         if (null != authentication) {
             return true;
         }
@@ -248,7 +250,7 @@ public class SecuritySettings {
      * @return The authentication string
      */
     public String getAuthentication() {
-        return authentication;
+        return authenticationRef.get();
     }
 
     /**
@@ -256,7 +258,7 @@ public class SecuritySettings {
      * @param authentication
      */
     public void setAuthentication(String authentication) {
-        this.authentication = authentication;
+        this.authenticationRef.set(authentication);
     }
 
     /**

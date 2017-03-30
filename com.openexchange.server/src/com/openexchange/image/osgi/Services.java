@@ -47,53 +47,73 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.crypto;
+package com.openexchange.image.osgi;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CryptographicServiceAuthenticationFactory} parses authentication for cryptographic services from HTTP requests.
+ * {@link Services}
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.3
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public interface CryptographicServiceAuthenticationFactory {
+public class Services {
 
     /**
-     * Parses authentication information from the given request.
-     *
-     * @param request The request to parse the authentication information from.
-     * @return The authentication information obtained from the request, or null if the request does not contain all necessary information.
-     * @throws OXException
+     * Initializes a new {@link Services}.
      */
-    String createAuthenticationFrom(HttpServletRequest request) throws OXException;
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
 
     /**
-     * Parses authentication information for a given {@link AJAXRequestData} object.
+     * Sets the service lookup.
      *
-     * @param requestData The {@link AJAXRequestData} to parse the authentication information from
-     * @return The authentication information obtained from the {@link AJAXRequestData} object, or null if the {@link AJAXRequestData} object does not contain all necessary information.
-     * @throws OXException
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    String createAuthenticationFrom(AJAXRequestData requestData) throws OXException;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Gets the authentication token for specified session
+     * Gets the service lookup.
      *
-     * @param session The session
-     * @return The authentication token
-     * @throws OXException If authentication token cannot be returned
+     * @return The service lookup or <code>null</code>
      */
-    String getAuthTokenFromSession(Session session) throws OXException;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
     /**
-     * Gets the token value from full authentication token's string
+     * Gets the service of specified type
      *
-     * @param string The authentication token's string
-     * @return The token value
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    String getTokenValueFromString(String string);
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.server\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
+
 }

@@ -54,6 +54,8 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.Data;
@@ -66,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
-import com.openexchange.image.osgi.ImageActivator;
+import com.openexchange.image.osgi.Services;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -86,6 +88,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InlineImageDataSource implements ImageDataSource {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InlineImageDataSource.class);
 
     private static final InlineImageDataSource INSTANCE = new InlineImageDataSource();
 
@@ -115,6 +119,7 @@ public final class InlineImageDataSource implements ImageDataSource {
 
     private ServiceLookup serviceLookup;
 
+
     /**
      * Initializes a new {@link InlineImageDataSource}
      */
@@ -123,7 +128,7 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session, final String auth) throws OXException {
-        MailAccess<?, ?> mailAccess = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             if(serviceLookup != null) {
@@ -170,32 +175,30 @@ public final class InlineImageDataSource implements ImageDataSource {
      */
     public void setServiceLookup(ServiceLookup serviceLookup) {
         this.serviceLookup = serviceLookup;
+
     }
 
     @Override
     public String generateUrl(final ImageLocation imageLocation, final Session session) {
         final StringBuilder sb = new StringBuilder(64);
-        /*
-         * Nothing special...
-         */
+
+        // Nothing special...
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
-        // append auth to sb here
-        CryptographicServiceAuthenticationFactory crypto = ImageActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+
+        // Append authentication token to StringBuilder here
+        CryptographicServiceAuthenticationFactory crypto = Services.optService(CryptographicServiceAuthenticationFactory.class);
         if (crypto != null) {  // Images may be encrypted within an Email
             try {
                 String auth = null;
                 // Try to get authentication from Image URL, else from session
-                if (imageLocation.getAuth() != null) {
-                    auth = crypto.getTokenValueFromString(imageLocation.getAuth());
-                } else {
-                    auth = crypto.getAuthTokenFromSession(session);
-                }
+                auth = imageLocation.getAuth() == null ? crypto.getAuthTokenFromSession(session) : crypto.getTokenValueFromString(imageLocation.getAuth());
                 if (auth != null) {
                     sb.append("&cryptoAuth=");
                     sb.append(URLEncoder.encode(auth, "UTF-8"));
                 }
             } catch (OXException | UnsupportedEncodingException ex) {
-
+                // Don't care...
+                LOG.debug("", ex);
             }
         }
 

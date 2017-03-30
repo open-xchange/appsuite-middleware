@@ -51,10 +51,8 @@ package com.openexchange.image.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -65,7 +63,6 @@ import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.image.Mp3ImageDataSource;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 import com.openexchange.mail.service.EncryptedMailService;
@@ -80,10 +77,8 @@ import com.openexchange.server.ServiceLookup;
 public class ImageActivator extends AJAXModuleActivator {
 
     /**
-     * The {@link ServiceLookup} reference.
+     * Initializes a new {@link ImageActivator}.
      */
-    public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
-
     public ImageActivator() {
         super();
     }
@@ -101,7 +96,7 @@ public class ImageActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         final ServiceLookup serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
-        SERVICES.set(serviceLookup);
+        Services.setServiceLookup(serviceLookup);
 
         ImageUtility.setDispatcherPrefixService(getService(DispatcherPrefixService.class));
         {
@@ -142,6 +137,12 @@ public class ImageActivator extends AJAXModuleActivator {
             ImageActionFactory.addMapping(imageDataSource.getRegistrationName(), imageDataSource.getAlias());
         }
         registerModule(new ImageActionFactory(this), "image");
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
 }
