@@ -622,6 +622,28 @@ title: Mail
 | __File__ | mail.properties |
 
 ---
+| __Key__ | com.openexhange.mail.authType |
+|:----------------|:--------|
+| __Description__ | Specifies the authentication type which should be used for mail access of the primary account. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+| __Default__ | login |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail.properties |
+
+---
+| __Key__ | com.openexhange.mail.transport.authType |
+|:----------------|:--------|
+| __Description__ | Specifies the authentication type which should be used for mail transport of the primary account. Known values: 'login', 'xoauth2', and "oauthbearer"<br> |
+| __Default__ | login |
+| __Version__ | 7.8.4 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a> |
+| __File__ | mail.properties |
+
+---
 | __Key__ | com.openexchange.mailmapping.lookUpByDomain |
 |:----------------|:--------|
 | __Description__ | This option specifies how look-up of mail addresses is performed.<br><br>Setting this option to "true" means that the domain part of a mail address (the part after the "@" sign) is used to find a matching<br>context by checking the login mappings. That mechanism does only work if Open-Xchange setup strictly defines a dedicated and unique domain<br>per context. Otherwise that look-up mechanism will lead to wrong results.<br><br>Setting this option to "false" means that the mail address is going to be looked-up on a per database schema basis. For each known schema<br>a query is performed to check whether there is such an internal user.<br> |
