@@ -59,6 +59,13 @@ import com.openexchange.java.Strings;
  * @since v7.8.4
  */
 public class FileNameTools {
+    
+    public static void main(String[] args) {
+        System.out.println((char)180);
+        String test = "\u0065\u0301.txt";
+        System.out.println(test);
+        System.out.println(sanitizeFilename(test));
+    }
 
     /**
      * Sanitizes specified file name.

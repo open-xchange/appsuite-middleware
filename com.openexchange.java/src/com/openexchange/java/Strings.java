@@ -256,7 +256,7 @@ public class Strings {
      * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
      */
     public static boolean isPunctuation(char ch) {
-        // !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+        // !"#$%&'()*+,-./:;<=>?@[\]^_`´{|}~
         switch (ch) {
             case '!':
             case '"':

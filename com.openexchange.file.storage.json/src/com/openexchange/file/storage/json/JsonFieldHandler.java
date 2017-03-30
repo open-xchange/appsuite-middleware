@@ -140,8 +140,6 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
         }
 
         switch (field) {
-        case FILENAME:
-            return FileNameTools.sanitizeFilename((String) value);
         case CATEGORIES:
             return handleCategories((String) value);
         case META:
