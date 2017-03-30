@@ -60,21 +60,20 @@ import org.json.JSONObject;
  * @since v7.8.4
  */
 public enum StarRatingV1Fields {
+    date("Date"), // only for export
     score("Score"),
+    comment("Comment"),
     app("App"),
     entry_point("Entry Point"),
-    comment("Comment"),
     operating_system("Operating System"),
     browser("Browser"),
     browser_version("Browser Version"),
     user_agent("User Agent"),
     screen_resolution("Screen Resolution"),
     language("Language"),
-    // only for export
-    date("Date"),
-    user("User"),
-    server_version("Server Version"),
-    client_version("Client Version"),
+    user("User"), // only for export
+    server_version("Server Version"), // only for expor
+    client_version("Client Version"), // only for expor
     ;
 
     private static final Set<String> INTERNAL_KEYS = new HashSet<String>();
