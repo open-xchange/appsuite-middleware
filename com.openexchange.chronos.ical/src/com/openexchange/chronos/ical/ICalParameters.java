@@ -65,6 +65,8 @@ public interface ICalParameters {
      * Configures whether iCal input should be pre-processed and sanitized so that known client quirks are corrected automatically.
      * <p/>
      * This currently includes all legacy workarounds, taken over from the previous parser implementation.
+     * <p/>
+     * Only effective during import, defaults to {@link Boolean#FALSE}.
      *
      * @see com.openexchange.data.conversion.ical.ical4j.ICal4JParser.parse(BufferedReader, Collection<Exception>)
      */
@@ -96,11 +98,23 @@ public interface ICalParameters {
      * <p/>
      * Optional string array denoting the names of the properties to forcibly ignore during import or export.
      * <p/>
-     * During export, the properties are removed after mapping, prior serialization. During import, the properties are removed after deserialization, before mapping.
+     * During export, the properties are removed after mapping, prior serialization. During import, the properties are removed after
+     * deserialization, before mapping.
      * <p/>
      * Wildcards are allowed in the names, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
      */
     String IGNORED_PROPERTIES = "IGNORED_PROPERTIES";
+
+    /**
+     * {@link Boolean}
+     * <p/>
+     * Configures whether properties that are not present in the iCalendat input should either be skipped, or if the mapped object
+     * attribute(s) should be explicitly set to <code>null</code>. The latter option will make the typical <code>containsXXX</code>
+     * methods return <code>true</code>, while ignoring such properties will keep the attributes appear unset.
+     * <p/>
+     * Only effective during import, defaults to {@link Boolean#FALSE}.
+     */
+    String IGNORE_UNSET_PROPERTIES = "IGNORE_EMPTY_PROPERTIES";
 
     /**
      * Gets the value of an arbitrary extended parameter.

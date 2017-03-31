@@ -52,17 +52,15 @@ package com.openexchange.chronos.ical.ical4j.mapping.event;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.TextList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Categories;
-
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link CategoriesMapping}
@@ -87,17 +85,17 @@ public class CategoriesMapping extends AbstractICalMapping<VEvent, Event> {
 	@Override
 	public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
 		PropertyList properties = component.getProperties(Property.CATEGORIES);
-		if (null == properties || 0 == properties.size()) {
+        if (null != properties && 0 < properties.size()) {
+            List<String> categories = new ArrayList<String>();
+            for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
+                Categories property = (Categories) iterator.next();
+                for (Iterator<?> i = property.getCategories().iterator(); i.hasNext();) {
+                    categories.add(String.valueOf(i.next()));
+                }
+            }
+            object.setCategories(categories);
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
 			object.setCategories(null);
-		} else {
-			List<String> categories = new ArrayList<String>();
-	        for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
-	        	Categories property = (Categories) iterator.next();
-		        for (Iterator<?> i = property.getCategories().iterator(); i.hasNext();) {
-		        	categories.add(String.valueOf(i.next()));
-		        }
-	        }
-	        object.setCategories(categories);
 		}
 	}
 

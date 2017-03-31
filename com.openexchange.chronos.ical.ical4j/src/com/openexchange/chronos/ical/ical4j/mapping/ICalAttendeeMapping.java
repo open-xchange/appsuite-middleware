@@ -124,7 +124,9 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
     public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
         PropertyList properties = component.getProperties(Property.ATTENDEE);
         if (null == properties || 0 == properties.size()) {
-            setValue(object, null);
+            if (false == isIgnoreUnsetProperties(parameters)) {
+                setValue(object, null);
+            }
         } else {
             List<Attendee> attendees = new ArrayList<Attendee>(properties.size());
             for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {

@@ -99,6 +99,16 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
     }
 
     /**
+     * Gets a value indicating whether unset properties in the iCal data should be ignored during import or not.
+     *
+     * @param parameters The iCal paramters to evaluate
+     * @return <code>true</code> if unset properties should be ignored, <code>false</code>, otherwise
+     */
+    protected boolean isIgnoreUnsetProperties(ICalParameters parameters) {
+        return null != parameters && Boolean.TRUE.equals(parameters.get(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.class));
+    }
+
+    /**
      * Gets a value indicating whether a specific property is not <i>ignored</i> based on the configured
      * {@link ICalParameters#IGNORED_PROPERTIES} array.
      *

@@ -133,9 +133,7 @@ public abstract class ICalDateMapping<T extends Component, U> extends AbstractIC
     @Override
     public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
         DateProperty property = getProperty(component);
-        if (null == property || null == property.getDate()) {
-            setValue(object, null, null, true);
-        } else {
+        if (null != property && null != property.getDate()) {
             if (ParserTools.isDateTime(property)) {
                 TimeZone defaultTimeZone = parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
                 Date value = ParserTools.toDateConsideringDateType(property, defaultTimeZone);
@@ -144,6 +142,8 @@ public abstract class ICalDateMapping<T extends Component, U> extends AbstractIC
             } else {
                 setValue(object, new Date(property.getDate().getTime()), null, false);
             }
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            setValue(object, null, null, true);
         }
     }
 

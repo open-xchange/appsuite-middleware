@@ -98,9 +98,7 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
     @Override
     public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
         PropertyList properties = component.getProperties(Property.EXDATE);
-        if (null == properties || 0 == properties.size()) {
-            object.setDeleteExceptionDates(null);
-        } else {
+        if (null != properties && 0 < properties.size()) {
             SortedSet<RecurrenceId> deleteExceptionDates = new TreeSet<RecurrenceId>();
             for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
                 ExDate property = (ExDate) iterator.next();
@@ -110,6 +108,8 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
                 }
             }
             object.setDeleteExceptionDates(deleteExceptionDates);
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            object.setDeleteExceptionDates(null);
         }
     }
 

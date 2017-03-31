@@ -100,9 +100,7 @@ public class TranspMapping extends AbstractICalMapping<VEvent, Event> {
     @Override
     public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
         Transp transp = component.getTransparency();
-        if (null == transp) {
-            object.setTransp(null);
-        } else {
+        if (null != transp) {
             object.setTransp(Enums.parse(TimeTransparency.class, transp.getValue(), null));
             Property busyStatus = component.getProperty(BusyStatus.PROPERTY_NAME);
             if (null != busyStatus && null != busyStatus.getValue()) {
@@ -112,6 +110,8 @@ public class TranspMapping extends AbstractICalMapping<VEvent, Event> {
                     object.setTransp(ShownAsTransparency.TEMPORARY);
                 }
             }
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            object.setTransp(null);
         }
     }
 

@@ -106,7 +106,11 @@ public abstract class ICalTextMapping<T extends Component, U> extends AbstractIC
 	@Override
 	public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
 		Property property = component.getProperty(propertyName);
-		setValue(object, null == property ? null : property.getValue());
+        if (null != property) {
+            setValue(object, property.getValue());
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            setValue(object, null);
+        }
 	}
 
 }

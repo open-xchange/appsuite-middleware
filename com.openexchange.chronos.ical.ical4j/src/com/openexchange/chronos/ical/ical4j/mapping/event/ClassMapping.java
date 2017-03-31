@@ -93,7 +93,10 @@ public class ClassMapping extends AbstractICalMapping<VEvent, Event> {
             } catch (IllegalArgumentException e) {
                 addConversionWarning(warnings, e, Property.CLASS, "Ignoring unknown event classification");
             }
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            object.setClassification(null);
         }
+
     }
 
 }

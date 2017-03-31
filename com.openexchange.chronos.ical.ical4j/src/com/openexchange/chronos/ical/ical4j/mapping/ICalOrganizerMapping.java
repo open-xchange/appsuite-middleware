@@ -103,7 +103,11 @@ public abstract class ICalOrganizerMapping<T extends Component, U> extends Abstr
     @Override
     public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
         net.fortuna.ical4j.model.property.Organizer property = (net.fortuna.ical4j.model.property.Organizer) component.getProperty(Property.ORGANIZER);
-        setValue(object, null == property ? null : importOrganizer(property));
+        if (null != property) {
+            setValue(object, importOrganizer(property));
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            setValue(object, null);
+        }
     }
 
     private static net.fortuna.ical4j.model.property.Organizer exportOrganizer(Organizer organizer, net.fortuna.ical4j.model.property.Organizer property) throws URISyntaxException {

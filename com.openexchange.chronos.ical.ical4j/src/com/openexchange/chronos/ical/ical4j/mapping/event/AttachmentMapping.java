@@ -101,9 +101,7 @@ public class AttachmentMapping extends AbstractICalMapping<VEvent, Event> {
     @Override
     public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
         PropertyList properties = component.getProperties(Property.ATTACH);
-        if (null == properties || 0 == properties.size()) {
-            object.setAttachments(null);
-        } else {
+        if (null != properties && 0 < properties.size()) {
             List<Attachment> attachments = new ArrayList<Attachment>(properties.size());
             for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
                 Attach property = (Attach) iterator.next();
@@ -114,6 +112,8 @@ public class AttachmentMapping extends AbstractICalMapping<VEvent, Event> {
                 }
             }
             object.setAttachments(attachments);
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            object.setAttachments(null);
         }
     }
 

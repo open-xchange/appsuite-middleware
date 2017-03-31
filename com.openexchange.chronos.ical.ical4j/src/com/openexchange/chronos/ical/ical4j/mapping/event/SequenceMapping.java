@@ -84,7 +84,11 @@ public class SequenceMapping extends AbstractICalMapping<VEvent, Event> {
 	@Override
 	public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
 		Sequence property = component.getSequence();
-        object.setSequence(null == property ? 0 : property.getSequenceNo());
+        if (null != property) {
+            object.setSequence(property.getSequenceNo());
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            object.setSequence(0);
+        }
 	}
 
 }
