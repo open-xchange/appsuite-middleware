@@ -291,7 +291,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         /*
          * perform export
          */
-        for (Event event : calendarService.getEventsInFolder(calendarSession, Integer.parseInt(target.getFolder()))) {
+        for (Event event : calendarService.getEventsInFolder(calendarSession, target.getFolder())) {
             calendarExport.add(event);
         }
         /*
