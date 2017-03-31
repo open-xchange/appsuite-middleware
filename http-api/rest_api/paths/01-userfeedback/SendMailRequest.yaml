@@ -58,6 +58,10 @@
         description: Bad request, response contains error message.
       401:
         description: Not authorized
+      404:
+        description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+      500:
+        description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
 
     x-ox-examples:
       Example:
