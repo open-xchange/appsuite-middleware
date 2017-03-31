@@ -476,42 +476,45 @@ fi
 # SoftwareChange_Request-1498
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
-jopts=${jopts//\"/}
-nopts=$jopts
-# -----------------------------------------------------------------------
-permval=$(echo $nopts | sed 's;^.*MaxPermSize=\([0-9]*\).*$;\1;')
-if [ $permval -lt 256 ]; then
-    nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
-fi
-# -----------------------------------------------------------------------
-for opt in "-server" "-Djava.awt.headless=true" \
-    "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
-    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
-    "-XX:-OmitStackTraceInFastThrow"; do
-    if ! echo $nopts | grep -- $opt > /dev/null; then
-        if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
-            opt="-XX:CMSInitiatingOccupancyFraction=75"
-        elif [ "$opt" = "-XX:NewRatio=" ]; then
-            opt="-XX:NewRatio=3"
-        fi
-        if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
-            if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
+if grep -q '^JAVA_XTRAOPTS=".*"$' "${pfile}"
+then
+    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+    jopts=${jopts//\"/}
+    nopts=$jopts
+    # -----------------------------------------------------------------------
+    permval=$(echo $nopts | sed 's;^.*MaxPermSize=\([0-9]*\).*$;\1;')
+    if [ $permval -lt 256 ]; then
+        nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
+    fi
+    # -----------------------------------------------------------------------
+    for opt in "-server" "-Djava.awt.headless=true" \
+        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
+        "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
+        "-XX:-OmitStackTraceInFastThrow"; do
+        if ! echo $nopts | grep -- $opt > /dev/null; then
+            if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
+                opt="-XX:CMSInitiatingOccupancyFraction=75"
+            elif [ "$opt" = "-XX:NewRatio=" ]; then
+                opt="-XX:NewRatio=3"
+            fi
+            if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
+                if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
+                    nopts="$nopts $opt"
+                fi
+            else
                 nopts="$nopts $opt"
             fi
-        else
-            nopts="$nopts $opt"
         fi
+    done
+    # -----------------------------------------------------------------------
+    for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC" "-XX:+CMSClassUnloadingEnabled"; do
+        if echo $nopts | grep -- $opt > /dev/null; then
+            nopts=$(echo $nopts | sed "s;$opt;;")
+        fi
+    done
+    if [ "$jopts" != "$nopts" ]; then
+        ox_set_property JAVA_XTRAOPTS \""$nopts"\" $pfile
     fi
-done
-# -----------------------------------------------------------------------
-for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC" "-XX:+CMSClassUnloadingEnabled"; do
-    if echo $nopts | grep -- $opt > /dev/null; then
-        nopts=$(echo $nopts | sed "s;$opt;;")
-    fi
-done
-if [ "$jopts" != "$nopts" ]; then
-   ox_set_property JAVA_XTRAOPTS \""$nopts"\" $pfile
 fi
 
 # SoftwareChange_Request-1141
@@ -558,11 +561,14 @@ fi
 # obsoletes SoftwareChange_Request-1068
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
-jopts=${jopts//\"/}
-if echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
-    jopts=$(echo $jopts | sed 's;-Dosgi.compatibility.bootdelegation=true;-Dosgi.compatibility.bootdelegation=false;')
-    ox_set_property JAVA_XTRAOPTS \""$jopts"\" $pfile
+if grep -q '^JAVA_XTRAOPTS=".*"$' "${pfile}"
+then
+    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+    jopts=${jopts//\"/}
+    if echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
+        jopts=$(echo $jopts | sed 's;-Dosgi.compatibility.bootdelegation=true;-Dosgi.compatibility.bootdelegation=false;')
+        ox_set_property JAVA_XTRAOPTS \""$jopts"\" $pfile
+    fi
 fi
 
 # SoftwareChange_Request-1135
@@ -1135,11 +1141,14 @@ ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 # SoftwareChange_Request-2335
 PFILE=/opt/open-xchange/etc/ox-scriptconf.sh
-JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
-JOPTS=${JOPTS//\"/}
-if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
-    JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
-    ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
+if grep -q '^JAVA_XTRAOPTS=".*"$' "${PFILE}"
+then
+    JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
+    JOPTS=${JOPTS//\"/}
+    if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
+        JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
+        ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
+    fi
 fi
 
 # SoftwareChange_Request-2342
