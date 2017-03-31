@@ -51,6 +51,7 @@ package com.openexchange.ajax.helper;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -72,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
+import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
@@ -855,6 +857,27 @@ public final class DownloadUtility {
     }
 
     private static boolean isIllegalImageData(UploadFile imageFile) throws IOException {
+        // Check size
+        {
+            long maxSize = Utility.maxSize();
+            if (0 < maxSize && maxSize < imageFile.getSize()) {
+                // Too big
+                return true;
+            }
+        }
+
+        // Check resolution
+        {
+            long maxResolution = Utility.maxResolution();
+            if (0 < maxResolution) {
+                Dimension dimension = Utility.getImageDimensionFor(imageFile.openStream(), imageFile.getContentType(), imageFile.getPreparedFileName());
+                int resolution = dimension.height * dimension.width;
+                if (resolution > maxResolution) {
+                    return true;
+                }
+            }
+        }
+
         if (!isValidImage(imageFile.openStream())) {
             // Invalid
             return true;
