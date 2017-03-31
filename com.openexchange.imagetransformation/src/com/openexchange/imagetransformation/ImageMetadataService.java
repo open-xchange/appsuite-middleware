@@ -47,43 +47,31 @@
  *
  */
 
-package com.openexchange.imagetransformation.java.osgi;
+package com.openexchange.imagetransformation;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.imagetransformation.ImageMetadataService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
-import com.openexchange.imagetransformation.java.impl.JavaImageTransformationProvider;
-import com.openexchange.imagetransformation.java.scheduler.Scheduler;
-import com.openexchange.imagetransformation.java.services.JavaImageMetadataService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.processing.ProcessorService;
-import com.openexchange.timer.TimerService;
-
+import java.awt.Dimension;
+import java.io.IOException;
+import java.io.InputStream;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link ImageTransformationActivator}
+ * {@link ImageMetadataService} - A service for providing several meta-data information for an image.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class ImageTransformationActivator extends HousekeepingActivator {
+@SingletonService
+public interface ImageMetadataService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationProvider(), 0);
-        registerService(ImageMetadataService.class, new JavaImageMetadataService());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
-        super.stopBundle();
-    }
+    /**
+     * Gets the {@link Dimension dimension} for specified image data.
+     *
+     * @param imageStream The image data
+     * @param mimeType The image MIME type
+     * @param name The image name
+     * @return The dimension
+     * @throws IOException If dimension cannot be returned
+     */
+    Dimension getDimensionFor(InputStream imageStream, String mimeType, String name) throws IOException;
 
 }
