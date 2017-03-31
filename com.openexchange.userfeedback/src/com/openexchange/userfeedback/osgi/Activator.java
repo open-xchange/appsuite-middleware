@@ -57,6 +57,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -100,11 +101,12 @@ public class Activator extends HousekeepingActivator{
                 public boolean isEnabled(String capability, Session ses) throws OXException {
                     if (sCapability.equals(capability)) {
                         ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous() || session.getUser().isGuest()) {
+                        User user = session.getUser();
+                        if (session.isAnonymous() || user.isGuest()) {
                             return false;
                         }
                         LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
-                        return leanConfig.getBooleanProperty(UserFeedbackProperty.enabled);
+                        return leanConfig.getBooleanProperty(user.getId(), session.getContextId(), UserFeedbackProperty.enabled);
                     }
 
                     return true;
