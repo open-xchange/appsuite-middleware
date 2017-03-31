@@ -223,7 +223,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private int skipLevel;
 
     /**
-     * Used to track script tags
+     * Used to track script/svg tags
      */
     private boolean insideScriptTag = false;
 
@@ -538,6 +538,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
             } else if (HTMLElementName.TABLE == name) {
                 tablePaddings.poll();
             }
+            if (isCss) {
+                // Ignore end tags in CSS content
+                return;
+            }
             if (depth == 0) {
                 htmlBuilder.append("</").append(name).append('>');
             } else if (!getAndUnmark()) {
@@ -556,7 +560,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
             return;
         }
         if (insideScriptTag) {
-            //ignore script tags completely
+            // Ignore script tags completely
+            return;
+        }
+        if (isCss) {
+            // Ignore tags in CSS content
             return;
         }
         final String tagName = startTag.getName();
@@ -632,7 +640,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static boolean isRemoveWholeTag(final Tag tag) {
         final String check = tag.getName();
-        return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
+        return (HTMLElementName.SCRIPT == check || "svg".equals(check) || check.startsWith("w:") || check.startsWith("o:"));
     }
 
     private static final Pattern PATTERN_STYLE_VALUE = Pattern.compile("([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}\\p{L}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);
