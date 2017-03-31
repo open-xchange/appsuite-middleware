@@ -4,6 +4,16 @@ title: Session
 
 This page shows all properties with the tag: Session
 
+| __Key__ | com.openexchange.groupware.dataRetrieval.lifetime |
+|:----------------|:--------|
+| __Description__ | Lifetime of a token in milliseconds. If this value is not set or negative the token only expires at the end of the session.<br> |
+| __Default__ | 60000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Data_Retrieval.html">Data Retrieval</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
+| __File__ | dataRetrieval.properties |
+
+---
 | __Key__ | com.openexchange.share.transientSessions |
 |:----------------|:--------|
 | __Description__ | Specifies whether guest sessions are treated as transient or not. Transient<br>sessions are only held in the short-term session containers, and are not put<br>into the distributed session storage. <br> |
@@ -12,17 +22,6 @@ This page shows all properties with the tag: Session
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
 | __File__ | share.properties |
-
----
-| __Key__ | com.openexchange.http.grizzly.sessionExpiryCheckInterval |
-|:----------------|:--------|
-| __Description__ | Specifies the interval in seconds when to check for expired/invalid HTTP sessions<br>This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"<br>that defines how long (in seconds) a HTTP session may stay idle/inactive until considered<br>as invalid<br> |
-| __Default__ | 60 |
-| __Version__ | 7.8.4 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
-| __File__ | grizzly.properties |
 
 ---
 | __Key__ | com.openexchange.ipcheck.mode |
@@ -36,14 +35,25 @@ This page shows all properties with the tag: Session
 | __File__ | server.properties |
 
 ---
-| __Key__ | com.openexchange.groupware.dataRetrieval.lifetime |
+| __Key__ | com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders |
 |:----------------|:--------|
-| __Description__ | Lifetime of a token in milliseconds. If this value is not set or negative the token only expires at the end of the session.<br> |
-| __Default__ | 60000 |
+| __Description__ | Specifies if changes to personal folders (personal in terms of non-global e.g. folders kept in database) are supposed to be propagated<br>to remote nodes. This option is only useful for installations that do offer collaboration features or do not support session stickyness.<br>For instance users are able to share mail folders or might be load-balanced to other nodes while active in a single session.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
+| __File__ | cache.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.sessionExpiryCheckInterval |
+|:----------------|:--------|
+| __Description__ | Specifies the interval in seconds when to check for expired/invalid HTTP sessions<br>This value should be aligned to property "com.openexchange.servlet.maxInactiveInterval"<br>that defines how long (in seconds) a HTTP session may stay idle/inactive until considered<br>as invalid<br> |
+| __Default__ | 60 |
+| __Version__ | 7.8.4 |
 | __Reloadable__ | false |
 | __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Data_Retrieval.html">Data Retrieval</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
-| __File__ | dataRetrieval.properties |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
+| __File__ | grizzly.properties |
 
 ---
 | __Key__ | com.openexchange.sessionstorage.hazelcast.enabled |
@@ -54,15 +64,5 @@ This page shows all properties with the tag: Session
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Hazelcast.html">Hazelcast</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
 | __File__ | sessionstorage-hazelcast.properties |
-
----
-| __Key__ | com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders |
-|:----------------|:--------|
-| __Description__ | Specifies if changes to personal folders (personal in terms of non-global e.g. folders kept in database) are supposed to be propagated<br>to remote nodes. This option is only useful for installations that do offer collaboration features or do not support session stickyness.<br>For instance users are able to share mail folders or might be load-balanced to other nodes while active in a single session.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
-| __File__ | cache.properties |
 
 ---

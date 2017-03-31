@@ -46,6 +46,17 @@ This page shows all properties with the tag: Thread
 | __File__ | reportserialization.properties |
 
 ---
+| __Key__ | com.openexchange.push.malpoll.concurrentglobal |
+|:----------------|:--------|
+| __Description__ | Whether the tasks executed by global timer are executed concurrently<br>or by calling timer's thread.<br>Note: This property only has effect if "com.openexchange.push.malpoll.global"<br>is set to "true"<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.push.malpoll.global |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
+| __File__ | malpoll.properties |
+
+---
 | __Key__ | cleanerInterval |
 |:----------------|:--------|
 | __Description__ | Timeinterval of cleaner thread in milliseconds. <br>This thread removes idle timed out database connections and <br>removes not used database connection pools after each cleanerInterval.<br> |
@@ -75,6 +86,28 @@ This page shows all properties with the tag: Thread
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Config_DB.html">Config DB</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Database.html">Database</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Logging.html">Logging</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | configdb.properties |
+
+---
+| __Key__ | com.openexchange.report.appsuite.maxThreadPoolSize |
+|:----------------|:--------|
+| __Description__ | How many threads can be used for report processing.<br> |
+| __Default__ | 20 |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Serialization.html">Serialization</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
+| __File__ | reportclient.properties |
+
+---
+| __Key__ | com.openexchange.report.appsuite.threadPriority |
+|:----------------|:--------|
+| __Description__ | Which thread priority do the processing threads have.<br> |
+| __Default__ | 1 |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Serialization.html">Serialization</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
+| __File__ | reportclient.properties |
 
 ---
 | __Key__ | com.openexchange.threadpool.corePoolSize |
@@ -159,28 +192,6 @@ This page shows all properties with the tag: Thread
 | __File__ | threadpool.properties |
 
 ---
-| __Key__ | com.openexchange.report.appsuite.maxThreadPoolSize |
-|:----------------|:--------|
-| __Description__ | How many threads can be used for report processing.<br> |
-| __Default__ | 20 |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Serialization.html">Serialization</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
-| __File__ | reportclient.properties |
-
----
-| __Key__ | com.openexchange.report.appsuite.threadPriority |
-|:----------------|:--------|
-| __Description__ | Which thread priority do the processing threads have.<br> |
-| __Default__ | 1 |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Report.html">Report</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Serialization.html">Serialization</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
-| __File__ | reportclient.properties |
-
----
 | __Key__ | com.openexchange.quartz.localThreads |
 |:----------------|:--------|
 | __Description__ | Number of worker threads for the local scheduler instance.<br> |
@@ -189,16 +200,5 @@ This page shows all properties with the tag: Thread
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Quartz.html">Quartz</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
 | __File__ | quartz.properties |
-
----
-| __Key__ | com.openexchange.push.malpoll.concurrentglobal |
-|:----------------|:--------|
-| __Description__ | Whether the tasks executed by global timer are executed concurrently<br>or by calling timer's thread.<br>Note: This property only has effect if "com.openexchange.push.malpoll.global"<br>is set to "true"<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.push.malpoll.global |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/MAL_Poll.html">MAL Poll</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Thread.html">Thread</a> |
-| __File__ | malpoll.properties |
 
 ---
