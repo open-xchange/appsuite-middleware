@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.net
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.sun.net,
+Import-Package: com.openexchange.java,
+ com.sun.net,
  com.sun.net.ssl,
  javax.crypto,
  javax.crypto.interfaces,
@@ -18,6 +19,7 @@ Import-Package: com.sun.net,
  javax.security.sasl,
  org.apache.commons.lang.math,
  org.apache.commons.validator.routines,
+ org.slf4j,
  sun.misc
 Export-Package: com.googlecode.ipv6,
  com.openexchange.net,
