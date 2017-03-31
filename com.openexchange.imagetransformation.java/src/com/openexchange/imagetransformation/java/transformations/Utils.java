@@ -151,7 +151,7 @@ public class Utils {
             if (null != extension) {
                 readerSpi = READER_SPI_BY_EXTENSION.get(extension);
             }
-            if (null == readerSpi && null != contentType) {
+            if (null == readerSpi) {
                 readerSpi = READER_SPI_BY_FORMAT_NAME.get(Utility.getImageFormat(contentType));
             }
             if (null != readerSpi) {
