@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 20
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -81,6 +81,8 @@ fi
 %doc com.openexchange.authentication.imap/ChangeLog
 
 %changelog
+* Fri Mar 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-04-03 (4050)
 * Tue Mar 28 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-03-27 (4066)
 * Thu Mar 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
