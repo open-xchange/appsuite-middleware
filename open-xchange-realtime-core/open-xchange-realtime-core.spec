@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 25
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -84,8 +84,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/realtime.properties
 
 %changelog
-* Fri Mar 24 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-04-03 (4047)
 * Fri Feb 24 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-02-24 (3991)
 * Wed Feb 08 2017 Marcus Klein <marcus.klein@open-xchange.com>
