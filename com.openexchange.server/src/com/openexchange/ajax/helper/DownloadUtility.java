@@ -53,7 +53,6 @@ import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -857,28 +856,7 @@ public final class DownloadUtility {
     }
 
     private static boolean isIllegalImageData(UploadFile imageFile) throws IOException {
-        // Check size
-        {
-            long maxSize = Utility.maxSize();
-            if (0 < maxSize && maxSize < imageFile.getSize()) {
-                // Too big
-                return true;
-            }
-        }
-
-        // Check resolution
-        {
-            long maxResolution = Utility.maxResolution();
-            if (0 < maxResolution) {
-                Dimension dimension = Utility.getImageDimensionFor(imageFile.openStream(), imageFile.getContentType(), imageFile.getPreparedFileName());
-                int resolution = dimension.height * dimension.width;
-                if (resolution > maxResolution) {
-                    return true;
-                }
-            }
-        }
-
-        if (!isValidImage(imageFile.openStream())) {
+        if (!isValidImage(imageFile)) {
             // Invalid
             return true;
         }
@@ -890,14 +868,37 @@ public final class DownloadUtility {
         return false;
     }
 
-    private static boolean isValidImage(final InputStream data) {
+    private static boolean isValidImage(UploadFile imageFile) {
         try {
-            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(data);
-            return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
+            Dimension dimension = Utility.getImageDimensionFor(imageFile.openStream(), imageFile.getContentType(), imageFile.getPreparedFileName());
+            if (dimension == null || dimension.getHeight() <= 0 || dimension.getWidth() <= 0) {
+                return false;
+            }
+
+            // Check size
+            {
+                long maxSize = Utility.maxSize();
+                if (0 < maxSize && maxSize < imageFile.getSize()) {
+                    // Too big
+                    return false;
+                }
+            }
+
+            // Check resolution
+            {
+                long maxResolution = Utility.maxResolution();
+                if (0 < maxResolution) {
+                    int resolution = dimension.height * dimension.width;
+                    if (resolution > maxResolution) {
+                        // Resolution too high
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         } catch (final Exception e) {
             return false;
-        } finally {
-            Streams.close(data);
         }
     }
 
