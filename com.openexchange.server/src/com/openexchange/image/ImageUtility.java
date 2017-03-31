@@ -69,6 +69,7 @@ import com.openexchange.image.osgi.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
@@ -231,7 +232,8 @@ public final class ImageUtility {
 
         String auth = null;
         {
-            CryptographicServiceAuthenticationFactory cryptoService = Services.getServiceLookup().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+            ServiceLookup services = Services.getServiceLookup();
+            CryptographicServiceAuthenticationFactory cryptoService = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
             if (cryptoService != null) {
                 try {
                     auth = cryptoService.createAuthenticationFrom(requestData);
