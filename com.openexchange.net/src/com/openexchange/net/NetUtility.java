@@ -52,6 +52,7 @@ package com.openexchange.net;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.util.LinkedHashMap;
+import com.openexchange.net.utils.Strings;
 
 /**
  * {@link NetUtility} - A utility class for network-related parsing/processing.
@@ -86,6 +87,12 @@ public class NetUtility {
                 cache.clear();
             }
         }
+
+        void clearCacheFor(String hostName) {
+            synchronized (lock) {
+                cache.remove(Strings.asciiLowerCase(hostName));
+            }
+        }
     }
 
     private static final class InetAddressCaches {
@@ -102,6 +109,11 @@ public class NetUtility {
         void clearCaches() {
             addressCache.clearCache();
             addressCache.clearCache();
+        }
+
+        void clearCachesFor(String hostName) {
+            addressCache.clearCacheFor(hostName);
+            addressCache.clearCacheFor(hostName);
         }
     }
 
@@ -156,6 +168,24 @@ public class NetUtility {
             return;
         }
         caches.clearCaches();
+    }
+
+    /**
+     * Flushes the specified host name from JVM-internal caches for DNS look-ups.
+     *
+     * @param hostName The host name to remove
+     */
+    public static void flushInetAddressCacheFor(String hostName) {
+        if (Strings.isEmpty(hostName)) {
+            return;
+        }
+
+        InetAddressCaches caches = getInetAddressCaches();
+        if (null == caches) {
+            LOGGER.warn("Failed to flush DNS look-up caches");
+            return;
+        }
+        caches.clearCachesFor(hostName);
     }
 
 }
