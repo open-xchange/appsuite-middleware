@@ -70,20 +70,38 @@ public class NetUtility {
         super();
     }
 
+    private static final class InetAddressCache {
+
+        private final Object lock;
+        private final LinkedHashMap cache;
+
+        InetAddressCache(LinkedHashMap cache, Object lock) {
+            super();
+            this.cache = cache;
+            this.lock = lock;
+        }
+
+        void clearCache() {
+            synchronized (lock) {
+                cache.clear();
+            }
+        }
+    }
+
     private static final class InetAddressCaches {
 
-        private final LinkedHashMap posCache;
-        private final LinkedHashMap negCache;
+        private final InetAddressCache addressCache;
+        private final InetAddressCache negativeCache;
 
-        InetAddressCaches(LinkedHashMap posCache, LinkedHashMap negCache) {
+        InetAddressCaches(InetAddressCache addressCache, InetAddressCache negativeCache) {
             super();
-            this.posCache = posCache;
-            this.negCache = negCache;
+            this.addressCache = addressCache;
+            this.negativeCache = negativeCache;
         }
 
         void clearCaches() {
-            posCache.clear();
-            negCache.clear();
+            addressCache.clearCache();
+            addressCache.clearCache();
         }
     }
 
@@ -96,22 +114,28 @@ public class NetUtility {
                 tmp = caches;
                 if (null == tmp) {
                     try {
+                        // Acquire the "addressCache" cache instance for positive DNS look-ups
                         Field addressCacheField = InetAddress.class.getDeclaredField("addressCache");
                         addressCacheField.setAccessible(true);
                         Object addressCache = addressCacheField.get(null);
 
+                        // Acquire the "negativeCache" cache instance for negative DNS look-ups
                         Field negativeCacheField = InetAddress.class.getDeclaredField("negativeCache");
                         negativeCacheField.setAccessible(true);
                         Object negativeCache = negativeCacheField.get(null);
 
+                        // Acquire the inner LinkedHashMap instances from both caches - "addressCache" cache and "negativeCache" cache
                         Class<?> cacheClazz = Class.forName("java.net.InetAddress$Cache");
-
                         Field cacheField = cacheClazz.getDeclaredField("cache");
                         cacheField.setAccessible(true);
                         LinkedHashMap posCache = (LinkedHashMap) cacheField.get(addressCache);
                         LinkedHashMap negCache = (LinkedHashMap) cacheField.get(negativeCache);
 
-                        tmp = new InetAddressCaches(posCache, negCache);
+                        // Both - addressCache and negativeCache -  are guarded by addressCache mutex
+                        InetAddressCache positiveInetAddressCache = new InetAddressCache(posCache, addressCache);
+                        InetAddressCache negativeInetAddressCache = new InetAddressCache(negCache, addressCache);
+
+                        tmp = new InetAddressCaches(positiveInetAddressCache, negativeInetAddressCache);
                         caches = tmp;
                     } catch (Exception e) {
                         LOGGER.error("Failed to initialze fields for InetAddress cache");
