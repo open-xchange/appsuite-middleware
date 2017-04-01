@@ -4,139 +4,6 @@ title: Authentication
 
 This page shows all properties with the tag: Authentication
 
-| __Key__ | IMAP_SERVER |
-|:----------------|:--------|
-| __Description__ | IMAP server ip or fqdn.<br> |
-| __Default__ | localhost |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | IMAP_PORT |
-|:----------------|:--------|
-| __Description__ | Port on which the IMAP server is listening.<br> |
-| __Default__ | 143 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | IMAP_USE_SECURE |
-|:----------------|:--------|
-| __Description__ | Set to true if connecting via imaps://<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | IMAP_TIMEOUT |
-|:----------------|:--------|
-| __Description__ | Socket I/O timeout value in milliseconds.<br> |
-| __Default__ | 5000 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | IMAP_CONNECTIONTIMEOUT |
-|:----------------|:--------|
-| __Description__ | Socket connection timeout value in milliseconds.<br> |
-| __Default__ | 5000 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | USE_FULL_LOGIN_INFO |
-|:----------------|:--------|
-| __Description__ | Set to true to auth with "user@domain" instead of just "user" against imap server.<br>If true the "domain" part will be used as the context name of the ox system.<br>so add "domain" as a login mapping to be able to login.<br>If false, the plugin react as only 1 context exists in the ox system,<br>and this context has the mapping "defaultcontext" added.<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP |
-|:----------------|:--------|
-| __Description__ | Define if the internal user-name matches the full login string or just the user part;<br>meaning the user is supposed to be queried using "user@domain" instead of "user".<br><br>Note: This property is only effective if "USE_MULTIPLE" is set to "true"<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | USE_MULTIPLE |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP |
-|:----------------|:--------|
-| __Description__ | Define if the internal context-name matches the full login string or just the domain part;<br>meaning the context is supposed to be queried using "user@domain" instead of "domain".<br><br>Note: This property is only effective if "USE_MULTIPLE" is set to "true"<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | USE_MULTIPLE |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | LOWERCASE_FOR_CONTEXT_USER_LOOKUP |
-|:----------------|:--------|
-| __Description__ | Specifies whether user/context look-up is supposed to be performed<br>by lower-casing the utilized user/context information.<br><br>Note: This property is only effective if "USE_MULTIPLE" is set to "true".<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | USE_MULTIPLE |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | USE_MULTIPLE |
-|:----------------|:--------|
-| __Description__ | If set to true the IMAP authentication plugin gets all IMAP server information from the OX database instead of reading<br>configuration from this file.<br>Following information is fetched from DB and will be used to authenticate against the server:<br>- server<br>- port<br>- ssl/tls<br>Moreover the proper login name is detected as configured by property "com.openexchange.mail.loginSource".<br>To use this feature, set the correct values while provisioning an OX user.<br>Useful if you have many IMAP Servers to connect to.<br><br>INFO: Domain part of the login is used as context name.<br>Example:<br>  test@test.org<br>  Username of the OX account must be "test" and name of the OX context must be "test.org".<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | LOWERCASE_FOR_CONTEXT_USER_LOOKUP, USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP, USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | com.openexchange.authentication.imap.imapAuthEnc |
-|:----------------|:--------|
-| __Description__ | Define the encoding for IMAP authentication.<br> |
-| __Default__ | UTF-8 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
-| __File__ | imapauth.properties |
-
----
-| __Key__ | JMXLogin |
-|:----------------|:--------|
-| __Description__ | Define the JMX login for authentication.<br>Leaving this property empty means not to use authentication.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
-| __File__ | management.properties |
-
----
-| __Key__ | JMXPassword |
-|:----------------|:--------|
-| __Description__ | Define the JMX password in SHA hashed version.<br>This property only has effect if property "JMXLogin" is set.<br><br>======================================================================<br>             Using Perl to generate the SHA hash<br>======================================================================<br><br>The following Perl command can be used to generate such a password:<br>(requires to install the Digest::SHA1 Perl module)<br><br>  perl -M'Digest::SHA1 qw(sha1_base64)' -e 'print sha1_base64("YOURSECRET")."=\n";'<br><br>NOTE:<br>Since Debian Wheezy and Ubuntu 12.04 the corresponding Perl module has been replaced with "Digest::SHA" (and "Digest::SHA1" is no longer maintained)<br><br>======================================================================<br>             Using ruby to generate the SHA hash<br>======================================================================<br><br>Alternatively, ruby can be used to generate the appropriate SHA1 hash:<br><br>  ruby -rdigest -e 'puts Digest::SHA1.base64digest("YOURSECRET")'<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | JMXLogin |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
-| __File__ | management.properties |
-
----
 | __Key__ | com.openexchange.authentication.ucs.useLdapPool |
 |:----------------|:--------|
 | __Description__ | Specifies whether to se ldap pooling or not.<br> |
@@ -234,83 +101,6 @@ This page shows all properties with the tag: Authentication
 | __Related__ | com.openexchange.authentication.ucs.bindDn |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Univention.html">Univention</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/LDAP.html">LDAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
 | __File__ | authplugin.properties |
-
----
-| __Key__ | mail.smtp.auth |
-|:----------------|:--------|
-| __Description__ | If true, attempt to authenticate the user using the AUTH command.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.smtp.saslrealm |
-|:----------------|:--------|
-| __Description__ | The realm to use with DIGEST-MD5 authentication.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.auth.login.disable |
-|:----------------|:--------|
-| __Description__ | If true, prevents use of the non-standard AUTHENTICATE LOGIN command, instead using the plain LOGIN command.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.auth.plain.disable |
-|:----------------|:--------|
-| __Description__ | If true, prevents use of the AUTHENTICATE PLAIN command.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.sasl.enable |
-|:----------------|:--------|
-| __Description__ | If set to true, attempt to use the javax.security.sasl package to choose an authentication mechanism for login.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.sasl.mechanisms |
-|:----------------|:--------|
-| __Description__ | A space or comma separated list of SASL mechanism names to try to use.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.imap.sasl.authorizationid |
-|:----------------|:--------|
-| __Description__ | The authorization ID to use in the SASL authentication. If not set, the authentication ID (user name) is used.<br> |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
-
----
-| __Key__ | mail.pop3.apop.enable |
-|:----------------|:--------|
-| __Description__ | If set to true, use APOP instead of USER/PASS to login to the POP3 server, if the POP3 server supports APOP.<br>APOP sends a digest of the password rather than the clear text password.<br> |
-| __Default__ | false |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
-| __File__ | javamail.properties |
 
 ---
 | __Key__ | com.openexchange.kerberos.moduleName |
@@ -567,5 +357,215 @@ This page shows all properties with the tag: Authentication
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Admin.html">Admin</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
 | __File__ | AdminDaemon.properties |
+
+---
+| __Key__ | IMAP_SERVER |
+|:----------------|:--------|
+| __Description__ | IMAP server ip or fqdn.<br> |
+| __Default__ | localhost |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Host.html">Host</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | IMAP_PORT |
+|:----------------|:--------|
+| __Description__ | Port on which the IMAP server is listening.<br> |
+| __Default__ | 143 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Port.html">Port</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | IMAP_USE_SECURE |
+|:----------------|:--------|
+| __Description__ | Set to true if connecting via imaps://<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | IMAP_TIMEOUT |
+|:----------------|:--------|
+| __Description__ | Socket I/O timeout value in milliseconds.<br> |
+| __Default__ | 5000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | IMAP_CONNECTIONTIMEOUT |
+|:----------------|:--------|
+| __Description__ | Socket connection timeout value in milliseconds.<br> |
+| __Default__ | 5000 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | USE_FULL_LOGIN_INFO |
+|:----------------|:--------|
+| __Description__ | Set to true to auth with "user@domain" instead of just "user" against imap server.<br>If true the "domain" part will be used as the context name of the ox system.<br>so add "domain" as a login mapping to be able to login.<br>If false, the plugin react as only 1 context exists in the ox system,<br>and this context has the mapping "defaultcontext" added.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP |
+|:----------------|:--------|
+| __Description__ | Define if the internal user-name matches the full login string or just the user part;<br>meaning the user is supposed to be queried using "user@domain" instead of "user".<br><br>Note: This property is only effective if "USE_MULTIPLE" is set to "true"<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | USE_MULTIPLE |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP |
+|:----------------|:--------|
+| __Description__ | Define if the internal context-name matches the full login string or just the domain part;<br>meaning the context is supposed to be queried using "user@domain" instead of "domain".<br><br>Note: This property is only effective if "USE_MULTIPLE" is set to "true"<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | USE_MULTIPLE |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | LOWERCASE_FOR_CONTEXT_USER_LOOKUP |
+|:----------------|:--------|
+| __Description__ | Specifies whether user/context look-up is supposed to be performed<br>by lower-casing the utilized user/context information.<br><br>Note: This property is only effective if "USE_MULTIPLE" is set to "true".<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | USE_MULTIPLE |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | USE_MULTIPLE |
+|:----------------|:--------|
+| __Description__ | If set to true the IMAP authentication plugin gets all IMAP server information from the OX database instead of reading<br>configuration from this file.<br>Following information is fetched from DB and will be used to authenticate against the server:<br>- server<br>- port<br>- ssl/tls<br>Moreover the proper login name is detected as configured by property "com.openexchange.mail.loginSource".<br>To use this feature, set the correct values while provisioning an OX user.<br>Useful if you have many IMAP Servers to connect to.<br><br>INFO: Domain part of the login is used as context name.<br>Example:<br>  test@test.org<br>  Username of the OX account must be "test" and name of the OX context must be "test.org".<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | LOWERCASE_FOR_CONTEXT_USER_LOOKUP, USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP, USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | com.openexchange.authentication.imap.imapAuthEnc |
+|:----------------|:--------|
+| __Description__ | Define the encoding for IMAP authentication.<br> |
+| __Default__ | UTF-8 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP_Auth.html">IMAP Auth</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a> |
+| __File__ | imapauth.properties |
+
+---
+| __Key__ | mail.smtp.auth |
+|:----------------|:--------|
+| __Description__ | If true, attempt to authenticate the user using the AUTH command.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.smtp.saslrealm |
+|:----------------|:--------|
+| __Description__ | The realm to use with DIGEST-MD5 authentication.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/SMTP.html">SMTP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.auth.login.disable |
+|:----------------|:--------|
+| __Description__ | If true, prevents use of the non-standard AUTHENTICATE LOGIN command, instead using the plain LOGIN command.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.auth.plain.disable |
+|:----------------|:--------|
+| __Description__ | If true, prevents use of the AUTHENTICATE PLAIN command.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.sasl.enable |
+|:----------------|:--------|
+| __Description__ | If set to true, attempt to use the javax.security.sasl package to choose an authentication mechanism for login.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.sasl.mechanisms |
+|:----------------|:--------|
+| __Description__ | A space or comma separated list of SASL mechanism names to try to use.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.imap.sasl.authorizationid |
+|:----------------|:--------|
+| __Description__ | The authorization ID to use in the SASL authentication. If not set, the authentication ID (user name) is used.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | mail.pop3.apop.enable |
+|:----------------|:--------|
+| __Description__ | If set to true, use APOP instead of USER/PASS to login to the POP3 server, if the POP3 server supports APOP.<br>APOP sends a digest of the password rather than the clear text password.<br> |
+| __Default__ | false |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/POP3.html">POP3</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a> |
+| __File__ | javamail.properties |
+
+---
+| __Key__ | JMXLogin |
+|:----------------|:--------|
+| __Description__ | Define the JMX login for authentication.<br>Leaving this property empty means not to use authentication.<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __File__ | management.properties |
+
+---
+| __Key__ | JMXPassword |
+|:----------------|:--------|
+| __Description__ | Define the JMX password in SHA hashed version.<br>This property only has effect if property "JMXLogin" is set.<br><br>======================================================================<br>             Using Perl to generate the SHA hash<br>======================================================================<br><br>The following Perl command can be used to generate such a password:<br>(requires to install the Digest::SHA1 Perl module)<br><br>  perl -M'Digest::SHA1 qw(sha1_base64)' -e 'print sha1_base64("YOURSECRET")."=\n";'<br><br>NOTE:<br>Since Debian Wheezy and Ubuntu 12.04 the corresponding Perl module has been replaced with "Digest::SHA" (and "Digest::SHA1" is no longer maintained)<br><br>======================================================================<br>             Using ruby to generate the SHA hash<br>======================================================================<br><br>Alternatively, ruby can be used to generate the appropriate SHA1 hash:<br><br>  ruby -rdigest -e 'puts Digest::SHA1.base64digest("YOURSECRET")'<br> |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | JMXLogin |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Management.html">Management</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Authentication.html">Authentication</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Credential.html">Credential</a> |
+| __File__ | management.properties |
 
 ---
