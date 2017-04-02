@@ -4,16 +4,6 @@ title: Caching
 
 This page shows all properties with the tag: Caching
 
-| __Key__ | com.openexchange.imap[.primary].allowFolderCaches |
-|:----------------|:--------|
-| __Description__ | Enables/disables caching of IMAP folders.<br>Default is true.<br>Note: Only disable IMAP folder cache if you certainly know what you are doing.<br>Disabling that cache may result in noticeable performance decrease.<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
-| __File__ | imap.properties |
-
----
 | __Key__ | ENABLE_DB_GROUPING |
 |:----------------|:--------|
 | __Description__ | Define where to perform folder grouping.<br>This filters the database results for duplicate folders in the where <br>clause of the db statement or afterwards in the application. <br>Possible values: TRUE / FALSE<br> |
@@ -144,26 +134,6 @@ This page shows all properties with the tag: Caching
 | __File__ | javamail.properties |
 
 ---
-| __Key__ | com.openexchange.caching.configfile |
-|:----------------|:--------|
-| __Description__ | Location of default cache configuration file<br> |
-| __Default__ | cache.ccf |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/System.html">System</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
-| __File__ | system.properties |
-
----
-| __Key__ | Cache |
-|:----------------|:--------|
-| __Description__ | Switch for enabling caching in the groupware. Normally this should be set to<br>true or the database will get a lot more load.<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/System.html">System</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
-| __File__ | system.properties |
-
----
 | __Key__ | com.openexchange.caching.jcs.enabled |
 |:----------------|:--------|
 | __Description__ | Specify whether JCS-based caching should be enabled.<br> |
@@ -192,5 +162,35 @@ This page shows all properties with the tag: Caching
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Session.html">Session</a> |
 | __File__ | cache.properties |
+
+---
+| __Key__ | com.openexchange.caching.configfile |
+|:----------------|:--------|
+| __Description__ | Location of default cache configuration file<br> |
+| __Default__ | cache.ccf |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/System.html">System</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
+| __File__ | system.properties |
+
+---
+| __Key__ | Cache |
+|:----------------|:--------|
+| __Description__ | Switch for enabling caching in the groupware. Normally this should be set to<br>true or the database will get a lot more load.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/System.html">System</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
+| __File__ | system.properties |
+
+---
+| __Key__ | com.openexchange.imap[.primary].allowFolderCaches |
+|:----------------|:--------|
+| __Description__ | Enables/disables caching of IMAP folders.<br>Default is true.<br>Note: Only disable IMAP folder cache if you certainly know what you are doing.<br>Disabling that cache may result in noticeable performance decrease.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Caching.html">Caching</a> |
+| __File__ | imap.properties |
 
 ---
