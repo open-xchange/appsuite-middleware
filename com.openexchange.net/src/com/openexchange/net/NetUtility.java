@@ -150,7 +150,7 @@ public class NetUtility {
                         tmp = new InetAddressCaches(positiveInetAddressCache, negativeInetAddressCache);
                         caches = tmp;
                     } catch (Exception e) {
-                        LOGGER.error("Failed to initialze fields for InetAddress cache");
+                        LOGGER.error("Failed to initialze fields for InetAddress cache", e);
                     }
                 }
             }
