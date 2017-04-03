@@ -77,6 +77,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -99,15 +100,15 @@ import com.openexchange.tools.arrays.Arrays;
 @RunWith(Parameterized.class)
 public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
-    private String              taxonomyTypes = "groupware_premium";
-    private Context             old;
-    private static final String reloadables   = "AdvertisementPackageServiceImpl";
-    private static final String DEFAULT       = "default";
-    private Executor            executor;
-    private URI                 baseRestUri;
+    private String taxonomyTypes = "groupware_premium";
+    private Context old;
+    private static final String reloadables = "AdvertisementPackageServiceImpl";
+    private static final String DEFAULT = "default";
+    private Executor executor;
+    private URI baseRestUri;
 
     @Parameter(value = 0)
-    public String         packageScheme;
+    public String packageScheme;
     private static Random random;
 
     @Parameters(name = "packageScheme={0}")
@@ -165,15 +166,9 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         String host = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         int port = 8009;
 
-        executor = Executor.newInstance()
-            .auth(new HttpHost(host, port), restUser.getUser(), restUser.getPassword())
-            .authPreemptive(new HttpHost(host, port));
-        baseRestUri = new URIBuilder()
-            .setScheme(protocol)
-            .setHost(host)
-            .setPort(port)
-            .setPath("/advertisement/v1/config")
-            .build();
+        executor = Executor.newInstance().auth(new HttpHost(host, port), restUser.getUser(), restUser.getPassword()).authPreemptive(new HttpHost(host, port));
+        baseRestUri = new URIBuilder().setScheme(protocol).setHost(host).setPort(port).setPath("/advertisement/v1/config").build();
+        LoggerFactory.getLogger(AdvertisementTest.class).info("Protocol: {}; host: {}, baseUri: {}, restCredentials: {}:{}", protocol, host, baseRestUri, restUser.getUser(), restUser.getPassword());
     }
 
     @After
@@ -203,16 +198,11 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     @Test
     public void configByUserIdTest() throws Exception {
-        URI restURI = restURI("user")
-            .setParameter("contextId", String.valueOf(getClient().getValues().getContextId()))
-            .setParameter("userId", String.valueOf(getClient().getValues().getUserId()))
-            .build();
+        URI restURI = restURI("user").setParameter("contextId", String.valueOf(getClient().getValues().getContextId())).setParameter("userId", String.valueOf(getClient().getValues().getUserId())).build();
 
         JSONValue adConfig = generateAdConfig();
         try {
-            HttpResponse setResponse = executor.execute(Request.Put(restURI)
-                .body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON)))
-                .returnResponse();
+            HttpResponse setResponse = executor.execute(Request.Put(restURI).body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON))).returnResponse();
             StatusLine statusLine = setResponse.getStatusLine();
             assertTrue("Unexpected status: " + statusLine.toString(), Arrays.contains(new int[] { 200, 201 }, statusLine.getStatusCode()));
 
@@ -224,6 +214,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             AJAXClient client2 = new AJAXClient(testContext.acquireUser());
             GetConfigResponse response2 = client2.execute(req);
             assertTrue("Expecting a response with an error.", response2.hasError());
+        } catch (Exception e) {
+            LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
         } finally {
             HttpResponse response = executor.execute(Request.Delete(restURI)).returnResponse();
             assertEquals("Deletion of ad config failed: " + response.getStatusLine(), 204, response.getStatusLine().getStatusCode());
@@ -243,16 +235,11 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
         }
 
-        URI restURI = restURI("package")
-            .setParameter("reseller", DEFAULT)
-            .setParameter("package", pack)
-            .build();
+        URI restURI = restURI("package").setParameter("reseller", DEFAULT).setParameter("package", pack).build();
 
         JSONValue adConfig = generateAdConfig();
         try {
-            HttpResponse setResponse = executor.execute(Request.Put(restURI)
-                .body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON)))
-                .returnResponse();
+            HttpResponse setResponse = executor.execute(Request.Put(restURI).body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON))).returnResponse();
             StatusLine statusLine = setResponse.getStatusLine();
             assertTrue("Unexpected status: " + statusLine.toString(), Arrays.contains(new int[] { 200, 201 }, statusLine.getStatusCode()));
 
@@ -260,6 +247,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             GetConfigResponse response = getClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", adConfig.equals(response.getData()));
+        } catch (Exception e) {
+            LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
         } finally {
             HttpResponse response = executor.execute(Request.Delete(restURI)).returnResponse();
             assertEquals("Deletion of ad config failed: " + response.getStatusLine(), 204, response.getStatusLine().getStatusCode());
@@ -279,17 +268,12 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
         }
 
-        URI restURI = restURI("package")
-            .setParameter("reseller", DEFAULT)
-            .setParameter("package", pack)
-            .build();
+        URI restURI = restURI("package").setParameter("reseller", DEFAULT).setParameter("package", pack).build();
 
         JSONValue adConfig = generateAdConfig();
 
         // create configuration
-        HttpResponse setResponse = executor.execute(Request.Put(restURI)
-            .body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON)))
-            .returnResponse();
+        HttpResponse setResponse = executor.execute(Request.Put(restURI).body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON))).returnResponse();
         StatusLine statusLine = setResponse.getStatusLine();
         assertTrue("Unexpected status: " + statusLine.toString(), Arrays.contains(new int[] { 200, 201 }, statusLine.getStatusCode()));
         // Check if configuration is available
@@ -318,16 +302,11 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
         }
 
-        URI restURI = restURI("package")
-            .setParameter("reseller", DEFAULT)
-            .setParameter("package", pack)
-            .build();
+        URI restURI = restURI("package").setParameter("reseller", DEFAULT).setParameter("package", pack).build();
 
         JSONValue adConfig = generateAdConfig();
         try {
-            HttpResponse setResponse = executor.execute(Request.Put(restURI)
-                .body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON)))
-                .returnResponse();
+            HttpResponse setResponse = executor.execute(Request.Put(restURI).body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON))).returnResponse();
             StatusLine statusLine = setResponse.getStatusLine();
             assertTrue("Unexpected status: " + statusLine.toString(), Arrays.contains(new int[] { 200, 201 }, statusLine.getStatusCode()));
             GetConfigRequest req = new GetConfigRequest();
@@ -337,13 +316,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
             // Create Preview
             JSONValue previewConfig = generateAdConfig();
-            URI previewURI = restURI("user")
-                .setParameter("contextId", String.valueOf(getClient().getValues().getContextId()))
-                .setParameter("userId", String.valueOf(getClient().getValues().getUserId()))
-                .build();
-            HttpResponse setPreviewResponse = executor.execute(Request.Put(previewURI)
-                .body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON)))
-                .returnResponse();
+            URI previewURI = restURI("user").setParameter("contextId", String.valueOf(getClient().getValues().getContextId())).setParameter("userId", String.valueOf(getClient().getValues().getUserId())).build();
+            HttpResponse setPreviewResponse = executor.execute(Request.Put(previewURI).body(new StringEntity(adConfig.toString(), ContentType.APPLICATION_JSON))).returnResponse();
             statusLine = setPreviewResponse.getStatusLine();
             assertTrue("Unexpected status: " + statusLine.toString(), Arrays.contains(new int[] { 200, 201 }, statusLine.getStatusCode()));
 
@@ -361,7 +335,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             response = getClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", adConfig.equals(response.getData()));
-
+        } catch (Exception e) {
+            LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
         } finally {
             HttpResponse response = executor.execute(Request.Delete(restURI)).returnResponse();
             assertEquals("Deletion of ad config failed: " + response.getStatusLine(), 204, response.getStatusLine().getStatusCode());
