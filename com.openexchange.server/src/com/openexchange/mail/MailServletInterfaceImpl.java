@@ -602,36 +602,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
         try {
-            MailMessage[] flagInfo = null;
-            if (move) {
-                /*
-                 * Check for spam action; meaning a move/copy from/to spam folder
-                 */
-                int spamActionSource = SPAM_NOOP;
-                int spamActionDest = SPAM_NOOP;
-                if (usm.isSpamEnabled()) {
-                    if (sourceFullname.equals(mailAccess.getFolderStorage().getSpamFolder())) {
-                        spamActionSource = SPAM_HAM;
-                    }
-                    if (destFullname.equals(destAccess.getFolderStorage().getSpamFolder())) {
-                        spamActionDest = SPAM_SPAM;
-                    }
-                }
-                if (SPAM_HAM == spamActionSource) {
-                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
-                    /*
-                     * Handle ham.
-                     */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
-                }
-                if (SPAM_SPAM == spamActionDest) {
-                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
-                    /*
-                     * Handle spam
-                     */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
-                }
-            }
             // Chunk wise copy
             int chunkSize;
             {
@@ -641,6 +611,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             // Iterate chunks
             int length = msgUIDs.length;
             List<String> retval = new LinkedList<>();
+            Map<String, Integer> flagsMap = null;
             for (int start = 0; start < length;) {
                 int end = start + chunkSize;
                 String[] ids;
@@ -656,42 +627,70 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     System.arraycopy(msgUIDs, start, ids, 0, len);
                 }
                 // Fetch messages from source folder
-                MailMessage[] messages = mailAccess.getMessageStorage().getMessages(sourceFullname, ids, FIELDS_FULL);
+                MailMessage[] messages = new MailMessage[ids.length];
+                for (int j = 0; j < ids.length; j++) {
+                    messages[j] = mailAccess.getMessageStorage().getMessage(sourceFullname, ids[j], false);
+                }
+                // Create mapping for flags
+                if (null == flagsMap) {
+                    flagsMap = new HashMap<>(messages.length);
+                } else {
+                    flagsMap.clear();
+                }
+                for (int i = 0; i < messages.length; i++) {
+                    MailMessage message = messages[i];
+                    if (null != message) {
+                        int systemFlags = message.getFlags();
+                        flagsMap.put(message.getMailId(), Integer.valueOf(systemFlags));
+                    }
+                }
                 // Append them to destination folder
                 String[] destIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
-                if (null == destIds || 0 == destIds.length) {
-                    return new String[0];
-                }
-                // Delete source messages if a move shall be performed
-                if (move) {
-                    mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
-                    postEvent(sourceAccountId, sourceFullname, true, true);
-                }
-                // Restore \Seen flags
-                if (null != flagInfo) {
-                    List<String> list = new LinkedList<>();
-                    for (int i = 0; i < destIds.length; i++) {
-                        MailMessage mailMessage = flagInfo[i];
-                        if (null != mailMessage && !mailMessage.isSeen()) {
-                            list.add(destIds[i]);
+                if (null != destIds && destIds.length > 0) {
+                    // Create ID mapping
+                    Map<String, String> idMap = new HashMap<>(destIds.length);
+                    for (int i = 0; i < messages.length; i++) {
+                        MailMessage message = messages[i];
+                        if (null != message && null != destIds[i]) {
+                            idMap.put(destIds[i], message.getMailId());
                         }
                     }
-                    destAccess.getMessageStorage().updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
-                }
-                postEvent(destAccountId, destFullname, true, true);
-                try {
+                    // Delete source messages if a move shall be performed
                     if (move) {
-                        /*
-                         * Update message cache
-                         */
-                        MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                        mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
+                        postEvent(sourceAccountId, sourceFullname, true, true);
                     }
-                    MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
-                } catch (OXException e) {
-                    LOG.error("", e);
+                    // Restore flags
+                    {
+                        for (Map.Entry<String, String> entry : idMap.entrySet()) {
+                            String sourceId = entry.getValue();
+                            Integer iFlags = flagsMap.get(sourceId);
+                            if (null != iFlags) {
+                                String[] mailIds = new String[] {entry.getKey()};
+                                if (iFlags.intValue() > 0) {
+                                    destAccess.getMessageStorage().updateMessageFlags(destFullname, mailIds, iFlags.intValue(), true);
+                                }
+                                if ((iFlags.intValue() & MailMessage.FLAG_SEEN) == 0) {
+                                    destAccess.getMessageStorage().updateMessageFlags(destFullname, mailIds, MailMessage.FLAG_SEEN, false);
+                                }
+                            }
+                        }
+                    }
+                    postEvent(destAccountId, destFullname, true, true);
+                    try {
+                        if (move) {
+                            /*
+                             * Update message cache
+                             */
+                            MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                        }
+                        MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                    }
+                    // Prepare for next iteration
+                    retval.addAll(Arrays.asList(destIds));
                 }
-                // Prepare for next iteration
-                retval.addAll(Arrays.asList(destIds));
                 start = end;
             }
             // Return destination identifiers
