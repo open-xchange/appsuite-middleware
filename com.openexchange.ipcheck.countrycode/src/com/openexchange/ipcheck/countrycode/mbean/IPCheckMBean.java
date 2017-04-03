@@ -61,6 +61,13 @@ public interface IPCheckMBean {
     static String NAME = "IPCheck MBean";
 
     /**
+     * Returns the total amount of IP checks per hour
+     * 
+     * @return the total amount of IP checks per hour
+     */
+    long getIPChangesPerHour();
+
+    /**
      * Returns the total amount of IP changes that were observed in sessions
      * 
      * @return the total amount of IP changes
@@ -199,8 +206,8 @@ public interface IPCheckMBean {
      * @return The deniedCountryChangedOverallPercentage
      */
     float getDeniedCountryChangedOverallPercentage();
-    
-    long getAcceptedIPChangesPerMinute();
-    
-    long getDeniedIPChangesPerMinute();
+
+    long getAcceptedIPChangesPerHour();
+
+    long getDeniedIPChangesPerHour();
 }
