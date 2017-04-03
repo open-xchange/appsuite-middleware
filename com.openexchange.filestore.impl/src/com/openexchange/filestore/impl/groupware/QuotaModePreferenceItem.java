@@ -104,12 +104,12 @@ public class QuotaModePreferenceItem implements PreferencesItemService, ConfigTr
 
     @Override
     public String getConfigTreePath() {
-       return "filestoreMode";
+       return "quotaMode";
     }
 
     @Override
     public String getJslobPath() {
-        return "io.ox/core//filestoreMode";
+        return "io.ox/core//quotaMode";
     }
 
 }
