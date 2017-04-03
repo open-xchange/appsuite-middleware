@@ -1154,6 +1154,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     @Override
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
+        // No Support for root folders...
+        return getVisibleFolders(treeId, contentType, type, storageParameters);
+    }
+
+    @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final User user = storageParameters.getUser();
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);

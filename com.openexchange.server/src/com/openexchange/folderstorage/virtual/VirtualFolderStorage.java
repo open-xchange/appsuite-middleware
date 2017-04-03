@@ -832,6 +832,11 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
     }
 
     @Override
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
+        return getVisibleFolders(null, contentType, type, storageParameters);
+    }
+
+    @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters params) throws OXException {
         final User user = params.getUser();
         final Locale locale = user.getLocale();

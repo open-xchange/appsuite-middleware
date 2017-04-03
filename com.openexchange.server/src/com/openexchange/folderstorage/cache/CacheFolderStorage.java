@@ -1371,6 +1371,29 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     }
 
     @Override
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = registry.getFolderStorageByContentType(treeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
+        }
+        boolean started = startTransaction(Mode.WRITE_AFTER_READ, storageParameters, folderStorage);
+        try {
+            SortableId[] ret = folderStorage.getVisibleFolders(rootFolderId, treeId, contentType, type, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+                started = false;
+            }
+            return ret;
+        } catch (RuntimeException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+        }
+    }
+
+    @Override
     public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
         FolderStorage folderStorage = registry.getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
