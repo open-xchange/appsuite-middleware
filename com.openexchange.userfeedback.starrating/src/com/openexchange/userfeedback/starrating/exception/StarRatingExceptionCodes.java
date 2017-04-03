@@ -47,68 +47,40 @@
  *
  */
 
-package com.openexchange.userfeedback.exception;
+package com.openexchange.userfeedback.starrating.exception;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link FeedbackExceptionCodes}
+ * 
+ * {@link StarRatingExceptionCodes}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
+public enum StarRatingExceptionCodes implements DisplayableOXExceptionCode {
 
-    /**
-     * An error occurred: %1$s
-     */
-    UNEXPECTED_ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
+    /** User provided an invalid feedback score: %1$s */
+    INVALID_SCORE_VALUE("User provided an invalid feedback score: %1$s", StarRatingExceptionMessages.SCORE_INVALID_MSG, CATEGORY_USER_INPUT, 1),
 
-    /**
-     * SQL problem: %1$s.
-     */
-    SQL_ERROR("SQL problem: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    /** User provided an invalid type for feedback score. */
+    INVALID_SCORE_TYPE("User provided an invalid type for feedback score.", StarRatingExceptionMessages.SCORE_INVALID_TYPE_MSG, CATEGORY_USER_INPUT, 2),
 
-    /**
-     * Unknown feedback type: %1$s
-     */
-    INVALID_FEEDBACK_TYPE("Unknown feedback type: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 3),
+    /** User provided feedback with missing key: %1$s */
+    PARAMETER_MISSING("User provided feedback with missing key: %1$s", StarRatingExceptionMessages.KEY_MISSING_MSG, CATEGORY_USER_INPUT, 3),
 
-    /**
-     * Unknown data type for feedback. Please provide %1$s
-     */
-    INVALID_DATA_TYPE("Unknown data type for feedback. Please provide %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4),
-
-    /**
-     * No global database configured.
-     */
-    GLOBAL_DB_NOT_CONFIGURED("No global database configured.", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 5),
-
-    /**
-     * Provided value '%1$s' for parameter '%2$s' is invalid.
-     */
-    INVALID_PARAMETER_VALUE("Provided value(s) for parameter(s) '%1$s' is/are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 6),
-
-    /**
-     * Provided SMTP configuration is invalid, unable to connect to server
-     */
-    INVALID_SMTP_CONFIGURATION("Provided SMTP configuration is invalid, unable to connect to server.", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 7),
-
-    /**
-     * Provided addresses are invalid.
-     */
-    INVALID_EMAIL_ADDRESSES("Provided addresses are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 8),
+    /** User provided feedback with missing key: %1$s */
+    BAD_PARAMETER("User provided feedback with bad formatting: %1$s", StarRatingExceptionMessages.BAD_VALUE_MSG, CATEGORY_USER_INPUT, 3),
 
     ;
 
     /**
      * The error code prefix for capability module.
      */
-    public static final String PREFIX = "FEEDBACK";
+    public static final String PREFIX = "STARRATING";
 
     private final Category category;
 
@@ -118,7 +90,7 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
 
     private final String message;
 
-    private FeedbackExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
+    private StarRatingExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.displayMessage = displayMessage;

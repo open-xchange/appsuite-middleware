@@ -70,11 +70,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.userfeedback.AbstractFeedbackType;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.Feedback;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
+import com.openexchange.userfeedback.starrating.exception.StarRatingExceptionCodes;
 
 /**
  * {@link StarRatingV1}
@@ -90,6 +92,33 @@ public class StarRatingV1 extends AbstractFeedbackType {
     private static final String INSERT_SQL = "INSERT INTO feedback_star_rating_v1 (data) VALUES (?)";
     private static final String SELECT_SQL = "SELECT id, data FROM feedback_star_rating_v1 WHERE id IN (";
     private static final String DELETE_SQL = "DELETE FROM feedback_star_rating_v1 WHERE id = ?";
+
+    @Override
+    public Object validateFeedback(Object feedback) throws OXException {
+        JSONObject jsonFeedback = (JSONObject) super.validateFeedback(feedback);
+
+        if (!jsonFeedback.has("score")) {
+            throw StarRatingExceptionCodes.PARAMETER_MISSING.create("score");
+        }
+
+        try {
+            String score = jsonFeedback.getString("score");
+            if (Strings.isEmpty(score)) {
+                throw StarRatingExceptionCodes.INVALID_SCORE_TYPE.create(score);
+            }
+            int scoreInt = Integer.valueOf(score).intValue();
+            if (scoreInt < 1) {
+                throw StarRatingExceptionCodes.INVALID_SCORE_VALUE.create(scoreInt);
+            }
+        } catch (JSONException e) {
+            LOG.error("Unable to retrieve 'score' from feedback.", e);
+            throw StarRatingExceptionCodes.PARAMETER_MISSING.create("score");
+        } catch (NumberFormatException e) {
+            LOG.error("Unable to parse 'score' value from feedback.", e);
+            throw StarRatingExceptionCodes.BAD_PARAMETER.create("score");
+        }
+        return jsonFeedback;
+    }
 
     @Override
     public long storeFeedbackInternal(Object feedback, Connection con) throws OXException {

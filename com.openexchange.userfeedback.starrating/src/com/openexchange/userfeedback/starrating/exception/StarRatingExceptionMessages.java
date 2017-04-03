@@ -47,69 +47,32 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.starrating.exception;
 
-import java.util.HashSet;
-import java.util.Set;
-import org.json.JSONObject;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link StarRatingV1JsonFieldsForTest}
+ * 
+ * {@link StarRatingExceptionMessages}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public enum StarRatingV1JsonFieldsForTest {
-    date("Date"),
-    user("User"),
-    score("Score"),
-    app("App"),
-    entry_point("Entry Point"),
-    comment("Comment"),
-    operating_system("Operating System"),
-    browser("Browser"),
-    browser_version("Browser Version"),
-    user_agent("User Agent"),
-    screen_resolution("Screen Resolution"),
-    language("Language"),
-    server_version("Server Version"),
-    client_version("Client Version"),
-    ;
+public final class StarRatingExceptionMessages implements LocalizableStrings {
 
-    private static final Set<String> INTERNAL_KEYS = new HashSet<String>();
+    // The provided feedback score is invalid. Please choose a number > 0.
+    public static final String SCORE_INVALID_MSG = "The provided feedback score is invalid. Please choose a number > 0.";
 
-    static {
-        for (StarRatingV1JsonFieldsForTest field : StarRatingV1JsonFieldsForTest.values()) {
-            INTERNAL_KEYS.add(field.name().toLowerCase());
-        }
-    }
+    // The provided feedback for key 'score' has an invalid type.
+    public static final String SCORE_INVALID_TYPE_MSG = "The provided feedback for key 'score' has an invalid type.";
 
-    private String displayName;
+    // The provided feedback does not contain required key "score".
+    public static final String KEY_MISSING_MSG = "The provided feedback does not contain required key \"%s\".";
 
-    StarRatingV1JsonFieldsForTest(String displayName) {
-        this.displayName = displayName;
-    }
+    // The provided feedback for key "score" cannot be parsed..
+    public static final String BAD_VALUE_MSG = "The provided feedback for key \"%s\" cannot be parsed.";
 
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.StarRatingV1JsonFieldsForTest.v1.StarRatingV1JsonFields#values()} are retrieved from other tables.
-     * 
-     * @return Set of {@link String} that are required within the {@link JSONObject}
-     */
-    public static Set<String> requiredJsonKeys() {
-        Set<String> copy = new HashSet<>(INTERNAL_KEYS);
-        copy.remove("date");
-        copy.remove("user");
-        copy.remove("client_version");
-        copy.remove("server_version");
-        return copy;
+    private StarRatingExceptionMessages() {
+        super();
     }
 }

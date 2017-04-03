@@ -85,7 +85,6 @@ public class AbstractFeedbackTypeTest {
         "\"user_agent\": \"Chrome/55.0.2883.87\","+
         "\"screen_resolution\":\"1600x900\","+
         "\"language\": \"de_de\","+
-        "\"server_version\":\"7.8.4 Rev1\","+
         "\"client_version\":\"7.8.4 Rev11\""+
         "}");
 
@@ -101,7 +100,6 @@ public class AbstractFeedbackTypeTest {
         "\"User_agent\": \"Chrome/55.0.2883.87\","+
         "\"Screen_Resolution\":\"1600x900\","+
         "\"Language\": \"de_de\","+
-        "\"server_version\":\"7.8.4 Rev1\","+
         "\"client_version\":\"7.8.4 Rev11\""+
         "}");
 
@@ -113,7 +111,6 @@ public class AbstractFeedbackTypeTest {
         "\"browser_version\": \"77.0\","+
         "\"user_agent\": \"Chrome/55.0.2883.87\","+
         "\"language\": \"de_de\","+
-        "\"server_version\":\"7.8.4 Rev1\","+
         "\"client_version\":\"7.8.4 Rev11\""+
         "}");
 
@@ -131,7 +128,6 @@ public class AbstractFeedbackTypeTest {
         "\"user_agent\": \"Chrome/55.0.2883.87\","+
         "\"screen_resolution\":\"1600x900\","+
         "\"language\": \"de_de\","+
-        "\"server_version\":\"7.8.4 Rev1\","+
         "\"client_version\":\"7.8.4 Rev11\""+
         "}");
 
@@ -207,7 +203,7 @@ public class AbstractFeedbackTypeTest {
     @Test
     public void testAddRequired_everythingFine_nothingToDo() throws JSONException {
         JSONObject feedback = new JSONObject(wellPreparedFeedbackStr);
-        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
 
         assertTrue(feedback.equals(addRequired));
     }
@@ -216,7 +212,7 @@ public class AbstractFeedbackTypeTest {
     public void testAddRequired_upperCaseKeys_addLowerCases() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
 
         assertTrue(addRequired.has("Comment"));
         assertTrue(addRequired.has("comment"));
@@ -227,7 +223,7 @@ public class AbstractFeedbackTypeTest {
     @Test
     public void testAddRequired_nothingToAddButAdditionalAvailable_leaveAdditional() throws JSONException {
         JSONObject feedback = new JSONObject(additionalFieldsFeedbackStr);
-        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
 
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
@@ -240,7 +236,7 @@ public class AbstractFeedbackTypeTest {
     @Test
     public void testAddRequired_requiredMissing_addRequired() throws JSONException {
         JSONObject feedback = new JSONObject(missingFieldsFeedbackStr);
-        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
 
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
@@ -274,12 +270,11 @@ public class AbstractFeedbackTypeTest {
     public void testRemoveAdditional_mixedKeys_onlyKeepExpectedLowerCaseKeys() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject remove = classUnderTest.remove(feedback, StarRatingV1JsonFieldsForTest.requiredJsonKeys());
+        JSONObject remove = classUnderTest.remove(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
 
         assertTrue(remove.has("score"));
         assertTrue(remove.has("app"));
         assertTrue(remove.has("entry_point"));
-        assertTrue(remove.has("server_version"));
         assertFalse(remove.has("Comment"));
         assertFalse(remove.has("Browser"));
         assertFalse(remove.has("Browser_version"));
@@ -296,14 +291,13 @@ public class AbstractFeedbackTypeTest {
         assertFalse(remove.has("entry_point")); // not in origin
         assertFalse(remove.has("Comment"));// not expected
         assertTrue(remove.has("score"));
-        assertTrue(remove.has("server_version"));
     }
 
     @Test
     public void testCleanup() throws JSONException, OXException {
         JSONObject feedback = new JSONObject(this.mixedFeedbackStr);
 
-        JSONObject remove = (JSONObject) classUnderTest.cleanUpFeedback(feedback);
+        JSONObject remove = (JSONObject) classUnderTest.cleanUpFeedback(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
 
         assertFalse(remove.has("additional_key"));
         assertTrue(remove.has("score"));
