@@ -395,6 +395,10 @@ public class ICal4JParser implements ICalParser {
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
 			inTZID = ParserTools.findTzidBySimilarity(tzidName);
 		}
+		
+		if (inTZID == null) {
+		    inTZID = ParserTools.findTimeZoneReplacement(tzidName);
+		}
 
         if (null != inTZID) {
             tz = inTZID;
