@@ -65,7 +65,6 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.Cookies;
-import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -264,10 +263,7 @@ public class OXSessionManager implements SessionManager {
         if (domain != null) {
             cookie.setDomain(domain);
         }
-        else if (Tools.validateDomainRegardingSharding(serverName)) {
-            cookie.setDomain(serverName);
-        }
-        
+
         /*
          * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
          * proxy in front of apache terminates ssl. The exception from forced https is a request from the local LAN.
@@ -288,7 +284,7 @@ public class OXSessionManager implements SessionManager {
     private static String determineServerNameByLogProperty() {
         return LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
     }
-    
+
     /**
      * Create a new JSessioID String that consists of a:
      * <pre>
@@ -303,13 +299,13 @@ public class OXSessionManager implements SessionManager {
      */
     private String createSessionID(Request request) {
         String backendRoute = grizzlyConfig.getBackendRoute();
-        String domain = Cookies.getDomainValue(request.getServerName());
+        //String domain = Cookies.getDomainValue(request.getServerName());
         StringBuilder idBuilder = new StringBuilder(String.valueOf(generateRandomLong()));
 
-        if (null != domain) {
-            String encodedDomain = JSessionDomainEncoder.urlEncode(domain);
-            idBuilder.append(encodedDomain);
-        }
+        //if (null != domain) {
+        //    String encodedDomain = JSessionDomainEncoder.urlEncode(domain);
+        //    idBuilder.append(encodedDomain);
+        //}
         idBuilder.append('.').append(backendRoute);
 
         return idBuilder.toString();
@@ -366,7 +362,7 @@ public class OXSessionManager implements SessionManager {
             if (cookie.getName().startsWith(sessionCookieName)) {
                 if (cookie.getValue().equals(invalidSessionId)) {
                     response.addCookie(createinvalidationCookie(cookie));
-                    String domain = Cookies.extractDomainValue(cookie.getValue());
+                    String domain = Cookies.getDomainValue(request.getServerName());
                     if (domain != null) {
                         response.addCookie(createinvalidationCookie(cookie, domain));
                     }

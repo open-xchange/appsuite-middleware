@@ -1045,9 +1045,6 @@ public class LoginServlet extends AJAXServlet {
         if (null != domain) {
             cookie.setDomain(domain);
         }
-        else if (Tools.validateDomainRegardingSharding(serverName)) {
-            cookie.setDomain(serverName);
-        }
         return cookie;
     }
 

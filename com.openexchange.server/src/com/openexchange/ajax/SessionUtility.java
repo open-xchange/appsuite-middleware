@@ -53,7 +53,6 @@ import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
-import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -892,10 +891,11 @@ public final class SessionUtility {
         }
 
         // Drop "open-xchange-session" cookie
+        String domain = Cookies.getDomainValue(req.getServerName());
         {
             Cookie cookie = cookies.get(SESSION_PREFIX + hash);
             if (null != cookie) {
-                removeCookie(cookie, "invalid", resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
 
@@ -903,7 +903,7 @@ public final class SessionUtility {
         {
             Cookie cookie = cookies.get(SECRET_PREFIX + hash);
             if (null != cookie) {
-                removeCookie(cookie, "invalid", resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
 
@@ -911,7 +911,7 @@ public final class SessionUtility {
         {
             Cookie cookie = cookies.get(LoginServlet.getShareCookieName(req));
             if (null != cookie) {
-                removeCookie(cookie, "invalid", resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
 
@@ -920,7 +920,7 @@ public final class SessionUtility {
             String cookieName = getPublicSessionCookieName(req, new String[] { Integer.toString(optSession.getContextId()), Integer.toString(optSession.getUserId()) });
             Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                removeCookie(cookie, "invalid", resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
     }
@@ -941,11 +941,12 @@ public final class SessionUtility {
     public static void removeOXCookies(Session session, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         String sessionHash = session.getHash();
-        removeCookie(cookies, response, SESSION_PREFIX + sessionHash);
-        removeCookie(cookies, response, SECRET_PREFIX + sessionHash);
+        String domain = Cookies.getDomainValue(request.getServerName());
+        removeCookie(cookies, response, SESSION_PREFIX + sessionHash, domain);
+        removeCookie(cookies, response, SECRET_PREFIX + sessionHash, domain);
         removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-            removeCookie(cookies, response, LoginServlet.getShareCookieName(request));
+            removeCookie(cookies, response, LoginServlet.getShareCookieName(request), domain);
         }
     }
 
@@ -962,13 +963,14 @@ public final class SessionUtility {
             return;
         }
 
+        String domain = Cookies.getDomainValue(req.getServerName());
         for (final String cookieName : cookieNames) {
             Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
                 if (startsWithOXPrefix(cookieName)) {
-                    removeCookie(cookie, "invalid", resp);
+                    removeCookie(cookie, "invalid", domain, resp);
                 } else {
-                    removeCookie(cookie, null, resp);
+                    removeCookie(cookie, null, domain, resp);
                 }
             }
         }
@@ -988,7 +990,8 @@ public final class SessionUtility {
         final String name = Tools.JSESSIONID_COOKIE;
         final Cookie cookie = cookies.get(name);
         if (null != cookie) {
-            removeCookie(cookie, null, resp);
+            String domain = Cookies.getDomainValue(req.getServerName());
+            removeCookie(cookie, null, domain, resp);
         }
     }
 
@@ -997,9 +1000,10 @@ public final class SessionUtility {
      *
      * @param cookie The cookie
      * @param newValue The optional new value to set
+     * @param domain The optional domain to set
      * @param resp The HTTP Servlet response
      */
-    public static void removeCookie(Cookie cookie, String newValue, HttpServletResponse resp) {
+    public static void removeCookie(Cookie cookie, String newValue, String domain, HttpServletResponse resp) {
         String name = cookie.getName();
         String value = null == newValue ? cookie.getValue() : newValue;
 
@@ -1007,7 +1011,6 @@ public final class SessionUtility {
         respCookie.setPath("/");
         respCookie.setMaxAge(0); // delete
 
-        String domain = extractDomainValue(value);
         if (null == domain) {
             resp.addCookie(respCookie);
             return;
@@ -1129,9 +1132,10 @@ public final class SessionUtility {
      * @param existingCookies The currently existing cookies in the client as carried with the corresponding request
      * @param response The response for instructing the client to remove the cookie
      * @param name The name of the cookie to remove
+     * @param domain The optional domain
      * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
      */
-    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name) {
+    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String domain) {
         return removeCookie(existingCookies, response, name, null);
     }
 
@@ -1142,16 +1146,17 @@ public final class SessionUtility {
      * @param response The response for instructing the client to remove the cookie
      * @param name The name of the cookie to remove
      * @param value The value of the cookie to remove, or <code>null</code> to only match by name
+     * @param domain The optional domain
      * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
      */
-    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String value) {
+    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String value, String domain) {
         if (null != existingCookies) {
             Cookie cookie = existingCookies.get(name);
             if (null != cookie && (null == value || value.equals(cookie.getValue()))) {
                 if (startsWithOXPrefix(name)) {
-                    removeCookie(cookie, "invalid", response);
+                    removeCookie(cookie, "invalid", domain, response);
                 } else {
-                    removeCookie(cookie, null, response);
+                    removeCookie(cookie, null, domain, response);
                 }
                 return true;
             }
