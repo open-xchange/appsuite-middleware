@@ -629,7 +629,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 // Fetch messages from source folder
                 MailMessage[] messages = new MailMessage[ids.length];
                 for (int j = 0; j < ids.length; j++) {
-                    messages[j] = mailAccess.getMessageStorage().getMessage(sourceFullname, ids[j], false);
+                    String mailId = ids[j];
+                    messages[j] = null == mailId ? null : mailAccess.getMessageStorage().getMessage(sourceFullname, mailId, false);
                 }
                 // Create mapping for flags
                 if (null == flagsMap) {
