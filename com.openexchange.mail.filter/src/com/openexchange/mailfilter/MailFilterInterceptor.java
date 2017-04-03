@@ -74,10 +74,12 @@ public interface MailFilterInterceptor {
      * This interception call happens right after the sieve script is read from the sieve server, but BEFORE
      * any processing begins on the middleware side.
      * 
+     * @param userId the user identifier
+     * @param contextId the context identifier
      * @param rules A {@link List} with {@link Rule} objects to intercept
      * @throws OXException if an error is occurred
      */
-    void before(List<Rule> rules) throws OXException;
+    void before(int userId, int contextId, List<Rule> rules) throws OXException;
 
     /**
      * Executes the interception process in all the {@link Rule} objects provided in the {@link List}.
@@ -85,8 +87,10 @@ public interface MailFilterInterceptor {
      * This interception call happens before writing the sieve script to the sieve server, but AFTER
      * any processing happened on the middleware side.
      * 
+     * @param userId the user identifier
+     * @param contextId the context identifier
      * @param rules A {@link List} with {@link Rule} objects to intercept
      * @throws OXException if an error is occurred
      */
-    void after(List<Rule> rules) throws OXException;
+    void after(int userId, int contextId, List<Rule> rules) throws OXException;
 }
