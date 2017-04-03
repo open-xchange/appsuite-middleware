@@ -944,7 +944,7 @@ public final class SessionUtility {
         String domain = Cookies.getDomainValue(request.getServerName());
         removeCookie(cookies, response, SESSION_PREFIX + sessionHash, domain);
         removeCookie(cookies, response, SECRET_PREFIX + sessionHash, domain);
-        removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
+        removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID), domain);
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             removeCookie(cookies, response, LoginServlet.getShareCookieName(request), domain);
         }
@@ -1136,7 +1136,7 @@ public final class SessionUtility {
      * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
      */
     private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String domain) {
-        return removeCookie(existingCookies, response, name, null);
+        return removeCookie(existingCookies, response, name, null, domain);
     }
 
     /**

@@ -299,15 +299,8 @@ public class OXSessionManager implements SessionManager {
      */
     private String createSessionID(Request request) {
         String backendRoute = grizzlyConfig.getBackendRoute();
-        //String domain = Cookies.getDomainValue(request.getServerName());
         StringBuilder idBuilder = new StringBuilder(String.valueOf(generateRandomLong()));
-
-        //if (null != domain) {
-        //    String encodedDomain = JSessionDomainEncoder.urlEncode(domain);
-        //    idBuilder.append(encodedDomain);
-        //}
         idBuilder.append('.').append(backendRoute);
-
         return idBuilder.toString();
     }
 
