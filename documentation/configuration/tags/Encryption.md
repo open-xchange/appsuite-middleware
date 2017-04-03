@@ -4,6 +4,16 @@ title: Encryption
 
 This page shows all properties with the tag: Encryption
 
+| __Key__ | com.openexchange.share.cryptKey |
+|:----------------|:--------|
+| __Description__ | Defines a key that is used to encrypt the password/pin of anonymously <br>accessible shares in the database.  <br>Defaults to "erE2e8OhAo71", and should be changed before the creation of the<br>first share on the system.<br> |
+| __Default__ | erE2e8OhAo71 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
+| __File__ | share.properties |
+
+---
 | __Key__ | com.openexchange.userfeedback.pgp.signKeyFile |
 |:----------------|:--------|
 | __Description__ | Path to PGP secret key used to sign mails<br> |
@@ -22,16 +32,6 @@ This page shows all properties with the tag: Encryption
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Feedback.html">Feedback</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a> |
 | __File__ | userfeedbackmail.properties |
-
----
-| __Key__ | com.openexchange.share.cryptKey |
-|:----------------|:--------|
-| __Description__ | Defines a key that is used to encrypt the password/pin of anonymously <br>accessible shares in the database.  <br>Defaults to "erE2e8OhAo71", and should be changed before the creation of the<br>first share on the system.<br> |
-| __Default__ | erE2e8OhAo71 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Share.html">Share</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Encryption.html">Encryption</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Security.html">Security</a> |
-| __File__ | share.properties |
 
 ---
 | __Key__ | com.openexchange.hazelcast.network.symmetricEncryption |
