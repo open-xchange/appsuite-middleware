@@ -1,15 +1,21 @@
 package com.openexchange.userfeedback.mail.internal;
 
+import static org.hamcrest.Matchers.any;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Transport;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -17,6 +23,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.userfeedback.ExportResult;
@@ -34,13 +41,17 @@ import com.openexchange.userfeedback.mail.osgi.Services;
  * @since v7.8.4
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class, FeedbackService.class, SSLSocketFactoryProvider.class, FeedbackMailServiceSMTP.class})
+@PrepareForTest({ Services.class, FeedbackService.class, SSLSocketFactoryProvider.class, FeedbackMailServiceSMTP.class, LeanConfigurationService.class, Transport.class})
 public class FeedbackMailServiceSMTPTest {
 
     @Mock
     private ConfigurationService configService;
     @Mock
     private FeedbackService feedbackService;
+    @Mock
+    private LeanConfigurationService leanConfigurationService;
+    @Mock
+    private Transport transport;
     
     private FeedbackMailFilter filter;
     
@@ -55,6 +66,7 @@ public class FeedbackMailServiceSMTPTest {
         PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
         PowerMockito.when(Services.getService(FeedbackService.class)).thenReturn(feedbackService);
         PowerMockito.when(Services.getService(FeedbackService.class)).thenReturn(feedbackService);
+        PowerMockito.when(Services.getService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);
         
         Mockito.when(configService.getProperty(org.mockito.Matchers.anyString(), org.mockito.Matchers.anyString())).thenReturn("");
         Mockito.when(configService.getIntProperty(org.mockito.Matchers.anyString(), org.mockito.Matchers.anyInt())).thenReturn(1);
@@ -88,12 +100,15 @@ public class FeedbackMailServiceSMTPTest {
         FeedbackMailServiceSMTP service = new FeedbackMailServiceSMTP();
         FeedbackMailServiceSMTP serviceSpy = PowerMockito.spy(service);
         
-        PowerMockito.doReturn(properties).when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "getSMTPProperties")).withNoArguments();
+        PowerMockito.whenNew(Transport.class).withAnyArguments().thenReturn(transport);
+        PowerMockito.doNothing().when(transport).connect(Matchers.any(String.class), Matchers.any(Integer.class), Matchers.any(String.class), Matchers.any(String.class));
+        
+        PowerMockito.doReturn(properties).when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "getSMTPProperties")).withArguments(leanConfigurationService);
         filter.getRecipients().put("dsfa", "");
         try {
             serviceSpy.sendFeedbackMail(filter);
         } catch (OXException e) {
-            assertEquals(e.getExceptionCode(), FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES);
+            assertEquals(FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES, e.getExceptionCode());
             return;
         }
         // should never get here
@@ -105,13 +120,13 @@ public class FeedbackMailServiceSMTPTest {
         FeedbackMailServiceSMTP service = new FeedbackMailServiceSMTP();
         FeedbackMailServiceSMTP serviceSpy = PowerMockito.spy(service);
         
-        PowerMockito.doReturn(properties).when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "getSMTPProperties")).withNoArguments();
+        PowerMockito.doReturn(properties).when(serviceSpy, PowerMockito.method(FeedbackMailServiceSMTP.class, "getSMTPProperties")).withArguments(leanConfigurationService);
         
         filter.getRecipients().put("dsfa@blub.de", "");
         try {
             serviceSpy.sendFeedbackMail(filter);
         } catch (OXException e) {
-            assertEquals(e.getExceptionCode(), FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION);
+            assertEquals(FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION, e.getExceptionCode());
             return;
         }
         // should never get here
