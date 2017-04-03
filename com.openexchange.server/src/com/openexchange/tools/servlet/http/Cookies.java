@@ -263,34 +263,6 @@ public final class Cookies {
         return null;
     }
 
-//    /**
-//     * Extracts domain parameter out of specified (JSESSIONID) cookie value.
-//     *
-//     * @param id The cookie value
-//     * @return The domain parameter or <code>null</code>
-//     */
-//    public static String extractDomainValue(final String id) {
-//        if (null == id) {
-//            return null;
-//        }
-//        final int start = id.indexOf('-');
-//        if (start > 0) {
-//            final int end = id.lastIndexOf('.');
-//            if (end > start) {
-//                return urlDecode(id.substring(start + 1, end));
-//            }
-//        }
-//        return null;
-//    }
-
-    private static String urlDecode(final String text) {
-        try {
-            return URLDecoder.decode(text, "iso-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return text;
-        }
-    }
-
     /**
      * Pretty-prints given cookies.
      *
