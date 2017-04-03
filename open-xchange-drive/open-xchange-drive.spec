@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -83,12 +83,14 @@ ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 6
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Apr 03 2017 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-prepare for 7.8.4 release
-* Thu Nov 24 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Tobias Friedrich <tobias.friedrich@open-xchange.com>
@@ -136,7 +138,7 @@ Sixth candidate for 7.8.0 release
 * Wed Sep 30 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Fri Sep 25 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
