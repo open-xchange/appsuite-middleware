@@ -163,7 +163,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         TestUser restUser = TestContextPool.getRestUser();
         String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
         String host = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        int port = 80;
+        int port = 8009;
 
         executor = Executor.newInstance()
             .auth(new HttpHost(host, port), restUser.getUser(), restUser.getPassword())
