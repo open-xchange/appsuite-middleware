@@ -49,8 +49,6 @@
 
 package com.sun.mail.util;
 
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -65,100 +63,18 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 
 /**
- * {@link RoundRobinSocket}
+ * {@link FailoverSocket} - Delegates calls to a possibly changing instance of {@link Socket}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RoundRobinSocket extends Socket {
+public class FailoverSocket extends Socket {
 
     private static MailLogger logger = new MailLogger(
-        RoundRobinSocket.class,
+        FailoverSocket.class,
         "socket",
         "DEBUG RoundRobinSocket",
         PropUtil.getBooleanSystemProperty("mail.socket.debug", false),
         System.out);
-
-    private static class WrappingInputStream extends FilterInputStream {
-
-        private final RoundRobinSocket roundRobinSocket;
-        private final WrappingOutputStream out;
-
-        WrappingInputStream(InputStream in, WrappingOutputStream out, RoundRobinSocket roundRobinSocket) {
-            super(in);
-            this.out = out;
-            this.roundRobinSocket = roundRobinSocket;
-        }
-
-        void applyNew(InputStream newIn) {
-            InputStream in = this.in;
-            if (null != in) {
-                try {
-                    in.close();
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
-
-            this.in = newIn;
-        }
-
-        @Override
-        public int read() throws IOException {
-            InputStream in = this.in;
-            try {
-                return in.read();
-            } catch (java.net.SocketTimeoutException e) {
-                if (this.in == in) {
-                    Socket socket = roundRobinSocket.initNext();
-                    applyNew(socket.getInputStream());
-                    out.applyNew(socket.getOutputStream());
-                }
-                throw e;
-            }
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            InputStream in = this.in;
-            try {
-                return in.read(b, off, len);
-            } catch (java.net.SocketTimeoutException e) {
-                if (this.in == in) {
-                    Socket socket = roundRobinSocket.initNext();
-                    applyNew(socket.getInputStream());
-                    out.applyNew(socket.getOutputStream());
-                }
-                throw e;
-            }
-        }
-
-        @Override
-        public int read(byte[] b) throws IOException {
-            return read(b, 0, b.length);
-        }
-
-    }
-
-    private static class WrappingOutputStream extends FilterOutputStream {
-
-        WrappingOutputStream(OutputStream out) {
-            super(out);
-        }
-
-        void applyNew(OutputStream newOut) {
-            OutputStream out = this.out;
-            if (null != out) {
-                try {
-                    out.close();
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
-
-            this.out = newOut;
-        }
-
-    }
 
     // ----------------------------------------------------------------------------------------------------
 
@@ -171,15 +87,12 @@ public class RoundRobinSocket extends Socket {
     private final String prefix;
     private final boolean useSSL;
 
-    private WrappingOutputStream out;
-    private WrappingInputStream in;
-
     /**
-     * Initializes a new {@link RoundRobinSocket}.
+     * Initializes a new {@link FailoverSocket}.
      *
      * @throws IOException If socket cannot be created
      */
-    public RoundRobinSocket(AddressSelector selector, String host, int port, Properties props, String prefix, boolean useSSL) throws IOException {
+    public FailoverSocket(AddressSelector selector, String host, int port, Properties props, String prefix, boolean useSSL) throws IOException {
         super();
         this.host = host;
         this.port = port;
@@ -192,7 +105,7 @@ public class RoundRobinSocket extends Socket {
 
     private Socket connectToNext(int retryCount) throws IOException {
         // Grab the IP address to use
-        InetAddress addressToUse = selector.nextAddress();
+        InetAddress addressToUse = selector.currentAddress();
 
         // Try to establish a socket connection
         try {
@@ -208,29 +121,9 @@ public class RoundRobinSocket extends Socket {
                 logger.finer("Failed to connect to " + e.getHost() + " (address " + e.getAddress() + "), port " + e.getPort() + ". Retrying in " + TimeUnit.NANOSECONDS.toMillis(nanosToWait) + " milliseconds");
             }
             LockSupport.parkNanos(nanosToWait);
+            selector.failoverAddress(addressToUse);
             return connectToNext(retry);
         }
-    }
-
-    /**
-     * Initializes the next socket
-     *
-     * @return The next available socket
-     * @throws IOException If next socket cannot be initialized
-     */
-    public Socket initNext() throws IOException {
-        Socket socket = this.socket;
-        if (null != socket) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                // Ignore
-            }
-        }
-
-        socket = connectToNext(0);
-        this.socket = socket;
-        return socket;
     }
 
     @Override
@@ -284,29 +177,13 @@ public class RoundRobinSocket extends Socket {
     }
 
     @Override
-    public synchronized InputStream getInputStream() throws IOException {
-        if (in == null) {
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
-
-            out = new WrappingOutputStream(outputStream);
-            in = new WrappingInputStream(inputStream, out, this);
-
-        }
-        return in;
+    public InputStream getInputStream() throws IOException {
+        return socket.getInputStream();
     }
 
     @Override
     public synchronized OutputStream getOutputStream() throws IOException {
-        if (out == null) {
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
-
-            out = new WrappingOutputStream(outputStream);
-            in = new WrappingInputStream(inputStream, out, this);
-        }
-
-        return out;
+        return socket.getOutputStream();
     }
 
     @Override

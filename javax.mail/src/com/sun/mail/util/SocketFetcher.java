@@ -150,7 +150,7 @@ public class SocketFetcher {
         }
 
         AddressSelector selector = AddressSelector.getSelectorFor(host, addresses, props, prefix);
-        return new RoundRobinSocket(selector, host, port, props, prefix, useSSL);
+        return new FailoverSocket(selector, host, port, props, prefix, useSSL);
     }
 
     /**

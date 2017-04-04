@@ -121,6 +121,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean allowSORTDISPLAY;
             boolean fallbackOnFailedSORT;
             boolean useMultipleAddresses;
+            boolean useMultipleAddressesUserHash;
 
             Params() {
                 super();
@@ -139,6 +140,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean allowSORTDISPLAY;
         final boolean fallbackOnFailedSORT;
         final boolean useMultipleAddresses;
+        final boolean useMultipleAddressesUserHash;
 
         PrimaryIMAPProperties(Params params) {
             super();
@@ -152,6 +154,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.allowSORTDISPLAY = params.allowSORTDISPLAY;
             this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
             this.useMultipleAddresses = params.useMultipleAddresses;
+            this.useMultipleAddressesUserHash = params.useMultipleAddressesUserHash;
         }
     }
 
@@ -294,6 +297,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.useMultipleAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddresses", false, view);
             writer.print("  Use Multiple IP addresses: ");
             writer.println(Boolean.toString(params.useMultipleAddresses));
+        }
+
+        if (params.useMultipleAddresses) {
+            params.useMultipleAddressesUserHash = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddressesUserHash", false, view);
+            writer.print("  Use User Hash for Multiple IP addresses: ");
+            writer.println(Boolean.toString(params.useMultipleAddressesUserHash));
         }
 
         PrimaryIMAPProperties primaryIMAPProps = new PrimaryIMAPProperties(params);
@@ -716,6 +725,27 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         try {
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddresses;
+        } catch (Exception e) {
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether a user hash should be used for selecting one of possible multiple IP addresses for a host name.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Only effective if {@link #isUseMultipleAddresses(int, int)} returns <code>true</code>!
+     * </div>
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to use multiple IP addresses; otherwise <code>false</code>
+     */
+    public boolean isUseMultipleAddressesUserHash(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.useMultipleAddressesUserHash;
         } catch (Exception e) {
             LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
             return false;

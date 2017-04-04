@@ -1315,8 +1315,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses(userId, contextId);
             if (useMultipleAddresses) {
                 imapProps.put("mail.imap.multiAddress.enabled", "true");
-                int hash = getHashFor(userId, contextId);
-                imapProps.put("mail.imap.multiAddress.key", Integer.toString(hash));
+                /*
+                 * Pass hash if needed
+                 */
+                boolean useMultipleAddressesUserHash = IMAPProperties.getInstance().isUseMultipleAddressesUserHash(userId, contextId);
+                if (useMultipleAddressesUserHash) {
+                    int hash = getHashFor(userId, contextId);
+                    imapProps.put("mail.imap.multiAddress.key", Integer.toString(hash));
+                }
             }
         }
         /*
