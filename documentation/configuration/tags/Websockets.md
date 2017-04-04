@@ -4,6 +4,28 @@ title: Websockets
 
 This page shows all properties with the tag: Websockets
 
+| __Key__ | com.openexchange.http.grizzly.wsTimeoutMillis |
+|:----------------|:--------|
+| __Description__ | Specifies the Web Socket timeout in milliseconds<br> |
+| __Default__ | 900000 |
+| __Version__ | 7.8.3 |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.websockets.enabled |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
+| __File__ | grizzly.properties |
+
+---
+| __Key__ | com.openexchange.http.grizzly.hasWebSocketsEnabled |
+|:----------------|:--------|
+| __Description__ | Bi-directional, full-duplex communications channels over a single TCP connection.<br> |
+| __Default__ | true |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
+| __File__ | grizzly.properties |
+
+---
 | __Key__ | com.openexchange.websockets.enabled |
 |:----------------|:--------|
 | __Description__ | The main switch to enable/disable Web Sockets. That property is responsive to config-cascade<br>and reloadable as well.<br> |
@@ -46,27 +68,5 @@ This page shows all properties with the tag: Websockets
 | __Configcascade Aware__ | false |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
 | __File__ | websockets.properties |
-
----
-| __Key__ | com.openexchange.http.grizzly.wsTimeoutMillis |
-|:----------------|:--------|
-| __Description__ | Specifies the Web Socket timeout in milliseconds<br> |
-| __Default__ | 900000 |
-| __Version__ | 7.8.3 |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.websockets.enabled |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Timeout.html">Timeout</a> |
-| __File__ | grizzly.properties |
-
----
-| __Key__ | com.openexchange.http.grizzly.hasWebSocketsEnabled |
-|:----------------|:--------|
-| __Description__ | Bi-directional, full-duplex communications channels over a single TCP connection.<br> |
-| __Default__ | true |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Grizzly.html">Grizzly</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Push.html">Push</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Websockets.html">Websockets</a> |
-| __File__ | grizzly.properties |
 
 ---
