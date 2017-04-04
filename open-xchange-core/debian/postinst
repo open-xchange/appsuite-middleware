@@ -874,9 +874,6 @@ fi
 # SoftwareChange_Request-2110
 ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
 
-# SoftwareChange_Request-2148
-ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
-
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
 VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
