@@ -64,8 +64,6 @@ import com.openexchange.userfeedback.internal.FeedbackServiceImplTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     FeedbackServiceImplTest.class, 
-    AbstractFeedbackTypeTest.class
-
 })
 public class UnitTests {
 }

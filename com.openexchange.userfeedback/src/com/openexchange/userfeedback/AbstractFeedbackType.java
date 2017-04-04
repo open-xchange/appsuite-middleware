@@ -50,13 +50,7 @@
 package com.openexchange.userfeedback;
 
 import java.sql.Connection;
-import java.util.Iterator;
-import java.util.Set;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 
 /**
  * {@link AbstractFeedbackType}
@@ -66,11 +60,9 @@ import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
  */
 public abstract class AbstractFeedbackType implements FeedbackType {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFeedbackType.class);
-
     @Override
     public long storeFeedback(Object feedback, Connection con) throws OXException {
-        Object validatedFeedback = validateFeedback(feedback);
+        Object validatedFeedback = prepareAndValidateFeedback(feedback);
         return storeFeedbackInternal(validatedFeedback, con);
     }
 
@@ -83,112 +75,24 @@ public abstract class AbstractFeedbackType implements FeedbackType {
      * @return ready-to-persist object
      * @throws OXException
      */
-    public Object validateFeedback(Object feedback) throws OXException {
-        if (!(feedback instanceof JSONObject)) {
-            throw FeedbackExceptionCodes.INVALID_DATA_TYPE.create("JSONObject");
-        }
+    public final Object prepareAndValidateFeedback(Object feedback) throws OXException {
+        Object normalizedFeedback = normalize(feedback);
+        Object cleanUpFeedback = cleanUp(normalizedFeedback);
 
-        JSONObject jsonFeedback = normalizeFeedback((JSONObject) feedback);
-        return cleanUpFeedback(jsonFeedback);
+        validate(cleanUpFeedback);
+
+        return cleanUpFeedback;
     }
 
     /**
-     * Delegate cleanup to implementation. Ensure the implementation also calls {@link #cleanUpFeedback(JSONObject, Set)} to have normalized and cleaned feedback content
+     * Delegates feedback validation to implementation to ensure requirements are met by the given feedback.
      * 
-     * @param jsonFeedback
-     * @return The feedback
+     * @param feedback
      * @throws OXException
      */
-    public abstract JSONObject cleanUpFeedback(JSONObject jsonFeedback) throws OXException;
+    protected abstract void validate(Object feedback) throws OXException;
 
-    /**
-     * Aligns the feedback to store (provided via the jsonFeedback parameter) against the JSON keys provided within the given Set<String>
-     *
-     * @param jsonFeedback The JSON object provided by the client
-     * @return {@link JSONObject} that is aligned to be stored
-     */
-    protected final JSONObject cleanUpFeedback(JSONObject jsonFeedback, Set<String> keys) {
-        JSONObject returnFeedback = new JSONObject(jsonFeedback);
+    protected abstract Object cleanUp(Object feedback) throws OXException;
 
-        JSONObject removeAdditional = remove(returnFeedback, keys);
-        JSONObject cleanedFeedback = addRequired(removeAdditional, keys);
-        return cleanedFeedback;
-    }
-
-    /**
-     * Enhances the given JSON by dummy entries for every missing key defined in the parameter list. If keys parameter is empty the origin object will be returned.<br>
-     * <br>
-     * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will add it even 'Comment' is available within the provided {@link JSONObject}.
-     *
-     * @param feedback The provided feedback that will be adapted.
-     * @param keys The keys that should be available within the object
-     */
-    protected final JSONObject addRequired(final JSONObject feedback, Set<String> keys) {
-        if ((keys == null) || (keys.isEmpty())) {
-            return feedback;
-        }
-
-        JSONObject processed = new JSONObject(feedback);
-        for (String key : keys) {
-            if (feedback.has(key)) {
-                continue;
-            }
-            LOG.info("Desired key {} not contained within the request. They will be stored as empty.", Strings.concat(",", keys));
-            try {
-                processed.put(key, "");
-            } catch (JSONException e) {
-                LOG.error("Error while adding new key.", e);
-            }
-        }
-        return processed;
-    }
-
-    /**
-     * Removes JSON entries from provided object that aren't expected. Expected keys are defined by the 'keys' parameter). If keys parameter is empty the origin object will be returned.<br>
-     * <br>
-     * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will remove 'Comment' from provided {@link JSONObject} as it is not expected.
-     *
-     * @param feedback The provided feedback that will be adapted
-     * @param expectedKeys The keys that are expected
-     */
-    protected final JSONObject remove(final JSONObject feedback, Set<String> expectedKeys) {
-        if ((expectedKeys == null) || (expectedKeys.isEmpty())) {
-            return feedback;
-        }
-
-        JSONObject processed = new JSONObject(feedback);
-        Iterator<?> jsonKeys = feedback.keys();
-        while (jsonKeys.hasNext()) {
-            String key = (String) jsonKeys.next();
-            if (!expectedKeys.contains(key)) {
-                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
-                processed.remove(key);
-                continue;
-            }
-            expectedKeys.remove(key);
-        }
-        return processed;
-    }
-
-    /**
-     * Ensures that the provided feedback only has lower case keys!
-     *
-     * @param feedback The feedback that should be normalized
-     * @return {@link JSONObject} with lower case keys
-     */
-    protected final JSONObject normalizeFeedback(JSONObject feedback) {
-        Iterator<?> jsonKeys = feedback.keys();
-        JSONObject processed = new JSONObject(feedback.length());
-        while (jsonKeys.hasNext()) {
-            try {
-                String unnormalizedKey = (String) jsonKeys.next();
-                String value = feedback.getString(unnormalizedKey);
-                String key = unnormalizedKey.toLowerCase();
-                processed.put(key, value);
-            } catch (JSONException e) {
-                LOG.warn("Error while updating json keys.", e);
-            }
-        }
-        return processed;
-    }
+    protected abstract Object normalize(Object feedback) throws OXException;
 }

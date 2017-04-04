@@ -93,9 +93,9 @@ public class FeedbackServiceImpl implements FeedbackService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackServiceImpl.class);
 
     @Override
-    public void store(Session session, JSONObject feedback, Map<String, String> params) throws OXException {
+    public void store(Session session, Object feedback, Map<String, String> params) throws OXException {
         ParameterValidator.checkObject(params);
-        ParameterValidator.checkJSON(feedback);
+        ParameterValidator.checkObject(feedback);
 
         // Get context group id
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
@@ -134,12 +134,17 @@ public class FeedbackServiceImpl implements FeedbackService {
             }
         }
         String uiVersion = "";
-        if (feedback.has("client_version")) {
-            try {
-                uiVersion = feedback.getString("client_version");
-            } catch (JSONException e) {
-                LOG.warn("Unable to retrieve client version.", e);
+        if (feedback instanceof JSONObject) {
+            JSONObject jsonFeedback = (JSONObject) feedback;
+            if (jsonFeedback.has("client_version")) {
+                try {
+                    uiVersion = jsonFeedback.getString("client_version");
+                } catch (JSONException e) {
+                    LOG.warn("Unable to retrieve client version.", e);
+                }
             }
+        } else {
+            LOG.debug("Unable to retrieve ui version as provided feedback is from type {}.", feedback.getClass().getName());
         }
 
         Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
