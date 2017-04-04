@@ -81,7 +81,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -181,9 +180,6 @@ public class AdminCache {
     private Hashtable<Integer, Credentials> adminCredentialsCache = null;
 
     private Hashtable<Integer, String> adminAuthMechCache = null;
-
-    // A flag to lock the database if an update is made
-    private boolean lockdb = false;
 
     // the patterns for parsing the sql scripts
     public static final String PATTERN_REGEX_NORMAL = "(" + "CREATE\\s+TABLE|" + "DELETE|" + "UPDATE|" + "ALTER|" + "DROP|" + "SET|" + "RENAME)" + " (.*?)\\s*;";
@@ -395,12 +391,10 @@ public class AdminCache {
     }
 
     public Connection getConnectionForContext(final int context_id) throws PoolException {
-        checkDatabaseLocked();
         return this.pool.getConnectionForContext(context_id);
     }
 
     public Connection getConnectionForContextNoTimeout(int contextId) throws PoolException {
-        checkDatabaseLocked();
         return this.pool.getConnectionForContextNoTimeout(contextId);
     }
 
@@ -492,20 +486,12 @@ public class AdminCache {
         }
     }
 
-    public final synchronized boolean isLockdb() {
-        return lockdb;
-    }
-
     public boolean masterAuthenticationDisabled() {
         return masterAuthenticationDisabled;
     }
 
     public boolean contextAuthenticationDisabled() {
         return contextAuthenticationDisabled;
-    }
-
-    public final synchronized void setLockdb(boolean lockdb) {
-        this.lockdb = lockdb;
     }
 
     public static Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
@@ -681,12 +667,6 @@ public class AdminCache {
             }
         }
         return null;
-    }
-
-    private final void checkDatabaseLocked() throws PoolException {
-        if (this.isLockdb()) {
-            throw new PoolException(new DatabaseLockedException("The database is locked due to an update"));
-        }
     }
 
     @Deprecated
