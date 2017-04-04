@@ -153,6 +153,8 @@ tags:
     description: The interface to add/remove notification subscriptions associated with a token for certain topics
   - name: Userfeedback
     description: The user feedback module
+  - name: RSS Feed
+    description: The RSS Feed module
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

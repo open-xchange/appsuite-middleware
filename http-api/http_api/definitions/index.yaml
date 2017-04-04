@@ -568,6 +568,9 @@ ClientOnboardingData:
   $ref: ./clientonboarding/ClientOnboardingData.yaml
 ClientOnboardingResponse:
   $ref: ./clientonboarding/ClientOnboardingResponse.yaml
+# Module: rss
+RssResponse:
+  $ref: ./rss/RssResponse.yaml
 # Module: pns
 PnsData:
   $ref: ./pns/PnsData.yaml
