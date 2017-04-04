@@ -220,6 +220,10 @@ public class RssAction implements AJAXActionService {
         if (sort.equalsIgnoreCase("DATE")) {
             Collections.sort(results, "DESC".equalsIgnoreCase(order) ? DESC : ASC);
         }
+        int limit = request.getIntParameter("limit");
+        if (limit > 0 && limit < results.size()) {
+            results = results.subList(0, limit);
+        }
 
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
     }
