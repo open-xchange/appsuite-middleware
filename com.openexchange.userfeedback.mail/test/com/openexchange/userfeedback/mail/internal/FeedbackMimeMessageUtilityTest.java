@@ -17,6 +17,7 @@ import javax.mail.internet.MimeMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -30,15 +31,18 @@ import com.openexchange.userfeedback.mail.osgi.Services;
 public class FeedbackMimeMessageUtilityTest {
 
     private final String TESTFILES_PATH = "./test/testfiles/";
+    
+    @Mock
+    LeanConfigurationService leanConfigurationService;
 
     @Before
     public void setUp() throws Exception {
 
         PowerMockito.mockStatic(Services.class);
-
-        PowerMockito.spy(LeanConfigurationService.class);
-        PowerMockito.doReturn("sender@ox.de").when(LeanConfigurationService.class, "getProperty", UserFeedbackMailProperty.senderAddress);
-        PowerMockito.doReturn("Sender").when(LeanConfigurationService.class, "getProperty", UserFeedbackMailProperty.senderName);
+        PowerMockito.when(Services.getService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);
+        
+        PowerMockito.when(leanConfigurationService.getProperty(UserFeedbackMailProperty.senderAddress)).thenReturn("sender@ox.de");
+        PowerMockito.when(leanConfigurationService.getProperty(UserFeedbackMailProperty.senderName)).thenReturn("Sender");
     }
 
     @Test

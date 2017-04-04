@@ -83,7 +83,7 @@ public abstract class AbstractFeedbackType implements FeedbackType {
      * @return ready-to-persist object
      * @throws OXException
      */
-    public final Object validateFeedback(Object feedback) throws OXException {
+    public Object validateFeedback(Object feedback) throws OXException {
         if (!(feedback instanceof JSONObject)) {
             throw FeedbackExceptionCodes.INVALID_DATA_TYPE.create("JSONObject");
         }

@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -124,12 +124,14 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
+* Mon Apr 03 2017 Thorben Betten <thorben.betten@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Thorben Betten <thorben.betten@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.8.4 release
-* Thu Nov 24 2016 Thorben Betten <thorben.betten@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Thorben Betten <thorben.betten@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Thorben Betten <thorben.betten@open-xchange.com>

@@ -141,11 +141,17 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
         try {
             MimeMessage mail = FeedbackMimeMessageUtility.createMailMessage(feedbackFile, filter, smtpSession);
+            
             Address[] recipients = null;
+            List<InternetAddress> invalidAddresses = new ArrayList<>();
+            recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
+            if (recipients.length == 0) {
+                throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
+            }
+            
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
 
-            List<InternetAddress> invalidAddresses = new ArrayList<>();
             List<InternetAddress> pgpFailedAddresses = new ArrayList<>();
 
             if (encrypt) {
@@ -160,10 +166,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 transport.sendMessage(pgpMail, pgpAddresses);
                 appendPositiveSendingResult(pgpAddresses, result, sign, true);
             }
-            recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
-            if (recipients.length == 0) {
-                throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
-            }
+
             if (sign) {
                 MimeMessage signedMail = pgpMimeService.sign(mail, signingKey, secretKeyPassword.toCharArray());
                 transport.sendMessage(signedMail, recipients);

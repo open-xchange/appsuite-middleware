@@ -47,69 +47,69 @@
  *
  */
 
-package com.openexchange.filestore.impl.groupware;
+package com.openexchange.userfeedback;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.session.Session;
+import java.util.HashSet;
+import java.util.Set;
+import org.json.JSONObject;
 
 /**
- * {@link QuotaModePreferenceItem}
+ * {@link FeedbackJsonFieldsForTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class QuotaModePreferenceItem implements PreferencesItemService, ConfigTreeEquivalent{
+public enum FeedbackJsonFieldsForTest {
+    date("Date"),
+    user("User"),
+    score("Score"),
+    app("App"),
+    entry_point("Entry Point"),
+    comment("Comment"),
+    operating_system("Operating System"),
+    browser("Browser"),
+    browser_version("Browser Version"),
+    user_agent("User Agent"),
+    screen_resolution("Screen Resolution"),
+    language("Language"),
+    server_version("Server Version"),
+    client_version("Client Version"),
+    ;
 
-    final QuotaFileStorageService storageService;
+    private static final Set<String> INTERNAL_KEYS = new HashSet<String>();
+
+    static {
+        for (FeedbackJsonFieldsForTest field : FeedbackJsonFieldsForTest.values()) {
+            INTERNAL_KEYS.add(field.name().toLowerCase());
+        }
+    }
+
+    private String displayName;
+
+    FeedbackJsonFieldsForTest(String displayName) {
+        this.displayName = displayName;
+    }
 
     /**
-     * Initializes a new {@link QuotaModePreferenceItem}.
+     * Gets the displayName
+     *
+     * @return The displayName
      */
-    public QuotaModePreferenceItem(QuotaFileStorageService storageService) {
-        super();
-        this.storageService = storageService;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    @Override
-    public String[] getPath() {
-        return new String[] { "quotaMode" };
+    /**
+     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.FeedbackJsonFieldsForTest.v1.StarRatingV1JsonFields#values()} are retrieved from other tables.
+     * 
+     * @return Set of {@link String} that are required within the {@link JSONObject}
+     */
+    public static Set<String> requiredJsonKeys() {
+        Set<String> copy = new HashSet<>(INTERNAL_KEYS);
+        copy.remove("date");
+        copy.remove("user");
+        copy.remove("client_version");
+        copy.remove("server_version");
+        return copy;
     }
-
-    @Override
-    public IValueHandler getSharedValue() {
-       return new ReadOnlyValue() {
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                String mode = storageService.getQuotaFileStorage(user.getId(), ctx.getContextId(), Info.drive()).getMode();
-                setting.setSingleValue(mode);
-            }
-        };
-    }
-
-    @Override
-    public String getConfigTreePath() {
-       return "quotaMode";
-    }
-
-    @Override
-    public String getJslobPath() {
-        return "io.ox/core//quotaMode";
-    }
-
 }

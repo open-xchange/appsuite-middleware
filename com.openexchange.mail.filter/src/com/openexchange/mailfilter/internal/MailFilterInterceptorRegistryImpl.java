@@ -119,11 +119,11 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
      * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#execute(java.util.List)
      */
     @Override
-    public void executeBefore(List<Rule> rules) throws OXException {
+    public void executeBefore(int userId, int contextId, List<Rule> rules) throws OXException {
         LOGGER.debug("Executing pre-processing mail filter interceptors...");
         for (MailFilterInterceptor interceptor : interceptors) {
             LOGGER.debug("Executing pre-processing mail filter interceptor {} with rank {}", interceptor.getClass().getSimpleName(), interceptor.getRank());
-            interceptor.before(rules);
+            interceptor.before(userId, contextId, rules);
         }
     }
 
@@ -133,11 +133,11 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
      * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#executeAfter(java.util.List)
      */
     @Override
-    public void executeAfter(List<Rule> rules) throws OXException {
+    public void executeAfter(int userId, int contextId, List<Rule> rules) throws OXException {
         LOGGER.debug("Executing post-processing mail filter interceptors...");
         for (MailFilterInterceptor interceptor : interceptors) {
             LOGGER.debug("Executing post-processing mail filter interceptor {} with rank {}", interceptor.getClass().getSimpleName(), interceptor.getRank());
-            interceptor.after(rules);
+            interceptor.after(userId, contextId, rules);
         }
     }
 }

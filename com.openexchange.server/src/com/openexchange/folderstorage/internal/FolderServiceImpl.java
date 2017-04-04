@@ -249,6 +249,12 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    public FolderResponse<UserizedFolder[]> getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, boolean all, Session session, FolderServiceDecorator decorator) throws OXException {
+        VisibleFoldersPerformer performer = new VisibleFoldersPerformer(ServerSessionAdapter.valueOf(session), decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(rootFolderId, treeId, contentType, type, all), performer.getWarnings());
+    }
+
+    @Override
     public FolderResponse<UserizedFolder[]> getUserSharedFolders(final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException {
         final UserSharedFoldersPerformer performer = new UserSharedFoldersPerformer(ServerSessionAdapter.valueOf(session), decorator);
         return FolderResponseImpl.newFolderResponse(performer.doSharedFolders(treeId, contentType), performer.getWarnings());

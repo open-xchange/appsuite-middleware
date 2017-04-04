@@ -1,3 +1,9 @@
+open-xchange-spamhandler-cloudmark (7.8.4-1) stable; urgency=medium
+
+  * First preview of 7.8.4 release
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Mon, 03 Apr 2017 15:18:45 +0200
+
 open-xchange-spamhandler-cloudmark (7.8.4-0) unstable; urgency=medium
 
   * prepare for 7.8.4 release

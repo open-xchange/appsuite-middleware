@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,5 +60,7 @@ GLOBIGNORE='*'
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Apr 03 2017 Thorben Betten <thorben.betten@open-xchange.com>
+First preview of 7.8.4 release
 * Mon Jan 30 2017 Thorben Betten <thorben.betten@open-xchange.com>
 Initial release

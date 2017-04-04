@@ -58,7 +58,7 @@ import com.openexchange.config.lean.Property;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum UserFeedbackMailProperty implements Property {
-    senderName(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "mail"),
+    senderName(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "mail."),
     senderAddress(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "mail."),
     exportPrefix(UserFeedbackMailProperty.EXPORT_PREFIX, UserFeedbackMailProperty.PREFIX + "mail."),
     hostname(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),

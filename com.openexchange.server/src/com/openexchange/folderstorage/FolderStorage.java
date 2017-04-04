@@ -347,6 +347,19 @@ public interface FolderStorage {
     SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException;
 
     /**
+     * Gets the folder identifiers for specified content type and type.
+     *
+     * @param rootFolderId The root folder identifier
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @param type The type
+     * @param storageParameters The storage parameters
+     * @return The folder identifiers for specified content type and type
+     * @throws OXException If returning the folder identifiers fails
+     */
+    SortableId[] getVisibleFolders(String rootFolderId, String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException;
+
+    /**
      * Gets the identifiers of all folders that are considered as "shared" by the user, i.e. those folders of the user that have been
      * shared to at least one other entity.
      *
