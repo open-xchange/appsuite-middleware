@@ -107,12 +107,21 @@ fi
 # On distros without systemd we might get called via su which might have
 # applied limits from /etc/security/limits.* depending on the distro. Assure
 # that user configured limits are used
-if ! pidof systemd > /dev/null 2>&1
+read the_init < /proc/1/comm
+if [[ -n "${the_init}" && "${the_init}" != systemd ]]
 then
   NRFILES=${NRFILES:-65536}
   NPROC=${NPROC:-65536}
-  ulimit -n ${NRFILE} 2> ${CONSOLELOG}
-  ulimit -u ${NPROC} 2> ${CONSOLELOG}
+  ulimit -n ${NRFILES} 2>> ${CONSOLELOG}
+  ulimit -u ${NPROC} 2>> ${CONSOLELOG}
+fi
+
+# Bug 51074: wrong locale will break encoding of started processes
+charmap=$(locale charmap)
+if ! [[ "${charmap}" == "UTF-8" ]]
+then
+  echo "WARNING: Couldn't detect proper unicode charmap in locale category LC_CTYPE." >> ${CONSOLELOG}
+  echo "WARNING: Current charmap: \"${charmap}\" might cause encoding problems."  >> ${CONSOLELOG}
 fi
 
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.11.0.v20160603-1336.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

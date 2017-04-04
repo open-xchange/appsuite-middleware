@@ -49,10 +49,9 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.isDateOrMidnight;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.XProperty;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
@@ -60,10 +59,13 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAt
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.XProperty;
 
 /**
  * {@link XMicrosoftCdoAlldayEvent}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class XMicrosoftCdoAlldayEvent<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
@@ -80,6 +82,9 @@ public class XMicrosoftCdoAlldayEvent<T extends CalendarComponent, U extends Cal
 
     @Override
     public void emit(Mode mode, int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
+        if (Boolean.FALSE.equals(calendar.getProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent"))) {
+            return;
+        }
         if (calendar instanceof Appointment) {
             if (((Appointment) calendar).getFullTime()) {
                 component.getProperties().add(new XProperty("X-MICROSOFT-CDO-ALLDAYEVENT", "TRUE"));
@@ -94,10 +99,14 @@ public class XMicrosoftCdoAlldayEvent<T extends CalendarComponent, U extends Cal
 
     @Override
     public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        if (Boolean.FALSE.equals(calendar.getProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent"))) {
+            return;
+        }
         if (component.getProperty(property).getValue().equalsIgnoreCase("true")) {
             if (calendar instanceof Appointment) {
-                Appointment appointment = (Appointment) calendar;
-                appointment.setFullTime(true);
+                if (isDateOrMidnight(component.getProperty(Property.DTSTART)) && isDateOrMidnight(component.getProperty(Property.DTEND))) {
+                    ((Appointment) calendar).setFullTime(true);
+                }
             }
         }
     }

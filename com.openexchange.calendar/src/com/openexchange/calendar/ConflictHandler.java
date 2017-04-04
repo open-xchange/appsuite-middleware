@@ -55,9 +55,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
+import org.slf4j.LoggerFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -216,8 +220,18 @@ public class ConflictHandler {
 
         return NO_CONFLICTS;
     }
+    
+    private Date moveFullTimeToUserTimeZone(Date input, String tz) {
+        Calendar c = new GregorianCalendar(TimeZone.getTimeZone(tz));
+        c.setTime(input);
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c.getTime();
+    }
 
-    private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
+    private CalendarDataObject[] resolveParticipantConflicts(Date start, Date end) throws OXException {
         final String sql_in = recColl.getSQLInStringForParticipants(getConflictUsers());
         if (sql_in == null) {
             return NO_CONFLICTS;
@@ -235,6 +249,15 @@ public class ConflictHandler {
             readcon = DBPool.pickup(ctx);
             final long whole_day_start = cdao.getFullTime() ? start.getTime() : recColl.getUserTimeUTCDate(start, user.getTimeZone());
             long whole_day_end = cdao.getFullTime() ? end.getTime() : recColl.getUserTimeUTCDate(end, user.getTimeZone());
+            
+            /*
+             * Adjust FullTime appointment ranges to match the current user's timezone.
+             * Fulltime appointments are floating and this is the best guess we can do on what the user wants...
+             */
+            if (cdao.getFullTime()) {
+                start = moveFullTimeToUserTimeZone(start, cdao.getTimezone());
+                end = moveFullTimeToUserTimeZone(end, cdao.getTimezone());
+            }
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_end+Constants.MILLI_DAY;
             }
