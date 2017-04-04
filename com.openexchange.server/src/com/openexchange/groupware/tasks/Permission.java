@@ -190,7 +190,7 @@ public final class Permission {
         checkForTaskFolder(folder);
         final OCLPermission permission = getPermission(ctx, con, user, userPerms, folder);
         if (!permission.canReadAllObjects() && !permission.canReadOwnObjects()) {
-            throw TaskExceptionCode.NO_READ_PERMISSION.create(folder.getFolderName(), I(folder.getObjectID()));
+            throw TaskExceptionCode.NO_READ_PERMISSION.create(I(folder.getObjectID()));
         }
         return !permission.canReadAllObjects() && permission.canReadOwnObjects();
     }
@@ -226,7 +226,7 @@ public final class Permission {
     static void canReadInFolder(final Context ctx, final Connection con, final User user, final UserPermissionBits userPerms, final FolderObject folder, final Task task) throws OXException {
         final boolean onlyOwn = canReadInFolder(ctx, con, user, userPerms, folder);
         if (onlyOwn && (user.getId() != task.getCreatedBy())) {
-            throw TaskExceptionCode.NO_READ_PERMISSION.create(folder.getFolderName(), I(folder.getObjectID()));
+            throw TaskExceptionCode.NO_READ_PERMISSION.create(I(folder.getObjectID()));
         }
     }
 
@@ -243,7 +243,7 @@ public final class Permission {
         checkForTaskFolder(folder);
         final OCLPermission permission = getPermission(ctx, con, user, userPerms, folder);
         if (!permission.canReadAllObjects() && !permission.canReadOwnObjects()) {
-            throw TaskExceptionCode.NO_READ_PERMISSION.create(folder.getFolderName(), I(folder.getObjectID()));
+            throw TaskExceptionCode.NO_READ_PERMISSION.create(I(folder.getObjectID()));
         }
     }
 
@@ -260,7 +260,7 @@ public final class Permission {
         checkForTaskFolder(folder);
         final OCLPermission permission = getPermission(ctx, user, userPermissionBits, folder);
         if (!permission.canWriteAllObjects() && !(permission.canWriteOwnObjects() && (user.getId() == task.getCreatedBy()))) {
-            throw TaskExceptionCode.NO_WRITE_PERMISSION.create(folder.getFolderName(), I(folder.getObjectID()));
+            throw TaskExceptionCode.NO_WRITE_PERMISSION.create(I(folder.getObjectID()));
         }
     }
 

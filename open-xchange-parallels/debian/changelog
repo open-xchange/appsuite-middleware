@@ -1,3 +1,9 @@
+open-xchange-parallels (7.8.2-30) stable; urgency=medium
+
+  * Build for patch 2017-04-03 (4049)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 31 Mar 2017 13:51:05 +0200
+
 open-xchange-parallels (7.8.2-29) stable; urgency=medium
 
   * Build for patch 2017-03-23 (4046)

@@ -51,24 +51,24 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.isDateTime;
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDateConsideringDateType;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.model.property.DtStart;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.DtStart;
 
 /**
  * Converts the start date.
@@ -146,16 +146,21 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
      * @param calendar
      */
     private boolean overrideFullTimeSetting(T component, U calendar) {
+        if (Boolean.FALSE.equals(calendar.getProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent"))) {
+            return false;
+        }
         DtStart dtStart = new DtStart();
         Property msAllDay = component.getProperty(XMicrosoftCdoAlldayEvent.property);
         if (msAllDay != null && msAllDay.getValue().equalsIgnoreCase("true")) {
             DateProperty dateProperty = (DateProperty)component.getProperty(dtStart.getName());
-            int timeZoneOffset = dateProperty.getTimeZone() != null ? dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()) : 0;
-            Date s = new Date(dateProperty.getDate().getTime() + timeZoneOffset);
-            calendar.setStartDate(s);
-            calendar.setEndDate(s);
-            calendar.setFullTime(true);
-            return true;
+            if (ParserTools.isDateOrMidnight(dateProperty)) {
+                int timeZoneOffset = dateProperty.getTimeZone() != null ? dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()) : 0;
+                Date s = new Date(dateProperty.getDate().getTime() + timeZoneOffset);
+                calendar.setStartDate(s);
+                calendar.setEndDate(s);
+                calendar.setFullTime(true);
+                return true;
+            }
         }
         return false;
     }
