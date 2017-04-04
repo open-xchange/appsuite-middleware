@@ -12,6 +12,11 @@
         description: An array containing all RSS Feeds to load. Array can consist of one element.
         required: true
       - in: query
+        name: limit
+        type: integer
+        description: Limitation of elements returned (in total).
+        required: false
+      - in: query
         name: sort
         type: string
         description: The identifier which determines the sort order of the response.
