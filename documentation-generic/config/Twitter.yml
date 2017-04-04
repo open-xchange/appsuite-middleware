@@ -1,4 +1,4 @@
-feature_name: Tokenlogin
+feature_name: Twitter
 properties:
     - key: com.openexchange.twitter.clientVersion
       description: |
