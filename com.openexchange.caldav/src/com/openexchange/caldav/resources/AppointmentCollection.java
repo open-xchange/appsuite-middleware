@@ -68,6 +68,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -129,6 +130,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     changeExceptions[i] = this.load(changeException, false);
                 }
             }
+            anonymizeAsNeeded(changeExceptions);
         }
         return changeExceptions;
     }
@@ -225,6 +227,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
                 getAppointmentInterface().getObjectById(appointment.getObjectID());
             this.remember(appointment);
+            anonymizeAsNeeded(cdo);
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
             throw super.protocolException(e);
@@ -302,6 +305,57 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             Patches.Outgoing.setOrganizersParticipantStatus(appointment);
             Patches.Outgoing.setSeriesStartAndEnd(factory, appointment);
             Patches.Outgoing.removeImplicitParticipant(getFolder(), appointment);
+        }
+        return appointment;
+    }
+
+    /**
+     * Removes sensitive properties from the supplied appointments in case they are marked as <i>private</i>, and the current user is
+     * neither creator nor participant.
+     *
+     * @param appointments The appointments to anonymize
+     * @return The passed appointments, anonymized as needed
+     */
+    private CalendarDataObject[] anonymizeAsNeeded(CalendarDataObject[] appointments) {
+        if (null != appointments && 0 < appointments.length) {
+            for (CalendarDataObject appointment : appointments) {
+                anonymizeAsNeeded(appointment);
+            }
+        }
+        return appointments;
+    }
+
+    /**
+     * Removes sensitive properties from the supplied appointment in case it is marked as <i>private</i>, and the current user is neither
+     * creator nor participant.
+     *
+     * @param appointment The appointment to anonymize
+     * @return The passed appointment, anonymized as needed
+     */
+    private CalendarDataObject anonymizeAsNeeded(CalendarDataObject appointment) {
+        // taken from com.openexchange.calendar.json.actions.AppointmentAction.anonymize(Appointment)
+        if (appointment.getPrivateFlag()) {
+            int userID = factory.getUser().getId();
+            if (appointment.getCreatedBy() == userID) {
+                return appointment;
+            }
+            for (UserParticipant user : appointment.getUsers()) {
+                if (user.getIdentifier() == userID) {
+                    return appointment;
+                }
+            }
+            appointment.setTitle("Private");
+            appointment.removeAlarm();
+            appointment.removeCategories();
+            appointment.removeConfirm();
+            appointment.removeConfirmMessage();
+            appointment.removeLabel();
+            appointment.removeLocation();
+            appointment.removeNote();
+            appointment.removeNotification();
+            appointment.removeParticipants();
+            appointment.removeShownAs();
+            appointment.removeUsers();
         }
         return appointment;
     }
