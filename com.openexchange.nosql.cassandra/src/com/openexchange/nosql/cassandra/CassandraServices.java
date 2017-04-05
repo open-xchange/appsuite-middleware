@@ -94,6 +94,8 @@ public class CassandraServices {
             throw CassandraServiceExceptionCodes.QUERY_VALIDATION_ERROR.create(e, query);
         } catch (com.datastax.driver.core.exceptions.DriverException e) {
             throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
