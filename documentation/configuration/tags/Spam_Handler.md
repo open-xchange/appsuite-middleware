@@ -27,6 +27,17 @@ This page shows all properties with the tag: Spam Handler
 | __File__ | spamhandler.properties |
 
 ---
+| __Key__ | com.openexchange.imap.spamHandler |
+|:----------------|:--------|
+| __Description__ | Define the registration name of the appropriate spam handler to use<br>Note: This value gets overwritten by "com.openexchange.spamhandler.name" property<br> |
+| __Default__ | DefaultSpamHandler |
+| __Reloadable__ | false |
+| __Configcascade Aware__ | false |
+| __Related__ | com.openexchange.spamhandler.name |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a> |
+| __File__ | imap.properties |
+
+---
 | __Key__ | com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress |
 |:----------------|:--------|
 | __Description__ | Defines the eMail address to which the selected eMails will be bounced. If no<br>address is specified the bounce will be skipped, but moving the selected mails<br>to the target folder will still be processed (if configured)<br> |
@@ -95,16 +106,5 @@ This page shows all properties with the tag: Spam Handler
 | __Configcascade Aware__ | true |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Folder.html">Folder</a> |
 | __File__ | defaultspamhandler.properties |
-
----
-| __Key__ | com.openexchange.imap.spamHandler |
-|:----------------|:--------|
-| __Description__ | Define the registration name of the appropriate spam handler to use<br>Note: This value gets overwritten by "com.openexchange.spamhandler.name" property<br> |
-| __Default__ | DefaultSpamHandler |
-| __Reloadable__ | false |
-| __Configcascade Aware__ | false |
-| __Related__ | com.openexchange.spamhandler.name |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/IMAP.html">IMAP</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Spam_Handler.html">Spam Handler</a> |
-| __File__ | imap.properties |
 
 ---

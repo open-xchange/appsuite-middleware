@@ -4,37 +4,6 @@ title: Capability
 
 This page shows all properties with the tag: Capability
 
-| __Key__ | com.openexchange.capability.drive |
-|:----------------|:--------|
-| __Description__ | Enables or disables the "drive" module capability globally. The capability<br>can also be set more fine-grained via config cascade. Per default it is only<br>enabled for users that have the "infostore" permission set. This is configured<br>in /opt/open-xchange/etc/contextSets/drive.yml.<br> |
-| __Default__ | false |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
-| __File__ | drive.properties |
-
----
-| __Key__ | com.openexchange.mail.categories |
-|:----------------|:--------|
-| __Description__ | General capability to enable/disable mail categories for primary inbox<br> |
-| __Default__ | false |
-| __Version__ | 7.8.2 |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
-| __File__ | mail-categories.properties |
-
----
-| __Key__ | com.openexchange.messaging.enabled |
-|:----------------|:--------|
-| __Description__ | Determines whether messaging is enabled for this server.<br> |
-| __Default__ | true |
-| __Reloadable__ | true |
-| __Configcascade Aware__ | true |
-| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Messaging.html">Messaging</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
-| __File__ | messaging.properties |
-
----
 | __Key__ | permissions |
 |:----------------|:--------|
 | __Description__ | Default permissions for all users<br> |
@@ -92,5 +61,36 @@ This page shows all properties with the tag: Capability
 | __Configcascade Aware__ | true |
 | __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Permission.html">Permission</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
 | __File__ | permissions.properties |
+
+---
+| __Key__ | com.openexchange.capability.drive |
+|:----------------|:--------|
+| __Description__ | Enables or disables the "drive" module capability globally. The capability<br>can also be set more fine-grained via config cascade. Per default it is only<br>enabled for users that have the "infostore" permission set. This is configured<br>in /opt/open-xchange/etc/contextSets/drive.yml.<br> |
+| __Default__ | false |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Drive.html">Drive</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
+| __File__ | drive.properties |
+
+---
+| __Key__ | com.openexchange.mail.categories |
+|:----------------|:--------|
+| __Description__ | General capability to enable/disable mail categories for primary inbox<br> |
+| __Default__ | false |
+| __Version__ | 7.8.2 |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail_Categories.html">Mail Categories</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Mail.html">Mail</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
+| __File__ | mail-categories.properties |
+
+---
+| __Key__ | com.openexchange.messaging.enabled |
+|:----------------|:--------|
+| __Description__ | Determines whether messaging is enabled for this server.<br> |
+| __Default__ | true |
+| __Reloadable__ | true |
+| __Configcascade Aware__ | true |
+| __Tags__ | <a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Messaging.html">Messaging</a>,<a href="https://documentation.open-xchange.com/latest/middleware/configuration/tags/Capability.html">Capability</a> |
+| __File__ | messaging.properties |
 
 ---
