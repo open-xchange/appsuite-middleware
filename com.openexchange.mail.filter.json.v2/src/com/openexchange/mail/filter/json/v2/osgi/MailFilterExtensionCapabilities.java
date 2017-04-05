@@ -67,6 +67,7 @@ public enum MailFilterExtensionCapabilities {
     imap4flags,
     vacation,
     date,
-    envelope
+    envelope,
+    reject
 
 }

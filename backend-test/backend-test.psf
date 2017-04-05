@@ -93,7 +93,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tokenlogin.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.rest"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.starrating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,liquibase.core"/>

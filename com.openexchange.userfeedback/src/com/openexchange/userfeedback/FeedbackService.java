@@ -50,7 +50,6 @@
 package com.openexchange.userfeedback;
 
 import java.util.Map;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
@@ -71,7 +70,7 @@ public interface FeedbackService {
      * @param params Additional parameters that have to be considered while persisting. Has to include parameter 'type'.
      * @throws OXException if feedback couldn't be stored
      */
-    void store(Session session, JSONObject feedback, Map<String, String> params) throws OXException;
+    void store(Session session, Object feedback, Map<String, String> params) throws OXException;
 
     /**
      * Exports feedback data within an {@link ExportResultConverter}. The export data becomes generated/formatted based on the {@link ExportType} defined for {@link ExportResultConverter#get(ExportType)}

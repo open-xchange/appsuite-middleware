@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: Array containing the differnet articles provided by the rss feed. 
+    items:
+      type: string

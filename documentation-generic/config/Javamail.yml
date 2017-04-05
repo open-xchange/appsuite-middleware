@@ -1,4 +1,4 @@
-feature_name: Javamail properties
+feature_name: Javamail
 feature_description: |
   This file contains all known JavaMail properties structured by sections\:
   JavaMail, JavaMail API System Properties, SMTP, IMAP, POP3 & Internet

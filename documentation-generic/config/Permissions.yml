@@ -1,4 +1,4 @@
-feature_name: Permission properties
+feature_name: Permission
 feature_description: |
   The properties for permissions
 properties:

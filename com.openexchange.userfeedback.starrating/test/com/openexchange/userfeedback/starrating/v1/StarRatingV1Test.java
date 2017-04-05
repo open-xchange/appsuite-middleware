@@ -47,17 +47,15 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.starrating.v1;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,12 +64,12 @@ import org.junit.Test;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AbstractFeedbackTypeTest}
+ * {@link StarRatingV1Test}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class AbstractFeedbackTypeTest {
+public class StarRatingV1Test {
 
     // @formatter:off
     private final String wellPreparedFeedbackStr = new String("{ " +
@@ -145,38 +143,7 @@ public class AbstractFeedbackTypeTest {
         "\"client_version\":\"7.8.4 Rev11\""+
         "}");
     
-    private AbstractFeedbackType classUnderTest = new AbstractFeedbackType() {
-
-        @Override
-        public String getType() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public long storeFeedbackInternal(Object feedback, Connection con) throws OXException {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public JSONObject cleanUpFeedback(JSONObject jsonFeedback) throws OXException {
-            // TODO Auto-generated method stub
-            return null;
-        }
-    };
+    private StarRatingV1 classUnderTest = new StarRatingV1();
 
     /**
      * @throws java.lang.Exception
@@ -185,9 +152,9 @@ public class AbstractFeedbackTypeTest {
     public void setUp() throws Exception {}
 
     @Test
-    public void testNormalizeFeedback_contentSizeNotChangedAndKeysLowerCased() throws JSONException {
+    public void testNormalizeFeedback_contentSizeNotChangedAndKeysLowerCased() throws JSONException, OXException {
         JSONObject origin = new JSONObject(wellPreparedFeedbackStr);
-        JSONObject normalizeFeedback = classUnderTest.normalizeFeedback(origin);
+        JSONObject normalizeFeedback = (JSONObject) classUnderTest.normalize(origin);
         assertFalse(normalizeFeedback.has("Comment"));
         assertTrue(normalizeFeedback.has("comment"));
 
@@ -203,7 +170,7 @@ public class AbstractFeedbackTypeTest {
     @Test
     public void testAddRequired_everythingFine_nothingToDo() throws JSONException {
         JSONObject feedback = new JSONObject(wellPreparedFeedbackStr);
-        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1Fields.requiredJsonKeys());
 
         assertTrue(feedback.equals(addRequired));
     }
@@ -212,7 +179,7 @@ public class AbstractFeedbackTypeTest {
     public void testAddRequired_upperCaseKeys_addLowerCases() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1Fields.requiredJsonKeys());
 
         assertTrue(addRequired.has("Comment"));
         assertTrue(addRequired.has("comment"));
@@ -223,7 +190,7 @@ public class AbstractFeedbackTypeTest {
     @Test
     public void testAddRequired_nothingToAddButAdditionalAvailable_leaveAdditional() throws JSONException {
         JSONObject feedback = new JSONObject(additionalFieldsFeedbackStr);
-        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1Fields.requiredJsonKeys());
 
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
@@ -236,7 +203,7 @@ public class AbstractFeedbackTypeTest {
     @Test
     public void testAddRequired_requiredMissing_addRequired() throws JSONException {
         JSONObject feedback = new JSONObject(missingFieldsFeedbackStr);
-        JSONObject addRequired = classUnderTest.addRequired(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
+        JSONObject addRequired = classUnderTest.addRequired(feedback, StarRatingV1Fields.requiredJsonKeys());
 
         assertTrue(addRequired.has("score"));
         assertFalse(addRequired.has("Score"));
@@ -270,7 +237,7 @@ public class AbstractFeedbackTypeTest {
     public void testRemoveAdditional_mixedKeys_onlyKeepExpectedLowerCaseKeys() throws JSONException {
         JSONObject feedback = new JSONObject(contentOkButUpperCaseFeedbackStr);
 
-        JSONObject remove = classUnderTest.remove(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
+        JSONObject remove = classUnderTest.remove(feedback, StarRatingV1Fields.requiredJsonKeys());
 
         assertTrue(remove.has("score"));
         assertTrue(remove.has("app"));
@@ -297,7 +264,7 @@ public class AbstractFeedbackTypeTest {
     public void testCleanup() throws JSONException, OXException {
         JSONObject feedback = new JSONObject(this.mixedFeedbackStr);
 
-        JSONObject remove = (JSONObject) classUnderTest.cleanUpFeedback(feedback, FeedbackJsonFieldsForTest.requiredJsonKeys());
+        JSONObject remove = (JSONObject) classUnderTest.cleanUpFeedback(feedback, StarRatingV1Fields.requiredJsonKeys());
 
         assertFalse(remove.has("additional_key"));
         assertTrue(remove.has("score"));
@@ -311,7 +278,7 @@ public class AbstractFeedbackTypeTest {
 
     @Test (expected=OXException.class)
     public void testValidateFeedback() throws OXException {
-        classUnderTest.validateFeedback(Collections.EMPTY_LIST);
+        classUnderTest.prepareAndValidateFeedback(Collections.EMPTY_LIST);
 
         fail();
     }

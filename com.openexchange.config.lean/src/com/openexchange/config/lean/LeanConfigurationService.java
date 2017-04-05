@@ -55,6 +55,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * {@link LeanConfigurationService} - A service combining the ConfigView (config cascade) and ConfigurationService
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.4
  */
 @SingletonService
 public interface LeanConfigurationService {
