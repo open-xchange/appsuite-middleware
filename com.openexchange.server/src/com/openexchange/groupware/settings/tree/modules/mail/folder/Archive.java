@@ -54,21 +54,25 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Sent implements PreferencesItemService {
+public class Archive implements PreferencesItemService {
 
     /**
      * Default constructor.
      */
-    public Sent() {
+    public Archive() {
         super();
     }
 
@@ -77,7 +81,7 @@ public class Sent implements PreferencesItemService {
      */
     @Override
     public String[] getPath() {
-        return new String[] { "modules", "mail", "defaultFolder", "sent" };
+        return new String[] { "modules", "mail", "defaultFolder", "archive" };
     }
 
     /**
@@ -89,7 +93,21 @@ public class Sent implements PreferencesItemService {
 
             @Override
             protected void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException {
-                setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, primaryMailAccess.getFolderStorage().getSentFolder()));
+                MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null == mass) {
+                    setting.setSingleValue(null);
+                    return;
+                }
+
+                Session session = primaryMailAccess.getSession();
+                MailAccount mailAccount = mass.getMailAccount(MailAccount.DEFAULT_ID, session.getUserId(), session.getContextId());
+                String archiveFullname = mailAccount.getArchiveFullname();
+
+                if (Strings.isEmpty(archiveFullname)) {
+                    setting.setSingleValue(null);
+                } else {
+                    setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, archiveFullname));
+                }
             }
         };
     }

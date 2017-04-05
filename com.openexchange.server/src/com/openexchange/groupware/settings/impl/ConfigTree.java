@@ -377,6 +377,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.folder.Sent.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Spam.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Trash.class,
+            com.openexchange.groupware.settings.tree.modules.mail.folder.Archive.class,
             com.openexchange.groupware.settings.tree.modules.mail.ForwardMessage.class,
             com.openexchange.groupware.settings.tree.modules.mail.GUI.class,
             com.openexchange.groupware.settings.tree.modules.mail.InlineAttachments.class,

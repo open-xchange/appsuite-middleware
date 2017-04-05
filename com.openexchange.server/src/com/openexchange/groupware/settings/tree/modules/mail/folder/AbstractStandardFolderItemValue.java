@@ -226,9 +226,9 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
      * Determines the value and applies it to given setting.
      *
      * @param setting The setting to apply to
-     * @param mailAccess The connected mail access to use
+     * @param primaryMailAccess The connected mail access to use
      * @throws OXException If operation fails
      */
-    protected abstract void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException;
+    protected abstract void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException;
 
 }
