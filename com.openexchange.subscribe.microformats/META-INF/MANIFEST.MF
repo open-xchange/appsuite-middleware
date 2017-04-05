@@ -72,8 +72,7 @@ Import-Package: com.openexchange.config,
  org.xml.sax.helpers
 Bundle-ClassPath: .,
  lib/htmllexer.jar,
- lib/htmlparser.jar,
- lib/jodatime.jar
+ lib/htmlparser.jar
 Eclipse-RegisterBuddy: com.openexchange.xerces
 Export-Package: com.openexchange.subscribe.microformats,
  com.openexchange.subscribe.microformats.datasources,
