@@ -1,4 +1,4 @@
-feature_name: Download properties
+feature_name: Download
 feature_description: |
   Enables download limits (based on donwload counts or sizes)
   It is possible to define
