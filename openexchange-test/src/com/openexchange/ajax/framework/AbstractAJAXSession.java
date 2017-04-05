@@ -49,15 +49,25 @@
 
 package com.openexchange.ajax.framework;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestManager;
+import junit.framework.TestCase;
 
 public abstract class AbstractAJAXSession extends TestCase {
 
     protected AJAXClient client;
 
+    protected CalendarTestManager catm;
+
+    private List<TestManager> testManager = new ArrayList<>();
+
     /**
      * Default constructor.
+     * 
      * @param name name of the test.
      */
     protected AbstractAJAXSession(final String name) {
@@ -78,10 +88,23 @@ public abstract class AbstractAJAXSession extends TestCase {
         super.setUp();
         String clientId = getClientId();
         client = null == clientId ? new AJAXClient(User.User1) : new AJAXClient(User.User1, clientId);
+
+        catm = new CalendarTestManager(client);
+        testManager.add(catm);
     }
 
     @Override
     protected void tearDown() throws Exception {
+        for (TestManager manager : testManager) {
+            if (manager != null) {
+                try {
+                    manager.cleanUp();
+                } catch (Exception e) {
+                    LoggerFactory.getLogger(AbstractAJAXSession.class).error("", e);
+                }
+            }
+        }
+
         if (client != null) {
             // Client can be null if setUp() fails
             client.logout();

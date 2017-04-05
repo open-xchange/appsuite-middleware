@@ -86,7 +86,6 @@ public class Bug7276Test extends AbstractTaskTest {
      * {@inheritDoc}
      */
     @Override
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         client2 = new AJAXClient(AJAXClient.User.User2);
@@ -96,7 +95,6 @@ public class Bug7276Test extends AbstractTaskTest {
      * {@inheritDoc}
      */
     @Override
-    @After
     public void tearDown() throws Exception {
         try {
             client2.logout();
