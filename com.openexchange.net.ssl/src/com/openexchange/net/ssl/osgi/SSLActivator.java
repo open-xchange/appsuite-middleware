@@ -50,10 +50,8 @@
 package com.openexchange.net.ssl.osgi;
 
 import javax.net.ssl.HttpsURLConnection;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.TrustedSSLSocketFactory;
-import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
@@ -91,9 +89,9 @@ public class SSLActivator extends HousekeepingActivator {
             SSLConfigurationService sslConfigurationService = getService(SSLConfigurationService.class);
 
             if (sslConfigurationService.isVerifyHostname()) {
-                HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
+                HttpsURLConnection.setDefaultHostnameVerifier(new com.openexchange.net.ssl.apache.DefaultHostnameVerifier());
             } else {
-                HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+                HttpsURLConnection.setDefaultHostnameVerifier(new org.apache.http.conn.ssl.NoopHostnameVerifier());
             }
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
