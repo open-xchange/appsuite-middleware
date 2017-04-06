@@ -168,7 +168,9 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.MessageRemovedIOException;
+import com.sun.mail.util.QDecoderStream;
 
 /**
  * {@link MimeMessageUtility} - Utilities for MIME messages.
@@ -1056,7 +1058,7 @@ public final class MimeMessageUtility {
                                 doEncode = false;
                             } else {
                                 if (false == prev.combine(ev)) {
-                                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString(), prev.asEncodedWord()));
+                                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
                                     prev = ev;
                                 }
                                 doEncode = false;
@@ -1064,7 +1066,7 @@ public final class MimeMessageUtility {
                         }
                     } else {
                         if (null != prev) {
-                            sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString(), prev.asEncodedWord()));
+                            sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
                             prev = null;
                         }
                         sb.append(hdrVal.substring(lastMatch, m.start()));
@@ -1072,7 +1074,7 @@ public final class MimeMessageUtility {
 
                     // Decode encoded-word
                     if (doEncode) {
-                        sb.append(decodeEncodedWord(charset, encoding, m.group(3), m.group()));
+                        sb.append(decodeEncodedWord(charset, encoding, m.group(3)));
                     }
 
                     // Remember last match position
@@ -1087,7 +1089,7 @@ public final class MimeMessageUtility {
             } while (m.find());
             if (null != prev) {
                 try {
-                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString(), prev.asEncodedWord()));
+                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
                 } catch (UnsupportedEncodingException e) {
                     LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(handleUnsupportedEncoding(prev.charset, prev.value.toString()));
@@ -1126,30 +1128,72 @@ public final class MimeMessageUtility {
         return hdrVal;
     }
 
-    private static String decodeEncodedWord(String charset, String encoding, String encodedValue, String encodedWord) throws ParseException, UnsupportedEncodingException {
+    private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedEncodingException {
         if (MessageUtility.isBig5(charset)) {
-            String decodeWord = MimeUtility.decodeWord(encodedWord);
+            String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
             if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "Big5-HKSCS"));
+                decodeWord = doDecodeEncodedWord("Big5-HKSCS", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isGB2312(charset)) {
-            String decodeWord = MimeUtility.decodeWord(encodedWord);
+            String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
             if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "GB18030"));
+                decodeWord = doDecodeEncodedWord("GB18030", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isShiftJis(charset)) {
-            if ("cp932".equalsIgnoreCase(charset)) {
-                encodedWord = new StringBuilder(encodedWord.length()).append("=?MS932?").append(encoding).append('?').append(encodedValue).append("?=").toString();
-            }
-            String decodeWord = MimeUtility.decodeWord(encodedWord);
+            String decodeWord = doDecodeEncodedWord("MS932", encoding, encodedValue);
             if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                decodeWord = CP932EmojiMapping.getInstance().replaceIn(MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932")));
+                decodeWord = CP932EmojiMapping.getInstance().replaceIn(doDecodeEncodedWord("MS932", encoding, encodedValue));
             }
             return decodeWord;
         } else {
-            return MimeUtility.decodeWord(encodedWord);
+            return doDecodeEncodedWord(charset, encoding, encodedValue);
+        }
+    }
+
+    private static String doDecodeEncodedWord(String charset2, String encoding, String encodedValue) throws ParseException, UnsupportedEncodingException {
+        String charset = MimeUtility.javaCharset(charset2);
+        if (encodedValue.length() <= 0) {
+            return "";
+        }
+
+        // Extract the bytes
+        byte[] asciiBytes = Charsets.toAsciiBytes(encodedValue);
+        int count = asciiBytes.length;
+
+        // Get the appropriate decoder
+        InputStream is;
+        if (encoding.equalsIgnoreCase("B")) {
+            is = new BASE64DecoderStream(Streams.newByteArrayInputStream(asciiBytes));
+        } else if (encoding.equalsIgnoreCase("Q")) {
+            is = new QDecoderStream(Streams.newByteArrayInputStream(asciiBytes));
+        } else {
+            throw new UnsupportedEncodingException("unknown encoding: " + encoding);
+        }
+
+        try {
+            byte[] bytes = new byte[count];
+            // count is set to the actual number of decoded bytes
+            count = is.read(bytes, 0, count);
+
+            // Finally, convert the decoded bytes into a String using the specified charset
+            return count <= 0 ? "" : new String(bytes, 0, count, charset);
+        } catch (IOException ioex) {
+            // Shouldn't happen.
+            throw new ParseException(ioex.toString());
+        } catch (IllegalArgumentException iex) {
+            /*
+             * An unknown charset of the form ISO-XXX-XXX, will cause
+             * the JDK to throw an IllegalArgumentException ... Since the
+             * JDK will attempt to create a classname using this string,
+             * but valid classnames must not contain the character '-',
+             * and this results in an IllegalArgumentException, rather than
+             * the expected UnsupportedEncodingException. Yikes
+             */
+            throw new UnsupportedEncodingException(charset);
+        } finally {
+            Streams.close(is);
         }
     }
 

@@ -818,7 +818,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Subject, etc.
              */
             if (jMail.hasAndNotNull(MailJSONField.SUBJECT.getKey())) {
-                composedMail.setSubject(jMail.getString(MailJSONField.SUBJECT.getKey()));
+                composedMail.setSubject(jMail.getString(MailJSONField.SUBJECT.getKey()), true);
             }
             /*
              * Size

@@ -702,6 +702,11 @@ public class ContentAwareMailMessage extends MailMessage {
     }
 
     @Override
+    public void setSubject(String subject, boolean decoded) {
+        message.setSubject(subject, decoded);
+    }
+
+    @Override
     public void prepareForCaching() {
         message.prepareForCaching();
     }
