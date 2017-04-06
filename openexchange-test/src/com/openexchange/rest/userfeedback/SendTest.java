@@ -50,46 +50,57 @@
 package com.openexchange.rest.userfeedback;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import java.io.File;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.testing.restclient.invoker.ApiException;
-import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
+import com.openexchange.userfeedback.rest.services.SendUserFeedbackService;
 
 /**
- * {@link ExportTest}
+ * {@link SendTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-public class ExportTest extends AbstractUserFeedbackTest {
+public class SendTest extends AbstractUserFeedbackTest {
+
+    private JSONArray recipients = null;
 
     @Override
     protected Application configure() {
-        return new ResourceConfig(ExportUserFeedbackService.class);
+        return new ResourceConfig(SendUserFeedbackService.class);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        recipients = new JSONArray();
+        JSONObject recipient1 = new JSONObject();
+        recipient1.put("address", testUser.getLogin());
+        recipient1.put("displayName", testUser.getUser());
+        recipients.put(recipient1);
     }
 
     @Test
-    public void testExportCSV_everythingFine_returnMessage() {
+    public void testSend_everythingFine_returnMessage() {
         try {
-            File export = userfeedbackApi.exportCSV("default", type, new Long(0), new Long(0));
+            userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(0), "subject", "body");
             assertEquals(200, getRestClient().getStatusCode());
-            assertNotNull(export);
         } catch (ApiException e) {
             fail(e.getMessage());
         }
     }
 
     @Test
-    public void testExportCSV_unknownContextGroup_return404() {
+    public void testSend_unknownContextGroup_return404() {
         try {
-            userfeedbackApi.exportCSV("unknown", type, new Long(0), new Long(0));
+            userfeedbackApi.sendMail("unknown", type, recipients.toString(), new Long(0), new Long(0), "subject", "body");
             fail();
         } catch (ApiException e) {
             assertEquals(404, getRestClient().getStatusCode());
@@ -97,9 +108,9 @@ public class ExportTest extends AbstractUserFeedbackTest {
     }
 
     @Test
-    public void testExportCSV_unknownFeefdbackType_return404() {
+    public void testSend_unknownFeefdbackType_return404() {
         try {
-            userfeedbackApi.exportCSV("default", "schalke-rating", new Long(0), new Long(0));
+            userfeedbackApi.sendMail("default", "schalke-rating", recipients.toString(), new Long(0), new Long(0), "subject", "body");
             fail();
         } catch (ApiException e) {
             assertEquals(404, getRestClient().getStatusCode());
@@ -107,9 +118,9 @@ public class ExportTest extends AbstractUserFeedbackTest {
     }
 
     @Test
-    public void testExportCSV_negativeStart_return404() {
+    public void testSend_negativeStart_return404() {
         try {
-            userfeedbackApi.exportCSV("default", type, new Long(-11111), new Long(0));
+            userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(-11111), new Long(0), "subject", "body");
             fail();
         } catch (ApiException e) {
             assertEquals(400, getRestClient().getStatusCode());
@@ -117,9 +128,9 @@ public class ExportTest extends AbstractUserFeedbackTest {
     }
 
     @Test
-    public void testExportCSV_negativeEnd_return404() {
+    public void testSend_negativeEnd_return404() {
         try {
-            userfeedbackApi.exportCSV("default", type, new Long(0), new Long(-11111));
+            userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(-11111), "subject", "body");
             fail();
         } catch (ApiException e) {
             assertEquals(400, getRestClient().getStatusCode());
@@ -127,70 +138,9 @@ public class ExportTest extends AbstractUserFeedbackTest {
     }
 
     @Test
-    public void testExportCSV_endBeforeStart_return404() {
+    public void testSend_endBeforeStart_return404() {
         try {
-            userfeedbackApi.exportCSV("default", type, new Long(222222222), new Long(11111));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(400, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportRAW_everythingFine_returnMessage() {
-        try {
-            String export = userfeedbackApi.exportRAW("default", type, new Long(0), new Long(0));
-            assertEquals(200, getRestClient().getStatusCode());
-            assertNotNull(export);
-        } catch (ApiException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testExportRAW_unknownContextGroup_return404() {
-        try {
-            userfeedbackApi.exportRAW("unknown", type, new Long(0), new Long(0));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(404, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportRAW_unknownFeefdbackType_return404() {
-        try {
-            userfeedbackApi.exportRAW("default", "schalke-rating", new Long(0), new Long(0));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(404, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportRAW_negativeStart_return404() {
-        try {
-            userfeedbackApi.exportRAW("default", type, new Long(-11111), new Long(0));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(400, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportRAW_negativeEnd_return404() {
-        try {
-            userfeedbackApi.exportRAW("default", type, new Long(0), new Long(-11111));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(400, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportRAW_endBeforeStart_return404() {
-        try {
-            userfeedbackApi.exportRAW("default", type, new Long(222222222), new Long(11111));
+            userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(222222222), new Long(11111), "subject", "body");
             fail();
         } catch (ApiException e) {
             assertEquals(400, getRestClient().getStatusCode());

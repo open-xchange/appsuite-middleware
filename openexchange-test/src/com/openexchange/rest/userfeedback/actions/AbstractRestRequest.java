@@ -47,27 +47,20 @@
  *
  */
 
-package com.openexchange.rest.userfeedback;
+package com.openexchange.rest.userfeedback.actions;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import javax.ws.rs.client.WebTarget;
 
 /**
- * 
- * {@link UserFeedbackSuite}
+ * {@link AbstractRestRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    FeedbackRoundtripTest.class,
-    SendTest.class,
-    ExportTest.class,
-    DeleteTest.class,
-    
+public abstract class AbstractRestRequest {
 
-})
-public class UserFeedbackSuite {
+    public abstract boolean requiresAdministrativePermission();
+
+    public abstract WebTarget getEndpoint(String host);
+
 }

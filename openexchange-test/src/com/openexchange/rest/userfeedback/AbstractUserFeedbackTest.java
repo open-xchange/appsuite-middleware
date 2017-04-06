@@ -49,25 +49,39 @@
 
 package com.openexchange.rest.userfeedback;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.rest.AbstractRestTest;
+import com.openexchange.testing.restclient.modules.UserfeedbackApi;
 
 /**
- * 
- * {@link UserFeedbackSuite}
+ * {@link AbstractUserFeedbackTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    FeedbackRoundtripTest.class,
-    SendTest.class,
-    ExportTest.class,
-    DeleteTest.class,
-    
+public class AbstractUserFeedbackTest extends AbstractRestTest {
 
-})
-public class UserFeedbackSuite {
+    protected String type = "star-rating-v1";
+
+    // @formatter:off
+    protected final String validFeedback = new String("{ " +
+        "\"score\":\"3\","+
+        "\"app\":\"app\","+
+        "\"entry_point\":\"entry\","+
+        "\"Comment\": \"s\u00FC\u00DFer die gl\u00F6cken nie klingen !|\u00A7$%&/()=?@\","+
+        "\"Operating_System\": \"Mac OS X 10.10\","+
+        "\"Browser\":\"Chrome\","+
+        "\"Browser_version\": \"77.0\","+
+        "\"User_agent\": \"Chrome/55.0.2883.87\","+
+        "\"Screen_Resolution\":\"1600x900\","+
+        "\"Language\": \"de_de\""+
+        "}");
+
+    protected UserfeedbackApi userfeedbackApi;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        userfeedbackApi = new UserfeedbackApi(getRestClient());
+    }
+
 }
