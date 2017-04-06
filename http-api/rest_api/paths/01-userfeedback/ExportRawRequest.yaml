@@ -2,7 +2,7 @@
   get:
     security:
       - basic: []
-    operationId: export
+    operationId: exportRAW
     tags:
       - Userfeedback
     summary: Exports user feedback
@@ -46,12 +46,18 @@
           type: string
       400:
         description: Bad request, response contains error message.
+        schema:
+          type: string
       401:
         description: Not authorized  
       404:
         description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
       500:
         description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
 
     x-ox-examples:
       Example:

@@ -33,17 +33,23 @@
         format: int64
     responses:
       200:
+        description: Info message when successfull.
         schema:
           type: string
-        description: Info message when successfull, error message from server in case of error.
       400:
         description: Bad request, response contains error message.
+        schema:
+          type: string
       401:
         description: Not authorized  
       404:
         description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
       500:
         description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
     x-ox-examples:
       Example:
         description: Delete user feedback from 2016-01-01 to 2016-12-31
