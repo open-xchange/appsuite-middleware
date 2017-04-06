@@ -52,6 +52,13 @@ package com.openexchange.userfeedback.mail;
 import com.openexchange.exception.OXException;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 
+/**
+ * 
+ * {@link FeedbackMailService}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since 7.8.4
+ */
 public interface FeedbackMailService {
 
     /**

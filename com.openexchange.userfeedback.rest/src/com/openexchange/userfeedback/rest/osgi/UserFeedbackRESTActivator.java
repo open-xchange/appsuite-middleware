@@ -54,7 +54,7 @@ import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.rest.services.DeleteUserFeedbackService;
 import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
-import com.openexchange.userfeedback.rest.services.SendMailService;
+import com.openexchange.userfeedback.rest.services.SendUserFeedbackService;
 
 /**
  * {@link UserFeedbackRESTActivator}
@@ -72,7 +72,7 @@ public class UserFeedbackRESTActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(ExportUserFeedbackService.class, new ExportUserFeedbackService(this));
-        registerService(SendMailService.class, new SendMailService(this));
+        registerService(SendUserFeedbackService.class, new SendUserFeedbackService(this));
         registerService(DeleteUserFeedbackService.class, new DeleteUserFeedbackService(this));
     }
 
