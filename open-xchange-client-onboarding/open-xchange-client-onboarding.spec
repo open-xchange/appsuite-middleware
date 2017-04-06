@@ -102,6 +102,11 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
             ox_set_property ${NAME} "${NEWVALUE}" $PFILE
         fi
     done
+
+    # SoftwareChange_Request-4062
+    ox_add_property com.openexchange.client.onboarding.caldav.login.customsource false /opt/open-xchange/etc/client-onboarding-caldav.properties
+    ox_add_property com.openexchange.client.onboarding.carddav.login.customsource false /opt/open-xchange/etc/client-onboarding-carddav.properties
+    ox_add_property com.openexchange.client.onboarding.eas.login.customsource false /opt/open-xchange/etc/client-onboarding-eas.properties
 fi
 
 %clean
