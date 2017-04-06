@@ -172,7 +172,7 @@ public final class CompositeMailMessage extends MailMessage {
             setSize(delegate.getSize());
         }
         if (delegate.containsSubject()) {
-            setSubject(delegate.getSubject());
+            setSubject(delegate.getSubject(), delegate.isSubjectDecoded());
         }
         if (delegate.containsThreadLevel()) {
             setThreadLevel(delegate.getThreadLevel());

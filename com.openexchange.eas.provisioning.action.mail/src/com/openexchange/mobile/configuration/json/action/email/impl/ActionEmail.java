@@ -71,6 +71,7 @@ public class ActionEmail implements ActionService {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningServlet.class);
 
+    @Override
     public ProvisioningResponse handleAction(final ProvisioningInformation provisioningInformation){
     	final ProvisioningResponse provisioningResponse = new ProvisioningResponse();
 
@@ -88,7 +89,7 @@ public class ActionEmail implements ActionService {
 			msg.addTo(new InternetAddress(provisioningInformation.getTarget()));
 
 			if (provisioningInformation.containsProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString())) {
-				msg.setSubject(provisioningInformation.getProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString()).getSubject());
+				msg.setSubject(provisioningInformation.getProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString()).getSubject(), true);
 
 				final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningInformation.getProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString()).getMessage());
 				msg.setBodyPart(textPart);

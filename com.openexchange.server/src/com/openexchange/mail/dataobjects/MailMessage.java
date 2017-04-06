@@ -399,6 +399,11 @@ public abstract class MailMessage extends MailPart {
     private boolean b_subject;
 
     /**
+     * The subject.
+     */
+    private boolean subjectDecoded;
+
+    /**
      * The sent date (the <code>Date</code> header).
      */
     private Date sentDate;
@@ -1194,7 +1199,7 @@ public abstract class MailMessage extends MailPart {
         if (!b_subject) {
             final String subjectStr = MimeMessageUtility.checkNonAscii(getFirstHeader(MessageHeaders.HDR_SUBJECT));
             if (subjectStr != null) {
-                setSubject(decodeMultiEncodedHeader(subjectStr));
+                setSubject(decodeMultiEncodedHeader(subjectStr), true);
             }
         }
         return subject;
@@ -1224,6 +1229,27 @@ public abstract class MailMessage extends MailPart {
     public void setSubject(final String subject) {
         this.subject = subject;
         b_subject = true;
+    }
+
+    /**
+     * Sets the subject
+     *
+     * @param subject The subject to set
+     * @param decoded <code>true</code> if ensured to be decoded; otherwise <code>false</code>
+     */
+    public void setSubject(final String subject, boolean decoded) {
+        this.subject = subject;
+        b_subject = true;
+        this.subjectDecoded = decoded;
+    }
+
+    /**
+     * Checks whether subject is ensured to be decoded.
+     *
+     * @return <code>true</code> if decoded; otherwise <code>false</code>
+     */
+    public boolean isSubjectDecoded() {
+        return subjectDecoded;
     }
 
     private static final MailDateFormat MAIL_DATE_FORMAT;

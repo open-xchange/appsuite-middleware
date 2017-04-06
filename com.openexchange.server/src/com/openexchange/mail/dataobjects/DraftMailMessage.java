@@ -674,6 +674,11 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
+    public void setSubject(String subject, boolean decoded) {
+        message.setSubject(subject, decoded);
+    }
+
+    @Override
     public Date getSentDate() {
         final Date sentDate = message.getSentDate();
         if (null == sentDate) {
