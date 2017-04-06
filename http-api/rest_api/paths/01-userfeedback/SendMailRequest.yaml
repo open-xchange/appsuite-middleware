@@ -1,6 +1,6 @@
 /userfeedback/v1/mail/{context-group}/{type}:
   post:
-    operationId: mail
+    operationId: sendMail
     tags:
       - Userfeedback
     summary: Exports user feedback and sends exported data to provided recipients
@@ -47,21 +47,29 @@
         type: string
       - 
         name: recipients
-        in: formData
+        in: body
         description: JSON Array containing address, display name and PGP key (if available) for every recipient.
         required: true
         type: string
     responses:
       200:
-        description: Blank in case of success, error message from server in case of error.
+        description: Info message about sent status
+        schema:
+          type: string
       400:
         description: Bad request, response contains error message.
+        schema:
+          type: string
       401:
         description: Not authorized
       404:
         description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
       500:
         description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
 
     x-ox-examples:
       Example:

@@ -2,7 +2,7 @@
   get:
     security:
       - basic: []
-    operationId: export
+    operationId: exportCSV
     tags:
       - Userfeedback
     summary: Exports user feedback as CSV
@@ -50,12 +50,18 @@
             description: text/csv; charset=utf-8
       400:
         description: Bad request, response contains error message.
+        schema:
+          type: string
       401:
         description: Not authorized  
       404:
         description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
       500:
         description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
 
     x-ox-examples:
       Example:
