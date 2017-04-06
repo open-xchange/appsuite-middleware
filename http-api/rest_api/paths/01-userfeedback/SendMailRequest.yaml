@@ -50,7 +50,8 @@
         in: body
         description: JSON Array containing address, display name and PGP key (if available) for every recipient.
         required: true
-        type: string
+        schema:
+          type: string
     responses:
       200:
         description: Info message about sent status
