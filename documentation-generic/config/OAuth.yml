@@ -21,3 +21,92 @@ properties:
       related: 
       file: oauth.properties
       tags: ["OAuth"]
+    - key: com.openexchange.oauth.[serviceId]
+      description: |
+        Enables or disables the oauth service with the service id [serviceId]. 
+
+        Currently known service ids:
+          * boxcom
+          * dropbox
+          * google
+          * linkedin
+          * msliveconnect
+          * twitter
+          * xing
+          * yahoo
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
+    - key: com.openexchange.oauth.[serviceId].apiKey
+      description: |
+        The api key of your [serviceId] application.
+
+        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
+    - key: com.openexchange.oauth.[serviceId].apiSecret
+      description: |
+        The api secret of your [serviceId] application.
+
+        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
+    - key: com.openexchange.oauth.[serviceId].redirectUrl
+      description: |
+        The redirect url of your [serviceId] application.
+        E.g. "https://myappsuite.mydomain.invalid/ajax/defer"
+
+        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MS Live Connect", "Yahoo"]
+    - key: com.openexchange.oauth.[serviceId].productName
+      description: |
+        The product name of your [serviceId] application.
+
+        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      tags: ["OAuth", "Dropbox", "Google", "Yahoo"]
+    - key: com.openexchange.oauth.xing.consumerKey
+      description: |
+        The consumer key (for upsell).
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      tags: ["OAuth", "Xing", "Credential"]
+    - key: com.openexchange.oauth.xing.consumerSecret
+      description: |
+        The consumer secret (for upsell)
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      tags: ["OAuth", "Xing", "Credential"]

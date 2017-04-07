@@ -643,7 +643,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 mail.setFolder(fullName);
                 mail.setAccountId(accountId);
                 mail.setOriginalId(uid.getId());
-                mail.setOriginalFolder(uid.getFullName());
+                mail.setOriginalFolder(new FullnameArgument(accountId, uid.getFullName()));
                 if (null != future) {
                     try {
                         mail.setUnreadMessages(future.get().intValue());
@@ -737,7 +737,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                             umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                             umm.setAccountId(accountId);
                                             umm.setOriginalId(accountMail.getMailId());
-                                            umm.setOriginalFolder(fn);
+                                            umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                             messages.add(umm);
                                         }
                                         ret.add(messages);
@@ -771,7 +771,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                             umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                             umm.setAccountId(accountId);
                                             umm.setOriginalId(accountMail.getMailId());
-                                            umm.setOriginalFolder(fn);
+                                            umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                             messages.add(umm);
                                         }
                                         ret.add(messages);
@@ -839,7 +839,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             if (null == effectiveSortField) {
                                 effectiveSortField = MailSortField.RECEIVED_DATE;
                             }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -859,7 +859,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                     umm.setAccountId(accountId);
                                     umm.setOriginalId(accountMail.getMailId());
-                                    umm.setOriginalFolder(fn);
+                                    umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                     messages.add(umm);
                                 }
                                 ret.add(messages);
@@ -901,7 +901,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true);
                 Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                     @Override
@@ -1029,7 +1029,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Sort root elements
             {
                 MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
-                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale(), mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                 Collections.sort(list, listComparator);
             }
             // Check for index range
@@ -1101,7 +1101,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                             umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                             umm.setAccountId(accountId);
                                             umm.setOriginalId(accountMail.getMailId());
-                                            umm.setOriginalFolder(fn);
+                                            umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                             messages.add(umm);
                                         }
                                         ret.add(messages);
@@ -1169,7 +1169,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             if (null == effectiveSortField) {
                                 effectiveSortField = MailSortField.RECEIVED_DATE;
                             }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -1189,7 +1189,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                     umm.setAccountId(accountId);
                                     umm.setOriginalId(accountMail.getMailId());
-                                    umm.setOriginalFolder(fn);
+                                    umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                     messages.add(umm);
                                 }
                                 ret.add(messages);
@@ -1224,7 +1224,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true);
                 Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                     @Override
@@ -1334,7 +1334,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Sort root elements
             {
                 MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
-                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale(), mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                 Collections.sort(list, listComparator);
             }
             // Check for index range
@@ -1393,8 +1393,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     }
 
-    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, Locale locale, boolean userFlagsEnabled) {
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, userFlagsEnabled);
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1484,7 +1484,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
                                     umm.setOriginalId(accountMail.getMailId());
-                                    umm.setOriginalFolder(fn);
+                                    umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                     messages.add(umm);
                                 }
                             }
@@ -1518,7 +1518,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale());
+                MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true);
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -1724,7 +1724,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                         @Override
                         public ContinuationResponse<Collection<MailMessage>> responseFor(List<MailMessage> messages, boolean completed) throws OXException {
                             // Sort them
-                            MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale);
+                            MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true);
                             Collections.sort(messages, c);
                             // Return as array
                             if (null == indexRange) {
@@ -1834,7 +1834,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                         umm.setAccountId(accountId);
                                         umm.setAccountName(name);
                                         umm.setOriginalId(accountMail.getMailId());
-                                        umm.setOriginalFolder(fn);
+                                        umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                         messages.add(umm);
                                     }
                                 }
@@ -1949,7 +1949,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setAccountId(accountId);
                                     umm.setAccountName(name);
                                     umm.setOriginalId(accountMail.getMailId());
-                                    umm.setOriginalFolder(fn);
+                                    umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                     messages.add(umm);
                                 }
                             }
@@ -1980,7 +1980,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 }
                 LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Sort them
-                MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale);
+                MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true);
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -2136,7 +2136,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
                                     umm.setOriginalId(accountMail.getMailId());
-                                    umm.setOriginalFolder(fn);
+                                    umm.setOriginalFolder(new FullnameArgument(accountId, fn));
                                     messages.add(umm);
                                 }
                             }
@@ -2159,7 +2159,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("Retrieving unread messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
+                Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true));
                 // Return as array
                 return messages.toArray(new MailMessage[messages.size()]);
             } catch (InterruptedException e) {
@@ -2518,7 +2518,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     umm.setFolder(uiFullname);
                     umm.setAccountId(accountId);
                     umm.setOriginalId(mail.getMailId());
-                    umm.setOriginalFolder(folder);
+                    umm.setOriginalFolder(new FullnameArgument(accountId, folder));
                 }
             }
         }

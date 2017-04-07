@@ -304,7 +304,7 @@ public class SchemaStoreImpl extends SchemaStore {
         // Refresh lock
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=? AND taskName=?");
+            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=0 AND taskName=?");
             stmt.setLong(1, System.currentTimeMillis());
             stmt.setString(2, idiom);
             return stmt.executeUpdate() > 0;

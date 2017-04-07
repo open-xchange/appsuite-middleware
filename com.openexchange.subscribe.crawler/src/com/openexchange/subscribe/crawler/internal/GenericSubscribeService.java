@@ -142,10 +142,14 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     }
 
     public Workflow getWorkflow() {
-        Workflow workflow = new Workflow();
+        Workflow workflow = null;
         try {
             workflow = WorkflowFactory.createWorkflowByString(workflowString);
         } catch (final OXException e) {
+        }
+
+        if (null == workflow) {
+            workflow = new Workflow();
         }
         workflow.setActivator(activator);
 

@@ -62,8 +62,6 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountProperties.class);
 
-    protected Boolean enforceSecureConnection;
-
     /** The mail server URL */
     protected final String url;
 
@@ -96,54 +94,13 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
     }
 
     @Override
-    public char getDefaultSeparator() {
-        return lookUpCharProperty("com.openexchange.mail.defaultSeparator", MailProperties.getInstance().getDefaultSeparator());
-    }
-
-    @Override
-    public int getMailAccessCacheIdleSeconds() {
-        return lookUpIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", MailProperties.getInstance().getMailAccessCacheIdleSeconds());
-    }
-
-    @Override
-    public int getMailAccessCacheShrinkerSeconds() {
-        return lookUpIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return lookUpIntProperty("com.openexchange.mail.mailFetchLimit", MailProperties.getInstance().getMailFetchLimit());
     }
 
     @Override
-    public int getWatcherFrequency() {
-        return lookUpIntProperty("com.openexchange.mail.watcherFrequency", MailProperties.getInstance().getWatcherFrequency());
-    }
-
-    @Override
-    public int getWatcherTime() {
-        return lookUpIntProperty("com.openexchange.mail.watcherTime", MailProperties.getInstance().getWatcherTime());
-    }
-
-    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return lookUpBoolProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace());
-
-    }
-
-    @Override
-    public boolean isEnforceSecureConnection() {
-        Boolean b = this.enforceSecureConnection;
-        if (null != b) {
-            return b.booleanValue();
-        }
-
-        return lookUpBoolProperty("com.openexchange.mail.enforceSecureConnection", MailProperties.getInstance().isEnforceSecureConnection());
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        this.enforceSecureConnection = Boolean.valueOf(enforceSecureConnection);
     }
 
     @Override
@@ -159,16 +116,6 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
     @Override
     public boolean isUserFlagsEnabled() {
         return lookUpBoolProperty("com.openexchange.mail.userFlagsEnabled", MailProperties.getInstance().isUserFlagsEnabled());
-    }
-
-    @Override
-    public boolean isWatcherEnabled() {
-        return lookUpBoolProperty("com.openexchange.mail.watcherEnabled", MailProperties.getInstance().isWatcherEnabled());
-    }
-
-    @Override
-    public boolean isWatcherShallClose() {
-        return lookUpBoolProperty("com.openexchange.mail.watcherShallClose", MailProperties.getInstance().isWatcherShallClose());
     }
 
     @Override

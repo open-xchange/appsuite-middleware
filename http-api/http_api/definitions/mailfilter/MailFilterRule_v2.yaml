@@ -18,7 +18,7 @@ properties:
     items:
       type: string
   test:
-    $ref: "#/definitions/MailFilterTest_v2"
+    $ref: "#/definitions/MailFilterTestv2"
   actioncmds:
     type: array
     description: An array of action commands.

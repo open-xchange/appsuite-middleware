@@ -140,27 +140,6 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean isImapSort();
 
     /**
-     * Whether to notify about recent messages.
-     *
-     * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
-     */
-    public boolean notifyRecent();
-
-    /**
-     * Gets the frequency (in seconds) when to check for recent mails.
-     *
-     * @return The frequency (in seconds)
-     */
-    public int getNotifyFrequencySeconds();
-
-    /**
-     * Gets the comma-separated full names of the folders to check for recent mails.
-     *
-     * @return The comma-separated full names
-     */
-    public String getNotifyFullNames();
-
-    /**
      * Gets the IMAP timeout.
      *
      * @return The IMAP timeout

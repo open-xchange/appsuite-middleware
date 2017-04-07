@@ -93,10 +93,11 @@ public interface LoginRequest {
     Interface getInterface();
 
     Map<String, List<String>> getHeaders();
-    
+
     /**
-     * In some cases the query parameters are needed to do a login, specially in custom implementations.
-     * @return The parameter of the {@link javax.servlet.http.HttpServletRequest#getParameterMap()}
+     * Gets the parameters associated with the HTTP login request (if any).
+     *
+     * @return The parameters or an empty map
      */
     Map<String, String[]> getRequestParameter();
 

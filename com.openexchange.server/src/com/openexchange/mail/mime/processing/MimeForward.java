@@ -85,7 +85,6 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -214,7 +213,7 @@ public final class MimeForward extends AbstractMimeProcessing {
             /*
              * Clone them to ensure consistent data
              */
-            MailMessage[] origMsgs = ManagedMimeMessage.clone(originalMsgs);
+            MailMessage[] origMsgs = originalMsgs;
             /*
              * New MIME message with a dummy session
              */

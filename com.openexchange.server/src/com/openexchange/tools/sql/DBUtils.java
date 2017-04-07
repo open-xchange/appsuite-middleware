@@ -103,7 +103,9 @@ public final class DBUtils {
      * Closes the ResultSet.
      *
      * @param result <code>null</code> or a ResultSet to close.
+     * @deprecated Prefer to use {@link Databases#closeSQLStuff(ResultSet)} instead
      */
+    @Deprecated
     public static void closeSQLStuff(final ResultSet result) {
         if (result != null) {
             try {
@@ -118,7 +120,9 @@ public final class DBUtils {
      * Closes the {@link Statement}.
      *
      * @param stmt <code>null</code> or a {@link Statement} to close.
+     * @deprecated Prefer to use {@link Databases#closeSQLStuff(Statement)} instead
      */
+    @Deprecated
     public static void closeSQLStuff(final Statement stmt) {
         if (null != stmt) {
             try {
@@ -134,7 +138,9 @@ public final class DBUtils {
      *
      * @param result <code>null</code> or a ResultSet to close.
      * @param stmt <code>null</code> or a Statement to close.
+     * @deprecated Prefer to use {@link Databases#closeSQLStuff(ResultSet, Statement)} instead
      */
+    @Deprecated
     public static void closeSQLStuff(final ResultSet result, final Statement stmt) {
         closeSQLStuff(result);
         closeSQLStuff(stmt);
@@ -216,7 +222,9 @@ public final class DBUtils {
      *
      * @param con connection to start the transaction on.
      * @throws SQLException if starting the transaction fails.
+     * @deprecated Prefer to use {@link Databases#startTransaction(Connection)} instead
      */
+    @Deprecated
     public static void startTransaction(final Connection con) throws SQLException {
         Statement stmt = null;
         try {
@@ -232,7 +240,9 @@ public final class DBUtils {
      * Performs a roll-back for a started transaction.
      *
      * @param con The connection to roll back.
+     * @deprecated Prefer to use {@link Databases#rollback(Connection)} instead
      */
+    @Deprecated
     public static void rollback(final Connection con) {
         if (null == con) {
             return;
@@ -250,7 +260,9 @@ public final class DBUtils {
      * Convenience method to set the autocommit of a connection to <code>true</code>.
      *
      * @param con connection that should go into autocommit mode.
+     * @deprecated Prefer to use {@link Databases#autocommit(Connection)} instead
      */
+    @Deprecated
     public static void autocommit(final Connection con) {
         if (null == con) {
             return;

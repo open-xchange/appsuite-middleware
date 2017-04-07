@@ -66,5 +66,7 @@ public enum TestCommand {
     HEADER,
     ANYOF,
     CURRENTDATE,
-    BODY;
+    DATE,
+    BODY,
+    EXISTS;
 }

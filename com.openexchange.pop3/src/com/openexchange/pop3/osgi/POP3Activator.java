@@ -153,8 +153,8 @@ public final class POP3Activator extends HousekeepingActivator {
              * Service tracker for possible POP3 storage provider
              */
             track(POP3StorageProvider.class, customizer);
-            track(SessiondService.class);
-            trackService(AuditLogService.class);
+            track(SessiondService.class, new RegistryCustomizingServiceTrackerCustomizer<SessiondService>(SessiondService.class, context));
+            track(AuditLogService.class, new RegistryCustomizingServiceTrackerCustomizer<AuditLogService>(AuditLogService.class, context));
             openTrackers();
             /*
              * Register

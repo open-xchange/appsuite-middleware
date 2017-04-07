@@ -18,7 +18,7 @@
         description: A JSON object describing the mail filter rule. If the field `position` is included, it's taken as the position of the rule in the array on the server side (this value shouldn't be greater than the size of all rules).
         required: true
         schema:
-          $ref: "#/definitions/MailFilterRule_v2"
+          $ref: "#/definitions/MailFilterRulev2"
     responses:
       200:
         description: |

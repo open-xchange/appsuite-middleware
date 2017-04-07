@@ -1,11 +1,7 @@
 
 package com.openexchange.webdav.protocol;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -26,6 +22,7 @@ public class ResourceTest extends AbstractResourceTest {
 
     static protected WebdavFactory FACTORY = null;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         try {
@@ -35,8 +32,10 @@ public class ResourceTest extends AbstractResourceTest {
         }
         FACTORY = TestWebdavFactoryBuilder.buildFactory();
         FACTORY.beginRequest();
+        super.setUp();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         super.tearDown();
@@ -362,21 +361,21 @@ public class ResourceTest extends AbstractResourceTest {
          * String defaultDispName = res.getUrl().substring(res.getUrl().lastIndexOf("/")+1);
          * Assert.assertEquals(res.getDisplayName(), res.getProperty("DAV:", "displayname").getValue());
          * Assert.assertEquals(defaultDispName, res.getDisplayName());
-         * 
+         *
          * res.setDisplayName("Other Disp");
          * res.save();
          * res = res.reload();
          * Assert.assertEquals("Other Disp", res.getDisplayName());
          * Assert.assertEquals(res.getDisplayName(), res.getProperty("DAV:", "displayname").getValue());
-         * 
+         *
          * WebdavProperty prop = Protocol.DISPLAYNAME_LITERAL.getWebdavProperty();
          * prop.setValue("My other disp");
          * res.putProperty(prop);
-         * 
+         *
          * Assert.assertEquals("My other disp", res.getDisplayName());
          * Assert.assertEquals(res.getDisplayName(), res.getProperty("DAV:","displayname").getValue());
-         * 
-         * 
+         *
+         *
          * return null;
          */
         return null;
@@ -389,7 +388,7 @@ public class ResourceTest extends AbstractResourceTest {
          * String defaultLanguage = "en";
          * Assert.assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
          * Assert.assertEquals(defaultLanguage, res.getLanguage());
-         * 
+         *
          * try {
          * res.setLanguage("de");
          * } catch (WebdavException e) {
@@ -397,20 +396,20 @@ public class ResourceTest extends AbstractResourceTest {
          * fail(e.toString());
          * }
          * res.save();
-         * 
+         *
          * res = res.reload();
-         * 
+         *
          * Assert.assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
          * Assert.assertEquals("de", res.getLanguage());
-         * 
+         *
          * WebdavProperty prop = Protocol.GETCONTENTLANGUAGE_LITERAL.getWebdavProperty();
          * prop.setValue("fr");
          * res.putProperty(prop);
-         * 
+         *
          * Assert.assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
          * Assert.assertEquals("fr", res.getLanguage());
-         * 
-         * 
+         *
+         *
          * return null;
          */ //FIXME
         return null;
@@ -560,14 +559,14 @@ public class ResourceTest extends AbstractResourceTest {
          * res = resourceManager.resolveResource(res.getUrl());
          * Assert.assertEquals(res.getSource(), res.getProperty("DAV:", "source").getValue());
          * Assert.assertEquals("http://localhost/theSecretSource", res.getSource());
-         * 
+         *
          * WebdavProperty prop = Protocol.SOURCE_LITERAL.getWebdavProperty();
          * prop.setValue("http://localhost/theSuperSecretSource");
          * res.putProperty(prop);
-         * 
+         *
          * Assert.assertEquals(res.getSource(), res.getProperty("DAV:", "source").getValue());
          * Assert.assertEquals("http://localhost/theSuperSecretSource", res.getSource());
-         * 
+         *
          */ // FIXME
         return null;
     }

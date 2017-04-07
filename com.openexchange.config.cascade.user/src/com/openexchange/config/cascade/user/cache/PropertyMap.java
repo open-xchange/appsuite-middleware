@@ -178,7 +178,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
+            ThreadPools.submitElseExecute(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();

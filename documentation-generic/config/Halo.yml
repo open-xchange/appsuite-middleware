@@ -1,0 +1,12 @@
+feature_name: Halo
+properties:
+    - key: com.openexchange.halo.linkedin.enabledMailCapableKey
+      description: |
+        Specify whether LinkedIn API key/secret are allowed to access E-Mail-sensitive data.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: halo-linkedin.properties
+      tags: ["Halo", "LinkedIn"]

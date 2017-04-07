@@ -83,6 +83,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MimeMailException;
@@ -354,7 +355,7 @@ public class IMAPDefaultFolderChecker {
                                 /*
                                  * Strange... No INBOX available. Try to create it.
                                  */
-                                char sep = IMAPCommandsCollection.getSeparator(tmp);
+                                char sep = IMAPCommandsCollection.getSeparator(tmp, MailProperties.getInstance().getDefaultSeparator());
                                 try {
                                     IMAPCommandsCollection.createFolder(tmp, sep, FOLDER_TYPE);
                                 } catch (MessagingException e) {

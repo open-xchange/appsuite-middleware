@@ -60,12 +60,16 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.image.osgi.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
@@ -139,6 +143,14 @@ public final class ImageUtility {
             @Override
             public void handleValue(String value, ImageLocation.Builder builder) {
                 builder.timestamp(value);
+            }
+        });
+
+        map.put(AJAXServlet.PARAMETER_AUTH_TOKEN, new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.auth(value);
             }
         });
 
@@ -217,9 +229,22 @@ public final class ImageUtility {
         final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
         final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
         final String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
+
+        String auth = null;
+        {
+            ServiceLookup services = Services.getServiceLookup();
+            CryptographicServiceAuthenticationFactory cryptoService = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+            if (cryptoService != null) {
+                try {
+                    auth = cryptoService.createAuthenticationFrom(requestData);
+                } catch (OXException e) {
+                    LOGGER.error("Problem creating authentication token ", e);
+                }
+            }
+        }
         String registrationName = requestData.getParameter("source");
 
-        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).build();
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).auth(auth).build();
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(requestData.getSerlvetRequestURI());
             if (null == registrationName) {

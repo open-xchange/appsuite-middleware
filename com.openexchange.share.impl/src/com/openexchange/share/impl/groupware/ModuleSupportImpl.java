@@ -122,7 +122,7 @@ public class ModuleSupportImpl implements ModuleSupport {
 
     @Override
     public TargetUpdate prepareAdministrativeUpdate(int contextID, Connection writeCon) throws OXException {
-        return new AdministrativeTargetUpdateImpl(services, contextID, writeCon, handlers);
+        return new AdministrativeTargetUpdateImpl(services, contextID, writeCon, handlers, folderExtensions);
     }
 
     @Override

@@ -238,6 +238,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
     }
 
     @Override
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
+        throw new UnsupportedOperationException("FileStorageFolderStorage.getVisibleSubfolders()");
+    }
+
+    @Override
     public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
         if (false == FileStorageContentType.class.isInstance(contentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());

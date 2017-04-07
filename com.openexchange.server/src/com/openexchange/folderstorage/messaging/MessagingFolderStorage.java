@@ -226,6 +226,11 @@ public final class MessagingFolderStorage implements FolderStorage {
     }
 
     @Override
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
+        throw new UnsupportedOperationException("MessagingFolderStorage.getVisibleSubfolders()");
+    }
+
+    @Override
     public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
         throw new UnsupportedOperationException("MessagingFolderStorage.getSharedFolders()");
     }

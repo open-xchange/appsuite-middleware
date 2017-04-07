@@ -4,7 +4,7 @@ properties:
     type: array
     description: Array of available test-objects.
     items:
-      $ref: "#/definitions/MailFilterConfigTest_v2"
+      $ref: "#/definitions/MailFilterConfigTestv2"
   actioncommands:
     type: array
     description: Array of available action-objects.

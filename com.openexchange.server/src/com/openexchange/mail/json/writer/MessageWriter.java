@@ -70,7 +70,6 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -499,7 +498,7 @@ public final class MessageWriter {
                 try {
                     Object originalFolder;
                     if (mail.containsOriginalFolder() && null != mail.getOriginalFolder()) {
-                        originalFolder = prepareFullname(accountId, mail.getOriginalFolder());
+                        originalFolder = prepareFullname(mail.getOriginalFolder().getAccountId(), mail.getOriginalFolder().getFullName());
                     } else {
                         // Fall back to regular folder
                         int accId = accountId;
@@ -545,7 +544,8 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().toLowerCaseString());
+                        // Only base type in case of JSON object
+                        jsonContainer.toObject().put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                     } else {
                         jsonContainer.toArray().put(mail.getContentType().toLowerCaseString());
                     }
@@ -622,14 +622,20 @@ public final class MessageWriter {
                     String subject = mail.getSubject();
                     if (withKey) {
                         if (subject != null) {
-                            subject = decodeMultiEncodedHeader(subject);
+                            // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
+                            if (false == mail.isSubjectDecoded()) {
+                                subject = decodeMultiEncodedHeader(subject);
+                            }
                             jsonContainer.toObject().put(MailJSONField.SUBJECT.getKey(), subject.trim());
                         }
                     } else {
                         if (subject == null) {
                             jsonContainer.toArray().put(JSONObject.NULL);
                         } else {
-                            subject = decodeMultiEncodedHeader(subject);
+                            // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
+                            if (false == mail.isSubjectDecoded()) {
+                                subject = decodeMultiEncodedHeader(subject);
+                            }
                             jsonContainer.toArray().put(subject.trim());
                         }
                     }
@@ -799,7 +805,7 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     int colorLabel;
-                    if (MailProperties.getInstance().isUserFlagsEnabled() && mail.containsColorLabel()) {
+                    if (mail.containsColorLabel()) {
                         colorLabel = mail.getColorLabel();
                     } else {
                         colorLabel = 0;

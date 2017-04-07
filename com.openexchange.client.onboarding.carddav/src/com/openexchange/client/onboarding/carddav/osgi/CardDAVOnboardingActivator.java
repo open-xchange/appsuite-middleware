@@ -51,9 +51,11 @@ package com.openexchange.client.onboarding.carddav.osgi;
 
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.carddav.CardDAVOnboardingProvider;
+import com.openexchange.client.onboarding.carddav.custom.CustomLoginSource;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 
 /**
@@ -78,7 +80,11 @@ public class CardDAVOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(OnboardingProvider.class, new CardDAVOnboardingProvider(this));
+        RankingAwareNearRegistryServiceTracker<CustomLoginSource> loginSources = new RankingAwareNearRegistryServiceTracker<>(context, CustomLoginSource.class);
+        rememberTracker(loginSources);
+        openTrackers();
+
+        registerService(OnboardingProvider.class, new CardDAVOnboardingProvider(loginSources, this));
     }
 
 }

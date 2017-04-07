@@ -940,6 +940,11 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
+    public void setSubject(String subject, boolean decoded) {
+        delegatee.setSubject(subject, decoded);
+    }
+
+    @Override
     public void setThreadLevel(final int threadLevel) {
         delegatee.setThreadLevel(threadLevel);
     }

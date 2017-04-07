@@ -76,8 +76,6 @@ public final class Server {
 
     private static volatile ConfigDatabaseService configDatabaseService;
 
-    private static int serverId = -1;
-
     /**
      * Prevent instantiation
      */
@@ -89,17 +87,25 @@ public final class Server {
         Server.configDatabaseService = configDatabaseService;
     }
 
-    public static final int getServerId() throws OXException {
-        synchronized (Server.class) {
-            if (-1 == serverId) {
-                serverId = Server.loadServerId(getServerName());
-                if (-1 == serverId) {
-                    throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
+    private static volatile Integer serverId;
+
+    public static int getServerId() throws OXException {
+        Integer tmp = serverId;
+        if (null == tmp) {
+            synchronized (Server.class) {
+                tmp = serverId;
+                if (null == tmp) {
+                    int iServerId = Server.loadServerId(getServerName());
+                    if (-1 == iServerId) {
+                        throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
+                    }
+                    tmp = I(iServerId);
+                    serverId = tmp;
+                    LOG.trace("Got server id: {}", tmp);
                 }
-                LOG.trace("Got server id: {}", I(serverId));
             }
         }
-        return serverId;
+        return tmp.intValue();
     }
 
     public static final void start(final ConfigurationService service) throws OXException {

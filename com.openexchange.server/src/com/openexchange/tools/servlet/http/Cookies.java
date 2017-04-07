@@ -181,6 +181,26 @@ public final class Cookies {
      * @see #configuredDomain()
      */
     public static String getDomainValue(final String serverName) {
+        String domain = getDomainValueFromConfiguration(serverName);
+        if (null != domain) {
+            return domain;
+        }
+        if (Tools.validateDomainRegardingSharding(serverName)) {
+            return serverName;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the domain parameter for specified server name with configured default behavior whether to prefix domain with a dot (
+     * <code>'.'</code>) character.
+     *
+     * @param serverName The server name
+     * @return The domain parameter or <code>null</code>
+     * @see #prefixWithDot()
+     * @see #configuredDomain()
+     */
+    public static String getDomainValueFromConfiguration(final String serverName) {
         if (!domainEnabled()) {
             return null;
         }
@@ -241,34 +261,6 @@ public final class Cookies {
             }
         }
         return null;
-    }
-
-    /**
-     * Extracts domain parameter out of specified (JSESSIONID) cookie value.
-     *
-     * @param id The cookie value
-     * @return The domain parameter or <code>null</code>
-     */
-    public static String extractDomainValue(final String id) {
-        if (null == id) {
-            return null;
-        }
-        final int start = id.indexOf('-');
-        if (start > 0) {
-            final int end = id.lastIndexOf('.');
-            if (end > start) {
-                return urlDecode(id.substring(start + 1, end));
-            }
-        }
-        return null;
-    }
-
-    private static String urlDecode(final String text) {
-        try {
-            return URLDecoder.decode(text, "iso-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return text;
-        }
     }
 
     /**

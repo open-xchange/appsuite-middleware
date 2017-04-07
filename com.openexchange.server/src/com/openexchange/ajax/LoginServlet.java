@@ -50,18 +50,13 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
-import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
-import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -185,7 +180,7 @@ public class LoginServlet extends AJAXServlet {
     /**
      * <code>"open-xchange-share-"</code>
      */
-    private static final String SHARE_PREFIX = "open-xchange-share-".intern();
+    public static final String SHARE_PREFIX = "open-xchange-share-".intern();
 
     /**
      * <code>"open-xchange-public-session-"</code>
@@ -333,34 +328,49 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
+
                 try {
-                    final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
-                    if (session != null) {
-                        SessionUtility.checkIP(session, req.getRemoteAddr());
-                        String[] additionalsForHash;
-                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                            /*
-                             * inject context- and user-id to allow parallel guest sessions
-                             */
-                            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
-                        } else {
-                            additionalsForHash = null;
-                        }
-
-                        LoginConfiguration conf = getLoginConfiguration(session);
-                        String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
-                        if (secret == null || !session.getSecret().equals(secret)) {
-                            LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
-                            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                            return;
-                        }
-
-                        LoginPerformer.getInstance().doLogout(sessionId);
-                        // Drop relevant cookies
-                        SessionUtility.removeOXCookies(session, req, resp);
-                        SessionUtility.removeJSESSIONID(req, resp);
+                    Session session = LoginPerformer.getInstance().lookupSession(sessionId);
+                    if (session == null) {
+                        LOG.info("Status code 403 (FORBIDDEN): No such session.");
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
                     }
-                } catch (final OXException e) {
+
+                    SessionUtility.checkIP(session, req.getRemoteAddr());
+
+                    String[] additionalsForHash;
+                    if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                        /*
+                         * inject context- and user-id to allow parallel guest sessions
+                         */
+                        additionalsForHash = new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) };
+                    } else {
+                        additionalsForHash = null;
+                    }
+
+                    LoginConfiguration conf = getLoginConfiguration(session);
+                    String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
+                    if (secret == null || !session.getSecret().equals(secret)) {
+                        LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+
+                    // Do the logout
+                    LoginPerformer.getInstance().doLogout(sessionId);
+
+                    // Drop relevant cookies
+                    SessionUtility.removeOXCookies(session, req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
+                } catch (OXException e) {
+                    if (SessionUtility.isIpCheckError(e)) {
+                        LOG.info("Status code 403 (FORBIDDEN): Wrong client IP address.");
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                    LOG.error("Logout failed", e);
+                } catch (RuntimeException e) {
                     LOG.error("Logout failed", e);
                 }
             }
@@ -1034,37 +1044,8 @@ public class LoginServlet extends AJAXServlet {
         final String domain = getDomainValue(null == serverName ? determineServerNameByLogProperty() : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
-        } 
-        else if (useShardingForHost(serverName) && null != serverName && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
-            cookie.setDomain(serverName);
         }
         return cookie;
-    }
-    
-    
-
-    private static boolean useShardingForHost(String serverName) {
-        boolean result = false;
-        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-        try {
-            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
-            if (customHostConfigurations != null) {
-                result = areShardingHostsAvailable(customHostConfigurations);
-            }
-        } catch (OXException e) {
-            LOG.error("Unable to load custom host configuration", e);
-        }
-        return result;
-    }
-    
-    private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
-        List<String> shardingSubdomains = new ArrayList<>();
-        for (Map<String, Object> map : customHostConfigurations) {
-            if (map.containsKey("shardingSubdomains")) {
-                shardingSubdomains = (List<String>) map.get("shardingSubdomains");
-            }
-        }
-        return shardingSubdomains.isEmpty() ? false : true;
     }
 
     /**

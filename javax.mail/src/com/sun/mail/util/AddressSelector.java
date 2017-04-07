@@ -50,10 +50,12 @@
 package com.sun.mail.util;
 
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link AddressSelector}
@@ -63,15 +65,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AddressSelector {
 
     /** The collection of shared <code>RoundRobinSelector</code> instances */
-    private static volatile ConcurrentMap<String, RoundRobinSelector> selectors;
+    private static volatile ConcurrentMap<String, FailoverSelector> selectors;
 
     /**
      * Gets the collection of shared <code>RoundRobinSelector</code> instances
      *
      * @return The collection
      */
-    private static ConcurrentMap<String, RoundRobinSelector> selectors() {
-        ConcurrentMap<String, RoundRobinSelector> tmp = selectors;
+    private static ConcurrentMap<String, FailoverSelector> selectors() {
+        ConcurrentMap<String, FailoverSelector> tmp = selectors;
         if (null == selectors) {
             synchronized (AddressSelector.class) {
                 tmp = selectors;
@@ -99,16 +101,16 @@ public abstract class AddressSelector {
             return new StaticSelector(addresses, hash);
         }
 
-        ConcurrentMap<String, RoundRobinSelector> selectors = selectors();
-        RoundRobinSelector selector = selectors.get(host);
+        ConcurrentMap<String, FailoverSelector> selectors = selectors();
+        FailoverSelector selector = selectors.get(host);
         if (null == selector) {
-            RoundRobinSelector newSelector = new RoundRobinSelector(addresses);
+            FailoverSelector newSelector = new FailoverSelector(addresses);
             selector = selectors.putIfAbsent(host, newSelector);
             if (null == selector) {
                 selector = newSelector;
             }
         } else if (false == selector.stillValid(addresses)) {
-            RoundRobinSelector newSelector = new RoundRobinSelector(addresses);
+            FailoverSelector newSelector = new FailoverSelector(addresses);
             if (selectors.replace(host, selector, newSelector)) {
                 selector = newSelector;
             } else {
@@ -132,46 +134,53 @@ public abstract class AddressSelector {
     abstract int length();
 
     /**
-     * Gets the next address to use.
+     * Gets the current address to use.
      *
-     * @return The next address
+     * @return The current address
      */
-    abstract InetAddress nextAddress();
+    abstract InetAddress currentAddress();
+
+    /**
+     * Advises to perform a fail-over while specifying the address that does not work anymore (that is a connect attempt encountered a timeout).
+     *
+     * @param corruptAddress The non-working address
+     */
+    abstract void failoverAddress(InetAddress corruptAddress);
 
     // -------------------------------------------------------------------------------------
 
-    private static final class RoundRobinSelector extends AddressSelector {
+    private static final class FailoverSelector extends AddressSelector {
 
-        private final AtomicInteger counter;
-        private final InetAddress[] addresses;
+        private final InetAddress[] addresses; // For fast equality check
+        private final Deque<InetAddress> addressesDeque;
         private final int length;
 
-        RoundRobinSelector(InetAddress[] addresses) {
+        FailoverSelector(InetAddress[] addresses) {
             super();
             this.addresses = addresses;
+            this.addressesDeque = new ConcurrentLinkedDeque<>(Arrays.asList(addresses));
             length = addresses.length;
-            counter = new AtomicInteger(length);
         }
 
-        boolean stillValid(InetAddress[] a2) {
+        boolean stillValid(InetAddress[] newAddresses) {
             InetAddress[] a = this.addresses;
-            if (a==a2) {
+            if (a == newAddresses) {
                 return true;
             }
-            if (a==null || a2==null) {
+            if (a == null || newAddresses == null) {
                 return false;
             }
 
             int length = a.length;
-            if (a2.length != length) {
+            if (newAddresses.length != length) {
                 return false;
             }
 
-            for (int i=0; i<length; i++) {
+            for (int i = 0; i < length; i++) {
                 InetAddress addr1 = a[i];
                 boolean found = false;
-                for (int j = 0; !found && j < a2.length; j++) {
-                    found = a2[j].equals(addr1);
+                for (int j = 0; !found && j < newAddresses.length; j++) {
+                    found = newAddresses[j].equals(addr1);
                 }
                 if (!found) {
                     return false;
@@ -187,17 +196,20 @@ public abstract class AddressSelector {
         }
 
         @Override
-        InetAddress nextAddress() {
-            int next = counter.incrementAndGet();
-            while (next < 0) {
-                int newNext = length;
-                if (counter.compareAndSet(next, newNext)) {
-                    next = newNext;
-                } else {
-                    next = counter.incrementAndGet();
-                }
+        InetAddress currentAddress() {
+            return addressesDeque.peek();
+        }
+
+        @Override
+        void failoverAddress(InetAddress corruptAddress) {
+            if (corruptAddress == addressesDeque.peekLast()) {
+                return;
             }
-            return addresses[next % length];
+
+            boolean removed = addressesDeque.remove(corruptAddress);
+            if (removed) {
+                addressesDeque.offer(corruptAddress);
+            }
         }
     }
 
@@ -217,8 +229,13 @@ public abstract class AddressSelector {
         }
 
         @Override
-        InetAddress nextAddress() {
+        InetAddress currentAddress() {
             return address;
+        }
+
+        @Override
+        void failoverAddress(InetAddress corruptAddress) {
+            // Do nothing
         }
     }
 

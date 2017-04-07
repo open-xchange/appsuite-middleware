@@ -85,6 +85,8 @@ public class ProvisioningSetup {
     private static final String ADMIN_IDENTIFIER = "oxadmin";
     private static final String MASTER_IDENTIFIER = "oxadminmaster";
     private static final String MASTER_PWD_IDENTIFIER = "oxadminmaster_password";
+    private static final String REST_IDENTIFIER = "restUser";
+    private static final String REST_PWD_IDENTIFIER = "restPwd";
 
     private static final String CONTEXT_IDENTIFIER = "context";
     private static final String USER1_IDENTIFIER = "user1";
@@ -110,6 +112,7 @@ public class ProvisioningSetup {
 
                 createProvisionedContext(contextsAndUsers);
                 createOXAdminMaster(contextsAndUsers);
+                createRestUser(contextsAndUsers);
 
                 TestContextPool.startWatcher();
 
@@ -125,6 +128,14 @@ public class ProvisioningSetup {
         TestUser oxadminMaster = new TestUser(user, "", password);
 
         TestContextPool.setOxAdminMaster(oxadminMaster);
+    }
+
+    private static void createRestUser(Properties contextsAndUsers) {
+        String user = contextsAndUsers.get(REST_IDENTIFIER).toString();
+        String password = contextsAndUsers.get(REST_PWD_IDENTIFIER).toString();
+        TestUser restUser = new TestUser(user, "", password);
+
+        TestContextPool.setRestUser(restUser);
     }
 
     private static void createProvisionedContext(Properties contextsAndUsers) {

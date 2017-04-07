@@ -173,6 +173,21 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
      * @throws OXException If a folder error occurs
      */
     public UserizedFolder[] doVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all) throws OXException {
+        return doVisibleFolders(null, treeId, contentType, type, all);
+    }
+
+    /**
+     * Performs the <code>LIST</code> request.
+     *
+     * @param rootFolderId The optional root folder identifier
+     * @param treeId The tree identifier
+     * @param parentId The parent folder identifier
+     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
+     *            subscribed ones
+     * @return The user-sensitive subfolders
+     * @throws OXException If a folder error occurs
+     */
+    public UserizedFolder[] doVisibleFolders(String rootFolderId, final String treeId, final ContentType contentType, final Type type, final boolean all) throws OXException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
@@ -181,7 +196,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
         try {
             final List<SortableId> allSubfolderIds;
             try {
-                allSubfolderIds = Arrays.asList(folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters));
+                allSubfolderIds = Arrays.asList(folderStorage.getVisibleFolders(rootFolderId, treeId, contentType, type, storageParameters));
             } catch (final UnsupportedOperationException e) {
                 LOG.warn("Operation is not supported for folder storage {} (content-type={})", folderStorage.getClass().getSimpleName(), contentType, e);
                 return new UserizedFolder[0];

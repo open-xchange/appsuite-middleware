@@ -62,6 +62,13 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface GlobalDatabaseService {
 
     /**
+     * Gets a value indicating whether at least one global database is available.
+     * 
+     * @return <code>true</code> if a global database is available, <code>false</code>, otherwise
+     */
+    boolean isGlobalDatabaseAvailable();
+
+    /**
      * Gets a value indicating whether a global database is available for a specific context group or not.
      *
      * @param group The context group to check availability for, or <code>null</code> to check for the default fallback
@@ -140,5 +147,4 @@ public interface GlobalDatabaseService {
      * @param connection The connection to return
      */
     void backWritableForGlobal(int contextId, Connection connection);
-
 }

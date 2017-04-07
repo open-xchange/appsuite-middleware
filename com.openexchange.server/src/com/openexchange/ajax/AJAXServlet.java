@@ -90,7 +90,6 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -392,6 +391,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR = "includeStackTraceOnError";
 
+    public static final String PARAMETER_AUTH_TOKEN = "cryptoauth";
+
     /**
      * The <code><b>&quot;delivery&quot;</b></code> parameter specifies how to deliver binary data; e.g. <code>&quot;view&quot;</code> for
      * inlined display or <code>&quot;download&quot;</code>.
@@ -532,8 +533,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     protected void doService(HttpServletRequest req, HttpServletResponse resp, boolean checkRateLimit) throws ServletException, IOException {
         incrementRequests();
-        // We already have a tracking id...
-        // LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
@@ -560,7 +559,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw se;
         } finally {
             decrementRequests();
-            LogProperties.removeProperty(LogProperties.Name.AJAX_REQUEST_NUMBER);
         }
     }
 

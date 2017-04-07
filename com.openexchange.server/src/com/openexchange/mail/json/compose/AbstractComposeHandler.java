@@ -75,6 +75,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -97,6 +98,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -117,6 +119,7 @@ import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
@@ -288,7 +291,12 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
             if (attachmentArray.length() > 1) {
                 // Check for inline images (in case content is HTML)
                 Set<String> contentIds = extractContentIds(sContent);
-                parseAttachments(sourceMessage, attachmentArray, contentIds, context);
+                parseAttachments(sourceMessage,
+                    attachmentArray,
+                    contentIds,
+                    context,
+                    // If forwarding a previously encrypted message, needs attachments decrypted with authentication
+                    (sourceMessage.getSecuritySettings() == null ? null : sourceMessage.getSecuritySettings().getAuthentication()));
             }
         } else {
             // There are no attachments at all; yield an empty text part
@@ -450,12 +458,12 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
      * @throws OXException If parsing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context) throws OXException, JSONException {
+    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context, String cryptoAuth) throws OXException, JSONException {
         // Get the identifier of the referenced message
         MailPath parentMsgRef = composeMessage.getMsgref();
 
         // Load & set referenced parts
-        Map<String, ReferencedMailPart> referencedParts = loadReferencedParts(jAttachments, contentIds, parentMsgRef, context);
+        Map<String, ReferencedMailPart> referencedParts = loadReferencedParts(jAttachments, contentIds, parentMsgRef, context, cryptoAuth);
 
         // Iterate attachments (once again)
         int len = jAttachments.length();
@@ -571,7 +579,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
      * @throws OXException If loading the parts fails
      * @throws JSONException If a JSON error occurred
      */
-    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, ComposeContext context) throws OXException, JSONException {
+    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, ComposeContext context, String cryptoAuth) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -598,6 +606,13 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = context.getConnectedMailAccess(parentMsgRef.getAccountId());
+            CryptographicAwareMailAccessFactory cryptoMailAccessFactory = MailJSONActivator.SERVICES.get().getOptionalService(CryptographicAwareMailAccessFactory.class);
+            if(cryptoMailAccessFactory != null) {
+                mailAccess = cryptoMailAccessFactory.createAccess(
+                    (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
+                    context.getSession(),
+                    cryptoAuth);
+            }
             return loadMultipleRefs(groupedSeqIDs, parentMsgRef, contentIds, mailAccess, context);
         } catch (OXException oe) {
             if (null == mailAccess || !shouldRetry(oe)) {
@@ -803,7 +818,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Subject, etc.
              */
             if (jMail.hasAndNotNull(MailJSONField.SUBJECT.getKey())) {
-                composedMail.setSubject(jMail.getString(MailJSONField.SUBJECT.getKey()));
+                composedMail.setSubject(jMail.getString(MailJSONField.SUBJECT.getKey()), true);
             }
             /*
              * Size
@@ -831,12 +846,13 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Security settings
              */
             {
-                final CryptographicServiceAuthenticationFactory authenticationFactory =
-                    MailJSONActivator.SERVICES.get().getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                ServiceLookup services = MailJSONActivator.SERVICES.get();
+                CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
                 String authentication = null;
-                if(authenticationFactory != null) {
-                    if(composeRequest.getRequest() != null) {
-                        authentication = authenticationFactory.createAuthenticationFrom(composeRequest.getRequest());
+                if (authenticationFactory != null) {
+                    AJAXRequestData request = composeRequest.getRequest();
+                    if (request != null) {
+                        authentication = authenticationFactory.createAuthenticationFrom(request);
                     }
                 }
                 JSONObject jSecuritySettings = jMail.optJSONObject("security");

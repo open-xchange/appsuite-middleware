@@ -401,11 +401,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         if (lcct.startsWith("multipart/", 0)) {
             final Multipart multipart = MimeMessageUtility.getMultipartContentFrom(mimeMessage);
-            parseSnippet(mimeMessage, (MimePart) multipart.getBodyPart(0), snippet);
-            final int count = multipart.getCount();
-            if (count > 1) {
-                for (int i = 1; i < count; i++) {
-                    parsePart((MimePart) multipart.getBodyPart(i), snippet);
+            if (multipart != null) {
+                parseSnippet(mimeMessage, (MimePart) multipart.getBodyPart(0), snippet);
+                final int count = multipart.getCount();
+                if (count > 1) {
+                    for (int i = 1; i < count; i++) {
+                        parsePart((MimePart) multipart.getBodyPart(i), snippet);
+                    }
                 }
             }
         } else {

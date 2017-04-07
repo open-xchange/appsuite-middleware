@@ -59,6 +59,7 @@ import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecuritySettings;
@@ -821,6 +822,11 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     }
 
     @Override
+    public void setSubject(String subject, boolean decoded) {
+        delegate.setSubject(subject, decoded);
+    }
+
+    @Override
     public Date getSentDate() {
         return delegate.getSentDate();
     }
@@ -956,7 +962,7 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     }
 
     @Override
-    public String getOriginalFolder() {
+    public FullnameArgument getOriginalFolder() {
         return delegate.getOriginalFolder();
     }
 
@@ -971,7 +977,7 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     }
 
     @Override
-    public void setOriginalFolder(String originalFolder) {
+    public void setOriginalFolder(FullnameArgument originalFolder) {
         delegate.setOriginalFolder(originalFolder);
     }
 

@@ -221,8 +221,8 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     /** Problem with a thread. */
     THREAD_ISSUE("Unexpected error.", Category.CATEGORY_ERROR, 45),
 
-    /** You are not allowed to see the task %1$d in folder %2$s (%3$d). */
-    NO_PERMISSION("You are not allowed to see the task %1$d in folder %2$s (%3$d).", TaskExceptionMessage.NO_PERMISSION_MSG,
+    /** You are not allowed to see the task with id %1$d in folder %2$d. **/
+    NO_PERMISSION("You are not allowed to see the task with id %1$d in folder %2$d.", TaskExceptionMessage.NO_PERMISSION_MSG,
         Category.CATEGORY_PERMISSION_DENIED, 46),
 
     /** Task contains invalid data: "%1$s" */

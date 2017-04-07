@@ -55,6 +55,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteRetrieval;
 
 /**
  * {@link ObfuscatorServiceTracker}
@@ -72,6 +73,7 @@ class ObfuscatorServiceTracker implements ServiceTrackerCustomizer<ObfuscatorSer
     @Override
     public void removedService(ServiceReference<ObfuscatorService> reference, ObfuscatorService service) {
         PortableSessionRemoteLookUp.setObfuscatorServiceReference(null);
+        PortableSessionRemoteRetrieval.setObfuscatorServiceReference(null);
         PortableMultipleSessionRemoteLookUp.setObfuscatorServiceReference(null);
         context.ungetService(reference);
     }
@@ -85,6 +87,7 @@ class ObfuscatorServiceTracker implements ServiceTrackerCustomizer<ObfuscatorSer
     public ObfuscatorService addingService(ServiceReference<ObfuscatorService> reference) {
         ObfuscatorService service = context.getService(reference);
         PortableSessionRemoteLookUp.setObfuscatorServiceReference(service);
+        PortableSessionRemoteRetrieval.setObfuscatorServiceReference(service);
         PortableMultipleSessionRemoteLookUp.setObfuscatorServiceReference(service);
         return service;
     }

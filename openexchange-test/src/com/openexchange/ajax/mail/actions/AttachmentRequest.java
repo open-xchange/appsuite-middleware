@@ -123,6 +123,7 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
     private boolean saveToDisk;
     private boolean filter;
     private boolean fromStructure;
+    private boolean decrypt;
 
     public AttachmentRequest(final String folder, final String ID, final String sequenceId) {
         this(new String[] { folder, ID, sequenceId }, true);
@@ -159,6 +160,16 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
         return this;
     }
 
+    /**
+     * Sets the <code>decrypt</code> flag in order to decrypt the attachment.
+     *
+     * @param doDecryption True, to obtain the decrypted attachment, false to obtain the raw attachment.
+     */
+    public AttachmentRequest setDecrypt(boolean decrypt) {
+        this.decrypt= decrypt;
+        return this;
+    }
+
     @Override
     public Object getBody() throws JSONException {
         return null;
@@ -179,6 +190,7 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
         l.add(new Parameter(Mail.PARAMETER_SAVE, String.valueOf(saveToDisk ? 1 : 0)));
         l.add(new Parameter(Mail.PARAMETER_FILTER, filter ? "true" : "false"));
         l.add(new Parameter("from_structure", fromStructure ? "true" : "false"));
+        l.add(new Parameter("decrypt", decrypt ? "true" : "false"));
         return l.toArray(new Parameter[0]);
     }
 

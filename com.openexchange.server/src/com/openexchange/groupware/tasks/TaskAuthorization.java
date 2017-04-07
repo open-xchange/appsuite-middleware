@@ -120,7 +120,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
         Set<Folder> folderMappings = FolderStorage.getInstance().selectFolder(session.getContext(), taskId, StorageType.ACTIVE);
         Folder matchingFolder = FolderStorage.getFolder(folderMappings, folderId);
         if (null == matchingFolder || (Tools.isFolderShared(folder, session.getUser()) && task.getPrivateFlag())) {
-            throw TaskExceptionCode.NO_PERMISSION.create(Autoboxing.I(taskId), folder.getFolderName(), Autoboxing.I(folderId));
+            throw TaskExceptionCode.NO_PERMISSION.create(Autoboxing.I(taskId), Autoboxing.I(folderId));
         }
     }
 }

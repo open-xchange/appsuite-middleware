@@ -50,6 +50,8 @@
 package com.openexchange.tools.servlet.http;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -64,6 +66,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,6 +102,7 @@ import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -1137,5 +1141,40 @@ public final class Tools {
 
     public static void setConfigurationService(final ConfigurationService configurationService) {
         CONFIG_SERVICE_REF.set(configurationService);
+    }
+
+    public static boolean validateDomainRegardingSharding(String serverName) {
+        return null != serverName && useShardingForHost(serverName) && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName));
+    }
+
+    public static boolean useShardingForHost(String serverName) {
+        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+        if (null == serverConfigService) {
+            LOG.info("Server configuration service unavailable. Assuming no sharding for hosts.");
+            return false;
+        }
+
+        boolean result = false;
+        try {
+            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
+            if (customHostConfigurations != null) {
+                result = areShardingHostsAvailable(customHostConfigurations);
+            }
+        } catch (OXException e) {
+            LOG.error("Unable to load custom host configuration", e);
+        }
+        return result;
+    }
+
+    private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
+        List<String> shardingSubdomains = null;
+        for (Iterator<Map<String, Object>> iter = customHostConfigurations.iterator(); null == shardingSubdomains && iter.hasNext();) {
+            Map<String, Object> config = iter.next();
+            Object object = config.get("shardingSubdomains");
+            if (null != object) {
+                shardingSubdomains = (List<String>) object;
+            }
+        }
+        return null == shardingSubdomains || shardingSubdomains.isEmpty() ? false : true;
     }
 }

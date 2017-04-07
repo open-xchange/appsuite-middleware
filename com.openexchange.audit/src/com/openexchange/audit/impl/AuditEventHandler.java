@@ -59,13 +59,6 @@ import org.apache.commons.lang.Validate;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
-import ch.qos.logback.core.rolling.RollingFileAppender;
-import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
-import ch.qos.logback.core.status.ErrorStatus;
-import ch.qos.logback.core.status.Status;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
@@ -91,6 +84,14 @@ import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
+import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
+import ch.qos.logback.core.status.ErrorStatus;
+import ch.qos.logback.core.status.Status;
+import ch.qos.logback.core.util.FileSize;
 
 /**
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
@@ -110,7 +111,7 @@ public class AuditEventHandler implements EventHandler {
 
         SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
         triggeringPolicy.setContext(context);
-        triggeringPolicy.setMaxFileSize(Integer.toString(AuditConfiguration.getLogfileLimit()));
+        triggeringPolicy.setMaxFileSize(FileSize.valueOf(Integer.toString(AuditConfiguration.getLogfileLimit())));
 
         FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
         rollingPolicy.setContext(context);
@@ -131,13 +132,14 @@ public class AuditEventHandler implements EventHandler {
         rollingPolicy.setParent(rollingFileAppender);
 
         encoder.start();
+        triggeringPolicy.start();
         rollingPolicy.start();
         rollingFileAppender.start();
 
         List<Status> statuses = context.getStatusManager().getCopyOfStatusList();
         if (null != statuses && false == statuses.isEmpty()) {
             for (Status status : statuses) {
-                if (status instanceof ErrorStatus) {
+                if (rollingFileAppender.equals(status.getOrigin()) && (status instanceof ErrorStatus)) {
                     ErrorStatus errorStatus = (ErrorStatus) status;
                     Throwable throwable = errorStatus.getThrowable();
                     if (null == throwable) {

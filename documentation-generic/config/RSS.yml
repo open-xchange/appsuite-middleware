@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      tags: ["RSS"]
     - key: com.openexchange.rss
       description: |
         If set to false disables the rss capability.
@@ -18,3 +19,47 @@ properties:
       configcascadeAware: true
       related: 
       file: rssmessaging.properties
+      tags: ["RSS"]
+    - key: com.openexchange.messaging.rss
+      description: |
+        Whether the RSS Messaging Service is available or not.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: rssmessaging.properties
+      tags: ["RSS"]
+    - key: com.openexchange.messaging.rss.feed.size
+      description: |
+        Defines the maximum feed size for an RSS feed in bytes.
+      defaultValue: 4194304
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: rssmessaging.properties
+      tags: ["RSS", "Limit"]
+    - key: com.openexchange.messaging.rss.feed.blacklist
+      description: |
+        Specifies a black-list for those hosts that are covered by denoted IP range; e.g. "127.0.0.1-127.255.255.255, localhost, internal.domain.org"
+        An empty value means no black-listing is active.
+      defaultValue: 127.0.0.1-127.255.255.255,localhost
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: rssmessaging.properties
+      tags: ["RSS", "Black List"]
+    - key: com.openexchange.messaging.rss.feed.whitelist.ports
+      description: |
+        Specifies a white-list for such ports that are allowed to connect against when adding/updating a RSS feed.
+        No port will always be accepted. 
+        An empty value means no white-listing is active.
+      defaultValue: 80,443
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: rssmessaging.properties
+      tags: ["RSS", "White List"]      

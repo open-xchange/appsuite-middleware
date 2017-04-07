@@ -52,7 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.yaml.snakeyaml.Yaml;
+import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.BrowserVersionFeatures;
 import com.gargoylesoftware.htmlunit.CrawlerCookieManager;
@@ -126,8 +126,7 @@ public class Workflow {
             if (currentStep instanceof LoginStep) {
                 ((LoginStep) currentStep).setUsername(username);
                 ((LoginStep) currentStep).setPassword(password);
-                Yaml yaml = new Yaml();
-                loginStepString = yaml.dump(currentStep);
+                loginStepString = Yaml.dump(currentStep);
             }
             if (currentStep instanceof NeedsLoginStepString && null != loginStepString) {
                 ((NeedsLoginStepString) currentStep).setLoginStepString(loginStepString);

@@ -74,8 +74,8 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     private final MetricAware<IPCheckMetrics> metricAware;
     private IPCheckMetrics metrics;
 
-    /** Window size for average calculation: 1 hour */
-    private static final long WINDOW_SIZE = 60L * 60000L;
+    /** Window size for average calculation: 1 day */
+    private static final long WINDOW_SIZE = 24L * 60L * 60000L;
 
     /** Double ended queue holding measurements over an hour */
     private final LinkedBlockingDeque<Measurement> measurements;
@@ -97,22 +97,25 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     private float deniedExceptionOverallPercentage;
     private float deniedCountryChangedOverallPercentage;
 
-    private long acceptedChangesPerMinute;
-    private long deniedChangesPerMinute;
+    private long acceptedChangesPerHour;
+    private long deniedChangesPerHour;
+    private long ipChangesPerHour;
 
     /**
-     * Represents a measurement of accepted and denied ip changes for a certain point in time.
+     * Represents a measurement of accepted and denied IP changes for a certain point in time.
      */
     static final class Measurement {
 
         final long timestamp;
         final long acceptedIPChanges;
         final long deniedIPChanges;
+        final long totalIPChanges;
 
-        Measurement(long accepted, long denied) {
+        Measurement(long accepted, long denied, long totalIPChanges) {
             super();
             this.acceptedIPChanges = accepted;
             this.deniedIPChanges = denied;
+            this.totalIPChanges = totalIPChanges;
             this.timestamp = System.currentTimeMillis();
         }
     }
@@ -142,9 +145,10 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
             @Override
             public void run() {
                 try {
-                    long accepted = metrics.getAcceptedIPChanges();
+                    long accepted = metrics.getAcceptedEligibleIPChanges();
                     long denied = metrics.getDeniedIPChanges();
-                    measurements.add(new Measurement(accepted, denied));
+                    long ipChanges = metrics.getTotalIPChanges();
+                    measurements.add(new Measurement(accepted, denied, ipChanges));
                     cleanUp();
                 } catch (Exception e) {
                     LOGGER.error("{}", e.getMessage(), e);
@@ -161,7 +165,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
                 }
             }
         };
-        timerTask = timerService.scheduleAtFixedRate(task, 0L, 60000L);
+        timerTask = timerService.scheduleAtFixedRate(task, 0L, 60 * 60000L);
     }
 
     /**
@@ -200,14 +204,15 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     }
 
     /**
-     * Calculates the changes per minute
+     * Calculates the changes per hour
      * 
      * @throws MBeanException
      */
-    private void calculateChangesPerMinute() {
+    private void calculateChangesPerHour() {
         long meantimes = 0L;
         long accepted = 0L;
         long denied = 0L;
+        long ipChanges = 0L;
 
         Measurement last = null;
         for (Iterator<Measurement> it = measurements.iterator(); it.hasNext();) {
@@ -216,6 +221,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
                 meantimes += current.timestamp - last.timestamp;
                 accepted += current.acceptedIPChanges - last.acceptedIPChanges;
                 denied += current.deniedIPChanges - last.deniedIPChanges;
+                ipChanges += current.totalIPChanges - last.totalIPChanges;
             }
 
             last = current;
@@ -231,8 +237,14 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
             deniedPerMillis = denied / (double) meantimes;
         }
 
-        acceptedChangesPerMinute = Math.round(acceptedPerMillis * 60000L);
-        deniedChangesPerMinute = Math.round(deniedPerMillis * 60000L);
+        double ipChangesPerMillis = 0L;
+        if (ipChanges > 0L && meantimes > 0L) {
+            ipChangesPerMillis = ipChanges / (double) meantimes;
+        }
+
+        acceptedChangesPerHour = Math.round(acceptedPerMillis * 60000L * 60L);
+        deniedChangesPerHour = Math.round(deniedPerMillis * 60000L * 60L);
+        ipChangesPerHour = Math.round(ipChangesPerMillis * 60000L * 60L);
     }
 
     /**
@@ -251,27 +263,37 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     protected void refresh() {
         metrics = metricAware.getMetricsObject();
         calculatePercentages();
-        calculateChangesPerMinute();
+        calculateChangesPerHour();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedIPChangesPerMinute()
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getIPChangesPerHour()
      */
     @Override
-    public long getAcceptedIPChangesPerMinute() {
-        return acceptedChangesPerMinute;
+    public long getIPChangesPerHour() {
+        return ipChangesPerHour;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#deniedIPChangesPerMinute()
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedIPChangesPerHour()
      */
     @Override
-    public long getDeniedIPChangesPerMinute() {
-        return deniedChangesPerMinute;
+    public long getAcceptedIPChangesPerHour() {
+        return acceptedChangesPerHour;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedIPChangesPerHour()
+     */
+    @Override
+    public long getDeniedIPChangesPerHour() {
+        return deniedChangesPerHour;
     }
 
     /*

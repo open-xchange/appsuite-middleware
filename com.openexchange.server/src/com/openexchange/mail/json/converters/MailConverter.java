@@ -287,9 +287,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             if (null != originalId) {
                 jMailThread.put("rootOriginalMailId", originalId);
             }
-            String originalFolder = rootMessage.getOriginalFolder();
+            FullnameArgument originalFolder = rootMessage.getOriginalFolder();
             if (null != originalFolder) {
-                jMailThread.put("rootOriginalFolderId", originalFolder);
+                jMailThread.put("rootOriginalFolderId", originalFolder.getFullName());
             }
         }
 
@@ -299,9 +299,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             if (null != originalId) {
                 jMailThread.put("latestOriginalMailId", originalId);
             }
-            String originalFolder = latestMessage.getOriginalFolder();
+            FullnameArgument originalFolder = latestMessage.getOriginalFolder();
             if (null != originalFolder) {
-                jMailThread.put("latestOriginalFolderId", originalFolder);
+                jMailThread.put("latestOriginalFolderId", originalFolder.getFullName());
             }
         }
         jMailThread.put("latestReceivedDate", MessageWriter.addUserTimezone(latestMessage.getReceivedDate().getTime(), timeZone));

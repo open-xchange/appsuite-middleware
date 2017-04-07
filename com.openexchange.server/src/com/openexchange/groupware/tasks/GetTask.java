@@ -239,7 +239,7 @@ public final class GetTask {
         }
         final Folder check = FolderStorage.getFolder(getFolders(), folderId);
         if (null == check || (Tools.isFolderShared(getFolder(), user) && getTask().getPrivateFlag())) {
-            throw TaskExceptionCode.NO_PERMISSION.create(I(taskId), getFolder().getFolderName(), I(folderId));
+            throw TaskExceptionCode.NO_PERMISSION.create(I(taskId), I(folderId));
         }
     }
 

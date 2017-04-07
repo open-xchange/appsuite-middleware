@@ -50,9 +50,11 @@
 package com.openexchange.imagetransformation.java.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.java.impl.JavaImageTransformationProvider;
 import com.openexchange.imagetransformation.java.scheduler.Scheduler;
+import com.openexchange.imagetransformation.java.services.JavaImageMetadataService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.processing.ProcessorService;
 import com.openexchange.timer.TimerService;
@@ -74,6 +76,7 @@ public class ImageTransformationActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
         registerService(ImageTransformationProvider.class, new JavaImageTransformationProvider(), 0);
+        registerService(ImageMetadataService.class, new JavaImageMetadataService());
     }
 
     @Override

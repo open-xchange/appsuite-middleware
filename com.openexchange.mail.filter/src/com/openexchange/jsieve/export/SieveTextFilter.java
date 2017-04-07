@@ -242,12 +242,13 @@ public final class SieveTextFilter {
 
     private final String username;
 
+    private final int userId;
+    private final int contextId;
+
     public SieveTextFilter(final Credentials creds) {
         this.username = creds.getRightUsername();
-    }
-
-    public SieveTextFilter(final String username) {
-        this.username = username;
+        this.userId = creds.getUserid();
+        this.contextId = creds.getContextid();
     }
 
     /**
@@ -292,7 +293,7 @@ public final class SieveTextFilter {
         }
 
         MailFilterInterceptorRegistry interceptorRegistry = Services.getService(MailFilterInterceptorRegistry.class);
-        interceptorRegistry.executeBefore(finalRules);
+        interceptorRegistry.executeBefore(userId, contextId, finalRules);
 
         return new RuleListAndNextUid(finalRules, nextUidAndError.getNextuid(), errorsInScript);
     }
@@ -308,7 +309,7 @@ public final class SieveTextFilter {
      */
     public String writeback(final ClientRulesAndRequire clientRulesAndRequire, final Set<String> capabilities) throws SieveException, OXException {
         MailFilterInterceptorRegistry interceptorRegistry = Services.getService(MailFilterInterceptorRegistry.class);
-        interceptorRegistry.executeAfter(clientRulesAndRequire.getRules());
+        interceptorRegistry.executeAfter(userId, contextId, clientRulesAndRequire.getRules());
 
         final ArrayList<Rule> finalRulesWithRightRequires = addRightRequires(clientRulesAndRequire, capabilities);
         addLines(finalRulesWithRightRequires);

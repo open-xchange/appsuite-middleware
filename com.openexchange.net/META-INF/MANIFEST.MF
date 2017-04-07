@@ -18,6 +18,7 @@ Import-Package: com.sun.net,
  javax.security.sasl,
  org.apache.commons.lang.math,
  org.apache.commons.validator.routines,
+ org.slf4j,
  sun.misc
 Export-Package: com.googlecode.ipv6,
  com.openexchange.net,

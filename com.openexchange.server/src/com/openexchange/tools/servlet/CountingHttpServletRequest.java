@@ -129,10 +129,10 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     // ------------------------------------------------------------------------------------------------------------------------- //
 
     private final HttpServletRequest servletRequest;
-    private volatile long max;
     private final Parameterizable parameterizable;
+    private volatile long max;
     private volatile ServletInputStream servletInputStream;
-    private String env;
+    private volatile String env;
 
     /**
      * Initializes a new {@link CountingHttpServletRequest}.

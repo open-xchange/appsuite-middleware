@@ -241,7 +241,7 @@ public final class HtmlServices {
                     return false;
                 }
             } else if (pos > 0) {
-                if (false == Strings.isAsciiLetter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
+                if (false == isWordCharacter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
                     return false;
                 }
             }
@@ -259,6 +259,15 @@ public final class HtmlServices {
         return true;
     }
 
+    /**
+     * Checks if specified character is a word character: <code>[a-zA-Z_0-9-]</code>
+     *
+     * @return <code>true</code> if the indicated character is a word character; otherwise <code>false</code>
+     */
+    private static boolean isWordCharacter(char c) {
+        return '-' == c || '_' == c || Strings.isAsciiLetterOrDigit(c);
+    }
+
     private static boolean nextAreAsciiLetter(int pos, int count, String s) {
         int c = count;
         int npos = pos + c--;
@@ -266,13 +275,14 @@ public final class HtmlServices {
             return false;
         }
 
-        boolean letter = true;
-        while (letter && c >= 0) {
-            letter = Strings.isAsciiLetter(s.charAt(npos));
+        while (c >= 0) {
+            if (false == Strings.isAsciiLetter(s.charAt(npos))) {
+                return false;
+            }
             npos = pos + c--;
         }
 
-        return letter;
+        return true;
     }
 
     private static String dropWhitespacesFrom(String str) {

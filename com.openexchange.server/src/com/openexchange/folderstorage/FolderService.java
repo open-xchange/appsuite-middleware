@@ -303,6 +303,22 @@ public interface FolderService {
      */
     FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException;
 
+    /**
+     * Gets all visible folders of specified content type and folder type starting from specified root folder.
+     *
+     * @param rootFolderId The identifier of the root folder
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @param type The folder type
+     * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
+     *            subscribed folders only.
+     * @param session The session
+     * @param decorator The optional folder service decorator
+     * @return All visible folders of specified content type and folder type.
+     * @throws OXException If operation fails
+     */
+    FolderResponse<UserizedFolder[]> getVisibleFolders(String rootFolderId, String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException;
+
     FolderResponse<UserizedFolder[]> getUserSharedFolders(final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException;
 
     /**

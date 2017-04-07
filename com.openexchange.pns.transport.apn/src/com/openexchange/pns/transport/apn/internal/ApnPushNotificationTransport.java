@@ -365,7 +365,10 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         } catch (InvalidDeviceTokenFormatException e) {
             LOG.warn("Invalid device token: '{}', removing from subscription store.", match.getToken(), e);
             try {
-                subscriptionRegistry.unregisterSubscription(DefaultPushSubscription.instanceFor(match));
+                boolean unregistered = subscriptionRegistry.unregisterSubscription(DefaultPushSubscription.instanceFor(match));
+                if (false == unregistered) {
+                    LOG.error("Failed to remove subscription for invalid token {}", match.getToken());
+                }
             } catch (OXException x) {
                 LOG.error("Failed to remove subscription for invalid token {}", match.getToken(), x);
             }

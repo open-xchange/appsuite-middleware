@@ -223,50 +223,6 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
-    public int getNotifyFrequencySeconds() {
-        String tmp = getAccountProperty("com.openexchange.imap.notifyFrequencySeconds");
-        if (null != tmp) {
-            try {
-                return Integer.parseInt(tmp.trim());
-            } catch (final NumberFormatException e) {
-                LOG.error("Notify Frequency Seconds: Invalid value.", e);
-                return IMAPProperties.getInstance().getNotifyFrequencySeconds();
-            }
-        }
-
-        if (mailAccountId == PRIMARY) {
-            tmp = lookUpProperty("com.openexchange.imap.primary.notifyFrequencySeconds");
-            if (null != tmp) {
-                try {
-                    return Integer.parseInt(tmp.trim());
-                } catch (final NumberFormatException e) {
-                    LOG.error("Notify Frequency Seconds: Invalid value.", e);
-                    return IMAPProperties.getInstance().getNotifyFrequencySeconds();
-                }
-            }
-        }
-
-        return lookUpIntProperty("com.openexchange.imap.notifyFrequencySeconds", IMAPProperties.getInstance().getNotifyFrequencySeconds());
-    }
-
-    @Override
-    public String getNotifyFullNames() {
-        String tmp = getAccountProperty("com.openexchange.imap.notifyFullNames");
-        if (null != tmp) {
-            return tmp.trim();
-        }
-
-        if (mailAccountId == PRIMARY) {
-            tmp = lookUpProperty("com.openexchange.imap.primary.notifyFullNames");
-            if (null != tmp) {
-                return tmp.trim();
-            }
-        }
-
-        return lookUpProperty("com.openexchange.imap.notifyFullNames", IMAPProperties.getInstance().getNotifyFullNames());
-    }
-
-    @Override
     public int getImapTimeout() {
         String tmp = getAccountProperty("com.openexchange.imap.imapTimeout");
         if (null != tmp) {
@@ -331,23 +287,6 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         return lookUpBoolProperty("com.openexchange.imap.imapFastFetch", IMAPProperties.getInstance().isFastFetch());
-    }
-
-    @Override
-    public boolean notifyRecent() {
-        String tmp = getAccountProperty("com.openexchange.imap.notifyRecent");
-        if (null != tmp) {
-            return Boolean.parseBoolean(tmp.trim());
-        }
-
-        if (mailAccountId == PRIMARY) {
-            tmp = lookUpProperty("com.openexchange.imap.primary.notifyRecent");
-            if (null != tmp) {
-                return Boolean.parseBoolean(tmp.trim());
-            }
-        }
-
-        return lookUpBoolProperty("com.openexchange.imap.notifyRecent", IMAPProperties.getInstance().notifyRecent());
     }
 
     @Override

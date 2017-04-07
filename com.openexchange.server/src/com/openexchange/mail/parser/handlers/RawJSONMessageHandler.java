@@ -71,6 +71,7 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -178,9 +179,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     }
                 }
                 if (mail.containsOriginalFolder()) {
-                    String originalFolder = mail.getOriginalFolder();
+                    FullnameArgument originalFolder = mail.getOriginalFolder();
                     if (null != originalFolder) {
-                        jsonObject.put(MailJSONField.ORIGINAL_FOLDER_ID.getKey(), originalFolder);
+                        jsonObject.put(MailJSONField.ORIGINAL_FOLDER_ID.getKey(), originalFolder.getPreparedName());
                     }
                 }
             }

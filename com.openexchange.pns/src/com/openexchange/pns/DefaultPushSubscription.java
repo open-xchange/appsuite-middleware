@@ -71,7 +71,8 @@ public class DefaultPushSubscription implements PushSubscription {
             .contextId(match.getContextId())
             .token(match.getToken())
             .transportId(match.getTransportId())
-            .userId(match.getUserId());
+            .userId(match.getUserId())
+            .client(match.getClient());
 
         return builder.build();
     }

@@ -1399,46 +1399,61 @@ public final class SessionHandler {
      */
     protected static SessionControl getSession(String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
+
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
         }
-        SessionControl sessionControl = considerLocalStorage ? sessionData.getSession(sessionId) : null;
+
+        if (false == considerLocalStorage) {
+            if (false == considerSessionStorage) {
+                return null;
+            }
+
+            return optSessionFromSessionStorage(sessionId, sessionData);
+        }
+
+        SessionControl sessionControl = sessionData.getSession(sessionId);
         if (considerSessionStorage && null == sessionControl) {
-            SessionStorageService storageService = Services.optService(SessionStorageService.class);
-            if (storageService != null) {
-                try {
-                    SessionImpl unwrappedSession = getSessionFrom(sessionId, timeout(), storageService);
-                    if (null != unwrappedSession) {
-                        SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
-                        if (unwrappedSession == sc.getSession()) {
-                            // we restored the session first
-                            for (SessionSerializationInterceptor interceptor : interceptors) {
-                                interceptor.deserialize(unwrappedSession);
-                            }
-                        }
-                        SessionControl retval = null == sc ? new SessionControl(unwrappedSession) : sc;
+            sessionControl = optSessionFromSessionStorage(sessionId, sessionData);
+        }
 
-                        // Post event for restored session
-                        postSessionRestauration(retval.getSession());
+        return sessionControl;
+    }
 
-                        return retval;
-                    }
-                } catch (OXException e) {
-                    if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                        LOG.warn("Session look-up failed in session storage.", e);
-                    }
+    private static SessionControl optSessionFromSessionStorage(String sessionId, SessionData sessionData) {
+        SessionStorageService storageService = Services.optService(SessionStorageService.class);
+        if (storageService == null) {
+            // No session storage available
+            return null;
+        }
+
+        try {
+            SessionImpl unwrappedSession = getSessionFrom(sessionId, timeout(), storageService);
+            if (null == unwrappedSession) {
+                return null;
+            }
+
+            SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
+            if (unwrappedSession == sc.getSession()) {
+                // This thread restored the session first
+                for (SessionSerializationInterceptor interceptor : interceptors) {
+                    interceptor.deserialize(unwrappedSession);
                 }
             }
+
+            // Post event for restored session
+            postSessionRestauration(sc.getSession());
+
+            return sc;
+        } catch (OXException e) {
+            if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                LOG.warn("Session look-up failed in session storage.", e);
+            }
         }
-        /*-
-         * Ensure session is available in session storage
-        if (null != sessionControl) {
-            storeSession(sessionControl.getSession(), Services.optService(SessionStorageService.class), true);
-        }
-         */
-        return sessionControl;
+
+        return null;
     }
 
     /**

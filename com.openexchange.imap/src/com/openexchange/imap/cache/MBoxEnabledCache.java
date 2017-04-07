@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -128,7 +129,7 @@ public final class MBoxEnabledCache {
         final ConcurrentMap<InetSocketAddress, Future<Boolean>> map = MAP;
         Future<Boolean> f = map.get(imapConfig.getImapServerSocketAddress());
         if (null == f) {
-            final SettableFutureTask<Boolean> ft = new SettableFutureTask<Boolean>(new MBoxEnabledCallable(imapFolder, prefix));
+            final SettableFutureTask<Boolean> ft = new SettableFutureTask<Boolean>(new MBoxEnabledCallable(imapFolder, prefix, MailProperties.getInstance().getDefaultSeparator()));
             f = map.putIfAbsent(imapConfig.getImapServerSocketAddress(), ft);
             if (null == f) {
                 f = ft;
@@ -171,20 +172,20 @@ public final class MBoxEnabledCache {
     private static final class MBoxEnabledCallable implements Callable<Boolean> {
 
         private static final int FOLDER_TYPE = (IMAPFolder.HOLDS_MESSAGES | IMAPFolder.HOLDS_FOLDERS);
-
         private final IMAPFolder imapFolder;
-
         private final String prefix;
+        private final char defaultSeparator;
 
-        public MBoxEnabledCallable(final IMAPFolder imapFolder, final String prefix) {
+        public MBoxEnabledCallable(IMAPFolder imapFolder, String prefix, char defaultSeparator) {
             super();
             this.imapFolder = imapFolder;
             this.prefix = prefix;
+            this.defaultSeparator = defaultSeparator;
         }
 
         @Override
         public Boolean call() throws Exception {
-            return Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(imapFolder, FOLDER_TYPE, prefix));
+            return Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(imapFolder, FOLDER_TYPE, prefix, defaultSeparator));
         }
 
     }

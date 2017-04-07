@@ -147,3 +147,293 @@ properties:
       related: com.openexchange.websockets.enabled
       file: pns.properties
       tags: ["Push"]
+    - key: com.openexchange.push.ms.delayDuration
+      description: |
+        Time in milliseconds after which a queued object object is pushed to clients
+        unless it got delayed again due to modifications of the push object within the
+        delayDuration or modifications within the folder of the push object.
+      defaultValue: 120000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-ms.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.ms.maxDelayDuration
+      description: |
+        The maximum time in milliseconds a push object may be delayed before finally pushing it to the clients.
+      defaultValue: 600000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-ms.properties
+      tags: ["Push", "Limit"]
+    - key: com.openexchange.push.udp.pushEnabled
+      description: |
+        Defines if server push port gets opened or not.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.remoteHost
+      description: |
+        List of open-xchange servers that should be connected when multicast is disabled.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push", "Host"]
+    - key: com.openexchange.push.udp.registerTimeout
+      description: |
+        Time in milliseconds a client registration is kept.
+      defaultValue: 3600000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push", "Timeout"]
+    - key: com.openexchange.push.udp.registerPort
+      description: |
+        Port where the clients send the push registration request to.
+      defaultValue: 44335
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push", "Port"]
+    - key: com.openexchange.push.udp.registerDistributionEnabled
+      description: |
+        Only one of registerDistribution or eventDistribution can be enabled at the same time.
+        If set to true, registrations are distributed to all ox servers.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.eventDistributionEnabled
+      description: |
+        If set to true, events will be distributed to all Open-Xchange servers.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push", "Event"]
+    - key: com.openexchange.push.udp.outputQueueDelay
+      description: |
+        Time in milliseconds after which queued "push" packages are sent to clients.
+      defaultValue: 120000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.hostname
+      description: |
+        If empty, then the output of the java function getHostName will be used. 
+        This name is used for internal communication.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push", "Host"]
+    - key: com.openexchange.push.udp.senderAddress
+      description: |
+        Address used as the sender address when UDP packages are sent to the clients 
+        (should be the IP address of the load balancer in front of the Open-Xchange server farm)
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastEnabled
+      description: |
+        Speciefies whether to send register information per multicast.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastAddress
+      description: |
+        Specifies the ip multicast address.
+      defaultValue: 224.0.0.1
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastPort
+      description: |
+        Specifies the multicast port.
+      defaultValue: 9982
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      tags: ["Push", "Port"]      
+      
+    - key: com.openexchange.push.imapidle.folder
+      description: |
+        Define the folder to look-up for new mails
+      defaultValue: INBOX
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.delay
+      description: |
+        Waiting time in milliseconds before a reconnect is performed
+      defaultValue: 5000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.clusterLock
+      description: |
+        Specifies what system to use to manage a cluster-lock
+        Possible values:
+        - "db" for database-based locking
+        - "hz" for Hazelcast-based locking
+        - "local" for node-local locking; each node may spawn an IMAP-IDLE listener for a user (default)
+        - "none" for no cluster lock mechanism
+      defaultValue: local
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.pushMode
+      description: |
+        when to fire push events?
+        possible values: newmail,always
+        
+        Explanation:
+        newmail means to only send a push event in case of at least one
+                new mail has arrived. NOTE: Using dovecot this does only
+                work when only ONE concurrent session of the same user
+                is active.
+        always  send a push event for every changes to the users mailbox.
+      defaultValue: always
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.supportsPermanentListeners
+      description: |
+        Controls whether IMAP IDLE based mail push implementation is supposed to also
+        support permanent listeners.
+        
+        Note: IMAP IDLE based mail push implementation is not recommended for operating
+        with permanent listeners due its nature to maintain a permanent IMAP connection
+        and its drawbacks to determine if a IDLE callback is due to a new message delivery.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      tags: ["Push"]
+      
+    - key: com.openexchange.push.mail.notify.udp_listen_multicast
+      description: |
+        Define if the listener should receive multicast messages
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.udp_listen_host
+      description: |
+        Define the hostname or interface/multicast group where the udp server should listen
+      defaultValue: localhost
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.udp_listen_port
+      description: |
+        Define the port where the udp server should listen
+      defaultValue: 23420
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.use_ox_login
+      description: |
+        Whether to use the ox login name to check for a valid push event.
+        The default is to only check the users aliases.
+        If mailboxname@example.com is not contained in the list of aliases,
+        set this to true.
+        Warning: This won't work in multidomain setups where the same login
+        might exist in different contexts!
+      defaultValue: 23420
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.use_full_email_address
+      description: |
+        Whether to use the full email address from aliases or just use the
+        localpart.
+        When using a multidomain setup where the imap login is an email address,
+        this should be set to true.
+        If not, login might not be unique because foo@example.com and foo@example.net
+        might be different users.
+        Note: Do NOT set com.openexchange.push.mail.notify.imap_login_delimiter in this case!
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.delay_millis
+      description: |
+        Specifies the delay time frame in which incoming UDP events are collected
+        and send out as one push event to the OX cluster
+      defaultValue: 5000
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      tags: ["Push"]
+      
+      
+      

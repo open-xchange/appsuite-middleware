@@ -202,6 +202,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             } catch (OXException e) {
                 acquiredLatch.result.set(e);
                 throw e;
+            } catch (RuntimeException e) {
+                acquiredLatch.result.set(new OXException(e));
+                throw e;
             } finally {
                 latch.countDown();
                 releaseFor(sessionId);
@@ -346,7 +349,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                 PortableSession removedSession = sessions().remove(sessionId);
                 if (null == removedSession) {
-                    LOG.debug("Session with ID '{}' not found, unable to remove from storage.", sessionId);
+                    LOG.debug("Session with ID '{}' not found, unable to remove from session storage.", sessionId);
+                } else {
+                    LOG.debug("Session with ID '{}' removed from session storage.", sessionId);
                 }
             } catch (HazelcastInstanceNotActiveException e) {
                 throw handleNotActiveException(e);

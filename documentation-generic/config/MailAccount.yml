@@ -1,4 +1,4 @@
-feature_name: MailAccount
+feature_name: Mail Account
 properties:
     - key: com.openexchange.mailaccount.failedAuth.limit
       description: |
@@ -9,7 +9,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mailaccount.failedAuth.span
       file: mailaccount.properties
-      tags: ["Mail","Limit"]
+      tags: ["Mail Account","Limit"]
     - key: com.openexchange.mailaccount.failedAuth.span
       description: |
         Specifies the time span in which the failed authentication attempts are tracked.
@@ -20,4 +20,4 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mailaccount.failedAuth.limit
       file: mailaccount.properties
-      tags: ["Mail"]
+      tags: ["Mail Account"]

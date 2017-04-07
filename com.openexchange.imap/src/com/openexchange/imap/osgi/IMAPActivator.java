@@ -76,8 +76,6 @@ import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
-import com.openexchange.imap.notify.IMAPNotifierRegistryService;
-import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.osgi.console.ClearListLsubCommandProvider;
 import com.openexchange.imap.osgi.console.ListLsubCommandProvider;
 import com.openexchange.imap.services.Services;
@@ -149,16 +147,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                 Dictionary<String, String> dictionary = new Hashtable<>(1);
                 dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
                 registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
-            }
-            /*
-             * Register IMAP notifier registry
-             */
-            if (IMAPProperties.getInstance().notifyRecent()) {
-                final ConfigurationService service = getService(ConfigurationService.class);
-                final boolean register = service.getBoolProperty("com.openexchange.imap.registerIMAPNotifierRegistryService", false);
-                if (register) {
-                    registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
-                }
             }
             /*
              * Trackers
@@ -278,7 +266,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false, false);
                                 IMAPStoreCache.getInstance().dropFor(userId.intValue(), contextId.intValue());
 
-                                IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());
                                 ConversationCache.getInstance().removeUserConversations(userId.intValue(), contextId.intValue());
                             }
                         }

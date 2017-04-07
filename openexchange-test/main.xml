@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="main" basedir=".">
+    <description>
+        Enhances test libs by the rest client
+    </description>
+	
+    <target name="download_check_and_add_jar">
+        <antcall target="download">
+            <param name="url" value="${jar.url}" />
+        </antcall>
+
+    	<basename property="jar.filename" file="${jar.url}" />
+        <antcall target="check">
+            <param name="file" value="${jar.filename}" />
+        </antcall>
+
+        <antcall target="add_to_lib">
+            <param name="file" value="${jar.filename}" />
+        </antcall>
+
+    </target>
+
+    <target name="mktmp">
+        <mkdir dir="${tmp_dir}" />
+    </target>
+
+    <target name="download" depends="mktmp">
+        <get dest="${tmp_dir}">
+            <url url="${url}" />
+        </get>
+    </target>
+
+    <target name="check">
+        <antcall target="download">
+            <param name="url" value="${jar.url}.md5" />
+        </antcall>
+        <checksum file="${tmp_dir}/${file}" fileext=".md5" verifyproperty="checksum.matches" />
+        <condition property="checksum.matches.fail">
+            <equals arg1="${checksum.matches}" arg2="false" />
+        </condition>
+        <echo message="MD5 matches for file ${file}: ${checksum.matches}" />
+        <fail if="checksum.matches.fail">Checksum error</fail>
+        <delete file="${tmp_dir}/${file}.md5" />
+    </target>
+
+    <target name="add_to_lib" depends="remove_other_versions">
+        <move file="${tmp_dir}/${file}" todir="${dest.loc}" />
+    </target>
+
+    <target name="remove_other_versions">
+        <basename property="jar.filename" file="${jar.url}" />
+        <loadresource property="rest-client.delete.prefix">
+          <propertyresource name="jar.filename"/>
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="\d\.\d\.\d\.jar$" replace="*"/>
+            </tokenfilter>
+          </filterchain>
+        </loadresource>
+
+        <fail message="Property &quot;rest-client.delete.prefix&quot; needs to be set to a value">
+            <condition>
+                <or>
+                    <equals arg1="${rest-client.delete.prefix}" arg2=""/>
+                    <not>
+                        <isset property="rest-client.delete.prefix"/>
+                    </not>
+               </or>
+           </condition>
+        </fail>
+
+        <delete verbose="true">
+            <fileset dir="${dest.loc}">
+                <include name="**/${rest-client.delete.prefix}" />
+            </fileset>
+        </delete>
+    </target>
+
+</project>

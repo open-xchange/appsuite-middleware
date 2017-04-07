@@ -21,7 +21,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1050,9 +1050,6 @@ fi
 # SoftwareChagne_Request-2110
 ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
 
-# SoftwareChange_Request-2148
-ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
-
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
 VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
@@ -1443,6 +1440,12 @@ ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 # SoftwareChange_Request-3934
 ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-4033
+sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/' /opt/open-xchange/etc/logback.xml
+
+# SoftwareChange_Request-4059
+ox_remove_property com.openexchange.mail.enforceSecureConnection /opt/open-xchange/etc/mail.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1484,12 +1487,14 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Mon Apr 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 7.8.4 release
-* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1537,7 +1542,7 @@ Sixth candidate for 7.8.0 release
 * Wed Sep 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -2005,7 +2010,7 @@ First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.0
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Second build for patch  2013-07-18
+Second build for patch 2013-07-18
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>

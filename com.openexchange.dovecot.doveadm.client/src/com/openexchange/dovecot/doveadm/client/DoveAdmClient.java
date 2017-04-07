@@ -63,6 +63,17 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface DoveAdmClient {
 
     /**
+     * Checks specified user identifier and prepares it for being used
+     *
+     * @param user The user identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The checked user identifier
+     * @throws OXException If checking user identifier fails
+     */
+    String checkUser(String user, int userId, int contextId) throws OXException;
+
+    /**
      * Executes the specified DoveAdm command.
      *
      * @param command The DoveAdm command to execute

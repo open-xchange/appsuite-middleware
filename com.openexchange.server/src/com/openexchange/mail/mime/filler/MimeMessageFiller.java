@@ -120,6 +120,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
@@ -1751,6 +1752,10 @@ public class MimeMessageFiller {
                                 ImageLocation il;
                                 try {
                                     il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                                    SecuritySettings securitySettings = mail.getSecuritySettings();
+                                    if (null != securitySettings) {
+                                        il.setAuth(securitySettings.getAuthentication());
+                                    }
                                 } catch (final IllegalArgumentException e) {
                                     final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
                                     srcMatcher.appendReplacement(bblankImageTag, "");

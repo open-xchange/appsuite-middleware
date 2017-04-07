@@ -1,0 +1,26 @@
+feature_name: Folder JSON
+properties:
+    - key: com.openexchange.folder.json.module
+      description: |
+        Define the module which also serves as the appendix for registered servlet:
+        If module is set to "myfolders", the servlet path is changed to "/ajax/myfolders"
+        Default is "folders"
+      defaultValue: folders
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: folderjson.properties
+      tags: ["Folder", "JSON"]
+    - key: com.openexchange.folder.json.servletPath
+      description: |
+        Define the path for registered servlet
+        If set, the complete path is set to specified value regardless of the value of "com.openexchange.folder.json.module" property
+        Default is empty to let path be: "/ajax/" + <module>
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: folderjson.properties
+      tags: ["Folder", "JSON"]

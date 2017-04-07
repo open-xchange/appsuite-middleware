@@ -321,7 +321,12 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     @Override
-    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
+    public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
+        return getVisibleFolders(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), treeId, contentType, type, storageParameters);
+    }
+
+    @Override
+    public SortableId[] getVisibleFolders(String rootFolderid, String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         if (!MailType.getInstance().equals(type) && !PrivateType.getInstance().equals(type)) {
             return new SortableId[0];
         }
@@ -329,12 +334,22 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             return new SortableId[0];
         }
 
+        int accountId;
+        if (null == rootFolderid) {
+            accountId = MailAccount.DEFAULT_ID;
+        } else {
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(rootFolderid);
+            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fa.getFullName())) {
+                throw new UnsupportedOperationException("FileStorageFolderStorage.getVisibleSubfolders()");
+            }
+            accountId = fa.getAccountId();
+        }
+
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             /*
              * Only primary account folders
              */
-            final int accountId = MailAccount.DEFAULT_ID;
             final ServerSession session = getServerSession(storageParameters);
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);

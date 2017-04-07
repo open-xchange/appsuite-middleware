@@ -70,7 +70,6 @@ import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.UIDFolder;
 import javax.mail.internet.AddressException;
@@ -81,6 +80,7 @@ import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -122,6 +122,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
+    private final int accountId;
     private String[] args;
     private final String command;
     private boolean uid;
@@ -154,6 +155,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
+        accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
@@ -187,6 +189,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
+        accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
@@ -218,6 +221,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
+        accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
         uid2index = new TLongIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
@@ -444,7 +448,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean error = false;
         MailMessage mail;
         try {
-            mail = handleFetchRespone(fetchResponse, fullname, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
+            mail = handleFetchRespone(fetchResponse, fullname, accountId, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -474,12 +478,15 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      *
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
+     * @param accountId The account identifier
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an OX error occurs
      */
-    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, null, false, false, false, false);
+    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final int accountId) throws MessagingException, OXException {
+        IDMailMessage mail = new IDMailMessage(null, fullName);
+        mail.setAccountId(accountId);
+        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false);
     }
 
     /**
@@ -496,8 +503,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false);
     }
 
-    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
+    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, int accountId, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
+        IDMailMessage mail = new IDMailMessage(null, fullName);
+        mail.setAccountId(accountId);
+        return handleFetchRespone(mail, fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
     }
 
     private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
@@ -644,7 +653,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue())));
+                        mailMessage.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue())), true);
                     }
                 });
                 put(MessageHeaders.HDR_DATE, new HeaderHandler() {
@@ -907,7 +916,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.addReplyTo(wrap(env.replyTo));
             msg.setHeader("In-Reply-To", env.inReplyTo);
             msg.setHeader("Message-Id", env.messageId);
-            msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
+            msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject), true);
             msg.setSentDate(env.date);
         }
 
@@ -946,7 +955,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
             header = message.getHeader("Subject");
             if (null != header && header.length > 0) {
-                msg.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(header[0]));
+                msg.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(header[0]), true);
             }
             msg.setSentDate(message.getSentDate());
         }
@@ -1149,7 +1158,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
-            msg.setOriginalFolder(((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox);
+            String mailbox = ((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox;
+            msg.setOriginalFolder(new FullnameArgument(msg.getAccountId(), mailbox));
         }
 
         @Override

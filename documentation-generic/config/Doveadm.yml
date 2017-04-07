@@ -2,14 +2,14 @@ feature_name: Doveadm
 properties:
     - key: com.openexchange.dovecot.doveadm.enabled
       description: |
-        Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not
+        Specifies whether the connector for the Dovecot DoveAdm REST interface will be enabled or not.
       defaultValue: false
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
       related: 
       file: doveadm.properties
-      tags: ["Mail","Rest"]
+      tags: ["Mail","REST"]
     - key: com.openexchange.dovecot.doveadm.endpoints
       description: |
         Specifies the URIs to the Dovecot DoveAdm REST interface end-points. 
@@ -22,7 +22,7 @@ properties:
         com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds (default is 3sec)
         com.openexchange.dovecot.doveadm.endpoints.checkInterval           The time interval in milliseconds when to check if a previously black-listed end-point is re-available again (default is 60sec)
 
-        Full example :
+        "Full example :"
         com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081
         com.openexchange.dovecot.doveadm.endpoints.totalConnections=100
         com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)
@@ -37,14 +37,25 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
-      tags: ["Mail","Rest"]
+      tags: ["Mail","REST", "Host"]
     - key: com.openexchange.dovecot.doveadm.apiSecret
       description: |
-        Specifies the API secret to communicate with the Dovecot DoveAdm REST interface
+        Specifies the API secret to communicate with the Dovecot DoveAdm REST interface.
       defaultValue: 
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
       related: 
       file: doveadm.properties
-      tags: ["Mail","Rest"]
+      tags: ["Mail","REST", "Credential"]
+    - key: com.openexchange.dovecot.doveadm.proxyDelimiter
+      description: |
+        Specifies the proxy delimiter to use in case created users use login names for proxy authentication; e.g. "user1@domain.com*master@super.net"
+        Default is empty (no proxy delimiter is used) 
+      defaultValue: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: doveadm.properties
+      tags: ["Mail","REST", "Credential"]

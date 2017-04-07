@@ -63,7 +63,6 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -212,7 +211,7 @@ public final class CapabilitiesCache {
             imapCaps.setNamespace(map.containsKey(IMAPCapabilities.CAP_NAMESPACE));
             imapCaps.setIdle(map.containsKey(IMAPCapabilities.CAP_IDLE));
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
-            imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
+            imapCaps.setHasSubscription(!imapConfig.getIMAPProperties().isIgnoreSubscription());
             imapCaps.setFileNameSearch(map.containsKey(IMAPCapabilities.CAP_SEARCH_FILENAME));
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled

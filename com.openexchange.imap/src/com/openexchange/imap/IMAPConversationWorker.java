@@ -835,7 +835,7 @@ public final class IMAPConversationWorker {
     }
 
     private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String fullName, final Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1062,7 +1062,7 @@ public final class IMAPConversationWorker {
     }
 
     private Comparator<MailThread> getThreadComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
         Comparator<MailThread> threadComparator = new Comparator<MailThread>() {
 
             @Override
@@ -1191,7 +1191,7 @@ public final class IMAPConversationWorker {
                 /*
                  * Sort according to order direction
                  */
-                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale()));
+                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
                 /*
                  * Output as flat list
                  */
@@ -1272,7 +1272,7 @@ public final class IMAPConversationWorker {
             /*
              * Sort according to order direction
              */
-            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale()));
+            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
             /*
              * Output as flat list
              */

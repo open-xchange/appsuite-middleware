@@ -144,7 +144,7 @@ public class HzDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
         }
 
         // Check if valid
-        if (validValue(previous, now, hzInstance)) {
+        if (validValue(previous, now)) {
             // Locked
             return false;
         }

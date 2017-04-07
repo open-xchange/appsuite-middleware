@@ -63,7 +63,6 @@ import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.config.MailProperties;
@@ -133,7 +132,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.preferSimpleAddressParsing");
+                return null;
             }
         });
     }
