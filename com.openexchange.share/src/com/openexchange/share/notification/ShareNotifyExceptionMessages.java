@@ -67,4 +67,6 @@ public class ShareNotifyExceptionMessages implements LocalizableStrings {
 
     public static final String UNEXPECTED_ERROR_MSG = "An error occurred, we were unable to send out the notification mails.";
 
+    public static final String INSUFFICIENT_PERMISSIONS_MSG = "You don't have sufficient permissions to send notifications for this share.";
+
 }
