@@ -160,8 +160,12 @@ public final class Cookies {
             synchronized (LoginServlet.class) {
                 tmp = configuredDomain;
                 if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = null == service ? "null" : service.getProperty("com.openexchange.cookie.domain", "null");
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return null;
+                    }
+
+                    tmp = service.getProperty("com.openexchange.cookie.domain", "null").trim();
                     configuredDomain = tmp;
                 }
             }
