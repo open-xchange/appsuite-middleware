@@ -50,44 +50,33 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.exception.OXException;
+import com.openexchange.pluginsloaded.PluginsLoadedService;
 
+/**
+ * {@link OXAdminCoreImpl}
+ *
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.8.4
+ */
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAdminCoreImpl.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXAdminCoreImpl.class);
 
-    private final BundleContext context;
-
-    public OXAdminCoreImpl(BundleContext context) {
+    public OXAdminCoreImpl() {
         super();
-        this.context = context;
     }
 
     @Override
-    public boolean allPluginsLoaded() throws RemoteException {
-        Bundle[] bundles = context.getBundles();
-        List<Bundle> fragments = new ArrayList<Bundle>();
-        List<Bundle> notStarted = new ArrayList<Bundle>();
-        for (Bundle bundle : bundles) {
-            if (!AdminDaemon.isNoFragment(bundle)) {
-                fragments.add(bundle);
-            } else if (Bundle.ACTIVE != bundle.getState()) {
-                notStarted.add(bundle);
-            }
+    public boolean allPluginsLoaded() throws RemoteException, OXException {
+        PluginsLoadedService service = AdminServiceRegistry.getInstance().getService(PluginsLoadedService.class);
+        if (null == service) {
+            LOGGER.error("The PluginsLoadedService was not started");
+            return false;
         }
-        if (notStarted.isEmpty()) {
-            return true;
-        }
-        if (!fragments.isEmpty()) {
-            log.info("System contains the following fragments which will not be started: {}", fragments);
-        }
-        log.error("The following bundles aren't started: {}", notStarted);
-        return false;
+        return service.allPluginsloaded();
     }
 
 }
