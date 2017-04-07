@@ -68,7 +68,7 @@ public enum MailFilterProperty implements Property {
 
     /**
      * Specify which sieve credentials should be use. Following options are allowed here:
-     * 
+     *
      * <li>{@link CredentialSource#SESSION}: login name and password are used from the current session</li>
      * <li>{@link CredentialSource#SESSION_FULL_LOGIN}: full login (incl. context part) name and password
      * are used from the current session</i>
@@ -86,7 +86,7 @@ public enum MailFilterProperty implements Property {
 
     /**
      * <p>Specify the SIEVE port</p>
-     * 
+     *
      * <p><b>NOTE</b>: <code>2000</code> is the deprecated port number for SIEVE (now assigned to
      * some Cisco SCCP protocol by the IANA).
      * <code>4190</code> is the new one used with most recent Linux and IMAP implementations.
@@ -139,7 +139,7 @@ public enum MailFilterProperty implements Property {
      * password to login into mail filter system. If 'session' is set, then user's individual
      * system's password is taken. If 'global' is set, then the value specified through
      * property 'com.openexchange.mail.filter.masterPassword' is taken.</p>
-     * 
+     *
      * <p>Currently known values: {@link PasswordSource#SESSION} and {@link PasswordSource#GLOBAL}</p>
      */
     passwordSource("session"),
@@ -154,7 +154,7 @@ public enum MailFilterProperty implements Property {
      * <p>This property defines if mailbox names shall be UTF-7 encoded as specified in
      * RFC2060; section 5.1.3. "Mailbox International Naming Convention".
      * Default is "false"; meaning no UTF-7 encoding is performed.</p>
-     * 
+     *
      * <p>Set to "true" for those Cyrus IMAP server versions that do NOT support
      * "sieve_utf8fileinto" property (e.g. lower than v2.3.11) Set to "true" for those
      * Cyrus IMAP server versions that support "sieve_utf8fileinto" property having that
@@ -184,12 +184,18 @@ public enum MailFilterProperty implements Property {
     /**
      * <p>Specifies the preferred SASL authentication mechanism.
      * An empty value falls-back to "PLAIN"</p>
-     * 
+     *
      * <p>Known values: GSSAPI, XOAUTH2, OAUTHBEARER</p>
-     * 
+     *
      * <p>Default is empty (which results in "PLAIN" being used).</p>
      */
     preferredSaslMech,
+
+    /**
+     * Specifies the time out (value in milliseconds) how long a Sieve end-point is supposed to be considered as down
+     * once a connect timeout occurred
+     */
+    tempDownTimeout(10000),
     ;
 
     private static final String EMPTY = "";
@@ -207,7 +213,7 @@ public enum MailFilterProperty implements Property {
 
     /**
      * Initialises a new {@link MailFilterProperty}.
-     * 
+     *
      * @param defaultValue The default value of the property
      */
     private MailFilterProperty(Object defaultValue) {
@@ -216,7 +222,7 @@ public enum MailFilterProperty implements Property {
 
     /**
      * Initialises a new {@link MailFilterProperty}.
-     * 
+     *
      * @param defaultValue The default value of the property
      * @param optional Whether the property is optional
      */
@@ -228,7 +234,7 @@ public enum MailFilterProperty implements Property {
 
     /**
      * Returns whether the property is optional
-     * 
+     *
      * @return <code>true</code> if the property is optional; <code>false</code> otherwise
      */
     public boolean isOptional() {
@@ -237,7 +243,7 @@ public enum MailFilterProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getFQPropertyName()
      */
     @Override
@@ -247,7 +253,7 @@ public enum MailFilterProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getDefaultValue(java.lang.Class)
      */
     @Override
