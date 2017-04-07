@@ -1,3 +1,9 @@
+open-xchange-sms-sipgate (7.8.3-21) stable; urgency=medium
+
+  * Build for patch 2017-04-18 (4084)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 07 Apr 2017 13:31:20 +0200
+
 open-xchange-sms-sipgate (7.8.3-20) stable; urgency=medium
 
   * Build for patch 2017-04-03 (4050)
