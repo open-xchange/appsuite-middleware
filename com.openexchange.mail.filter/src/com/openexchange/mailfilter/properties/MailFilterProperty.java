@@ -195,7 +195,7 @@ public enum MailFilterProperty implements Property {
      * Specifies the time out (value in milliseconds) how long a Sieve end-point is supposed to be considered as down
      * once a connect timeout occurred
      */
-    tempDownTimeout(10000),
+    tempDownTimeout(10000, true),
     ;
 
     private static final String EMPTY = "";
