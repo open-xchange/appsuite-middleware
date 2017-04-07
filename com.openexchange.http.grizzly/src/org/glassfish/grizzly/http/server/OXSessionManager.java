@@ -355,10 +355,9 @@ public class OXSessionManager implements SessionManager {
             if (cookie.getName().startsWith(sessionCookieName)) {
                 if (cookie.getValue().equals(invalidSessionId)) {
                     response.addCookie(createinvalidationCookie(cookie));
+
                     String domain = Cookies.getDomainValue(request.getServerName());
-                    if (domain != null) {
-                        response.addCookie(createinvalidationCookie(cookie, domain));
-                    }
+                    response.addCookie(createinvalidationCookie(cookie, null == domain ? request.getServerName() : domain));
                     break;
                 }
             }

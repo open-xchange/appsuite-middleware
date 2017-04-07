@@ -51,8 +51,6 @@ package com.openexchange.tools.servlet.http;
 
 import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
 import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -172,13 +170,12 @@ public final class Cookies {
     }
 
     /**
-     * Gets the domain parameter for specified server name with configured default behavior whether to prefix domain with a dot (
-     * <code>'.'</code>) character.
+     * Gets the (possible) domain argument to use when creating a cookie. That domain argument is either configured or is required being set since host sharding is enabled
      *
      * @param serverName The server name
      * @return The domain parameter or <code>null</code>
-     * @see #prefixWithDot()
-     * @see #configuredDomain()
+     * @see #getDomainValueFromConfiguration()
+     * @see Tools#validateDomainRegardingSharding(String)
      */
     public static String getDomainValue(final String serverName) {
         String domain = getDomainValueFromConfiguration(serverName);
