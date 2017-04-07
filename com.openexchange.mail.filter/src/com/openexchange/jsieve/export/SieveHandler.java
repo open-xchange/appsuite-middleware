@@ -331,11 +331,12 @@ public class SieveHandler {
         if (tmpDownTimeout > 0) {
             Long range = TIMED_OUT_SERVERS.get(hostAndPort);
             if (range != null) {
-                if (System.currentTimeMillis() - range.longValue() <= tmpDownTimeout) {
+                long duration = System.currentTimeMillis() - range.longValue();
+                if (duration <= tmpDownTimeout) {
                     /*
                      * Still considered as being temporary broken
                      */
-                    throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, null);
+                    throw new java.net.SocketTimeoutException("Sieve server still considered as down since " + duration + "msec");
                 }
                 TIMED_OUT_SERVERS.remove(hostAndPort);
             }
@@ -356,10 +357,13 @@ public class SieveHandler {
                 s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), effectiveConnectTimeout);
             } catch (final java.net.ConnectException e) {
                 // Connection refused remotely
+                throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
+            } catch (final java.net.SocketTimeoutException e) {
+                // Connection attempt timed out
                 if (tmpDownTimeout > 0 && effectiveConnectTimeout >= configuredTimeout) {
                     TIMED_OUT_SERVERS.put(hostAndPort, Long.valueOf(System.currentTimeMillis()));
                 }
-                throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
+                throw e;
             }
         }
         /*
