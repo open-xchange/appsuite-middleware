@@ -66,7 +66,6 @@ import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.UIDFolder;
 import javax.mail.internet.InternetAddress;
@@ -419,7 +418,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue())));
+                        mailMessage.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue())), true);
                     }
                 });
                 put(MessageHeaders.HDR_DATE, new HeaderHandler() {
@@ -679,7 +678,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             msg.addReplyTo(env.replyTo);
             msg.addHeader("In-Reply-To", env.inReplyTo);
             msg.addHeader("Message-Id", env.messageId);
-            msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject));
+            msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject), true);
             msg.setSentDate(env.date);
         }
 
@@ -700,7 +699,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             }
             header = message.getHeader("Subject");
             if (null != header && header.length > 0) {
-                msg.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(header[0]));
+                msg.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(header[0]), true);
             }
             msg.setSentDate(message.getSentDate());
         }

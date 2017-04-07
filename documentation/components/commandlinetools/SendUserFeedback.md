@@ -1,5 +1,5 @@
 ---
-title: SendFeedbackViaMail
+title: SendUserFeedback
 ---
 
 # Sends the stored user feedback data via mail

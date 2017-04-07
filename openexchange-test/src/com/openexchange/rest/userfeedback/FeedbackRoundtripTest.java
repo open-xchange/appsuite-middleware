@@ -47,33 +47,91 @@
  *
  */
 
-package com.openexchange.userfeedback.rest.osgi;
+package com.openexchange.rest.userfeedback;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.uadetector.UserAgentParser;
-import com.openexchange.userfeedback.FeedbackService;
+import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.IOException;
+import javax.ws.rs.core.Application;
+import org.apache.commons.io.FileUtils;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.userfeedback.actions.StoreRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.testing.restclient.invoker.ApiException;
 import com.openexchange.userfeedback.rest.services.DeleteUserFeedbackService;
 import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
 import com.openexchange.userfeedback.rest.services.SendUserFeedbackService;
 
 /**
- * {@link UserFeedbackRESTActivator}
+ * {@link FeedbackRoundtripTest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class UserFeedbackRESTActivator extends HousekeepingActivator {
+@RunWith(BlockJUnit4ClassRunner.class)
+public class FeedbackRoundtripTest extends AbstractUserFeedbackTest {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackRoundtripTest.class);
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, FeedbackService.class };
+    protected Application configure() {
+        return new ResourceConfig(ExportUserFeedbackService.class, DeleteUserFeedbackService.class, SendUserFeedbackService.class);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ExportUserFeedbackService.class, new ExportUserFeedbackService(this));
-        registerService(SendUserFeedbackService.class, new SendUserFeedbackService(this));
-        registerService(DeleteUserFeedbackService.class, new DeleteUserFeedbackService(this));
+    public void setUp() throws Exception {
+        super.setUp();
+
+        removeFeedbacks();
     }
 
+    @Test
+    public void testRawExport() throws Exception {
+        storeFeedbacks(3);
+
+        String export = userfeedbackApi.exportRAW("default", type, new Long(0), new Long(0));
+        JSONArray jsonExport = new JSONArray(export);
+
+        assertEquals(3, jsonExport.length());
+    }
+
+    @Test
+    public void testCsvExport() throws Exception {
+        storeFeedbacks(3);
+
+        File export2 = userfeedbackApi.exportCSV("default", type, new Long(0), new Long(0));
+        String readFileToString = FileUtils.readFileToString(export2);
+        System.out.println(readFileToString);
+
+    }
+
+    private void storeFeedbacks(int numberOfFeedbacks) throws OXException, IOException, JSONException {
+        StoreRequest feedback = new StoreRequest(type, validFeedback);
+        for (int feedbacks = 0; feedbacks < numberOfFeedbacks; feedbacks++) {
+            getAjaxClient().execute(feedback);
+        }
+
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            removeFeedbacks();
+        } finally {
+            super.tearDown();
+        }
+    }
+
+    private void removeFeedbacks() {
+        try {
+            userfeedbackApi.delete("default", type, new Long(0), new Long(0));
+        } catch (ApiException e) {
+            LOG.warn("Unable to cleanup: {}", e.getMessage(), e);
+        }
+    }
 }

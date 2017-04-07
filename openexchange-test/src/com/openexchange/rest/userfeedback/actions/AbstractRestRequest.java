@@ -47,27 +47,20 @@
  *
  */
 
-package com.openexchange.userfeedback.mail;
+package com.openexchange.rest.userfeedback.actions;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
+import javax.ws.rs.client.WebTarget;
 
 /**
- * 
- * {@link FeedbackMailService}
+ * {@link AbstractRestRequest}
  *
- * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since 7.8.4
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public interface FeedbackMailService {
+public abstract class AbstractRestRequest {
 
-    /**
-     * Send a user feedback file to a set of recipients. All needed information is 
-     * inside the {@link FeedbackMailFilter} property.
-     * 
-     * @param filter, with all export filter information and recipients
-     * @return, a result String if at least one mail is sent out
-     * @throws OXException, if anything during gathering export data or sending went wrong
-     */
-    public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException;
+    public abstract boolean requiresAdministrativePermission();
+
+    public abstract WebTarget getEndpoint(String host);
+
 }

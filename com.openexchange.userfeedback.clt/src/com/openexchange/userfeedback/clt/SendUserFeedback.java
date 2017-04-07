@@ -79,12 +79,12 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Strings;
 
 /**
- * {@link SendFeedbackViaMail}
+ * {@link SendUserFeedback}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.4
  */
-public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
+public class SendUserFeedback extends AbstractRestCLI<Void> {
 
     private static final String END_LONG = "end-time";
     private static final String END_SHORT = "e";
@@ -113,7 +113,7 @@ public class SendFeedbackViaMail extends AbstractRestCLI<Void> {
     private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/mail";
 
     public static void main(String[] args) {
-        new SendFeedbackViaMail().execute(args);
+        new SendUserFeedback().execute(args);
     }
 
     @Override

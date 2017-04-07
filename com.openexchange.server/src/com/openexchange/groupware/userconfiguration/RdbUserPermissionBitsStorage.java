@@ -274,20 +274,6 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      */
 
     /**
-     * Loads the user permissions from database specified through user ID and context
-     *
-     * @param userId - the user ID
-     * @param ctx - the context
-     * @return the instance of <code>{@link UserPermissionBits}</code>
-     * @throws SQLException - if user configuration could not be loaded from database
-     * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
-     *             implementation
-     */
-    public static UserPermissionBits loadUserPermissionBits(int userId, Context ctx) throws SQLException, OXException {
-        return loadUserPermissionBits(userId, ctx, null);
-    }
-
-    /**
      * Special method invoked by admin to load user permissions since no exception is thrown if no matching config could be found. In this
      * case an instance of {@link UserPermissionBits} is returned that does not hold any permissions.
      *
@@ -367,7 +353,6 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @param userId - the user ID
      * @param groupsArg - the group IDs the user belongs to; may be <code>null</code>
      * @param ctx - the context
-     * @param readConArg - the readable context; may be <code>null</code>
      * @return the instance of <code>{@link UserPermissionBits}</code>
      * @throws SQLException - if user configuration could not be loaded from database
      * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
@@ -375,16 +360,37 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws OXException - if a readable connection could not be obtained from connection pool
      * @throws OXException - if no matching user configuration is kept in database
      */
-    public static UserPermissionBits loadUserPermissionBits(int userId, Context ctx, Connection readConArg) throws SQLException, OXException {
-        Connection readCon = readConArg;
-        boolean closeCon = false;
+    public static UserPermissionBits loadUserPermissionBits(int userId, Context ctx) throws SQLException, OXException {
+        Connection readCon = DBPool.pickup(ctx);
+        try {
+            return loadUserPermissionBits(userId, ctx, readCon);
+        } finally {
+            DBPool.closeReaderSilent(ctx, readCon);
+        }
+    }
+
+    /**
+     * Loads the user permissions from database specified through user ID and context
+     *
+     * @param userId - the user ID
+     * @param groupsArg - the group IDs the user belongs to; may be <code>null</code>
+     * @param ctx - the context
+     * @param readCon - the readable context; may be <code>null</code>
+     * @return the instance of <code>{@link UserPermissionBits}</code>
+     * @throws SQLException - if user configuration could not be loaded from database
+     * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
+     *             implementation
+     * @throws OXException - if a readable connection could not be obtained from connection pool
+     * @throws OXException - if no matching user configuration is kept in database
+     */
+    public static UserPermissionBits loadUserPermissionBits(int userId, Context ctx, Connection readCon) throws SQLException, OXException {
+        if (null == readCon) {
+            return loadUserPermissionBits(userId, ctx);
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeCon = true;
-            }
             stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATION);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
@@ -394,7 +400,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             }
             return new UserPermissionBits(rs.getInt(1), userId, ctx);
         } finally {
-            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            closeResources(rs, stmt, null, true, ctx);
         }
     }
 

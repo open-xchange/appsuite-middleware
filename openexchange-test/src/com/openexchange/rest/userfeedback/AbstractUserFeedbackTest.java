@@ -47,27 +47,41 @@
  *
  */
 
-package com.openexchange.userfeedback.mail;
+package com.openexchange.rest.userfeedback;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
+import com.openexchange.rest.AbstractRestTest;
+import com.openexchange.testing.restclient.modules.UserfeedbackApi;
 
 /**
- * 
- * {@link FeedbackMailService}
+ * {@link AbstractUserFeedbackTest}
  *
- * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since 7.8.4
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public interface FeedbackMailService {
+public class AbstractUserFeedbackTest extends AbstractRestTest {
 
-    /**
-     * Send a user feedback file to a set of recipients. All needed information is 
-     * inside the {@link FeedbackMailFilter} property.
-     * 
-     * @param filter, with all export filter information and recipients
-     * @return, a result String if at least one mail is sent out
-     * @throws OXException, if anything during gathering export data or sending went wrong
-     */
-    public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException;
+    protected String type = "star-rating-v1";
+
+    // @formatter:off
+    protected final String validFeedback = new String("{ " +
+        "\"score\":\"3\","+
+        "\"app\":\"app\","+
+        "\"entry_point\":\"entry\","+
+        "\"Comment\": \"s\u00FC\u00DFer die gl\u00F6cken nie klingen !|\u00A7$%&/()=?@\","+
+        "\"Operating_System\": \"Mac OS X 10.10\","+
+        "\"Browser\":\"Chrome\","+
+        "\"Browser_version\": \"77.0\","+
+        "\"User_agent\": \"Chrome/55.0.2883.87\","+
+        "\"Screen_Resolution\":\"1600x900\","+
+        "\"Language\": \"de_de\""+
+        "}");
+
+    protected UserfeedbackApi userfeedbackApi;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        userfeedbackApi = new UserfeedbackApi(getRestClient());
+    }
+
 }

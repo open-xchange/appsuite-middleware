@@ -35,7 +35,7 @@
 
     <target name="compileTests" depends="clean">
         <mkdir dir="${binDir}"/>
-        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.6" target="1.6" includeAntRuntime="false" debuglevel="lines,vars,source">
+        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.7" target="1.7" includeAntRuntime="false" debuglevel="lines,vars,source">
             <classpath>
                 <path refid="rmiClasspath"/>
             </classpath>

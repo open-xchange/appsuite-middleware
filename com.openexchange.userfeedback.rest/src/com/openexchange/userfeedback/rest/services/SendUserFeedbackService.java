@@ -79,25 +79,25 @@ import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 
 /**
- * {@link SendMailService}
+ * {@link SendUserFeedbackService}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.4
  */
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/userfeedback/v1/mail")
-public class SendMailService extends AbstractUserFeedbackService {
+public class SendUserFeedbackService extends AbstractUserFeedbackService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendMailService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendUserFeedbackService.class);
 
-    public SendMailService(ServiceLookup services) {
+    public SendUserFeedbackService(ServiceLookup services) {
         super(services);
     }
 
     @POST
     @Path("/{context-group}/{type}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Produces(MediaType.TEXT_PLAIN)
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("subject") String subject, @QueryParam("body") String body, String json) {
         return send(contextGroup, type, start, end, subject, body, json);
     }
@@ -147,7 +147,7 @@ public class SendMailService extends AbstractUserFeedbackService {
                 return builder.build();
             }
             builder.entity(response);
-            builder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM + "; charset=utf-8");
+            builder.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN).type(MediaType.TEXT_PLAIN_TYPE);
             return builder.build();
         } catch (JSONException e) {
             ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
