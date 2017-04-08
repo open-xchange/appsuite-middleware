@@ -42,7 +42,7 @@
     </path>
 	
 
-    <target name="default" depends="interface-jar,unit-jar"/>
+    <target name="default" depends="prepare,interface-jar,unit-jar"/>
 
     <target name="clean">
         <delete dir="${build}"/>

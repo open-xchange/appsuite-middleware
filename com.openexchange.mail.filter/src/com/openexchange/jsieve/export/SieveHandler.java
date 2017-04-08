@@ -64,7 +64,9 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -77,6 +79,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.jsieve.export.utils.HostAndPort;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PreferredSASLMech;
@@ -143,6 +146,12 @@ public class SieveHandler {
     protected static final int OK = 0;
 
     protected static final int NO = 1;
+
+    /**
+     * Remembers timed out servers for 10 seconds. Any further attempts to connect to such
+     * a server-port-pair will throw an appropriate exception.
+     */
+    private static final Map<HostAndPort, Long> TIMED_OUT_SERVERS = new ConcurrentHashMap<>(4, 0.9F, 1);
 
     /*-
      * Member section
@@ -312,8 +321,28 @@ public class SieveHandler {
      * @throws OXSieveHandlerInvalidCredentialsException
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
-        measureStart();
         final LeanConfigurationService mailFilterConfig = Services.getService(LeanConfigurationService.class);
+
+        /*
+         * Check if still marked as temporary down
+         */
+        HostAndPort hostAndPort = new HostAndPort(sieve_host, sieve_host_port);
+        int tmpDownTimeout = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.tempDownTimeout);
+        if (tmpDownTimeout > 0) {
+            Long range = TIMED_OUT_SERVERS.get(hostAndPort);
+            if (range != null) {
+                long duration = System.currentTimeMillis() - range.longValue();
+                if (duration <= tmpDownTimeout) {
+                    /*
+                     * Still considered as being temporary broken
+                     */
+                    throw new java.net.SocketTimeoutException("Sieve server still considered as down since " + duration + "msec");
+                }
+                TIMED_OUT_SERVERS.remove(hostAndPort);
+            }
+        }
+
+        measureStart();
 
         useSIEVEResponseCodes = mailFilterConfig.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
 
@@ -322,11 +351,20 @@ public class SieveHandler {
          * Connect with the connect-timeout of the config file or the one which was explicitly set
          */
         int configuredTimeout = mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.connectionTimeout);
-        try {
-            s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), getEffectiveConnectTimeout(configuredTimeout));
-        } catch (final java.net.ConnectException e) {
-            // Connection refused
-            throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
+        {
+            int effectiveConnectTimeout = getEffectiveConnectTimeout(configuredTimeout);
+            try {
+                s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), effectiveConnectTimeout);
+            } catch (final java.net.ConnectException e) {
+                // Connection refused remotely
+                throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
+            } catch (final java.net.SocketTimeoutException e) {
+                // Connection attempt timed out
+                if (tmpDownTimeout > 0 && effectiveConnectTimeout >= configuredTimeout) {
+                    TIMED_OUT_SERVERS.put(hostAndPort, Long.valueOf(System.currentTimeMillis()));
+                }
+                throw e;
+            }
         }
         /*
          * Set timeout to the one specified in the config file or the one which was explicitly set
@@ -447,7 +485,7 @@ public class SieveHandler {
 
     /**
      * Returns the {@link PreferredSASLMech}
-     * 
+     *
      * @param leanConfigService The {@link LeanConfigurationService}
      * @param sasl The server SASL
      * @return The {@link PreferredSASLMech}
@@ -1187,7 +1225,7 @@ public class SieveHandler {
     /**
      * Parse the https://tools.ietf.org/html/rfc5804#section-1.3 Response code of a SIEVE
      * response line.
-     * 
+     *
      * @param multiline TODO
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.

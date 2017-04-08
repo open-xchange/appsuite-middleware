@@ -395,6 +395,7 @@ public class DispatcherServlet extends SessionServlet {
             MailExceptionCode.REFERENCED_MAIL_NOT_FOUND,
             MailExceptionCode.FOLDER_NOT_FOUND,
             SessionExceptionCodes.SESSION_EXPIRED,
+            SessionExceptionCodes.WRONG_SESSION_SECRET,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED
         );

@@ -224,3 +224,7 @@ http-api/build
 http-api/codegen/*/clients
 http-api/http_api/swagger.json
 documentation/docu/configuration/properties.md
+openexchange-test/lib/httpClient-java-*
+openexchange-test/lib/restClient-java-*
+openexchange-test/lib/source/httpClient-java-*
+openexchange-test/lib/source/restClient-java-*

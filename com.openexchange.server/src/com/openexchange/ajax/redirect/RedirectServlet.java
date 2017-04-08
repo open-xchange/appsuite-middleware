@@ -96,7 +96,12 @@ public class RedirectServlet extends HttpServlet {
         }
 
         location = assumeRelative(referer, location);
-        resp.sendRedirect(AJAXUtility.encodeUrl(location, true, true));
+        try {
+            resp.sendRedirect(AJAXUtility.encodeUrl(location, true, true));
+        } catch (IllegalArgumentException e) {
+            // Apparently location is invalid
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Invalid \"location\" parameter");
+        }
     }
 
     private static final Pattern PROTOCOL_PATTERN = Pattern.compile("^(\\w*:)?//");

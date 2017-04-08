@@ -1771,7 +1771,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             ConfigView view;
             try {
                 view = viewFactory.getView(usr.getId().intValue(), ctx.getId().intValue());
-                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
+                Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, true);
                 if (check != null && check.booleanValue()) {
                     ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);

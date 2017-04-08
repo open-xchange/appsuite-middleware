@@ -72,7 +72,7 @@ public class FailoverSocket extends Socket {
     private static MailLogger logger = new MailLogger(
         FailoverSocket.class,
         "socket",
-        "DEBUG RoundRobinSocket",
+        "DEBUG FailoverSocket",
         PropUtil.getBooleanSystemProperty("mail.socket.debug", false),
         System.out);
 
@@ -111,9 +111,10 @@ public class FailoverSocket extends Socket {
         try {
             return SocketFetcher.getSocket(addressToUse, host, port, props, prefix, useSSL);
         } catch (com.sun.mail.util.SocketConnectException e) {
-            // Connect attempt failed. Retry using exponential backoff.
+            // Connect attempt failed. Retry using exponential back-off.
             int retry = retryCount + 1;
             if (retry >= selector.length()) {
+                // Tried with all available IP addresses. Giving up...
                 throw e;
             }
             long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
