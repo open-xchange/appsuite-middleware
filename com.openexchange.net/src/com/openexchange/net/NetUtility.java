@@ -182,7 +182,7 @@ public class NetUtility {
 
         InetAddressCaches caches = getInetAddressCaches();
         if (null == caches) {
-            LOGGER.warn("Failed to flush DNS look-up caches");
+            LOGGER.warn("Failed to flush DNS look-up caches for {}", hostName);
             return;
         }
         caches.clearCachesFor(hostName);
