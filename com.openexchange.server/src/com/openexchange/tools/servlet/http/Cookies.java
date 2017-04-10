@@ -257,11 +257,26 @@ public final class Cookies {
                 }
             }
         } else {
-            if (!"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
+            if (isValidDomainValue(serverName)) {
                 return serverName.toLowerCase(Locale.US).startsWith("www.") ? serverName.substring(4) : serverName;
             }
         }
         return null;
+    }
+
+    /**
+     * Checks if specified server/host name is valid for being used as domain value.
+     * <ul>
+     * <li>Not <code>"localhost"</code></li>
+     * <li>Not an IPv4 identifier</li>
+     * <li>Not an IPv6 identifier</li>
+     * </ul>
+     *
+     * @param serverName The server name
+     * @return <code>true</code> if server/host name is valid for being used as domain value; otherwise <code>false</code>
+     */
+    public static boolean isValidDomainValue(String serverName) {
+        return (null != serverName && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName)));
     }
 
     /**
