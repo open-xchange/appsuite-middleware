@@ -51,38 +51,39 @@ package com.openexchange.oauth.linkedin;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.LinkedInApi;
-import org.scribe.model.OAuthRequest;
-import org.scribe.model.Response;
-import org.scribe.model.Token;
-import org.scribe.model.Verb;
-import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.version.Version;
 
 /**
  * {@link LinkedInServiceImpl}
@@ -92,19 +93,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class LinkedInServiceImpl implements LinkedInService {
 
-    private static final String PERSONAL_FIELDS = "id,first-name,last-name,email-address,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInServiceImpl.class);
 
-    private static final String RELATION_TO_VIEWER = "relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))";
+    public static enum Verb {
+      GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE
+    }
 
-    private static final String PERSONAL_FIELD_QUERY = ":(" + PERSONAL_FIELDS + ")";
-
-    private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,email-address,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
-
-    private static final String IN_JSON = "?format=json";
+    // --------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInServiceImpl.class);
+    private final CloseableHttpClient httpClient;
 
     /**
      * Initializes a new {@link LinkedInServiceImpl}.
@@ -114,104 +112,118 @@ public class LinkedInServiceImpl implements LinkedInService {
     public LinkedInServiceImpl(final ServiceLookup services) {
         super();
         this.services = services;
+
+        ClientConfig clientConfig = ClientConfig.newInstance()
+            .setUserAgent("OX LinkedIn Http Client v" + Version.getInstance().getVersionString())
+            .setMaxTotalConnections(100)
+            .setMaxConnectionsPerRoute(100)
+            .setConnectionTimeout(5000)
+            .setSocketReadTimeout(30000);
+        httpClient = HttpClients.getHttpClient(clientConfig);
     }
 
-    public Response performRequest(final Session session, final int user, final int contextId, final int accountId, final Verb method, final String url) throws OXException {
+    /**
+     * Shuts-down this LinkedIn service.
+     */
+    public void shutDown() {
+        Streams.close(httpClient);
+    }
+
+    private String urlEncode(String toEncode) {
         try {
-            final OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(services);
-
-            final OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey(session)).apiSecret(
-                linkedInMetaData.getAPISecret(session)).build();
-
-            OAuthAccount account = null;
-            try {
-                final com.openexchange.oauth.OAuthService oAuthService = services.getService(com.openexchange.oauth.OAuthService.class);
-                if (null == oAuthService) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
-                }
-                account = oAuthService.getAccount(accountId, session, user, contextId);
-            } catch (final OXException e) {
-                LOG.error("", e);
-                return null;
-            }
-
-            final Token accessToken = new Token(account.getToken(), account.getSecret());
-            final OAuthRequest request = new OAuthRequest(method, url);
-            request.setConnectTimeout(5, TimeUnit.SECONDS);
-            request.setReadTimeout(30, TimeUnit.SECONDS);
-            service.signRequest(accessToken, request);
-            return request.send();
-        } catch (org.scribe.exceptions.OAuthException e) {
-            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
-            Throwable cause = e.getCause();
-            if (cause instanceof java.net.SocketTimeoutException) {
-                // A socket timeout
-                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
-            }
-
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
+            return URLEncoder.encode(toEncode, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Should not occur
+            return URLEncoder.encode(toEncode);
         }
     }
 
-    private JSONObject extractJson(final Response response) throws OXException {
-        Reader reader = null;
-        try {
-            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
-            final JSONValue value = JSONObject.parse(reader);
-            if (value.isObject()) {
-                return value.toObject();
-            }
-            throw OAuthExceptionCodes.JSON_ERROR.create("Not a JSON object, but " + value.getClass().getName());
-        } catch (final JSONException e) {
-            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(reader);
-        }
+    private void setCommonHeaders(HttpRequestBase request, String token) {
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
     }
 
-    private JSONValue extractJsonValue(final Response response, final Collection<Object> fallback) throws OXException {
-        UnsynchronizedPushbackReader reader = null;
+    private JSONValue performRequest(Session session, int user, int contextId, int accountId, String url) throws OXException {
+        // Get specified OAuth account for denoted user
+        OAuthAccount account;
         try {
-            reader = new UnsynchronizedPushbackReader(new InputStreamReader(response.getStream(), Charsets.UTF_8));
-            // Read first character...
-            final int read = reader.read();
-            if (read < 0) {
-                return null;
+            final com.openexchange.oauth.OAuthService oAuthService = services.getService(com.openexchange.oauth.OAuthService.class);
+            if (null == oAuthService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
             }
-            final char c = (char) read;
-            // ... and push it back to reader
-            reader.unread(c);
-            if ('[' == c || '{' == c) {
-                // Expect JSON content
-                return JSONObject.parse(reader);
-            }
-            LOG.warn("No JSON format in LinkedIn response. Assume XML format.");
-            final String body = Streams.reader2string(reader);
-            fallback.add(body);
-            return null;
-        } catch (final JSONException e) {
-            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(reader);
-        }
-    }
-
-    protected List<String> extractIds(final Response response) throws OXException {
-        List<String> result = new LinkedList<String>();
-        try {
-            final JSONObject json = new JSONObject(response.getBody());
-            final JSONArray ids = json.getJSONArray("values");
-            result = extractIds(ids);
-        } catch (final JSONException e) {
+            account = oAuthService.getAccount(accountId, session, user, contextId);
+        } catch (final OXException e) {
             LOG.error("", e);
+            return null;
+        }
+
+        HttpGet get = null;
+        CloseableHttpResponse response = null;
+        try {
+            // Initialize request
+            get = new HttpGet(url);
+            setCommonHeaders(get, account.getToken());
+
+            // Execute
+            response = httpClient.execute(get);
+
+            // Check status code
+            {
+                StatusLine statusLine = response.getStatusLine();
+                int statusCode = statusLine.getStatusCode();
+                if (statusCode < 200 || statusCode >= 300) {
+                    String body = null;
+                    {
+                        try {
+                            body = Streams.reader2string(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
+                        } catch (Exception x) {
+                            // ignore
+                        }
+                    }
+
+                    String reason = null == body ? statusLine.getReasonPhrase() : body;
+                    throw new HttpResponseException(statusCode, reason);
+                }
+            }
+
+            // Parse response body to JSON
+            try {
+                return JSONObject.parse(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
+            } catch (JSONException e) {
+                throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+        } catch (HttpResponseException e) {
+            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+                // Authentication failed
+                throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, account.getDisplayName(), account.getId(), user, contextId);
+            }
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } finally {
+            close(get, response);
+            Streams.close(response);
+        }
+    }
+
+    protected List<String> extractIds(final JSONObject jRresponse) {
+        JSONArray ids = jRresponse.optJSONArray("values");
+
+        int length = ids.length();
+        List<String> result = new ArrayList<>(length);
+        for (int i = 0; i < length; i++) {
+            JSONObject jConnection = ids.optJSONObject(i);
+            if (null != jConnection) {
+                String id = jConnection.optString("id", null);
+                if (null != id) {
+                    result.add(id);
+                }
+            }
         }
         return result;
     }
 
-    protected List<String> extractIds(final JSONArray connections) throws OXException {
-        final List<String> result = new LinkedList<String>();
+    protected List<String> extractIds(final JSONArray connections) {
+        List<String> result = new LinkedList<String>();
         try {
             for (int i = 0, max = connections.length(); i < max; i++) {
                 result.add(connections.getJSONObject(i).getString("id"));
@@ -240,178 +252,221 @@ public class LinkedInServiceImpl implements LinkedInService {
 
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, CONNECTIONS_URL + IN_JSON);
-        if (response == null) {
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, "https://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,email-address,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)?format=json");
+        if (jResponse == null) {
             return Collections.emptyList();
         }
-        // FIXME: Error handling via exception is completely missing... :-(
-        // at least log anything here
-        if (response.getCode() != 200) {
-            LOG.error(response.getBody());
-        }
-        final List<Object> fallback = new ArrayList<Object>(1);
-        final JSONValue jsonValue = extractJsonValue(response, fallback);
-        if (null != jsonValue) {
-            final LinkedInXMLParser parser = new LinkedInXMLParser();
-            final List<Contact> contacts = parser.parseConnections(jsonValue);
-            return contacts;
-        }
-        // No JSON format
-        if (fallback.isEmpty()) {
-            return Collections.emptyList();
-        }
-        final LinkedInXMLParser parser = new LinkedInXMLParser();
-        final List<Contact> contacts = parser.parseConnections(fallback.get(0).toString());
+
+        LinkedInXMLParser parser = new LinkedInXMLParser();
+        final List<Contact> contacts = parser.parseConnections(jResponse);
         return contacts;
     }
 
     @Override
     public JSONObject getProfileForId(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final String uri = "http://api.linkedin.com/v1/people/id=" + id + PERSONAL_FIELD_QUERY;
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-        if (response == null) {
+        String uri = "https://api.linkedin.com/v1/people/id=" + id + ":(" + "id,first-name,last-name,email-address,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url" + ")";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
             return new JSONObject(0);
         }
-        return extractJson(response);
+
+        return jResponse.toObject();
     }
 
     @Override
     public JSONObject getRelationToViewer(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final String uri = "http://api.linkedin.com/v1/people/id=" + id + ":(relation-to-viewer)";
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-        if (response == null) {
+        String uri = "https://api.linkedin.com/v1/people/id=" + id + ":(relation-to-viewer)";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
             return new JSONObject(0);
         }
-        return extractJson(response);
+
+        return jResponse.toObject();
     }
 
     @Override
     public JSONObject getConnections(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final String uri = "http://api.linkedin.com/v1/people/~/connections" + PERSONAL_FIELD_QUERY;
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-        if (response == null) {
+        String uri = "https://api.linkedin.com/v1/people/~/connections" + ":(" + "id,first-name,last-name,email-address,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url" + ")";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
             return new JSONObject(0);
         }
-        return extractJson(response);
+
+        return jResponse.toObject();
     }
 
     @Override
     public List<String> getUsersConnectionsIds(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-        if (response == null) {
+        String uri = "https://api.linkedin.com/v1/people/~/connections:(id)";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
             return Collections.emptyList();
         }
-        return extractIds(response);
+
+        return extractIds(jResponse.toObject());
     }
 
     public JSONObject getFullProfileById(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final String uri = "http://api.linkedin.com/v1/people/id=" + id + ":(" + RELATION_TO_VIEWER + "," + PERSONAL_FIELDS + ")";
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-        if (response == null) {
+        String uri = "https://api.linkedin.com/v1/people/id=" + id + ":(" + "relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))" + "," + "id,first-name,last-name,email-address,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url" + ")";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
             return new JSONObject(0);
         }
-        return extractJson(response);
+
+        return jResponse.toObject();
     }
 
     @Override
     public JSONObject getFullProfileByEMail(final List<String> email, final Session session, final int user, final int contextId, final int accountId) throws OXException {
-
         String uri = null;
         if (email.size() == 1) {
-            uri = "http://api.linkedin.com/v1/people/email=" + email.get(0) + ":(" + RELATION_TO_VIEWER + "," + PERSONAL_FIELDS + ")";
+            uri = "https://api.linkedin.com/v1/people/email=" + email.get(0) + ":(" + "relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))" + "," + "id,first-name,last-name,email-address,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url" + ")";
         } else {
             final StringBuilder b = new StringBuilder("http://api.linkedin.com/v1/people::(");
             for (final String s : email) {
                 b.append("email=").append(s).append(',');
             }
             b.setLength(b.length() - 1);
-            b.append("):(").append(RELATION_TO_VIEWER).append(',').append(PERSONAL_FIELDS).append(')');
+            b.append("):(").append("relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))").append(',').append("id,first-name,last-name,email-address,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url").append(')');
             uri = b.toString();
         }
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-        if (response == null) {
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
             return new JSONObject(0);
         }
-        return extractJson(response);
+
+        return jResponse.toObject();
     }
 
     @Override
     public JSONObject getFullProfileByFirstAndLastName(String firstName, String lastName, ServerSession session, final int user, final int contextId, final int accountId) throws OXException {
-        try {
-            String uri = "http://api.linkedin.com/v1/people-search?first-name=" + URLEncoder.encode(firstName, "UTF-8") + "&last-name=" + URLEncoder.encode(
-                lastName,
-                "UTF-8") + "&sort=distance&format=json";
-            Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
-            if (response == null) {
-                return new JSONObject();
-            }
-            JSONObject data = extractJson(response);
-            if (data.optInt("numResults") > 0) {
-                JSONObject people = data.optJSONObject("people");
-                if (people != null) {
-                    JSONArray values = people.optJSONArray("values");
-                    if (null != values && values.length() > 0) {
-                        JSONObject firstMatch = values.optJSONObject(0);
-                        if (firstMatch != null) {
-                            String id = firstMatch.optString("id");
-                            if (id != null) {
-                                return getFullProfileById(id, session, user, contextId, accountId);
-                            }
+        String uri = "https://api.linkedin.com/v1/people-search?first-name=" + urlEncode(firstName) + "&last-name=" + urlEncode(lastName) + "&sort=distance&format=json";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
+            return new JSONObject(0);
+        }
+
+        JSONObject data = jResponse.toObject();
+        if (data.optInt("numResults") > 0) {
+            JSONObject people = data.optJSONObject("people");
+            if (people != null) {
+                JSONArray values = people.optJSONArray("values");
+                if (null != values && values.length() > 0) {
+                    JSONObject firstMatch = values.optJSONObject(0);
+                    if (firstMatch != null) {
+                        String id = firstMatch.optString("id");
+                        if (id != null) {
+                            return getFullProfileById(id, session, user, contextId, accountId);
                         }
                     }
                 }
-            } else {
-                uri = "http://api.linkedin.com/v1/people-search?first-name=" + URLEncoder.encode(lastName, "UTF-8") + "&last-name=" + URLEncoder.encode(
-                    firstName,
-                    "UTF-8") + "&sort=distance&format=json";
-                response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
-                if (response == null) {
-                    return new JSONObject();
-                }
-                data = extractJson(response);
-                if (data.optInt("numResults") > 0) {
-                    JSONObject people = data.optJSONObject("people");
-                    if (people != null) {
-                        JSONArray values = people.optJSONArray("values");
-                        if (null != values && values.length() > 0) {
-                            JSONObject firstMatch = values.optJSONObject(0);
-                            if (firstMatch != null) {
-                                String id = firstMatch.optString("id");
-                                if (id != null) {
-                                    return getFullProfileById(id, session, user, contextId, accountId);
-                                }
-                            }
+            }
+
+            // Not found
+            return null;
+        }
+
+        uri = "https://api.linkedin.com/v1/people-search?first-name=" + urlEncode(lastName) + "&last-name=" + urlEncode(firstName) + "&sort=distance&format=json";
+
+        jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
+            return new JSONObject(0);
+        }
+
+        data = jResponse.toObject();
+        if (data.optInt("numResults") > 0) {
+            JSONObject people = data.optJSONObject("people");
+            if (people != null) {
+                JSONArray values = people.optJSONArray("values");
+                if (null != values && values.length() > 0) {
+                    JSONObject firstMatch = values.optJSONObject(0);
+                    if (firstMatch != null) {
+                        String id = firstMatch.optString("id");
+                        if (id != null) {
+                            return getFullProfileById(id, session, user, contextId, accountId);
                         }
                     }
                 }
-                return null;
             }
-        } catch (UnsupportedEncodingException e) {
-            // Ignore
         }
         return null;
-
     }
 
     @Override
     public JSONObject getNetworkUpdates(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final String uri = "http://api.linkedin.com/v1/people/~/network/updates" + IN_JSON + "&type=CONN";
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
-        if (response == null) {
-            return new JSONObject();
+        String uri = "https://api.linkedin.com/v1/people/~/network/updates" + "?format=json" + "&type=CONN";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
+            return new JSONObject(0);
         }
-        return extractJson(response);
+
+        return jResponse.toObject();
     }
 
     @Override
     public JSONObject getMessageInbox(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        final String uri = "http://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions,body)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
-        final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
-        if (response == null) {
-            return new JSONObject();
+        String uri = "https://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions,body)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
+
+        JSONValue jResponse = performRequest(session, user, contextId, accountId, uri);
+        if (jResponse == null) {
+            return new JSONObject(0);
         }
-        return extractJson(response);
+
+        return jResponse.toObject();
+    }
+
+    // -------------------------------------------------------------------------------------------------
+
+    /**
+     * Resets given HTTP request
+     *
+     * @param request The HTTP request
+     */
+    private static void reset(HttpRequestBase request) {
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Ensures that the entity content is fully consumed and the content stream, if exists, is closed silently.
+     *
+     * @param response The HTTP response to consume and close
+     */
+    private static void consume(HttpResponse response) {
+        if (null != response) {
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                try {
+                    EntityUtils.consume(entity);
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP request & response resources silently.
+     *
+     * @param request The HTTP request to reset
+     * @param response The HTTP response to consume and close
+     */
+    private static void close(HttpRequestBase request, HttpResponse response) {
+        consume(response);
+        reset(request);
     }
 
 }

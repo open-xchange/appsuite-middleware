@@ -342,17 +342,13 @@ public class LinkedInXMLParser {
      * @throws OXException If operation fails
      */
     public List<Contact> parseConnections(final JSONValue body) throws OXException {
-        final JSONArray persons;
-        if (body.isObject()) {
-            persons = body.toObject().optJSONArray("values");
-        } else {
-            persons = body.toArray();
-        }
+        JSONArray persons = body.isObject() ? body.toObject().optJSONArray("values") : body.toArray();
         if (null == persons) {
             return Collections.emptyList();
         }
-        final int length = persons.length();
-        final List<Contact> contacts = new ArrayList<Contact>(length);
+
+        int length = persons.length();
+        List<Contact> contacts = new ArrayList<Contact>(length);
         for (int i = 0; i < length; i++) {
             try {
                 contacts.add(parse(persons.optJSONObject(i)));
