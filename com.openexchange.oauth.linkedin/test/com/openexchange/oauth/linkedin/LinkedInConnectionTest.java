@@ -89,7 +89,6 @@ public class LinkedInConnectionTest extends TestCase {
     public void setUp() {
         final Activator activator = new Activator();
         linkedIn = new LinkedInServiceImpl(activator);
-        activator.setOauthService(new MockOAuthService());
     }
 
     /**
