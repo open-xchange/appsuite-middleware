@@ -139,6 +139,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     private boolean enableTls;
 
     private boolean auditLogEnabled;
+    
+    private boolean overwritePreLoginCapabilities;
 
     private Set<String> propagateHostNames;
 
@@ -162,6 +164,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         sContainerType = "boundary-aware";
         enableTls = true;
         auditLogEnabled = false;
+        overwritePreLoginCapabilities = false;
         maxNumConnection = -1;
         newACLExtMap = new NonBlockingHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
@@ -247,6 +250,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             String tmp = configuration.getProperty("com.openexchange.imap.auditLog.enabled", STR_FALSE).trim();
             auditLogEnabled = Boolean.parseBoolean(tmp);
             logBuilder.append("\tAudit Log Enabled: ").append(auditLogEnabled).append('\n');
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.overwritePreLoginCapabilities", STR_FALSE).trim();
+            overwritePreLoginCapabilities = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tOverwrite Pre-Login Capabilities: ").append(overwritePreLoginCapabilities).append('\n');
         }
 
         {
@@ -465,6 +474,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         propagateClientIPAddress = false;
         enableTls = true;
         auditLogEnabled = false;
+        overwritePreLoginCapabilities = false;
         propagateHostNames = Collections.emptySet();
         supportsACLs = null;
         imapTimeout = 0;
@@ -518,6 +528,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isAuditLogEnabled() {
         return auditLogEnabled;
+    }
+
+    @Override
+    public boolean isOverwritePreLoginCapabilities() {
+        return overwritePreLoginCapabilities;
     }
 
     @Override
