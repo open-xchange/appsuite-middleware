@@ -49,6 +49,10 @@
 
 package com.openexchange.oauth;
 
+import java.util.Collection;
+import java.util.Collections;
+import com.google.common.collect.ImmutableList;
+
 /**
  * {@link KnownApi} - An enumeration for available APIs.
  */
@@ -56,63 +60,64 @@ public enum KnownApi implements API {
     /**
      * Twitter
      */
-    TWITTER("Twitter", "com.openexchange.oauth.twitter"),
+    TWITTER("Twitter", "com.openexchange.oauth.twitter", "twitter"),
     /**
      * LinkedIn
      */
-    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin"),
+    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin", "linkedin"),
     /**
      * Other/unknown
      */
-    OTHER("Other", "com.openexchange.oauth.other"),
+    OTHER("Other", "com.openexchange.oauth.other", "other"),
     /**
      * MSN
      */
-    MSN("MSN", "com.openexchange.oauth.msn"),
+    MSN("MSN", "com.openexchange.oauth.msn", "msn"),
     /**
      * Yahoo
      */
-    YAHOO("Yahoo", "com.openexchange.oauth.yahoo"),
+    YAHOO("Yahoo", "com.openexchange.oauth.yahoo", "yahoo"),
     /**
      * Tumblr
      */
-    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr"),
+    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr", "tumblr"),
     /**
      * Flickr
      */
-    FLICKR("Flickr", "com.openexchange.oauth.flickr"),
+    FLICKR("Flickr", "com.openexchange.oauth.flickr", "flickr"),
     /**
      * Dropbox
      */
-    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox"),
+    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox", "dropbox"),
     /**
      * XING
      */
-    XING("XING", "com.openexchange.oauth.xing"),
+    XING("XING", "com.openexchange.oauth.xing", "xing"),
     /**
      * vkontakte
      */
-    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte"),
+    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte", "vkontakte"),
     /**
      * Google
      */
-    GOOGLE("Google", "com.openexchange.oauth.google"),
+    GOOGLE("Google", "com.openexchange.oauth.google", "google"),
     /**
      * Box.com
      */
-    BOX_COM("Box.com", "com.openexchange.oauth.boxcom"),
+    BOX_COM("Box.com", "com.openexchange.oauth.boxcom", "boxcom"),
     /**
      * Microsoft Live Connect
      */
-    MS_LIVE_CONNECT("Microsoft Live Connect", "com.openexchange.oauth.msliveconnect"),
+    MS_LIVE_CONNECT("Microsoft Live Connect", "com.openexchange.oauth.msliveconnect", "msliveconnect"),
     /**
      * Copy.com
      */
-    COPY_COM("Copy.com", "com.openexchange.oauth.copycom"),
+    COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom"),
     ;
 
     private final String serviceId;
     private final String name;
+    private final Collection<String> aliases;
 
     /**
      * Initializes a new {@link KnownApi}.
@@ -120,9 +125,24 @@ public enum KnownApi implements API {
      * @param shortName The short name of the API
      * @param fullName The full name of the API
      */
-    private KnownApi(String shortName, String fullName) {
+    private KnownApi(String shortName, String fullName, String... aliases) {
         name = shortName;
         serviceId = fullName;
+
+        if (null == aliases || aliases.length == 0) {
+            this.aliases = Collections.emptyList();
+        } else {
+            this.aliases = ImmutableList.copyOf(aliases);
+        }
+    }
+
+    /**
+     * Gets possible alias identifiers
+     *
+     * @return The alias identifiers or an empty collection
+     */
+    public Collection<String> getAliases() {
+        return aliases;
     }
 
     @Override
