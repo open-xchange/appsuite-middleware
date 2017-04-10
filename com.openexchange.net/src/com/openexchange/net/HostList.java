@@ -55,10 +55,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.net.utils.Strings;
 
 /**
- * 
+ *
  * {@link HostList}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -133,8 +134,8 @@ public class HostList {
     private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames) {
         super();
         this.ipRanges = ipRanges;
-        this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : matchingAppendixHostNames;
-        this.matchingHostNames = matchingHostNames;
+        this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : ImmutableSet.copyOf(matchingAppendixHostNames);
+        this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
     }
 
     /**
