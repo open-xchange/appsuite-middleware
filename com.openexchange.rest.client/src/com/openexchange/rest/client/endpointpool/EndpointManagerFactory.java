@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.client.HttpClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link EndpointManagerFactory} - A factory service for new end-point managers.
@@ -61,6 +62,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
+@SingletonService
 public interface EndpointManagerFactory {
 
     /**
