@@ -110,7 +110,6 @@ public class JoinCommand implements GroupCommand {
         } catch (RealtimeException re) {
             throw re;
         } catch(Exception t) {
-            org.slf4j.LoggerFactory.getLogger(JoinCommand.class).debug("Error while performing Join. Error: {}",t.getMessage());
             throw RealtimeExceptionCodes.JOIN_FAILED.create(t, stanza.getFrom().toString());
         }
     }
