@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="openexchange-test" default="default" basedir=".">
 
-    <import file="rest-client.xml" />
-    <import file="http-client.xml" />
-
     <!-- Customizable values -->
     <property name="bundlesDir" value="bundles"/>
     <property name="cltDir" value="cltLib"/>
@@ -40,9 +37,8 @@
             <include name="*.jar"/>
         </fileset>
     </path>
-	
 
-    <target name="default" depends="prepare,interface-jar,unit-jar"/>
+    <target name="default" depends="interface-jar,unit-jar"/>
 
     <target name="clean">
         <delete dir="${build}"/>
@@ -51,7 +47,7 @@
         <delete file="open-xchange-unit-tests.jar"/>
     </target>
 
-    <target name="compile-common" depends="prepare">
+    <target name="compile-common">
         <mkdir dir="${build}"/>
         <property file=".settings/org.eclipse.jdt.core.prefs"/>
         <echo message="Java compiler source ${org.eclipse.jdt.core.compiler.source} and target ${org.eclipse.jdt.core.compiler.codegen.targetPlatform}."/>
@@ -157,9 +153,4 @@
         </junit>
     </target>
 
-    <!-- When building locally -->
-    <target name="prepare">
-        <antcall target="download_check_and_add_rest_jar" />
-        <antcall target="download_check_and_add_http_jar" />
-    </target>
 </project>
