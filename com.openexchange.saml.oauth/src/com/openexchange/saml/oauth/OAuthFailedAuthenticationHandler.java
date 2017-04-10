@@ -144,6 +144,7 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
     private AuthenticationFailureHandlerResult doHandleAuthFailed(Session session, String oldRefreshToken, MailConfig mailConfig, SessiondService sessiondService) {
         if (false == oldRefreshToken.equals(session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN))) {
             // Changed in the meantime...
+            mailConfig.setPassword((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN));
             return AuthenticationFailureHandlerResult.createRetryResult();
         }
 
