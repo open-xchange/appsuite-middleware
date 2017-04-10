@@ -78,7 +78,7 @@ public class FailoverSocket extends Socket {
 
     // ----------------------------------------------------------------------------------------------------
 
-    private volatile Socket socket;
+    private final Socket socket;
 
     private final AddressSelector selector;
     private final String host;
