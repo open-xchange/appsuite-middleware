@@ -50,15 +50,27 @@
 package com.openexchange.rest.userfeedback;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.mail.actions.AllRequest;
+import com.openexchange.ajax.mail.actions.AllResponse;
+import com.openexchange.ajax.mail.actions.DeleteRequest;
+import com.openexchange.ajax.mail.actions.DeleteResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.MailListField;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.testing.restclient.invoker.ApiException;
+import com.openexchange.tools.RandomString;
 import com.openexchange.userfeedback.rest.services.SendUserFeedbackService;
 
 /**
@@ -67,10 +79,11 @@ import com.openexchange.userfeedback.rest.services.SendUserFeedbackService;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class SendTest extends AbstractUserFeedbackTest {
 
     private JSONArray recipients = null;
+
+    private String mailId = "";
 
     @Override
     protected Application configure() {
@@ -87,13 +100,107 @@ public class SendTest extends AbstractUserFeedbackTest {
         recipients.put(recipient1);
     }
 
-    @Test
-    public void testSend_everythingFine_returnMessage() {
+    @Override
+    public void tearDown() throws Exception {
         try {
-            userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(0), "subject", "body");
-            assertEquals(200, getRestClient().getStatusCode());
+            deleteMail();
+        } finally {
+            super.tearDown();
+        }
+    }
+
+    private void deleteMail() throws OXException, IOException, JSONException {
+        if (Strings.isNotEmpty(mailId)) {
+            DeleteRequest delete = new DeleteRequest(getAjaxClient().getValues().getInboxFolder(), mailId, true);
+            DeleteResponse deleteResponse = getAjaxClient().execute(delete);
+            assertFalse(deleteResponse.hasError());
+        }
+    }
+
+    private void assertMailRetrieved(String subject, MailMessage[] mailMessages) {
+        for (MailMessage mailMessage : mailMessages) {
+            if (mailMessage.getSubject().equals(subject)) {
+                mailId = mailMessage.getMailId();
+            }
+        }
+        assertFalse("Unable to find feeback mail", mailId.equals(""));
+    }
+
+    private static final int[] listAttributes = new int[] { MailListField.ID.getField(), MailListField.FROM.getField(), MailListField.TO.getField(), MailListField.SUBJECT.getField() };
+
+    @Test
+    public void testSend_everythingFine_returnMessageAndVerifyMail() throws OXException, IOException, JSONException, AddressException, ApiException {
+        String subject = RandomString.generateChars(35);
+        String sendMail = userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(0), subject, "body");
+        assertEquals(200, getRestClient().getStatusCode());
+
+        AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
+        AllResponse response = getAjaxClient().execute(all);
+
+        MailMessage[] mailMessages = response.getMailMessages(listAttributes);
+        assertMailRetrieved(subject, mailMessages);
+    }
+
+    @Test
+    public void testSend_subjectNull_sentWithDefaultSubject() throws ApiException, OXException, IOException, JSONException, AddressException {
+        String sendMail = userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(0), null, "body");
+        assertEquals(200, getRestClient().getStatusCode());
+
+        AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
+        AllResponse response = getAjaxClient().execute(all);
+
+        MailMessage[] mailMessages = response.getMailMessages(listAttributes);
+        assertMailRetrieved("User Feedback Report", mailMessages);
+    }
+
+    @Test
+    public void testSend_bodyNull_sentWithEmptyBody() throws ApiException, OXException, IOException, JSONException, AddressException {
+        String subject = RandomString.generateChars(35);
+        String sendMail = userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(0), subject, null);
+        assertEquals(200, getRestClient().getStatusCode());
+
+        AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
+        AllResponse response = getAjaxClient().execute(all);
+
+        MailMessage[] mailMessages = response.getMailMessages(listAttributes);
+        assertMailRetrieved(subject, mailMessages);
+    }
+
+    @Test
+    public void testSend_noDisplayName_sentWithoutDisplayName() throws JSONException, ApiException, OXException, IOException, AddressException {
+        recipients = new JSONArray();
+        JSONObject recipient1 = new JSONObject();
+        recipient1.put("address", testUser.getLogin());
+        recipients.put(recipient1);
+
+        String subject = RandomString.generateChars(35);
+
+        String sendMail = userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(0), subject, "body");
+
+        assertEquals(200, getRestClient().getStatusCode());
+
+        AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
+        AllResponse response = getAjaxClient().execute(all);
+
+        MailMessage[] mailMessages = response.getMailMessages(listAttributes);
+        assertMailRetrieved(subject, mailMessages);
+    }
+
+    @Test
+    public void testSend_badMailAddress_returnException() throws JSONException {
+        recipients = new JSONArray();
+        JSONObject recipient1 = new JSONObject();
+        recipient1.put("address", "badmailaddress");
+        recipient1.put("displayName", testUser.getUser());
+        recipients.put(recipient1);
+
+        try {
+            String sendMail = userfeedbackApi.sendMail("default", type, recipients.toString(), new Long(0), new Long(0), "subject", "body");
+            fail();
         } catch (ApiException e) {
-            fail(e.getMessage());
+            assertEquals(400, getRestClient().getStatusCode());
+            JSONObject exception = new JSONObject(e.getResponseBody());
+            assertEquals("Provided addresses are invalid.", exception.get("error_desc"));
         }
     }
 

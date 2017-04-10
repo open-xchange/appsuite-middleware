@@ -77,9 +77,9 @@ public class DeleteTest extends AbstractUserFeedbackTest {
     @Test
     public void testDelete_everythingFine_returnMessage() {
         try {
-            String export = userfeedbackApi.delete("default", type, new Long(0), new Long(0));
+            String deleteMsg = userfeedbackApi.delete("default", type, new Long(0), new Long(0));
             assertEquals(200, getRestClient().getStatusCode());
-            assertNotNull(export);
+            assertNotNull(deleteMsg);
         } catch (ApiException e) {
             fail(e.getMessage());
         }
