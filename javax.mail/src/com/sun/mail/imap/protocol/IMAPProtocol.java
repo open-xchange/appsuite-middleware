@@ -489,6 +489,10 @@ public class IMAPProtocol extends Protocol {
     String c = cap;
 	if (c.endsWith("*")) {
 	    c = toUpperCase(c.substring(0, c.length() - 1));
+	    if (c.length() == 0) {
+	        // Check for "*"
+	        return true;
+	    }
 	    final Iterator<String> it = capabilities.keySet().iterator();
 	    while (it.hasNext()) {
 		if (it.next().startsWith(c)) {
