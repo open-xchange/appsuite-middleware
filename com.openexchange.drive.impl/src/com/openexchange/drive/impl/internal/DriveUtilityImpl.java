@@ -506,6 +506,14 @@ public class DriveUtilityImpl implements DriveUtility {
         jsonObject.put("checksum", serverVersion.getChecksum());
         jsonObject.put("path", serverVersion.getPath());
         jsonObject.put("name", folder.getName());
+        if (null != folder.getCreationDate()) {
+            jsonObject.put("created", folder.getCreationDate().getTime());
+        }
+        if (null != folder.getLastModifiedDate()) {
+            jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+        }
+        jsonObject.put("created_by", folder.getCreatedBy());
+        jsonObject.put("modified_by", folder.getModifiedBy());
         return jsonObject;
     }
 
