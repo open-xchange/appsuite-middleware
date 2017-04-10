@@ -132,7 +132,10 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
             for (int i = 0; i < array.length(); i++) {
                 JSONObject object = array.getJSONObject(i);
                 String address = object.getString("address");
-                String displayName = object.getString("displayName");
+                String displayName = "";
+                if (object.hasAndNotNull("displayName")) {
+                    displayName = object.getString("displayName");
+                }
                 if (object.hasAndNotNull("pgpKey")) {
                     String pgpKey = object.optString("pgpKey");
                     pgpKeys.put(address, pgpKey);
