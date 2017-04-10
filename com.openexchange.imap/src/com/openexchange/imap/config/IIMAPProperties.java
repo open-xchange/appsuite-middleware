@@ -84,6 +84,13 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean isAuditLogEnabled();
 
     /**
+     * Whether the pre-login capabilities are supposed to be overwritten (completely replaced with the ones advertised after login)
+     *
+     * @return <code>true</code> to overwrite; otherwise <code>false</code> to extend
+     */
+    public boolean isOverwritePreLoginCapabilities();
+
+    /**
      * Gets the host names to propagate to.
      *
      * @return The host names to propagate to

@@ -80,6 +80,7 @@ public class IMAPProtocol extends Protocol {
     private boolean failOnNOFetch = false; // Whether a NO response for issued FETCH throws a CommandFailedException or only returns null
     private boolean connected = false;	// did constructor succeed?
     private boolean rev1 = false;	// REV1 server ?
+    private boolean overwritePreLoginCapabilitiesAfterLogin = false;
     private boolean referralException;	// throw exception for IMAP REFERRAL?
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean authenticated;	// authenticated?
@@ -135,6 +136,9 @@ public class IMAPProtocol extends Protocol {
 	    // in case it was not initialized in processGreeting
 	    referralException = PropUtil.getBooleanProperty(props,
 				prefix + ".referralexception", false);
+
+	    overwritePreLoginCapabilitiesAfterLogin = PropUtil.getBooleanProperty(props,
+            prefix + ".overwriteprelogincapabilities", false);
 
 	    if (capabilities == null)
 		capability();
@@ -608,7 +612,7 @@ public class IMAPProtocol extends Protocol {
             logger.fine("LOGIN command result: " + r[r.length - 1]);
         handleLoginResult(r[r.length-1]);
         // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r[r.length - 1]);
+        boolean hasCaps = setCapabilities(r[r.length - 1], overwritePreLoginCapabilitiesAfterLogin);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
         } else {
@@ -616,7 +620,7 @@ public class IMAPProtocol extends Protocol {
             if (r.length > 0) {
                 for (int i = r.length-1; !hasCaps && i-- > 0;) {
                     Response unsolicited = r[i];
-                    hasCaps = setCapabilities(unsolicited);
+                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
                     if (hasCaps) {
                         capabilities.remove("__PRELOGIN__");
                     }
@@ -739,7 +743,7 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE LOGIN command result: " + r);
         handleLoginResult(r);
         // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r, false);
+        boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
         } else {
@@ -747,7 +751,7 @@ public class IMAPProtocol extends Protocol {
             if (responses.length > 0) {
                 for (int i = responses.length; !hasCaps && i-- > 0;) {
                     Response unsolicited = responses[i];
-                    hasCaps = setCapabilities(unsolicited);
+                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
                     if (hasCaps) {
                         capabilities.remove("__PRELOGIN__");
                     }
@@ -899,7 +903,7 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE PLAIN command result: " + r);
         handleLoginResult(r);
         // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r, false);
+        boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
         } else {
@@ -907,7 +911,7 @@ public class IMAPProtocol extends Protocol {
             if (responses.length > 0) {
                 for (int i = responses.length; !hasCaps && i-- > 0;) {
                     Response unsolicited = responses[i];
-                    hasCaps = setCapabilities(unsolicited);
+                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
                     if (hasCaps) {
                         capabilities.remove("__PRELOGIN__");
                     }
@@ -1013,7 +1017,7 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE NTLM command result: " + r);
         handleLoginResult(r);
         // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r, false);
+        boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
         } else {
@@ -1021,7 +1025,7 @@ public class IMAPProtocol extends Protocol {
             if (responses.length > 0) {
                 for (int i = responses.length; !hasCaps && i-- > 0;) {
                     Response unsolicited = responses[i];
-                    hasCaps = setCapabilities(unsolicited);
+                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
                     if (hasCaps) {
                         capabilities.remove("__PRELOGIN__");
                     }
@@ -1127,7 +1131,7 @@ public class IMAPProtocol extends Protocol {
 	    logger.fine("AUTHENTICATE XOAUTH2 command result: " + r);
 	handleLoginResult(r);
 	// If the response includes a CAPABILITY response code, process it
-	boolean hasCaps = setCapabilities(r);
+	boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
     if (hasCaps) {
         capabilities.remove("__PRELOGIN__");
     } else {
@@ -1135,7 +1139,7 @@ public class IMAPProtocol extends Protocol {
         if (responses.length > 0) {
             for (int i = responses.length; !hasCaps && i-- > 0;) {
                 Response unsolicited = responses[i];
-                hasCaps = setCapabilities(unsolicited);
+                hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
                 if (hasCaps) {
                     capabilities.remove("__PRELOGIN__");
                 }
@@ -1242,7 +1246,7 @@ public class IMAPProtocol extends Protocol {
         logger.fine("AUTHENTICATE XOAUTH2 command result: " + r);
     handleLoginResult(r);
     // If the response includes a CAPABILITY response code, process it
-    boolean hasCaps = setCapabilities(r);
+    boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
     if (hasCaps) {
         capabilities.remove("__PRELOGIN__");
     } else {
@@ -1250,7 +1254,7 @@ public class IMAPProtocol extends Protocol {
         if (responses.length > 0) {
             for (int i = responses.length; !hasCaps && i-- > 0;) {
                 Response unsolicited = responses[i];
-                hasCaps = setCapabilities(unsolicited);
+                hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
                 if (hasCaps) {
                     capabilities.remove("__PRELOGIN__");
                 }
