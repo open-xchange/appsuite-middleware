@@ -119,4 +119,22 @@ public class ExportUserFeedbackServiceTest {
             fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testValidateParams_onlyStartSet_return() {
+        try {
+            service.validateParams(now, 0L);
+        } catch (OXException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidateParams_onlyEndSet_return() {
+        try {
+            service.validateParams(0L, now);
+        } catch (OXException e) {
+            fail(e.getMessage());
+        }
+    }
 }
