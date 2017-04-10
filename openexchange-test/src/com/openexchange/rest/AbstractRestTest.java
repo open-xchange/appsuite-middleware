@@ -98,26 +98,16 @@ public abstract class AbstractRestTest extends JerseyTest {
         return ajaxClient2;
     }
 
-    /**
-     * Gets the client identifier to use when performing a login
-     *
-     * @return The client identifier or <code>null</code> to use default one (<code>"com.openexchange.ajax.framework.AJAXClient"</code>)
-     */
-    protected String getClientId() {
-        return null;
-    }
-
     @Before
     public void setUp() throws Exception {
         ProvisioningSetup.init();
 
-        String clientId = getClientId();
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
         testUser2 = testContext.acquireUser();
-        ajaxClient1 = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
-        ajaxClient2 = null == clientId ? new AJAXClient(testUser2) : new AJAXClient(testUser2, clientId);
+        ajaxClient1 = new AJAXClient(testUser);
+        ajaxClient2 = new AJAXClient(testUser2);
         admin = testContext.getAdmin();
 
         restClient = new ApiClient();

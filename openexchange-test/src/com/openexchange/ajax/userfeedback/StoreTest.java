@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.userfeedback;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -106,11 +107,11 @@ public class StoreTest extends AbstractAJAXSession {
 
     @Test
     public void testStore_emptyFeedback_returnError() throws Exception {
-        StoreRequest store = new StoreRequest("jibbetNet", emptyFeedback);
+        StoreRequest store = new StoreRequest("star-rating-v1", emptyFeedback);
         StoreResponse response = getClient().execute(store);
 
         assertTrue(response.hasError());
-        assertTrue(response.getException().getLogMessage().contains("Provided JSON object does not contain content."));
+        assertTrue(response.getException().getMessage().contains("Provided JSON object does not contain content."));
     }
 
     @Test
@@ -130,7 +131,6 @@ public class StoreTest extends AbstractAJAXSession {
         StoreResponse response = getClient().execute(store);
 
         assertFalse(response.hasError());
-        
     }
     
     @Test
@@ -140,5 +140,15 @@ public class StoreTest extends AbstractAJAXSession {
 
         assertFalse(response.hasError());
         
+    }
+
+    @Test
+    public void testStore_invalidScore_returnException() throws Exception {
+        String feedback = new String("{\"score\":\"0\"}");
+        StoreRequest store = new StoreRequest("star-rating-v1", feedback);
+        StoreResponse response = getClient().execute(store);
+
+        assertTrue(response.hasError());
+        assertEquals("The provided feedback score is invalid. Please choose a number > 0.", response.getErrorMessage());
     }
 }

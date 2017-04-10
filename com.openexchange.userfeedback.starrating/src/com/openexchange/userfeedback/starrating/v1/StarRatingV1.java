@@ -73,6 +73,7 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.validate.ParameterValidator;
 import com.openexchange.userfeedback.AbstractFeedbackType;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.Feedback;
@@ -94,6 +95,13 @@ public class StarRatingV1 extends AbstractFeedbackType {
     private static final String INSERT_SQL = "INSERT INTO feedback_star_rating_v1 (data) VALUES (?)";
     private static final String SELECT_SQL = "SELECT id, data FROM feedback_star_rating_v1 WHERE id IN (";
     private static final String DELETE_SQL = "DELETE FROM feedback_star_rating_v1 WHERE id = ?";
+
+    @Override
+    protected void checkFeedback(Object feedback) throws OXException {
+        JSONObject jsonFeedback = getFeedback(feedback);
+
+        ParameterValidator.checkJSON(jsonFeedback);
+    }
 
     @Override
     protected void validate(Object feedback) throws OXException {
@@ -351,5 +359,4 @@ public class StarRatingV1 extends AbstractFeedbackType {
         }
         return processed;
     }
-
 }
