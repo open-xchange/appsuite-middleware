@@ -173,7 +173,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.nosql.cassandra.idleConnectionTrashTimeout
       file: cassandra.properties
-      tags: ["Cassandra", "Database"]
+      tags: ["Cassandra", "Database", "Limit"]
     - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
       description: |
         Defines the throttling of concurrent requests per connection on local (on the same datacenter) nodes. 
@@ -237,4 +237,4 @@ properties:
       configcascadeAware: false
       related: 
       file: cassandra.properties
-      tags: ["Cassandra", "Database"]
+      tags: ["Cassandra", "Database", "Timeout"]
