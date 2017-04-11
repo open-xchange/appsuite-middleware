@@ -62,8 +62,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -82,13 +80,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
  * @since v7.8.0
  */
 public class RdbAliasStorage implements UserAliasStorage {
-
-    /**
-     * Maximum length of an alias. Table defined in com.openexchange.admin.mysql.CreateLdap2SqlTables
-     */
-    protected static final int ALIAS_MAX_LENGTH = 256;
-
-    private static final Logger LOG = LoggerFactory.getLogger(RdbAliasStorage.class);
 
     /**
      * Initialises a new {@link RdbAliasStorage}.
@@ -198,7 +189,7 @@ public class RdbAliasStorage implements UserAliasStorage {
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     for (int j = 0; j < clen; j++) {
-                        int userId = userIds[i + j];
+                        int userId = userIds[i+j];
                         stmt.setInt(pos++, userId);
                         map.put(userId, new HashSet<String>(6, 0.9F));
                     }
@@ -229,7 +220,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         try {
             int index = 0;
             /*
-             * Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
+             *  Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
              */
             stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE utf8_bin");
             stmt.setInt(++index, contextId);
@@ -258,11 +249,6 @@ public class RdbAliasStorage implements UserAliasStorage {
 
     @Override
     public boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException {
-        if (checkLength(alias) == false) {
-            LOG.info("The alias {} exceeded the maximum length for an alias. Alias will not be created", alias);
-            return false;
-        }
-
         if (con == null) {
             return createAlias(contextId, userId, alias);
         }
@@ -295,11 +281,6 @@ public class RdbAliasStorage implements UserAliasStorage {
 
     @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
-        if (checkLength(newAlias) == false) {
-            LOG.info("The alias {} exceeded the maximum length for an alias. Alias will not be updated", newAlias);
-            return false;
-        }
-
         if (con == null) {
             return updateAlias(contextId, userId, oldAlias, newAlias);
         }
@@ -410,14 +391,4 @@ public class RdbAliasStorage implements UserAliasStorage {
         }
     }
 
-    /**
-     * Check if alias is within SQL criteria
-     * 
-     * @param alias The alias to check
-     * @return <code>true</code> if alias is not <code>null</code> and not bigger then {@value #ALIAS_MAX_LENGTH},
-     *         <code>false</code> otherwise
-     */
-    private boolean checkLength(String alias) {
-        return alias != null && alias.length() > 0 && alias.length() <= ALIAS_MAX_LENGTH;
-    }
 }
