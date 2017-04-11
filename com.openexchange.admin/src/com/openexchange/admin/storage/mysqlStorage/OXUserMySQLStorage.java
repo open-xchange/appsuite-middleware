@@ -803,7 +803,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
             final HashSet<String> alias = usrdata.getAliases();
             if(null != alias) {
-                Set<String> storedAliases = aliasStorage.getAliases(contextId, userId);
+                Set<String> storedAliases = new HashSet<>(aliasStorage.getAliases(contextId, userId));
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
                         if (!containsAndRemove(elem, storedAliases)) {
