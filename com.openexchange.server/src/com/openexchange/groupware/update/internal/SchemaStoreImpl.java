@@ -124,18 +124,22 @@ public class SchemaStoreImpl extends SchemaStore {
 
     static SchemaUpdateState loadSchema(Connection con) throws OXException {
         final SchemaUpdateState retval;
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             checkForTable(con);
             retval = loadSchemaStatus(con);
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
         }
         return retval;
