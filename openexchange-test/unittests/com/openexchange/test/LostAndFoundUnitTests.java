@@ -65,7 +65,6 @@ import org.junit.runners.Suite;
     com.openexchange.groupware.importexport.Bug7470Test.class,
     com.openexchange.groupware.importexport.Bug7732Test.class,
     com.openexchange.groupware.importexport.Bug8475.class,
-    com.openexchange.groupware.importexport.Bug8527.class,
     com.openexchange.groupware.importexport.Bug8653.class,
     com.openexchange.groupware.importexport.Bug8654.class,
     com.openexchange.groupware.importexport.Bug8681forCSV.class,
