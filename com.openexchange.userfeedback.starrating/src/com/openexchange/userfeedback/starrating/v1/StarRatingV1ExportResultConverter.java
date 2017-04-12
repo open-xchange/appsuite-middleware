@@ -108,6 +108,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         StarRatingV1ExportResult exportResult = new StarRatingV1ExportResult();
         ThresholdFileHolder sink = new ThresholdFileHolder();
         OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
+        boolean error = true;
         try {
             final StarRatingV1Fields[] jsonFields = StarRatingV1Fields.values();
             StringBuilder bob = new StringBuilder(1024);
@@ -121,8 +122,13 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
             }
             writer.flush();
             exportResult.setCSV(sink.getClosingStream());
-        } catch (final IOException | OXException | JSONException e) {
-            sink.close();
+            error = false;
+        } catch (IOException | OXException | JSONException | RuntimeException e) {
+            LOG.error("Failed to create CSV stream", e);
+        } finally {
+            if (error) {
+                sink.close();
+            }
         }
         return exportResult;
     }
