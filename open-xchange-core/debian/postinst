@@ -1302,6 +1302,96 @@ if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
     ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
 fi
 
+# SoftwareChange_Request-4096
+# use subshell to not pollute current env when sourcing ox-scriptconf.sh
+(
+  . /opt/open-xchange/lib/oxfunctions.sh
+  to_migrate=/opt/open-xchange/etc/ox-scriptconf.sh
+
+  # Pitfall_1 JAVA_XTRAOPTS="${JAVA_XTRAOPTS} foo=bar"
+  # was added by some customers to ox-scriptconf.sh
+  unset JAVA_XTRAOPTS
+  . ${to_migrate}
+  opts_old=${JAVA_XTRAOPTS}
+
+  # only migrate if pre RM-177 style options are found
+  if [[ ! -z "${opts_old}" ]]
+  then
+    backup=${to_migrate}.$(date +%s)
+    cp -a --remove-destination ${to_migrate} ${backup}
+
+    gc_regx="-XX:\+UseConcMarkSweepGC|-XX:\+UseParNewGC|-XX:CMSInitiatingOccupancyFraction|-XX:\+UseCMSInitiatingOccupancyOnly|-XX:NewRatio|-XX:\+DisableExplicitGC"
+    log_regx="-Dlogback.threadlocal.put.duplicate|-XX:-OmitStackTraceInFastThrow"
+    mem_regx="-Xmx|-XX:MaxHeapSize|-XX:MaxPermSize|-XX:\+UseTLAB"
+    net_regx="-Dsun.net.inetaddr.ttl|-Dnetworkaddress.cache.ttl|-Dnetworkaddress.cache.negative.ttl"
+    osgi_regx="-Dosgi.compatibility.bootdelegation"
+    server_regx="-server|-Djava.awt.headless"
+
+    opts_gc=()
+    opts_log=()
+    opts_mem=()
+    opts_net=()
+    opts_osgi=()
+    opts_server=()
+    opts_other=()
+
+    ((debug)) && echo "The options are: ${opts_old}"
+
+    opt_arr=(${opts_old})
+    num_opts=${#opt_arr[@]}
+    ((debug)) && echo "There are ${num_opts} options to migrate"
+    for ((i=0; i < num_opts; i++))
+    do
+      #assign single options to appropriate array
+      ((debug)) && echo "Option ${i}: ${opt_arr[${i}]}"
+      curr_opt=${opt_arr[${i}]}
+      if [[ "${curr_opt}" =~ ${gc_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a gc opt"
+        opts_gc+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${log_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a log opt"
+        opts_log+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${mem_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a mem opt"
+        opts_mem+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${net_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a net opt"
+        opts_net+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${osgi_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is an osgi opt"
+        opts_osgi+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${server_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a server opt"
+        opts_server+=(${curr_opt})
+      else
+        ((debug)) && echo "${curr_opt} is another opt"
+        opts_other+=(${curr_opt})
+      fi
+    done
+
+    ox_add_property JAVA_OPTS_GC     "\"${opts_gc[*]}\""     "${to_migrate}"
+    ox_add_property JAVA_OPTS_LOG    "\"${opts_log[*]}\""    "${to_migrate}"
+    ox_add_property JAVA_OPTS_MEM    "\"${opts_mem[*]}\""    "${to_migrate}"
+    ox_add_property JAVA_OPTS_NET    "\"${opts_net[*]}\""    "${to_migrate}"
+    ox_add_property JAVA_OPTS_OSGI   "\"${opts_osgi[*]}\""   "${to_migrate}"
+    ox_add_property JAVA_OPTS_SERVER "\"${opts_server[*]}\"" "${to_migrate}"
+    ox_add_property JAVA_OPTS_OTHER  "\"${opts_other[*]}\""  "${to_migrate}"
+    sed -i -e '${a\
+# Define options for debugging the groupware Java virtual machine, disabled by default.\
+#JAVA_OPTS_DEBUG="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/mnt/heapdump -Xloggc:/var/log/open-xchange/gc.log -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintHeapAtGC -XX:+PrintGCApplicationStoppedTime -XX:+PrintTenuringDistribution"
+    }' "${to_migrate}"
+
+    # Pitfall_1: removes all occurrences
+    ox_remove_property JAVA_XTRAOPTS "${to_migrate}"
+  fi
+)
+
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
     for FILE in "${PROTECT[@]}"
