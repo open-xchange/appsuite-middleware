@@ -326,7 +326,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
         while (jsonKeys.hasNext()) {
             String key = (String) jsonKeys.next();
             if (!expectedKeys.contains(key)) {
-                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
+                LOG.info("An unknown key '{}' has been provided. It will be removed before persisting.", key);
                 processed.remove(key);
                 continue;
             }

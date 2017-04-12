@@ -73,7 +73,7 @@ public enum StarRatingV1Fields {
     language("Language"),
     user("User"), // only for export
     server_version("Server Version"), // only for export
-    client_version("Client Version"), // only for export
+    client_version("Client Version"),
     ;
 
     private static final Set<String> INTERNAL_KEYS = new HashSet<String>();
@@ -108,7 +108,6 @@ public enum StarRatingV1Fields {
         Set<String> copy = new HashSet<>(INTERNAL_KEYS);
         copy.remove("date");
         copy.remove("user");
-        copy.remove("client_version");
         copy.remove("server_version");
         return copy;
     }
