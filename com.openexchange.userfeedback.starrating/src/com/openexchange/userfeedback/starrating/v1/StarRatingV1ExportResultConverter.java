@@ -52,7 +52,6 @@ package com.openexchange.userfeedback.starrating.v1;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
-import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,11 +73,10 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1ExportResultConverter.class);
 
-    private static final Pattern PATTERN_QUOTE = Pattern.compile("\"", Pattern.LITERAL);
     private static final char CELL_DELIMITER = ',';
     private static final char ROW_DELIMITER = '\n';
 
-    private Collection<Feedback> feedbacks;
+    private final Collection<Feedback> feedbacks;
 
     public StarRatingV1ExportResultConverter(Collection<Feedback> feedbacks) {
         this.feedbacks = feedbacks;
@@ -112,10 +110,14 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
         try {
             final StarRatingV1Fields[] jsonFields = StarRatingV1Fields.values();
-            writer.write(convertToLine(jsonFields, null));
+            StringBuilder bob = new StringBuilder(1024);
+
+            // Writer header line
+            writer.write(convertToLine(jsonFields, null, bob));
 
             for (Feedback feedback : feedbacks) {
-                writer.write(convertToLine(jsonFields, (JSONObject) feedback.getContent()));
+                // Write entry line
+                writer.write(convertToLine(jsonFields, (JSONObject) feedback.getContent(), bob));
             }
             writer.flush();
             exportResult.setCSV(sink.getClosingStream());
@@ -125,21 +127,87 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         return exportResult;
     }
 
-    private String convertToLine(StarRatingV1Fields[] jsonFields, JSONObject object) throws JSONException {
-        boolean isHeader = object == null;
-        StringBuilder bob = new StringBuilder(1024);
-        for (StarRatingV1Fields token : jsonFields) {
-            bob.append('"');
-            if (isHeader) {
-                bob.append(PATTERN_QUOTE.matcher(token.getDisplayName()).replaceAll("\"\""));
-            } else {
-                bob.append(PATTERN_QUOTE.matcher(object.getString(token.name())).replaceAll("\"\""));
+    private String convertToLine(StarRatingV1Fields[] jsonFields, JSONObject object, StringBuilder sb) throws JSONException {
+        StringBuilder bob;
+        if (null == sb) {
+            bob = new StringBuilder(1024);
+        } else {
+            bob = sb;
+            bob.setLength(0);
+        }
+
+        if (null == object) {
+            // Header line
+            for (StarRatingV1Fields token : jsonFields) {
+                bob.append('"');
+                bob.append(sanitize(token.getDisplayName()));
+                bob.append('"');
+                bob.append(CELL_DELIMITER);
             }
-            bob.append('"');
-            bob.append(CELL_DELIMITER);
+        } else {
+            for (StarRatingV1Fields token : jsonFields) {
+                bob.append('"');
+                bob.append(sanitize(object.getString(token.name())));
+                bob.append('"');
+                bob.append(CELL_DELIMITER);
+            }
         }
         bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
-
         return bob.toString();
     }
+
+    private String sanitize(String value) {
+        int length = value.length();
+        if (length <= 0) {
+            return value;
+        }
+
+        StringBuilder builder = null;
+
+        char firstChar = value.charAt(0);
+        if (needsSanitizing(firstChar)) {
+            builder = new StringBuilder(length);
+            builder.append('\'').append(firstChar);
+        }
+
+        for (int i = 1; i < length; i++) {
+            char c = value.charAt(i);
+            if (null == builder) {
+                if (c == '"' || c == '\'' || c == '|') {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(value, 0, i);
+                    }
+                    builder.append("\\").append(c);
+                }
+            } else {
+                if (c == '"' || c == '\'' || c == '|') {
+                    builder.append("\\").append(c);
+                } else {
+                    builder.append(c);
+                }
+            }
+        }
+        return null == builder ? value : builder.toString();
+    }
+
+    private boolean needsSanitizing(char c) {
+        switch (c) {
+            case '=':
+                return true;
+            case '+':
+                return true;
+            case '-':
+                return true;
+            case '@':
+                return true;
+            case '|':
+                return true;
+            case '\'':
+                return true;
+            default:
+                return false;
+        }
+    }
+
 }
