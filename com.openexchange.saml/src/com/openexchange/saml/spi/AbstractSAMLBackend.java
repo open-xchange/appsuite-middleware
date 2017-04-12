@@ -54,6 +54,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.DecoderException;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
@@ -68,6 +69,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.SAMLExceptionCode;
 import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
@@ -209,31 +211,39 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     }
 
     @Override
-    public AuthnRequestInfo parseRelayState(Response response, String relayState) {
-        LOG_ABSTRACT.debug("RelayState: {}", relayState);
-        DefaultAuthnRequestInfo defaultAuthnRequestInfo = new DefaultAuthnRequestInfo();
-        String string = new String(Base64.decode(relayState.getBytes()));
-        LOG_ABSTRACT.debug("decoded RelayState: {}", string);
-        String[] splitRelayState = string.split(":");
-        for (String s : splitRelayState) {
-            String[] split = s.split("=");
-            if (null != split && split.length == 2) {
-                switch (split[0]) {
-                    case "domain":
-                        defaultAuthnRequestInfo.setDomainName(split[1]);
-                        break;
-                    case "loginpath":
-                        defaultAuthnRequestInfo.setLoginPath(split[1]);
-                        break;
-                    case "client":
-                        defaultAuthnRequestInfo.setClientID(split[1]);
-                        break;
-                    default:
-                        break;
+    public AuthnRequestInfo parseRelayState(Response response, String relayState) throws OXException {
+        try {
+            LOG_ABSTRACT.debug("RelayState: {}", relayState);
+            DefaultAuthnRequestInfo defaultAuthnRequestInfo = new DefaultAuthnRequestInfo();
+            String string = new String(Base64.decode(relayState.getBytes()));
+            LOG_ABSTRACT.debug("decoded RelayState: {}", string);
+            String[] splitRelayState = string.split(":");
+            for (String s : splitRelayState) {
+                String[] split = s.split("=");
+                if (null != split && split.length == 2) {
+                    switch (split[0]) {
+                        case "domain":
+                            defaultAuthnRequestInfo.setDomainName(split[1]);
+                            break;
+                        case "loginpath":
+                            defaultAuthnRequestInfo.setLoginPath(split[1]);
+                            break;
+                        case "client":
+                            defaultAuthnRequestInfo.setClientID(split[1]);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
+            return defaultAuthnRequestInfo;
+        } catch (DecoderException e) {
+            // Base64-decoding failed
+            throw SAMLExceptionCode.INVALID_REQUEST.create(e, "The 'RelayState' parameter is invalid");
+        } catch (RuntimeException e) {
+            // Whatever unexpected uncaught exception
+            throw SAMLExceptionCode.INVALID_REQUEST.create(e, "Parsing the 'RelayState' parameter failed");
         }
-        return defaultAuthnRequestInfo;
     }
 
     @Override
