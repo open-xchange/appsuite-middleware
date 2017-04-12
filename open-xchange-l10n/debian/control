@@ -53,6 +53,12 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: Package containing Open-Xchange backend localization for es_MX
 
+Package: open-xchange-l10n-et-ee
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for et_EE
+ This localization package are driven by the community.
+
 Package: open-xchange-l10n-eu-es
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
