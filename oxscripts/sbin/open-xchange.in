@@ -65,7 +65,22 @@ test -f $OXFUNCTIONS || {
 
 . $OXFUNCTIONS
 
+# Get existing variables that match our pattern
+get_jopts() {
+  echo $(compgen -A variable | grep JAVA_OPTS_)
+}
+
+# unset JAVA_XTRAOPTS and JAVA_OPTS_* to start with a clean environment
+for x in JAVA_XTRAOPTS $(get_jopts)
+do
+  unset $x
+done
+
 test -f $OXCONFIG && . $OXCONFIG
+
+# Use old JAVA_XTRAOPTS if declared otherwise build it from JAVA_OPTS_ fragments
+GATHERED_OPTS=$(eval echo "$(sed -e 's/\(\<\)/$\1/g' <<<$(get_jopts))")
+JAVA_XTRAOPTS=${JAVA_XTRAOPTS:=${GATHERED_OPTS}}
 
 ox_set_JAVA_BIN
 
@@ -89,12 +104,6 @@ fi
 JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Djava.awt.headless=true \
 -Dopenexchange.propdir=$PROPERTIESDIR"
-
-CLASSPATH=""
-
-if [ -n "$CLASSPATH" ]; then
-    CLASSPATH="-classpath $CLASSPATH"
-fi
 
 ox_save_backup $CONSOLELOG
 
