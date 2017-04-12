@@ -100,10 +100,12 @@ public class UserTest extends AbstractTest {
     // global setting for stored password
     protected static final String pass = "foo-user-pass";
 
+    protected static final String TOO_LONG = "royyxgoyxrixllsguvhsyazyboliexlgfcvzckxnxqwffwctvafzxxxxkjzawrwrqqzxlgizevqzfwtapzokcyijvxmujlecmwgjkaiwfablzgiqabzwthazawcuffplpcuairrcllnhrckbxfvxmfefdpnxzvjpkpheptvdsolsuwycsrsmmbspnrcgocfmstdcaaeizshmkdvdzdwpbwevbheasogpilbzhytvfleisuhbzgyodisehdhjieqwnyznuskktlblreghauwjcthltvnagasntwtguclpsqmmvhnfiynnwhnealxbezqegmocfoxxdwlxeetcoayuwuaxoiqgfckglcwbqtsqmgnxhaamalmtruidkefxfcoavcrsfuyujcoucygszoaafkgzjysvgffhaukyewjxpwtadmbkzulehmqqdjlyqacethsyuvawkvfivyzvbrlrhpoiinxtbbnxoultmgkgjctkiboaovfukjdaiigcptesqhlpdcccmusfiauvwwdvvddupolqvnuewzapcpdlsqxdgsowrgekxyyczhgtbrhqfqbpkjdgikzsbegzlvmavjsgltxiobbzhcqawplhqatbxmxmrhfesaupggpznosrjtnfcbujppgnhxxqkznaeiifcakvsnudvxaxiwowdailfltbtvnujbrszzotsvqovpryrsjypydfuhwseibpgmbdrjhkswpolymyjpjrpgfpkfxgtekukctlnjhxjqyegiutwbpingdaymrbvhhqboyxophfauqtweebaphuajytvbmwkktnvqjdrziayzojlmghzbspvepazyxjdbxwnjeafruoeiujbwmbrwyojljjntzaonolgfhxpwtmasimaxwuzhyhwshphtoqjochgzvcchcumppckexrlujgkatilsvwwfxhwfvzhfimsoanxrmkgzlwswedpiovjewxrpmltwqwhalgojcpzwutecxrhpnebcgxsiynfkuqhsvnnwznwwpwjvrubytdzmwfoipkykoprhhzzcqcfzvowtfudfqhyaptbqdqqitkxeihjqdosbafmlljadrlvfkqjcvovqyctnvmgynmycmxtqfdyecpnaxlgstyxtsxlvibuuzibbaewsocpdeosbtbdbugrwrpvugtyltrnzxzndsflpnbogiymbcgksjdnchvcmqiavrojrffsuchzmkvyhexklueuuwxvkyrvwkiezqkhebpiarcgdamlqtpagjtrypdwxbopozobgadjvrkisckejdhabanhespbioebfexakannwutaizcroqlfabfvhfonytwthsunlrqdrypjhtaectwflmgijijdhphhjmacqotxwigsnnxqrbzgyplubwvwwycbhhqjrestclarzkiwyvlysgegkcjxlyzjfgfrxnbygpwlgpbwfpivmehhpcctqwrjscbxanjmkrfrdlcjwqppowbujhiocrazuniiycgakgkcuawkwbvuwoqaurdzobelhmqropiazzcehvblylpuhusbfmshczonqwklasghfwwssfotwfajrwwfiixdfremujvcwyzizwdauqomgzswzdqduvqjfovrnygblvtgsctisgrqtgkodvltjpnunjcjvkinlbhzkmiebfqgvqayqglcjunqvstaiyvpsxhtwpynbdlorutovplochscyynyuqsydwarhflhhyvvsezhvrkjurscqofdrepaaostqbkpkrkwscxzrzcdharhdfeqomdxiwjnqtzwuymtqmgiuaeaeegucxvhelnnwwqqlguglbrhesbfqhpltnesgaauqshhbgymhbkhxgpjnwltyjpbnxjykycevndesugkshhutisvklbvohulprepljqybzxrpmratiybjfbjiqzjrxxdajkrsinzkewvkwkmsplvjanfrpfobpmbvvhjtwfmnxxxzyyftbsbwpgkxsltugjokboizhgolfqmcfhqoyswcayqpacyfhnwezecvxgazdakidjmifeiygxuglkoxgjmlrzkcmsclukqlgoqfuotxkgqxyzyosywyxxozwgqykhehhecypblllvhfowmjjdepffbyyvzegmodfzwrdqzblvrgdqkaxomsorzyggrybhxhrddrtkdloqpxnvrwsrxwrvogrjplvbwdjztwxdxpjdtimumxmtjslndnwalkpyznksvxgqdtmftuedofhaohfifwxkepqqbzatnqljvaqjbblyfankuoypbvbjahoneoxbckvgetwrntjahoewoabdlghpdqjvlgpeginhgebfpunllglltvcuhcunevihvmwulmcysfeoipdfxbohncfbqdvheumleetpvvxjgoiykxnzayjivsaclhlrjllsyqvoxfagkczlxsvshyjnmfexmnbuwtajacxjcfphuuekutsffbgvzkxhexmxegecjbjymslmrvmrmegpmavhkohfzcdmnzhdpnkvpoblplpjssyqanwnwzyvapwgdkkvsuyqlgcxegkdiaqgscvqqyxbwcihjfnjnsnfjtkdfhzvwjxkhtkprchrzxldwqdesxkwmkkfntffclyyievdkrqalgjrvddkpuhgradpanyqnorjwsapvcifinqnpqyatkiafaynjlkyztgbhovvvrdmswygvadyevajkjcxjqlmalfzsmaadefqirwfbvptxadkqjzbzhzwfxrrgybyevdpwkmptceccqebzawrsdjsfthgkmxiuabhrlmldmualjpkwidnevzrgkgzpieqbjxukbjnbsvryegegdgdlpkqirjvfxvtefyegbegyfylavjsvxseoivkmtkemluthuqpnrugqhwpalwqoriwvbjubjvbbdvzwpzyghvdjrutxlnkwncqvtarizhvrzsqhlxvuqqqaxkpijnmvpkerjyadsumdgdmapqbxrmpqzqevcbeykkjhygxktvcedyjlnmqwrcxcabfuejvffqbwcefmqmprahrbqezhoxllxqacneoynvmzlehajoflbnxmorydpqdcnvjztqdjpitazuunlkhrryjdnapccqzlvsjtjqnsrujllscamzjkkbdcpmzelcolmacjsawqyxucidijnlpfedkjjdsgkohlurjahynqiakqrgxswnzsdpcivaznkgsirbfwmpfiqwlfvzqujkzwrtuyhybssnooialbcyjxiyupolvmdoirfzqcwhsoefuwoadfjswbjyahgzedijxyuzenurmceqhyhluptswxmsvvyoaqtkexuykmbrvzcjrivwujxzitqfywztlwohqnaovykwplynkrhrqphdmrkwjuohvbzypqjdkubayhiyskzwvxsuawwwtyfdvczsbwqxmtzbakoltilvvwpaqtipqpxzkrmkuamynknlxuomlzfioixgnehidwvumswcalggqrygweuvnetgiwizvujvocwwmelikeclynxfahevnesdvwnlfzibovbopjrnofgbqipspnxfyvbtfrjjootuiqjzmxsmigpzormbgplggikvldtuojptyootvqpgabhwgpsnjwoklngypnlnqjknqocyqnjwlyiljztfhnlqkrakeiremqzymwrynqsnupicufmgxebposdrzpskxnqujtgjubxzclunotakupvjcfqaasksanhbyzngeevsbkmlpzheghqvbwczsdzvbtwgyhrtseynoctskiegablmcbegrezhphkleulojzjycrncdojbvueipyvyiopmldtdtpbobfkgfweospddnhxzscceblvwbocwgvrubjlerdhftzuteaexwbkptyfbdgrlvmsewoupwokofdafrrpzfytbqeuarihalxcisdpcxtdxfpmauwvmrpsngjmaohiaukgctczdlcnojojstatihepxexvlzupqmlkyzdwqdbepvgftlvgmtkmmchoozwynybmfevaoyvictlbzqxbrjafmooazcaugynewnhlpxxmlx@test.net";
+
     protected static OXUserInterface getUserClient() throws Exception {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
-    
+
     private static List<User> toDeleteUsers = new ArrayList<User>();
 
     @AfterClass
@@ -117,7 +119,7 @@ public class UserTest extends AbstractTest {
             oxu.delete(ctx, userArray, null, cred);
         }
     }
-    
+
     private void rememberToDeleteUser(User createduser) {
         if (toDeleteUsers != null) {
             toDeleteUsers.add(createduser);
@@ -169,8 +171,6 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data for added user");
         }
     }
-
-    
 
     private User id(User createduser) {
         User user = new User();
@@ -245,7 +245,7 @@ public class UserTest extends AbstractTest {
         }
 
     }
-    
+
     private void compareUserMandatory(User a, User b) {
 
         System.out.println("USERA" + a.toString());
@@ -258,12 +258,12 @@ public class UserTest extends AbstractTest {
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
 
     }
-    
+
     @Test
     public void testCreateUserWithWrongDriveFoldersMode() throws Exception {
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
-        
+
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
         final User user = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
@@ -419,7 +419,7 @@ public class UserTest extends AbstractTest {
             // Everything is fine. Setting publicFolderEditable should be denied. See bugs 18866, 20369, 20635.
             access.setPublicFolderEditable(false);
             createduser = oxu.create(ctx, usr, access, cred);
-            
+
         }
         rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
@@ -729,6 +729,107 @@ public class UserTest extends AbstractTest {
         final User user_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
         // set Username to old value for verification
         srv_loaded.setName(createduser.getName());
+        // remove deleted dynamic attribute for verification
+        srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
+        if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
+            //verify data
+            compareUser(srv_loaded, user_changed_loaded);
+        } else {
+            fail("Expected to get correct changed user data");
+        }
+    }
+
+    @Test
+    public void testChangeAlias() throws Exception {
+        // change alias
+
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
+            //verify data
+            compareUser(createduser, srv_loaded);
+        } else {
+            fail("Expected to get user data");
+        }
+
+        // now change data
+        srv_loaded.addAlias("newAlias123@test.com");
+        // submit changes
+        oxu.change(ctx, srv_loaded, cred);
+
+        // load again
+        final User user_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
+
+        // remove deleted dynamic attribute for verification
+        srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
+        if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
+            //verify data
+            compareUser(srv_loaded, user_changed_loaded);
+        } else {
+            fail("Expected to get correct changed user data");
+        }
+    }
+    
+    @Test(expected=StorageException.class)
+    public void testChangeAliasTooLong() throws Exception {
+        // Try to change alias with too long name (Bug 52763) 
+
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
+            //verify data
+            compareUser(createduser, srv_loaded);
+        } else {
+            fail("Expected to get user data");
+        }
+
+        // now change data
+        srv_loaded.addAlias(TOO_LONG);
+        // submit changes, should throw StorageException
+        oxu.change(ctx, srv_loaded, cred);
+
+        // load again - should not be changed
+        final User user_not_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
+
+        // remove deleted dynamic attribute for verification
+        srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
+        // remove flawed alias
+        srv_loaded.removeAlias(TOO_LONG);
+        if (srv_loaded.getId().equals(user_not_changed_loaded.getId())) {
+            //verify data
+            compareUser(srv_loaded, user_not_changed_loaded);
+        } else {
+            fail("Expected to get correct changed user data");
+        }
+        
+        // check if you can still change alias (Bug 52763)
+        srv_loaded.addAlias("foobar@example.net");
+        // submit changes
+        oxu.change(ctx, srv_loaded, cred);
+
+        // load again
+        final User user_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
+
         // remove deleted dynamic attribute for verification
         srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
         if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
@@ -1101,10 +1202,10 @@ public class UserTest extends AbstractTest {
 
     private class MethodMapObject {
 
-        private Method getter = null;
-        private Method setter = null;
+        private Method getter              = null;
+        private Method setter              = null;
         private String methodParameterType = null;
-        private String methodName = null;
+        private String methodName          = null;
 
         /**
          * @return the getter

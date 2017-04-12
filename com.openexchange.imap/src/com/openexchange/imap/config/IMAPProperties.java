@@ -50,11 +50,12 @@
 package com.openexchange.imap.config;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -62,7 +63,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import org.apache.commons.io.output.StringBuilderWriter;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -201,12 +201,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         PrimaryIMAPProperties.Params params = new PrimaryIMAPProperties.Params();
 
         StringBuilder logMessageBuilder = new StringBuilder(1024);
-        PrintWriter writer = new PrintWriter(new StringBuilderWriter(logMessageBuilder));
-        writer.print("Primary IMAP properties successfully loaded for user ");
-        writer.print(userId);
-        writer.print(" in context ");
-        writer.print(contextId);
-        writer.println();
+        List<Object> args = new ArrayList<>(16);
+
+        logMessageBuilder.append("Primary IMAP properties successfully loaded for user {} in context {}{}");
+        args.add(userId);
+        args.add(contextId);
+        args.add(Strings.getLineSeparator());
 
         {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.greeting.host.regex", view);
@@ -216,12 +216,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     Pattern pattern = Pattern.compile(tmp);
                     params.hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
 
-                    writer.print("  Host name regular expression: ");
-                    writer.println(tmp);
+                    logMessageBuilder.append("  Host name regular expression: {}{}");
+                    args.add(tmp);
+                    args.add(Strings.getLineSeparator());
                 } catch (PatternSyntaxException e) {
                     LOG.warn("Invalid expression for host name", e);
-                    writer.print("  Host name regular expression");
-                    writer.println("<none>");
+                    logMessageBuilder.append("  Host name regular expression: {}{}");
+                    args.add("<none>");
+                    args.add(Strings.getLineSeparator());
                 }
             }
         }
@@ -232,27 +234,35 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 params.rootSubfoldersAllowed = Boolean.FALSE;
             } else {
                 params.rootSubfoldersAllowed = Boolean.valueOf(tmp);
-                writer.print("  Root sub-folders allowed: ");
-                writer.println(params.rootSubfoldersAllowed);
+
+                logMessageBuilder.append("  Root sub-folders allowed: {}{}");
+                args.add(params.rootSubfoldersAllowed);
+                args.add(Strings.getLineSeparator());
             }
         }
 
         {
             params.namespacePerUser = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.namespacePerUser", false, view);
-            writer.print("  Namespace per User: ");
-            writer.println(params.namespacePerUser);
+
+            logMessageBuilder.append("  Namespace per User: {}{}");
+            args.add(params.namespacePerUser);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.umlautFilterThreshold = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.umlautFilterThreshold", 50, view);
-            writer.print("  Umlaut filter threhold: ");
-            writer.println(params.umlautFilterThreshold);
+
+            logMessageBuilder.append("  Umlaut filter threshold: {}{}");
+            args.add(params.umlautFilterThreshold);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.maxMailboxNameLength = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.maxMailboxNameLength", 60, view);
-            writer.print("  Max. Mailbox Name Length: ");
-            writer.println(params.maxMailboxNameLength);
+
+            logMessageBuilder.append("  Max. Mailbox Name Length: {}{}");
+            args.add(params.maxMailboxNameLength);
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -269,44 +279,56 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 }
 
                 params.invalidChars = invalidChars;
-                writer.print("  Invalid Mailbox Characters: ");
-                writer.println(invalids);
+
+                logMessageBuilder.append("  Invalid Mailbox Characters: {}{}");
+                args.add(invalids);
+                args.add(Strings.getLineSeparator());
             }
 
         }
 
         {
             params.allowESORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowESORT", true, view);
-            writer.print("  Allow ESORT: ");
-            writer.println(Boolean.toString(params.allowESORT));
+
+            logMessageBuilder.append("  Allow ESORT: {}{}");
+            args.add(params.allowESORT);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.allowSORTDISPLAY = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowSORTDISPLAY", false, view);
-            writer.print("  Allow SORT-DSIPLAY: ");
-            writer.println(Boolean.toString(params.allowSORTDISPLAY));
+
+            logMessageBuilder.append("  Allow SORT-DSIPLAY: {}{}");
+            args.add(params.allowSORTDISPLAY);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.fallbackOnFailedSORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.fallbackOnFailedSORT", false, view);
-            writer.print("  Fallback On Failed SORT: ");
-            writer.println(Boolean.toString(params.fallbackOnFailedSORT));
+
+            logMessageBuilder.append("  Fallback On Failed SORT: {}{}");
+            args.add(params.fallbackOnFailedSORT);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.useMultipleAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddresses", false, view);
-            writer.print("  Use Multiple IP addresses: ");
-            writer.println(Boolean.toString(params.useMultipleAddresses));
+
+            logMessageBuilder.append("  Use Multiple IP addresses: {}{}");
+            args.add(params.useMultipleAddresses);
+            args.add(Strings.getLineSeparator());
         }
 
         if (params.useMultipleAddresses) {
             params.useMultipleAddressesUserHash = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddressesUserHash", false, view);
-            writer.print("  Use User Hash for Multiple IP addresses: ");
-            writer.println(Boolean.toString(params.useMultipleAddressesUserHash));
+
+            logMessageBuilder.append("  Use User Hash for Multiple IP addresses: {}{}");
+            args.add(params.useMultipleAddressesUserHash);
+            args.add(Strings.getLineSeparator());
         }
 
         PrimaryIMAPProperties primaryIMAPProps = new PrimaryIMAPProperties(params);
-        LOG.info(logMessageBuilder.toString());
+        LOG.info(logMessageBuilder.toString(), args.toArray(new Object[args.size()]));
         return primaryIMAPProps;
     }
 
@@ -352,6 +374,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean auditLogEnabled;
     
+    private boolean overwritePreLoginCapabilities;
+
     private boolean overwritePreLoginCapabilities;
 
     private Set<String> propagateHostNames;

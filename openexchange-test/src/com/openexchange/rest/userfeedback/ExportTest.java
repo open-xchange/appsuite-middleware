@@ -182,6 +182,7 @@ public class ExportTest extends AbstractUserFeedbackTest {
     public void testRawExport_onlyOlderFeedbacks_emptyExport() throws Exception {
         storeFeedbacks(3);
 
+        Thread.sleep(2000);
         try {
             DateTime now = DateTime.now(DateTimeZone.UTC);
 
@@ -190,13 +191,14 @@ public class ExportTest extends AbstractUserFeedbackTest {
 
             assertEquals(0, jsonExport.length());
         } catch (Exception e) {
-            fail();
+            fail(e.getMessage());
         }
     }
 
     @Test
     public void testRawExport_onlyNewerFeedbacks_emptyExport() throws Exception {
         DateTime now = DateTime.now(DateTimeZone.UTC);
+        Thread.sleep(2000);
 
         storeFeedbacks(3);
 
@@ -209,9 +211,13 @@ public class ExportTest extends AbstractUserFeedbackTest {
     @Test
     public void testRawExport_between_exportThree() throws Exception {
         storeFeedbacks(3);
+        Thread.sleep(2000);
         DateTime second = DateTime.now(DateTimeZone.UTC);
+        Thread.sleep(2000);
         storeFeedbacks(3);
+        Thread.sleep(2000);
         DateTime third = DateTime.now(DateTimeZone.UTC);
+        Thread.sleep(2000);
         storeFeedbacks(3);
 
         String export = userfeedbackApi.exportRAW("default", type, second.getMillis(), third.getMillis());

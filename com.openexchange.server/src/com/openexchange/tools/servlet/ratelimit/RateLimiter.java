@@ -411,9 +411,11 @@ public final class RateLimiter {
         if (omitLocals() && LOCALS.contains(httpRequest.getServerName())) {
             return;
         }
-        if (lenientCheckForRequest(httpRequest)) {
+        LenientReason result = lenientCheckForRequest(httpRequest);
+        if (LenientType.NONE != result.type) {
+            // No rate limit for given request
+            LOG.debug("No rate limit for request. {} ({})", result.reason, result.type.name());
             return;
-            //maxRatePerMinute <<= 2;
         }
 
         // Do the rate limit check
@@ -730,50 +732,50 @@ public final class RateLimiter {
         return tmp;
     }
 
-    private static final Cache<String, Boolean> CACHE_AGENTS = CacheBuilder.newBuilder().maximumSize(250).expireAfterWrite(30, TimeUnit.MINUTES).build();
+    private static final Cache<String, LenientReason> CACHE_AGENTS = CacheBuilder.newBuilder().maximumSize(250).expireAfterWrite(30, TimeUnit.MINUTES).build();
 
-    private static boolean lenientCheckForUserAgent(final String userAgent) {
+    private static LenientReason lenientCheckForUserAgent(final String userAgent) {
         if (null != userAgent) {
-            Boolean result = CACHE_AGENTS.getIfPresent(userAgent);
+            LenientReason result = CACHE_AGENTS.getIfPresent(userAgent);
             if (null == result) {
                 for (final StringChecker checker : userAgentCheckers()) {
                     if (checker.matches(userAgent)) {
-                        result = Boolean.TRUE;
+                        result = new LenientReason(LenientType.USER_AGENT, "User-Agent white-listed: " + userAgent);
                         break;
                     }
                 }
                 if (null == result) {
-                    result = Boolean.FALSE;
+                    result = LenientReason.NONE;
                 }
                 CACHE_AGENTS.put(userAgent, result);
             }
 
-            return result.booleanValue();
+            return result;
         }
-        return false;
+        return LenientReason.NONE;
     }
 
-    private static final Cache<String, Boolean> CACHE_REMOTE_ADDRS = CacheBuilder.newBuilder().maximumSize(2500).expireAfterWrite(30, TimeUnit.MINUTES).build();
+    private static final Cache<String, LenientReason> CACHE_REMOTE_ADDRS = CacheBuilder.newBuilder().maximumSize(2500).expireAfterWrite(30, TimeUnit.MINUTES).build();
 
-    private static boolean lenientCheckForRemoteAddress(final String remoteAddress) {
+    private static LenientReason lenientCheckForRemoteAddress(final String remoteAddress) {
         if (null != remoteAddress) {
-            Boolean result = CACHE_REMOTE_ADDRS.getIfPresent(remoteAddress);
+            LenientReason result = CACHE_REMOTE_ADDRS.getIfPresent(remoteAddress);
             if (null == result) {
                 for (final StringChecker checker : remoteAddressCheckers()) {
                     if (checker.matches(remoteAddress)) {
-                        result = Boolean.TRUE;
+                        result = new LenientReason(LenientType.REMOTE_ADDRESS, "Remote address white-listed: " + remoteAddress);
                         break;
                     }
                 }
                 if (null == result) {
-                    result = Boolean.FALSE;
+                    result = LenientReason.NONE;
                 }
                 CACHE_REMOTE_ADDRS.put(remoteAddress, result);
             }
 
-            return result.booleanValue();
+            return result;
         }
-        return false;
+        return LenientReason.NONE;
     }
 
     private static volatile List<String> modules;
@@ -813,13 +815,37 @@ public final class RateLimiter {
         return tmp;
     }
 
-    private static final Cache<String, Boolean> CACHE_PATHS = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
+    private static enum LenientType {
+        NONE, PATH, USER_AGENT, REMOTE_ADDRESS, THUMBNAIL_REQUEST;
+    }
 
-    private static boolean lenientCheckForRequest(HttpServletRequest servletRequest) {
+    private static final class LenientReason {
+
+        static final LenientReason NONE = new LenientReason(LenientType.NONE, null);
+        static final LenientReason THUMBNAIL_REQUEST = new LenientReason(LenientType.THUMBNAIL_REQUEST, "Thumbnail request");
+
+        final LenientType type;
+        final String reason;
+
+        LenientReason(LenientType type, String reason) {
+            super();
+            this.type = type;
+            this.reason = reason;
+        }
+
+        @Override
+        public String toString() {
+            return null == reason ? type.name() : new StringBuilder(16 + reason.length()).append(type.name()).append(" - ").append(reason).toString();
+        }
+    }
+
+    private static final Cache<String, LenientReason> CACHE_PATHS = CacheBuilder.newBuilder().maximumSize(1500).expireAfterWrite(2, TimeUnit.HOURS).build();
+
+    private static LenientReason lenientCheckForRequest(HttpServletRequest servletRequest) {
         // Servlet path check
         {
             String requestURI = servletRequest.getRequestURI();
-            Boolean result = CACHE_PATHS.getIfPresent(requestURI);
+            LenientReason result = CACHE_PATHS.getIfPresent(requestURI);
             if (null == result) {
                 // Check modules
                 {
@@ -828,39 +854,46 @@ public final class RateLimiter {
                     String lcRequestURI = asciiLowerCase(requestURI);
                     for (String module : modules()) {
                         sb.setLength(reslen);
-                        if (lcRequestURI.startsWith(sb.append(module).toString())) {
-                            result = Boolean.TRUE;
+                        String prefix = sb.append(module).toString();
+                        if (lcRequestURI.startsWith(prefix)) {
+                            result = new LenientReason(LenientType.PATH, "Request path starts with: " + prefix);
                             break;
                         }
                     }
                 }
                 if (null == result) {
-                    result = Boolean.FALSE;
+                    result = LenientReason.NONE;
                 }
                 CACHE_PATHS.put(requestURI, result);
             }
 
-            if (result.booleanValue()) {
-                return true;
+            if (LenientType.NONE != result.type) {
+                return result;
             }
         }
 
         // User-Agent check
-        if (lenientCheckForUserAgent(servletRequest.getHeader("User-Agent"))) {
-            return true;
+        {
+            LenientReason result = lenientCheckForUserAgent(servletRequest.getHeader("User-Agent"));
+            if (LenientType.NONE != result.type) {
+                return result;
+            }
         }
 
         // Remote address check
-        if (lenientCheckForRemoteAddress(servletRequest.getRemoteAddr())) {
-            return true;
+        {
+            LenientReason result = lenientCheckForRemoteAddress(servletRequest.getRemoteAddr());
+            if (LenientType.NONE != result.type) {
+                return result;
+            }
         }
 
         // A thumbnail request
         if (ImageTransformationUtility.seemsLikeThumbnailRequest(servletRequest)) {
-            return true;
+            return LenientReason.THUMBNAIL_REQUEST;
         }
 
-        return false;
+        return LenientReason.NONE;
     }
 
     /** Converts specified wild-card string to a regular expression */

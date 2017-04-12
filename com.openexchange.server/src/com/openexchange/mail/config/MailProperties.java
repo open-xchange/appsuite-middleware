@@ -55,16 +55,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import org.apache.commons.io.output.StringBuilderWriter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
@@ -263,276 +263,294 @@ public final class MailProperties implements IMailProperties {
         PrimaryMailProps.Params params = new PrimaryMailProps.Params();
 
         StringBuilder logMessageBuilder = new StringBuilder(1024);
-        PrintWriter writer = new PrintWriter(new StringBuilderWriter(logMessageBuilder));
-        try {
-            writer.print("Primary mail properties successfully loaded for user ");
-            writer.print(userId);
-            writer.print(" in context ");
-            writer.print(contextId);
-            writer.println();
+        List<Object> args = new ArrayList<>(16);
 
-            {
-                final String loginStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.loginSource", view);
-                if (loginStr == null) {
-                    throw MailConfigException.create("Property \"com.openexchange.mail.loginSource\" not set");
-                }
-                LoginSource loginSource = LoginSource.parse(loginStr.trim());
-                if (null == loginSource) {
-                    throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
-                }
-                params.loginSource = loginSource;
+        logMessageBuilder.append("Primary mail properties successfully loaded for user {} in context {}{}");
+        args.add(userId);
+        args.add(contextId);
+        args.add(Strings.getLineSeparator());
 
-                writer.print("  Login Source: ");
-                writer.println(loginSource.toString());
+        {
+            final String loginStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.loginSource", view);
+            if (loginStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.loginSource\" not set");
             }
-
-            {
-                final String pwStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.passwordSource", view);
-                if (pwStr == null) {
-                    throw MailConfigException.create("Property \"com.openexchange.mail.passwordSource\" not set");
-                }
-                PasswordSource passwordSource = PasswordSource.parse(pwStr.trim());
-                if (null == passwordSource) {
-                    throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
-                }
-                params.passwordSource = passwordSource;
-
-                writer.print("  Password Source: ");
-                writer.println(passwordSource.toString());
+            LoginSource loginSource = LoginSource.parse(loginStr.trim());
+            if (null == loginSource) {
+                throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
             }
+            params.loginSource = loginSource;
 
-            {
-                final String mailSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServerSource", view);
-                if (mailSrcStr == null) {
-                    throw MailConfigException.create("Property \"com.openexchange.mail.mailServerSource\" not set");
-                }
-                ServerSource mailServerSource = ServerSource.parse(mailSrcStr.trim());
-                if (null == mailServerSource) {
-                    throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
-                }
-                params.mailServerSource = mailServerSource;
-
-                writer.print("  Mail Server Source: ");
-                writer.println(mailServerSource.toString());
-            }
-
-            {
-                final String transSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServerSource", view);
-                if (transSrcStr == null) {
-                    throw MailConfigException.create("Property \"com.openexchange.mail.transportServerSource\" not set");
-                }
-                ServerSource transportServerSource = ServerSource.parse(transSrcStr.trim());
-                if (null == transportServerSource) {
-                    throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
-                }
-                params.transportServerSource = transportServerSource;
-
-                writer.print("  Transport Server Source: ");
-                writer.println(transportServerSource.toString());
-            }
-
-            {
-                ConfiguredServer mailServer = null;
-                String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServer", view);
-                if (tmp != null) {
-                    mailServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.IMAP);
-
-                    writer.print("  Mail Server: ");
-                    writer.println(mailServer.toString());
-                }
-                params.mailServer = mailServer;
-
-            }
-
-            {
-                ConfiguredServer transportServer = null;
-                String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServer", view);
-                if (tmp != null) {
-                    transportServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.SMTP);
-
-                    writer.print("  Transport Server: ");
-                    writer.println(transportServer.toString());
-                }
-                params.transportServer = transportServer;
-            }
-
-            {
-                String masterPassword = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.masterPassword", view);
-                if (masterPassword != null) {
-                    masterPassword = masterPassword.trim();
-
-                    writer.print("  Master Password: ");
-                    writer.println("XXXXXXX");
-                }
-                params.masterPassword = masterPassword;
-            }
-
-            params.mailStartTls = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.mailStartTls", false, view);
-            params.transportStartTls = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.transportStartTls", false, view);
-
-            {
-                try {
-                    params.maxToCcBcc = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxToCcBcc", 0, view);
-                } catch (final NumberFormatException e) {
-                    LOG.debug("", e);
-                    params.maxToCcBcc = 0;
-                }
-
-                writer.print("  maxToCcBcc: ");
-                writer.println(params.maxToCcBcc);
-            }
-
-            {
-                try {
-                    params.maxDriveAttachments = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxDriveAttachments", 20, view);
-                } catch (final NumberFormatException e) {
-                    LOG.debug("", e);
-                    params.maxDriveAttachments = 20;
-                }
-
-                writer.print("  maxDriveAttachments: ");
-                writer.println(params.maxDriveAttachments);
-            }
-
-            {
-                String phishingHdrsStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.phishingHeader", view);
-                if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
-                    params.phishingHeaders = phishingHdrsStr.split(" *, *");
-
-                    writer.print("  Phishing Headers: ");
-                    writer.println(Arrays.toString(params.phishingHeaders));
-                } else {
-                    params.phishingHeaders = null;
-                }
-            }
-
-            {
-                params.rateLimitPrimaryOnly = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.rateLimitPrimaryOnly", true, view);
-
-                writer.print("  Rate limit primary only: ");
-                writer.println(Boolean.toString(params.rateLimitPrimaryOnly));
-            }
-
-            {
-                try {
-                    params.rateLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.rateLimit", 0, view);
-                } catch (final NumberFormatException e) {
-                    LOG.debug("", e);
-                    params.rateLimit = 0;
-                }
-
-                writer.print("  Sent Rate limit: ");
-                writer.println(Integer.toString(params.rateLimit));
-            }
-
-            {
-                HostList ranges = HostList.EMPTY;
-                String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.rateLimitDisabledRange", view);
-                if (false == Strings.isEmpty(tmp)) {
-                    ranges = HostList.valueOf(tmp);
-                }
-                params.ranges = ranges;
-
-                writer.print("  White-listed from send rate limit: ");
-                writer.println(ranges.toString());
-            }
-
-            {
-                try {
-                    params.defaultArchiveDays = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.archive.defaultDays", 90, view);
-                } catch (final NumberFormatException e) {
-                    LOG.debug("", e);
-                    params.defaultArchiveDays = 90;
-                }
-
-                writer.print("  Default archive days: ");
-                writer.println(params.defaultArchiveDays);
-            }
-
-            {
-                params.preferSentDate = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.preferSentDate", false, view);
-
-                writer.print("  Prefer Sent Date: ");
-                writer.println(params.preferSentDate);
-            }
-
-            {
-                params.hidePOP3StorageFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.hidePOP3StorageFolders", false, view);
-
-                writer.print("  Hide POP3 Storage Folder: ");
-                writer.println(params.hidePOP3StorageFolders);
-            }
-
-            {
-                params.translateDefaultFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.translateDefaultFolders", true, view);
-
-                writer.print("  Translate Default Folders: ");
-                writer.println(params.translateDefaultFolders);
-            }
-
-            {
-                params.deleteDraftOnTransport = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.deleteDraftOnTransport", false, view);
-
-                writer.print("  Delete Draft On Transport: ");
-                writer.println(params.deleteDraftOnTransport);
-            }
-
-            {
-                params.forwardUnquoted = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.forwardUnquoted", false, view);
-
-                writer.print("  Forward Unquoted: ");
-                writer.println(params.forwardUnquoted);
-            }
-
-            {
-                long maxMailSize;
-                String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.maxMailSize", view);
-                if (null == tmp) {
-                    maxMailSize = -1L;
-                } else {
-                    try {
-                        maxMailSize = Long.parseLong(tmp);
-                    } catch (NumberFormatException e) {
-                        LOG.debug("", e);
-                        maxMailSize = -1L;
-                    }
-                }
-                params.maxMailSize = maxMailSize;
-
-                writer.print("  Max. Mail Size: ");
-                writer.println(params.maxMailSize);
-            }
-
-            {
-                try {
-                    params.maxForwardCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxForwardCount", 8, view);
-                } catch (final NumberFormatException e) {
-                    LOG.debug("", e);
-                    params.maxForwardCount = 8;
-                }
-
-                writer.print("  Max. Forward Count: ");
-                writer.println(params.maxForwardCount);
-            }
-
-            {
-                try {
-                    params.mailFetchLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.mailFetchLimit", 1000, view);
-                } catch (final NumberFormatException e) {
-                    LOG.debug("", e);
-                    params.mailFetchLimit = 1000;
-                }
-
-                writer.print("  Mail Fetch Limit: ");
-                writer.println(params.mailFetchLimit);
-            }
-
-            PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
-            LOG.info(logMessageBuilder.toString());
-            return primaryMailProps;
-        } finally {
-            Streams.close(writer);
+            logMessageBuilder.append("  Login Source: {}{}");
+            args.add(loginSource);
+            args.add(Strings.getLineSeparator());
         }
+
+        {
+            final String pwStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.passwordSource", view);
+            if (pwStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.passwordSource\" not set");
+            }
+            PasswordSource passwordSource = PasswordSource.parse(pwStr.trim());
+            if (null == passwordSource) {
+                throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
+            }
+            params.passwordSource = passwordSource;
+
+            logMessageBuilder.append("  Password Source: {}{}");
+            args.add(passwordSource);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            final String mailSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServerSource", view);
+            if (mailSrcStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.mailServerSource\" not set");
+            }
+            ServerSource mailServerSource = ServerSource.parse(mailSrcStr.trim());
+            if (null == mailServerSource) {
+                throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
+            }
+            params.mailServerSource = mailServerSource;
+
+            logMessageBuilder.append("  Mail Server Source: {}{}");
+            args.add(mailServerSource);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            final String transSrcStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServerSource", view);
+            if (transSrcStr == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.transportServerSource\" not set");
+            }
+            ServerSource transportServerSource = ServerSource.parse(transSrcStr.trim());
+            if (null == transportServerSource) {
+                throw MailConfigException.create(new StringBuilder(256).append("Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
+            }
+            params.transportServerSource = transportServerSource;
+
+            logMessageBuilder.append("  Transport Server Source: {}{}");
+            args.add(transportServerSource);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            ConfiguredServer mailServer = null;
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.mailServer", view);
+            if (tmp != null) {
+                mailServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.IMAP);
+
+                logMessageBuilder.append("  Mail Server: {}{}");
+                args.add(mailServer);
+                args.add(Strings.getLineSeparator());
+            }
+            params.mailServer = mailServer;
+
+        }
+
+        {
+            ConfiguredServer transportServer = null;
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.transportServer", view);
+            if (tmp != null) {
+                transportServer = ConfiguredServer.parseFrom(tmp.trim(), URIDefaults.SMTP);
+
+                logMessageBuilder.append("  Transport Server: {}{}");
+                args.add(transportServer);
+                args.add(Strings.getLineSeparator());
+            }
+            params.transportServer = transportServer;
+        }
+
+        {
+            String masterPassword = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.masterPassword", view);
+            if (masterPassword != null) {
+                masterPassword = masterPassword.trim();
+
+                logMessageBuilder.append("  Master Password: {}{}");
+                args.add("XXXXXXX");
+                args.add(Strings.getLineSeparator());
+            }
+            params.masterPassword = masterPassword;
+        }
+
+        params.mailStartTls = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.mailStartTls", false, view);
+        params.transportStartTls = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.transportStartTls", false, view);
+
+        {
+            try {
+                params.maxToCcBcc = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxToCcBcc", 0, view);
+            } catch (final NumberFormatException e) {
+                LOG.debug("", e);
+                params.maxToCcBcc = 0;
+            }
+
+            logMessageBuilder.append("  maxToCcBcc: {}{}");
+            args.add(params.maxToCcBcc);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            try {
+                params.maxDriveAttachments = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxDriveAttachments", 20, view);
+            } catch (final NumberFormatException e) {
+                LOG.debug("", e);
+                params.maxDriveAttachments = 20;
+            }
+
+            logMessageBuilder.append("  maxDriveAttachments: {}{}");
+            args.add(params.maxDriveAttachments);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            String phishingHdrsStr = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.phishingHeader", view);
+            if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
+                params.phishingHeaders = phishingHdrsStr.split(" *, *");
+
+                logMessageBuilder.append("  Phishing Headers: {}{}");
+                args.add(Arrays.toString(params.phishingHeaders));
+                args.add(Strings.getLineSeparator());
+            } else {
+                params.phishingHeaders = null;
+            }
+        }
+
+        {
+            params.rateLimitPrimaryOnly = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.rateLimitPrimaryOnly", true, view);
+
+            logMessageBuilder.append("  Rate limit primary only: {}{}");
+            args.add(params.rateLimitPrimaryOnly);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            try {
+                params.rateLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.rateLimit", 0, view);
+            } catch (final NumberFormatException e) {
+                LOG.debug("", e);
+                params.rateLimit = 0;
+            }
+
+            logMessageBuilder.append("  Sent Rate limit: {}{}");
+            args.add(params.rateLimit);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            HostList ranges = HostList.EMPTY;
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.rateLimitDisabledRange", view);
+            if (false == Strings.isEmpty(tmp)) {
+                ranges = HostList.valueOf(tmp);
+            }
+            params.ranges = ranges;
+
+            logMessageBuilder.append("  White-listed from send rate limit: {}{}");
+            args.add(ranges.toString());
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            try {
+                params.defaultArchiveDays = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.archive.defaultDays", 90, view);
+            } catch (final NumberFormatException e) {
+                LOG.debug("", e);
+                params.defaultArchiveDays = 90;
+            }
+
+            logMessageBuilder.append("  Default archive days: {}{}");
+            args.add(params.defaultArchiveDays);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.preferSentDate = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.preferSentDate", false, view);
+
+            logMessageBuilder.append("  Prefer Sent Date: {}{}");
+            args.add(params.preferSentDate);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.hidePOP3StorageFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.hidePOP3StorageFolders", false, view);
+
+            logMessageBuilder.append("  Hide POP3 Storage Folder: {}{}");
+            args.add(params.hidePOP3StorageFolders);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.translateDefaultFolders = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.translateDefaultFolders", true, view);
+
+            logMessageBuilder.append("  Translate Default Folders: {}{}");
+            args.add(params.translateDefaultFolders);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.deleteDraftOnTransport = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.deleteDraftOnTransport", false, view);
+
+            logMessageBuilder.append("  Delete Draft On Transport: {}{}");
+            args.add(params.deleteDraftOnTransport);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.forwardUnquoted = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.forwardUnquoted", false, view);
+
+            logMessageBuilder.append("  Forward Unquoted: {}{}");
+            args.add(params.forwardUnquoted);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            long maxMailSize;
+            String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.maxMailSize", view);
+            if (null == tmp) {
+                maxMailSize = -1L;
+            } else {
+                try {
+                    maxMailSize = Long.parseLong(tmp);
+                } catch (NumberFormatException e) {
+                    LOG.debug("", e);
+                    maxMailSize = -1L;
+                }
+            }
+            params.maxMailSize = maxMailSize;
+
+            logMessageBuilder.append("  Max. Mail Size: {}{}");
+            args.add(params.maxMailSize);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            try {
+                params.maxForwardCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxForwardCount", 8, view);
+            } catch (final NumberFormatException e) {
+                LOG.debug("", e);
+                params.maxForwardCount = 8;
+            }
+
+            logMessageBuilder.append("  Max. Forward Count: {}{}");
+            args.add(params.maxForwardCount);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            try {
+                params.mailFetchLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.mailFetchLimit", 1000, view);
+            } catch (final NumberFormatException e) {
+                LOG.debug("", e);
+                params.mailFetchLimit = 1000;
+            }
+
+            logMessageBuilder.append("   Mail Fetch Limit: {}{}");
+            args.add(params.mailFetchLimit);
+            args.add(Strings.getLineSeparator());
+        }
+
+        PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
+        LOG.info(logMessageBuilder.toString(), args.toArray(new Object[args.size()]));
+        return primaryMailProps;
     }
 
 

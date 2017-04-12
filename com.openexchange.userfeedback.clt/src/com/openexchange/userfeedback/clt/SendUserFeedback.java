@@ -62,7 +62,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -176,7 +175,6 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
-        context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
         String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
         JSONArray array = new JSONArray();
         if (recipients.startsWith("@")) {

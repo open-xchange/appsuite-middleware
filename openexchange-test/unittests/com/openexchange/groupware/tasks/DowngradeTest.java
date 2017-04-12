@@ -93,10 +93,6 @@ public class DowngradeTest {
     private User secondUser;
     private Session session;
 
-    public DowngradeTest(final String name) {
-        super();
-    }
-
     private static String getUsername(final String un) {
         final int pos = un.indexOf('@');
         return pos == -1 ? un : un.substring(0, pos);
