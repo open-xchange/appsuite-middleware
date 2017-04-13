@@ -98,11 +98,11 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
     @Path("/{context-group}/{type}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("subject") String subject, @QueryParam("body") String body, String json) {
-        return send(contextGroup, type, start, end, subject, body, json);
+    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("subject") String subject, @QueryParam("body") String body, @QueryParam("compress") boolean compress, String json) {
+        return send(contextGroup, type, start, end, subject, body, compress, json);
     }
 
-    private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, String json) {
+    private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, boolean compress, String json) {
         JSONArray array = null;
         try {
             validateParams(start, end);
@@ -143,7 +143,7 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 recipients.put(address, displayName);
             }
             FeedbackMailService service = getService(FeedbackMailService.class);
-            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, pgpKeys, subject, mailBody, start, end, type);
+            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, pgpKeys, subject, mailBody, start, end, type, compress);
             String response = service.sendFeedbackMail(filter);
             builder = Response.status(Status.OK);
             if (Strings.isEmpty(response)) {
