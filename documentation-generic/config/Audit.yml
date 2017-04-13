@@ -126,7 +126,7 @@ properties:
       description: |
         Specifies the optional date pattern to use.
         Accepts a pattern according to: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html. 
-        
+
         By default "com.openexchange.log.audit.slf4j.date.pattern" is empty, which means standard ISO-8601 formatting is used and accompanying properties
         "com.openexchange.log.audit.slf4j.date.locale" and "com.openexchange.log.audit.slf4j.date.timezone" are ignored.
         
@@ -165,17 +165,18 @@ properties:
     - key: com.openexchange.log.audit.slf4j.file.location
       description: |
         Specifies the file location to use.
-        
+          
         By default "com.openexchange.log.audit.slf4j.file.location" is empty, which means regular App Suite logging is used and accompanying properties
         "com.openexchange.log.audit.slf4j.file.size", "com.openexchange.log.audit.slf4j.file.count" and "com.openexchange.log.audit.slf4j.file.pattern" are ignored.
-        
+          
         Once a file location/pattern is set, audit logger will no more use regular App Suite logging, but output its log messages to rotating files.
         E.g. a file location/pattern might be: "/var/log/open-xchange/my-audit.log"
+
         It is then possible to configure how that logging is done:
-         - "com.openexchange.log.audit.slf4j.file.size" specifies the max. file size to use
-         - "com.openexchange.log.audit.slf4j.file.count" defines the max. number of files to use for rotation
-         - "com.openexchange.log.audit.slf4j.file.pattern" defines the layout pattern of the log entry; 
-            for more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
+         <ul><li>"com.openexchange.log.audit.slf4j.file.size" specifies the max. file size to use</li>
+         <li>"com.openexchange.log.audit.slf4j.file.count" defines the max. number of files to use for rotation</li>
+         <li>"com.openexchange.log.audit.slf4j.file.pattern" defines the layout pattern of the log entry</li></ul>
+        For more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
       defaultValue: GMT
       version:
       reloadable: false
@@ -208,8 +209,8 @@ properties:
       tags: ["Audit", "Logging", "Limit"]
     - key: com.openexchange.log.audit.slf4j.file.pattern
       description: |
-        Defines the layout pattern of the log entry; 
-        for more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
+        Defines the layout pattern of the log entry.
+        For more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
       defaultValue: "\"%sanitisedMessage%n\""
       version:
       reloadable: false

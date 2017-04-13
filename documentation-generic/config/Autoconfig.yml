@@ -28,8 +28,10 @@ properties:
     - key: com.openexchange.mail.autoconfig.http.proxy
       description: |
         Provides the possibility to specify a proxy that is used to access any HTTP end-points. If empty, no proxy is used.
-        Notation is: <optional-protocol> + "://" + <proxy-host> + ":" + <proxy-port>
-                     With "http" as fall-back protocol
+
+        Notation is: &lt;optional-protocol&gt; + "://" + &lt;proxy-host&gt; + ":" + &lt;proxy-port&gt;  
+        With "http" as fall-back protocol
+        
         E.g. "67.177.104.230:58720" (using HTTP protocol) or "https://78.0.25.45:8345" (using HTTPS protocol)
       defaultValue:
       version:

@@ -23,7 +23,7 @@ properties:
         By enabling the option CACHED_ITERATOR_FAST_FETCH you
         can define the numbers of pre fetched results with
         the parameter MAX_PRE_FETCH.
-
+          
         This means that MAX_PRE_FETCH results are gathered in one
         SQL query instead of MAX_PRE_FETCH single SQL queries.
         Normally higher values result in more performance if this

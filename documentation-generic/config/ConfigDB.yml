@@ -346,9 +346,12 @@ properties:
       tags: ["Config DB", "Database", "Limit"]
     - key: exhaustedAction
       description: |
-        BLOCK: If maxActive number of connections is reached threads have to wait for a connection.
-        FAIL: If maxActive number of connections is reached an exception is thrown.
-        GROW: Open more connections even if maxActive is already reached.
+        Possible values:
+        <ul>
+        <li>BLOCK: If maxActive number of connections is reached threads have to wait for a connection.</li>
+        <li>FAIL: If maxActive number of connections is reached an exception is thrown.</li>
+        <li>GROW: Open more connections even if maxActive is already reached.</li>
+        </ul>
         This value is overwritten for OX databases from configdb.
       defaultValue: BLOCK
       version:
