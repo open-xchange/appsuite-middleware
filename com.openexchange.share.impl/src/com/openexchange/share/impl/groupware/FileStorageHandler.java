@@ -152,7 +152,7 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public TargetProxy loadTarget(ShareTarget target, Session session) throws OXException {
+    public FileTargetProxy loadTarget(ShareTarget target, Session session) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (fileID.getFolderId() == null) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
@@ -174,18 +174,7 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public boolean mayAdjust(ShareTarget target, Session session) throws OXException {
-        FileID fileID = new FileID(target.getItem());
-        if (null == fileID.getFolderId()) {
-            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
-        }
-        Context context = requireService(ContextService.class, services).getContext(session.getContextId());
-        IDBasedAdministrativeFileAccess administrativeFileAccess = getAdministrativeFileAccess(context);
-        if (administrativeFileAccess.canRead(fileID.toUniqueID(), session.getUserId())) {
-            File file = administrativeFileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-            return file.isShareable();
-        }
-
-        return false;
+        return loadTarget(target, session).mayAdjust();
     }
 
     @Override
