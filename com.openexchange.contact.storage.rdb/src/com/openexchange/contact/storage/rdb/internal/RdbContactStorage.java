@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -81,7 +80,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.imagetransformation.ImageTransformationService;
-import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -1076,25 +1074,19 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                     type = ScaleType.AUTO;
                     break;
             }
-            final byte[] imageBytes = contact.getImage1();
 
+            byte[] imageBytes = contact.getImage1();
             if (imageBytes == null || imageBytes.length == 0) {
                 return;
             }
 
-            final ImageTransformationService resizeService = RdbServiceLookup.getService(ImageTransformationService.class, true);
-            final ImageTransformations transform = resizeService.transfom(contact.getImage1());
-            if (transform == null) {
-                return;
-            }
-            final BufferedImage oldImage = transform.getImage();
-            if (oldImage == null || oldImage.getWidth() < image_width || oldImage.getHeight() < image_height) {
-                return;
-            }
-            transform.scale(image_width, image_height, type, true);
-            final byte[] image = transform.getBytes("jpg");
-            if (image != null && image.length != 0) {
-                contact.setImage1(image);
+            byte[] transformedImage = RdbServiceLookup.getService(ImageTransformationService.class, true)
+                .transfom(imageBytes)
+                .rotate()
+                .scale(image_width, image_height, type, true)
+                .getBytes("jpeg");
+            if (transformedImage != null && transformedImage.length != 0) {
+                contact.setImage1(transformedImage);
             }
         } catch (OXException | IOException | NumberFormatException ex) {
             LOG.error("Unable to resize contact image due to " + ex.getMessage());
