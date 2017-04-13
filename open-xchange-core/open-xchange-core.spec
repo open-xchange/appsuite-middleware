@@ -1431,6 +1431,12 @@ ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 # SoftwareChange_Request-3934
 ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-4094
+VALUE=$(ox_read_property com.openexchange.mail.autoconfig.ispdb /opt/open-xchange/etc/autoconfig.properties)
+if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
+    ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
