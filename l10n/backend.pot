@@ -9570,12 +9570,12 @@ msgstr ""
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
 msgstr ""
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr ""
 
 #. The value given in the property %1$s is no integer value
