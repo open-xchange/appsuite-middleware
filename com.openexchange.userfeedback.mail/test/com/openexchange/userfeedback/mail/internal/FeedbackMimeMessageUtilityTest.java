@@ -63,6 +63,24 @@ public class FeedbackMimeMessageUtilityTest {
         return new FeedbackMailFilter("1", new HashMap<String, String>(), "subject", "Mail body", 0l, 0l, "", false);
     }
 
+    private FeedbackMailFilter getCompressedFilter() {
+        return new FeedbackMailFilter("1", new HashMap<String, String>(), "subject", "Mail body", 0l, 0l, "", true);
+    }
+
+    @Test
+    public void createMailMessageTest_Compressed() throws OXException, IOException, MessagingException {
+        MimeMessage mimeMessage = FeedbackMimeMessageUtility.createMailMessage(new FileInputStream(TESTFILES_PATH + "feedback.csv"), getCompressedFilter(), null);
+        // Check if message has a multipart body with a plain text part and a file attachment
+        Multipart content = (Multipart) mimeMessage.getContent();
+        assertTrue(content.getCount() == 2);
+        MimeBodyPart messageBodyPart = (MimeBodyPart) content.getBodyPart(0);
+        assertTrue(messageBodyPart.getContentType().equals("text/plain"));
+        MimeBodyPart fileBodyPart = (MimeBodyPart) content.getBodyPart(1);
+        InputStream fileStream = (InputStream) fileBodyPart.getContent();
+        assertTrue(fileStream != null);
+        fileStream.close();
+    }
+
     @Test
     public void extractRecipientsTest_NoneNotNullResult() throws UnsupportedEncodingException, OXException {
         FeedbackMailFilter filter = getDefaultFilter();
