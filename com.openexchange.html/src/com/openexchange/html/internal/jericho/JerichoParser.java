@@ -491,7 +491,11 @@ public final class JerichoParser {
             } else if (firstSegment.length() <= 0 || firstSegment.charAt(0) != '<' || firstSegment.charAt(firstSegment.length() - 1) != '>' || (indexOf('<', 1, firstSegment) >= 0)) {
                 // Start tag detection did not help
                 throw HtmlExceptionCodes.CORRUPT.create();
+            } else {
+                // Seems to be a valid start tag that cannot be parsed. Most likely due to invalid attributes
+                // Ignore...
             }
+
             while (!thread.isInterrupted() && iter.hasNext()) {
                 Segment nestedSegment = iter.next();
                 handleSegment(handler, nestedSegment, css, false, true);
