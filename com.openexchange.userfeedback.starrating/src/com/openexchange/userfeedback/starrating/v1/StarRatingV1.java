@@ -116,7 +116,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
             if (Strings.isEmpty(score)) {
                 throw StarRatingExceptionCodes.INVALID_SCORE_TYPE.create(score);
             }
-            int scoreInt = Integer.valueOf(score).intValue();
+            long scoreInt = Long.valueOf(score).longValue();
             if (scoreInt < 1) {
                 throw StarRatingExceptionCodes.INVALID_SCORE_VALUE.create(scoreInt);
             }
