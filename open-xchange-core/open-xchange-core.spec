@@ -1446,6 +1446,12 @@ sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/
 # SoftwareChange_Request-4059
 ox_remove_property com.openexchange.mail.enforceSecureConnection /opt/open-xchange/etc/mail.properties
 
+# SoftwareChange_Request-4094
+VALUE=$(ox_read_property com.openexchange.mail.autoconfig.ispdb /opt/open-xchange/etc/autoconfig.properties)
+if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
+    ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
