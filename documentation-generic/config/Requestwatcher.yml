@@ -9,6 +9,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    packageName: open-xchange-core
     tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.frequency
     description: |
@@ -19,6 +20,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    packageName: open-xchange-core
     tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.maxRequestAge
     description: |
@@ -29,6 +31,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    packageName: open-xchange-core
     tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.restartPermission
     description: |
@@ -39,6 +42,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    packageName: open-xchange-core
     tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.eas.ignore.cmd
     description: |
@@ -50,6 +54,7 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    packageName: open-xchange-core
     tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.usm.ignore.path
     description: |
@@ -61,4 +66,5 @@ properties:
     configcascadeAware: false
     related: 
     file: requestwatcher.properties
+    packageName: open-xchange-core
     tags: ["Requestwatcher"] 

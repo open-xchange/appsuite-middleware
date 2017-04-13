@@ -10,6 +10,7 @@ properties:
     configcascadeAware: true
     related: 
     file: pns-mobile-api-facade.properties
+    packageName: open-xchange-pns-mobile-api-facade
     tags: ["Mail","Push"]
   - key: com.openexchange.pns.mobile.api.facade.apn.sound.enabled
     description: |
@@ -20,6 +21,7 @@ properties:
     configcascadeAware: true
     related: 
     file: pns-mobile-api-facade.properties
+    packageName: open-xchange-pns-mobile-api-facade
     tags: ["Mail","Push"]
   - key: com.openexchange.pns.mobile.api.facade.apn.sound.filename
     description: |
@@ -32,4 +34,5 @@ properties:
     configcascadeAware: true
     related: 
     file: pns-mobile-api-facade.properties
+    packageName: open-xchange-pns-mobile-api-facade
     tags: ["Mail","Push"]

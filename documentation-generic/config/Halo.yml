@@ -1,4 +1,4 @@
-feature_name: Halo
+feature_name: LinkedIn
 properties:
     - key: com.openexchange.halo.linkedin.enabledMailCapableKey
       description: |
@@ -9,4 +9,5 @@ properties:
       configcascadeAware: true
       related: 
       file: halo-linkedin.properties
+      packageName: open-xchange-linkedin
       tags: ["Halo", "LinkedIn"]

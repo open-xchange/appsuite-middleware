@@ -10,6 +10,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminDaemon.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "Authentication"]
     - key: CONTEXT_AUTHENTICATION_DISABLED
       description: |
@@ -23,6 +24,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminDaemon.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "Authentication"]
     - key: USER_STORAGE
       description: |
@@ -33,6 +35,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminDaemon.properties
+      packageName: open-xchange-admin
       tags: ["Admin"]
     - key: GROUP_STORAGE
       description: |
@@ -43,6 +46,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminDaemon.properties
+      packageName: open-xchange-admin
       tags: ["Admin"]
     - key: RESOURCE_STORAGE
       description: |
@@ -53,6 +57,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminDaemon.properties
+      packageName: open-xchange-admin
       tags: ["Admin"]
     - key: CONCURRENT_JOBS
       description: |
@@ -63,6 +68,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminDaemon.properties
+      packageName: open-xchange-admin
       tags: ["Admin"]
     - key: MASTER_ACCOUNT_OVERRIDE
       description: |
@@ -74,6 +80,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminDaemon.properties
+      packageName: open-xchange-admin
       tags: ["Admin"]
     - key: DEFAULT_TIMEZONE
       description: |
@@ -85,6 +92,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "Timezone", "User", "Provisioning"]
     - key: AUTO_TO_LOWERCASE_UID
       description: |
@@ -95,6 +103,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User"]
     - key: UID_NUMBER_START
       description: |
@@ -105,6 +114,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin"]
     - key: CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS
       description: |
@@ -115,6 +125,7 @@ properties:
       configcascadeAware: false
       related: CHECK_USER_UID_REGEXP
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User"]
     - key: CHECK_USER_UID_REGEXP
       description: |
@@ -125,6 +136,7 @@ properties:
       configcascadeAware: false
       related: CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User"]
     - key: USERNAME_CHANGEABLE
       description: |
@@ -139,6 +151,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User"]
     - key: PRIMARY_MAIL_UNCHANGEABLE
       description: |
@@ -152,6 +165,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail"]
     - key: AVERAGE_USER_SIZE
       description: |
@@ -162,6 +176,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Filestore"]
     - key: ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET
       description: |
@@ -176,6 +191,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Filestore"]
     - key: SENT_MAILFOLDER_[language]
       description: |
@@ -203,6 +219,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail", "Folder"]
     - key: TRASH_MAILFOLDER_[language]
       description: |
@@ -230,6 +247,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail", "Folder"]
     - key: DRAFTS_MAILFOLDER_[language]
       description: |
@@ -257,6 +275,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail", "Folder"]
     - key: SPAM_MAILFOLDER_[language]
       description: |
@@ -284,6 +303,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail", "Folder"]
     - key: CONFIRMED_SPAM_MAILFOLDER_[language]
       description: |
@@ -311,6 +331,7 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail", "Folder"]
     - key: CONFIRMED_HAM_MAILFOLDER_[language]
       description: |
@@ -338,4 +359,5 @@ properties:
       configcascadeAware: false
       related: 
       file: AdminUser.properties
+      packageName: open-xchange-admin
       tags: ["Admin", "User", "Mail", "Folder"]

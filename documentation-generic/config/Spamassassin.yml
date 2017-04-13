@@ -9,6 +9,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.hostname, com.openexchange.spamhandler.spamassassin.port
       file: spamassassin.properties
+      packageName: open-xchange-spamhandler-spamassassin
       tags: ["Spamassassin"]
     - key: com.openexchange.spamhandler.spamassassin.hostname
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
+      packageName: open-xchange-spamhandler-spamassassin
       tags: ["Spamassassin", "Host"]
     - key: com.openexchange.spamhandler.spamassassin.port
       description: |
@@ -30,6 +32,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
+      packageName: open-xchange-spamhandler-spamassassin
       tags: ["Spamassassin", "Port"]
     - key: com.openexchange.spamhandler.spamassassin.timeout
       description: |
@@ -41,6 +44,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
+      packageName: open-xchange-spamhandler-spamassassin
       tags: ["Spamassassin", "Timeout"]
     - key: com.openexchange.spamhandler.spamassassin.retries
       description: |
@@ -51,6 +55,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
+      packageName: open-xchange-spamhandler-spamassassin
       tags: ["Spamassassin"]
     - key: com.openexchange.spamhandler.spamassassin.retrysleep
       description: |
@@ -62,4 +67,5 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.spamassassin.spamd
       file: spamassassin.properties
+      packageName: open-xchange-spamhandler-spamassassin
       tags: ["Spamassassin"] 

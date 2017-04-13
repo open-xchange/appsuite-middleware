@@ -13,6 +13,7 @@ properties:
       configcascadeAware: false
       related: MAX_UPLOAD_SIZE in server.properties
       file: infostore.properties
+      packageName: open-xchange-core
       tags: ["Infostore"]
 
     - key: com.openexchange.infostore.zipDocumentsCompressionLevel
@@ -27,6 +28,7 @@ properties:
       configcascadeAware: false
       related: 
       file: infostore.properties
+      packageName: open-xchange-core
       tags: ["Infostore"]
 
     - key: com.openexchange.infostore.trash.retentionDays
@@ -47,4 +49,5 @@ properties:
       configcascadeAware: false
       related: 
       file: infostore.properties
+      packageName: open-xchange-core
       tags: ["Infostore"]

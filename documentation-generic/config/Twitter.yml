@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter"]
     - key: com.openexchange.twitter.http.proxyHost
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.twitter.http.proxyPort
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Host"]
     - key: com.openexchange.twitter.http.proxyPort
       description: |
@@ -29,6 +31,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.twitter.http.proxyHost
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Port"]
     - key: com.openexchange.twitter.http.connectionTimeout
       description: |
@@ -39,6 +42,7 @@ properties:
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.readTimeout
       description: |
@@ -49,6 +53,7 @@ properties:
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.retryCount
       description: |
@@ -59,6 +64,7 @@ properties:
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter"]
     - key: com.openexchange.twitter.http.retryIntervalSecs
       description: |
@@ -69,4 +75,5 @@ properties:
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter"]

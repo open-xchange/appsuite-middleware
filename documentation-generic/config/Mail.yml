@@ -14,6 +14,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.passwordSource
       description: |
@@ -28,6 +29,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.mailServerSource
       description: |
@@ -42,6 +44,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.transportServerSource
       description: |
@@ -56,6 +59,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Transport"]
     - key: com.openexchange.mail.masterPassword
       description: |
@@ -67,6 +71,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Credential"]
     - key: com.openexchange.mail.mailServer
       description: |
@@ -78,6 +83,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Host"]
     - key: com.openexchange.mail.transportServer
       description: |
@@ -89,6 +95,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Transport"]
     - key: com.openexchange.mail.mailStartTls
       description: |
@@ -100,6 +107,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.transportStartTls
       description: |
@@ -111,6 +119,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Transport"]
     - key: com.openexchange.mail.defaultMailProvider
       description: |
@@ -121,6 +130,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: mail.mime.charset
       description: |
@@ -133,6 +143,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.saneLogin
       description: |
@@ -144,6 +155,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.replaceWithComma
       description: |
@@ -154,6 +166,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.mailFetchLimit
       description: |
@@ -166,6 +179,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.bodyDisplaySizeLimit
       description: |
@@ -177,6 +191,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.attachmentDisplaySizeLimit
       description: |
@@ -188,6 +203,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.mailAccessCacheShrinkerSeconds
       description: |
@@ -198,6 +214,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Thread"]
     - key: com.openexchange.mail.mailAccessCacheIdleSeconds
       description: |
@@ -208,6 +225,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Thread"]
     - key: com.openexchange.mail.quoteLineColors
       description: |
@@ -219,6 +237,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.forwardUnquoted
       description: |
@@ -229,6 +248,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.userFlagsEnabled
       description: |
@@ -239,6 +259,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace
       description: |
@@ -253,6 +274,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.ignoreSubscription
       description: |
@@ -265,6 +287,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.supportSubscription
       description: |
@@ -275,6 +298,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.defaultSeparator
       description: |
@@ -285,6 +309,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.watcherEnabled
       description: |
@@ -297,6 +322,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.watcherFrequency
       description: |
@@ -307,6 +333,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.watcherTime
       description: |
@@ -319,6 +346,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.watcherShallClose
       description: |
@@ -329,6 +357,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.JavaMailProperties
       description: |
@@ -339,6 +368,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.phishingHeader
       description: |
@@ -351,6 +381,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.adminMailLoginEnabled
       description: |
@@ -363,6 +394,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.addClientIPAddress
       description: |
@@ -374,6 +406,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.clientIPAddressPattern
       description: |
@@ -390,6 +423,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.rateLimitPrimaryOnly
       description: |
@@ -401,6 +435,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.rateLimit
       description: |
@@ -412,6 +447,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.rateLimitDisabledRange
       description: |
@@ -423,6 +459,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.maxToCcBcc
       description: |
@@ -434,6 +471,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.hidePOP3StorageFolders
       description: |
@@ -445,6 +483,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.deleteDraftOnTransport
       description: |
@@ -457,6 +496,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.supportMsisdnAddresses
       description: |
@@ -467,6 +507,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.translateDefaultFolders
       description: |
@@ -485,6 +526,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.authProxyDelimiter
       description: |
@@ -499,6 +541,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.maxMailSize
       description: |
@@ -511,6 +554,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.hideDetailsForDefaultAccount
       description: |
@@ -523,6 +567,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.maxForwardCount
       description: |
@@ -534,6 +579,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.account.blacklist
       description: |
@@ -547,6 +593,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Mail Account", "Black List"]
     - key: com.openexchange.mail.account.whitelist.ports
       description: |
@@ -559,6 +606,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Mail Account", "White List"]
     - key: com.openexchange.mail.imageHost
       description: |
@@ -578,6 +626,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Host"]
     - key: com.openexchange.mail.signature.maxImageSize
       description: |
@@ -588,6 +637,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Signature"]
     - key: com.openexchange.mail.signature.maxImageLimit
       description: |
@@ -598,6 +648,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Signature"]
     - key: com.openexchange.mail.useStaticDefaultFolders
       description: |
@@ -609,6 +660,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Folder"]
     - key: com.openexchange.imap.setSpecialUseFlags
       description: |
@@ -632,6 +684,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.maxDriveAttachments
       description: |
@@ -642,6 +695,7 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","Drive"]
     - key: com.openexchange.mail.authType
       description: |
@@ -652,6 +706,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "OAuth"]
     - key: com.openexchange.mail.transport.authType
       description: |
@@ -662,6 +717,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","OAuth"]
     - key: com.openexchange.mail.flagging.mode
       description: |
@@ -676,6 +732,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.flagging.color
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.flagging.color
       description: |
@@ -685,7 +742,8 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mail.flagging.mode
-      file: mail.properties 
+      file: mail.properties
+      packageName: open-xchange-core 
       tags: ["Mail"]     
     - key: com.openexchange.mail.maliciousFolders.enabled
       description: |
@@ -703,6 +761,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.maliciousFolders.listing
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","Folder"]
     - key: com.openexchange.mail.maliciousFolders.listing
       description: |
@@ -718,6 +777,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.maliciousFolders.enabled
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","Folder"]
     - key: com.openexhange.mail.authType
       description: |
@@ -728,6 +788,7 @@ properties:
       configcascadeAware: true
       related:
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexhange.mail.transport.authType
       description: |
@@ -738,6 +799,7 @@ properties:
       configcascadeAware: true
       related:
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mailmapping.lookUpByDomain
       description: |
@@ -755,4 +817,5 @@ properties:
       configcascadeAware: false
       related:
       file: mailresolver.properties
+      packageName: open-xchange-core
       tags: ["Mail"]

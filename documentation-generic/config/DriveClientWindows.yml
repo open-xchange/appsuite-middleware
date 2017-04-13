@@ -18,6 +18,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive-client-windows.properties
+      packageName: open-xchange-drive-client-windows
       tags: ["Drive Client Windows"]
     - key: com.openexchange.drive.updater.tmpl
       description: |
@@ -28,6 +29,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive-client-windows.properties
+      packageName: open-xchange-drive-client-windows
       tags: ["Drive Client Windows"]     
     - key: com.openexchange.drive.update.branding
       description: |
@@ -41,6 +43,7 @@ properties:
       configcascadeAware: true
       related: 
       file: drive-client-windows.properties
+      packageName: open-xchange-drive-client-windows
       tags: ["Drive Client Windows"]  
     - key: com.openexchange.drive.windows.binaryRegex.exe
       description: |
@@ -51,6 +54,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive-client-windows.properties
+      packageName: open-xchange-drive-client-windows
       tags: ["Drive Client Windows"]  
     - key: com.openexchange.drive.windows.binaryRegex.msi
       description: |
@@ -61,4 +65,5 @@ properties:
       configcascadeAware: false
       related: 
       file: drive-client-windows.properties
+      packageName: open-xchange-drive-client-windows
       tags: ["Drive Client Windows"]  

@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: CHECK_RES_UID_REGEXP
       file: Resource.properties
+      packageName: open-xchange-admin
       tags: ["Resource"]
     - key: CHECK_RES_UID_REGEXP
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: CHECK_RES_UID_FOR_NOT_ALLOWED_CHARS
       file: Resource.properties
+      packageName: open-xchange-admin
       tags: ["Resource"]
     - key: AUTO_TO_LOWERCASE_UID
       description: |
@@ -29,4 +31,5 @@ properties:
       configcascadeAware: false
       related:
       file: Resource.properties
+      packageName: open-xchange-admin
       tags: ["Resource"]

@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related: 
       file: jolokia.properties
+      packageName: open-xchange-core
       tags: ["Jolokia"]
     - key: com.openexchange.jolokia.servlet.name
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: false
       related: 
       file: jolokia.properties
+      packageName: open-xchange-core
       tags: ["Jolokia"]
     - key: com.openexchange.jolokia.user
       description: |
@@ -31,6 +33,7 @@ properties:
       configcascadeAware: false
       related: 
       file: jolokia.properties
+      packageName: open-xchange-core
       tags: ["Jolokia"]
     - key: com.openexchange.jolokia.password
       description: |
@@ -41,6 +44,7 @@ properties:
       configcascadeAware: false
       related: 
       file: jolokia.properties
+      packageName: open-xchange-core
       tags: ["Jolokia"]
     - key: com.openexchange.jolokia.maxDepth
       description: |
@@ -51,6 +55,7 @@ properties:
       configcascadeAware: false
       related: 
       file: jolokia.properties
+      packageName: open-xchange-core
       tags: ["Jolokia", "Limit"]
     - key: com.openexchange.jolokia.maxObjects
       description: |
@@ -62,6 +67,7 @@ properties:
       configcascadeAware: false
       related: 
       file: jolokia.properties
+      packageName: open-xchange-core
       tags: ["Jolokia", "Limit"]
     - key: com.openexchange.jolokia.restrict.to.localhost
       description: |
@@ -75,4 +81,5 @@ properties:
       configcascadeAware: false
       related: com.openexchange.connector.networkListenerHost
       file: jolokia.properties
+      packageName: open-xchange-core
       tags: ["Jolokia"]

@@ -10,6 +10,7 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
+      packageName: open-xchange-soap-cxf
       tags: ["SOAP"]
     - key: com.openexchange.soap.cxf.hideServiceListPage
       description: |
@@ -20,6 +21,7 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
+      packageName: open-xchange-soap-cxf
       tags: ["SOAP"]
     - key: com.openexchange.soap.cxf.entityExpansionLimit
       description: |
@@ -34,6 +36,7 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
+      packageName: open-xchange-soap-cxf
       tags: ["SOAP", "Limit"]
     - key: com.openexchange.soap.cxf.disableAddressUpdates
       description: |
@@ -46,4 +49,5 @@ properties:
       configcascadeAware: false
       related: 
       file: soap-cxf.properties
+      packageName: open-xchange-soap-cxf
       tags: ["SOAP", "Limit"]

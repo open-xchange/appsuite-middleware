@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rmi.properties
+      packageName: open-xchange-core
       tags: ["RMI", "Host"]
     - key: com.openexchange.rmi.port
       description: |
@@ -19,4 +20,5 @@ properties:
       configcascadeAware: false
       related: 
       file: rmi.properties
+      packageName: open-xchange-core
       tags: ["RMI", "Port"]

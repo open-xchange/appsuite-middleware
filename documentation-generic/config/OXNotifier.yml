@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related: 
       file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
       tags: ["OXNotifier"]
 
     - key: com.openexchange.oxnotifier.productName
@@ -23,6 +24,7 @@ properties:
       configcascadeAware: true
       related: 
       file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
       tags: ["OXNotifier"]
 
     - key: com.openexchange.oxnotifier.icon
@@ -34,5 +36,6 @@ properties:
       configcascadeAware: true
       related: 
       file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
       tags: ["OXNotifier"]
       

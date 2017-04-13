@@ -11,6 +11,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: validate_contact_email
     description: |
@@ -22,6 +23,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: max_image_size
     description: |
@@ -33,6 +35,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.mailAddressAutoSearch
     description: |
@@ -45,6 +48,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    packageName: open-xchange-core
     tags: ["Contact"]   
   - key: com.openexchange.contact.singleFolderSearch
     description: |
@@ -58,6 +62,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"] 
   - key: com.openexchange.contacts.characterSearch
     description: |
@@ -68,6 +73,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"] 
   - key: com.openexchange.contacts.allFoldersForAutoComplete
     description: |
@@ -82,7 +88,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.scaleVCardImages
     description: |
@@ -106,7 +113,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.maxVCardSize
     description: |
@@ -119,6 +127,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.scaleImages
     description: |
@@ -129,6 +138,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.maxWidth
     description: |
@@ -138,7 +148,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.maxHeight
     description: |
@@ -148,7 +159,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.scaleType
     description: |
@@ -162,6 +174,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.fulltextAutocomplete
     description: |
@@ -180,6 +193,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.fulltextIndexFields
     description: |
@@ -210,7 +224,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties  
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.autocomplete.fields
     description: |
@@ -222,7 +237,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.search.fields
     description: |
@@ -256,7 +272,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties  
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"] 
   - key: com.openexchange.contactcollector.enabled
     description: |
@@ -267,7 +284,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: contactcollector.properties  
+    file: contactcollector.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contactcollector.folder.deleteDenied
     description: |
@@ -277,5 +295,6 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contactcollector.properties  
+    file: contactcollector.properties
+    packageName: open-xchange-core
     tags: ["Contact"]   

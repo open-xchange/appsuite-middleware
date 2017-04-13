@@ -14,6 +14,7 @@ properties:
       configcascadeAware: true
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Capability"]
     - key: com.openexchange.drive.shortProductName
       description: |
@@ -25,6 +26,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive"]
     - key: com.openexchange.drive.useTempFolder
       description: |
@@ -40,6 +42,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Folder"]
     - key: com.openexchange.drive.cleaner.interval
       description: |
@@ -55,6 +58,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Folder"]
     - key: com.openexchange.drive.cleaner.maxAge
       description: |
@@ -69,6 +73,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Folder", "Limit"]
     - key: com.openexchange.drive.checksum.cleaner.interval
       description: |
@@ -85,6 +90,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Database"]
     - key: com.openexchange.drive.checksum.cleaner.maxAge
       description: |
@@ -98,6 +104,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Database", "Limit"]
     - key: com.openexchange.drive.maxBandwidth
       description: |
@@ -115,6 +122,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Limit"]
     - key: com.openexchange.drive.maxBandwidthPerClient
       description: |
@@ -133,6 +141,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Limit"]
     - key: com.openexchange.drive.maxConcurrentSyncOperations
       description: |
@@ -148,6 +157,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Limit"]
     - key: com.openexchange.drive.maxDirectories
       description: |
@@ -159,6 +169,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Limit", "Folder"]
     - key: com.openexchange.drive.maxFilesPerDirectory
       description: |
@@ -170,6 +181,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Limit", "Folder"]
     - key: com.openexchange.drive.enabledServices
       description: |
@@ -181,6 +193,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive"]
     - key: com.openexchange.drive.excludedFolders
       description: |
@@ -196,6 +209,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Folder", "Black List"]
     - key: com.openexchange.drive.directLinkQuota
       description: |
@@ -218,6 +232,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Host"]
     - key: com.openexchange.drive.directLinkHelp
       description: |
@@ -241,6 +256,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Host"]
     - key: com.openexchange.drive.events.apn.ios.enabled
       description: |
@@ -254,6 +270,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn.ios.keystore
       description: |
@@ -268,6 +285,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.ios.enabled
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn.ios.password
       description: |
@@ -282,6 +300,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.ios.enabled
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple", "Credential"]
     - key: com.openexchange.drive.events.apn.ios.production
       description: |
@@ -294,6 +313,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn.ios.feedbackQueryInterval
       description: |
@@ -309,6 +329,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn.macos.enabled
       description: |
@@ -322,6 +343,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn.macos.keystore
       description: |
@@ -336,6 +358,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn.macos.password
       description: |
@@ -350,6 +373,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple", "Credential"]
     - key: com.openexchange.drive.events.apn.macos.production
       description: |
@@ -362,6 +386,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn.macos.feedbackQueryInterval
       description: |
@@ -377,6 +402,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.gcm.enabled
       description: |
@@ -389,6 +415,7 @@ properties:
       configcascadeAware: false
       related: 
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Android"]
     - key: com.openexchange.drive.events.gcm.key
       description: |
@@ -401,6 +428,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.drive.events.gcm.enabled
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push", "Android"]
     - key: com.openexchange.drive.events.blockingLongPolling.enabled
       description: |
@@ -415,6 +443,7 @@ properties:
       configcascadeAware: false
       related:
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Push"]
     - key: com.openexchange.drive.version.[client].softMinimum
       description: |
@@ -435,6 +464,7 @@ properties:
       configcascadeAware: false
       related:
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Windows", "Android", "Apple"]
     - key: com.openexchange.drive.version.[client].hardMinimum
       description: |
@@ -454,4 +484,5 @@ properties:
       configcascadeAware: false
       related:
       file: drive.properties
+      packageName: open-xchange-drive
       tags: ["Drive", "Windows", "Android", "Apple"]

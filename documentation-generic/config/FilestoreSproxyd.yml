@@ -19,6 +19,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.sproxyd.[filestoreID].hosts
@@ -33,6 +34,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore", "Host", "Port"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].path
@@ -47,6 +49,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore", "Host"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].maxConnections
@@ -60,6 +63,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].maxConnectionsPerHost
@@ -72,6 +76,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].connectionTimeout
@@ -86,6 +91,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore", "Black List", "Timeout"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].socketReadTimeout
@@ -100,6 +106,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore", "Black List", "Timeout"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].heartbeatInterval
@@ -117,4 +124,5 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
+      packageName: open-xchange-filestore-sproxyd
       tags: ["Filestore", "Black List"]

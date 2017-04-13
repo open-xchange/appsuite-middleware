@@ -19,6 +19,7 @@ properties:
       configcascadeAware: false
       related: 
       file:
+      packageName: open-xchange-core
       tags:[]
     - key: c.o.some.property2
       description: |
@@ -30,6 +31,7 @@ properties:
       configcascadeAware: true
       related: c.o.some.property
       file: somefile.properties
+      packageName: open-xchange-packageB
       tags: ["tagA","tagB"]
 
 

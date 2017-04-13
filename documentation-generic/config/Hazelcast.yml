@@ -22,6 +22,7 @@ properties:
       configcascadeAware: false
       related:
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.shutdownOnOutOfMemory
       description: |
@@ -32,6 +33,7 @@ properties:
       configcascadeAware: false
       related:
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.group.name
       description: |
@@ -42,6 +44,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.network.join
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.group.password
       description: |
@@ -52,6 +55,7 @@ properties:
       configcascadeAware: false
       related:
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Credential"]
     - key: com.openexchange.hazelcast.network.join
       description: |
@@ -62,6 +66,7 @@ properties:
       configcascadeAware: false
       related:
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.network.join.static.nodes
       description: |
@@ -72,6 +77,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.network.join
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Host"]
     - key: com.openexchange.hazelcast.network.join.multicast.group
       description: |
@@ -82,6 +88,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.network.join
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.network.join.multicast.port
       description: |
@@ -92,6 +99,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.network.join
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.merge.firstRunDelay
       description: |
@@ -102,6 +110,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.merge.runDelay
       description: |
@@ -112,6 +121,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.network.interfaces
       description: |
@@ -122,6 +132,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.network.port
       description: |
@@ -132,6 +143,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.network.portAutoIncrement
       description: |
@@ -142,6 +154,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.network.outboundPortDefinitions
       description: |
@@ -152,6 +165,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Port"]
     - key: com.openexchange.hazelcast.network.enableIPv6Support
       description: |
@@ -162,6 +176,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.socket.bindAny
       description: |
@@ -172,6 +187,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption
       description: |
@@ -182,6 +198,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Encryption"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.algorithm
       description: |
@@ -192,6 +209,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Encryption"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.salt
       description: |
@@ -202,6 +220,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Encryption"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.password
       description: |
@@ -212,6 +231,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Encryption"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.iterationCount
       description: |
@@ -233,6 +253,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Logging"]
     - key: com.openexchange.hazelcast.maxOperationTimeout
       description: |
@@ -243,6 +264,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Limit", "Timeout"]
     - key: com.openexchange.hazelcast.jmx
       description: |
@@ -253,6 +275,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Monitoring"]
     - key: com.openexchange.hazelcast.jmxDetailed
       description: |
@@ -263,6 +286,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.jmx 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Monitoring"]
     - key: com.openexchange.hazelcast.jmxDetailed
       description: |
@@ -273,6 +297,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.hazelcast.jmx 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Monitoring"]
     - key: com.openexchange.hazelcast.memcache.enabled
       description: |
@@ -283,6 +308,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.rest.enabled
       description: |
@@ -293,6 +319,7 @@ properties:
       configcascadeAware: false
       related: 
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast", "REST"]
     - key: com.openexchange.hazelcast.liteMember
       description: |
@@ -304,6 +331,7 @@ properties:
       configcascadeAware: false
       related:
       file: hazelcast.properties
+      packageName: open-xchange-core
       tags: ["Hazelcast"]
     - key: com.openexchange.sessionstorage.hazelcast.enabled
       description: |
@@ -314,4 +342,5 @@ properties:
       configcascadeAware: false
       related:
       file: sessionstorage-hazelcast.properties
+      packageName: open-xchange-sessionstorage-hazelcast
       tags: ["Hazelcast", "Session"]

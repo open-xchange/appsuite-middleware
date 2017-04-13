@@ -10,6 +10,7 @@ properties:
       configcascadeAware: true
       related: 
       file: autoconfig.properties
+      packageName: open-xchange-core
       tags: ["Autoconfig", "Mail"]
     - key: com.openexchange.mail.autoconfig.ispdb
       description: |
@@ -22,6 +23,7 @@ properties:
       configcascadeAware: true
       related:
       file: autoconfig.properties
+      packageName: open-xchange-core
       tags: ["Autoconfig", "Mail", "Host"]
     - key: com.openexchange.mail.autoconfig.http.proxy
       description: |
@@ -35,6 +37,7 @@ properties:
       configcascadeAware: true
       related: 
       file: autoconfig.properties
+      packageName: open-xchange-core
       tags: ["Autoconfig", "Mail", "Host", "Port"]
     - key: com.openexchange.mail.autoconfig.http.proxy.login
       description: |
@@ -46,6 +49,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.autoconfig.http.proxy.password, com.openexchange.mail.autoconfig.http.proxy
       file: autoconfig.properties
+      packageName: open-xchange-core
       tags: ["Autoconfig", "Mail", "Credential"]
     - key: com.openexchange.mail.autoconfig.http.proxy.password
       description: |
@@ -57,6 +61,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.autoconfig.http.proxy.login, com.openexchange.mail.autoconfig.http.proxy
       file: autoconfig.properties
+      packageName: open-xchange-core
       tags: ["Autoconfig", "Mail", "Credential"]
     - key: com.openexchange.mail.autoconfig.allowGuess
       description: |
@@ -67,4 +72,5 @@ properties:
       configcascadeAware: true
       related:
       file: autoconfig.properties
+      packageName: open-xchange-core
       tags: ["Autoconfig", "Mail"]

@@ -13,6 +13,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"]
   - key: com.openexchange.ajax.login.http-auth.client
     description: |
@@ -27,6 +28,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.http-auth.version
     description: |
@@ -38,6 +40,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.insecure
     description: |
@@ -52,6 +55,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.redirect.changeIPAllowed
     description: |
@@ -66,6 +70,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.randomToken
     description: |
@@ -79,6 +84,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.checkPunyCodeLoginString
     description: |
@@ -90,6 +96,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.formatstring.login
     description: |
@@ -113,6 +120,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.formatstring.logout
     description: |
@@ -130,6 +138,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.maxRateTimeWindow
     description: |
@@ -142,6 +151,7 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.maxRate
     description: |
@@ -163,4 +173,5 @@ properties:
     configcascadeAware: false
     related: 
     file: login.properties
+    packageName: open-xchange-core
     tags: ["Login"] 

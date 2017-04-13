@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS"]
     - key: com.openexchange.rss
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: true
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS"]
     - key: com.openexchange.messaging.rss
       description: |
@@ -29,6 +31,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS"]
     - key: com.openexchange.messaging.rss.feed.size
       description: |
@@ -39,6 +42,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS", "Limit"]
     - key: com.openexchange.messaging.rss.feed.blacklist
       description: |
@@ -50,6 +54,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS", "Black List"]
     - key: com.openexchange.messaging.rss.feed.whitelist.ports
       description: |
@@ -62,4 +67,5 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS", "White List"]      

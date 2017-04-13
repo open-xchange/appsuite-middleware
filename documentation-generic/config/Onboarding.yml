@@ -11,6 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding"]
     - key: com.openexchange.client.onboarding.apple.displayName
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.apple.description
       description: |
@@ -31,6 +33,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.android.displayName
       description: |
@@ -41,6 +44,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.android.description
       description: |
@@ -51,6 +55,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.windows.displayName
       description: |
@@ -61,6 +66,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Windows"]
     - key: com.openexchange.client.onboarding.windows.description
       description: |
@@ -71,6 +77,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Windows"]
     - key: com.openexchange.client.onboarding.apple.mac.scenarios
       description: |
@@ -81,6 +88,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.apple.ipad.scenarios
       description: |
@@ -91,6 +99,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.apple.iphone.scenarios
       description: |
@@ -101,6 +110,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.android.tablet.scenarios
       description: |
@@ -111,6 +121,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.android.phone.scenarios
       description: |
@@ -121,6 +132,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.windows.desktop.scenarios
       description: |
@@ -131,6 +143,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Windows"]
     - key: com.openexchange.client.onboarding.plist.signature.enabled
       description: |
@@ -141,6 +154,7 @@ properties:
       configcascadeAware: false
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList"]
     - key: com.openexchange.client.onboarding.plist.pkcs12store.filename
       description: |
@@ -151,6 +165,7 @@ properties:
       configcascadeAware: false
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList"]
     - key: com.openexchange.client.onboarding.plist.pkcs12store.password
       description: |
@@ -161,6 +176,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList", "Credential"]
     - key: com.openexchange.client.onboarding.plist.signkey.alias
       description: |
@@ -171,6 +187,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList"]
     - key: com.openexchange.client.onboarding.sms.ratelimit
       description: |
@@ -182,6 +199,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Limit", "SMS"]
     - key: com.openexchange.client.onboarding.sms.defaultCountry
       description: |
@@ -193,6 +211,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "SMS"]
     - key: com.openexchange.client.onboarding.enabledScenarios
       description: |
@@ -203,6 +222,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding"]
     - key: com.openexchange.client.onboarding.caldav.url
       description: |
@@ -220,6 +240,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-caldav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CalDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.caldav.login.customsource
       description: |
@@ -231,6 +252,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-caldav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CalDAV"]
     - key: com.openexchange.client.onboarding.carddav.url
       description: |
@@ -248,6 +270,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-carddav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CardDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.carddav.login.customsource
       description: |
@@ -259,6 +282,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-carddav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CardDAV"]
     - key: com.openexchange.client.onboarding.driveapp.store.google.playstore
       description: |
@@ -269,6 +293,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-driveapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Drive", "Android"]
     - key: com.openexchange.client.onboarding.driveapp.store.apple.appstore
       description: |
@@ -279,6 +304,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-driveapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Drive", "Apple"]
     - key: com.openexchange.client.onboarding.driveapp.store.apple.macappstore
       description: |
@@ -289,6 +315,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-driveapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Drive", "Apple"]
     - key: com.openexchange.client.onboarding.eas.url
       description: |
@@ -305,6 +332,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-eas.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "EAS", "Host", "Port"]
     - key: com.openexchange.client.onboarding.eas.login.customsource
       description: |
@@ -316,6 +344,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-eas.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "EAS"]
     - key: com.openexchange.client.onboarding.emclient.url
       description: |
@@ -326,6 +355,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-emclient.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "eM-Client"]
     - key: com.openexchange.client.onboarding.mail.imap.host
       description: |
@@ -337,6 +367,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Host"]
     - key: com.openexchange.client.onboarding.mail.imap.port
       description: |
@@ -348,6 +379,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Port"]
     - key: com.openexchange.client.onboarding.mail.imap.secure
       description: |
@@ -361,6 +393,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Security"]
     - key: com.openexchange.client.onboarding.mail.smtp.host
       description: |
@@ -372,6 +405,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Host"]
     - key: com.openexchange.client.onboarding.mail.smtp.port
       description: |
@@ -383,6 +417,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Port"]
     - key: com.openexchange.client.onboarding.mail.smtp.secure
       description: |
@@ -396,6 +431,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Security"]
     - key: com.openexchange.client.onboarding.mailapp.store.google.playstore
       description: |
@@ -406,6 +442,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mailapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Android"]
     - key: com.openexchange.client.onboarding.mailapp.store.apple.appstore
       description: |
@@ -416,6 +453,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mailapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Apple"]
     - key: com.openexchange.client.onboarding.syncapp.store.google.playstore
       description: |
@@ -426,4 +464,5 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-syncapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Sync App", "Android"]

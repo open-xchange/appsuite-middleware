@@ -9,4 +9,5 @@ properties:
       configcascadeAware: true
       related: 
       file: messaging.properties
+      packageName: open-xchange-core
       tags: ["Messaging", "Capability"]

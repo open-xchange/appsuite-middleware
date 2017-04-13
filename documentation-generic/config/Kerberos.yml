@@ -12,6 +12,7 @@ properties:
       configcascadeAware: false
       related: 
       file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]
     - key: com.openexchange.kerberos.userModuleName
       description: |
@@ -23,6 +24,7 @@ properties:
       configcascadeAware: false
       related: 
       file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]
     - key: com.openexchange.kerberos.proxyDelimiter
       description: |
@@ -36,6 +38,7 @@ properties:
       configcascadeAware: false
       related: 
       file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]
     - key: com.openexchange.kerberos.proxyUser
       description: |
@@ -46,6 +49,7 @@ properties:
       configcascadeAware: false
       related: 
       file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]
     - key: java.security.auth.login.config
       description: |
@@ -56,6 +60,7 @@ properties:
       configcascadeAware: false
       related: 
       file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]
     - key: sun.security.krb5.debug
       description: |
@@ -66,6 +71,7 @@ properties:
       configcascadeAware: false
       related: 
       file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication", "Logging"]
     - key: java.security.krb5.conf
       description: |
@@ -76,4 +82,5 @@ properties:
       configcascadeAware: false
       related: 
       file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]

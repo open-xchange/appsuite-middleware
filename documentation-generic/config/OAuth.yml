@@ -20,6 +20,7 @@ properties:
       configcascadeAware: true
       related: 
       file: oauth.properties
+      packageName: open-xchange-oauth
       tags: ["OAuth"]
     - key: com.openexchange.oauth.[serviceId]
       description: |
@@ -40,6 +41,7 @@ properties:
       configcascadeAware: true
       related: 
       file: 
+      packageName: open-xchange-oauth
       tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
     - key: com.openexchange.oauth.[serviceId].apiKey
       description: |
@@ -52,6 +54,7 @@ properties:
       configcascadeAware: true
       related:
       file: 
+      packageName: open-xchange-oauth
       tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].apiSecret
       description: |
@@ -64,6 +67,7 @@ properties:
       configcascadeAware: true
       related: 
       file: 
+      packageName: open-xchange-oauth
       tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].redirectUrl
       description: |
@@ -77,6 +81,7 @@ properties:
       configcascadeAware: true
       related:
       file: 
+      packageName: open-xchange-oauth
       tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MS Live Connect", "Yahoo"]
     - key: com.openexchange.oauth.[serviceId].productName
       description: |
@@ -89,6 +94,7 @@ properties:
       configcascadeAware: true
       related:
       file: 
+      packageName: open-xchange-oauth
       tags: ["OAuth", "Dropbox", "Google", "Yahoo"]
     - key: com.openexchange.oauth.xing.consumerKey
       description: |
@@ -98,7 +104,8 @@ properties:
       reloadable: true
       configcascadeAware: true
       related:
-      file: 
+      file: xingoauth.properties
+      packageName: open-xchange-oauth
       tags: ["OAuth", "Xing", "Credential"]
     - key: com.openexchange.oauth.xing.consumerSecret
       description: |
@@ -108,5 +115,6 @@ properties:
       reloadable: true
       configcascadeAware: true
       related:
-      file: 
+      file: xingoauth.properties
+      packageName: open-xchange-oauth
       tags: ["OAuth", "Xing", "Credential"]

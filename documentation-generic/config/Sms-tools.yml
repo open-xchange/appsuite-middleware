@@ -9,6 +9,7 @@ properties:
     configcascadeAware: true
     related: 
     file: sms-tools.properties
+    packageName: open-xchange-core
     tags: ["Sms-tools"] 
   - key: com.openexchange.sms.userlimit
     description: |
@@ -19,6 +20,7 @@ properties:
     configcascadeAware: true
     related: 
     file: sms-tools.properties
+    packageName: open-xchange-core
     tags: ["Sms-tools"] 
   - key: com.openexchange.sms.userlimit.refreshInterval
     description: |
@@ -31,4 +33,5 @@ properties:
     configcascadeAware: true
     related: 
     file: sms-tools.properties
+    packageName: open-xchange-core
     tags: ["Sms-tools"] 

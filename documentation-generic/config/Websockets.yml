@@ -10,6 +10,7 @@ properties:
       configcascadeAware: true
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets"]
     - key: com.openexchange.websockets.grizzly.remote.delayDuration
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: false
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets"]
     - key: com.openexchange.websockets.grizzly.remote.maxDelayDuration
       description: |
@@ -34,6 +36,7 @@ properties:
       configcascadeAware: false
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets","Limit"]
     - key: com.openexchange.websockets.grizzly.remote.timerFrequency
       description: |
@@ -45,4 +48,5 @@ properties:
       configcascadeAware: false
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets"]

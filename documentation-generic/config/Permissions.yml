@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Capability"]
 
     - key: com.openexchange.capability.boring
@@ -22,6 +23,7 @@ properties:
       configcascadeAware: false
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Capability"]
 
     - key: com.openexchange.capability.alone
@@ -34,6 +36,7 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Capability"]
 
     - key: com.openexchange.capability.mobile_mail_app
@@ -45,6 +48,7 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission"]
 
     - key: com.openexchange.capability.share_links
@@ -56,6 +60,7 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Share", "Capability"]
 
     - key: com.openexchange.capability.invite_guests
@@ -67,6 +72,7 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Share", "Capability"]
 
     - key: com.openexchange.capability.archive_emails
@@ -79,4 +85,5 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Mail", "Capability"]

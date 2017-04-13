@@ -16,6 +16,7 @@ properties:
       configcascadeAware: false
       related: MAX_PRE_FETCH
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar", "Cache"]
     - key: MAX_PRE_FETCH
       description: |
@@ -33,6 +34,7 @@ properties:
       configcascadeAware: false
       related: CACHED_ITERATOR_FAST_FETCH
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Limit", "Cache"]
     - key: CHECK_AND_REMOVE_PAST_REMINDERS
       description: |
@@ -45,6 +47,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Mail", "Event"]
     - key: CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS
       description: |
@@ -58,6 +61,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Mail", "Event"]
     - key: MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS
       description: |
@@ -73,6 +77,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.seriesconflictlimit
       description: |
@@ -87,6 +92,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Limit", "Appointment"]
     - key: com.openexchange.calendar.undefinedstatusconflict
       description: |
@@ -99,4 +105,5 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar"]

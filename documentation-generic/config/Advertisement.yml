@@ -15,6 +15,7 @@ properties:
     configcascadeAware: false
     related: 
     file: advertisement.properties
+    packageName: open-xchange-advertisement
     tags: ["Reseller"]
   - key: com.openexchange.advertisement.[reseller].taxonomy.types
     description: |
@@ -26,4 +27,5 @@ properties:
     configcascadeAware: false
     related: 
     file: advertisement.properties
+    packageName: open-xchange-advertisement
     tags: ["Reseller"]

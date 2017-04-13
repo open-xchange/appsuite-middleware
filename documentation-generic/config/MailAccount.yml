@@ -9,6 +9,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mailaccount.failedAuth.span
       file: mailaccount.properties
+      packageName: open-xchange-core
       tags: ["Mail Account","Limit"]
     - key: com.openexchange.mailaccount.failedAuth.span
       description: |
@@ -20,4 +21,5 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mailaccount.failedAuth.limit
       file: mailaccount.properties
+      packageName: open-xchange-core
       tags: ["Mail Account"]

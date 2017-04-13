@@ -9,4 +9,5 @@ properties:
       configcascadeAware: false
       related: 
       file: reseller.properties
+      packageName: open-xchange-admin-reseller
       tags: ["Reseller"]

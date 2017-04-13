@@ -19,6 +19,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].hosts
@@ -32,6 +33,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore", "Host"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].path
@@ -44,6 +46,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].userName
@@ -56,6 +59,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].tenantName
@@ -68,6 +72,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].authType
@@ -81,6 +86,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].authValue
@@ -94,6 +100,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].identityUrl
@@ -107,6 +114,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].maxConnections
@@ -120,6 +128,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].maxConnectionsPerHost
@@ -132,6 +141,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].connectionTimeout
@@ -146,6 +156,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore", "Black List", "Timeout"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].socketReadTimeout
@@ -160,6 +171,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore", "Black List", "Timeout"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].heartbeatInterval
@@ -177,4 +189,5 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
       tags: ["Filestore", "Black List"]

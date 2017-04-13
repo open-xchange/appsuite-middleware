@@ -11,6 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: snippets.properties
+      packageName: open-xchange-core
       tags: ["Snippet", "Attachment"]
     - key: com.openexchange.snippet.quota.limit
       description: |
@@ -22,4 +23,5 @@ properties:
       configcascadeAware: true
       related: 
       file: snippets.properties
+      packageName: open-xchange-core
       tags: ["Snippet", "Limit"]

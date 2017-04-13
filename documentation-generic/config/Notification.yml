@@ -37,6 +37,7 @@ properties:
       configcascadeAware: false
       related: 
       file: notification.properties
+      packageName: open-xchange-core
       tags: ["Notification", "Task", "Appointment", "Mail"]
     - key: object_link
       description: |
@@ -51,6 +52,7 @@ properties:
       configcascadeAware: false
       related: 
       file: notification.properties
+      packageName: open-xchange-core
       tags: ["Notification", "Task", "Appointment", "Host"]
     - key: imipForInternalUsers
       description: |
@@ -61,6 +63,7 @@ properties:
       configcascadeAware: false
       related: 
       file: notification.properties
+      packageName: open-xchange-core
       tags: ["Notification", "Task", "Appointment", "Mail"]
     - key: com.openexchange.notification.fromSource
       description: |
@@ -72,6 +75,7 @@ properties:
       configcascadeAware: false
       related: 
       file: notification.properties
+      packageName: open-xchange-core
       tags: ["Notification", "Task", "Appointment", "Mail"]
     - key: com.openexchange.calendar.notify.poolenabled
       description: |
@@ -84,4 +88,5 @@ properties:
       configcascadeAware: false
       related: 
       file: notification.properties
+      packageName: open-xchange-core
       tags: ["Notification", "Task", "Appointment", "Mail"]

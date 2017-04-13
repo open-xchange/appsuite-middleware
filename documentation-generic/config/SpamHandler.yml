@@ -11,6 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: spamhandler.properties
+      packageName: open-xchange-core
       tags: ["Spam Handler", "Mail"]
     - key: com.openexchange.spamhandler.enabled
       description: |
@@ -23,4 +24,5 @@ properties:
       configcascadeAware: true
       related: com.openexchange.spamhandler.name
       file: spamhandler.properties
+      packageName: open-xchange-core
       tags: ["Spam Handler","Mail"]

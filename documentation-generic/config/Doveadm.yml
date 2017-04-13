@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST"]
     - key: com.openexchange.dovecot.doveadm.endpoints
       description: |
@@ -37,6 +38,7 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST", "Host"]
     - key: com.openexchange.dovecot.doveadm.apiSecret
       description: |
@@ -47,6 +49,7 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST", "Credential"]
     - key: com.openexchange.dovecot.doveadm.proxyDelimiter
       description: |
@@ -58,4 +61,5 @@ properties:
       configcascadeAware: true
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST", "Credential"]

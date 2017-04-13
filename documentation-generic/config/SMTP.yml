@@ -21,6 +21,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP", "Host"]
     - key: com.openexchange.smtp[.primary].smtpAuthEnc
       description: |
@@ -32,6 +33,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.setSMTPEnvelopeFrom
       description: |
@@ -45,6 +47,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp[.primary].smtpTimeout
       description: |
@@ -57,6 +60,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp[.primary].smtpConnectionTimeout
       description: |
@@ -69,6 +73,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp.logTransport
       description: |
@@ -81,6 +86,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp[.primary].ssl.protocols
       description: |
@@ -92,6 +98,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp[.primary].ssl.ciphersuites
       description: |
@@ -106,6 +113,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.sendPartial
       description: |
@@ -117,4 +125,5 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","SMTP"]

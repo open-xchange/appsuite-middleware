@@ -11,6 +11,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.filter.server
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.credentialSource
       description: |
@@ -26,6 +27,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.server
       description: |
@@ -36,6 +38,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "Host", "SIEVE"]
     - key: com.openexchange.mail.filter.port
       description: |
@@ -51,6 +54,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "Port", "SIEVE"]
     - key: com.openexchange.mail.filter.scriptName
       description: |
@@ -63,6 +67,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.authenticationEncoding
       description: |
@@ -73,6 +78,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.nonRFCCompliantTLSRegex
       description: |
@@ -83,6 +89,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.tls
       description: |
@@ -93,6 +100,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Security"]
     - key: com.openexchange.mail.filter.vacationDomains
       description: |
@@ -105,6 +113,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.connectionTimeout
       description: |
@@ -115,6 +124,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Timeout"]
     - key: com.openexchange.mail.filter.authTimeout
       description: |
@@ -125,6 +135,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Timeout"]
     - key: com.openexchange.mail.filter.passwordSource
       description: |
@@ -138,6 +149,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.filter.masterPassword
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.masterPassword
       description: |
@@ -149,6 +161,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.filter.passwordSource
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Credential"]
     - key: com.openexchange.mail.filter.useUTF7FolderEncoding
       description: |
@@ -164,6 +177,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.punycode
       description: |
@@ -174,6 +188,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.useSIEVEResponseCodes
       description: |
@@ -185,6 +200,7 @@ properties:
       configcascadeAware: true
       related:
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.redirectWhitelist
       description: |
@@ -195,6 +211,7 @@ properties:
       configcascadeAware: true
       related:
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "White List"]
     - key: com.openexchange.mail.filter.preferredSaslMech
       description: |
@@ -208,4 +225,5 @@ properties:
       configcascadeAware: true
       related:
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]

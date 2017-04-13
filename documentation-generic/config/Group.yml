@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: Group.properties
+      packageName: open-xchange-admin
       tags: ["Group"]
     - key: CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: CHECK_GROUP_UID_REGEXP
       file: Group.properties
+      packageName: open-xchange-admin
       tags: ["Group"]
     - key: CHECK_GROUP_UID_REGEXP
       description: |
@@ -29,6 +31,7 @@ properties:
       configcascadeAware: false
       related: CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS
       file: Group.properties
+      packageName: open-xchange-admin
       tags: ["Group"]
     - key: AUTO_TO_LOWERCASE_UID
       description: |
@@ -39,4 +42,5 @@ properties:
       configcascadeAware: false
       related: CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS
       file: Group.properties
+      packageName: open-xchange-admin
       tags: ["Group"]

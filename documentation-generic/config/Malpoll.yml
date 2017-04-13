@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: malpoll.properties
+      packageName: open-xchange-push-malpoll
       tags: ["MAL Poll", "Mail", "Push"]
     - key: com.openexchange.push.malpoll.global
       description: |
@@ -20,6 +21,7 @@ properties:
       configcascadeAware: false
       related: 
       file: malpoll.properties
+      packageName: open-xchange-push-malpoll
       tags: ["MAL Poll", "Mail", "Push"]
     - key: com.openexchange.push.malpoll.concurrentglobal
       description: |
@@ -33,6 +35,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.push.malpoll.global
       file: malpoll.properties
+      packageName: open-xchange-push-malpoll
       tags: ["MAL Poll", "Mail", "Push", "Thread"]
     - key: com.openexchange.push.malpoll.folder
       description: |
@@ -43,4 +46,5 @@ properties:
       configcascadeAware: false
       related:
       file: malpoll.properties
+      packageName: open-xchange-push-malpoll
       tags: ["MAL Poll", "Mail", "Push", "Folder"]

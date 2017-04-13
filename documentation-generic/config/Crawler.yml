@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related: 
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.web.de
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.gmx.de
       description: |
@@ -31,6 +33,7 @@ properties:
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.msn.de
       description: |
@@ -41,6 +44,7 @@ properties:
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncontacts
       description: |
@@ -51,6 +55,7 @@ properties:
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncalendar
       description: |
@@ -61,6 +66,7 @@ properties:
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suntasks
       description: |
@@ -71,6 +77,7 @@ properties:
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.web.de.autorunInterval
       description: |
@@ -82,6 +89,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.gmx.de.autorunInterval
       description: |
@@ -93,6 +101,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.msn.de.autorunInterval
       description: |
@@ -104,6 +113,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncontacts.autorunInterval
       description: |
@@ -115,6 +125,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncalendar.autorunInterval
       description: |
@@ -126,6 +137,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suntasks.autorunInterval
       description: |
@@ -137,4 +149,5 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]      

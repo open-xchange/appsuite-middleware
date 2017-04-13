@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
+      packageName: open-xchange-core
       tags: ["Management", "RMI", "Port"]
     - key: JMXServerPort
       description: |
@@ -20,6 +21,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
+      packageName: open-xchange-core
       tags: ["Management", "RMI", "Port"]
     - key: JMXBindAddress
       description: |
@@ -31,6 +33,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
+      packageName: open-xchange-core
       tags: ["Management", "Monitoring", "Host"]
     - key: JMXLogin
       description: |
@@ -42,6 +45,7 @@ properties:
       configcascadeAware: false
       related: 
       file: management.properties
+      packageName: open-xchange-core
       tags: ["Management", "Authentication", "Credential"]
     - key: JMXPassword
       description: |
@@ -73,4 +77,5 @@ properties:
       configcascadeAware: false
       related: JMXLogin
       file: management.properties
+      packageName: open-xchange-core
       tags: ["Management", "Authentication", "Credential"]

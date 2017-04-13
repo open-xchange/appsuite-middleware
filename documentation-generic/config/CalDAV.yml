@@ -9,6 +9,7 @@ properties:
       configcascadeAware: true
       related:
       file: caldav.properties
+      packageName: open-xchange-dav
       tags: ["CalDAV"]
     - key: com.openexchange.caldav.tree
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: true
       related:
       file: caldav.properties
+      packageName: open-xchange-dav
       tags: ["CalDAV", "Folder"]
     - key: com.openexchange.caldav.interval.start
       description: |
@@ -34,6 +36,7 @@ properties:
       configcascadeAware: false
       related:
       file: caldav.properties
+      packageName: open-xchange-dav
       tags: ["CalDAV", "Limit", "Appointment"]
     - key: com.openexchange.caldav.interval.end
       description: |
@@ -49,6 +52,7 @@ properties:
       configcascadeAware: false
       related:
       file: caldav.properties
+      packageName: open-xchange-dav
       tags: ["CalDAV", "Limit", "Appointment"]
     - key: com.openexchange.caldav.url
       description: |
@@ -64,4 +68,5 @@ properties:
       configcascadeAware: false
       related:
       file: caldav.properties
+      packageName: open-xchange-dav
       tags: ["CalDAV", "Folder", "Host"]

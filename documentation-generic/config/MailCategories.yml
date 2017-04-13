@@ -21,6 +21,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail", "Capability"]
     - key: com.openexchange.mail.categories.enabled
       description: |
@@ -33,6 +34,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.forced
       description: |
@@ -44,6 +46,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.general.name.fallback
       description: |
@@ -54,6 +57,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.general.name.[locale]
       description: |
@@ -67,6 +71,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.identifiers
       description: |
@@ -80,6 +85,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.user.categories.identifiers
       description: |
@@ -93,6 +99,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].flag
       description: |
@@ -106,6 +113,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].force
       description: |
@@ -118,6 +126,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].active
       description: |
@@ -131,6 +140,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].name.fallback
       description: |
@@ -143,6 +153,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].name.[locale]
       description: |
@@ -157,6 +168,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].description
       description: |
@@ -167,6 +179,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].description.[locale]
       description: |
@@ -181,6 +194,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.apply.ox.rules
       description: |
@@ -194,6 +208,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.categories.rules.[category]
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.rules.[category]
       description: |
@@ -206,4 +221,5 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.categories.apply.ox.rules
       file: mail-categories.properties
+      packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]

@@ -18,6 +18,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
+      packageName: open-xchange-smtp
       tags: ["No-Reply", "Mail"]
     - key: com.openexchange.noreply.login
       description: |
@@ -28,6 +29,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
+      packageName: open-xchange-smtp
       tags: ["No-Reply", "Mail", "Credential"]
     - key: com.openexchange.noreply.password
       description: |
@@ -38,6 +40,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
+      packageName: open-xchange-smtp
       tags: ["No-Reply", "Mail", "Credential"]
     - key: com.openexchange.noreply.server
       description: |
@@ -49,6 +52,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
+      packageName: open-xchange-smtp
       tags: ["No-Reply", "Mail"]
     - key: com.openexchange.noreply.port
       description: |
@@ -59,6 +63,7 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
+      packageName: open-xchange-smtp
       tags: ["No-Reply", "Mail", "Port"]
     - key: com.openexchange.noreply.secureMode
       description: |
@@ -70,4 +75,5 @@ properties:
       configcascadeAware: true
       related: 
       file: noreply.properties
+      packageName: open-xchange-smtp
       tags: ["No-Reply", "Mail"]

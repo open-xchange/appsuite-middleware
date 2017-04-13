@@ -11,4 +11,5 @@ properties:
       configcascadeAware: false
       related: 
       file: tokens.properties
+      packageName: open-xchange-core
       tags: ["Jump", "Host"]
