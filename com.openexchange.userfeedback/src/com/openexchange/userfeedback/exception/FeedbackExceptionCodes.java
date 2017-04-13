@@ -89,7 +89,7 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
     GLOBAL_DB_NOT_CONFIGURED("No global database configured.", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 5),
 
     /**
-     * Provided value '%1$s' for parameter '%2$s' is invalid.
+     * Provided value(s) for parameter(s) '%1$s' is/are invalid.
      */
     INVALID_PARAMETER_VALUE("Provided value(s) for parameter(s) '%1$s' is/are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 6),
 
@@ -102,6 +102,11 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
      * Provided addresses are invalid.
      */
     INVALID_EMAIL_ADDRESSES("Provided addresses are invalid.", OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 8),
+
+    /**
+     * Provided value(s) for parameter(s) '%1$s' is/are too big.
+     */
+    INVALID_PARAMETER_VALUE_SIZE("Provided value(s) for parameter(s) '%1$s' is/are too big.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 9),
 
     ;
 

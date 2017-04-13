@@ -217,8 +217,9 @@ public interface SAMLBackend {
      * @param response The SAML response
      * @param relayState The relayState set by the IDP
      * @return The AuthnRequestInfo
+     * @throws If parsing the relay state fails
      */
-    AuthnRequestInfo parseRelayState(Response response, String relayState);
+    AuthnRequestInfo parseRelayState(Response response, String relayState) throws OXException;
 
     /**
      * Method to retrieve the SAMLConfig

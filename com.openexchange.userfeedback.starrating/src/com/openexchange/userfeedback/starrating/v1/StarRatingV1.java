@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -107,6 +108,8 @@ public class StarRatingV1 extends AbstractFeedbackType {
     protected void validate(Object feedback) throws OXException {
         JSONObject jsonFeedback = getFeedback(feedback);
 
+        checkSizeRestrictions(jsonFeedback);
+
         if (!jsonFeedback.has("score")) {
             throw StarRatingExceptionCodes.PARAMETER_MISSING.create("score");
         }
@@ -126,6 +129,78 @@ public class StarRatingV1 extends AbstractFeedbackType {
         } catch (NumberFormatException e) {
             LOG.error("Unable to parse 'score' value from feedback.", e);
             throw StarRatingExceptionCodes.BAD_PARAMETER.create("score");
+        }
+    }
+
+    /**
+     * Limits the data column to have at most 21000 UTF-8 characters as the blob column is able to take 65535 bytes and an UTF-8 character can be up to 3 bytes.
+     * 
+     * @param jsonFeedback
+     * @throws OXException
+     */
+    protected void checkSizeRestrictions(JSONObject jsonFeedback) throws OXException {
+        List<String> warnings = new ArrayList<String>();
+
+        try {
+            {
+                String app = jsonFeedback.getString(StarRatingV1Fields.app.name());
+                check(StarRatingV1Fields.app.name(), app, 50, warnings);
+            }
+            {
+                String browser = jsonFeedback.getString(StarRatingV1Fields.browser.name());
+                check(StarRatingV1Fields.browser.name(), browser, 50, warnings);
+            }
+            {
+                String browserVersion = jsonFeedback.getString(StarRatingV1Fields.browser_version.name());
+                check(StarRatingV1Fields.browser_version.name(), browserVersion, 10, warnings);
+            }
+            {
+                String clientVersion = jsonFeedback.getString(StarRatingV1Fields.client_version.name());
+                check(StarRatingV1Fields.client_version.name(), clientVersion, 20, warnings);
+            }
+            {
+                String comment = jsonFeedback.getString(StarRatingV1Fields.comment.name());
+                check(StarRatingV1Fields.comment.name(), comment, 20000, warnings);
+            }
+            {
+                String entryPoint = jsonFeedback.getString(StarRatingV1Fields.entry_point.name());
+                check(StarRatingV1Fields.entry_point.name(), entryPoint, 50, warnings);
+            }
+            {
+                String language = jsonFeedback.getString(StarRatingV1Fields.language.name());
+                check(StarRatingV1Fields.language.name(), language, 20, warnings);
+            }
+            {
+                String operatingSystem = jsonFeedback.getString(StarRatingV1Fields.operating_system.name());
+                check(StarRatingV1Fields.operating_system.name(), operatingSystem, 50, warnings);
+            }
+            {
+                String screenResolution = jsonFeedback.getString(StarRatingV1Fields.screen_resolution.name());
+                check(StarRatingV1Fields.screen_resolution.name(), screenResolution, 20, warnings);
+            }
+            {
+                String userAgent = jsonFeedback.getString(StarRatingV1Fields.user_agent.name());
+                check(StarRatingV1Fields.user_agent.name(), userAgent, 200, warnings);
+            }
+            {
+                String score = jsonFeedback.getString(StarRatingV1Fields.score.name());
+                check(StarRatingV1Fields.score.name(), score, 5, warnings);
+            }
+        } catch (JSONException e) {
+            LOG.error("Unable to check size restrictions for given feedback.", e);
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+        }
+        if (!warnings.isEmpty()) {
+            throw FeedbackExceptionCodes.INVALID_PARAMETER_VALUE_SIZE.create(Strings.concat(",", warnings));
+        }
+    }
+
+    private void check(String key, String value, int allowed, List<String> warnings) {
+        if (Strings.isEmpty(value)) {
+            return;
+        }
+        if (value.length() > allowed) {
+            warnings.add(key);
         }
     }
 
@@ -326,7 +401,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
         while (jsonKeys.hasNext()) {
             String key = (String) jsonKeys.next();
             if (!expectedKeys.contains(key)) {
-                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
+                LOG.info("An unknown key '{}' has been provided. It will be removed before persisting.", key);
                 processed.remove(key);
                 continue;
             }
