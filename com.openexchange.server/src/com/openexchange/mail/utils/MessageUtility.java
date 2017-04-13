@@ -91,6 +91,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.DataContentHandlerDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
+import com.openexchange.tools.stream.CountingInputStream;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
@@ -614,7 +615,19 @@ public final class MessageUtility {
                 for (int read; (read = input.read(buf, 0, BUFSIZE_8K)) > 0;) {
                     size += read;
                     if (size > maxSize) {
-                        throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString());
+                        // Count remaining bytes
+                        CountingInputStream cis = new CountingInputStream(input, 0);
+                        try {
+                            while ((read = cis.read(buf, 0, BUFSIZE_8K)) > 0) {
+                                // Nothing
+                            }
+                            size = size + cis.getCount();
+
+                            // Throw exception
+                            throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString(), maxSize, size);
+                        } finally {
+                            Streams.close(cis);
+                        }
                     }
                     tmp.write(buf, 0, read);
                 }
@@ -774,7 +787,19 @@ public final class MessageUtility {
                 for (int len; (len = input.read(buf, 0, buf.length)) > 0;) {
                     size += len;
                     if (size > maxSize) {
-                        throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString());
+                        // Count remaining bytes
+                        CountingInputStream cis = new CountingInputStream(input, 0);
+                        try {
+                            while ((len = cis.read(buf, 0, BUFSIZE_8K)) > 0) {
+                                // Nothing
+                            }
+                            size = size + cis.getCount();
+
+                            // Throw exception
+                            throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString(), maxSize, size);
+                        } finally {
+                            Streams.close(cis);
+                        }
                     }
                     out.write(buf, 0, len);
                 }

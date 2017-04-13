@@ -118,8 +118,18 @@ public final class UrlReplacerJerichoHandler implements JerichoHandler {
     }
 
     @Override
+    public void markCssEnd(EndTag endTag) {
+        handleEndTag(endTag);
+    }
+
+    @Override
     public void handleEndTag(final EndTag endTag) {
         htmlBuilder.append(endTag);
+    }
+
+    @Override
+    public void markCssStart(StartTag startTag) {
+        handleStartTag(startTag);
     }
 
     @Override

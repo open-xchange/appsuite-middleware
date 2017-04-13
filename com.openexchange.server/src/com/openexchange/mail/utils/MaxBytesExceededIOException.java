@@ -62,39 +62,38 @@ public class MaxBytesExceededIOException extends IOException {
 
     private static final long serialVersionUID = -2821126584291903503L;
 
-    /**
-     * Initializes a new {@link MaxBytesExceededIOException}.
-     */
-    public MaxBytesExceededIOException() {
-        super();
-    }
+    private final long maxSize;
+    private final long size;
 
     /**
      * Initializes a new {@link MaxBytesExceededIOException}.
      *
      * @param message The detail message
+     * @param maxSize The max. allowed size
+     * @param size The actual number of bytes
      */
-    public MaxBytesExceededIOException(String message) {
+    public MaxBytesExceededIOException(String message, long maxSize, long size) {
         super(message);
+        this.maxSize = maxSize;
+        this.size = size;
     }
 
     /**
-     * Initializes a new {@link MaxBytesExceededIOException}.
+     * Gets the max. allowed size
      *
-     * @param cause The cause
+     * @return The max. allowed size
      */
-    public MaxBytesExceededIOException(Throwable cause) {
-        super(cause);
+    public long getMaxSize() {
+        return maxSize;
     }
 
     /**
-     * Initializes a new {@link MaxBytesExceededIOException}.
+     * Gets the actual size
      *
-     * @param message The detail message
-     * @param cause The cause
+     * @return The actual size
      */
-    public MaxBytesExceededIOException(String message, Throwable cause) {
-        super(message, cause);
+    public long getSize() {
+        return size;
     }
 
 }
