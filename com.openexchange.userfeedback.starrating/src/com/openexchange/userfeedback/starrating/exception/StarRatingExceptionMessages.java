@@ -67,10 +67,10 @@ public final class StarRatingExceptionMessages implements LocalizableStrings {
     public static final String SCORE_INVALID_TYPE_MSG = "The provided feedback for key 'score' has an invalid type.";
 
     // The provided feedback does not contain required key "score".
-    public static final String KEY_MISSING_MSG = "The provided feedback does not contain required key \"%s\".";
+    public static final String KEY_MISSING_MSG = "The provided feedback does not contain required key '%s'.";
 
     // The provided feedback for key "score" cannot be parsed..
-    public static final String BAD_VALUE_MSG = "The provided feedback for key \"%s\" cannot be parsed.";
+    public static final String BAD_VALUE_MSG = "The provided feedback for key '%s' cannot be parsed.";
 
     private StarRatingExceptionMessages() {
         super();

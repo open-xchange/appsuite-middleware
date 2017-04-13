@@ -56,7 +56,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -108,8 +107,6 @@ public class StarRatingV1 extends AbstractFeedbackType {
     protected void validate(Object feedback) throws OXException {
         JSONObject jsonFeedback = getFeedback(feedback);
 
-        checkSizeRestrictions(jsonFeedback);
-
         if (!jsonFeedback.has("score")) {
             throw StarRatingExceptionCodes.PARAMETER_MISSING.create("score");
         }
@@ -133,74 +130,42 @@ public class StarRatingV1 extends AbstractFeedbackType {
     }
 
     /**
-     * Limits the data column to have at most 21000 UTF-8 characters as the blob column is able to take 65535 bytes and an UTF-8 character can be up to 3 bytes.
+     * Limits the data column to have at most 21000 UTF-8 characters as the blob column is able to take 65535 bytes and an UTF-8 character can be up to 3 bytes. Therefor values will be cut off after defined lengths.
      * 
      * @param jsonFeedback
-     * @throws OXException
      */
-    protected void checkSizeRestrictions(JSONObject jsonFeedback) throws OXException {
-        List<String> warnings = new ArrayList<String>();
+    protected JSONObject ensureSizeLimits(JSONObject jsonFeedback) {
+        JSONObject limitedFeedback = new JSONObject(jsonFeedback);
 
-        try {
-            {
-                String app = jsonFeedback.getString(StarRatingV1Fields.app.name());
-                check(StarRatingV1Fields.app.name(), app, 50, warnings);
-            }
-            {
-                String browser = jsonFeedback.getString(StarRatingV1Fields.browser.name());
-                check(StarRatingV1Fields.browser.name(), browser, 50, warnings);
-            }
-            {
-                String browserVersion = jsonFeedback.getString(StarRatingV1Fields.browser_version.name());
-                check(StarRatingV1Fields.browser_version.name(), browserVersion, 10, warnings);
-            }
-            {
-                String clientVersion = jsonFeedback.getString(StarRatingV1Fields.client_version.name());
-                check(StarRatingV1Fields.client_version.name(), clientVersion, 20, warnings);
-            }
-            {
-                String comment = jsonFeedback.getString(StarRatingV1Fields.comment.name());
-                check(StarRatingV1Fields.comment.name(), comment, 20000, warnings);
-            }
-            {
-                String entryPoint = jsonFeedback.getString(StarRatingV1Fields.entry_point.name());
-                check(StarRatingV1Fields.entry_point.name(), entryPoint, 50, warnings);
-            }
-            {
-                String language = jsonFeedback.getString(StarRatingV1Fields.language.name());
-                check(StarRatingV1Fields.language.name(), language, 20, warnings);
-            }
-            {
-                String operatingSystem = jsonFeedback.getString(StarRatingV1Fields.operating_system.name());
-                check(StarRatingV1Fields.operating_system.name(), operatingSystem, 50, warnings);
-            }
-            {
-                String screenResolution = jsonFeedback.getString(StarRatingV1Fields.screen_resolution.name());
-                check(StarRatingV1Fields.screen_resolution.name(), screenResolution, 20, warnings);
-            }
-            {
-                String userAgent = jsonFeedback.getString(StarRatingV1Fields.user_agent.name());
-                check(StarRatingV1Fields.user_agent.name(), userAgent, 200, warnings);
-            }
-            {
-                String score = jsonFeedback.getString(StarRatingV1Fields.score.name());
-                check(StarRatingV1Fields.score.name(), score, 5, warnings);
-            }
-        } catch (JSONException e) {
-            LOG.error("Unable to check size restrictions for given feedback.", e);
-            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        }
-        if (!warnings.isEmpty()) {
-            throw FeedbackExceptionCodes.INVALID_PARAMETER_VALUE_SIZE.create(Strings.concat(",", warnings));
-        }
+        limit(limitedFeedback, StarRatingV1Fields.app.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.browser.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.browser_version.name(), 10);
+        limit(limitedFeedback, StarRatingV1Fields.client_version.name(), 20);
+        limit(limitedFeedback, StarRatingV1Fields.comment.name(), 20000);
+        limit(limitedFeedback, StarRatingV1Fields.entry_point.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.language.name(), 20);
+        limit(limitedFeedback, StarRatingV1Fields.operating_system.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.screen_resolution.name(), 20);
+        limit(limitedFeedback, StarRatingV1Fields.user_agent.name(), 200);
+        limit(limitedFeedback, StarRatingV1Fields.score.name(), 5);
+        return limitedFeedback;
     }
 
-    private void check(String key, String value, int allowed, List<String> warnings) {
-        if (Strings.isEmpty(value)) {
+    protected void limit(JSONObject feedback, String key, int allowed) {
+        if ((feedback == null) || (Strings.isEmpty(key)) || (allowed <= 10)) {
             return;
         }
-        if (value.length() > allowed) {
-            warnings.add(key);
+        if (!feedback.has(key)) {
+            return;
+        }
+        try {
+            String value = feedback.getString(key);
+            if (value.length() > allowed) {
+                String limitedValue = org.apache.commons.lang.StringUtils.substring(value, 0, allowed - 4).concat(" ...");
+                feedback.put(key, limitedValue);
+            }
+        } catch (JSONException e) {
+            LOG.warn("Unable to limit json value.", e);
         }
     }
 
@@ -352,7 +317,10 @@ public class StarRatingV1 extends AbstractFeedbackType {
 
         JSONObject removeAdditional = remove(returnFeedback, keys);
         JSONObject cleanedFeedback = addRequired(removeAdditional, keys);
-        return cleanedFeedback;
+
+        JSONObject ensureSizeLimits = ensureSizeLimits(cleanedFeedback);
+
+        return ensureSizeLimits;
     }
 
     /**
