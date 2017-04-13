@@ -53,6 +53,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
@@ -60,8 +62,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import com.openexchange.cli.AbstractRestCLI;
 
@@ -122,11 +122,10 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     protected String getName() {
         return "exportuserfeedback [OPTIONS] output_file";
     }
-    
+
     @Override
     protected String getHeader() {
-        return "exportuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time] output_file\n" +
-            "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
+        return "exportuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
     }
 
     @Override
@@ -151,10 +150,10 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
         builder.acceptEncoding("UTF-8");
 
         InputStream response = builder.get(InputStream.class);
-
-        File file = new File(pathStr);
-        byte[] byteArray = IOUtils.toByteArray(response);
-        FileUtils.writeByteArrayToFile(file, byteArray);
+        if (!pathStr.startsWith("file:")) {
+            pathStr = "file:".concat(pathStr);
+        }
+        Files.copy(response, Paths.get(URI.create(pathStr)));
 
         System.out.println("File successfully written to: " + pathStr);
         return null;
