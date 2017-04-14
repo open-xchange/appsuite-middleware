@@ -1022,6 +1022,10 @@ public final class MimeMessageUtility {
             return false;
         }
 
+        boolean isPadded() {
+            return value.charAt(value.length() - 1) == '=';
+        }
+
         String asEncodedWord() {
             return new StringBuilder(value.length() + 8).append("=?").append(charset).append("?B?").append(value).append("?=").toString();
         }
@@ -1044,22 +1048,30 @@ public final class MimeMessageUtility {
             int lastMatch = 0;
             Base64EncodedValue prev = null;
             do {
+                String encoding = m.group(2);
+                String encodedValue = m.group(3);
                 try {
-                    String encoding = m.group(2);
                     String charset = m.group(1);
 
                     boolean doEncode = true;
                     int start = m.start();
                     if (lastMatch == start) {
                         if ("b".equalsIgnoreCase(encoding)) {
-                            Base64EncodedValue ev = new Base64EncodedValue(charset, m.group(3));
+                            Base64EncodedValue ev = new Base64EncodedValue(charset, encodedValue);
                             if (null == prev) {
-                                prev = ev;
-                                doEncode = false;
+                                // Only combineable if not padded
+                                if (!encodedValue.endsWith("=")) {
+                                    // Is padded...
+                                    prev = ev;
+                                    doEncode = false;
+                                }
                             } else {
                                 if (false == prev.combine(ev)) {
                                     sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
                                     prev = ev;
+                                } else if (prev.isPadded()) {
+                                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
+                                    prev = null;
                                 }
                                 doEncode = false;
                             }
@@ -1074,14 +1086,14 @@ public final class MimeMessageUtility {
 
                     // Decode encoded-word
                     if (doEncode) {
-                        sb.append(decodeEncodedWord(charset, encoding, m.group(3)));
+                        sb.append(decodeEncodedWord(charset, encoding, encodedValue));
                     }
 
                     // Remember last match position
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
                     LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    sb.append(handleUnsupportedEncoding(m.group(2), m.group(3)));
+                    sb.append(handleUnsupportedEncoding(encoding, encodedValue));
                     lastMatch = m.end();
                 } catch (final ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
