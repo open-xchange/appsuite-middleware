@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related: 
       file: user.properties
+      packageName: open-xchange-core
       tags: ["User"]
     - key: com.openexchange.folder.tree
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: false
       related: 
       file: user.properties
+      packageName: open-xchange-core
       tags: ["User", "Folder"]
     - key: com.openexchange.user.contactCollectOnMailAccess
       description: |
@@ -32,6 +34,7 @@ properties:
       configcascadeAware: false
       related: 
       file: user.properties
+      packageName: open-xchange-core
       tags: ["User", "Mail", "Contact"]
     - key: com.openexchange.user.contactCollectOnMailTransport
       description: |
@@ -43,6 +46,7 @@ properties:
       configcascadeAware: false
       related: 
       file: user.properties
+      packageName: open-xchange-core
       tags: ["User", "Mail", "Contact", "Transport"]
     - key: com.openexchange.user.maxClientCount
       description: |
@@ -54,4 +58,5 @@ properties:
       configcascadeAware: false
       related: 
       file: user.properties
+      packageName: open-xchange-core
       tags: ["User", "Limit"]

@@ -10,6 +10,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.prestartAllCoreThreads
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.maximumPoolSize
       description: |
@@ -32,6 +34,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Limit", "Thread"]
     - key: com.openexchange.threadpool.keepAliveTime
       description: |
@@ -43,6 +46,7 @@ properties:
       configcascadeAware: false
       related: 
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Limit", "Thread"]
     - key: com.openexchange.threadpool.workQueue
       description: |
@@ -62,6 +66,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.threadpool.maximumPoolSize
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.workQueueSize
       description: |
@@ -74,6 +79,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.threadpool.workQueue
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.blocking
       description: |
@@ -85,6 +91,7 @@ properties:
       configcascadeAware: false
       related:
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Thread"]
     - key: com.openexchange.threadpool.refusedExecutionBehavior
       description: |
@@ -100,4 +107,5 @@ properties:
       configcascadeAware: false
       related:
       file: threadpool.properties
+      packageName: open-xchange-core
       tags: ["Threadpool", "Thread"]

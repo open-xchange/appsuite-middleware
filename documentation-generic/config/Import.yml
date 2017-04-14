@@ -10,7 +10,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: import.properties.in
+      file: import.properties
+      packageName: open-xchange-core
       tags: ["Import"]
     - key: com.openexchange.import.ical.limit
       description: |
@@ -22,7 +23,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: import.properties.in
+      file: import.properties
+      packageName: open-xchange-core
       tags: ["Import", "Limit"]
     - key: com.openexchange.import.contacts.limit
       description: |
@@ -33,5 +35,6 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: import.properties.in
+      file: import.properties
+      packageName: open-xchange-core
       tags: ["Import", "Limit"]

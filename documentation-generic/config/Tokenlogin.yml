@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.tokenlogin.maxIdleTime
       file: tokenlogin.properties
+      packageName: open-xchange-core
       tags: ["Tokenlogin"]
     - key: com.openexchange.tokenlogin.maxIdleTime
       description: |
@@ -19,4 +20,5 @@ properties:
       configcascadeAware: false
       related: com.openexchange.tokenlogin
       file: tokenlogin.properties
+      packageName: open-xchange-core
       tags: ["Tokenlogin"]

@@ -542,6 +542,20 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     @Override
+    public void markCssEnd(EndTag endTag) {
+        if (skipLevel == 0) {
+            isCss = false;
+            if (depth == 0) {
+                htmlBuilder.append("</").append(endTag.getName()).append('>');
+            } else if (!getAndUnmark()) {
+                htmlBuilder.append("</").append(endTag.getName()).append('>');
+            }
+        } else {
+            skipLevel--;
+        }
+    }
+
+    @Override
     public void handleEndTag(final EndTag endTag) {
         if (skipLevel == 0) {
             final String name = endTag.getName();
@@ -565,6 +579,16 @@ public final class FilterJerichoHandler implements JerichoHandler {
             skipLevel--;
             insideScriptTag = false;
         }
+    }
+
+    @Override
+    public void markCssStart(StartTag startTag) {
+        if (skipLevel > 0) {
+            skipLevel++;
+            return;
+        }
+        isCss = true;
+        addStartTag(startTag, false, htmlMap.get(startTag.getName()));
     }
 
     @Override

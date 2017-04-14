@@ -11,6 +11,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
+    packageName: open-xchange-spamhandler-cloudmark
     tags: ["Spam Handler", "Cloudmark"] 
   - key: com.openexchange.spamhandler.cloudmark.targetHamEmailAddress
     description: |
@@ -24,6 +25,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
+    packageName: open-xchange-spamhandler-cloudmark
     tags: ["Spam Handler", "Cloudmark"] 
   - key: com.openexchange.spamhandler.cloudmark.targetSpamFolder
     description: |
@@ -41,6 +43,7 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
+    packageName: open-xchange-spamhandler-cloudmark
     tags: ["Spam Handler", "Cloudmark"] 
   - key: com.openexchange.spamhandler.cloudmark.wrapMessage
     description: |
@@ -57,4 +60,5 @@ properties:
     configcascadeAware: true
     related: 
     file: spamhandler_cloudmark.properties
+    packageName: open-xchange-spamhandler-cloudmark
     tags: ["Spam Handler", "Cloudmark"] 

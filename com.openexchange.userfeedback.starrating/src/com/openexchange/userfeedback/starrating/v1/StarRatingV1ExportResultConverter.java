@@ -153,7 +153,9 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         } else {
             for (StarRatingV1Fields token : jsonFields) {
                 bob.append('"');
-                bob.append(sanitize(object.getString(token.name())));
+                String sanitizedValue = sanitize(object.getString(token.name()));
+                String removedNewLines = sanitizedValue.replace("\r\n", " ").replace("\n", " ");
+                bob.append(removedNewLines);
                 bob.append('"');
                 bob.append(CELL_DELIMITER);
             }

@@ -32,6 +32,7 @@ properties:
       configcascadeAware: true
       related: 
       file: folder.properties
+      packageName: open-xchange-core
       tags: ["Folder","Permission"]
     - key: com.openexchange.folderstorage.inheritParentPermissions
       description: |
@@ -42,6 +43,7 @@ properties:
       configcascadeAware: false
       related: 
       file: folder.properties
+      packageName: open-xchange-core
       tags: ["Folder","Permission"]
     - key: com.openexchange.folderstorage.inheritParentPermissions
       description: |
@@ -52,6 +54,7 @@ properties:
       configcascadeAware: false
       related: 
       file: folder.properties
+      packageName: open-xchange-core
       tags: ["Folder","Permission"]
     - key: ENABLE_DB_GROUPING
       description: |
@@ -65,6 +68,7 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
+      packageName: open-xchange-core
       tags: ["Folder","Caching"]
     - key: ENABLE_FOLDER_CACHE
       description: |
@@ -75,6 +79,7 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
+      packageName: open-xchange-core
       tags: ["Folder","Caching"]
     - key: IGNORE_SHARED_ADDRESSBOOK
       description: |
@@ -86,6 +91,7 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
+      packageName: open-xchange-core
       tags: ["Folder","Caching", "Contact"]
     - key: ENABLE_INTERNAL_USER_EDIT
       description: |
@@ -97,6 +103,7 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
+      packageName: open-xchange-core
       tags: ["Folder", "Contact"]
     - key: com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore
       description: |
@@ -114,6 +121,7 @@ properties:
       configcascadeAware: true
       related: 
       file: foldercache.properties
+      packageName: open-xchange-core
       tags: ["Folder"]
     - key: com.openexchange.folderstorage.database.preferDisplayName
       description: |
@@ -125,4 +133,5 @@ properties:
       configcascadeAware: false
       related: 
       file: foldercache.properties
+      packageName: open-xchange-core
       tags: ["Folder", "Database"]

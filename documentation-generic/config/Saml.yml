@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML"]       
     - key: com.openexchange.saml.enableMetadataService
       description: |
@@ -20,6 +21,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML"]       
     - key: com.openexchange.saml.enableSingleLogout
       description: |
@@ -29,7 +31,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties 
+      file: saml.properties
+      packageName: open-xchange-saml-core 
       tags: ["SAML"]      
     - key: com.openexchange.saml.entityID
       description: |
@@ -40,6 +43,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML"]       
     - key: com.openexchange.saml.providerName
       description: |
@@ -50,6 +54,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML"]       
     - key: com.openexchange.saml.acsURL
       description: |
@@ -66,7 +71,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties 
+      file: saml.properties
+      packageName: open-xchange-saml-core 
       tags: ["SAML", "Host"]      
     - key: com.openexchange.saml.slsURL
       description: |
@@ -83,6 +89,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML", "Host"]   
     - key: com.openexchange.saml.logoutResponseBinding
       description: |
@@ -96,6 +103,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML"] 
     - key: com.openexchange.saml.logoutResponseTemplate
       description: |
@@ -109,7 +117,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties 
+      file: saml.properties
+      packageName: open-xchange-saml-core 
       tags: ["SAML"]  
     - key: com.openexchange.saml.idpEntityID
       description: |
@@ -122,6 +131,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML"] 
     - key: com.openexchange.saml.idpAuthnURL
       description: |
@@ -133,7 +143,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties 
+      file: saml.properties
+      packageName: open-xchange-saml-core 
       tags: ["SAML", "Host"]      
     - key: com.openexchange.saml.idpLogoutURL
       description: |
@@ -145,7 +156,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties  
+      file: saml.properties
+      packageName: open-xchange-saml-core  
       tags: ["SAML", "Host"]     
     - key: com.openexchange.saml.enableAutoLogin
       description: |
@@ -169,7 +181,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties 
+      file: saml.properties
+      packageName: open-xchange-saml-core 
       tags: ["SAML"]      
     - key: com.openexchange.saml.allowUnsolicitedResponses
       description: |
@@ -179,7 +192,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: saml.properties  
+      file: saml.properties
+      packageName: open-xchange-saml-core  
       tags: ["SAML"]        
     - key: com.openexchange.saml.enableSessionIndexAutoLogin
       description: |
@@ -190,6 +204,7 @@ properties:
       configcascadeAware: false
       related: 
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML"]
     - key: com.openexchange.saml.oauth.tokenEndpoint
       description: |
@@ -200,6 +215,7 @@ properties:
       configcascadeAware: true
       related:
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML","OAuth"]
     - key: com.openexchange.saml.oauth.clientId
       description: |
@@ -210,6 +226,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.saml.oauth.tokenEndpoint
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML","OAuth"]
     - key: com.openexchange.saml.oauth.clientSecret
       description: |
@@ -220,4 +237,5 @@ properties:
       configcascadeAware: true
       related: com.openexchange.saml.oauth.tokenEndpoint
       file: saml.properties
+      packageName: open-xchange-saml-core
       tags: ["SAML","OAuth"]

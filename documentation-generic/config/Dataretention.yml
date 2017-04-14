@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
       tags: ["Data Retention"]
     - key: com.openexchange.dataretention.versionNumber
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
       tags: ["Data Retention"]
     - key: com.openexchange.dataretention.clientID
       description: |
@@ -29,6 +31,7 @@ properties:
       configcascadeAware: false
       related: 
       file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
       tags: ["Data Retention"]
     - key: com.openexchange.dataretention.sourceID
       description: |
@@ -39,6 +42,7 @@ properties:
       configcascadeAware: false
       related: 
       file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
       tags: ["Data Retention"]
     - key: com.openexchange.dataretention.location
       description: |
@@ -49,6 +53,7 @@ properties:
       configcascadeAware: false
       related: 
       file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
       tags: ["Data Retention"]
     - key: com.openexchange.dataretention.timeZone
       description: |
@@ -59,6 +64,7 @@ properties:
       configcascadeAware: false
       related: 
       file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
       tags: ["Data Retention"]
     - key: com.openexchange.dataretention.rotateLength
       description: |
@@ -75,4 +81,5 @@ properties:
       configcascadeAware: false
       related: 
       file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
       tags: ["Data Retention", "Limit"]

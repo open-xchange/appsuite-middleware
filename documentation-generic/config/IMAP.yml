@@ -23,6 +23,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapSearch
       description: |
@@ -37,6 +38,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.umlautFilterThreshold
       description: |
@@ -49,6 +51,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapFastFetch
       description: |
@@ -65,6 +68,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapSupportsACL
       description: |
@@ -77,6 +81,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapTimeout
       description: |
@@ -88,6 +93,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP", "Timeout"]
     - key: com.openexchange.imap[.primary].imapConnectionTimeout
       description: |
@@ -99,6 +105,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP", "Timeout"]
     - key: com.openexchange.imap[.primary].imapTemporaryDown
       description: |
@@ -112,6 +119,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapAuthEnc
       description: |
@@ -122,6 +130,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.User2ACLImpl
       description: |
@@ -133,6 +142,7 @@ properties:
       configcascadeAware: false
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].blockSize
       description: |
@@ -147,6 +157,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.spamHandler
       description: |
@@ -158,6 +169,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.spamhandler.name
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP","Spam Handler"]
     - key: com.openexchange.imap[.primary].propagateClientIPAddress
       description: |
@@ -168,6 +180,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].propagateHostNames
       description: |
@@ -178,6 +191,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP", "Host"]
     - key: com.openexchange.imap[.primary].maxNumConnections
       description: |
@@ -192,6 +206,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.imap.storeContainerType
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.storeContainerType
       description: |
@@ -228,6 +243,7 @@ properties:
       configcascadeAware: false
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.maxNumExternalConnections
       description: |
@@ -244,6 +260,7 @@ properties:
       configcascadeAware: false
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].enableTls
       description: |
@@ -255,6 +272,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.invalidMailboxNameCharacters
       description: |
@@ -267,6 +285,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].allowFolderCaches
       description: |
@@ -280,6 +299,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP", "Caching"]
     - key: com.openexchange.imap[.primary].ssl.protocols
       description: |
@@ -293,6 +313,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].ssl.ciphersuites
       description: |
@@ -307,6 +328,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.maxMailboxNameLength
       description: |
@@ -317,6 +339,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.invalidMailboxNameCharacters
       description: |
@@ -329,6 +352,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.namespacePerUser
       description: |
@@ -348,6 +372,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.rootSubfoldersAllowed
       description: |
@@ -361,6 +386,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.allowSORTDISPLAY
       description: |
@@ -373,6 +399,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.fallbackOnFailedSORT
       description: |
@@ -387,6 +414,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].auditLog.enabled
       description: |
@@ -402,6 +430,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.initWithSpecialUse
       description: |
@@ -414,6 +443,7 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.greeting.host.regex
       description: |
@@ -430,6 +460,7 @@ properties:
       configcascadeAware: false
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.overwritePreLoginCapabilities
       description: |
@@ -445,4 +476,5 @@ properties:
       configcascadeAware: true
       related: 
       file: imap.properties
+      packageName: open-xchange-imap
       tags: ["Mail","IMAP"]

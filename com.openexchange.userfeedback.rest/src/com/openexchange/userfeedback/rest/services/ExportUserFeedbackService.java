@@ -89,7 +89,7 @@ public class ExportUserFeedbackService extends AbstractUserFeedbackService {
 
     @GET
     @Path("/{context-group}/{type}")
-    @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.TEXT_PLAIN })
+    @Produces({ MediaType.APPLICATION_OCTET_STREAM })
     public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         Response response = export(start, end, type, contextGroup, ExportType.CSV);
         return response;
@@ -110,10 +110,8 @@ public class ExportUserFeedbackService extends AbstractUserFeedbackService {
             validateParams(start, end);
             ExportResultConverter converter = feedbackService.export(contextGroup, new DateOnlyFilter(type, start, end));
             ExportResult export = converter.get(exportType);
-            ResponseBuilder builder = Response.status(Status.OK);
-            builder.type(new MediaType(exportType.getMediaType(), exportType.getMediaSubType()));
+            ResponseBuilder builder = Response.ok(export.getResult(), new MediaType(exportType.getMediaType(), exportType.getMediaSubType()));
             builder.encoding("UTF-8");
-            builder.entity(export.getResult());
             return builder.build();
         } catch (OXException e) {
             JSONObject errorJson = generateError(e);

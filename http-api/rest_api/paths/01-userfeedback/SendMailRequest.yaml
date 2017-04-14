@@ -46,6 +46,12 @@
         required: false
         type: string
       - 
+        name: compress
+        in: query
+        description: Compress exported feedback
+        required: true
+        type: boolean
+      - 
         name: recipients
         in: body
         description: JSON Array containing address, display name and PGP key (if available) for every recipient.

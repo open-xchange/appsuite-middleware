@@ -10,6 +10,7 @@ properties:
     configcascadeAware: true
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail"]
 
   - key: com.openexchange.userfeedback.mail.senderAddress
@@ -21,6 +22,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail"]
 
   - key: com.openexchange.userfeedback.mail.exportPrefix
@@ -32,6 +34,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail"]
 
   - key: com.openexchange.userfeedback.smtp.hostname
@@ -43,6 +46,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "Host", "SMTP"]
 
   - key: com.openexchange.userfeedback.smtp.port
@@ -54,6 +58,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "Port", "SMTP"]
 
   - key: com.openexchange.userfeedback.smtp.timeout
@@ -65,6 +70,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "SMTP", "Timeout"]
 
   - key: com.openexchange.userfeedback.smtp.connectionTimeout
@@ -76,6 +82,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "SMTP", "Timeout"]
 
   - key: com.openexchange.userfeedback.smtp.username
@@ -87,6 +94,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "Credential", "SMTP"]
 
   - key: com.openexchange.userfeedback.smtp.password
@@ -98,6 +106,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "Credential", "SMTP"]
 
   - key: com.openexchange.userfeedback.pgp.signKeyFile
@@ -109,6 +118,7 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "Encryption"]
 
   - key: com.openexchange.userfeedback.pgp.signKeyPassword
@@ -120,4 +130,5 @@ properties:
     configcascadeAware: false
     related: 
     file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback", "Mail", "Encryption"]

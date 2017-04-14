@@ -19,6 +19,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.validate,
  com.openexchange.userfeedback,
  com.openexchange.userfeedback.exception,
+ org.apache.commons.lang,
  org.json,
  org.osgi.framework,
  org.slf4j

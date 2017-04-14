@@ -215,11 +215,7 @@ setup()
 
     echo setting up open-xchange configuration ${CONFDIR}
 
-    CUROPTS=$(eval ox_read_property JAVA_XTRAOPTS ${CONFDIR}/ox-scriptconf.sh)
-    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
-    SERVEROPTS="$CUROPTS -Xmx${SERVER_MEMORY}m"
-
-    v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
+    ox_set_max_heap "${CONFDIR}/ox-scriptconf.sh" "${SERVER_MEMORY}M"
 
     GLOBIGNORE='*'
     v_setprop com.openexchange.server.backendRoute "$AJP_JVM_ROUTE" ${CONFDIR}/server.properties

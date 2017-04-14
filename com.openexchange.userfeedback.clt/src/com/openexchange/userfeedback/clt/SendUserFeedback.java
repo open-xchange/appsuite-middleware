@@ -105,6 +105,9 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
     private static final String BODY_LONG = "body";
     private static final String BODY_SHORT = "b";
 
+    private static final String COMPRESS_LONG = "compress";
+    private static final String COMPRESS_SHORT = "c";
+
     private static final String RECIPIENTS_SHORT = "r";
     private static final String RECIPIENT_LONG = "recipients";
 
@@ -128,6 +131,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
         options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
         options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
+        options.addOption(COMPRESS_SHORT, COMPRESS_LONG, false, "Use to gzip-compress exported feedback.");
         Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Single Recipient's mail address like \"Displayname <email@example.com>\" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.");
         recipients.setRequired(true);
         options.addOption(recipients);
@@ -160,6 +164,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             if (cmd.hasOption(BODY_SHORT)) {
                 target = target.queryParam("body", cmd.getOptionValue(BODY_SHORT));
             }
+            target = target.queryParam("compress", cmd.hasOption(COMPRESS_SHORT));
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());

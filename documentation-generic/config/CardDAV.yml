@@ -9,6 +9,7 @@ properties:
       configcascadeAware: true
       related:
       file: carddav.properties
+      packageName: open-xchange-dav
       tags: ["CardDAV"]
     - key: com.openexchange.carddav.ignoreFolders
       description: |
@@ -22,6 +23,7 @@ properties:
       configcascadeAware: true
       related:
       file: carddav.properties
+      packageName: open-xchange-dav
       tags: ["CardDAV", "Folder"]
     - key: com.openexchange.carddav.tree
       description: |
@@ -32,6 +34,7 @@ properties:
       configcascadeAware: true
       related:
       file: carddav.properties
+      packageName: open-xchange-dav
       tags: ["CardDAV", "Folder"]
     - key: com.openexchange.carddav.exposedCollections
       description: |
@@ -48,6 +51,7 @@ properties:
       configcascadeAware: true
       related:
       file: carddav.properties
+      packageName: open-xchange-dav
       tags: ["CardDAV", "Folder"]
     - key: com.openexchange.carddav.userAgentForAggregatedCollection
       description: |
@@ -62,6 +66,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.carddav.exposedCollections
       file: carddav.properties
+      packageName: open-xchange-dav
       tags: ["CardDAV"]
     - key: com.openexchange.carddav.userAgentForAggregatedCollection
       description: |
@@ -76,5 +81,6 @@ properties:
       configcascadeAware: true
       related: com.openexchange.carddav.exposedCollections
       file: carddav.properties
+      packageName: open-xchange-dav
       tags: ["CardDAV", "Folder"]
       

@@ -11,5 +11,5 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file:
+      file: probe.properties
       tags: ["Probe"]

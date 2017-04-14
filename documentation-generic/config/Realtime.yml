@@ -17,6 +17,7 @@ properties:
       configcascadeAware: false
       related: 
       file: realtime.properties
+      packageName: open-xchange-core
       tags: ["Realtime", "Logging"]
     - key: com.openexchange.realtime.usersToTrace
       description: |
@@ -27,6 +28,7 @@ properties:
       configcascadeAware: false
       related: 
       file: realtime.properties
+      packageName: open-xchange-core
       tags: ["Realtime", "Logging"]
     - key: com.openexchange.realtime.numberOfRunLoops
       description: |
@@ -40,4 +42,5 @@ properties:
       configcascadeAware: false
       related: 
       file: realtime.properties
+      packageName: open-xchange-core
       tags: ["Realtime"]

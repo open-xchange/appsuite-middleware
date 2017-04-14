@@ -28,6 +28,8 @@ Username and password to use for API authentication (user:password).
 The mail body (plain text).
 - ``-S,--subject <arg>``
 The mail subject. Default: "User Feedback Report: [time range]".
+- ``-c,--compress``
+Compress exported feedback. Optional, default: false.
 - ``-r,--recipients <arg>``
 Single Recipient's mail address like "Displayname <email@example.com>" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.
 

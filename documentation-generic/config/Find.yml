@@ -13,6 +13,7 @@ properties:
       configcascadeAware: true
       related: 
       file: findbasic.properties
+      packageName: open-xchange-core
       tags: ["Find", "Mail"]
     - key: com.openexchange.find.basic.mail.searchmailbody
       description: |
@@ -27,4 +28,5 @@ properties:
       configcascadeAware: false
       related:
       file: findbasic.properties
+      packageName: open-xchange-core
       tags: ["Find", "Mail"]

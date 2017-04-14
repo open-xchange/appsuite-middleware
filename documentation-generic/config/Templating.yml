@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: templating.properties
+      packageName: open-xchange-core
       tags: ["Template"]
     - key: com.openexchange.templating.assets.path
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: templating.properties
+      packageName: open-xchange-core
       tags: ["Template"]
     - key: com.openexchange.templating.trusted
       description: |
@@ -30,6 +32,7 @@ properties:
       configcascadeAware: false
       related: 
       file: templating.properties
+      packageName: open-xchange-core
       tags: ["Template"]
     - key: com.openexchange.templating.usertemplating
       description: |
@@ -42,4 +45,5 @@ properties:
       configcascadeAware: false
       related: 
       file: templating.properties
+      packageName: open-xchange-core
       tags: ["Template"]

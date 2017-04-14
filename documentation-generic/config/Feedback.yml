@@ -10,6 +10,7 @@ properties:
     configcascadeAware: true
     related: 
     file: userfeedback.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback"]
 
   - key: com.openexchange.userfeedback.mode
@@ -21,4 +22,5 @@ properties:
     configcascadeAware: true
     related: 
     file: userfeedback.properties
+    packageName: open-xchange-userfeedback
     tags: ["Feedback"]

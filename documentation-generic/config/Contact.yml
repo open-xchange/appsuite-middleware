@@ -2,8 +2,9 @@ feature_name: Contact
 properties:
   - key: contact_first_letter_field
     description: |
-      First Letter Field, the field you sort in when you hit one of the start letters
-      field02 Last name
+      First Letter Field, the field you sort in when you hit one of the start letters.
+
+      field02 Last name  
       field03 First name
     defaultValue: field02 
     version: 
@@ -11,6 +12,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: validate_contact_email
     description: |
@@ -22,17 +24,19 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: max_image_size
     description: |
-     "The maximum size in bytes for the upload of contact images. Remember: If you decrease the size after some images where uploaded already, 
-      you might trigger errors, for example when trying to modify the contact without adding an image of the correct size." 
+      The maximum size in bytes for the upload of contact images. Remember: If you decrease the size after some images where uploaded already, 
+      you might trigger errors, for example when trying to modify the contact without adding an image of the correct size.
     defaultValue: 4194304
     version: 
     reloadable: true
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.mailAddressAutoSearch
     description: |
@@ -45,6 +49,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties 
+    packageName: open-xchange-core
     tags: ["Contact"]   
   - key: com.openexchange.contact.singleFolderSearch
     description: |
@@ -58,6 +63,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"] 
   - key: com.openexchange.contacts.characterSearch
     description: |
@@ -68,6 +74,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"] 
   - key: com.openexchange.contacts.allFoldersForAutoComplete
     description: |
@@ -82,7 +89,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.scaleVCardImages
     description: |
@@ -106,7 +114,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.maxVCardSize
     description: |
@@ -119,6 +128,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.scaleImages
     description: |
@@ -129,6 +139,7 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.maxWidth
     description: |
@@ -138,7 +149,8 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.maxHeight
     description: |
@@ -148,20 +160,24 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.image.scaleType
     description: |
-      Defines the scale type
-      1 = contain - maxWidth and maxHeight defines the maximum target dimension
-      2 = cover - maxWidth and maxHeight defines the minimum target dimension
-      3 = auto
+      Defines the scale type:
+      <ul>
+      <li>1 = contain - maxWidth and maxHeight defines the maximum target dimension</li>
+      <li>2 = cover - maxWidth and maxHeight defines the minimum target dimension</li>
+      <li>3 = auto</li>
+      </ul>
     defaultValue: 2
     version: 
     reloadable: true
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.fulltextAutocomplete
     description: |
@@ -180,83 +196,184 @@ properties:
     configcascadeAware: false
     related: 
     file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.fulltextIndexFields
     description: |
       "Specifies the contact fields for which a FULLTEXT index is supposed to be created
       provided that property "com.openexchange.contact.fulltextAutocomplete" is set to "true".
       
-      Supported fields
-       - DISPLAY_NAME
-       - SUR_NAME
-       - GIVEN_NAME
-       - TITLE
-       - SUFFIX
-       - MIDDLE_NAME
-       - COMPANY
-       - EMAIL1
-       - EMAIL2
-       - EMAIL3
-       - DEPARTMENT
+      Supported fields:
+      <ul>
+       <li>DISPLAY_NAME</li>
+       <li>SUR_NAME</li>
+       <li>GIVEN_NAME</li>
+       <li>TITLE</li>
+       <li>SUFFIX</li>
+       <li>MIDDLE_NAME</li>
+       <li>COMPANY</li>
+       <li>EMAIL1</li>
+       <li>EMAIL2</li>
+       <li>EMAIL3</li>
+       <li>DEPARTMENT</li>
+      </ul>
+      Note:
+
+      These fields are only checked one time if "com.openexchange.contact.fulltextAutocomplete" is set to "true".
+      In case the fields are altered later on, manual execution of the associated update task is required to adapt
+      the FULLTEXT index to the newly specified fields:
       
-       Note:
-       These fields are only checked one time if "com.openexchange.contact.fulltextAutocomplete" is set to "true".
-       In case the fields are altered later on, manual execution of the associated update task is required to adapt
-       the FULLTEXT index to the newly specified fields:
-      
-       /opt/open-xchange/sbin/forceupdatetask --task com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask <other command-line arguments"
+      /opt/open-xchange/sbin/forceupdatetask --task com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask <other command-line arguments"
     defaultValue: DISPLAY_NAME, SUR_NAME, GIVEN_NAME, TITLE, SUFFIX, MIDDLE_NAME, COMPANY, EMAIL1, EMAIL2, EMAIL3 
     version: 
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties  
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.autocomplete.fields
     description: |
-      "Defines the fields considered within the autocomplete search operation.
+      Defines the fields considered within the autocomplete search operation.
       Must be a comma separated list of available fields.
-      The available fields are: GIVEN_NAME, SUR_NAME, DISPLAY_NAME, EMAIL1, EMAIL2, EMAIL3, DEPARTMENT"
+      The available fields are: GIVEN_NAME, SUR_NAME, DISPLAY_NAME, EMAIL1, EMAIL2, EMAIL3, DEPARTMENT
     defaultValue: GIVEN_NAME, SUR_NAME, DISPLAY_NAME, EMAIL1, EMAIL2, EMAIL3
     version: 
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties 
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contact.search.fields
     description: |
-      "Defines the fields considered within the normal search operation.
+      Defines the fields considered within the normal search operation.
       Must be a comma separated list of available fields, groups of fields or any combination of both.
+
       The available groups and their fields are the following:
-      "ADDRESS_FIELDS":  
-         "STREET_BUSINESS", "STREET_HOME", "STREET_OTHER","POSTAL_CODE_BUSINESS", "POSTAL_CODE_HOME","POSTAL_CODE_OTHER","CITY_BUSINESS","CITY_HOME", 
-         "CITY_OTHER", "STATE_BUSINESS", "STATE_HOME", "STATE_OTHER", "COUNTRY_BUSINESS", "COUNTRY_HOME", "COUNTRY_OTHER"
-      "EMAIL_FIELDS":
-         "EMAIL1", "EMAIL2", "EMAIL3", "DISTRIBUTIONLIST"
-      "NAME_FIELDS":
-         "DISPLAY_NAME", "SUR_NAME", "MIDDLE_NAME", "GIVEN_NAME", "TITLE", "YOMI_FIRST_NAME", "YOMI_LAST_NAME", "SUFFIX"
-      "PHONE_FIELDS":
-         "TELEPHONE_ASSISTANT", "TELEPHONE_BUSINESS1", "TELEPHONE_BUSINESS2", "TELEPHONE_CALLBACK", "TELEPHONE_CAR", "TELEPHONE_COMPANY", "TELEPHONE_HOME1",
-         "TELEPHONE_HOME2", "TELEPHONE_IP", "TELEPHONE_ISDN", "TELEPHONE_OTHER", "TELEPHONE_PAGER", "TELEPHONE_PRIMARY", "TELEPHONE_RADIO", "TELEPHONE_TELEX",
-         "TELEPHONE_TTYTDD", "CELLULAR_TELEPHONE1", "CELLULAR_TELEPHONE2", "NUMBER_OF_CHILDREN", 
-      "USER_FIELDS":
-         "USERFIELD01", "USERFIELD02", "USERFIELD03", "USERFIELD04", "USERFIELD05", "USERFIELD06",
-         "USERFIELD07", "USERFIELD08", "USERFIELD09", "USERFIELD10", "USERFIELD11", "USERFIELD12",
-         "USERFIELD13", "USERFIELD14", "USERFIELD15", "USERFIELD16", "USERFIELD17", "USERFIELD18",
-         "USERFIELD19", "USERFIELD20"
-      
-      
-      The remaining unassigned fields are:
-         "CATEGORIES", "COMPANY", "DEPARTMENT", "COMMERCIAL_REGISTER", "MARITAL_STATUS", "PROFESSION", "NICKNAME", "SPOUSE_NAME", "NOTE", "POSITION", "EMPLOYEE_TYPE",
-         "ROOM_NUMBER", "TAX_ID", "BRANCHES", "BUSINESS_CATEGORY", "INFO", "MANAGER_NAME", "ASSISTANT_NAME", "FAX_BUSINESS", "FAX_HOME", "FAX_OTHER", "URL", "INSTANT_MESSENGER1",
-         "INSTANT_MESSENGER2",   "
+      <ul>
+      <li>"ADDRESS_FIELDS": 
+        <ul>
+         <li>"STREET_BUSINESS"</li>
+         <li>"STREET_HOME"</li>
+         <li>"STREET_OTHER"</li>
+         <li>"POSTAL_CODE_BUSINESS"</li>
+         <li>"POSTAL_CODE_HOME"</li>
+         <li>"POSTAL_CODE_OTHER"</li>
+         <li>"CITY_BUSINESS"</li>
+         <li>"CITY_HOME"</li>
+         <li>"CITY_OTHER"</li>
+         <li>"STATE_BUSINESS"</li>
+         <li>"STATE_HOME"</li>
+         <li>"STATE_OTHER"</li>
+         <li>"COUNTRY_BUSINESS"</li>
+         <li>"COUNTRY_HOME"</li>
+         <li>"COUNTRY_OTHER"</li>
+        </ul>
+      </li>
+      <li>"EMAIL_FIELDS":
+        <ul>
+         <li>"EMAIL1"</li>
+         <li>"EMAIL2"</li>
+         <li>"EMAIL3"</li>
+         <li>"DISTRIBUTIONLIST"</li>
+        </ul>
+      </li>
+      <li>"NAME_FIELDS":
+        <ul>
+         <li>"DISPLAY_NAME"
+         <li>"SUR_NAME"</li>
+         <li>"MIDDLE_NAME"</li>
+         <li>"GIVEN_NAME"</li>
+         <li>"TITLE"</li>
+         <li>"YOMI_FIRST_NAME"</li>
+         <li>"YOMI_LAST_NAME"</li>
+         <li>"SUFFIX"</li></li>
+        </ul>
+      </li>
+      <li>"PHONE_FIELDS":
+        <ul>
+         <li>"TELEPHONE_ASSISTANT"</li>
+         <li>"TELEPHONE_BUSINESS1"</li>
+         <li>"TELEPHONE_BUSINESS2"</li>
+         <li>"TELEPHONE_CALLBACK"</li>
+         <li>"TELEPHONE_CAR"</li>
+         <li>"TELEPHONE_COMPANY"</li>
+         <li>"TELEPHONE_HOME1"</li>
+         <li>"TELEPHONE_HOME2"</li>
+         <li>"TELEPHONE_IP"</li>
+         <li>"TELEPHONE_ISDN"</li>
+         <li>"TELEPHONE_OTHER"</li>
+         <li>"TELEPHONE_PAGER"</li>
+         <li>"TELEPHONE_PRIMARY"</li>
+         <li>"TELEPHONE_RADIO"</li>
+         <li>"TELEPHONE_TELEX"</li>
+         <li>"TELEPHONE_TTYTDD"</li>
+         <li>"CELLULAR_TELEPHONE1"</li>
+         <li>"CELLULAR_TELEPHONE2"</li>
+         <li>"NUMBER_OF_CHILDREN" </li>
+        </ul>
+      </li>
+      <li>"USER_FIELDS":
+        <ul>
+         <li>"USERFIELD01"</li>
+         <li>"USERFIELD02"</li>
+         <li>"USERFIELD03"</li>
+         <li>"USERFIELD04"</li>
+         <li>"USERFIELD05"</li>
+         <li>"USERFIELD06"</li>
+         <li>"USERFIELD07"</li>
+         <li>"USERFIELD08"</li>
+         <li>"USERFIELD09"</li>
+         <li>"USERFIELD10"</li>
+         <li>"USERFIELD11"</li>
+         <li>"USERFIELD12"</li>
+         <li>"USERFIELD13"</li>
+         <li>"USERFIELD14"</li>
+         <li>"USERFIELD15"</li>
+         <li>"USERFIELD16"</li>
+         <li>"USERFIELD17"</li>
+         <li>"USERFIELD18"</li>
+         <li>"USERFIELD19"</li>
+         <li>"USERFIELD20"</li>
+        </ul>
+      </li>
+      <li>The remaining unassigned fields are:
+        <ul>
+         <li>"CATEGORIES"</li>
+         <li>"COMPANY"</li>
+         <li>"DEPARTMENT"</li>
+         <li>"COMMERCIAL_REGISTER"</li>
+         <li>"MARITAL_STATUS"</li>
+         <li>"PROFESSION"</li>
+         <li>"NICKNAME"</li>
+         <li>"SPOUSE_NAME"</li>
+         <li>"NOTE"</li>
+         <li>"POSITION"</li>
+         <li>"EMPLOYEE_TYPE"</li>
+         <li>"ROOM_NUMBER"</li>
+         <li>"TAX_ID"</li>
+         <li>"BRANCHES"</li>
+         <li>"BUSINESS_CATEGORY"</li>
+         <li>"INFO"</li>
+         <li>"MANAGER_NAME"</li>
+         <li>"ASSISTANT_NAME"</li>
+         <li>"FAX_BUSINESS"</li>
+         <li>"FAX_HOME"</li>
+         <li>"FAX_OTHER"</li>
+         <li>"URL"</li>
+         <li>"INSTANT_MESSENGER1"</li>
+         <li>"INSTANT_MESSENGER2"</li>
+        </ul>
+      </li>
+      </ul>
     defaultValue: ADDRESS_FIELDS, EMAIL_FIELDS, NAME_FIELDS, PHONE_FIELDS, CATEGORIES, COMPANY, DEPARTMENT, COMMERCIAL_REGISTER, POSITION
     version: 
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contact.properties  
+    file: contact.properties
+    packageName: open-xchange-core
     tags: ["Contact"] 
   - key: com.openexchange.contactcollector.enabled
     description: |
@@ -267,7 +384,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: contactcollector.properties  
+    file: contactcollector.properties
+    packageName: open-xchange-core
     tags: ["Contact"]
   - key: com.openexchange.contactcollector.folder.deleteDenied
     description: |
@@ -277,5 +395,6 @@ properties:
     reloadable: true
     configcascadeAware: false
     related: 
-    file: contactcollector.properties  
+    file: contactcollector.properties
+    packageName: open-xchange-core
     tags: ["Contact"]   

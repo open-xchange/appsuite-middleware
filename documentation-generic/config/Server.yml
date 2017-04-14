@@ -8,6 +8,7 @@ properties:
     reloadable: false
     configcascadeAware: false
     file: server.properties
+    packageName: open-xchange-core
     tags: ["Server"]
   - key: com.openexchange.servlet.robotsMetaTag
     description: |
@@ -19,6 +20,7 @@ properties:
     configcascadeAware: false
     related: com.openexchange.servlet.useRobotsMetaTag
     file: server.properties
+    packageName: open-xchange-core
     tags: ["Server"]
   - key: PrefetchEnabled
     description: |
@@ -31,6 +33,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: UPLOAD_DIRECTORY
     description: |
@@ -42,6 +45,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: MAX_UPLOAD_SIZE
     description: |
@@ -57,6 +61,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: MAX_UPLOAD_IDLE_TIME_MILLIS
     description: |
@@ -68,6 +73,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
   - key: MAX_BODY_SIZE
     description: |
       The max. HTTP body size
@@ -79,6 +85,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.defaultMaxConcurrentAJAXRequests
     description: |
@@ -91,6 +98,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: DefaultEncoding
     description: |
@@ -102,6 +110,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.MinimumSearchCharacters
     description: |
@@ -114,6 +123,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: PUBLISH_REVOKE
     description: |
@@ -126,6 +136,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.IPCheck
     description: |
@@ -141,6 +152,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.IPMaskV4
     description: |
@@ -156,6 +168,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.IPMaskV6
     description: |
@@ -171,6 +184,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.IPCheckWhitelist
     description: |
@@ -182,6 +196,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server", "White List"] 
   - key: com.openexchange.UIWebPath
     description: |
@@ -195,6 +210,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.dispatcher.prefix
     description: |
@@ -205,6 +221,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.cookie.ttl
     description: |
@@ -215,6 +232,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.cookie.httpOnly
     description: |
@@ -225,6 +243,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.cookie.hash
     description: |
@@ -239,6 +258,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.cookie.hash.salt
     description: |
@@ -250,6 +270,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.forceHTTPS
     description: |
@@ -263,6 +284,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxActiveSessions
     description: |
@@ -274,6 +296,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxInactiveInterval
     description: |
@@ -287,6 +310,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxBodySize
     description: |
@@ -300,6 +324,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.echoHeaderName
     description: |
@@ -310,6 +335,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.contentSecurityPolicy
     description: |
@@ -322,6 +348,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateTimeWindow
     description: |
@@ -333,6 +360,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxRate
     description: |
@@ -349,6 +377,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientModules
     description: |
@@ -359,6 +388,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientClients
     description: |
@@ -370,6 +400,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientRemoteAddresses
     description: |
@@ -380,6 +411,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateLenientRemoteAddresses
     description: |
@@ -399,6 +431,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.servlet.maxRateKeyPartProviders
     description: |
@@ -409,6 +442,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.log.maxMessageLength
     description: |
@@ -420,7 +454,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server"] 
   - key: com.openexchange.json.maxSize
     description: |
@@ -430,7 +465,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server"] 
   - key: com.openexchange.webdav.disabled
     description: |
@@ -443,6 +479,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.ajax.response.includeStackTraceOnError
     description: |
@@ -452,7 +489,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties  
+    file: Server.properties
+    packageName: open-xchange-core  
     tags: ["Server"] 
   - key: com.openexchange.ajax.response.includeArguments
     description: |
@@ -463,6 +501,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"]  
   - key: com.openexchange.connector.networkListenerHost
     description: |
@@ -474,7 +513,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server", "Host"] 
   - key: com.openexchange.connector.networkListenerPort
     description: |
@@ -484,7 +524,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server", "Port"]   
   - key: com.openexchange.connector.networkSslListenerPort
     description: |
@@ -495,6 +536,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server", "Port"] 
   - key: com.openexchange.connector.maxRequestParameters
     description: |
@@ -504,7 +546,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties  
+    file: Server.properties
+    packageName: open-xchange-core  
     tags: ["Server"] 
   - key: com.openexchange.connector.shutdownFast
     description: |
@@ -520,7 +563,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server"] 
   - key: com.openexchange.connector.awaitShutDownSeconds
     description: |
@@ -534,7 +578,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server"] 
   - key: com.openexchange.server.backendRoute
     description: |
@@ -550,7 +595,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties  
+    file: Server.properties
+    packageName: open-xchange-core  
     tags: ["Server"] 
   - key: com.openexchange.server.considerXForwards
     description: |
@@ -562,7 +608,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties   
+    file: Server.properties
+    packageName: open-xchange-core   
     tags: ["Server"] 
   - key: com.openexchange.server.forHeader
     description: |
@@ -577,6 +624,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"]  
   - key: com.openexchange.server.knownProxies
     description: |
@@ -586,7 +634,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server"] 
   - key: com.openexchange.html.css.parse.timeout
     description: |
@@ -597,7 +646,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties 
+    file: Server.properties
+    packageName: open-xchange-core 
     tags: ["Server", "Timeout"] 
   - key: com.openexchange.log.suppressedCategories
     description: |
@@ -610,6 +660,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.rest.services.basic-auth.login
     description: |
@@ -621,7 +672,8 @@ properties:
     reloadable: false
     configcascadeAware: false
     related: 
-    file: Server.properties  
+    file: Server.properties
+    packageName: open-xchange-core  
     tags: ["Server", "Credential"] 
   - key: com.openexchange.rest.services.basic-auth.password
     description: |
@@ -634,6 +686,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server", "Credential"] 
   - key: com.openexchange.preview.thumbnail.blockingWorker
     description: |
@@ -652,6 +705,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.webdav.recursiveMarshallingLimit
     description: |
@@ -667,6 +721,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.maxSize
     description: |
@@ -679,6 +734,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.maxResolution
     description: |
@@ -691,6 +747,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.waitTimeoutSeconds
     description: |
@@ -702,6 +759,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.tools.images.transformations.preferThumbnailThreshold
     description: |
@@ -719,6 +777,7 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 
   - key: com.openexchange.ical.updateTimezones
     description: |
@@ -732,4 +791,5 @@ properties:
     configcascadeAware: false
     related: 
     file: Server.properties
+    packageName: open-xchange-core
     tags: ["Server"] 

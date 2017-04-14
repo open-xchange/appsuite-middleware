@@ -20,6 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].bucketName
@@ -35,6 +36,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].region
@@ -50,6 +52,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].pathStyleAccess
@@ -64,6 +67,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].accessKey
@@ -75,6 +79,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].secretKey
@@ -86,6 +91,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption
@@ -102,6 +108,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption.rsa.keyStore
@@ -116,6 +123,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption.rsa.password
@@ -130,6 +138,7 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore", "Credential"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].signerOverride
@@ -151,4 +160,5 @@ properties:
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
       tags: ["Filestore"]

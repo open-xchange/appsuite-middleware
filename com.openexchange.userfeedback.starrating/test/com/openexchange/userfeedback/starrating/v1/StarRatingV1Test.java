@@ -87,6 +87,11 @@ public class StarRatingV1Test {
         "}");
 
     // @formatter:off
+    private final String limitFeedbackStr = new String("{ " +
+        "\"comment\": \"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.\""+
+        "}");
+
+    // @formatter:off
     private final String contentOkButUpperCaseFeedbackStr = new String("{ " +
         "\"score\":\"3\","+
         "\"app\":\"app\","+
@@ -261,7 +266,7 @@ public class StarRatingV1Test {
     }
 
     @Test
-    public void testCleanup() throws JSONException, OXException {
+    public void testCleanup() throws JSONException {
         JSONObject feedback = new JSONObject(this.mixedFeedbackStr);
 
         JSONObject remove = (JSONObject) classUnderTest.cleanUpFeedback(feedback, StarRatingV1Fields.requiredJsonKeys());
@@ -281,5 +286,33 @@ public class StarRatingV1Test {
         classUnderTest.prepareAndValidateFeedback(Collections.EMPTY_LIST);
 
         fail();
+    }
+
+    @Test
+    public void testEnsureSizeLimits_valueTooBig_limit() throws JSONException {
+        JSONObject feedback = new JSONObject(limitFeedbackStr);
+        classUnderTest.limit(feedback, StarRatingV1Fields.comment.name(), 15);
+        
+        String limitedValue = feedback.getString("comment");
+        assertTrue(limitedValue.length() <= 15);
+        assertEquals(limitedValue, "Lorem ipsum ...");
+    }
+    
+    @Test
+    public void testEnsureSizeLimits_limitTooSmall_ignore() throws JSONException {
+        JSONObject feedback = new JSONObject(limitFeedbackStr);
+        classUnderTest.limit(feedback, StarRatingV1Fields.comment.name(), 1);
+        
+        String limitedValue = feedback.getString("comment");
+        assertEquals(new JSONObject(limitFeedbackStr).getString("comment"), limitedValue);
+    }
+
+    @Test
+    public void testEnsureSizeLimits_limitNotReached_ignore() throws JSONException {
+        JSONObject feedback = new JSONObject(limitFeedbackStr);
+        classUnderTest.limit(feedback, StarRatingV1Fields.comment.name(), 10000000);
+        
+        String limitedValue = feedback.getString("comment");
+        assertEquals(new JSONObject(limitFeedbackStr).getString("comment"), limitedValue);
     }
 }

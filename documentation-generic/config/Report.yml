@@ -9,6 +9,7 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report"]
   - key: com.openexchange.report.appsuite.maxChunkSize
     description: |
@@ -20,6 +21,7 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report","Limit"]
   - key: com.openexchange.report.appsuite.maxThreadPoolSize
     description: |
@@ -30,6 +32,7 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report","Limit", "Thread"]
   - key: com.openexchange.report.appsuite.threadPriority
     description: |
@@ -40,4 +43,5 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report", "Thread"]           

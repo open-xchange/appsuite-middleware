@@ -12,6 +12,7 @@ properties:
       configcascadeAware: false
       related: 
       file: publications.properties
+      packageName: open-xchange-core
       tags: ["Publication", "White List"]
     - key: com.openexchange.publish.domain
       description: |
@@ -25,6 +26,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.publish.subdomain
       file: publications.properties
+      packageName: open-xchange-core
       tags: ["Publication"]  
     - key: com.openexchange.publish.subdomain
       description: |
@@ -40,6 +42,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.publish.domain
       file: publications.properties
+      packageName: open-xchange-core
       tags: ["Publication"]
     - key: com.openexchange.publish.legalHosterName
       description: |
@@ -53,6 +56,7 @@ properties:
       configcascadeAware: false
       related:
       file: publications.properties
+      packageName: open-xchange-core
       tags: ["Publication"]  
     - key: com.openexchange.publish.createModifyEnabled
       description: |
@@ -64,4 +68,5 @@ properties:
       configcascadeAware: false
       related:
       file: publications.properties
+      packageName: open-xchange-core
       tags: ["Publication"]

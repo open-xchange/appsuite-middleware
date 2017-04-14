@@ -13,6 +13,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.net.ssl.custom.truststore.enabled
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.custom.truststore.enabled
       description: |
@@ -25,6 +26,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.net.ssl.custom.truststore.path, com.openexchange.net.ssl.custom.truststore.password
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.custom.truststore.path
       description: |
@@ -35,6 +37,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.password
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.custom.truststore.password
       description: |
@@ -45,6 +48,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL", "Credential"]
     - key: com.openexchange.net.ssl.hostname.verification.enabled
       description: |
@@ -57,6 +61,7 @@ properties:
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.trustlevel
       description: |
@@ -69,6 +74,7 @@ properties:
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.protocols
       description: |
@@ -79,6 +85,7 @@ properties:
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.ciphersuites
       description: |
@@ -91,6 +98,7 @@ properties:
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.whitelist
       description: |
@@ -103,6 +111,7 @@ properties:
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL", "White List"]
     - key: com.openexchange.net.ssl.user.configuration.enabled
       description: |
@@ -116,5 +125,6 @@ properties:
       related: |
         com.openexchange.net.ssl.trustlevel, JSLob: io.ox/core//trustAllConnections
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
       

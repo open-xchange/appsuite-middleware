@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related:
       file: folderjson.properties
+      packageName: open-xchange-core
       tags: ["Folder", "JSON"]
     - key: com.openexchange.folder.json.servletPath
       description: |
@@ -23,4 +24,5 @@ properties:
       configcascadeAware: false
       related:
       file: folderjson.properties
+      packageName: open-xchange-core
       tags: ["Folder", "JSON"]

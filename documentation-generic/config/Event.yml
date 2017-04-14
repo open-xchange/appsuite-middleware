@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related: 
       file: event.properties
+      packageName: open-xchange-core
       tags: ["Event"]
     - key: com.openexchange.event.eventQueueDelay
       description: |
@@ -27,4 +28,5 @@ properties:
       configcascadeAware: false
       related: com.openexchange.event.isEventQueueEnabled
       file: event.properties
+      packageName: open-xchange-core
       tags: ["Event"]

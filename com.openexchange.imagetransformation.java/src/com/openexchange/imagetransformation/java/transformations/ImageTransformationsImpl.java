@@ -57,6 +57,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import javax.imageio.IIOImage;
@@ -128,6 +130,16 @@ public class ImageTransformationsImpl implements ImageTransformations {
         return new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too high. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
     }
 
+    private static final Comparator<ImageTransformation> TRANSFORMATION_COMPARATOR = new Comparator<ImageTransformation>() {
+
+        @Override
+        public int compare(ImageTransformation t1, ImageTransformation t2) {
+            boolean isRotate1 = t1 == RotateTransformation.getInstance();
+            boolean isRotate2 = t2 == RotateTransformation.getInstance();
+            return isRotate1 ? (isRotate2 ? 0 : 1) : (isRotate2 ? -1 : 0);
+        }
+    };
+
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
     private final TransformationContext transformationContext;
@@ -166,6 +178,18 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     /**
+     * Adds specified transformation to the chain and re-orders that chain to ensure auto-rotation is at chain's head (as previously executed transformations loose EXIF data).
+     *
+     * @param transformation The transformation to add
+     */
+    private void addAndSort(ImageTransformation transformation) {
+        transformations.add(transformation);
+        if (transformations.size() > 1) {
+            Collections.sort(transformations, TRANSFORMATION_COMPARATOR);
+        }
+    }
+
+    /**
      * Initializes a new {@link ImageTransformationsImpl}.
      *
      * @param sourceImage The source image
@@ -197,7 +221,8 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     @Override
     public ImageTransformations rotate() {
-        transformations.add(RotateTransformation.getInstance());
+        // No need to sort
+        transformations.add(0, RotateTransformation.getInstance());
         return this;
     }
 
@@ -214,13 +239,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
         if (maxHeight > Constants.getMaxHeight()) {
             throw new IllegalArgumentException("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
         }
-        transformations.add(new ScaleTransformation(maxWidth, maxHeight, scaleType, shrinkOnly));
+        addAndSort(new ScaleTransformation(maxWidth, maxHeight, scaleType, shrinkOnly));
         return this;
     }
 
     @Override
     public ImageTransformations crop(int x, int y, int width, int height) {
-        transformations.add(new CropTransformation(x, y, width, height));
+        addAndSort(new CropTransformation(x, y, width, height));
         return this;
     }
 

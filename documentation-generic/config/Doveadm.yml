@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST"]
     - key: com.openexchange.dovecot.doveadm.endpoints
       description: |
@@ -16,19 +17,29 @@ properties:
         e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"
 
         Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior
-        com.openexchange.dovecot.doveadm.endpoints.totalConnections        The number of total connections held in HTTP connection pool
-        com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining
-        com.openexchange.dovecot.doveadm.endpoints.readTimeout             The read time-out in milliseconds (default is 10sec)
-        com.openexchange.dovecot.doveadm.endpoints.connectTimeout          The connect time-out in milliseconds (default is 3sec)
-        com.openexchange.dovecot.doveadm.endpoints.checkInterval           The time interval in milliseconds when to check if a previously black-listed end-point is re-available again (default is 60sec)
+        com.openexchange.dovecot.doveadm.endpoints.totalConnections :
+        The number of total connections held in HTTP connection pool.
 
-        "Full example :"
-        com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081
-        com.openexchange.dovecot.doveadm.endpoints.totalConnections=100
-        com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)
-        com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000
-        com.openexchange.dovecot.doveadm.endpoints.connectTimeout=3000
-        com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000
+        com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute :  
+        The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining.
+
+        com.openexchange.dovecot.doveadm.endpoints.readTimeout :  
+        The read time-out in milliseconds (default is 10sec).
+
+        com.openexchange.dovecot.doveadm.endpoints.connectTimeout :  
+        The connect time-out in milliseconds (default is 3sec).
+
+        com.openexchange.dovecot.doveadm.endpoints.checkInterval :  
+        The time interval in milliseconds when to check if a previously black-listed end-point is re-available again (default is 60sec).
+          
+
+        "Full example :"  
+        com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081  
+        com.openexchange.dovecot.doveadm.endpoints.totalConnections=100  
+        com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)  
+        com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000  
+        com.openexchange.dovecot.doveadm.endpoints.connectTimeout=3000  
+        com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000  
 
         The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.
       defaultValue: 
@@ -37,6 +48,7 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST", "Host"]
     - key: com.openexchange.dovecot.doveadm.apiSecret
       description: |
@@ -47,6 +59,7 @@ properties:
       configcascadeAware: false
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST", "Credential"]
     - key: com.openexchange.dovecot.doveadm.proxyDelimiter
       description: |
@@ -58,4 +71,5 @@ properties:
       configcascadeAware: true
       related: 
       file: doveadm.properties
+      packageName: open-xchange-core
       tags: ["Mail","REST", "Credential"]

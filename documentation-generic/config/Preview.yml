@@ -11,6 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: preview.properties
+      packageName: open-xchange-core
       tags: ["Preview", "Caching"]
 
     - key: com.openexchange.preview.cache.quota
@@ -24,6 +25,7 @@ properties:
       configcascadeAware: true
       related: 
       file: preview.properties
+      packageName: open-xchange-core
       tags: ["Preview", "Quota", "Caching"]
 
     - key: com.openexchange.preview.cache.quotaPerDocument
@@ -37,6 +39,7 @@ properties:
       configcascadeAware: true
       related: 
       file: preview.properties
+      packageName: open-xchange-core
       tags: ["Preview", "Quota", "Caching"]
 
     - key: com.openexchange.preview.cache.type
@@ -49,6 +52,7 @@ properties:
       configcascadeAware: false
       related: 
       file: preview.properties
+      packageName: open-xchange-core
       tags: ["Preview", "Caching"]
 
     - key: com.openexchange.preview.cache.quotaAware
@@ -61,4 +65,5 @@ properties:
       configcascadeAware: false
       related: 
       file: preview.properties
+      packageName: open-xchange-core
       tags: ["Preview", "Quota", "Caching"]

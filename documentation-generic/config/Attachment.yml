@@ -12,4 +12,5 @@ properties:
       configcascadeAware: false
       related: 
       file: attachment.properties
+      packageName: open-xchange-core
       tags: ["Attachment", "Contact", "Task", "Appointment", "Limit"]

@@ -49,7 +49,7 @@
 
 package com.openexchange.userfeedback.mail.internal;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -98,24 +98,12 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
-        File feedbackfile = FeedbackMimeMessageUtility.getFeedbackfile(filter);
-        if (feedbackfile != null) {
-            try {
-                result = sendMail(feedbackfile, filter);
-            } catch (OXException e) {
-                boolean deleted = feedbackfile.delete();
-                if (false == deleted) {
-                    LOG.warn("Failed to delete file: {}", feedbackfile);
-                }
-                throw e;
-            }
-            feedbackfile.delete();
-        }
-
+        InputStream data = FeedbackMimeMessageUtility.getFeedbackfile(filter);
+        result = sendMail(data, filter);
         return result;
     }
 
-    private String sendMail(File feedbackFile, FeedbackMailFilter filter) throws OXException {
+    private String sendMail(InputStream data, FeedbackMailFilter filter) throws OXException {
         LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
         boolean sign = false;
         boolean encrypt = false;
@@ -140,15 +128,15 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         StringBuilder result = new StringBuilder();
 
         try {
-            MimeMessage mail = FeedbackMimeMessageUtility.createMailMessage(feedbackFile, filter, smtpSession);
-            
+            MimeMessage mail = FeedbackMimeMessageUtility.createMailMessage(data, filter, smtpSession);
+
             Address[] recipients = null;
             List<InternetAddress> invalidAddresses = new ArrayList<>();
             recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
             if (recipients.length == 0) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
-            
+
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
 

@@ -1,4 +1,4 @@
-feature_name: PushNotificationService
+feature_name: Push
 properties:
     - key: com.openexchange.pns.delayDuration
       description: |
@@ -10,6 +10,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.pns.timerFrequency
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.pns.numProcessorThreads
       description: |
@@ -32,6 +34,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.pns.maxProcessorTasks
       description: |
@@ -43,6 +46,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push","Limit"]
     - key: com.openexchange.pns.transport.apn.ios.enabled
       description: |
@@ -66,6 +70,7 @@ properties:
       configcascadeAware: true
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.pns.transport.apn.ios.feedbackQueryInterval
       description: |
@@ -77,6 +82,7 @@ properties:
       configcascadeAware: false
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.pns.transport.gcm.enabled
       description: |
@@ -100,6 +106,7 @@ properties:
       configcascadeAware: true
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.pns.transport.wns.enabled
       description: |
@@ -123,6 +130,7 @@ properties:
       configcascadeAware: true
       related:
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.pns.transport.websocket.enabled
       description: |
@@ -146,6 +154,7 @@ properties:
       configcascadeAware: true
       related: com.openexchange.websockets.enabled
       file: pns.properties
+      packageName: open-xchange-pns-impl
       tags: ["Push"]
     - key: com.openexchange.push.ms.delayDuration
       description: |
@@ -158,6 +167,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-ms.properties
+      packageName: open-xchange-core
       tags: ["Push"]
     - key: com.openexchange.push.ms.maxDelayDuration
       description: |
@@ -168,6 +178,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-ms.properties
+      packageName: open-xchange-core
       tags: ["Push", "Limit"]
     - key: com.openexchange.push.udp.pushEnabled
       description: |
@@ -178,6 +189,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push"]
     - key: com.openexchange.push.udp.remoteHost
       description: |
@@ -188,6 +200,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push", "Host"]
     - key: com.openexchange.push.udp.registerTimeout
       description: |
@@ -198,6 +211,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push", "Timeout"]
     - key: com.openexchange.push.udp.registerPort
       description: |
@@ -208,6 +222,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push", "Port"]
     - key: com.openexchange.push.udp.registerDistributionEnabled
       description: |
@@ -219,6 +234,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push"]
     - key: com.openexchange.push.udp.eventDistributionEnabled
       description: |
@@ -229,6 +245,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push", "Event"]
     - key: com.openexchange.push.udp.outputQueueDelay
       description: |
@@ -239,6 +256,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push"]
     - key: com.openexchange.push.udp.hostname
       description: |
@@ -250,6 +268,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push", "Host"]
     - key: com.openexchange.push.udp.senderAddress
       description: |
@@ -261,6 +280,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push"]
     - key: com.openexchange.push.udp.multicastEnabled
       description: |
@@ -271,6 +291,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push"]
     - key: com.openexchange.push.udp.multicastAddress
       description: |
@@ -281,6 +302,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push"]
     - key: com.openexchange.push.udp.multicastPort
       description: |
@@ -291,6 +313,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push-udp.properties
+      packageName: open-xchange-core
       tags: ["Push", "Port"]      
       
     - key: com.openexchange.push.imapidle.folder
@@ -302,6 +325,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
       tags: ["Push"]
     - key: com.openexchange.push.imapidle.delay
       description: |
@@ -312,6 +336,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
       tags: ["Push"]
     - key: com.openexchange.push.imapidle.clusterLock
       description: |
@@ -327,6 +352,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
       tags: ["Push"]
     - key: com.openexchange.push.imapidle.pushMode
       description: |
@@ -345,6 +371,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
       tags: ["Push"]
     - key: com.openexchange.push.imapidle.supportsPermanentListeners
       description: |
@@ -360,6 +387,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
       tags: ["Push"]
       
     - key: com.openexchange.push.mail.notify.udp_listen_multicast
@@ -371,6 +399,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
       tags: ["Push"]
     - key: com.openexchange.push.mail.notify.udp_listen_host
       description: |
@@ -381,6 +410,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
       tags: ["Push"]
     - key: com.openexchange.push.mail.notify.udp_listen_port
       description: |
@@ -391,6 +421,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
       tags: ["Push"]
     - key: com.openexchange.push.mail.notify.use_ox_login
       description: |
@@ -406,6 +437,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
       tags: ["Push"]
     - key: com.openexchange.push.mail.notify.use_full_email_address
       description: |
@@ -422,6 +454,7 @@ properties:
       configcascadeAware: false
       related: 
       file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
       tags: ["Push"]
     - key: com.openexchange.push.mail.notify.delay_millis
       description: |
@@ -433,7 +466,5 @@ properties:
       configcascadeAware: false
       related: 
       file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
       tags: ["Push"]
-      
-      
-      
