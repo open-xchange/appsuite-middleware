@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.passwordchange;
 
-import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeScriptResultRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeScriptResultResponse;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 
 /**
@@ -75,7 +75,7 @@ public final class PasswordChangeScriptUpdateAJAXTest extends AbstractPasswordCh
      *
      **/
     public PasswordChangeScriptUpdateAJAXTest() {
-        super();
+        super(PasswordChangeScriptUpdateAJAXTest.class.getName());
     }
 
     /**
@@ -91,7 +91,7 @@ public final class PasswordChangeScriptUpdateAJAXTest extends AbstractPasswordCh
          * Perform update request
          */
         final String newPassword = "(\u0298\u203f\u0298)";
-        final String oldPassword = testUser.getPassword();
+        final String oldPassword = AJAXConfig.getProperty(Property.PASSWORD);
         Executor.execute(getSession(), new PasswordChangeUpdateRequest(newPassword, oldPassword, true));
 
         //verify file contains same text

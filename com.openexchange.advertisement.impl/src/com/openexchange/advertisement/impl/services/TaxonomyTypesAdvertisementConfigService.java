@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.advertisement.impl.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.advertisement.AdvertisementConfigService;
-import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.impl.osgi.Services;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;

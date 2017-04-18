@@ -47,61 +47,45 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.mail.usersetting.reloadable;
 
-import com.openexchange.advertisement.osgi.Services;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.data.ResellerAdmin;
-import com.openexchange.session.Session;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
 /**
- * {@link AccessCombinationAdvertisementConfigService}
+ * {@link ForcedReloadable} that ensures to clear {@link UserSettingMail} cache and guarantees reading the configuration again.<br>
+ * <br>
+ * As the initial configuration setting 'com.openexchange.spamhandler.enabled' is ConfigCascade-aware and might only have configurations within
+ * the contextSets definition we have to force this download as changes in the contextSets cannot be recognized without having a defined file.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.3
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.4
  */
-public class AccessCombinationAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public class UserSettingMailReloadable implements ForcedReloadable {
 
     /**
-     * Gets the instance of {@code AccessCombinationAdvertisementConfigService}; initializes it if necessary.
-     *
-     * @return The instance
+     * Initializes a new {@link UserSettingMailReloadable}.
      */
-    public static AccessCombinationAdvertisementConfigService getInstance() {
-        return new AccessCombinationAdvertisementConfigService();
-    }
-
-    // -------------------------------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link AccessCombinationAdvertisementConfigService}.
-     */
-    private AccessCombinationAdvertisementConfigService() {
+    public UserSettingMailReloadable() {
         super();
     }
 
     @Override
-    protected String getReseller(int contextId) throws OXException {
-        ResellerService resellerService = Services.getService(ResellerService.class);
-        ResellerAdmin resellerAdmin = resellerService.getReseller(contextId);
-        return resellerAdmin.getName();
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            UserSettingMailStorage.getInstance().clearStorage();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserSettingMailReloadable.class);
+            logger.error("Unable to reload configuration for UserSettingMail.", e);
+        }
+
     }
 
     @Override
-    protected String getPackage(Session session) throws OXException {
-        UserPermissionService permissionService = Services.getService(UserPermissionService.class);
-        ContextService contextService = Services.getService(ContextService.class);
-        Context ctx = contextService.getContext(session.getContextId());
-        return permissionService.getAccessCombinationName(ctx, session.getUserId());
+    public Interests getInterests() {
+        return null;
     }
-
-    @Override
-    public String getSchemeId() {
-        return "AccessCombinations";
-    }
-
 }

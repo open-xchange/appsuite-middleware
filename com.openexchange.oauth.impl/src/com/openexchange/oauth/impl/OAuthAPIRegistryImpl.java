@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAPIRegistry;
@@ -89,18 +90,27 @@ public class OAuthAPIRegistryImpl implements OAuthAPIRegistry {
         KnownApi[] apis = KnownApi.values();
         registry = new ConcurrentHashMap<>(apis.length, 0.9F, 1);
         for (KnownApi api : apis) {
-            registry.put(api.getServiceId(), api);
+            registry.put(Strings.asciiLowerCase(api.getServiceId()), api);
+            Collection<String> aliases = api.getAliases();
+            if (null != aliases) {
+                for (String alias : aliases) {
+                    registry.put(Strings.asciiLowerCase(alias), api);
+                }
+            }
         }
     }
 
     @Override
     public boolean registerAPI(String serviceId, API api) {
-        return null == registry.putIfAbsent(serviceId, api);
+        if (Strings.isEmpty(serviceId) || null == api) {
+            return false;
+        }
+        return null == registry.putIfAbsent(Strings.asciiLowerCase(serviceId), api);
     }
 
     @Override
     public API resolveFromServiceId(String serviceId) {
-        return registry.get(serviceId);
+        return null == serviceId ? null : registry.get(Strings.asciiLowerCase(serviceId));
     }
 
     @Override

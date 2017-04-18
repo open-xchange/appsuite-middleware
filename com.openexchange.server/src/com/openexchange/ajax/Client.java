@@ -168,7 +168,7 @@ public enum Client {
      * @return <code>true</code> if given session is associated with App Suite UI client; otherwise <code>false</code>
      */
     public static boolean isAppSuiteUI(Session session) {
-        return isUsmEas(session.getClient());
+        return isAppSuiteUI(session.getClient());
     }
 
     /**

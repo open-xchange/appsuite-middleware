@@ -62,6 +62,9 @@ import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -346,6 +349,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                     if (!rs.next()) {
                         throw UserConfigurationCodes.MAIL_SETTING_NOT_FOUND.create(Integer.valueOf(user), Integer.valueOf(ctx.getContextId()));
                     }
+
                     usm.parseBits(rs.getInt(1));
                     usm.setSendAddr(rs.getString(2));
                     usm.setReplyToAddr(rs.getString(3));
@@ -363,6 +367,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                     loadSignatures(usm, user, ctx, readCon);
                     usm.setModifiedDuringSession(false);
 
+                    applyConfigCascadeSettings(usm, user, ctx);
                     if (null != cache) {
                         /*
                          * Put into cache
@@ -384,6 +389,37 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         } catch (final SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected static final String SPAM_ENABLED = "com.openexchange.spamhandler.enabled";
+
+    protected void applyConfigCascadeSettings(UserSettingMail userSettingMail, int userId, Context ctx) throws OXException {
+        ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (configViewFactory == null) {
+            LOG.warn("Required service ConfigViewFactory absent. Unable to retrieve spam configuration for user {} in context {}.");
+            return;
+        }
+        ConfigView configView = configViewFactory.getView(userId, ctx.getContextId());
+        if (configView == null) {
+            LOG.warn("Required ConfigView not available. Unable to retrieve spam configuration for user {} in context {}.");
+            return;
+        }
+        updateSpamSetting(userSettingMail, userId, ctx, configView);
+    }
+
+    protected void updateSpamSetting(UserSettingMail userSettingMail, int userId, Context ctx, ConfigView configView) throws OXException {
+        ComposedConfigProperty<Boolean> spamEnabledByConfig = configView.property(SPAM_ENABLED, Boolean.class);
+
+        if (!spamEnabledByConfig.isDefined()) {
+            LOG.debug("No config for user {} in context {} found. Falling back to user permission bit for spam handling.", userId, ctx.getContextId());
+            return;
+        }
+        boolean boolSpamEnabledByConfig = spamEnabledByConfig.get().booleanValue();
+        if (userSettingMail.isSpamOptionEnabled() != boolSpamEnabledByConfig) {
+            userSettingMail.setSpamEnabled(boolSpamEnabledByConfig);
+            this.saveUserSettingMail(userSettingMail, userId, ctx);
+            LOG.debug("Updated spam configuration for user {} in context {} to '{}' based on ConfigCascade setting.", userId, ctx.getContextId(), boolSpamEnabledByConfig);
         }
     }
 
@@ -485,7 +521,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         stmt.setInt(8, usm.getAutoLinebreak());
         stmt.setString(9, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
         stmt.setString(10, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
-        stmt.setString(11, usm.getStdDraftsName() == null ? MailStrings.DRAFTS: usm.getStdDraftsName());
+        stmt.setString(11, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
         stmt.setString(12, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
         stmt.setLong(13, usm.getUploadQuota());
         stmt.setLong(14, usm.getUploadQuotaPerFile());

@@ -49,10 +49,10 @@
 
 package com.openexchange.advertisement.json;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.PUT;
@@ -62,11 +62,14 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
+
 import com.openexchange.advertisement.AdvertisementConfigService;
-import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.ConfigResult;
 import com.openexchange.advertisement.json.osgi.Services;
@@ -77,19 +80,19 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link OCPRestService}
+ * {@link AdConfigRestService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 @Path("/advertisement/v1")
-public class OCPRestService {
+public class AdConfigRestService {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/user")
-    public Response putConfig(@QueryParam("ctxId") int ctxId, @QueryParam("userId") int userId, JSONObject body) throws OXException {
+    public Response putConfig(@QueryParam("contextId") int ctxId, @QueryParam("userId") int userId, JSONValue body) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getScheme(ctxId);
         if (configService == null) {
@@ -117,7 +120,7 @@ public class OCPRestService {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/package")
-    public Response putConfig(@QueryParam("reseller") String reseller, @QueryParam("package") String pack, JSONObject body) throws OXException {
+    public Response putConfig(@QueryParam("reseller") String reseller, @QueryParam("package") String pack, JSONValue body) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
@@ -131,7 +134,7 @@ public class OCPRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/reseller")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response putConfig(@QueryParam("reseller") String reseller, JSONArray array) throws OXException {
+    public Response putConfig(@QueryParam("reseller") String reseller, JSONValue body) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
@@ -141,25 +144,32 @@ public class OCPRestService {
         Map<String, String> data;
         //Parse configs String
         try {
+        	JSONArray array = body.toArray();
+        	if (array == null) {
+        		return Response.status(Status.BAD_REQUEST).build();
+        	}
+        	
             if (array.isEmpty()) {
                 ResponseBuilder builder = Response.status(200);
                 builder.entity(new JSONArray(0));
                 return builder.build();
             }
+        	
             data = new LinkedHashMap<>(array.length());
-
-            for (Object value : array.asList()) {
-                if (!(value instanceof HashMap)) {
-                    throw new JSONException("Child is not a JSONObject.");
-                }
-                @SuppressWarnings("unchecked") HashMap<String, String> obj = (HashMap<String, String>) value;
-                String pack = obj.get("package");
-                String config = obj.get("config");
-                config = config == JSONObject.NULL ? null : config;
-                data.put(pack, config);
-            }
+        	for (int i = 0; i < array.length(); i++) {
+        		Object elem = array.get(i);
+        		if (elem instanceof JSONObject) {
+        			JSONObject json = (JSONObject) elem;
+                    String pack = json.getString("package");
+                    Object config = json.get("config");
+                    config = config == JSONObject.NULL ? null : config.toString();                    
+                    data.put(pack, (String) config);
+        		} else {
+        			return Response.status(Status.BAD_REQUEST).build();
+        		}
+        	}
         } catch (JSONException e) {
-            throw AdvertisementExceptionCodes.PARSING_ERROR.create(e.getMessage());
+        	return Response.status(Status.BAD_REQUEST).build();
         }
 
         List<ConfigResult> results = configService.setConfig(reseller, data);
@@ -187,7 +197,7 @@ public class OCPRestService {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/name")
-    public Response putConfigByName(@QueryParam("name") String name, @QueryParam("ctxId") int ctxId, JSONObject body) throws OXException {
+    public Response putConfigByName(@QueryParam("name") String name, @QueryParam("contextId") int ctxId, JSONValue body) throws OXException {    	
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
@@ -199,7 +209,7 @@ public class OCPRestService {
 
     @DELETE
     @Path("/config/user")
-    public Response removeConfig(@QueryParam("ctxId") int ctxId, @QueryParam("userId") int userId) throws OXException {
+    public Response removeConfig(@QueryParam("contextId") int ctxId, @QueryParam("userId") int userId) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getScheme(ctxId);
         if (configService == null) {
@@ -223,7 +233,7 @@ public class OCPRestService {
 
     @DELETE
     @Path("/config/name")
-    public Response removeConfigByName(@QueryParam("name") String name, @QueryParam("ctxId") int ctxId) throws OXException {
+    public Response removeConfigByName(@QueryParam("name") String name, @QueryParam("contextId") int ctxId) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {

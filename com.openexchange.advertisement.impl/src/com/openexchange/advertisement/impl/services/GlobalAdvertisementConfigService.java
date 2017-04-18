@@ -47,55 +47,53 @@
  *
  */
 
-package com.openexchange.mail.loginhandler;
+package com.openexchange.advertisement.impl.services;
 
-import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link TransportLoginHandler} - The login handler for mail transport.
+ * {@link GlobalAdvertisementConfigService} is the default implementation of the {@link AdvertisementConfigService}.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * It returns always the default reseller and the default package.
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public final class TransportLoginHandler implements LoginHandlerService {
+public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
     /**
-     * Initializes a new {@link TransportLoginHandler}.
+     * Gets the instance of {@code GlobalAdvertisementConfigService}; initializes it if necessary.
+     *
+     * @return The instance
      */
-    public TransportLoginHandler() {
+    public static GlobalAdvertisementConfigService getInstance() {
+        return new GlobalAdvertisementConfigService();
+    }
+
+    // ------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link GlobalAdvertisementConfigService}.
+     */
+    private GlobalAdvertisementConfigService() {
         super();
     }
 
     @Override
-    public void handleLogin(final LoginResult login) throws OXException {
-        try {
-            /*
-             * Ensure publishing infostore folder exists
-             */
-            final Context ctx = login.getContext();
-            final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
-            final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
-        } catch (final RuntimeException e) {
-            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-        }
+    protected String getReseller(int contextId) throws OXException {
+        return RESELLER_ALL;
     }
 
     @Override
-    public void handleLogout(final LoginResult logout) throws OXException {
-        // Nothing to do
+    protected String getPackage(Session session) throws OXException {
+        return PACKAGE_ALL;
     }
 
-    private static ServerSession getServerSessionFrom(final Session session, final Context context) {
-        if (session instanceof ServerSession) {
-            return (ServerSession) session;
-        }
-        return ServerSessionAdapter.valueOf(session, context);
+    @Override
+    public String getSchemeId() {
+        return "Global";
     }
+
 }
