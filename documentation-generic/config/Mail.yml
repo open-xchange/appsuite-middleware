@@ -193,18 +193,6 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
-    - key: com.openexchange.mail.attachmentDisplaySizeLimit
-      description: |
-        Specifies the maximum size (in bytes) for email text attachments that will be displayed inline
-        Default is 8192 (8 KB)
-      defaultValue: 8192
-      version: 
-      reloadable: true
-      configcascadeAware: true
-      related: 
-      file: mail.properties
-      packageName: open-xchange-core
-      tags: ["Mail"]
     - key: com.openexchange.mail.mailAccessCacheShrinkerSeconds
       description: |
         Define the interval seconds of the mail access cache's shrinker thread
