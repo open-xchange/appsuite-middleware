@@ -68,6 +68,9 @@ public final class HtmlExceptionMessages implements LocalizableStrings {
     // Thrown when parser failed or timed-out while processing HTML, in turn it cannot be safely displayed
     public static final String PARSING_FAILED_MSG = "The HTML content cannot be safely displayed";
 
+    // Thrown when parser failed or timed-out while processing HTML, in turn it cannot be safely displayed
+    public static final String PARSING_FAILED_WITH_FAILOVERMSG = "The HTML content cannot be safely displayed. The content is displayed as plain text instead.";
+
     /**
      * Prevent instantiation.
      */

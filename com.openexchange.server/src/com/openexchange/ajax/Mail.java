@@ -1499,7 +1499,7 @@ public class Mail extends PermissionServlet {
                     }
                 }
             } else {
-                data = MailConverter.getInstance().convertSingle4Get(mail, paramContainer, session, mailInterface);
+                data = MailConverter.getInstance().convertSingle4Get(mail, paramContainer, warnings, session, mailInterface);
             }
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
@@ -4410,6 +4410,7 @@ public class Mail extends PermissionServlet {
     public void actionGetGetMessageMultiple(ServerSession session, JSONWriter writer, String[] mailIDs, ParamContainer[] containers, String folder, MailServletInterface mailInterfaceArg) throws JSONException {
         try {
             MailServletInterface mailInterface = mailInterfaceArg;
+            List<OXException> warnings = new ArrayList<OXException>(2);
             boolean closeMailInterface = false;
             try {
                 if (mailInterface == null) {
@@ -4429,7 +4430,7 @@ public class Mail extends PermissionServlet {
                         response = new Response(session);
                         response.setException(MailExceptionCode.MAIL_NOT_FOUND.create(mailIDs[i], folder));
                     } else {
-                        JSONObject jMail = MailConverter.getInstance().convertSingle4Get(m, containers[i], session, mailInterface);
+                        JSONObject jMail = MailConverter.getInstance().convertSingle4Get(m, containers[i], warnings, session, mailInterface);
                         response = new Response(session);
                         response.setData(jMail);
                     }
