@@ -120,7 +120,7 @@ public final class JerichoParser {
         }
 
         Segment getContent() {
-            return new Segment(new Source(content), 0, content.length());
+            return null == content ? null : new Segment(new Source(content), 0, content.length());
         }
 
         boolean isCss() {
