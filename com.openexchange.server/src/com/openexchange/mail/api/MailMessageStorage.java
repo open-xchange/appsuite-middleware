@@ -50,6 +50,7 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -154,7 +155,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
-        if (null == contentId) {
+        if (Strings.isEmpty(contentId)) {
             return null;
         }
         final MailMessage mail = getMessage(folder, mailId, false);

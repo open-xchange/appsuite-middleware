@@ -74,6 +74,7 @@ import com.openexchange.continuation.ExecutorContinuation.ContinuationResponseGe
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -512,7 +513,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public MailPart getImageAttachment(String fullName, String mailId, String contentId) throws OXException {
-        if (null == contentId) {
+        if (Strings.isEmpty(contentId)) {
             return null;
         }
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
