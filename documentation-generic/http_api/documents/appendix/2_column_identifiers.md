@@ -86,6 +86,7 @@ specific field data of single or multiple objects.
 | 316 | standard_folder_type |Number|Indicates the default folder type. Zero for non-default folder. See [Standard folder types](#standard-folder-types)|
 | 317 | supported_capabilities |Array|Each element is a String identifying a supported folder capability as described in [supported capabilities](#supported-capabilities). Only applicable for non-mail folders. Read Only, Since 7.4.0.|
 | 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.|
+| 319 | folder_name |String|The raw and therefore untranslated name of this folder|
 | 3010 | com.openexchange.publish.publicationFlag |Boolean|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.|
 | 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.|
 | 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only, Since 6.20.|
