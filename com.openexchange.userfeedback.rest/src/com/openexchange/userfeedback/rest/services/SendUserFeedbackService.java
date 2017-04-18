@@ -85,7 +85,7 @@ import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
  * @since v7.8.4
  */
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
-@Path("/userfeedback/v1/mail")
+@Path("/userfeedback/v1/send")
 public class SendUserFeedbackService extends AbstractUserFeedbackService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendUserFeedbackService.class);
@@ -98,18 +98,19 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
     @Path("/{context-group}/{type}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("subject") String subject, @QueryParam("body") String body, @QueryParam("compress") boolean compress, String json) {
-        return send(contextGroup, type, start, end, subject, body, compress, json);
-    }
-
-    private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, boolean compress, String json) {
-        JSONArray array = null;
+    public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, String json) {
+        JSONObject requestBody = null;
+        String subject = null;
+        String body = null;
+        boolean compress = false;
+        Map<String, String> recipients = null;
+        Map<String, String> pgpKeys = null;
         try {
             validateParams(start, end);
-
-            array = new JSONArray(json);
-            ResponseBuilder builder = null;
-            if (null == subject || Strings.isEmpty(subject)) {
+            requestBody = new JSONObject(json);
+            if (requestBody.hasAndNotNull("subject")) {
+                subject = requestBody.getString("subject");
+            } else {
                 StringBuilder sb = new StringBuilder();
                 sb.append("User Feedback Report");
                 if (start > 0L || end > 0L) {
@@ -124,11 +125,15 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 }
                 subject = sb.toString();
             }
-            if (null == mailBody) {
-                mailBody = "";
+            if (requestBody.hasAndNotNull("body")) {
+                body = requestBody.getString("body");
+            } else {
+                body = "";
             }
-            Map<String, String> recipients = new HashMap<>(array.length());
-            Map<String, String> pgpKeys = new HashMap<>(array.length());
+            compress = requestBody.getBoolean("compress");
+            JSONArray array = requestBody.getJSONArray("recipients");
+            recipients = new HashMap<>(array.length());
+            pgpKeys = new HashMap<>(array.length());
             for (int i = 0; i < array.length(); i++) {
                 JSONObject object = array.getJSONObject(i);
                 String address = object.getString("address");
@@ -142,16 +147,7 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 }
                 recipients.put(address, displayName);
             }
-            FeedbackMailService service = getService(FeedbackMailService.class);
-            FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, pgpKeys, subject, mailBody, start, end, type, compress);
-            String response = service.sendFeedbackMail(filter);
-            builder = Response.status(Status.OK);
-            if (Strings.isEmpty(response)) {
-                return builder.build();
-            }
-            builder.entity(response);
-            builder.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN).type(MediaType.TEXT_PLAIN_TYPE);
-            return builder.build();
+            return send(contextGroup, type, start, end, subject, body, compress, recipients, pgpKeys);
         } catch (JSONException e) {
             ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
             builder.entity(e.getMessage());
@@ -181,5 +177,19 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
             builder.entity(errorJson);
             return builder.build();
         }
+    }
+
+    private Response send(String contextGroup, String type, long start, long end, String subject, String mailBody, boolean compress, Map<String, String> recipients, Map<String, String> pgpKeys) throws OXException {
+        ResponseBuilder builder = null;
+        FeedbackMailService service = getService(FeedbackMailService.class);
+        FeedbackMailFilter filter = new FeedbackMailFilter(contextGroup, recipients, pgpKeys, subject, mailBody, start, end, type, compress);
+        String response = service.sendFeedbackMail(filter);
+        builder = Response.status(Status.OK);
+        if (Strings.isEmpty(response)) {
+            return builder.build();
+        }
+        builder.entity(response);
+        builder.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN).type(MediaType.TEXT_PLAIN_TYPE);
+        return builder.build();
     }
 }

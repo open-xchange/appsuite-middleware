@@ -112,7 +112,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
     private static final String RECIPIENT_LONG = "recipients";
 
     private static final String ENDPOINT_LONG = "api-root";
-    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/mail";
+    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/send";
 
     public static void main(String[] args) {
         new SendUserFeedback().execute(args);
@@ -158,13 +158,6 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             if (cmd.hasOption(END_SHORT)) {
                 target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
             }
-            if (cmd.hasOption(SUBJECT_SHORT)) {
-                target = target.queryParam("subject", cmd.getOptionValue(SUBJECT_SHORT));
-            }
-            if (cmd.hasOption(BODY_SHORT)) {
-                target = target.queryParam("body", cmd.getOptionValue(BODY_SHORT));
-            }
-            target = target.queryParam("compress", cmd.hasOption(COMPRESS_SHORT));
             return target;
         } catch (URISyntaxException e) {
             System.err.print("Unable to return endpoint: " + e.getMessage());
@@ -180,6 +173,14 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
+        JSONObject requestBody = new JSONObject();
+        if (cmd.hasOption(SUBJECT_SHORT)) {
+            requestBody.put("subject", cmd.getOptionValue(SUBJECT_SHORT));
+        }
+        if (cmd.hasOption(BODY_SHORT)) {
+            requestBody.put("body", cmd.getOptionValue(BODY_SHORT));
+        }
+        requestBody.put("compress", cmd.hasOption(COMPRESS_SHORT));
         String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
         JSONArray array = new JSONArray();
         if (recipients.startsWith("@")) {
@@ -188,8 +189,9 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
         } else {
             array.add(0, extractSingleRecipient(recipients));
         }
+        requestBody.put("recipients", array);
         InputStream response = null;
-        response = context.post(Entity.json(array.toString()), InputStream.class);
+        response = context.post(Entity.json(requestBody.toString()), InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
         System.exit(0);
         return null;
