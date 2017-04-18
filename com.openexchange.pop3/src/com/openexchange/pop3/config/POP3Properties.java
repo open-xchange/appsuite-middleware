@@ -264,11 +264,6 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public int getAttachDisplaySize() {
-        return mailProperties.getAttachDisplaySize();
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return mailProperties.getMailFetchLimit();
     }

@@ -578,8 +578,6 @@ public final class MailProperties implements IMailProperties {
 
     private int mailFetchLimit;
 
-    private int attachDisplaySize;
-
     private int bodyDisplaySize;
 
     private boolean userFlagsEnabled;
@@ -712,7 +710,6 @@ public final class MailProperties implements IMailProperties {
         transportServer = null;
         masterPassword = null;
         mailFetchLimit = 0;
-        attachDisplaySize = 0;
         bodyDisplaySize = 10485760; // 10 MB
         userFlagsEnabled = false;
         allowNestedDefaultFolderOnAltNamespace = false;
@@ -855,19 +852,6 @@ public final class MailProperties implements IMailProperties {
                 bodyDisplaySize = 10485760;
                 logBuilder.append("\tBody Display Size Limit: Non parseable value \"").append(bodyDisplaySizeStr).append(
                     fallbackPrefix).append(bodyDisplaySize).append('\n');
-            }
-        }
-
-        {
-            final String attachDisplaySizeStr = configuration.getProperty("com.openexchange.mail.attachmentDisplaySizeLimit", "8192").trim();
-            try {
-                attachDisplaySize = Integer.parseInt(attachDisplaySizeStr);
-                logBuilder.append("\tAttachment Display Size Limit: ").append(attachDisplaySize).append('\n');
-            } catch (final NumberFormatException e) {
-                LOG.debug("", e);
-                attachDisplaySize = 8192;
-                logBuilder.append("\tAttachment Display Size Limit: Non parseable value \"").append(attachDisplaySizeStr).append(
-                    fallbackPrefix).append(attachDisplaySize).append('\n');
             }
         }
 
@@ -1228,11 +1212,6 @@ public final class MailProperties implements IMailProperties {
     @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return allowNestedDefaultFolderOnAltNamespace;
-    }
-
-    @Override
-    public int getAttachDisplaySize() {
-        return attachDisplaySize;
     }
 
     /**

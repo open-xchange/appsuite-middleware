@@ -49,6 +49,7 @@
 
 package com.openexchange.unifiedinbox.config;
 
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.config.MailConfigException;
@@ -86,20 +87,12 @@ public final class UnifiedInboxProperties extends AbstractProtocolProperties imp
 
     @Override
     protected void loadProperties0() throws MailConfigException {
-        final StringBuilder logBuilder = new StringBuilder(1024);
-        logBuilder.append("\nLoading global Unified Mail properties...\n");
-        logBuilder.append("Global Unified Mail properties successfully loaded!");
-        LOG.info(logBuilder.toString());
+        LOG.info("{}Loading global Unified Mail properties...{}Global Unified Mail properties successfully loaded", Strings.getLineSeparator(), Strings.getLineSeparator());
     }
 
     @Override
     protected void resetFields() {
         // Nothing to do
-    }
-
-    @Override
-    public int getAttachDisplaySize() {
-        return mailProperties.getAttachDisplaySize();
     }
 
     @Override

@@ -67,13 +67,6 @@ public interface IMailProperties {
     boolean isAllowNestedDefaultFolderOnAltNamespace();
 
     /**
-     * Gets the max. allowed size (in bytes) for attachment for being displayed.
-     *
-     * @return The max. allowed size (in bytes) for attachment for being displayed
-     */
-    int getAttachDisplaySize();
-
-    /**
      * Indicates whether subscription shall be ignored or not.
      *
      * @return <code>true</code> if subscription shall be ignored; otherwise <code>false</code>
