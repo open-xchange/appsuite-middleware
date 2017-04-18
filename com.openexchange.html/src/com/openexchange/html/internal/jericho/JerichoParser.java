@@ -113,14 +113,14 @@ public final class JerichoParser {
 
         private boolean css;
         private int level = 0;
-        private Segment content;
+        private StringBuilder content;
 
         CSS() {
             super();
         }
 
         Segment getContent() {
-            return content;
+            return new Segment(new Source(content), 0, content.length());
         }
 
         boolean isCss() {
@@ -129,10 +129,9 @@ public final class JerichoParser {
 
         void addSegment(Segment segment) {
             if (null == content) {
-                content = segment;
-            } else {
-                content = combineSegments(content, segment);
+                content = new StringBuilder(segment.length() << 1);
             }
+            content.append(segment);
         }
 
         boolean handleStartTag(StartTag startTag) {
