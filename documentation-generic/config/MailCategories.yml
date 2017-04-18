@@ -64,7 +64,8 @@ properties:
         For each language which should be supported a translated name for the general category should be defined.
         For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO-3166 country code (e.g. de_DE or en_US)
 
-        NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
+        NOTE:  
+        Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
       defaultValue:
       version: 7.8.2
       reloadable: true
@@ -77,7 +78,7 @@ properties:
       description: |
         Specifies a comma separated list of system category identifiers ([category]).
 
-        System categories can be forced but not renamed.
+        System categories can be forced but not renamed.  
         Please note that the use of "general" is prohibited!
       defaultValue:
       version: 7.8.2
@@ -91,7 +92,7 @@ properties:
       description: |
         Specifies a comma separated list of user category identifiers ([category]). E.g.: "uc1,uc2,uc3"
 
-        User categories can be renamed but not be forced.
+        User categories can be renamed but not be forced.  
         Please note that the use of "general" is prohibited!
       defaultValue:
       version: 7.8.2
@@ -105,7 +106,7 @@ properties:
       description: |
         Specifies the category's flag name that is supposed to be used for filter/search expressions executed by mail back-end;
         e.g. "com.openexchange.mail.categories.offers.flag=$offers"
-        Required. 
+        This property is required.  
         [category] must be replaced with the actual category identifier.
       defaultValue:
       version: 7.8.2
@@ -117,8 +118,9 @@ properties:
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].force
       description: |
-        Specifies whether the category is forced; meaning a user is not allowed to disable the category.
-        Required. Only for system categories.
+        Specifies whether the category is forced; meaning a user is not allowed to disable the category.  
+        This property is required.  
+        Only for system categories.  
         [category] must be replaced with the actual category identifier.
       defaultValue: false
       version: 7.8.2
@@ -131,8 +133,8 @@ properties:
     - key: com.openexchange.mail.categories.[category].active
       description: |
         Specifies whether the category is activated/deactivate for a user. Only effective if "force" is set to "false".
-        This setting can be set by a user.
-        Required.
+        This setting can be set by a user.  
+        This property is required.  
         [category] must be replaced with the actual category identifier.
       defaultValue: true
       version: 7.8.2
@@ -144,8 +146,8 @@ properties:
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].name.fallback
       description: |
-        Specifies the category's fall-back name.
-        Required.
+        Specifies the category's fall-back name.  
+        This property is required.  
         [category] must be replaced with the actual category identifier.
       defaultValue:
       version: 7.8.2
@@ -158,10 +160,11 @@ properties:
     - key: com.openexchange.mail.categories.[category].name.[locale]
       description: |
         For each language which should be supported a translated name for the category should be defined.
-        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).
+        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).  
         [category] must be replaced with the actual category identifier.
         
-        NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
+        NOTE:  
+        Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
       defaultValue:
       version: 7.8.2
       reloadable: true
@@ -184,10 +187,11 @@ properties:
     - key: com.openexchange.mail.categories.[category].description.[locale]
       description: |
         For each language which should be supported a translated description for the category should be defined.
-        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).
+        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).  
         [category] must be replaced with the actual category identifier.
         
-        NOTE: Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
+        NOTE:  
+        Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
       defaultValue:
       version: 7.8.2
       reloadable: true

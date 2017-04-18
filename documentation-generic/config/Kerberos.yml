@@ -29,8 +29,10 @@ properties:
     - key: com.openexchange.kerberos.proxyDelimiter
       description: |
         Define a delimiter to be used to separate proxy authentication from normal user login on the frontend login screen. If defined, a proxy
-        user can login on behalf of a user using the form <PROXYACCOUNT><DELIMITER><USERACCOUNT>.
-        NOTE: Login to the mail server is not supported. The implementation for mail filter implementation based on SIEVE protocol does not
+        user can login on behalf of a user using the form &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;.
+
+        NOTE:  
+        Login to the mail server is not supported. The implementation for mail filter implementation based on SIEVE protocol does not
         support a proxy authentication, so it will raise error messages.
       defaultValue: +
       version:

@@ -61,7 +61,8 @@ properties:
     - key: uidAttribute
       description: |
         This attribute is used for login. E.g. uid=<login>,baseDN
-        NOTE: 
+
+        NOTE:  
         If the attribute is not part of the user dn, you need to set bindOnly=false.
       defaultValue: uid
       version:
@@ -99,7 +100,7 @@ properties:
       description: |
         This option activates a special ADS bind. It allows the user to
         authenticate at the ADS with only the displayName or by using the syntax
-        DOMAIN\Samaccountname.
+        <code>DOMAIN\Samaccountname</code>.  
         Note that "\" cannot be used in user names when this option is activated.
       defaultValue: false
       version:
@@ -114,7 +115,9 @@ properties:
         Set bindonly to false if the user entries are not directly contained in the
         entry of the dn, and you have to search within ldap, change ldapScope
         in order to define the search depth.
-        NOTE: When two users exist with the same uidAttribute, authentication
+
+        NOTE:  
+        When two users exist with the same uidAttribute, authentication
         will be refused, though.
       defaultValue: true
       version:
@@ -140,8 +143,9 @@ properties:
       description: |
         Specify the filter to limit the search of user entries (used in combination with subtreeSearch=true).
         The filter will be ANDed with the attributed specified in uidAttribute.
+
         Example:
-        (&(objectclass=posixAccount)(uid=foo))
+        <code>(&(objectclass=posixAccount)(uid=foo))</code>
       defaultValue: (objectclass=posixAccount)
       version:
       reloadable: false
@@ -200,13 +204,16 @@ properties:
     - key: proxyDelimiter
       description: |
         Define a delimiter to be used to seperate Proxy from Userlogin
-        If defined, a proxy user can login on behalf of a user using the form
-        <PROXYACCOUNT><DELIMITER><USERACCOUNT>
+        If defined, a proxy user can login on behalf of a user using the form:  
+        &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;
+
         NOTES:
-            1. The underlying Mailserver must support SASL AUTHPROXYING.
-               The open-xchange mailfilterbundle does not support it, so it will
-               raise errors.
-            2. The same option has to be set in mail.properties
+          <ol>
+            <li>The underlying Mailserver must support SASL AUTHPROXYING.
+                The open-xchange mailfilterbundle does not support it, so it will
+                raise errors.</li>
+            <li>The same option has to be set in mail.properties</li>
+          </ol>
       defaultValue:
       version:
       reloadable: false

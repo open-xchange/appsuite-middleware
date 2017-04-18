@@ -117,16 +117,19 @@ properties:
         If set to true the IMAP authentication plugin gets all IMAP server information from the OX database instead of reading
         configuration from this file.
         Following information is fetched from DB and will be used to authenticate against the server:
-        - server
-        - port
-        - ssl/tls
+        <ul>
+         <li>server</li>
+         <li>port</li>
+         <li>ssl/tls</li>
+        </ul>
         Moreover the proper login name is detected as configured by property "com.openexchange.mail.loginSource".
         To use this feature, set the correct values while provisioning an OX user.
         Useful if you have many IMAP Servers to connect to.
         
         INFO: Domain part of the login is used as context name.
-        Example:
-          test@test.org
+        
+        Example:  
+          test@test.org  
           Username of the OX account must be "test" and name of the OX context must be "test.org".
       defaultValue: false
       version:

@@ -17,7 +17,7 @@ properties:
       description: |
         Define the path for registered servlet
         If set, the complete path is set to specified value regardless of the value of "com.openexchange.folder.json.module" property
-        Default is empty to let path be: "/ajax/" + <module>
+        Default is empty to let path be: "/ajax/" + &lt;module&gt;
       defaultValue:
       version:
       reloadable: false
