@@ -198,7 +198,7 @@ public class TestCommand extends Command {
          * <code>currentdate [":zone" &lt;time-zone: string&gt;] [COMPARATOR] [MATCH-TYPE] &lt;date-part: string&gt; ;&ltkey-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5260#section-5">RFC-5260: Test currentdate</a></p>
          */
-        CURRENTDATE("currentdate", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
+        CURRENTDATE("currentdate", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", currentDateOtherArguments()),
         /**
          * <p>The hasflag test evaluates to true if any of the variables matches any flag name.</p>
          * <code>hasflag [MATCH-TYPE] [COMPARATOR] [&lt;variable-list: string-list&gt;] &lt;list-of-flags: string-list&gt;</code>
@@ -295,12 +295,25 @@ public class TestCommand extends Command {
         }
 
         /**
-         * Specifies the ':zone' argument as described in
+         * Specifies the ':zone' and ':originalzone' argument as described in
          * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone Arguments</a>
          *
          * @return A hashtable with the argument
          */
         private static Hashtable<String, String> dateOtherArguments() {
+            final Hashtable<String, String> arguments = new Hashtable<String, String>(2);
+            arguments.put(":zone", "");
+            arguments.put(":originalzone", "");
+            return arguments;
+        }
+        
+        /**
+         * Specifies the ':zone' argument as described in
+         * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone Arguments</a>
+         *
+         * @return A hashtable with the argument
+         */
+        private static Hashtable<String, String> currentDateOtherArguments() {
             final Hashtable<String, String> arguments = new Hashtable<String, String>(1);
             arguments.put(":zone", "");
             return arguments;
