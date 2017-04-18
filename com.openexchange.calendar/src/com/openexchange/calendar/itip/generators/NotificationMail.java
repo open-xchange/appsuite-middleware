@@ -67,6 +67,7 @@ import com.openexchange.calendar.CalendarField;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -74,6 +75,9 @@ import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.notify.State.Type;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.mail.config.MailProperties;
 
 
 /**
@@ -334,6 +338,12 @@ public class NotificationMail {
     public boolean shouldBeSent() {
         if (appointment != null && endsInPast(appointment)) {
             return false;
+        }
+        if (recipient.getIdentifier() == organizer.getContext().getMailadmin()) {
+            if (MailProperties.getInstance().isAdminMailLoginEnabled() == false || recipient.getEmail() == null || recipient.getEmail().isEmpty()) {
+                // Context administrator is recipient but does not have permission to access mail or rather has no mail account
+                return false;
+            }
         }
         if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
             return true;
