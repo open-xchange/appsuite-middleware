@@ -246,7 +246,7 @@ properties:
     - key: com.openexchange.hazelcast.healthMonitorLevel
       description: |
         Controls the log level for regular statistics of the health monitor. Possible values include <code>off</code>(disables the health monitor), <code>silent</code> (prints out statistics if certain thresholds are exceeded) and <code>noisy</code> (always prints out statistics).
-        <b>Note</b>: Please also check the configured log level for <code>com.hazelcast.internal.diagnostics<code>.
+        <b>Note</b>: Please also check the configured log level for <code>com.hazelcast.internal.diagnostics</code>.
       defaultValue: silent
       version:
       reloadable: false
