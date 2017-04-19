@@ -876,6 +876,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     OXException e = HtmlExceptionCodes.TOO_BIG.create(x, mbe.getMaxSize(), mbe.getSize());
                     warnings.add(e.setCategory(Category.CATEGORY_WARNING).setDisplayMessage(HtmlExceptionMessages.PARSING_FAILED_WITH_FAILOVERMSG, e.getDisplayArgs()));
                     asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
+                    textAppended = true;
                     return true;
                 }
             }
