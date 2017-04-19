@@ -376,8 +376,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     
     private boolean overwritePreLoginCapabilities;
 
-    private boolean overwritePreLoginCapabilities;
-
     private Set<String> propagateHostNames;
 
     private boolean allowFolderCaches;
