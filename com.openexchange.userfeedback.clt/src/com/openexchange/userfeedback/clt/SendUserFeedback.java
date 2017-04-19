@@ -153,10 +153,10 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             WebTarget target = baseTarget.path(contextGroup).path(type);
 
             if (cmd.hasOption(START_SHORT)) {
-                target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
+                target = target.queryParam("start", cmd.getOptionValue(START_SHORT).concat("000")); // convert seconds to ms
             }
             if (cmd.hasOption(END_SHORT)) {
-                target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
+                target = target.queryParam("end", cmd.getOptionValue(END_SHORT).concat("000")); // convert seconds to ms
             }
             return target;
         } catch (URISyntaxException e) {
@@ -246,7 +246,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
         String displayName = "";
         if (startOfAddress >= 0) {
             address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
-            displayName = startOfAddress != 0 ? recipients.substring(0,  startOfAddress - 1) : "" ;
+            displayName = startOfAddress != 0 ? recipients.substring(0, startOfAddress - 1) : "";
         } else {
             address = recipients;
         }

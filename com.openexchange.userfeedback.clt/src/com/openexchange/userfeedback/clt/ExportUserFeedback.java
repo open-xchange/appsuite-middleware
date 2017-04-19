@@ -175,10 +175,10 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             target.request(MediaType.APPLICATION_OCTET_STREAM_TYPE).accept(MediaType.APPLICATION_OCTET_STREAM_TYPE);
 
             if (cmd.hasOption(START_SHORT)) {
-                target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
+                target = target.queryParam("start", cmd.getOptionValue(START_SHORT).concat("000")); // convert seconds to ms
             }
             if (cmd.hasOption(END_SHORT)) {
-                target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
+                target = target.queryParam("end", cmd.getOptionValue(END_SHORT).concat("000")); // convert seconds to ms
             }
             return target;
         } catch (URISyntaxException e) {
