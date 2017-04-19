@@ -62,6 +62,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -82,7 +83,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Separators implements PreferencesItemService {
+public class Separators implements PreferencesItemService, ConfigTreeEquivalent {
 
     /** The primary-only flag */
     final boolean primaryOnly;
@@ -93,6 +94,16 @@ public class Separators implements PreferencesItemService {
     public Separators() {
         super();
         primaryOnly = true;
+    }
+
+    @Override
+    public String getConfigTreePath() {
+        return "modules/mail/separators";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/mail//separators";
     }
 
     /**

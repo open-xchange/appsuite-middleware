@@ -221,6 +221,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private int skipLevel;
 
     /**
+     * Used to track script/svg tags
+     */
+    private boolean insideScriptTag = false;
+
+    /**
      * Used to track all subsequent elements of a tag from which only its tag elements ought to be removed.
      */
     private int depth;
@@ -531,6 +536,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
             } else if (HTMLElementName.TABLE == name) {
                 tablePaddings.poll();
             }
+            if (isCss) {
+                // Ignore end tags in CSS content
+                return;
+            }
             if (depth == 0) {
                 htmlBuilder.append("</").append(name).append('>');
             } else if (!getAndUnmark()) {
@@ -538,6 +547,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         } else {
             skipLevel--;
+            insideScriptTag = false;
         }
     }
 
@@ -545,6 +555,14 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public void handleStartTag(final StartTag startTag) {
         if (maxContentSizeExceeded) {
             // Do not append more elements
+            return;
+        }
+        if (insideScriptTag) {
+            // Ignore script tags completely
+            return;
+        }
+        if (isCss) {
+            // Ignore tags in CSS content
             return;
         }
         final String tagName = startTag.getName();
@@ -593,6 +611,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     /*
                      * Remove whole tag incl. subsequent content and tags
                      */
+                    insideScriptTag = true;
                     skipLevel++;
                 } else {
                     /*
@@ -619,7 +638,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static boolean isRemoveWholeTag(final Tag tag) {
         final String check = tag.getName();
-        return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
+        return (HTMLElementName.SCRIPT == check || "svg".equals(check) || check.startsWith("w:") || check.startsWith("o:"));
     }
 
     private static final Pattern PATTERN_STYLE_VALUE = Pattern.compile("([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}\\p{L}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);

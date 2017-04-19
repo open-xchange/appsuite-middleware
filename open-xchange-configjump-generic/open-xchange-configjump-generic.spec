@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 30
+%define        ox_release 31
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,6 +59,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Apr 12 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-04-18 (4083)
 * Fri Mar 31 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-04-03 (4049)
 * Wed Mar 22 2017 Carsten Hoeger <choeger@open-xchange.com>
