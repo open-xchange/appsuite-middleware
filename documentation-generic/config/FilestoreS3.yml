@@ -4,8 +4,9 @@ feature_description: |
   Amazon Simple Storage Service (Amazon S3). Each connected storage is
   identified by a so called "filestore ID", which refers to the authority
   part of the URI configured in the "uri" column in the "filestore" table of
-  the config database, previously registered using
+  the config database, previously registered using  
   "./registerfilestore -t [filestoreID]".
+
   For each configured filestore, an own set of the properties may be defined,
   replacing [filestoreID] with the actual identifier.
 properties:
@@ -42,7 +43,7 @@ properties:
     - key: com.openexchange.filestore.s3.[filestoreID].region
       description: |
         Configures the Amazon S3 region to use when creating new buckets. This value
-        is also used to pre-configure the client when no specific endpoint is set.
+        is also used to pre-configure the client when no specific endpoint is set.  
         Possible values are "us-gov-west-1", "us-east-1", "us-west-1", "us-west-2",
         "eu-west-1", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1" and
         "sa-east-1".
@@ -98,7 +99,7 @@ properties:
       description: |
         Optionally specifies which client-side encryption should be used. Current
         options include "none" for no encryption, or "rsa" for an RSA-based asymmetric
-        encryption.
+        encryption.  
         Please note that depending on the used key length and Java runtime, one
         might need to replace the so-called "JCE Unlimited Strength Jurisdiction
         Policy Files" accordingly.

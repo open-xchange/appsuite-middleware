@@ -401,6 +401,13 @@ public final class FolderWriter {
                 }
             }
         });
+        m.put(FolderField.FOLDER_NAME_RAW.getColumn(), new FolderFieldWriter() {
+
+            @Override
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.FOLDER_NAME_RAW.getName() : null, folder.getName());
+            }
+        });
         m.put(FolderField.MODULE.getColumn(), new FolderFieldWriter() {
 
             @Override

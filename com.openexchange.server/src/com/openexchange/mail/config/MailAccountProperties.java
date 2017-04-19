@@ -89,11 +89,6 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
     }
 
     @Override
-    public int getAttachDisplaySize() {
-        return lookUpIntProperty("com.openexchange.mail.attachmentDisplaySizeLimit", MailProperties.getInstance().getAttachDisplaySize());
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return lookUpIntProperty("com.openexchange.mail.mailFetchLimit", MailProperties.getInstance().getMailFetchLimit());
     }

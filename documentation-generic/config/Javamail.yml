@@ -251,7 +251,10 @@ properties:
     - key: mail.smtp.from
       description: |
         Email address to use for SMTP MAIL command. This sets the envelope return address.
-         Defaults to msg.getFrom() or InternetAddress.getLocalAddress(). NOTE: mail.smtp.user was previously used for this. 
+         Defaults to msg.getFrom() or InternetAddress.getLocalAddress(). 
+
+         NOTE: 
+         mail.smtp.user was previously used for this. 
       defaultValue: 
       version: 
       reloadable: false

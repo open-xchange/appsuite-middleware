@@ -109,9 +109,13 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
      */
     protected void parseZone(List<Object> argList, JSONObject jsonObject, ServerSession session, String commandName) throws OXException {
         if (jsonObject.hasAndNotNull(DateTestField.zone.name())) {
-            argList.add(ArgumentUtil.createTagArgument("zone"));
             String zone = CommandParserJSONUtil.getString(jsonObject, DateTestField.zone.name(), commandName);
-            argList.add(CommandParserJSONUtil.stringToList(zone));
+            if ("original".equals(zone)) {
+                argList.add(ArgumentUtil.createTagArgument("originalzone"));
+            } else {
+                argList.add(ArgumentUtil.createTagArgument("zone"));
+                argList.add(CommandParserJSONUtil.stringToList(zone));
+            }
         } else {
             // add the zone tag
             if (session != null && session.getUser().getTimeZone() != null) {
@@ -154,7 +158,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
                 default:
                     throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
             }
-           return true;
+            return true;
         } else {
             Comparison comparison = Comparison.valueOf(comparisonTag);
 
@@ -233,13 +237,12 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
     protected void parseComparisonTag(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
 
-
         String matchType = command.getMatchType();
         final String comparison; // = command.getMatchType().substring(1);
         if (matchType == null) {
             comparison = MatchType.is.name();
         } else {
-            if(transformToNotMatcher){
+            if (transformToNotMatcher) {
                 String notMatchType = MatchType.getNotNameForArgumentName(matchType);
                 comparison = notMatchType;
             } else {
@@ -250,7 +253,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         if (MatchType.value.name().equals(comparison) || MatchType.value.getNotName().equals(comparison)) {
             int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
             String resultMatchTtype = ((List<String>) command.getArguments().get(compPos)).get(0);
-            if(transformToNotMatcher){
+            if (transformToNotMatcher) {
                 resultMatchTtype = MatchType.valueOf(resultMatchTtype).getNotName();
             }
             jsonObject.put(DateTestField.comparison.name(), resultMatchTtype);
@@ -260,6 +263,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
     }
 
     private static final TagArgument ZONE_TAG = ArgumentUtil.createTagArgument("zone");
+    private static final TagArgument ORIGINAL_ZONE_TAG = ArgumentUtil.createTagArgument("originalzone");
 
     /**
      * Parses the zone tag
@@ -273,12 +277,14 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
             Object arg = command.getArguments().get(x);
             if (ZONE_TAG.equals(arg)) {
                 Object zoneArgument = command.getArguments().get(x + 1);
-                if(zoneArgument instanceof List<?>){
+                if (zoneArgument instanceof List<?>) {
                     jsonObject.put(DateTestField.zone.name(), ((List<?>) zoneArgument).get(0));
                 } else {
                     jsonObject.put(DateTestField.zone.name(), zoneArgument);
                 }
                 return;
+            } else if (ORIGINAL_ZONE_TAG.equals(arg)) {
+                jsonObject.put(DateTestField.zone.name(), "original");
             }
         }
     }

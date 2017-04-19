@@ -2,9 +2,9 @@ feature_name: IMAP
 feature_description: |
   To differentiate between settings that apply all IMAP accounts or settings that only apply to the primary account
   each property containing the "[.primary]" suffix allows to specify a value only applicable to the primary account
-  by appending the "primary." suffix to properties' common "com.openexchange.imap." prefix..
-  E.g.
-  "com.openexchange.imap.imapTimeout=50000" specifies 50sec read timeout for every IMAP account
+  by appending the "primary." suffix to properties' common "com.openexchange.imap." prefix.  
+  E.g.  
+  "com.openexchange.imap.imapTimeout=50000" specifies 50sec read timeout for every IMAP account  
   "com.openexchange.imap.primary.imapTimeout=20000" specifies 20sec read timeout for primary-only IMAP account
 properties:
     - key: com.openexchange.imap[.primary].imapSort
@@ -13,10 +13,10 @@ properties:
         Leave blank or fill in value "application" to sort within application (slower but good quality).
         The sorting is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in
         mail.properties.
-        NOTE:
+
+        NOTE:  
         This value is going to be set to "application" if IMAP server capabilities do not contain string "SORT".
         Moreover, please also refer to property "com.openexchange.imap.fallbackOnFailedSORT" to specify how to react to a possible "NO" response.
-        Default is "imap"
       defaultValue: imap
       version: 
       reloadable: true
@@ -28,10 +28,11 @@ properties:
     - key: com.openexchange.imap[.primary].imapSearch
       description: |
         Define where to search for emails:
-        - Use value "imap" to let the IMAP Server search. The search is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in mail.properties.
-        - Use value "force-imap" to let the IMAP Server search in every case.
-        - Leave blank or fill in value "application" to search within application.
-        Default is "force-imap"
+        <ul>
+         <li>Use value "imap" to let the IMAP Server search. The search is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in mail.properties.</li>
+         <li>Use value "force-imap" to let the IMAP Server search in every case.</li>
+         <li>Leave blank or fill in value "application" to search within application.</li>
+        <ul>
       defaultValue: force-imap
       version: 
       reloadable: true
@@ -44,7 +45,6 @@ properties:
       description: |
         Specify the threshold for number of search results returned by IMAP server for which manual umlauts-filtering
         will be applied. If less than or equal to zero, no manual filtering will be applied.
-        Default value is 50.
       defaultValue: 50
       version: 
       reloadable: true
@@ -60,8 +60,10 @@ properties:
         transfered during reading response which cause a temporary memory peak.
         If disabled only the necessary fields are used as command arguments,
         which is slower but needs less memory.
-        NOTE: See property "imapMessageFetchLimit" to know which mail folders are
-        treated as large mail folders
+
+        NOTE:  
+        See property "imapMessageFetchLimit" to know which mail folders are
+        treated as large mail folders.
       defaultValue: true
       version: 
       reloadable: true
@@ -73,8 +75,10 @@ properties:
     - key: com.openexchange.imap[.primary].imapSupportsACL
       description: |
         Define if IMAP server supports ACLs. Possible values: true/false/auto
-        NOTE: Value "auto" means to use server-defined ACL support as indicated
-        through response to IMAP command "CAPABILITY"
+
+        NOTE:  
+        Value "auto" means to use server-defined ACL support as indicated
+        through response to IMAP command "CAPABILITY".
       defaultValue: auto
       version: 
       reloadable: true
@@ -162,7 +166,9 @@ properties:
     - key: com.openexchange.imap.spamHandler
       description: |
         Define the registration name of the appropriate spam handler to use
-        Note: This value gets overwritten by "com.openexchange.spamhandler.name" property
+
+        Note:  
+        This value gets overwritten by "com.openexchange.spamhandler.name" property
       defaultValue: DefaultSpamHandler
       version: 
       reloadable: false
@@ -173,7 +179,7 @@ properties:
       tags: ["Mail","IMAP","Spam Handler"]
     - key: com.openexchange.imap[.primary].propagateClientIPAddress
       description: |
-        Whether client's IP address should be propagated by a NOOP command; e.g. "A01 NOOP <CLIENT_IP>"
+        Whether client's IP address should be propagated by a NOOP command; e.g. "A01 NOOP &lt;CLIENT_IP&gt;"
       defaultValue: false
       version: 
       reloadable: true
@@ -184,7 +190,7 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].propagateHostNames
       description: |
-        Configure a comma-separated list of external IMAP server's host names which should receive client's IP address by a NOOP command, too
+        Configure a comma-separated list of external IMAP server's host names which should receive client's IP address by a NOOP command, too.
       defaultValue: 
       version: 
       reloadable: true
@@ -198,7 +204,8 @@ properties:
         The max. number of connection allowed being established for a user to an IMAP server. Less than or equal to zero means infinite.
         Please also consider "com.openexchange.imap.storeContainerType".
         
-        Note: This setting overrides possibles restrictions specified through property "com.openexchange.imap.maxNumExternalConnections" if
+        Note:  
+        This setting overrides possibles restrictions specified through property "com.openexchange.imap.maxNumExternalConnections" if
         this property's value is less than the other one.
       defaultValue: 0
       version: 
@@ -248,11 +255,14 @@ properties:
     - key: com.openexchange.imap.maxNumExternalConnections
       description: |
         Configure the max. number of concurrent connections which are allowed being established to a subscribed/external IMAP account.
-        Notation is a comma-separated list of: <host> + ':' + <max-count>; e.g.:
+
+        Notation is a comma-separated list of: &lt;host&gt; + ':' + &lt;max-count&gt;; e.g.:  
             com.openexchange.imap.maxNumExternalConnections=imap.host1.com:4, imap.host2.com:6
-        For convenience a max-count can be specified which applies to all subscribed/external IMAP accounts; e.g.:
+
+        For convenience a max-count can be specified which applies to all subscribed/external IMAP accounts; e.g.:  
             com.openexchange.imap.maxNumExternalConnections=4
-        Zero or less is interpreted as unlimited.
+
+        Zero or less is interpreted as unlimited.  
         If not set, unlimited concurrent connections are allowed.
       defaultValue: imap.gmail.com:2,imap.googlemail.com:2
       version: 
@@ -265,7 +275,9 @@ properties:
     - key: com.openexchange.imap[.primary].enableTls
       description: |
         Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
-        Note: This property is statically used in IMAP authentication bundle
+
+        Note:  
+        This property is statically used in IMAP authentication bundle
       defaultValue: true
       version: 
       reloadable: true
@@ -276,9 +288,8 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.invalidMailboxNameCharacters
       description: |
-        Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;
-        e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . | \\"<<
-        Default is empty.
+        Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;  
+        e.g. <code>; / . | \\</code>
       defaultValue: 
       version: 
       reloadable: true
@@ -290,8 +301,9 @@ properties:
     - key: com.openexchange.imap[.primary].allowFolderCaches
       description: |
         Enables/disables caching of IMAP folders.
-        Default is true.
-        Note: Only disable IMAP folder cache if you certainly know what you are doing.
+
+        Note:  
+        Only disable IMAP folder cache if you certainly know what you are doing.
         Disabling that cache may result in noticeable performance decrease.
       defaultValue: true
       version: 
@@ -304,9 +316,9 @@ properties:
     - key: com.openexchange.imap[.primary].ssl.protocols
       description: |
         Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
-        Default is empty
         
-        Note: This property is statically used in IMAP authentication bundle
+        Note:  
+        This property is statically used in IMAP authentication bundle
       defaultValue: true
       version: 
       reloadable: true
@@ -318,10 +330,11 @@ properties:
     - key: com.openexchange.imap[.primary].ssl.ciphersuites
       description: |
         Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
-        Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.
+        Check "http://&lt;ox-grizzly-hostname&gt;:&lt;ox-grizzly-port&gt;/stats/diagnostic?param=ciphersuites" to check available cipher suites.
         Default value is empty (fall-back to current JVM's default SSL cipher suite)
         
-        Note: This property is statically used in IMAP authentication bundle
+        Note:  
+        This property is statically used in IMAP authentication bundle
       defaultValue: true
       version: 
       reloadable: true
@@ -343,9 +356,8 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.invalidMailboxNameCharacters
       description: |
-        Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;
-        e.g. >>com.openexchange.imap.invalidMailboxNameCharacters="; / . | \\"<<
-        Default is empty.
+        Specifies a space-separated list of characters that are not allowed to be contained in a mailbox name;  
+        e.g. <code>; / . | \\</code>
       defaultValue: 
       version: 
       reloadable: true
@@ -364,8 +376,6 @@ properties:
         globally (only requested once).
         
         Do not touch unless you certainly know IMAP sever's behavior.
-        
-        Default is "true"
       defaultValue: true
       version: 
       reloadable: true
@@ -378,8 +388,6 @@ properties:
       description: |
         If either "true" or "false" set, it enforces whether to assume root sub-folder capability for primary account.
         If not set, root sub-folder capability is probed through creating a temporary folder.
-        
-        Default is empty (probe through temp. folder)
       defaultValue: 
       version: 
       reloadable: true
@@ -391,8 +399,6 @@ properties:
     - key: com.openexchange.imap.allowSORTDISPLAY
       description: |
         Specifies if "SORT=DISPLAY" IMAP extension is supposed to be considered when returning a mail listing sorted by From/To
-        
-        Default is "false"
       defaultValue: false
       version: 
       reloadable: true
@@ -405,9 +411,9 @@ properties:
       description: |
         Specifies if a fall-back to in-application sort is supposed to be performed in case the IMAP server quits with a "NO" response for the
         issued SORT command.
-        Note: Doing in-application sort contains the danger of utilizing too much memory (especially for big mailboxes).
-        
-        Default is "false"
+
+        Note:  
+        Doing in-application sort contains the danger of utilizing too much memory (especially for big mailboxes).
       defaultValue: false
       version: 
       reloadable: true
@@ -421,9 +427,7 @@ properties:
         Enables the audit log for issued IMAP commands via 'com.sun.mail.imap.AuditLog' class.
         
         Accepts the "primary." suffix to only enable for primary account;
-        e.g. "com.openexchange.imap.primary.auditLog.enabled=true"
-        
-        Default is "false"
+        e.g. <code>com.openexchange.imap.primary.auditLog.enabled=true</code>
       defaultValue: false
       version: 
       reloadable: true
@@ -435,8 +439,6 @@ properties:
     - key: com.openexchange.imap.initWithSpecialUse
       description: |
         Specifies whether the primary mail account should be initialized with special-use folders from the imap server in case no standard folder names are configured.
-        
-        Default is 'true'
       defaultValue: true
       version: 
       reloadable: true
@@ -448,7 +450,7 @@ properties:
     - key: com.openexchange.imap.greeting.host.regex
       description: |
         Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary
-        IMAP server. Only applicable for primary IMAP server! Default is empty.
+        IMAP server. <b>Only applicable for primary IMAP server!</b>
 
         The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
 
@@ -468,8 +470,8 @@ properties:
         typically useful in case there is another IMAP service used as proxy to the actual IMAP server, which might advertise different
         capabilities. 
 
-        Accepts the "primary." suffix to only enable for primary account;
-        e.g. "com.openexchange.imap.primary.overwritePreLoginCapabilities=true"
+        Accepts the "primary." suffix to only enable for primary account;  
+        e.g. <code>com.openexchange.imap.primary.overwritePreLoginCapabilities=true</code>
       defaultValue: false
       version: 7.8.4
       reloadable: true

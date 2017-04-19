@@ -60,6 +60,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -111,6 +112,9 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         String secretKeyPassword = null;
         PGPSecretKey signingKey = null;
         PGPMimeService pgpMimeService = Services.getService(PGPMimeService.class);
+        List<InternetAddress> invalidAddresses = new ArrayList<>();
+        List<InternetAddress> pgpFailedAddresses = new ArrayList<>();
+        Map<Address, PGPPublicKey> pgpRecipients = null;
         if (null != pgpMimeService) {
             secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
             secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
@@ -119,6 +123,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 sign = true;
             }
             if (null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
+                pgpRecipients = FeedbackMimeMessageUtility.extractRecipientsForPgp(filter, invalidAddresses, pgpFailedAddresses);
                 encrypt = true;
             }
         }
@@ -131,26 +136,25 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             MimeMessage mail = FeedbackMimeMessageUtility.createMailMessage(data, filter, smtpSession);
 
             Address[] recipients = null;
-            List<InternetAddress> invalidAddresses = new ArrayList<>();
+
             recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
             if (recipients.length == 0) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
+            mail.addRecipients(RecipientType.TO, recipients);
 
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
 
-            List<InternetAddress> pgpFailedAddresses = new ArrayList<>();
-
             if (encrypt) {
-                Map<Address, PGPPublicKey> pgpRecipients = FeedbackMimeMessageUtility.extractRecipientsForPgp(filter, invalidAddresses, pgpFailedAddresses);
                 MimeMessage pgpMail = null;
+                Address[] pgpAddresses = pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]);
+                mail.addRecipients(RecipientType.TO, pgpAddresses);
                 if (sign) {
                     pgpMail = pgpMimeService.encryptSigned(mail, signingKey, secretKeyPassword.toCharArray(), new ArrayList<>(pgpRecipients.values()));
                 } else {
                     pgpMail = pgpMimeService.encrypt(mail, new ArrayList<>(pgpRecipients.values()));
                 }
-                Address[] pgpAddresses = pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]);
                 transport.sendMessage(pgpMail, pgpAddresses);
                 appendPositiveSendingResult(pgpAddresses, result, sign, true);
             }

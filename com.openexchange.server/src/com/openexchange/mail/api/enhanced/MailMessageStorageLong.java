@@ -50,6 +50,7 @@
 package com.openexchange.mail.api.enhanced;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -232,7 +233,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws OXException If no image can be found whose <code>Content-Id</code> header matches given <code>contentId</code>.
      */
     public MailPart getImageAttachmentLong(final String folder, final long mailId, final String contentId) throws OXException {
-        if (null == contentId) {
+        if (Strings.isEmpty(contentId)) {
             return null;
         }
         final MailMessage mail = getMessageLong(folder, mailId, false);

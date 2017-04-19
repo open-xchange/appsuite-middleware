@@ -19,8 +19,8 @@ properties:
     description: |
       Every client tells the backend through the client parameter on the login request his identity. This is not possible when using the HTTP
       authorization header based login. So the client identifier for that request is defined here. It must be the same identifier that the web
-      frontend uses, if you set com.openexchange.cookie.hash to calculate and want the previously configured autologin to work.
-      "Identifier for OX6 UI is: com.openexchange.ox.gui.dhtml"
+      frontend uses, if you set com.openexchange.cookie.hash to calculate and want the previously configured autologin to work.  
+      "Identifier for OX6 UI is: com.openexchange.ox.gui.dhtml"  
       "Identifier for App Suite UI is: open-xchange-appsuite (which is the default)"
     defaultValue: open-xchange-appsuite
     version: 
@@ -47,7 +47,8 @@ properties:
       Configures whether an insecure login is allowed. Meaning if local IP and/or user-agent strings are replaced in associated user session on
       login redirect or login redeem requests. To create a session from a server for some client you have to pass the clients IP address when
       creating the session.
-      WARNING! Setting this parameter to true may result in users seeing a different users content if the infrastructure around OX does not work
+
+      <b>WARNING!</b> Setting this parameter to true may result in users seeing a different users content if the infrastructure around OX does not work
       correctly.
     defaultValue: false
     version: 
@@ -100,21 +101,21 @@ properties:
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.formatstring.login
     description: |
-      Specifies the format for a logged login.
+      Specifies the format for a logged login.  
       Default format string "$login $ip $auth $agent $client $c $u $s"
 
-      $s - session information
-      $c - context information
-      $u - user information
-      $login - login string
-      $ip - IP
-      $auth - auth ID
-      $agent - User-Agent
-      $client - client identifier (and version)
+      $s - session information  
+      $c - context information  
+      $u - user information  
+      $login - login string  
+      $ip - IP  
+      $auth - auth ID  
+      $agent - User-Agent  
+      $client - client identifier (and version)  
       $iface - associated interface
       
-      e.g. "$u - $c - $s - $agent - $client"
-    defaultValue: empty
+      e.g. <code>$u - $c - $s - $agent - $client</code>
+    defaultValue:
     version: 
     reloadable: false
     configcascadeAware: false
@@ -124,15 +125,15 @@ properties:
     tags: ["Login"] 
   - key: com.openexchange.ajax.login.formatstring.logout
     description: |
-      Specifies the format for a logged logout.
+      Specifies the format for a logged logout.  
       Default format string "Logout $c $u $s"
       
-      $s - session information
-      $c - context information
+      $s - session information  
+      $c - context information  
       $u - user information
       
-      e.g. "$u - $c - $s"
-    defaultValue: empty
+      e.g. <code>$u - $c - $s</code>
+    defaultValue:
     version: 
     reloadable: false
     configcascadeAware: false
@@ -162,8 +163,8 @@ properties:
   
       A client that exceeds that limit will receive a "429 Too Many Requests" HTTP error code
       That rate limit acts like a sliding window time frame; meaning that it considers only
-      requests that fit into time windows specified through "com.openexchange.ajax.login.maxRateTimeWindow" from current time stamp":"
-      window-end := $now
+      requests that fit into time windows specified through "com.openexchange.ajax.login.maxRateTimeWindow" from current time stamp:  
+      window-end := $now  
       window-start := $window-end - $maxRateTimeWindow
 
       The general rate limiter behavior is specified in 'server.properties' file through "com.openexchange.servlet.maxRate*" properties.

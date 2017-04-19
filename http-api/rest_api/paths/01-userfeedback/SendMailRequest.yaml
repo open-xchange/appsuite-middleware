@@ -1,6 +1,6 @@
-/userfeedback/v1/mail/{context-group}/{type}:
+/userfeedback/v1/send/{context-group}/{type}:
   post:
-    operationId: sendMail
+    operationId: send
     tags:
       - Userfeedback
     summary: Exports user feedback and sends exported data to provided recipients
@@ -35,20 +35,20 @@
         format: int64
       - 
         name: subject
-        in: query
+        in: body
         description: "The mail subject. Default: User Feedback Report: [time range]"
         required: false
         type: string
       - 
         name: body
-        in: query
+        in: body
         description: The mail body (plain text).
         required: false
         type: string
       - 
         name: compress
-        in: query
-        description: Compress exported feedback
+        in: body
+        description: Compress exported feedback. Default: false.
         required: true
         type: boolean
       - 
@@ -82,12 +82,15 @@
       Example:
         description: Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org
         example: >
-                 POST http://localhost:8009/userfeedback/v1/mail/default/star-rating-v1?start=1451606400&end=1483228799
-                 [
-                   {"address":"user1@example.org",
-                    "displayName":"User 1",
-                    "pgpKey":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."},
-                   {"address":"user2@example.org",
-                    "displayName":"User 2",
-                    "pgpKey":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."}
-                 ]
+                 POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799
+                 {"subject":"User Feedback",
+                  "body":"User Feedback",
+                  "recipients": [
+                    {"address":"user1@example.org",
+                     "displayName":"User 1",
+                     "pgpKey":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."},
+                    {"address":"user2@example.org",
+                     "displayName":"User 2",
+                     "pgpKey":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."}
+                  ]
+                 }
