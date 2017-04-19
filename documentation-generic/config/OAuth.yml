@@ -4,16 +4,18 @@ properties:
       description: |
         A comma seperated list of enabled oauth modules. 
         This list can be configured for each individual oauth provider. 
-        To identify the oauth provider replace [oauth_provider] with the last part of the provider id.
-        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google
+        To identify the oauth provider replace [oauth_provider] with the last part of the provider id.  
+        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google  
         Available modules are:
-         -mail
-         -calendar_ro
-         -contacts_ro
-         -calendar
-         -contacts
-         -drive
-         -generic 
+          <ul>
+           <li>mail</li>
+           <li>calendar_ro</li>
+           <li>contacts_ro</li>
+           <li>calendar</li>
+           <li>contacts</li>
+           <li>drive</li>
+           <li>generic</li>
+          </ul>
       defaultValue: null
       version: 7.8.3
       reloadable: true
@@ -27,14 +29,16 @@ properties:
         Enables or disables the oauth service with the service id [serviceId]. 
 
         Currently known service ids:
-          * boxcom
-          * dropbox
-          * google
-          * linkedin
-          * msliveconnect
-          * twitter
-          * xing
-          * yahoo
+          <ul>
+           <li>boxcom</li>
+           <li>dropbox</li>
+           <li>google</li>
+           <li>linkedin</li>
+           <li>msliveconnect</li>
+           <li>twitter</li>
+           <li>xing</li>
+           <li>yahoo</li>
+          </ul>
       defaultValue: false
       version:
       reloadable: true
@@ -71,7 +75,7 @@ properties:
       tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].redirectUrl
       description: |
-        The redirect url of your [serviceId] application.
+        The redirect url of your [serviceId] application.  
         E.g. "https://myappsuite.mydomain.invalid/ajax/defer"
 
         See com.openexchange.oauth.[serviceId] for a list of currently known service ids.

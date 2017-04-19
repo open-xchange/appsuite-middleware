@@ -53,10 +53,12 @@ properties:
         The queue type to use for holding tasks before they are executed. This queue will
         hold only the tasks submitted by the execute method.
         Supported values: synchronous and linked
+
         A synchronous queue is an appropriate choice when "com.openexchange.threadpool.maximumPoolSize"
         is unlimited and possible rejection of tasks is allowed. A synchronous queue has no capacity,
         it rather acts as a direct hand-off of tasks to an already waiting worker thread and will deny
         the task if there is no further worker thread to process the task.
+
         A linked queue is an appropriate choice when "com.openexchange.threadpool.maximumPoolSize"
         is limited and rejection of tasks is prohibited. A linked queue has a (fixed) capacity to store
         submitted tasks which have to wait for a worker thread to become ready.
@@ -96,11 +98,13 @@ properties:
     - key: com.openexchange.threadpool.refusedExecutionBehavior
       description: |
         The default behavior to obey when execution is blocked because the thread bounds and queue
-        capacities are reached.
-        Supported values: abort, caller-runs, discard
-        - abort: Aborts execution by throwing an appropriate exception to the caller.
-        - caller-runs: The caller is considered to run the task if thread pool is unable to do so.
-        - discard: The task is silently discarded. No exception is thrown.
+        capacities are reached.  
+        Supported values:
+          <ul>
+           <li><code>abort</code> - Aborts execution by throwing an appropriate exception to the caller.</li>
+           <li><code>caller-runs</code> - The caller is considered to run the task if thread pool is unable to do so.</li>
+           <li><code>discard</code> - The task is silently discarded. No exception is thrown.</li>
+          </ul>
       defaultValue: abort
       version:
       reloadable: false

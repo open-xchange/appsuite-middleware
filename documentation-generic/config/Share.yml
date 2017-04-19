@@ -30,7 +30,7 @@ properties:
       description: |
         Specifies a comma-separated list (ignore-case) of such User-Agents that are supposed to receive a "404 Not Found" when trying to
         access a share link. White-card notation is supported; e.g. "*aolbuild*".
-        This configuration option is only effective if "com.openexchange.share.userAgentBlacklist.enabled" is set to "true"
+        This configuration option is only effective if "com.openexchange.share.userAgentBlacklist.enabled" is set to "true".
       defaultValue: "*aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*"
       version: 7.8.4
       reloadable: true
@@ -239,10 +239,10 @@ properties:
         shared with them. Additionally it is possible to define further capabilities
         to let guests have some more of the installed features enabled. This setting
         can also be changed via config cascade for certain contexts and context sets.
-        One of three different modes can be chosen:
-          - deny_all: guest users have no additional capabilities applied
+        One of three different modes can be chosen:  
+          - deny_all: guest users have no additional capabilities applied  
           - static:   every guest user obtains a statically configured set of
-                capabilities (com.openexchange.share.staticGuestCapabilities)
+                capabilities (com.openexchange.share.staticGuestCapabilities)  
           - inherit:  guest users inherit the capabilities of the user who created
                 the (initial) according share
       defaultValue: static

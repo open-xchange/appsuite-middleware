@@ -35,7 +35,7 @@ properties:
       tags: ["Twitter", "Port"]
     - key: com.openexchange.twitter.http.connectionTimeout
       description: |
-        Connection time out
+        The connection time out.
       defaultValue: 20000
       version:
       reloadable: false
@@ -46,7 +46,7 @@ properties:
       tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.readTimeout
       description: |
-        Read time out
+        The read time out.
       defaultValue: 120000
       version:
       reloadable: false
@@ -57,7 +57,7 @@ properties:
       tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.retryCount
       description: |
-        Retry count
+        The retry count.
       defaultValue: 3
       version:
       reloadable: false
@@ -68,7 +68,7 @@ properties:
       tags: ["Twitter"]
     - key: com.openexchange.twitter.http.retryIntervalSecs
       description: |
-        Retry interval seconds
+        The retry interval in seconds.
       defaultValue: 10
       version:
       reloadable: false

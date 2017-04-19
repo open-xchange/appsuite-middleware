@@ -18,7 +18,9 @@ properties:
       description: |
         If enabled, this allows you to have a different domain as
         part of the URI for publications.
-        NOTE: If you enable both the domain and the subdomain option,
+
+        NOTE:  
+        If you enable both the domain and the subdomain option,
         domain takes precedence.
       defaultValue: 
       version:
@@ -34,7 +36,9 @@ properties:
         part of the URI for publications. This subdomain will be
         prepended to the domain of the server you are currently using.
         No need to end the subdomain name with a dot, btw.
-        NOTE: If you enable both the domain and the subdomain option,
+
+        NOTE:  
+        If you enable both the domain and the subdomain option,
         domain takes precedence.
       defaultValue:  
       version:
@@ -48,7 +52,9 @@ properties:
       description: |
         The legal name of the company that will be displayed in the
         disclaimer of the default publication template.
-        NOTE: If no value is set or the property is commented out, the
+
+        NOTE:  
+        If no value is set or the property is commented out, the
         default will be the generic wording 'the hoster'.
       defaultValue:
       version:
