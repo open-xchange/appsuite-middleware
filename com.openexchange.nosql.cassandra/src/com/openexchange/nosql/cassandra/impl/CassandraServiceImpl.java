@@ -122,6 +122,11 @@ public class CassandraServiceImpl implements CassandraService {
         asynchronousSessions = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Initialises the cluster connection
+     * 
+     * @throws OXException if initialisation fails
+     */
     public void init() throws OXException {
         try {
             // Initialise cluster
