@@ -380,7 +380,12 @@ public final class JerichoParser {
                                 // Leaving <style> section
                                 Segment cssContent = css.getContent();
                                 if (Strings.isNotEmptyCharSequence(cssContent)) {
-                                    handler.handleSegment(cssContent);
+                                    int cssThreshold = HtmlServices.cssThreshold();
+                                    if (cssThreshold > 0 && cssThreshold < cssContent.length()) {
+                                        LOG.debug("Discarding content of <style> tag as its size ({}) exceeds max. allowed size ({})", Integer.valueOf(cssContent.length()), Integer.valueOf(cssThreshold));
+                                    } else {
+                                        handler.handleSegment(cssContent);
+                                    }
                                 }
                                 handler.markCssEnd(endTag);
                             } else {
