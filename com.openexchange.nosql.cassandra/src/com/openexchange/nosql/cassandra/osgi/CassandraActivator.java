@@ -146,7 +146,7 @@ public class CassandraActivator extends HousekeepingActivator {
     }
 
     /**
-     * {@link CassandraInitialiser} - Self cancelling scheduled task
+     * {@link CassandraInitialiser} - Self-cancelling scheduled task
      */
     private final class CassandraInitialiser implements Runnable {
 
