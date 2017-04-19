@@ -130,7 +130,9 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
             } else {
                 body = "";
             }
-            compress = requestBody.getBoolean("compress");
+            if (requestBody.hasAndNotNull("compress")) {
+                compress = requestBody.getBoolean("compress");
+            }
             JSONArray array = requestBody.getJSONArray("recipients");
             recipients = new HashMap<>(array.length());
             pgpKeys = new HashMap<>(array.length());
