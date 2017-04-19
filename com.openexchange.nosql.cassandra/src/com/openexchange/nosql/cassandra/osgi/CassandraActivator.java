@@ -49,17 +49,22 @@
 
 package com.openexchange.nosql.cassandra.osgi;
 
+import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.nosql.cassandra.CassandraService;
+import com.openexchange.nosql.cassandra.exceptions.CassandraServiceExceptionCodes;
 import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
 import com.openexchange.nosql.cassandra.mbean.CassandraClusterMBean;
 import com.openexchange.nosql.cassandra.mbean.impl.CassandraClusterMBeanImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link CassandraActivator}
@@ -70,6 +75,9 @@ public class CassandraActivator extends HousekeepingActivator {
 
     private CassandraService cassandraService;
     private ObjectName objectName;
+    private static final long DELAY = TimeUnit.SECONDS.toMillis(15);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraActivator.class);
+    private ScheduledTimerTask timerTask;
 
     /**
      * Initialises a new {@link CassandraActivator}.
@@ -80,15 +88,26 @@ public class CassandraActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ManagementService.class, LeanConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, ManagementService.class, LeanConfigurationService.class, TimerService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        CassandraService cassandraService = new CassandraServiceImpl(this);
+        final CassandraService cassandraService = new CassandraServiceImpl(this);
         registerService(CassandraService.class, cassandraService);
         addService(CassandraService.class, cassandraService);
         this.cassandraService = cassandraService;
+        try {
+            ((CassandraServiceImpl) cassandraService).init();
+        } catch (OXException e) {
+            if (!CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.equals(e)) {
+                throw e;
+            }
+            // Create a self-cancelling task to initialise the cassandra service
+            LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), DELAY, e);
+            TimerService service = getService(TimerService.class);
+            timerTask = service.scheduleAtFixedRate(new CassandraInitialiser((CassandraServiceImpl) cassandraService), DELAY, DELAY, TimeUnit.MILLISECONDS);
+        }
 
         // Register the cluster mbean
         ObjectName objectName = new ObjectName(CassandraClusterMBean.DOMAIN, "name", CassandraClusterMBean.NAME);
@@ -124,5 +143,40 @@ public class CassandraActivator extends HousekeepingActivator {
 
         final Logger logger = LoggerFactory.getLogger(CassandraActivator.class);
         logger.info("Cassandra service was successfully shutdown and unregistered");
+    }
+
+    /**
+     * {@link CassandraInitialiser} - Self cancelling scheduled task
+     */
+    private final class CassandraInitialiser implements Runnable {
+
+        private CassandraServiceImpl cassandraService;
+        private final Logger LOGGER = LoggerFactory.getLogger(CassandraInitialiser.class);
+
+        /**
+         * Initialises a new {@link CassandraActivator.CassandraInitialiser}.
+         */
+        public CassandraInitialiser(CassandraServiceImpl cassandraService) {
+            super();
+            this.cassandraService = cassandraService;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            try {
+                cassandraService.init();
+                LOGGER.info("Cassandra successfully initialised.");
+                timerTask.cancel();
+            } catch (OXException e) {
+                if (CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.equals(e)) {
+                    LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), DELAY, e);
+                }
+            }
+        }
     }
 }
