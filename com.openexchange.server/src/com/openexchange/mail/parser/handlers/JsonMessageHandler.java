@@ -116,6 +116,7 @@ import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.MaxBytesExceededIOException;
 import com.openexchange.mail.utils.SizePolicy;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -864,7 +865,23 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleInlineHtml(final ContentProvider contentProvider, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
-        String htmlContent = contentProvider.getContent();
+        String htmlContent;
+        try {
+            htmlContent = contentProvider.getContent();
+        } catch (OXException x) {
+            Throwable cause = x.getCause();
+            if (cause instanceof MaxBytesExceededIOException) {
+                MaxBytesExceededIOException mbe = (MaxBytesExceededIOException) cause;
+                if (plainText != null) {
+                    OXException e = HtmlExceptionCodes.TOO_BIG.create(x, mbe.getMaxSize(), mbe.getSize());
+                    warnings.add(e.setCategory(Category.CATEGORY_WARNING).setDisplayMessage(HtmlExceptionMessages.PARSING_FAILED_WITH_FAILOVERMSG, e.getDisplayArgs()));
+                    asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
+                    return true;
+                }
+            }
+
+            throw x;
+        }
         if (textAppended) {
             /*
              * A text part has already been detected as message's body
