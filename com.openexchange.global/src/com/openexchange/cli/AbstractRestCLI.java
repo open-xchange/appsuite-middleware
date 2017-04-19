@@ -199,7 +199,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
 
     private boolean showHelp(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-h")) {
+            if (args[i].equals("-h") || args[i].equals("--help")) {
                 return true;
             }
         }
