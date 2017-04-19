@@ -112,7 +112,6 @@ public final class JerichoParser {
     private static final class CSS {
 
         private boolean css;
-        private int level = 0;
         private StringBuilder content;
 
         CSS() {
@@ -139,11 +138,6 @@ public final class JerichoParser {
                 return false;
             }
 
-            if (css) {
-                level++;
-                return false;
-            }
-
             // Start of <style>
             css = true;
             return true;
@@ -155,11 +149,6 @@ public final class JerichoParser {
             }
 
             if (!css) {
-                return false;
-            }
-
-            if (level > 0) {
-                level--;
                 return false;
             }
 
