@@ -82,24 +82,26 @@ public class CassandraServiceImpl implements CassandraService {
     /**
      * The Cassandra {@link Cluster} instance
      */
-    private Cluster cluster;
+    private final Cluster cluster;
 
     /**
      * Local Cassandra {@link Session}s cache; one per keyspace
      */
-    private Map<String, CassandraSession> synchronousSessions;
+    private final Map<String, CassandraSession> synchronousSessions;
 
     /**
      * Local Cassandra asynchronous {@link Session}s cache; one per keyspace
      */
-    private ConcurrentMap<String, Future<Session>> asynchronousSessions;
+    private final ConcurrentMap<String, Future<Session>> asynchronousSessions;
     /**
      * A multi-purpose global keyspace-less Cassandra {@link Session}. Used for
      * retrieving statistics for the {@link Cluster}
      */
     private Session globalSession;
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
+
+    private final CassandraServiceInitializer initializer;
 
     /**
      * Initialises a new {@link CassandraServiceImpl}.
@@ -110,12 +112,17 @@ public class CassandraServiceImpl implements CassandraService {
     public CassandraServiceImpl(ServiceLookup services) {
         super();
         this.services = services;
+
+        // Build the Cluster
+        initializer = new CassandraServiceInitializer(services);
+        cluster = Cluster.buildFrom(initializer);
+
+        // Initialise the sessions cache
+        synchronousSessions = new ConcurrentHashMap<>();
+        asynchronousSessions = new ConcurrentHashMap<>();
     }
 
     public void init() throws OXException {
-        // Build the Cluster
-        CassandraServiceInitializer initializer = new CassandraServiceInitializer(services);
-        cluster = Cluster.buildFrom(initializer);
         try {
             // Initialise cluster
             cluster.init();
@@ -136,9 +143,6 @@ public class CassandraServiceImpl implements CassandraService {
         } catch (AuthenticationException e) {
             throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
         }
-        // Initialise the sessions cache
-        synchronousSessions = new ConcurrentHashMap<>();
-        asynchronousSessions = new ConcurrentHashMap<>();
     }
 
     @Override
