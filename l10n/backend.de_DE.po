@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-11 16:17+0200\n"
+"PO-Revision-Date: 2017-04-20 09:20+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3342,6 +3342,15 @@ msgstr "Der HTML-Inhalt ist ungültig und kann nicht angezeigt werden"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:69
 msgid "The HTML content cannot be safely displayed"
 msgstr "Der HTML-Inhalt kann nicht sicher angezeigt werden"
+
+#. Thrown when parser failed or timed-out while processing HTML, in turn it cannot be safely displayed
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid ""
+"The HTML content cannot be safely displayed. The content is displayed as "
+"plain text instead."
+msgstr ""
+"Der HTML-Inhalt kann nicht sicher angezeigt werden. Der Inhalt wird "
+"stattdessen als Klartext angezeigt."
 
 #. *
 #. * No connection available to access mailbox
@@ -11062,22 +11071,23 @@ msgstr ""
 
 #. The provided feedback for key 'score' has an invalid type.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
-#, fuzzy
 msgid "The provided feedback for key 'score' has an invalid type."
 msgstr ""
 "Das bereitgestellte Feedback für \"Score\" enthält einen ungültigen Typ."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
 msgstr ""
 "Das bereitgestellte Feedback enthält nicht den erforderlichen Schlüssel \"%s"
 "\"."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "Das bereitgestellte Feedback für \"%s\" kann nicht analysiert werden."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr ""
+"Das bereitgestellte Feedback für den Schlüssel \"%s\" kann nicht analysiert "
+"werden."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -13343,6 +13353,15 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr ""
+#~ "Das bereitgestellte Feedback enthält nicht den erforderlichen Schlüssel "
+#~ "\"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr ""
+#~ "Das bereitgestellte Feedback für \"%s\" kann nicht analysiert werden."
 
 #~ msgid ""
 #~ "Your mail transort for %2$s was disabled because of authorization issues. "
