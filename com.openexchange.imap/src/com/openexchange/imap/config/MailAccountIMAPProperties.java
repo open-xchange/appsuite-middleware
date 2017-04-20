@@ -400,7 +400,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
 
     @Override
     public boolean isOverwritePreLoginCapabilities() {
-        String tmp = getAccountProperty("com.openexchange.imap.overwritePreLoginCapabilities");
+        String tmp = properties.get("com.openexchange.imap.overwritePreLoginCapabilities");
         if (null != tmp) {
             return Boolean.parseBoolean(tmp.trim());
         }
@@ -412,7 +412,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             }
         }
 
-        return lookUpBoolProperty("com.openexchange.imap.overwritePreLoginCapabilities", IMAPProperties.getInstance().isOverwritePreLoginCapabilities());
+        return IMAPProperties.getInstance().isOverwritePreLoginCapabilities();
     }
 
     @Override
