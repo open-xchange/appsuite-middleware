@@ -138,7 +138,13 @@ public final class PListSignerImpl implements PListSigner {
         try {
             PrivateKey privKey = getPrivateKey(storeName, password, alias);
             Certificate[] certChain = getCertificateChain(storeName, password, alias);
+            if (null == privKey || null == certChain) {
+                throw OnboardingExceptionCodes.SIGN_ERROR.create(alias);
+            }
             X509Certificate cert = (X509Certificate) certChain[0];
+            if (null == cert) {
+                throw OnboardingExceptionCodes.SIGN_ERROR.create(alias);
+            }
             Store<?> certs = new JcaCertStore(Arrays.asList(certChain));
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
@@ -192,22 +198,28 @@ public final class PListSignerImpl implements PListSigner {
     }
 
     private Certificate[] getCertificateChain(String storeName, String password, String alias) throws Exception {
-        KeyStore store = KeyStore.getInstance("PKCS12");
-        FileInputStream fis = new FileInputStream(storeName);
+        FileInputStream fis = null;
         try {
+            KeyStore store = KeyStore.getInstance("PKCS12");
+            fis = new FileInputStream(storeName);
             store.load(fis, password.toCharArray());
             return store.getCertificateChain(alias);
+        } catch (Exception e) {
+            throw OnboardingExceptionCodes.KEYSTORE_ERROR.create(e, storeName);
         } finally {
             Streams.close(fis);
         }
     }
 
-    private PrivateKey getPrivateKey(String storeName, String password, String alias) throws Exception {
-        KeyStore store = KeyStore.getInstance("PKCS12");
-        FileInputStream fis = new FileInputStream(storeName);
+    private PrivateKey getPrivateKey(String storeName, String password, String alias) throws OXException {
+        FileInputStream fis = null;
         try {
+            KeyStore store = KeyStore.getInstance("PKCS12");
+            fis = new FileInputStream(storeName);
             store.load(fis, password.toCharArray());
             return (PrivateKey) store.getKey(alias, password.toCharArray());
+        } catch (Exception e) {
+            throw OnboardingExceptionCodes.KEYSTORE_ERROR.create(e, storeName);
         } finally {
             Streams.close(fis);
         }
