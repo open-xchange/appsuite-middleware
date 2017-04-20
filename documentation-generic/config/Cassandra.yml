@@ -183,7 +183,7 @@ properties:
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database"]
-    - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
+    - key: com.openexchange.nosql.cassandra.idleConnectionTrashTimeout
       description: |
         When activity goes down, the driver will "trash" connections if the maximum number of requests in a 10 second time period can be satisfied by less than the number of connections opened. 
         Trashed connections are kept open but do not accept new requests. After the given timeout, trashed connections are closed and removed. 
@@ -192,7 +192,6 @@ properties:
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.nosql.cassandra.idleConnectionTrashTimeout
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database", "Limit"]
