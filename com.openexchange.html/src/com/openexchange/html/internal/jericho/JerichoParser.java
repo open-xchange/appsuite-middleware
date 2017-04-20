@@ -89,7 +89,8 @@ import net.htmlparser.jericho.TagType;
  */
 public final class JerichoParser {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
 
     private static final JerichoParser INSTANCE = new JerichoParser();
 
@@ -111,11 +112,15 @@ public final class JerichoParser {
 
     private static final class CSS {
 
+        private final int cssThreshold;
+        private boolean exceeded;
+
         private boolean css;
         private StringBuilder content;
 
-        CSS() {
+        CSS(int cssThreshold) {
             super();
+            this.cssThreshold = cssThreshold;
         }
 
         Segment getContent() {
@@ -127,10 +132,19 @@ public final class JerichoParser {
         }
 
         void addSegment(Segment segment) {
+            if (exceeded) {
+                return;
+            }
+
             if (null == content) {
                 content = new StringBuilder(segment.length() << 1);
             }
             content.append(segment);
+            if (cssThreshold > 0 && content.length() > cssThreshold) {
+                LOG.debug("Discarding content of <style> tag as its size exceeds max. allowed size ({})", Integer.valueOf(cssThreshold));
+                content = null;
+                exceeded = true;
+            }
         }
 
         boolean handleStartTag(StartTag startTag) {
@@ -267,7 +281,7 @@ public final class JerichoParser {
             // Start regular parsing
             streamedSource = new StreamedSource(InterruptibleCharSequence.valueOf(html));
             streamedSource.setLogger(null);
-            CSS css = new CSS();
+            CSS css = new CSS(HtmlServices.cssThreshold());
             int lastSegmentEnd = 0;
             Segment prev = null;
             for (Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
@@ -369,12 +383,7 @@ public final class JerichoParser {
                                 // Leaving <style> section
                                 Segment cssContent = css.getContent();
                                 if (Strings.isNotEmptyCharSequence(cssContent)) {
-                                    int cssThreshold = HtmlServices.cssThreshold();
-                                    if (cssThreshold > 0 && cssThreshold < cssContent.length()) {
-                                        LOG.debug("Discarding content of <style> tag as its size ({}) exceeds max. allowed size ({})", Integer.valueOf(cssContent.length()), Integer.valueOf(cssThreshold));
-                                    } else {
-                                        handler.handleSegment(cssContent);
-                                    }
+                                    handler.handleSegment(cssContent);
                                 }
                                 handler.markCssEnd(endTag);
                             } else {
