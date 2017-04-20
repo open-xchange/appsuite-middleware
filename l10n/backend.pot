@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -3110,11 +3121,9 @@ msgstr ""
 msgid "The HTML content cannot be safely displayed"
 msgstr ""
 
-#. Thrown when parser failed or timed-out while processing HTML, in turn it cannot be safely displayed
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
-msgid ""
-"The HTML content cannot be safely displayed. The content is displayed as "
-"plain text instead."
+msgid "This message can only be displayed as plain text"
 msgstr ""
 
 #. *
