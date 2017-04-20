@@ -1184,18 +1184,32 @@ public final class MimeMessageUtility {
             throw new UnsupportedEncodingException("unknown encoding: " + encoding);
         }
 
+        // Read decoded bytes
+        byte[] bytes;
         try {
-            byte[] bytes = new byte[count];
+            bytes = new byte[count];
             // count is set to the actual number of decoded bytes
             count = is.read(bytes, 0, count);
 
-            // Finally, convert the decoded bytes into a String using the specified charset
-            return count <= 0 ? "" : new String(bytes, 0, count, charset);
+            if (count <= 0) {
+                return "";
+            }
         } catch (IOException ioex) {
             // Shouldn't happen.
-            throw new ParseException(ioex.toString());
+            throw new ParseException(ioex.toString(), ioex);
+        } finally {
+            Streams.close(is);
+        }
+
+        // Return decoded value
+        try {
+            return new String(bytes, 0, count, charset);
+        } catch (java.io.UnsupportedEncodingException uec) {
+            LOG.debug("Unsupported character-encoding in encoded-word: {}", encodedValue, uec);
+            String decoded = detectCharsetAndDecodeElseNull(bytes, count);
+            return null == decoded ? encodedValue : decoded;
         } catch (IllegalArgumentException iex) {
-            /*
+            /*-
              * An unknown charset of the form ISO-XXX-XXX, will cause
              * the JDK to throw an IllegalArgumentException ... Since the
              * JDK will attempt to create a classname using this string,
@@ -1203,9 +1217,22 @@ public final class MimeMessageUtility {
              * and this results in an IllegalArgumentException, rather than
              * the expected UnsupportedEncodingException. Yikes
              */
-            throw new UnsupportedEncodingException(charset);
-        } finally {
-            Streams.close(is);
+            LOG.debug("Unsupported character-encoding in encoded-word: {}", encodedValue, iex);
+            String decoded = detectCharsetAndDecodeElseNull(bytes, count);
+            return null == decoded ? encodedValue : decoded;
+        }
+    }
+
+    private static String detectCharsetAndDecodeElseNull(byte[] bytes, int count) {
+        String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes, 0, count));
+        try {
+            return new String(bytes, 0, count, Charsets.forName(detectedCharset));
+        } catch (java.nio.charset.UnsupportedCharsetException uce) {
+            /*
+             * Even detected charset is unknown... giving up
+             */
+            LOG.warn("Unknown character-encoding: {}", detectedCharset, uce);
+            return null;
         }
     }
 
