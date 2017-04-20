@@ -97,6 +97,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         metrics.incrementTotalIPChanges();
 
         boolean whiteListedClient = IPCheckers.isWhitelistedClient(session, configuration);
+        // ACCEPT: If session-associated client is white-listed
         if (whiteListedClient) {
             accept(current, previous, session, true, AcceptReason.WHITE_LISTED);
             return;
