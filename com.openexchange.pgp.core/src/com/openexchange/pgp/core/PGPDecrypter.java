@@ -184,7 +184,7 @@ public class PGPDecrypter {
             }
 
             if (privateKey == null) {
-                throw PGPCoreExceptionCodes.PRIVATE_KEY_NOT_FOUND.create(userID);
+                throw PGPCoreExceptionCodes.PRIVATE_KEY_NOT_FOUND.create(userID + getMissingKeyIds(encryptedDataList));
             }
 
             InputStream clearDataStream = encryptedData.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(privateKey));
@@ -259,5 +259,29 @@ public class PGPDecrypter {
         }
         output.flush();
         return ret;
+    }
+
+    /**
+     * Get a list of keyIds from an EncryptedDataList
+     * Padded with "("
+     * @param encryptedDataList
+     * @return formatted list of 8 digit hex key Ids
+     */
+    private String getMissingKeyIds (PGPEncryptedDataList encryptedDataList) {
+        StringBuilder sb = new StringBuilder();
+        Iterator<PGPPublicKeyEncryptedData> dataListIterator = encryptedDataList.getEncryptedDataObjects();
+        PGPPublicKeyEncryptedData encryptedData = null;
+        sb.append(" ( ");
+        while (dataListIterator.hasNext()) {
+            encryptedData = dataListIterator.next();
+            String keyId = Long.toHexString(encryptedData.getKeyID()).substring(8).toUpperCase();
+            if (!sb.toString().contains(keyId)) { // avoid repeats
+                if (sb.length() > 8) sb.append(", "); // already more than one added
+                sb.append("0x");
+                sb.append(keyId);
+            }
+        }
+        sb.append(" )");
+        return (sb.toString());
     }
 }
