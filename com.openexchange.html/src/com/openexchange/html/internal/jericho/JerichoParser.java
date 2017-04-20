@@ -112,7 +112,6 @@ public final class JerichoParser {
     private static final class CSS {
 
         private boolean css;
-        private int level = 0;
         private StringBuilder content;
 
         CSS() {
@@ -139,11 +138,6 @@ public final class JerichoParser {
                 return false;
             }
 
-            if (css) {
-                level++;
-                return false;
-            }
-
             // Start of <style>
             css = true;
             return true;
@@ -155,11 +149,6 @@ public final class JerichoParser {
             }
 
             if (!css) {
-                return false;
-            }
-
-            if (level > 0) {
-                level--;
                 return false;
             }
 
@@ -380,7 +369,12 @@ public final class JerichoParser {
                                 // Leaving <style> section
                                 Segment cssContent = css.getContent();
                                 if (Strings.isNotEmptyCharSequence(cssContent)) {
-                                    handler.handleSegment(cssContent);
+                                    int cssThreshold = HtmlServices.cssThreshold();
+                                    if (cssThreshold > 0 && cssThreshold < cssContent.length()) {
+                                        LOG.debug("Discarding content of <style> tag as its size ({}) exceeds max. allowed size ({})", Integer.valueOf(cssContent.length()), Integer.valueOf(cssThreshold));
+                                    } else {
+                                        handler.handleSegment(cssContent);
+                                    }
                                 }
                                 handler.markCssEnd(endTag);
                             } else {

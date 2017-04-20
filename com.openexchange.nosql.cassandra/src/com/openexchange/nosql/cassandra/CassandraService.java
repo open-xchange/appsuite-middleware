@@ -65,7 +65,8 @@ public interface CassandraService {
     /**
      * Gets the Cassandra {@link Cluster} instance
      *
-     * @return The Cassandra {@link Cluster} instance
+     * @return The Cassandra {@link Cluster} instance or <code>null</code> if the service was
+     *         not initialised yet.
      * @throws OXException if the Cassandra {@link Cluster} cannot be returned or any other error is occurred
      */
     Cluster getCluster() throws OXException;
@@ -74,7 +75,8 @@ public interface CassandraService {
      * Gets a Cassandra {@link Session} for the specified keyspace
      *
      * @param keyspace The keyspace name
-     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified keyspace
+     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} with the specified keyspace or <code>null</code> if the service was
+     *         not initialised yet.
      * @throws OXException if there is no such Cassandra keyspace or if the Cassandra {@link Session} cannot be returned
      * @see CassandraServices#executeQuery(String, Session)
      */
@@ -85,7 +87,8 @@ public interface CassandraService {
      * {@link Session} is not bound to any keyspace, meaning that all tables in the CQL queries
      * performed with that {@link Session} will have to be prefixed with the keyspace name.
      *
-     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster}
+     * @return a Cassandra {@link Session} for the Cassandra {@link Cluster} or <code>null</code> if the service was
+     *         not initialised yet.
      * @throws OXException if the Cassandra {@link Session} cannot be returned
      * @see CassandraServices#executeQuery(String, Session)
      */
@@ -95,7 +98,8 @@ public interface CassandraService {
      * Gets a Cassandra {@link Session} for an asynchronous query for the specified keyspace
      *
      * @param keyspace The keyspace name
-     * @return The Cassandra {@link Session} encapsulated in a {@link Future} object
+     * @return The Cassandra {@link Session} encapsulated in a {@link Future} object or <code>null</code> if the service was
+     *         not initialised yet.
      * @throws OXException If the Cassandra {@link Session} cannot be returned
      */
     Future<Session> getSessionForAsynchronousExecution(String keyspace) throws OXException;

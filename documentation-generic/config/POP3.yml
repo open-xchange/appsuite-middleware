@@ -136,7 +136,7 @@ properties:
         
         Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.
         
-        Default value is empty (fall-back to current JVM's default SSL cipher suite)
+        An empty value means, that the current JVM's default SSL cipher suite is used.
       defaultValue: 
       version: 
       reloadable: true

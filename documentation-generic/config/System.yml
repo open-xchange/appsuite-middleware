@@ -74,7 +74,10 @@ properties:
     tags: ["System", "Caching"] 
   - key: CalendarSQL
     description: |
-      IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml
+      Defines the CalendarSqlImp implementation to use for the calendar feature.
+
+      <b>Note</b>:  
+      This is a legacy property and its value should never be changed!
     defaultValue: com.openexchange.groupware.calendar.CalendarMySQL
     version: 
     reloadable: false

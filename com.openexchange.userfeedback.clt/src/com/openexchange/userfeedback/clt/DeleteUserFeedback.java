@@ -64,7 +64,6 @@ import org.glassfish.jersey.client.ClientConfig;
 import com.openexchange.cli.AbstractRestCLI;
 import com.openexchange.java.AsciiReader;
 
-
 /**
  * {@link DeleteUserFeedback}
  *
@@ -126,10 +125,10 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
             WebTarget target = baseTarget.path(contextGroup).path(type);
 
             if (cmd.hasOption(START_SHORT)) {
-                target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
+                target = target.queryParam("start", cmd.getOptionValue(START_SHORT).concat("000")); // convert seconds to ms
             }
             if (cmd.hasOption(END_SHORT)) {
-                target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
+                target = target.queryParam("end", cmd.getOptionValue(END_SHORT).concat("000")); // convert seconds to ms
             }
             return target;
         } catch (URISyntaxException e) {
@@ -168,7 +167,6 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected String getHeader() {
-        return "deleteuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time]\n" + 
-       "deleteuserfeedback -s 1487348317";
+        return "deleteuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time]\n" + "deleteuserfeedback -s 1487348317";
     }
 }

@@ -15,7 +15,7 @@ properties:
     - key: com.openexchange.websockets.grizzly.remote.delayDuration
       description: |
         The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)
-        is queued in buffer to await & aggregate equal messages that arrive during that time
+        is queued in buffer to await and aggregate equal messages that arrive during that time
       defaultValue: 1000
       version: 7.8.3
       reloadable: true
@@ -27,7 +27,7 @@ properties:
     - key: com.openexchange.websockets.grizzly.remote.maxDelayDuration
       description: |
         The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)
-        is at max. queued in buffer to await & aggregate equal messages that arrive during that time.
+        is at max. queued in buffer to await and aggregate equal messages that arrive during that time.
         So, even if there was an equal message recently, message is flushed from queue to avoid holding back
         a message forever in case there are frequent equal messages.
       defaultValue: 3000

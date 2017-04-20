@@ -15,11 +15,11 @@ properties:
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.credentialSource
       description: |
-        Specifies which sieve credentials should be use. Four options are allowed here:
-        "session" : login name and password are used from the current session.
-        "session-full-login" : full login (incl. context part) name and password are used from the current session.
+        Specifies which sieve credentials should be use. Four options are allowed here:  
+        "session" : login name and password are used from the current session.  
+        "session-full-login" : full login (incl. context part) name and password are used from the current session.  
         "imapLogin" : the login name is taken from the field imapLogin of the current
-                      user the password is taken from the current session.
+                      user the password is taken from the current session.  
         "mail" : use the primary mail address of the user and the password from the session.
       defaultValue: session
       version:
@@ -42,11 +42,12 @@ properties:
       tags: ["Mail Filter", "Mail", "Host", "SIEVE"]
     - key: com.openexchange.mail.filter.port
       description: |
-        Specifies the SIEVE port
-        -----------------------------------------------------------
-        NOTE: 2000 is the deprecated port number for SIEVE (now assigned to some Cisco SCCP protocol by the IANA)
-              4190 is the new one used with most recent Linux and IMAP implementations.
-        Please check your system's default port defined at /etc/services.
+        Specifies the SIEVE port  
+        -----------------------------------------------------------  
+        NOTE:  
+        2000 is the deprecated port number for SIEVE (now assigned to some Cisco SCCP protocol by the IANA).  
+        4190 is the new one used with most recent Linux and IMAP implementations.  
+        Please check your system's default port defined at /etc/services.  
         -----------------------------------------------------------
       defaultValue: 4190
       version:
@@ -139,9 +140,9 @@ properties:
       tags: ["Mail Filter", "Mail", "SIEVE", "Timeout"]
     - key: com.openexchange.mail.filter.passwordSource
       description: |
-        Set the password source; meaning which source is taken to determine a user's password to login into mail filter system. 
-        If 'session' is set, then user's individual system's password is taken. 
-        If 'global' is set, then the value specified through property 'com.openexchange.mail.filter.masterPassword' is taken.
+        Set the password source; meaning which source is taken to determine a user's password to login into mail filter system.  
+        If 'session' is set, then user's individual system's password is taken.  
+        If 'global' is set, then the value specified through property 'com.openexchange.mail.filter.masterPassword' is taken.  
         Currently known values: session and global
       defaultValue: session
       version:
@@ -168,8 +169,8 @@ properties:
         This property defines if mailbox names shall be UTF-7 encoded as specified in RFC2060; section 5.1.3. "Mailbox International Naming Convention".
         If set to "false" no UTF-7 encoding is performed.
 
-        Set to "true" for those Cyrus IMAP server versions that do NOT support "sieve_utf8fileinto" property (e.g. lower than v2.3.11)
-        Set to "true" for those Cyrus IMAP server versions that support "sieve_utf8fileinto" property having that property set to "0".
+        Set to "true" for those Cyrus IMAP server versions that do NOT support "sieve_utf8fileinto" property (e.g. lower than v2.3.11).  
+        Set to "true" for those Cyrus IMAP server versions that support "sieve_utf8fileinto" property having that property set to "0".  
         Thus moving mails with the 'fileinto' command will properly work for mailbox names that contain non-ascii characters.
       defaultValue: false
       version:

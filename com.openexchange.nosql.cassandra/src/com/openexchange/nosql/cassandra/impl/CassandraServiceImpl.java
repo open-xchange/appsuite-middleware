@@ -97,7 +97,11 @@ public class CassandraServiceImpl implements CassandraService {
      * A multi-purpose global keyspace-less Cassandra {@link Session}. Used for
      * retrieving statistics for the {@link Cluster}
      */
-    private final Session globalSession;
+    private Session globalSession;
+
+    private final ServiceLookup services;
+
+    private final CassandraServiceInitializer initializer;
 
     /**
      * Initialises a new {@link CassandraServiceImpl}.
@@ -105,12 +109,25 @@ public class CassandraServiceImpl implements CassandraService {
      * @param services The {@link ServiceLookup} instance
      * @throws OXException
      */
-    public CassandraServiceImpl(ServiceLookup services) throws OXException {
+    public CassandraServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
 
         // Build the Cluster
-        CassandraServiceInitializer initializer = new CassandraServiceInitializer(services);
+        initializer = new CassandraServiceInitializer(services);
         cluster = Cluster.buildFrom(initializer);
+
+        // Initialise the sessions cache
+        synchronousSessions = new ConcurrentHashMap<>();
+        asynchronousSessions = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Initialises the cluster connection
+     * 
+     * @throws OXException if initialisation fails
+     */
+    public void init() throws OXException {
         try {
             // Initialise cluster
             cluster.init();
@@ -131,9 +148,6 @@ public class CassandraServiceImpl implements CassandraService {
         } catch (AuthenticationException e) {
             throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
         }
-        // Initialise the sessions cache
-        synchronousSessions = new ConcurrentHashMap<>();
-        asynchronousSessions = new ConcurrentHashMap<>();
     }
 
     @Override

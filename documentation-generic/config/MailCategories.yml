@@ -205,7 +205,9 @@ properties:
         It is possible to create some predefined rules for the system categories (see com.openexchange.mail.categories.rules.[category]).
         This rules will be added for each user which has the mail_categories capability and has the mail_categories feature enabled.
         This property enables/disables this feature. Nevertheless it is strongly recommended to use system wide rules instead.
-        Please notice that these rules must only be used instead of system wide rules! Don't use this feature if there are already system wide rules defined!       
+
+        Note:  
+        These rules must only be used instead of system wide rules! Don't use this feature if there are already system wide rules defined!       
       defaultValue: false
       version: 7.8.2
       reloadable: true

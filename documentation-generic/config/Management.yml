@@ -52,22 +52,16 @@ properties:
         Define the JMX password in SHA hashed version.
         This property only has effect if property "JMXLogin" is set.
 
-        ======================================================================
-                     Using Perl to generate the SHA hash
-        ======================================================================
-
-        The following Perl command can be used to generate such a password:
+        <h3>Using Perl to generate the SHA hash</h3>
+        The following Perl command can be used to generate such a password:  
         (requires to install the Digest::SHA1 Perl module)
 
           perl -M'Digest::SHA1 qw(sha1_base64)' -e 'print sha1_base64("YOURSECRET")."=\n";'
 
-        NOTE:
+        NOTE:  
         Since Debian Wheezy and Ubuntu 12.04 the corresponding Perl module has been replaced with "Digest::SHA" (and "Digest::SHA1" is no longer maintained)
 
-        ======================================================================
-                     Using ruby to generate the SHA hash
-        ======================================================================
-
+        <h3>Using ruby to generate the SHA hash</h3>
         Alternatively, ruby can be used to generate the appropriate SHA1 hash:
 
           ruby -rdigest -e 'puts Digest::SHA1.base64digest("YOURSECRET")'

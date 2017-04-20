@@ -543,7 +543,7 @@ public final class MailProperties implements IMailProperties {
                 params.mailFetchLimit = 1000;
             }
 
-            logMessageBuilder.append("   Mail Fetch Limit: {}{}");
+            logMessageBuilder.append("  Mail Fetch Limit: {}{}");
             args.add(params.mailFetchLimit);
             args.add(Strings.getLineSeparator());
         }

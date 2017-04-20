@@ -400,6 +400,34 @@ public final class HtmlServices {
         return i.intValue();
     }
 
+    /** Volatile cache variable for CSS size threshold */
+    private static volatile Integer maxCssLength;
+
+    /**
+     * Gets the CSS size threshold (<code>"<i>com.openexchange.html.css.maxLength</i>"</code> property).
+     *
+     * @return The CSS size threshold
+     */
+    public static int cssThreshold() {
+        Integer i = maxCssLength;
+        if (null == maxCssLength) {
+            synchronized (HtmlServices.class) {
+                i = maxCssLength;
+                if (null == maxCssLength) {
+                    // Default is 96KB
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    int defaultMaxLength = 98304;
+                    if (null == service) {
+                        return defaultMaxLength;
+                    }
+                    i = Integer.valueOf(service.getIntProperty("com.openexchange.html.css.maxLength", defaultMaxLength));
+                    maxCssLength = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------ //
 
     private static char[] lowercases = {
