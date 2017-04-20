@@ -67,6 +67,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 import com.openexchange.pgp.mail.PGPMimeService;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
@@ -118,7 +119,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         if (null != pgpMimeService) {
             secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
             secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
-            if (Strings.isNotEmpty(secretKeyFile) && Strings.isNotEmpty(secretKeyPassword)) {
+            if (Strings.isNotEmpty(secretKeyFile)) {
                 signingKey = FeedbackMimeMessageUtility.parsePrivateKey(secretKeyFile);
                 sign = true;
             }
@@ -169,6 +170,11 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             appendPositiveSendingResult(recipients, result, sign, false);
             appendWarnings(result, invalidAddresses, pgpFailedAddresses);
             return result.toString();
+        } catch (OXException e) {
+            if (PGPCoreExceptionCodes.BAD_PASSWORD.equals(e)) {
+                throw FeedbackExceptionCodes.INVALID_PGP_CONFIGURATION.create(e, e.getMessage());
+            }
+            throw e;
         } catch (MessagingException e) {
             LOG.error(e.getMessage(), e);
             throw FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION.create(e.getMessage());

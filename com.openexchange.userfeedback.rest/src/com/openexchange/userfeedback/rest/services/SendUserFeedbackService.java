@@ -173,6 +173,11 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
+            } else if (FeedbackExceptionCodes.INVALID_PGP_CONFIGURATION.equals(e)) {
+                LOG.error(DEFAULT_CONFIG_ERROR_MESSAGE, e);
+                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
             }
             ResponseBuilder builder = Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON);
             builder.entity(errorJson);

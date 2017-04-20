@@ -108,6 +108,11 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_PARAMETER_VALUE_SIZE("Provided value(s) for parameter(s) '%1$s' is/are too big.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 9),
 
+    /**
+     * Provided PGP configuration is invalid, unable to sign mail.
+     */
+    INVALID_PGP_CONFIGURATION("Provided PGP configuration is invalid, unable to sign mail.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 10),
+
     ;
 
     /**
