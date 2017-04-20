@@ -91,7 +91,7 @@ properties:
     - key: com.openexchange.log.audit.slf4j.level
       description: |
         Specifies the log level to use.
-        Possible values: "trace", "debug", "info", "warn" or "error".
+        Possible values: <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code> or <code>error</code>.
       defaultValue: info
       version:
       reloadable: false
@@ -173,9 +173,11 @@ properties:
         E.g. a file location/pattern might be: "/var/log/open-xchange/my-audit.log"
 
         It is then possible to configure how that logging is done:
-         <ul><li>"com.openexchange.log.audit.slf4j.file.size" specifies the max. file size to use</li>
-         <li>"com.openexchange.log.audit.slf4j.file.count" defines the max. number of files to use for rotation</li>
-         <li>"com.openexchange.log.audit.slf4j.file.pattern" defines the layout pattern of the log entry</li></ul>
+        <ul>
+          <li>"com.openexchange.log.audit.slf4j.file.size" - specifies the max. file size to use</li>
+          <li>"com.openexchange.log.audit.slf4j.file.count" - defines the max. number of files to use for rotation</li>
+          <li>"com.openexchange.log.audit.slf4j.file.pattern" - defines the layout pattern of the log entry</li>
+        </ul>
         For more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
       defaultValue: GMT
       version:

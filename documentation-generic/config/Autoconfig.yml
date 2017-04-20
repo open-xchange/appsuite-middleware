@@ -32,7 +32,7 @@ properties:
         Notation is: &lt;optional-protocol&gt; + "://" + &lt;proxy-host&gt; + ":" + &lt;proxy-port&gt;  
         With "http" as fall-back protocol
         
-        E.g. "67.177.104.230:58720" (using HTTP protocol) or "https://78.0.25.45:8345" (using HTTPS protocol)
+        E.g. <code>67.177.104.230:58720</code> (using HTTP protocol) or <code>https://78.0.25.45:8345</code> (using HTTPS protocol)
       defaultValue:
       version:
       reloadable: true

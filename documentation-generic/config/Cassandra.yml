@@ -117,20 +117,21 @@ properties:
     - key: com.openexchange.nosql.cassandra.queryLatencyThreshold
       description: |
         Defines the latency threshold in milliseconds beyond which queries are considered 'slow' and logged as such by the Cassandra service. 
-        Used in conjunction with the <code>enableQueryLogger</code> property.
+        Used in conjunction with the <code>com.openexchange.nosql.cassandra.enableQueryLogger</code> property.
       defaultValue: 5000
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.nosql.cassandra.enableQueryLogger
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database"]
     - key: com.openexchange.nosql.cassandra.poolingHeartbeat
       description: |
         Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat. 
-        When a connection has been idle for the given amount of time, the Cassandra service will simulate activity by writing a dummy request to it (by sending an <code>OPTIONS</code> message). 
-        To disable heartbeat, set the interval to 0. 
+        When a connection has been idle for the given amount of time, the Cassandra service will simulate activity 
+        by writing a dummy request to it (by sending an <code>OPTIONS</code> message). 
+        To disable heartbeat, set the interval to <code>0</code>. 
       defaultValue: 30
       version: 7.8.4
       reloadable: false
