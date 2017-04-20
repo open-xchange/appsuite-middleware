@@ -87,7 +87,7 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
     private static final String TYPE_DEFAULT = "star-rating-v1";
 
     private static final String ENDPOINT_LONG = "api-root";
-    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/delete";
+    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/";
 
     /**
      * @param args
