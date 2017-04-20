@@ -24,7 +24,7 @@ properties:
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.net.ssl.custom.truststore.path, com.openexchange.net.ssl.custom.truststore.password
+      related: ["com.openexchange.net.ssl.custom.truststore.path", "com.openexchange.net.ssl.custom.truststore.password"]
       file: ssl.properties
       packageName: open-xchange-core
       tags: ["SSL"]
@@ -35,7 +35,7 @@ properties:
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.password
+      related: ["com.openexchange.net.ssl.custom.truststore.enabled", "com.openexchange.net.ssl.custom.truststore.password"]
       file: ssl.properties
       packageName: open-xchange-core
       tags: ["SSL"]
@@ -46,7 +46,7 @@ properties:
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
+      related: ["com.openexchange.net.ssl.custom.truststore.enabled", "com.openexchange.net.ssl.custom.truststore.path"]
       file: ssl.properties
       packageName: open-xchange-core
       tags: ["SSL", "Credential"]

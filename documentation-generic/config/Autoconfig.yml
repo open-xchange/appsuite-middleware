@@ -49,7 +49,7 @@ properties:
       version:
       reloadable: true
       configcascadeAware: true
-      related: com.openexchange.mail.autoconfig.http.proxy.password, com.openexchange.mail.autoconfig.http.proxy
+      related: ["com.openexchange.mail.autoconfig.http.proxy.password", "com.openexchange.mail.autoconfig.http.proxy"]
       file: autoconfig.properties
       packageName: open-xchange-core
       tags: ["Autoconfig", "Mail", "Credential"]
@@ -61,7 +61,7 @@ properties:
       version:
       reloadable: true
       configcascadeAware: true
-      related: com.openexchange.mail.autoconfig.http.proxy.login, com.openexchange.mail.autoconfig.http.proxy
+      related: ["com.openexchange.mail.autoconfig.http.proxy.login", "com.openexchange.mail.autoconfig.http.proxy"]
       file: autoconfig.properties
       packageName: open-xchange-core
       tags: ["Autoconfig", "Mail", "Credential"]

@@ -135,7 +135,7 @@ properties:
       version:
       reloadable: false
       configcascadeAware: false
-      related: LOWERCASE_FOR_CONTEXT_USER_LOOKUP, USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP, USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP
+      related: ["LOWERCASE_FOR_CONTEXT_USER_LOOKUP", "USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP", "USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP"]
       file: imapauth.properties
       packageName: open-xchange-authentication-imap
       tags: ["IMAP Auth","Authentication", "IMAP"]

@@ -136,7 +136,7 @@ properties:
       version:
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.log.audit.slf4j.date.locale, com.openexchange.log.audit.slf4j.date.timezone
+      related: ["com.openexchange.log.audit.slf4j.date.locale", "com.openexchange.log.audit.slf4j.date.timezone"]
       file: slf4j-auditlog.properties
       packageName: open-xchange-core
       tags: ["Audit", "Logging"]
@@ -181,7 +181,7 @@ properties:
       version:
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.log.audit.slf4j.file.size, com.openexchange.log.audit.slf4j.file.count, com.openexchange.log.audit.slf4j.file.pattern
+      related: ["com.openexchange.log.audit.slf4j.file.size", "com.openexchange.log.audit.slf4j.file.count", "com.openexchange.log.audit.slf4j.file.pattern"]
       file: slf4j-auditlog.properties
       packageName: open-xchange-core
       tags: ["Audit", "Logging"]
