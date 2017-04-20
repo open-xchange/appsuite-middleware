@@ -139,7 +139,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             Address[] recipients = null;
 
             recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
-            if (recipients.length == 0) {
+            if (recipients.length == 0 && (null == pgpRecipients || pgpRecipients.size() == 0)) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
             mail.addRecipients(RecipientType.TO, recipients);
@@ -147,7 +147,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
 
-            if (encrypt) {
+            if (encrypt && null != pgpRecipients && pgpRecipients.size() > 0) {
                 MimeMessage pgpMail = null;
                 Address[] pgpAddresses = pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]);
                 mail.addRecipients(RecipientType.TO, pgpAddresses);
@@ -160,13 +160,14 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 appendPositiveSendingResult(pgpAddresses, result, sign, true);
             }
 
-            if (sign) {
-                MimeMessage signedMail = pgpMimeService.sign(mail, signingKey, secretKeyPassword.toCharArray());
-                transport.sendMessage(signedMail, recipients);
-            } else {
-                transport.sendMessage(mail, recipients);
+            if (recipients.length > 0) {
+                if (sign) {
+                    MimeMessage signedMail = pgpMimeService.sign(mail, signingKey, secretKeyPassword.toCharArray());
+                    transport.sendMessage(signedMail, recipients);
+                } else {
+                    transport.sendMessage(mail, recipients);
+                }
             }
-
             appendPositiveSendingResult(recipients, result, sign, false);
             appendWarnings(result, invalidAddresses, pgpFailedAddresses);
             return result.toString();

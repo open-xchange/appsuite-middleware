@@ -142,8 +142,8 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 if (object.hasAndNotNull("displayName")) {
                     displayName = object.getString("displayName");
                 }
-                if (object.hasAndNotNull("pgpKey")) {
-                    String pgpKey = object.optString("pgpKey");
+                if (object.hasAndNotNull("pgp_key")) {
+                    String pgpKey = object.optString("pgp_key");
                     pgpKeys.put(address, pgpKey);
                 }
                 recipients.put(address, displayName);

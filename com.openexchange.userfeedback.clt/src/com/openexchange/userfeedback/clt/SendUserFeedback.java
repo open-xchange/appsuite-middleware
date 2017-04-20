@@ -220,7 +220,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
                 if (null != pgp && Strings.isNotEmpty(pgp)) {
                     try {
                         pgp = new String(Files.readAllBytes(Paths.get(pgp)));
-                        json.put("pgpKey", pgp);
+                        json.put("pgp_key", pgp);
                     } catch (IOException e) {
                         exitWithError("Could not load PGP key " + pgp);
                     }
@@ -241,16 +241,34 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
     }
 
     private JSONObject extractSingleRecipient(String recipients) throws JSONException {
-        int startOfAddress = recipients.lastIndexOf("<");
-        String address = "";
-        String displayName = "";
-        if (startOfAddress >= 0) {
-            address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
-            displayName = startOfAddress != 0 ? recipients.substring(0, startOfAddress - 1) : "";
-        } else {
-            address = recipients;
+        String publicKeyFile = null;
+        JSONObject json = null;
+        try {
+            boolean hasPublicKeyFile = recipients.contains(":");
+            int startOfAddress = recipients.lastIndexOf("<");
+            String address = "";
+            String displayName = "";
+            if (startOfAddress >= 0) {
+                address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
+                displayName = startOfAddress != 0 ? recipients.substring(0, startOfAddress - 1) : "";
+            } else {
+                address = recipients;
+            }
+            json = getAddressJSON(address, displayName);
+            if (hasPublicKeyFile) {
+                int startOfPublicKeyFile = recipients.lastIndexOf(":");
+                if (displayName.contains(":")) {
+                    if (startOfAddress > startOfPublicKeyFile) {
+                        return json;
+                    }
+                }
+                publicKeyFile = recipients.substring(startOfPublicKeyFile + 1);
+                String pgp = new String(Files.readAllBytes(Paths.get(publicKeyFile)));
+                json.put("pgp_key", pgp);
+            }
+        } catch (IOException e) {
+            exitWithError("Could not load PGP public key file " + publicKeyFile);
         }
-        JSONObject json = getAddressJSON(address, displayName);
         return json;
     }
 
