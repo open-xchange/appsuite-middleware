@@ -88,9 +88,9 @@
                   "recipients": [
                     {"address":"user1@example.org",
                      "displayName":"User 1",
-                     "pgpKey":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."},
+                     "pgp_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."},
                     {"address":"user2@example.org",
                      "displayName":"User 2",
-                     "pgpKey":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."}
+                     "pgp_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."}
                   ]
                  }
