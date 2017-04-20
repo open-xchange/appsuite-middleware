@@ -208,21 +208,23 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             while (it.hasNext()) {
                 CSVRecord record = it.next();
                 String address = record.get(0);
+                String publicKeyFile = "";
+                int startOfPublicKeyFile = address.indexOf(":");
+                if (startOfPublicKeyFile > -1) {
+                    publicKeyFile = address.substring(startOfPublicKeyFile + 1);
+                    address = address.substring(0, startOfPublicKeyFile);
+                }
                 String displayName = "";
-                String pgp = "";
-                if (record.size() >= 2) {
+                if (record.size() == 2) {
                     displayName = record.get(1);
                 }
-                if (record.size() == 3) {
-                    pgp = record.get(2);
-                }
                 JSONObject json = getAddressJSON(address, displayName);
-                if (null != pgp && Strings.isNotEmpty(pgp)) {
+                if (null != publicKeyFile && Strings.isNotEmpty(publicKeyFile)) {
                     try {
-                        pgp = new String(Files.readAllBytes(Paths.get(pgp)));
+                        String pgp = new String(Files.readAllBytes(Paths.get(publicKeyFile)));
                         json.put("pgp_key", pgp);
                     } catch (IOException e) {
-                        exitWithError("Could not load PGP key " + pgp);
+                        exitWithError("Could not load PGP key " + publicKeyFile);
                     }
                 }
                 array.add(0, json);
