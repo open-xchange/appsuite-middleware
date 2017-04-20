@@ -51,6 +51,7 @@ package com.openexchange.ajax.ipcheck;
 
 import static com.openexchange.ajax.SessionUtility.isWhitelistedFromIPCheck;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.ipcheck.internal.NoneIPChecker;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -152,14 +153,14 @@ public class IPCheckers {
      *
      * @param current The current IP address to set
      * @param session The session to apply to
-     * @param checkPerformed Whether an IP check has been performed at all
+     * @param effectivelyChecked Whether changed IP has been effectively checked (<code>false</code> for {@link NoneIPChecker})
      * @param whiteListedClient <code>true</code> if session-associated client has been excluded from IP check; otherwise <code>false</code> if IP check happened
      */
-    public static void updateIPAddress(String current, Session session, boolean checkPerformed, boolean whiteListedClient) {
+    public static void updateIPAddress(String current, Session session, boolean effectivelyChecked, boolean whiteListedClient) {
         if (whiteListedClient) {
             // Change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
             updateIPAddress(current, session);
-        } else if (!checkPerformed) {
+        } else if (!effectivelyChecked) {
             // Do not change session's IP address anymore in case of USM/EAS (Bug #29136)
             if (!isUsmEas(session.getClient())) {
                 updateIPAddress(current, session);
