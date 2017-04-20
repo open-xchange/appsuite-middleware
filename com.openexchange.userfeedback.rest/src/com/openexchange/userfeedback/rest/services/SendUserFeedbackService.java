@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -117,10 +116,10 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                     SimpleDateFormat df = new SimpleDateFormat();
                     df.setTimeZone(TimeZone.getTimeZone("UTC"));
                     if (start > 0L) {
-                        sb.append(" from ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start))));
+                        sb.append(" from ").append(df.format(new Date(start)));
                     }
                     if (end > 0L) {
-                        sb.append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
+                        sb.append(" to ").append(df.format(new Date(end)));
                     }
                 }
                 subject = sb.toString();
