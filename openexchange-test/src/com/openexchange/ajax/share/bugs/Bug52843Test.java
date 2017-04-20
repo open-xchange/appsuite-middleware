@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.share.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -114,10 +116,10 @@ public class Bug52843Test extends ShareTest {
         /*
          * try to re-send notification as guest
          */
-        getNoReplyClient().execute(new ClearMailsRequest());
+        getClient().execute(new ClearMailsRequest());
         AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), getClient().getValues().getUserId()));
         assertTrue("No errors or warnings", notifyResponse.hasError() || notifyResponse.hasWarnings());
-        Message notificationMessage = discoverInvitationMessage(getNoReplyClient(), getClient().getValues().getDefaultAddress());
+        Message notificationMessage = discoverInvitationMessage(getClient(), getClient().getValues().getDefaultAddress());
         assertNull("Notification was received", notificationMessage);
     }
 
@@ -164,10 +166,10 @@ public class Bug52843Test extends ShareTest {
         /*
          * try to re-send notification as guest
          */
-        getNoReplyClient().execute(new ClearMailsRequest());
+        getClient().execute(new ClearMailsRequest());
         AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFileRequest(guestClient.getItem(), otherUserId));
         assertTrue("No errors or warnings", notifyResponse.hasError() || notifyResponse.hasWarnings());
-        Message notificationMessage = discoverInvitationMessage(getNoReplyClient(), getClient2().getValues().getDefaultAddress());
+        Message notificationMessage = discoverInvitationMessage(getClient(), getClient2().getValues().getDefaultAddress());
         assertNull("Notification was received", notificationMessage);
     }
 

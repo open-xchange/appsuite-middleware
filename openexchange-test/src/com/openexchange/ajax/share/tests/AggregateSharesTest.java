@@ -57,11 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -84,12 +80,11 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class AggregateSharesTest extends ShareTest {
 
     private java.util.Map<AJAXClient, List<Integer>> clientsAndFolders;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
@@ -97,7 +92,7 @@ public class AggregateSharesTest extends ShareTest {
         clientsAndFolders.put(getClient2(), new ArrayList<Integer>());
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (null != clientsAndFolders) {
@@ -127,6 +122,7 @@ public class AggregateSharesTest extends ShareTest {
                 for (int module1 : TESTED_MODULES) {
                     for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
+//                            System.out.println("AggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
@@ -147,6 +143,7 @@ public class AggregateSharesTest extends ShareTest {
                 for (int module1 : TESTED_MODULES) {
                     for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
+//                            System.out.println("RemoveAggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testRemoveAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
@@ -191,7 +188,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(getNoReplyClient(), guestA);
+        String shareURLA = discoverShareURL(client1, guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -222,7 +219,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(getNoReplyClient(), guestB);
+        String shareURLB = discoverShareURL(client2, guestB);
         /*
          * check permission entities
          */
@@ -281,7 +278,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(getNoReplyClient(), guestA);
+        String shareURLA = discoverShareURL(client1, guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -312,7 +309,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(getNoReplyClient(), guestB);
+        String shareURLB = discoverShareURL(client2, guestB);
         /*
          * check permission entities
          */

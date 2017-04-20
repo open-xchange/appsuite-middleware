@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
@@ -90,7 +89,7 @@ public class FileStorageTransactionTest extends ShareTest {
     private FolderObject testFolder;
     private List<DefaultFile> files;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         testFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder());

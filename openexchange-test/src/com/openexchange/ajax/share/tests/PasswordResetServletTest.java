@@ -68,7 +68,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -95,16 +94,7 @@ public final class PasswordResetServletTest extends ShareTest {
     private FolderObject folder;
     private String shareURL;
 
-    /**
-     * Initializes a new {@link PasswordResetServletTest}
-     *
-     * @param name The test name
-     */
-    public PasswordResetServletTest() {
-        super();
-    }
-
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -198,7 +188,7 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     private PWResetData getConfirmationToken() throws Exception {
-        List<Message> messages = getNoReplyClient().execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         Message message = messages.get(0);
         String url = message.getHeaders().get("X-Open-Xchange-Share-Reset-PW-URL");

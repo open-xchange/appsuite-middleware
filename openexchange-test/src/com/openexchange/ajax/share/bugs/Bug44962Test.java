@@ -59,8 +59,6 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -83,20 +81,10 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class Bug44962Test extends ShareTest {
 
     private AJAXClient client2;
     private Map<Integer, FolderObject> foldersToDelete;
-
-    /**
-     * Initializes a new {@link Bug44962Test}.
-     *
-     * @param name The test name
-     */
-    public Bug44962Test() {
-        super();
-    }
 
     @Before
     public void setUp() throws Exception {

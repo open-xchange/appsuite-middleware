@@ -216,5 +216,4 @@ public class Bug40369Test extends ShareTest {
         }
         return responses;
     }
-
 }
