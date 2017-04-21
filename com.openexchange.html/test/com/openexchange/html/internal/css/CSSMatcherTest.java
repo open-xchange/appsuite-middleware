@@ -193,7 +193,7 @@ public class CSSMatcherTest {
         assertTrue(checkCSSElements);
     }
 
-    private final String bug34659CSS = "<style type=\"text/css\">                                                                                                          \n" +
+    private final String bug34659CSS =
         "        /* Client-specific Styles */                                                                                                                        \n" +
         "        #outlook a{padding:0;} /* Force Outlook to provide a \"view in browser\" button. */                                                                 \n" +
         "        body{width:100% !important;} .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */              \n" +
@@ -247,37 +247,7 @@ public class CSSMatcherTest {
         "        }                                                                                                                                                   \n" +
         "        .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td {                                                                     \n" +
         "            line-height: 18px                                                                                                                               \n" +
-        "        }                                                                                                                                                   \n" +
-        "                                                                                                                                                            \n" +
-        "    </style>";
-
-     @Test
-     public void testDoCheckCss_returnCorrectStartTag() {
-        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
-
-        FilterJerichoHandler.loadWhitelist();
-
-        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
-        String convertedCss = cssBld.toString();
-
-        String startTag = "<style type=\"text/#123456 css\">";
-
-        Assert.assertTrue("Processed CSS does not start with the desired parameter " + startTag, convertedCss.startsWith(startTag));
-    }
-
-     @Test
-     public void testDoCheckCss_returnStyleEndTag() {
-        Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
-
-        FilterJerichoHandler.loadWhitelist();
-
-        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
-        String convertedCss = cssBld.toString();
-
-        String endTag = "</style>";
-
-        Assert.assertTrue("Processed CSS does not end with the desired parameter " + endTag, convertedCss.endsWith(endTag));
-    }
+        "        }                                                                                                                                                   \n";
 
      @Test
      public void testDoCheckCss_includesActiveForHTags() {
