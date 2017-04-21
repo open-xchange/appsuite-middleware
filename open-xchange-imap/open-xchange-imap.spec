@@ -115,6 +115,9 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "SSLv3 TLSv1" = "$VALUE" ]; then
         ox_set_property com.openexchange.imap.ssl.protocols "" $PFILE
     fi
+
+    # SoftwareChange_Request-4092
+    ox_add_property com.openexchange.imap.overwritePreLoginCapabilities false $PFILE
 fi
 
 %clean
