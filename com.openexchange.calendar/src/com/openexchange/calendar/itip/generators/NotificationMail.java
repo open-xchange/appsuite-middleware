@@ -332,15 +332,28 @@ public class NotificationMail {
         return attachmentUpdate;
     }
 
+    private boolean recipientIsOrganizerAndHasNoAccess() {
+        if (recipient.isExternal()) {
+            return true;
+        }
+        if (!recipient.hasRole(ITipRole.ORGANIZER)) {
+            return true;
+        }
+        if (recipient.getIdentifier() == recipient.getContext().getMailadmin()) {
+            if (MailProperties.getInstance().isAdminMailLoginEnabled() == false) {
+                // Context administrator is recipient but does not have permission to access mail
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean shouldBeSent() {
         if (appointment != null && endsInPast(appointment)) {
             return false;
         }
-        if (recipient.getIdentifier() == organizer.getContext().getMailadmin()) {
-            if (MailProperties.getInstance().isAdminMailLoginEnabled() == false || recipient.getEmail() == null || recipient.getEmail().isEmpty()) {
-                // Context administrator is recipient but does not have permission to access mail or rather has no mail account
-                return false;
-            }
+        if (!recipientIsOrganizerAndHasNoAccess()) {
+            return false;
         }
         if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
             return true;
