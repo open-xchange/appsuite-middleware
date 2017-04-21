@@ -74,7 +74,9 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceExceptionCode;
@@ -134,7 +136,23 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         }
 
         final ServerSession session = subscription.getSession();
-        final GoogleCredential googleCreds = GoogleApiClients.getCredentials(session);
+
+        OAuthAccount oauthAccount = null;
+        {
+            Object accountId = subscription.getConfiguration().get("account");
+            if (null != accountId) {
+                int iAccountId;
+                if (accountId instanceof Integer) {
+                    iAccountId = ((Integer) accountId).intValue();
+                } else {
+                    iAccountId = Integer.parseInt(accountId.toString());
+                }
+                OAuthService service = services.getService(OAuthService.class);
+                oauthAccount = service.getAccount(iAccountId, session, session.getUserId(), session.getContextId());
+            }
+        }
+
+        final GoogleCredential googleCreds = null == oauthAccount ? GoogleApiClients.getCredentials(session) : GoogleApiClients.getCredentials(oauthAccount, session);
         final Calendar googleCalendarService = new Calendar.Builder(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
 
         // Check if we have permissions
