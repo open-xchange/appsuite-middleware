@@ -14,7 +14,7 @@ BuildRequires:  java7-devel
 BuildRequires:  java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 21
+%define         ox_release 22
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -54,6 +54,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Fri Apr 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-05-02 (4113)
 * Wed Apr 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-04-18 (4084)
 * Fri Mar 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
