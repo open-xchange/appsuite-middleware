@@ -85,7 +85,7 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
     // -------------------------------------------------------------------------------------------------------------------
 
     private final ConfigurationService configService;
-    private final ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
+    private final ConcurrentMap<String, ServerProperty> properties;
 
     /**
      * Initializes a new {@link ConfigProviderServiceImpl}.
@@ -96,7 +96,8 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
     public ConfigProviderServiceImpl(final ConfigurationService configService) throws OXException {
         super();
         this.configService = configService;
-        init();
+        properties = new ConcurrentHashMap<String, ServerProperty>(2048, 0.9f, 1);
+        init(configService);
     }
 
     @Override
@@ -104,20 +105,20 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
         if (null == property) {
             return null;
         }
-        final ServerProperty basicProperty = properties.get(property);
-        if (basicProperty != null) {
-            return basicProperty;
-        }
-        final ServerProperty retval = new ServerProperty();
-        final String value = configService.getProperty(property);
-        retval.setDefined(value != null);
-        retval.set(value);
 
-        final ServerProperty alreadyDefined = properties.putIfAbsent(property, retval);
-        if(alreadyDefined != null) {
-            return alreadyDefined;
+        ServerProperty basicProperty = properties.get(property);
+        if (null == basicProperty) {
+            // Not yet available, create it...
+            ServerProperty newBasicProperty = new ServerProperty();
+            String value = configService.getProperty(property);
+            newBasicProperty.setDefined(value != null);
+            newBasicProperty.set(value);
+            basicProperty = properties.putIfAbsent(property, newBasicProperty);
+            if (null == basicProperty) {
+                basicProperty = newBasicProperty;
+            }
         }
-        return retval;
+        return basicProperty;
     }
 
     @Override
@@ -136,7 +137,7 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
         return retval;
     }
 
-    private void init() throws OXException {
+    private void init(ConfigurationService configService) throws OXException {
         initSettings(configService);
         initStructuredObjects(configService);
         initMetadata(configService);
@@ -245,7 +246,7 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
     @Override
     public void reinit() throws OXException {
         properties.clear();
-        init();
+        init(this.configService);
     }
 
 }
