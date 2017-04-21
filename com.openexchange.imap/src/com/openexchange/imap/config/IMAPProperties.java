@@ -269,7 +269,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             TIntSet invalidChars;
             String invalids = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.invalidMailboxNameCharacters", view);
             if (Strings.isEmpty(invalids)) {
-                invalidChars = new TIntHashSet(0);
+                params.invalidChars = new TIntHashSet(0);
             } else {
                 final String[] sa = Strings.splitByWhitespaces(Strings.unquote(invalids));
                 final int length = sa.length;
