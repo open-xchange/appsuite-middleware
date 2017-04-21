@@ -231,7 +231,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.rootSubfoldersAllowed", view);
             if (null == tmp) {
-                params.rootSubfoldersAllowed = Boolean.FALSE;
+                params.rootSubfoldersAllowed = null;
             } else {
                 params.rootSubfoldersAllowed = Boolean.valueOf(tmp);
 
