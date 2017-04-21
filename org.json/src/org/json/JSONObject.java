@@ -615,9 +615,13 @@ public class JSONObject extends AbstractJSONValue {
      */
     public boolean getBoolean(final String key) throws JSONException {
         final Object o = get(key);
-        if (o.equals(Boolean.FALSE) || (o instanceof String && ((String) o).equalsIgnoreCase(STR_FALSE))) {
+        if (o.equals(Boolean.FALSE)) {
             return false;
-        } else if (o.equals(Boolean.TRUE) || (o instanceof String && ((String) o).equalsIgnoreCase(STR_TRUE))) {
+        } else if (o.equals(Boolean.TRUE)) {
+            return true;
+        } else if (o instanceof String && ((String) o).equalsIgnoreCase(STR_FALSE)) {
+            return false;
+        } else if (o instanceof String && ((String) o).equalsIgnoreCase(STR_TRUE)) {
             return true;
         }
         throw new JSONException("JSONObject[" + quote(key) + "] is not a Boolean.");
@@ -827,6 +831,20 @@ public class JSONObject extends AbstractJSONValue {
      */
     public Object opt(final String key) {
         return key == null ? null : this.myHashMap.get(key);
+    }
+
+    /**
+     * Get an optional value associated with a key that is supposed not to be {@link JSONObject#NULL <code>NULL</code>}.
+     *
+     * @param key A key string.
+     * @return An object which is the value, or null if there is no value.
+     */
+    public Object optIfNotNull(final String key) {
+        if (key == null) {
+            return null;
+        }
+        Object object = this.myHashMap.get(key);
+        return NULL == object ? null : object;
     }
 
     /**
