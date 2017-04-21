@@ -138,12 +138,12 @@ public class NotifyFolderSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        getNoReplyClient().execute(new ClearMailsRequest());
+        getClient().execute(new ClearMailsRequest());
         getClient().execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(getNoReplyClient(), emailAddress);
+        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
         assertNotNull(notificationMessage);
     }
 

@@ -76,15 +76,6 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  */
 public class AddGuestPermissionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link AddGuestPermissionTest}.
-     *
-     * @param name The test name
-     */
-    public AddGuestPermissionTest() {
-        super();
-    }
-
     @Test
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();
@@ -181,7 +172,6 @@ public class AddGuestPermissionTest extends ShareTest {
         rootFolder.addPermission(guestPermission);
         rootFolder.setLastModified(clientLastModified);
         rootFolder = updateFolder(api, rootFolder, new RequestCustomizer<UpdateRequest>() {
-
             @Override
             public void customize(UpdateRequest request) {
                 request.setCascadePermissions(true);
@@ -275,5 +265,4 @@ public class AddGuestPermissionTest extends ShareTest {
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
-
 }

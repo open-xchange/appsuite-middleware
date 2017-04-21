@@ -1,4 +1,4 @@
-/userfeedback/v1/delete/{context-group}/{type}:
+/userfeedback/v1/{context-group}/{type}:
   delete:
     operationId: delete
     tags:
@@ -53,4 +53,4 @@
     x-ox-examples:
       Example:
         description: Delete user feedback from 2016-01-01 to 2016-12-31
-        example: DELETE http://localhost:8009/userfeedback/v1/delete/default/star-rating-v1?start=1451606400&end=1483228799
+        example: DELETE http://localhost:8009/userfeedback/v1/default/star-rating-v1?start=1451606400&end=1483228799

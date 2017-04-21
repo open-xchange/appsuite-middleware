@@ -29,7 +29,7 @@ properties:
         interval, i.e. how far past appointments should be considered. More formal, 
         this value defines the negative offset relative to the current date 
         representing the minimum end time of appointments to be synchronized.
-        Possible values are "one_month", "one_year" and "six_months". 
+        Possible values are: <code>one_month</code>, <code>one_year</code> and <code>six_months</code>.
       defaultValue: one_month
       version: 
       reloadable: false
@@ -45,7 +45,7 @@ properties:
         interval, i.e. how far future appointments should be considered. More 
         formal, this value defines the positive offset relative to the current date 
         representing the maximum start time of appointments to be synchronized.
-        Possible values are "one_year" and "two_years".
+        Possible values are: <code>one_year</code> and <code>two_years</code>.
       defaultValue: one_year
       version:
       reloadable: false
@@ -59,9 +59,9 @@ properties:
         Tells users where to find a caldav folder. This can be displayed in frontends.
         You can use the variables [hostname] and [folderId]. 
         If you chose to deploy caldav as a virtual host (say 'dav.open-xchange.com') use
-        https://dav.open-xchange.com/caldav/[folderId] as the value
+        <code>https://dav.open-xchange.com/caldav/[folderId]</code> as the value
         If you are using user-agent sniffing use
-        https://[hostname]/caldav/[folderId]        
+        <code>https://[hostname]/caldav/[folderId]</code>
       defaultValue: https://[hostname]/caldav/[folderId]
       version:
       reloadable: false

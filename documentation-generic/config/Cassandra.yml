@@ -117,20 +117,21 @@ properties:
     - key: com.openexchange.nosql.cassandra.queryLatencyThreshold
       description: |
         Defines the latency threshold in milliseconds beyond which queries are considered 'slow' and logged as such by the Cassandra service. 
-        Used in conjunction with the <code>enableQueryLogger</code> property.
+        Used in conjunction with the <code>com.openexchange.nosql.cassandra.enableQueryLogger</code> property.
       defaultValue: 5000
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.nosql.cassandra.enableQueryLogger
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database"]
     - key: com.openexchange.nosql.cassandra.poolingHeartbeat
       description: |
         Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat. 
-        When a connection has been idle for the given amount of time, the Cassandra service will simulate activity by writing a dummy request to it (by sending an <code>OPTIONS</code> message). 
-        To disable heartbeat, set the interval to 0. 
+        When a connection has been idle for the given amount of time, the Cassandra service will simulate activity 
+        by writing a dummy request to it (by sending an <code>OPTIONS</code> message). 
+        To disable heartbeat, set the interval to <code>0</code>. 
       defaultValue: 30
       version: 7.8.4
       reloadable: false
@@ -183,7 +184,7 @@ properties:
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database"]
-    - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
+    - key: com.openexchange.nosql.cassandra.idleConnectionTrashTimeout
       description: |
         When activity goes down, the driver will "trash" connections if the maximum number of requests in a 10 second time period can be satisfied by less than the number of connections opened. 
         Trashed connections are kept open but do not accept new requests. After the given timeout, trashed connections are closed and removed. 
@@ -192,11 +193,10 @@ properties:
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.nosql.cassandra.idleConnectionTrashTimeout
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database", "Limit"]
-    - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
+    - key: com.openexchange.nosql.cassandra.maximumRequestsPerLocalConnection
       description: |
         Defines the throttling of concurrent requests per connection on local (on the same datacenter) nodes.
         <ul>
@@ -210,11 +210,11 @@ properties:
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.nosql.cassandra.maximumRequestsPerLocalConnection
+      related: com.openexchange.nosql.cassandra.maximumRequestsPerRemoteConnection
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database", "Limit"]
-    - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
+    - key: com.openexchange.nosql.cassandra.maximumRequestsPerRemoteConnection
       description: |
         Defines the throttling of concurrent requests per connection on remote (on a different datacenter) nodes.
         <ul>
@@ -228,11 +228,11 @@ properties:
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.nosql.cassandra.maximumRequestsPerRemoteConnection
+      related: com.openexchange.nosql.cassandra.maximumRequestsPerLocalConnection
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database", "Limit"]
-    - key: com.openexchange.nosql.cassandra.maximumRemoteConnectionsPerNode
+    - key: com.openexchange.nosql.cassandra.acquisitionQueueMaxSize
       description: |
         When the CassandraService tries to send a request to a host, it will first try to acquire a connection from this host's pool.
         If the pool is busy (i.e. all connections are already handling their maximum number of in flight requests), the acquisition attempt gets enqueued until a connection becomes available again. 
@@ -243,7 +243,6 @@ properties:
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.nosql.cassandra.acquistionQueueMaxSize
       file: cassandra.properties
       packageName: open-xchange-cassandra
       tags: ["Cassandra", "Database", "Limit"]

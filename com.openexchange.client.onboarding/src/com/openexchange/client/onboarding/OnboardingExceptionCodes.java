@@ -154,7 +154,15 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid link type %1$s in scenario configuration for %2$s
      */
-    INVALID_LINK_TYPE_IN_SCENARIO_CONFIGURATION("Invalid link type %1$s in scenario configuration for %2$s", null, Category.CATEGORY_CONFIGURATION, 23)
+    INVALID_LINK_TYPE_IN_SCENARIO_CONFIGURATION("Invalid link type %1$s in scenario configuration for %2$s", null, Category.CATEGORY_CONFIGURATION, 23),
+    /**
+     * Could not open keystore %1$s.
+     */
+    KEYSTORE_ERROR("Could not open keystore %1$s.", null, Category.CATEGORY_ERROR, 24),
+    /**
+     * Key with alias '%1$s' not found in keystore.
+     */
+    SIGN_ERROR("Key with alias '%1$s' not found in keystore.", null, Category.CATEGORY_ERROR, 25)
     ;
 
     /** The error code prefix for on-boarding module */

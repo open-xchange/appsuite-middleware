@@ -49,19 +49,18 @@
 
 package com.openexchange.ajax.framework;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.test.pool.TestUser;
 
+@RunWith(BlockJUnit4ClassRunner.class)
 public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
-
-    protected TestUser noReplyUser;
-    private AJAXClient noReplyClient;
 
     private static final AtomicInteger counter = new AtomicInteger();
 
@@ -71,30 +70,27 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
         SmtpMockSetup.init();
     }
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
-        noReplyUser = testContext.getNoReplyUser();
-        noReplyClient = new AJAXClient(noReplyUser);
-        getNoReplyClient().execute(new ClearMailsRequest());
+        List<TestUser> copyOfAll = testContext.getCopyOfAll();
+        for (TestUser user : copyOfAll) {
+            new AJAXClient(user).execute(new ClearMailsRequest());
+        }
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
-            if (getNoReplyClient() != null) {
-                getNoReplyClient().logout();
-                noReplyClient = null;
+            List<TestUser> copyOfAll = testContext.getCopyOfAll();
+            for (TestUser user : copyOfAll) {
+                new AJAXClient(user).logout();
             }
         } catch (Exception e) {
             LoggerFactory.getLogger(AbstractSmtpAJAXSession.class).error("Unable to correctly tear down test setup.", e);
         } finally {
             super.tearDown();
         }
-    }
-
-    public AJAXClient getNoReplyClient() {
-        return noReplyClient;
     }
 
     @AfterClass

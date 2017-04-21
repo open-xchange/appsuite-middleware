@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -117,10 +116,10 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                     SimpleDateFormat df = new SimpleDateFormat();
                     df.setTimeZone(TimeZone.getTimeZone("UTC"));
                     if (start > 0L) {
-                        sb.append(" from ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(start))));
+                        sb.append(" from ").append(df.format(new Date(start)));
                     }
                     if (end > 0L) {
-                        sb.append(" to ").append(df.format(new Date(TimeUnit.SECONDS.toMillis(end))));
+                        sb.append(" to ").append(df.format(new Date(end)));
                     }
                 }
                 subject = sb.toString();
@@ -143,8 +142,8 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 if (object.hasAndNotNull("displayName")) {
                     displayName = object.getString("displayName");
                 }
-                if (object.hasAndNotNull("pgpKey")) {
-                    String pgpKey = object.optString("pgpKey");
+                if (object.hasAndNotNull("pgp_key")) {
+                    String pgpKey = object.optString("pgp_key");
                     pgpKeys.put(address, pgpKey);
                 }
                 recipients.put(address, displayName);
@@ -170,6 +169,11 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 builder.entity(errorJson);
                 return builder.build();
             } else if (FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION.equals(e)) {
+                LOG.error(DEFAULT_CONFIG_ERROR_MESSAGE, e);
+                ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
+            } else if (FeedbackExceptionCodes.INVALID_PGP_CONFIGURATION.equals(e)) {
                 LOG.error(DEFAULT_CONFIG_ERROR_MESSAGE, e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);

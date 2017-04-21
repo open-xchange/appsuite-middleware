@@ -67,4 +67,13 @@ public class ParseException extends MessagingException {
     public ParseException(String s) {
 	super(s);
     }
+
+    /**
+     * Constructs a ParseException with the specified detail message.
+     * @param s     the detail message
+     * @param cause the cause
+     */
+    public ParseException(String s, Exception cause) {
+    super(s, cause);
+    }
 }

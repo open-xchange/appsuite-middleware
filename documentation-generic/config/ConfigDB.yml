@@ -357,7 +357,7 @@ properties:
       version:
       reloadable: false
       configcascadeAware: false
-      related: maxWait, maxActive
+      related: ["maxWait", "maxActive"]
       file: configdb.properties
       packageName: open-xchange-core
       tags: ["Config DB", "Database"]

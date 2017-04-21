@@ -159,7 +159,7 @@ public class Bug41622Test extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(getClient(), api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(getNoReplyClient(), guestA);
+        String shareURLA = discoverShareURL(getClient(), guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -191,7 +191,7 @@ public class Bug41622Test extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(getNoReplyClient(), guestB);
+        String shareURLB = discoverShareURL(client2, guestB);
         /*
          * check permission entities
          */

@@ -15,7 +15,7 @@ properties:
       tags: ["Caching"]
     - key: com.openexchange.caching.jcs.eventInvalidation
       description: |
-        Configures how remote cache invalidation is done. Set to 'true' for cache events via the cache event messaging service, or to 'false'
+        Configures how remote cache invalidation is done. Set to <code>true</code> for cache events via the cache event messaging service, or to <code>false</code>
         to stick with the JCS-internal lateral auxiliary cache configuration.
       defaultValue: true
       version:

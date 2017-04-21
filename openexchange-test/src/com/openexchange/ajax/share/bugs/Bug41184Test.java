@@ -54,9 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -81,13 +79,13 @@ public class Bug41184Test extends ShareTest {
 
     private AJAXClient client2;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (null != client2) {
@@ -96,15 +94,6 @@ public class Bug41184Test extends ShareTest {
         } finally {
             super.tearDown();
         }
-    }
-
-    /**
-     * Initializes a new {@link Bug41184Test}.
-     *
-     * @param name The test name
-     */
-    public Bug41184Test() {
-        super();
     }
 
     @Test
@@ -119,7 +108,7 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String folderLink = discoverInvitationLink(getNoReplyClient(), client2.getValues().getDefaultAddress());
+        String folderLink = discoverInvitationLink(getClient(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", folderLink);
         String fragmentParams = new URI(folderLink).getRawFragment();
         Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
@@ -133,7 +122,7 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String fileLink = discoverInvitationLink(getNoReplyClient(), client2.getValues().getDefaultAddress());
+        String fileLink = discoverInvitationLink(getClient(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", fileLink);
         fragmentParams = new URI(fileLink).getRawFragment();
         folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);

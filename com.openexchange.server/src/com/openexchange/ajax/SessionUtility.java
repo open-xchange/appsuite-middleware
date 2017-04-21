@@ -748,7 +748,7 @@ public final class SessionUtility {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             if (cookies.isEmpty()) {
-                LOG.info("Empty Cookies in HTTP request. No session secret can be looked up.");
+                LOG.debug("Empty Cookies in HTTP request. No session secret can be looked up.");
             } else {
                 final String secretPrefix = SECRET_PREFIX;
                 final StringBuilder tmp = new StringBuilder(256);

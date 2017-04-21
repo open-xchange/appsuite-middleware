@@ -7,7 +7,7 @@ properties:
       version:
       reloadable: true
       configcascadeAware: true
-      related: com.openexchange.spamhandler.spamassassin.hostname, com.openexchange.spamhandler.spamassassin.port
+      related: ["com.openexchange.spamhandler.spamassassin.hostname", "com.openexchange.spamhandler.spamassassin.port"]
       file: spamassassin.properties
       packageName: open-xchange-spamhandler-spamassassin
       tags: ["Spamassassin"]

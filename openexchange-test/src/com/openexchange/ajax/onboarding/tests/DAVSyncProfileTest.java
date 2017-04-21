@@ -70,7 +70,7 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
  * @since v7.8.1
  */
 public class DAVSyncProfileTest extends AbstractSmtpAJAXSession {
-    
+
     @Test
     public void testDAVsyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();
@@ -78,7 +78,7 @@ public class DAVSyncProfileTest extends AbstractSmtpAJAXSession {
         ExecuteRequest req = new ExecuteRequest("apple.mac/davsync", "email", body, false);
         getClient().execute(req);
         GetMailsRequest mailReq = new GetMailsRequest();
-        GetMailsResponse mailResp = getNoReplyClient().execute(mailReq);
+        GetMailsResponse mailResp = getClient().execute(mailReq);
         List<Message> messages = mailResp.getMessages();
         assertNotNull(messages);
         assertEquals(1, messages.size());

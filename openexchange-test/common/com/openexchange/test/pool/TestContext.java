@@ -56,6 +56,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.ConcurrentHashSet;
+import com.openexchange.java.Strings;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -235,6 +236,23 @@ public class TestContext implements Serializable {
 
     public void setNoReplyUser(TestUser noReplyUser) {
         this.noReplyUser.set(noReplyUser);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append("TestContext [");
+        if (Strings.isNotEmpty(name)) {
+            builder.append("name=").append(name).append(", ");
+        }
+        if (Strings.isNotEmpty(acquiredBy)) {
+            builder.append("acquiredBy=").append(acquiredBy).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

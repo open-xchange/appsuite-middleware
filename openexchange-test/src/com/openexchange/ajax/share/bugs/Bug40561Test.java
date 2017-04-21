@@ -82,10 +82,6 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug40561Test extends ShareTest {
 
-    public Bug40561Test() {
-        super();
-    }
-
     @Test
     public void testShareFileAndSearchForItAsGuest() throws Exception {
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
@@ -101,7 +97,7 @@ public class Bug40561Test extends ShareTest {
         tmp.setFolderId(sharedFolderID);
         String sharedFileID = tmp.toUniqueID();
 
-        GuestClient guestClient = resolveShare(discoverInvitationLink(getNoReplyClient(), guestEmailAddress));
+        GuestClient guestClient = resolveShare(discoverInvitationLink(getClient(), guestEmailAddress));
         guestClient.checkFileAccessible(sharedFolderID, sharedFileID, guestPermission);
 
         List<Facet> facets = AbstractFindTest.autocomplete(guestClient, Module.DRIVE, "tests");
@@ -135,5 +131,4 @@ public class Bug40561Test extends ShareTest {
             shareClient.logout();
         }
     }
-
 }

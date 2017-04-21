@@ -78,7 +78,7 @@ import com.openexchange.userfeedback.filter.FeedbackFilter;
  * @since v7.8.4
  */
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
-@Path("/userfeedback/v1/delete")
+@Path("/userfeedback/v1/")
 public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteUserFeedbackService.class);

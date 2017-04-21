@@ -101,6 +101,14 @@ public class MimeMessageUtilityTest {
     }
 
     @Test
+    public void testForBug53100() {
+       String s = "=?CP-850?B?U3BhbV9JTVNWQTpOb24gcmVjYXBpdGFiaWxlOiBTcGE=?==?CP-850?B?bV9JTVNWQTo4NTI2?=";
+       s = MimeMessageUtility.decodeEnvelopeSubject(s);
+
+       assertEquals("Subject nor properly unfolded/decoded.", "Spam_IMSVA:Non recapitabile: Spam_IMSVA:8526", s);
+    }
+
+    @Test
     public void testForBug53023() {
        String s = "=?utf-8?B?TGEgdHVhIExpYmVybyBNYWlsIFBsdXMgc3RhIHBlciBlc3M=?==?utf-8?B?ZXJlIHJpbm5vdmF0YQ==?=";
        s = MimeMessageUtility.decodeEnvelopeSubject(s);

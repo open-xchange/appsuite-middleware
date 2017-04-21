@@ -130,16 +130,27 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
-    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] { createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"), createNamedGuestPermission("horst@example.com", "Horst Example", "secret"), createAnonymousGuestPermission("secret"), createAnonymousGuestPermission()
+    // @formatter:off
+    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
+        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
+        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
+        createAnonymousGuestPermission("secret"),
+        createAnonymousGuestPermission()
     };
 
-    protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] { asObjectPermission(TESTED_PERMISSIONS[0]), asObjectPermission(TESTED_PERMISSIONS[1]), asObjectPermission(TESTED_PERMISSIONS[2]), asObjectPermission(TESTED_PERMISSIONS[3])
+    protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] {
+        asObjectPermission(TESTED_PERMISSIONS[0]),
+        asObjectPermission(TESTED_PERMISSIONS[1]),
+        asObjectPermission(TESTED_PERMISSIONS[2]),
+        asObjectPermission(TESTED_PERMISSIONS[3])
     };
-
+    
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
 
-    protected static final int[] TESTED_MODULES = new int[] { FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
+    protected static final int[] TESTED_MODULES = new int[] {
+        FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
     };
+    // @formatter:on
 
     protected static final Random random = new Random();
     protected static final int CLEANUP_DELAY = 30000;
@@ -747,7 +758,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The share URL, or <code>null</code> if not found
      */
     protected String discoverShareURL(ExtendedPermissionEntity guestEntity) throws Exception {
-        return discoverShareURL(getNoReplyClient(), guestEntity);
+        return discoverShareURL(getClient(), guestEntity);
     }
 
     /**

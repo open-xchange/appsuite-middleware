@@ -67,6 +67,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 import com.openexchange.pgp.mail.PGPMimeService;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
@@ -118,7 +119,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         if (null != pgpMimeService) {
             secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
             secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
-            if (Strings.isNotEmpty(secretKeyFile) && Strings.isNotEmpty(secretKeyPassword)) {
+            if (Strings.isNotEmpty(secretKeyFile)) {
                 signingKey = FeedbackMimeMessageUtility.parsePrivateKey(secretKeyFile);
                 sign = true;
             }
@@ -138,7 +139,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             Address[] recipients = null;
 
             recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
-            if (recipients.length == 0) {
+            if (recipients.length == 0 && (null == pgpRecipients || pgpRecipients.size() == 0)) {
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
             mail.addRecipients(RecipientType.TO, recipients);
@@ -146,7 +147,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             transport = smtpSession.getTransport("smtp");
             transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
 
-            if (encrypt) {
+            if (encrypt && null != pgpRecipients && pgpRecipients.size() > 0) {
                 MimeMessage pgpMail = null;
                 Address[] pgpAddresses = pgpRecipients.keySet().toArray(new Address[pgpRecipients.size()]);
                 mail.addRecipients(RecipientType.TO, pgpAddresses);
@@ -159,16 +160,22 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 appendPositiveSendingResult(pgpAddresses, result, sign, true);
             }
 
-            if (sign) {
-                MimeMessage signedMail = pgpMimeService.sign(mail, signingKey, secretKeyPassword.toCharArray());
-                transport.sendMessage(signedMail, recipients);
-            } else {
-                transport.sendMessage(mail, recipients);
+            if (recipients.length > 0) {
+                if (sign) {
+                    MimeMessage signedMail = pgpMimeService.sign(mail, signingKey, secretKeyPassword.toCharArray());
+                    transport.sendMessage(signedMail, recipients);
+                } else {
+                    transport.sendMessage(mail, recipients);
+                }
             }
-
             appendPositiveSendingResult(recipients, result, sign, false);
             appendWarnings(result, invalidAddresses, pgpFailedAddresses);
             return result.toString();
+        } catch (OXException e) {
+            if (PGPCoreExceptionCodes.BAD_PASSWORD.equals(e)) {
+                throw FeedbackExceptionCodes.INVALID_PGP_CONFIGURATION.create(e, e.getMessage());
+            }
+            throw e;
         } catch (MessagingException e) {
             LOG.error(e.getMessage(), e);
             throw FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION.create(e.getMessage());

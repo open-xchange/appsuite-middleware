@@ -208,21 +208,23 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             while (it.hasNext()) {
                 CSVRecord record = it.next();
                 String address = record.get(0);
+                String publicKeyFile = "";
+                int startOfPublicKeyFile = address.indexOf(":");
+                if (startOfPublicKeyFile > -1) {
+                    publicKeyFile = address.substring(startOfPublicKeyFile + 1);
+                    address = address.substring(0, startOfPublicKeyFile);
+                }
                 String displayName = "";
-                String pgp = "";
-                if (record.size() >= 2) {
+                if (record.size() == 2) {
                     displayName = record.get(1);
                 }
-                if (record.size() == 3) {
-                    pgp = record.get(2);
-                }
                 JSONObject json = getAddressJSON(address, displayName);
-                if (null != pgp && Strings.isNotEmpty(pgp)) {
+                if (null != publicKeyFile && Strings.isNotEmpty(publicKeyFile)) {
                     try {
-                        pgp = new String(Files.readAllBytes(Paths.get(pgp)));
-                        json.put("pgpKey", pgp);
+                        String pgp = new String(Files.readAllBytes(Paths.get(publicKeyFile)));
+                        json.put("pgp_key", pgp);
                     } catch (IOException e) {
-                        exitWithError("Could not load PGP key " + pgp);
+                        exitWithError("Could not load PGP key " + publicKeyFile);
                     }
                 }
                 array.add(0, json);
@@ -241,16 +243,34 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
     }
 
     private JSONObject extractSingleRecipient(String recipients) throws JSONException {
-        int startOfAddress = recipients.lastIndexOf("<");
-        String address = "";
-        String displayName = "";
-        if (startOfAddress >= 0) {
-            address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
-            displayName = startOfAddress != 0 ? recipients.substring(0, startOfAddress - 1) : "";
-        } else {
-            address = recipients;
+        String publicKeyFile = null;
+        JSONObject json = null;
+        try {
+            boolean hasPublicKeyFile = recipients.contains(":");
+            int startOfAddress = recipients.lastIndexOf("<");
+            String address = "";
+            String displayName = "";
+            if (startOfAddress >= 0) {
+                address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
+                displayName = startOfAddress != 0 ? recipients.substring(0, startOfAddress - 1) : "";
+            } else {
+                address = recipients;
+            }
+            json = getAddressJSON(address, displayName);
+            if (hasPublicKeyFile) {
+                int startOfPublicKeyFile = recipients.lastIndexOf(":");
+                if (displayName.contains(":")) {
+                    if (startOfAddress > startOfPublicKeyFile) {
+                        return json;
+                    }
+                }
+                publicKeyFile = recipients.substring(startOfPublicKeyFile + 1);
+                String pgp = new String(Files.readAllBytes(Paths.get(publicKeyFile)));
+                json.put("pgp_key", pgp);
+            }
+        } catch (IOException e) {
+            exitWithError("Could not load PGP public key file " + publicKeyFile);
         }
-        JSONObject json = getAddressJSON(address, displayName);
         return json;
     }
 

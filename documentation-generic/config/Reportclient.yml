@@ -11,7 +11,7 @@ properties:
       version:
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.report.client.proxy.address, com.openexchange.report.client.proxy.port, com.openexchange.report.client.proxy.authrequired
+      related: ["com.openexchange.report.client.proxy.address", "com.openexchange.report.client.proxy.port", "com.openexchange.report.client.proxy.authrequired"]
       file: reportclient.properties
       packageName: open-xchange-report-client
       tags: ["Report", "Proxy"]
@@ -44,7 +44,7 @@ properties:
       version:
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.report.client.proxy.username, com.openexchange.report.client.proxy.password
+      related: ["com.openexchange.report.client.proxy.username", "com.openexchange.report.client.proxy.password"]
       file: reportclient.properties
       packageName: open-xchange-report-client
       tags: ["Report", "Proxy"]
