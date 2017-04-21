@@ -50,6 +50,7 @@
 package com.openexchange.test.pool;
 
 import java.io.Serializable;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TestUser}
@@ -73,7 +74,7 @@ public class TestUser implements Serializable {
     private final String context;
 
     public TestUser(String user, String context, String password) {
-        this.user = user; 
+        this.user = user;
         this.context = context;
         this.login = user + "@" + context;
         this.password = password;
@@ -94,6 +95,17 @@ public class TestUser implements Serializable {
 
     public String getContext() {
         return context;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append("TestUser [");
+        if (Strings.isNotEmpty(login)) {
+            builder.append("login=").append(login);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }
