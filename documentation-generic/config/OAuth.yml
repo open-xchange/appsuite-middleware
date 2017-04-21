@@ -7,15 +7,48 @@ properties:
         To identify the oauth provider replace [oauth_provider] with the last part of the provider id.  
         E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google  
         Available modules are:
-          <ul>
-           <li>mail</li>
-           <li>calendar_ro</li>
-           <li>contacts_ro</li>
-           <li>calendar</li>
-           <li>contacts</li>
-           <li>drive</li>
-           <li>generic</li>
-          </ul>
+          <table>
+            <tr>
+              <th>Module identifier</th>
+              <th>Description</th>
+              <th>Supported by</th>
+            </tr>
+            <tr>
+              <td>mail</td>
+              <td>Allows access to mail data of the OAuth provider</td>
+              <td>google</td>
+            </tr>
+            <tr>
+              <td>calendar_ro</td>
+              <td>Allows read-only access to calendar data of the OAuth provider</td>
+              <td>google, msliveconnect</td>
+            </tr>
+            <tr>
+              <td>contacts_ro</td>
+              <td>Allows read-only access to contact data of the OAuth provider</td>
+              <td>google, linkedin, msliveconnect, xing, yahoo</td>
+            </tr>
+            <tr>
+              <td>calendar</td>
+              <td>Allows read-write access to calendar data of the OAuth provider</td>
+              <td>google, msliveconnect</td>
+            </tr>
+            <tr>
+              <td>contacts</td>
+              <td>Allows read-write access to contact data of the OAuth provider</td>
+              <td>google, msliveconnect, yahoo</td>
+            </tr>
+            <tr>
+              <td>drive</td>
+              <td>Allows access to files/documents API of the OAuth provider</td>
+              <td>boxcom, dropbox, google, msliveconnect, </td>
+            </tr>
+            <tr>
+              <td>feeds</td>
+              <td>Allows access to feeds API of the OAuth provider</td>
+              <td>twitter</td>
+            </tr>
+          </table>
       defaultValue: null
       version: 7.8.3
       reloadable: true
