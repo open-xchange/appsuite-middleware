@@ -49,7 +49,6 @@
 
 package com.openexchange.userfeedback.clt;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.ws.rs.client.Client;
@@ -59,10 +58,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
+import org.json.JSONObject;
 import com.openexchange.cli.AbstractRestCLI;
-import com.openexchange.java.AsciiReader;
 
 /**
  * {@link DeleteUserFeedback}
@@ -145,8 +143,13 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
         context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE);
-        InputStream response = context.delete(InputStream.class);
-        System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
+        String response = context.delete(String.class);
+        JSONObject entity = new JSONObject(response);
+
+        if (entity.getBoolean("successful")) {
+            String result = "Feedback data deleted for type: " + entity.getString("type") + ", context group: " + entity.getString("contextGroup") + (entity.has("start") ? (", start time: " + entity.getLong("start") / 1000) : "") + (entity.has("end") ? (", end time: " + entity.getLong("end") / 1000) : "");
+            System.out.println(result);
+        }
         return null;
     }
 

@@ -190,10 +190,8 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             array.add(0, extractSingleRecipient(recipients));
         }
         requestBody.put("recipients", array);
-        InputStream response = null;
-        response = context.post(Entity.json(requestBody.toString()), InputStream.class);
+        InputStream response = context.post(Entity.json(requestBody.toString()), InputStream.class);
         System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
-        System.exit(0);
         return null;
     }
 

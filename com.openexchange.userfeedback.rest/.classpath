@@ -5,8 +5,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="output" path="bin"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-client-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-client-2.17-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-common-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-common-2.17-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.ws.rs-api-2.0.1.jar" sourcepath="/com.openexchange.bundles/source/javax.ws.rs-api-2.0.1-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 </classpath>
