@@ -43,7 +43,7 @@ properties:
         exposes an aggregated collection containing all contact resources from all visible folders. The 
         value <code>0</code> exposes either an aggregated collection or individual 
         collections for each folder, depending on the client's user-agent that is 
-        matched against the pattern in 'com.openexchange.carddav.userAgentForAggregatedCollection'. 
+        matched against the pattern in [[com.openexchange.carddav.userAgentForAggregatedCollection]].
       defaultValue: 0
       version:
       reloadable: true
@@ -57,7 +57,7 @@ properties:
         Regular expression to match against the client's user-agent to decide 
         whether the aggregated collection is exposed or not. The default pattern 
         matches all known varieties of the Mac OS Addressbook client, that doesn't 
-        support multiple collections. Only used if 'com.openexchange.carddav.exposedCollections'
+        support multiple collections. Only used if [[com.openexchange.carddav.exposedCollections]]
         is set to <code>0</code>. The pattern is used case insensitive. 
       defaultValue: ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*"
       version:

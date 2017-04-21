@@ -127,10 +127,10 @@ properties:
         Specifies the optional date pattern to use.
         Accepts a pattern according to: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html. 
 
-        By default "com.openexchange.log.audit.slf4j.date.pattern" is empty, which means standard ISO-8601 formatting is used and accompanying properties
-        "com.openexchange.log.audit.slf4j.date.locale" and "com.openexchange.log.audit.slf4j.date.timezone" are ignored.
+        An empty value means standard ISO-8601 formatting is used and accompanying properties
+        [[com.openexchange.log.audit.slf4j.date.locale]] and [[com.openexchange.log.audit.slf4j.date.timezone]] are ignored.
         
-        If a pattern is specified for "com.openexchange.log.audit.slf4j.date.pattern" the accompanying properties may optionally be used to also define
+        If a pattern is specified for this property the accompanying properties may optionally be used to also define
         the locale and time zone to use for date formatting.
       defaultValue:
       version:
@@ -166,17 +166,17 @@ properties:
       description: |
         Specifies the file location to use.
           
-        By default "com.openexchange.log.audit.slf4j.file.location" is empty, which means regular App Suite logging is used and accompanying properties
-        "com.openexchange.log.audit.slf4j.file.size", "com.openexchange.log.audit.slf4j.file.count" and "com.openexchange.log.audit.slf4j.file.pattern" are ignored.
+        An empty value means regular App Suite logging is used and accompanying properties
+        [[com.openexchange.log.audit.slf4j.file.size]], [[com.openexchange.log.audit.slf4j.file.count]] and [[com.openexchange.log.audit.slf4j.file.pattern]] are ignored.
           
         Once a file location/pattern is set, audit logger will no more use regular App Suite logging, but output its log messages to rotating files.
         E.g. a file location/pattern might be: "/var/log/open-xchange/my-audit.log"
 
         It is then possible to configure how that logging is done:
         <ul>
-          <li>"com.openexchange.log.audit.slf4j.file.size" - specifies the max. file size to use</li>
-          <li>"com.openexchange.log.audit.slf4j.file.count" - defines the max. number of files to use for rotation</li>
-          <li>"com.openexchange.log.audit.slf4j.file.pattern" - defines the layout pattern of the log entry</li>
+          <li>[[com.openexchange.log.audit.slf4j.file.size]] - specifies the max. file size to use</li>
+          <li>[[com.openexchange.log.audit.slf4j.file.count]] - defines the max. number of files to use for rotation</li>
+          <li>[[com.openexchange.log.audit.slf4j.file.pattern]] - defines the layout pattern of the log entry</li>
         </ul>
         For more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
       defaultValue: GMT

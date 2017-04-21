@@ -25,7 +25,7 @@ properties:
       tags: ["Cassandra", "Database"]
     - key: com.openexchange.nosql.cassandra.port
       description: |
-        Defines the port on which the Cassandra server is running
+        Defines the port on which the Cassandra server is running.
       defaultValue: 9042
       version: 7.8.4
       reloadable: false
@@ -38,20 +38,20 @@ properties:
       description: |
         Defines load balancing policy to use for the cluster. There are three load balancing policies to choose from: <code>RoundRobin</code>, <code>DCAwareRoundRobin</code> and <code>DCTokenAwareRoundRobin</code>.
 
-        <b><u>RoundRobin</u></b>  
+        <h3>RoundRobin</h3>
         A Round-robin load balancing policy. 
         This policy queries nodes in a round-robin fashion. For a given query, if an host fail, the next one (following the round-robin order) is tried, until all hosts have been tried. 
         This policy is not datacenter aware and will include every known Cassandra host in its round robin algorithm. 
         If you use multiple datacenter this will be inefficient and you will want to use the <code>DCAwareRoundRobin</code> load balancing policy instead.
 
-        <b><u>DCAwareRoundRobin</u></b>  
+        <h3>DCAwareRoundRobin</h3>
         A data-center aware Round-robin load balancing policy. 
         This policy provides round-robin queries over the node of the local data center. 
         It also includes in the query plans returned a configurable number of hosts in the remote data centers, but those are always tried after the local nodes. 
         In other words, this policy guarantees that no host in a remote data center will be queried unless no host in the local data center can be reached. 
         If used with a single data center, this policy is equivalent to the <code>RoundRobin</code>, but its DC awareness incurs a slight overhead so the latter should be preferred to this policy in that case.
 
-        <b><u>DCTokenAwareRoundRobin</u></b>  
+        <h3>DCTokenAwareRoundRobin</h3>
         Same as the <code>DCAwareRoundRobin</code> load balancing policy but with added token awareness. 
       defaultValue: RoundRobin
       version: 7.8.4
@@ -65,24 +65,23 @@ properties:
       description: |
         A policy that defines a default behaviour to adopt when a request fails. There are three retry policies to choose from: 
 
-        <b><u>defaultRetryPolicy</u></b>
-
+        <h3>defaultRetryPolicy</h3>
         This policy retries queries in only two cases: 
-        <ul><li>On a read timeout, if enough replicas replied but data was not retrieved.</li>
-        <li>On a write timeout, if we timeout while writing the distributed log used by batch statements.</li></ul>
+        <ul>
+         <li>On a read timeout, if enough replicas replied but data was not retrieved.</li>
+         <li>On a write timeout, if we timeout while writing the distributed log used by batch statements.</li>
+        </ul>
         This retry policy is conservative in that it will never retry with a different consistency level than the one of the initial operation. 
         In some cases, it may be convenient to use a more aggressive retry policy like <code>downgradingConsistencyRetryPolicy</code>. 
 
-        <b><u>downgradingConsistencyRetryPolicy</u></b>
-
-        A retry policy that sometimes retries with a lower consistency level than the one initially requested. 
-        <b>BEWARE</b>: this policy may retry queries using a lower consistency level than the one initially requested. By doing so, it may break consistency guarantees. 
+        <h3>downgradingConsistencyRetryPolicy</h3>
+        A retry policy that sometimes retries with a lower consistency level than the one initially requested.  
+        <b>Beware</b>: this policy may retry queries using a lower consistency level than the one initially requested. By doing so, it may break consistency guarantees. 
         In other words, if you use this retry policy, there are cases where a read at QUORUM may NOT see a preceding write at QUORUM. 
         Do not use this policy unless you have understood the cases where this can happen and are ok with that. 
         It is also highly recommended to always enable the <code>logRetryPolicy</code> to log the occurrences of such consistency breaks.
         
-        <b><u>fallthroughRetryPolicy</u></b>
-
+        <h3>fallthroughRetryPolicy</h3>
         A retry policy that never retries (nor ignores). 
       defaultValue: defaultRetryPolicy
       version: 7.8.4
@@ -94,7 +93,7 @@ properties:
       tags: ["Cassandra", "Database"]
     - key: com.openexchange.nosql.cassandra.logRetryPolicy
       description: |
-        Logs the retry decision of the policy
+        Logs the retry decision of the policy.
       defaultValue: false
       version: 7.8.4
       reloadable: false
@@ -105,7 +104,7 @@ properties:
       tags: ["Cassandra", "Database"]
     - key: com.openexchange.nosql.cassandra.enableQueryLogger
       description: |
-        Enables the query logger which logs all executed statements
+        Enables the query logger which logs all executed statements.
       defaultValue: false
       version: 7.8.4
       reloadable: false
@@ -117,7 +116,7 @@ properties:
     - key: com.openexchange.nosql.cassandra.queryLatencyThreshold
       description: |
         Defines the latency threshold in milliseconds beyond which queries are considered 'slow' and logged as such by the Cassandra service. 
-        Used in conjunction with the <code>com.openexchange.nosql.cassandra.enableQueryLogger</code> property.
+        Used in conjunction with the [[com.openexchange.nosql.cassandra.enableQueryLogger]] property.
       defaultValue: 5000
       version: 7.8.4
       reloadable: false
@@ -200,8 +199,8 @@ properties:
       description: |
         Defines the throttling of concurrent requests per connection on local (on the same datacenter) nodes.
         <ul>
-        <li>For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max).</li>
-        <li>For Cassandra clusters that use a protocol v3 and up, it is set by default to 1024.</li>
+         <li>For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max).</li>
+         <li>For Cassandra clusters that use a protocol v3 and up, it is set by default to 1024.</li>
         </ul>
         These low defaults were chosen so that the default configuration for protocol v2 and v3 allow the same total number of simultaneous requests 
         (to avoid bad surprises when clients migrate from v2 to v3). This threshold can be raised, or even set it to the max which is 32768 for LOCAL nodes.
@@ -218,8 +217,8 @@ properties:
       description: |
         Defines the throttling of concurrent requests per connection on remote (on a different datacenter) nodes.
         <ul>
-        <li>For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max)</li>
-        <li>For Cassandra clusters that use a protocol v3 and up, it is set by default to 256.</li>
+         <li>For Cassandra clusters that use a protocol v2 and below, there is no reason to throttle. It should be set to 128 (the max)</li>
+         <li>For Cassandra clusters that use a protocol v3 and up, it is set by default to 256.</li>
         </ul>
         These low defaults were chosen so that the default configuration for protocol v2 and v3 allow the same total number of simultaneous requests 
         (to avoid bad surprises when clients migrate from v2 to v3). This threshold can be raised, or even set it to the max which is 2000 for REMOTE nodes.
@@ -237,7 +236,7 @@ properties:
         When the CassandraService tries to send a request to a host, it will first try to acquire a connection from this host's pool.
         If the pool is busy (i.e. all connections are already handling their maximum number of in flight requests), the acquisition attempt gets enqueued until a connection becomes available again. 
         If the queue has already reached its limit, further attempts to acquire a connection will be rejected immediately: 
-        the CassandraService will move on and try to acquire a connection from the next host's pool. The limit can be set to 0 to disable queueing entirely. 
+        the CassandraService will move on and try to acquire a connection from the next host's pool. The limit can be set to <code>0</code> to disable queueing entirely. 
         If all hosts are busy with a full queue, the request will fail with a <code>NoHostAvailableException</code>.
       defaultValue: 256
       version: 7.8.4
@@ -248,7 +247,7 @@ properties:
       tags: ["Cassandra", "Database", "Limit"]
     - key: com.openexchange.nosql.cassandra.connectTimeout
       description: |
-        Specifies the connect timeout in milliseconds
+        Specifies the connect timeout in milliseconds.
       defaultValue: 5000
       version: 7.8.4
       reloadable: false
@@ -259,7 +258,7 @@ properties:
       tags: ["Cassandra", "Database", "Timeout"]
     - key: com.openexchange.nosql.cassandra.readTimeout
       description: |
-        Specifies the read timeout in milliseconds
+        Specifies the read timeout in milliseconds.
       defaultValue: 12000
       version: 7.8.4
       reloadable: false

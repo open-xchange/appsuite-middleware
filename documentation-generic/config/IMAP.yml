@@ -2,26 +2,25 @@ feature_name: IMAP
 feature_description: |
   To differentiate between settings that apply all IMAP accounts or settings that only apply to the primary account
   each property containing the "[.primary]" suffix allows to specify a value only applicable to the primary account
-  by appending the "primary." suffix to properties' common "com.openexchange.imap." prefix.  
+  by appending the "primary." suffix to properties common "com.openexchange.imap." prefix.  
   E.g.  
   "com.openexchange.imap.imapTimeout=50000" specifies 50sec read timeout for every IMAP account  
   "com.openexchange.imap.primary.imapTimeout=20000" specifies 20sec read timeout for primary-only IMAP account
 properties:
     - key: com.openexchange.imap[.primary].imapSort
       description: |
-        Define where to sort emails: Value "imap" to let the  IMAP Server sort (faster but less reliable).
-        Leave blank or fill in value "application" to sort within application (slower but good quality).
-        The sorting is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in
-        mail.properties.
+        Define where to sort emails: Value <code>imap</code> to let the  IMAP Server sort (faster but less reliable).
+        Leave blank or fill in value <code>application</code> to sort within application (slower but good quality).
+        The sorting is done on IMAP server if a mailbox size exceeds the [[com.openexchange.mail.mailFetchLimit]].
 
         NOTE:  
-        This value is going to be set to "application" if IMAP server capabilities do not contain string "SORT".
-        Moreover, please also refer to property "com.openexchange.imap.fallbackOnFailedSORT" to specify how to react to a possible "NO" response.
+        This value is going to be set to <code>application</code> if IMAP server capabilities do not contain the string "SORT".
+        Moreover, please also refer to property [[com.openexchange.imap.fallbackOnFailedSORT]] to specify how to react to a possible "NO" response.
       defaultValue: imap
       version: 
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: ["com.openexchange.imap.fallbackOnFailedSORT", "com.openexchange.mail.mailFetchLimit"]
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
@@ -29,15 +28,15 @@ properties:
       description: |
         Define where to search for emails:
         <ul>
-         <li>Use value "imap" to let the IMAP Server search. The search is done on IMAP server if a mailbox' size exceeds the mailFetchLimit as defined in mail.properties.</li>
-         <li>Use value "force-imap" to let the IMAP Server search in every case.</li>
-         <li>Leave blank or fill in value "application" to search within application.</li>
+         <li>Use value <code>imap<code> to let the IMAP Server search. The search is done on IMAP server if a mailbox size exceeds the [[com.openexchange.mail.mailFetchLimit]].</li>
+         <li>Use value <code>force-imap</code> to let the IMAP Server search in every case.</li>
+         <li>Leave blank or fill in value <code>application</code> to search within application.</li>
         <ul>
       defaultValue: force-imap
       version: 
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.mail.mailFetchLimit
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
@@ -62,7 +61,7 @@ properties:
         which is slower but needs less memory.
 
         NOTE:  
-        See property "imapMessageFetchLimit" to know which mail folders are
+        See property [[com.openexchange.mail.mailFetchLimit]] to know which mail folders are
         treated as large mail folders.
       defaultValue: true
       version: 
@@ -74,10 +73,10 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapSupportsACL
       description: |
-        Define if IMAP server supports ACLs. Possible values: true/false/auto
+        Define if IMAP server supports ACLs. Possible values: <code>true</code>, <code>false</code>, <code>auto<//code>
 
         NOTE:  
-        Value "auto" means to use server-defined ACL support as indicated
+        Value <code>auto</code> means to use server-defined ACL support as indicated
         through response to IMAP command "CAPABILITY".
       defaultValue: auto
       version: 
@@ -90,7 +89,7 @@ properties:
     - key: com.openexchange.imap[.primary].imapTimeout
       description: |
         Define the socket read timeout value in milliseconds. A value less than
-        or equal to zero is infinite timeout. See also mail.imap.timeout
+        or equal to zero is infinite timeout. See also [[mail.imap.timeout]].
       defaultValue: 50000
       version: 
       reloadable: true
@@ -102,7 +101,7 @@ properties:
     - key: com.openexchange.imap[.primary].imapConnectionTimeout
       description: |
         Define the socket connect timeout value in milliseconds. A value less than
-        or equal to zero is infinite timeout. See also mail.imap.connectiontimeout
+        or equal to zero is infinite timeout. See also [[mail.imap.connectiontimeout]]
       defaultValue: 20000
       version: 
       reloadable: true
@@ -127,7 +126,7 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapAuthEnc
       description: |
-        Define the encoding for IMAP authentication
+        Define the encoding for IMAP authentication.
       defaultValue: UTF-8
       version: 
       reloadable: true
@@ -138,8 +137,8 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.User2ACLImpl
       description: |
-        Name of the class that implements User2ACL, their alias or "auto" to use auto-detection.
-        Currently known aliases: Cyrus, Courier, Dovecot, and Sun (Sun Java(tm) System Messaging Server)
+        Name of the class that implements User2ACL, their alias or <code>auto</code> to use auto-detection.
+        Currently known aliases: <code>Cyrus</code>, <code>Courier</code>, <code>Dovecot</code>, and <code>Sun</code> (Sun Java(tm) System Messaging Server).
       defaultValue: auto
       version: 
       reloadable: false
@@ -165,10 +164,10 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.spamHandler
       description: |
-        Define the registration name of the appropriate spam handler to use
+        Define the registration name of the appropriate spam handler to use.
 
         Note:  
-        This value gets overwritten by "com.openexchange.spamhandler.name" property
+        This value gets overwritten by [[com.openexchange.spamhandler.name]] property.
       defaultValue: DefaultSpamHandler
       version: 
       reloadable: false
@@ -202,43 +201,43 @@ properties:
     - key: com.openexchange.imap[.primary].maxNumConnections
       description: |
         The max. number of connection allowed being established for a user to an IMAP server. Less than or equal to zero means infinite.
-        Please also consider "com.openexchange.imap.storeContainerType".
+        Please also consider [[com.openexchange.imap.storeContainerType]].
         
         Note:  
-        This setting overrides possibles restrictions specified through property "com.openexchange.imap.maxNumExternalConnections" if
+        This setting overrides possibles restrictions specified through property [[com.openexchange.imap.maxNumExternalConnections]] if
         this property's value is less than the other one.
       defaultValue: 0
       version: 
       reloadable: true
       configcascadeAware: true
-      related: com.openexchange.imap.storeContainerType
+      related: ["com.openexchange.imap.storeContainerType","com.openexchange.imap.maxNumExternalConnections"]
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP", "Limit"]
     - key: com.openexchange.imap.storeContainerType
       description: |
         An IMAP connection cache acts a temporary keep-alive cache for already connected resources to an IMAP server's account.
-        Meaning it keeps a resource open/connected for a short amount of time (see "com.openexchange.mail.mailAccessCacheIdleSeconds")
-        and performs a "close elapsed ones" run periodically (see "com.openexchange.mail.mailAccessCacheShrinkerSeconds").
+        Meaning it keeps a resource open/connected for a short amount of time (see [[com.openexchange.mail.mailAccessCacheIdleSeconds]])
+        and performs a "close elapsed ones" run periodically (see [[com.openexchange.mail.mailAccessCacheShrinkerSeconds]]).
         
         In addition to that behavior there are two modes of operation - bounded and unbounded.
         
-        For an unbounded cache, set this property to "unbounded".
+        For an unbounded cache, set this property to <code>unbounded</code>.
         Thus a user is allowed to establish as many connections to his IMAP account as demanded by his active clients (Web UI, EAS, Outlook OXtender, etc.).
         
-        A bounded cache allows only as many concurrently opened resources as specified through "com.openexchange.imap.maxNumConnections" property.
+        A bounded cache allows only as many concurrently opened resources as specified through [[com.openexchange.imap.maxNumConnections]] property.
         Taking the wording "resource" was chosen by intention, since two types of resource abstractions exist:
         IMAP store and IMAP protocol (an authenticated login's socket connection).
         
-        The default setting "boundary-aware" considers an "IMAP store" as limited resources to an IMAP server.
+        The setting <code>boundary-aware</code> considers an "IMAP store" as limited resources to an IMAP server.
         The vague thing about IMAP store is that it maintains a connection pool internally by itself.
         Thus it is possible that there are actually more active socket connections open than specified,
         because an IMAP store is allowed to open further connections when needed;
         e.g. when accessing another IMAP folder while INBOX has been opened, too.
-        Practical experience showed that there will be at max.: "com.openexchange.imap.maxNumConnections" + 1
+        Practical experience showed that there will be at max.: [[com.openexchange.imap.maxNumConnections]] + 1
         
-        The setting "non-caching" does an exact mapping of resource to an established/authenticated socket connection to the IMAP account.
-        It is named "non-caching" as it does no caching on its own, but delegates it to a custom queuing 'com.sun.mail.imap.IMAPStore' class.
+        The setting <code>non-caching</code> does an exact mapping of resource to an established/authenticated socket connection to the IMAP account.
+        It is named <code>non-caching</code> as it does no caching on its own, but delegates it to a custom queuing 'com.sun.mail.imap.IMAPStore' class.
         Thus an exact limitation of connected socket connections ('com.sun.mail.imap.protocol.IMAPProtocol' instances) is achieved.
         Specifying a quite small limitation - let's say "1" - arises the possibility that JavaMail gets dead-locked by itself.
         E.g. an IMAP store attempts to create a second connection. That attempt may get stalled as it waits for itself to free the already
@@ -248,7 +247,7 @@ properties:
       version: 
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.mail.mailAccessCacheIdleSeconds", "com.openexchange.mail.mailAccessCacheShrinkerSeconds", "com.openexchange.imap.maxNumConnections"]
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
@@ -277,7 +276,7 @@ properties:
         Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
 
         Note:  
-        This property is statically used in IMAP authentication bundle
+        This property is statically used in IMAP authentication bundle.
       defaultValue: true
       version: 
       reloadable: true
@@ -331,10 +330,10 @@ properties:
       description: |
         Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
         Check "http://&lt;ox-grizzly-hostname&gt;:&lt;ox-grizzly-port&gt;/stats/diagnostic?param=ciphersuites" to check available cipher suites.
-        Default value is empty (fall-back to current JVM's default SSL cipher suite)
+        If left empty it falls-back to the current JVM's default SSL cipher suite.
         
         Note:  
-        This property is statically used in IMAP authentication bundle
+        This property is statically used in IMAP authentication bundle.
       defaultValue: true
       version: 
       reloadable: true
@@ -369,10 +368,10 @@ properties:
     - key: com.openexchange.imap.namespacePerUser
       description: |
         This option controls whether there it is expected to have a dedicated NAMESPACE per user or not.
-        In case of "true" each mailbox account on associated IMAP server is allowed to have its own NAMESPACE set; might be "" (root) or "INBOX.".
-        Otherwise for "false" every mailbox is assumed to have the same NAMESPACE set.
+        In case of <code>true</code> each mailbox account on associated IMAP server is allowed to have its own NAMESPACE set; might be "" (root) or "INBOX.".
+        Otherwise for <code>false</code> every mailbox is assumed to have the same NAMESPACE set.
         
-        This influences the way Open-Xchange Server detects & caches NAMESPACE information; either on a per user basis (more IMAP traffic) or
+        This influences the way Open-Xchange Server detects and caches NAMESPACE information; either on a per user basis (more IMAP traffic) or
         globally (only requested once).
         
         Do not touch unless you certainly know IMAP sever's behavior.
@@ -386,7 +385,7 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.rootSubfoldersAllowed
       description: |
-        If either "true" or "false" set, it enforces whether to assume root sub-folder capability for primary account.
+        If either <code>true</code> or <code>false</code> set, it enforces whether to assume root sub-folder capability for primary account.
         If not set, root sub-folder capability is probed through creating a temporary folder.
       defaultValue: 
       version: 
@@ -398,7 +397,7 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap.allowSORTDISPLAY
       description: |
-        Specifies if "SORT=DISPLAY" IMAP extension is supposed to be considered when returning a mail listing sorted by From/To
+        Specifies if "SORT=DISPLAY" IMAP extension is supposed to be considered when returning a mail listing sorted by From/To.
       defaultValue: false
       version: 
       reloadable: true
@@ -427,7 +426,7 @@ properties:
         Enables the audit log for issued IMAP commands via 'com.sun.mail.imap.AuditLog' class.
         
         Accepts the "primary." suffix to only enable for primary account;
-        e.g. <code>com.openexchange.imap.primary.auditLog.enabled=true</code>
+        e.g. <pre>com.openexchange.imap.primary.auditLog.enabled=true</pre>
       defaultValue: false
       version: 
       reloadable: true
@@ -471,7 +470,7 @@ properties:
         capabilities. 
 
         Accepts the "primary." suffix to only enable for primary account;  
-        e.g. <code>com.openexchange.imap.primary.overwritePreLoginCapabilities=true</code>
+        e.g. <pre>com.openexchange.imap.primary.overwritePreLoginCapabilities=true</pre>
       defaultValue: false
       version: 7.8.4
       reloadable: true

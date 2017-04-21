@@ -30,7 +30,7 @@ properties:
         Provides the possibility to specify a proxy that is used to access any HTTP end-points. If empty, no proxy is used.
 
         Notation is: &lt;optional-protocol&gt; + "://" + &lt;proxy-host&gt; + ":" + &lt;proxy-port&gt;  
-        With "http" as fall-back protocol
+        With "http" as fall-back protocol.
         
         E.g. <code>67.177.104.230:58720</code> (using HTTP protocol) or <code>https://78.0.25.45:8345</code> (using HTTPS protocol)
       defaultValue:
@@ -43,7 +43,7 @@ properties:
       tags: ["Autoconfig", "Mail", "Host", "Port"]
     - key: com.openexchange.mail.autoconfig.http.proxy.login
       description: |
-        Specifies the login/username to use in case specified proxy in property "com.openexchange.mail.autoconfig.http.proxy"
+        Specifies the login/username to use in case specified proxy in property [[com.openexchange.mail.autoconfig.http.proxy]]
         requires authentication.
       defaultValue:
       version:
@@ -55,7 +55,7 @@ properties:
       tags: ["Autoconfig", "Mail", "Credential"]
     - key: com.openexchange.mail.autoconfig.http.proxy.password
       description: |
-        Specifies the password to use in case specified proxy in property "com.openexchange.mail.autoconfig.http.proxy"
+        Specifies the password to use in case specified proxy in property [[com.openexchange.mail.autoconfig.http.proxy]]
         requires authentication.
       defaultValue:
       version:

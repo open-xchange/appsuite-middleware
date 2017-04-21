@@ -507,7 +507,6 @@ properties:
     description: |
       The host for the connector's http network listener. Set to "*" if you
       want to listen on all available interfaces.
-      "Default value:" 127.0.0.1, bind to localhost only.
     defaultValue: 127.0.0.1
     version: 
     reloadable: false

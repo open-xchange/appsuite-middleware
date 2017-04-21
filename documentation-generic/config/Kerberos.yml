@@ -5,24 +5,24 @@ properties:
     - key: com.openexchange.kerberos.moduleName
       description: |
         Name of the module in the authentication and authorization configuration file. Must be an entry in the file named by
-        java.security.auth.login.config.
+        [[java.security.auth.login.config]].
       defaultValue: Open-Xchange
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: java.security.auth.login.config
       file: kerberos.properties
       packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]
     - key: com.openexchange.kerberos.userModuleName
       description: |
         Name of the module in the authentication and authorization configuration file used for username and password authentication. Must be an
-        entry in the file named by java.security.auth.login.config.
+        entry in the file named by [[java.security.auth.login.config]].
       defaultValue: Open-Xchange-User-Auth
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: java.security.auth.login.config
       file: kerberos.properties
       packageName: open-xchange-authentication-kerberos
       tags: ["Kerberos", "Authentication"]

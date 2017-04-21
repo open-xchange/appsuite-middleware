@@ -286,7 +286,7 @@ properties:
     - key: maxIdle
       description: |
         Number of maximum idle connections. More connections aren't pooled and closed.
-        -1 stands for unlimited.
+        <code>-1</code> stands for unlimited.
       defaultValue: -1
       version:
       reloadable: false
@@ -348,9 +348,9 @@ properties:
       description: |
         Possible values:
         <ul>
-        <li>BLOCK: If maxActive number of connections is reached threads have to wait for a connection.</li>
-        <li>FAIL: If maxActive number of connections is reached an exception is thrown.</li>
-        <li>GROW: Open more connections even if maxActive is already reached.</li>
+         <li><code>BLOCK</code> - If maxActive number of connections is reached threads have to wait for a connection.</li>
+         <li><code>FAIL</code> - If maxActive number of connections is reached an exception is thrown.</li>
+         <li><code>GROW</code> - Open more connections even if maxActive is already reached.</li>
         </ul>
         This value is overwritten for OX databases from configdb.
       defaultValue: BLOCK
@@ -428,8 +428,8 @@ properties:
       tags: ["Config DB", "Database"]
     - key: com.openexchange.database.checkWriteCons
       description: |
-        If com.openexchange.database.checkWriteCons is set to true, a warning will be logged every time when a writable connection is used to
-        perform only SELECT queries. Default is 'false' to avoid flooding of log files.
+        If this property is set to <code>true</code>, a warning will be logged every time when a writable connection is used to
+        perform only SELECT queries. It should be set to <code>false</code> to avoid flooding of log files.
       defaultValue: false
       version:
       reloadable: false

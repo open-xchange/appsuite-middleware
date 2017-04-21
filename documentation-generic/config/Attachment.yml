@@ -3,7 +3,7 @@ properties:
     - key: MAX_UPLOAD_SIZE
       description: |
         If the sum of all uploaded files (for contacts, appointments or tasks) in one request is larger than this value,
-        the upload will be rejected. If this value is set to <code>-1</code> or not set at all, the more general MAX_UPLOAD_SIZE configured in
+        the upload will be rejected. If this value is set to <code>-1</code> or not set at all, the more general [[MAX_UPLOAD_SIZE]] configured in
         server.properties will be used. If that value is <code>0</code> uploads will be unrestricted.
         The size is in Bytes.
       defaultValue: 10485760
