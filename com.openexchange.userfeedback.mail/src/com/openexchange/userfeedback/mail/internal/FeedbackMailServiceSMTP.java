@@ -167,8 +167,8 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
                 } else {
                     transport.sendMessage(mail, recipients);
                 }
+                appendPositiveSendingResult(recipients, result, sign, false);
             }
-            appendPositiveSendingResult(recipients, result, sign, false);
             appendWarnings(result, invalidAddresses, pgpFailedAddresses);
             return result.toString();
         } catch (OXException e) {
@@ -193,19 +193,21 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
      * @param pgpEncrypt If PGP was used to encrypt the feedback mail
      */
     private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder, boolean pgpSign, boolean pgpEncrypt) {
-        if (pgpSign && pgpEncrypt) {
-            builder.append("A PGP-signed/encrypted email with user feedback was send to \n");
-        } else if (pgpSign && !pgpEncrypt) {
-            builder.append("A PGP-signed email with user feedback was send to \n");
-        } else if (!pgpSign && pgpEncrypt) {
-            builder.append("A PGP-encrypted email with user feedback was send to \n");
-        } else {
-            builder.append("An email with user feedback was send to \n");
-        }
-        for (int i = 0; i < recipients.length; i++) {
-            InternetAddress address = (InternetAddress) recipients[i];
-            String personalPart = address.getPersonal();
-            builder.append(address.getAddress()).append(" ").append(personalPart != null && !personalPart.isEmpty() ? personalPart : "").append("\n");
+        if (null != recipients && recipients.length > 0) {
+            if (pgpSign && pgpEncrypt) {
+                builder.append("A PGP-signed/encrypted email with user feedback was send to \n");
+            } else if (pgpSign && !pgpEncrypt) {
+                builder.append("A PGP-signed email with user feedback was send to \n");
+            } else if (!pgpSign && pgpEncrypt) {
+                builder.append("A PGP-encrypted email with user feedback was send to \n");
+            } else {
+                builder.append("An email with user feedback was send to \n");
+            }
+            for (int i = 0; i < recipients.length; i++) {
+                InternetAddress address = (InternetAddress) recipients[i];
+                String personalPart = address.getPersonal();
+                builder.append(address.getAddress()).append(" ").append(personalPart != null && !personalPart.isEmpty() ? personalPart : "").append("\n");
+            }
         }
     }
 

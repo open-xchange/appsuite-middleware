@@ -24,7 +24,7 @@ properties:
       tags: ["Drive Client Windows"]
     - key: com.openexchange.drive.updater.tmpl
       description: |
-        The filename of the drive updater template
+        The filename of the drive updater template.
       defaultValue: oxdrive_update.tmpl
       version: 
       reloadable: true
@@ -35,10 +35,8 @@ properties:
       tags: ["Drive Client Windows"]     
     - key: com.openexchange.drive.update.branding
       description: |
-        The name of the system wide drive branding identifier
-        This name must be equal to the name of one of the subfolder's under com.openexchange.drive.updater.path
-        This property can be overwritten through the config-cascade mechanism. 
-        Therefore you can configure different branding's for different context-sets or even single users.
+        The name of the system wide drive branding identifier.
+        This name must be equal to the name of one of the subfolder's under [[com.openexchange.drive.updater.path]].
       defaultValue: generic
       version: 
       reloadable: true

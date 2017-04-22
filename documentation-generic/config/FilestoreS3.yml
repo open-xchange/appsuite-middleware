@@ -5,8 +5,7 @@ feature_description: |
   identified by a so called "filestore ID", which refers to the authority
   part of the URI configured in the "uri" column in the "filestore" table of
   the config database, previously registered using  
-  "./registerfilestore -t [filestoreID]".
-
+  <pre>./registerfilestore -t [filestoreID]</pre>
   For each configured filestore, an own set of the properties may be defined,
   replacing [filestoreID] with the actual identifier.
 properties:
@@ -30,7 +29,7 @@ properties:
         automatically if it not yet exists, however, it's still possible to use an
         already existing one. There are some naming restrictions, please refer to
         http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html for
-        details. Required.
+        details. This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -44,9 +43,9 @@ properties:
       description: |
         Configures the Amazon S3 region to use when creating new buckets. This value
         is also used to pre-configure the client when no specific endpoint is set.  
-        Possible values are "us-gov-west-1", "us-east-1", "us-west-1", "us-west-2",
-        "eu-west-1", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1" and
-        "sa-east-1".
+        Possible values are <code>us-gov-west-1</code>, <code>us-east-1</code>, <code>us-west-1</code>, <code>us-west-2</code>,
+        <code>eu-west-1</code>, <code>ap-southeast-1</code>, <code>ap-southeast-2</code>, <code>ap-northeast-1</code> and
+        <code>sa-east-1</code>.
       defaultValue: us-west-2
       version: 
       reloadable: false
@@ -59,7 +58,7 @@ properties:
     - key: com.openexchange.filestore.s3.[filestoreID].pathStyleAccess
       description: |
         Defines if path-style-access should be used when accessing the S3 API. If
-        not set to "true", virtual-hosted-style access is used. Please refer to
+        not set to <code>true</code>, virtual-hosted-style access is used. Please refer to
         http://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html for
         details.
       defaultValue: true
@@ -73,7 +72,7 @@ properties:
 
     - key: com.openexchange.filestore.s3.[filestoreID].accessKey
       description: |
-        Configures the AWS access key to use. Required.
+        Configures the AWS access key to use. This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -85,7 +84,7 @@ properties:
 
     - key: com.openexchange.filestore.s3.[filestoreID].secretKey
       description: |
-        Configures the AWS secret key to use. Required.
+        Configures the AWS secret key to use. This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -98,7 +97,7 @@ properties:
     - key: com.openexchange.filestore.s3.[filestoreID].encryption
       description: |
         Optionally specifies which client-side encryption should be used. Current
-        options include "none" for no encryption, or "rsa" for an RSA-based asymmetric
+        options include <code>none</code> for no encryption, or <code>rsa<code> for an RSA-based asymmetric
         encryption.  
         Please note that depending on the used key length and Java runtime, one
         might need to replace the so-called "JCE Unlimited Strength Jurisdiction
@@ -117,12 +116,12 @@ properties:
         Specifies the path to the local keystore file (PKCS #12) containing the
         public-/private-key pair to use for encryption, e.g.
         "/opt/open-xchange/etc/cert/awss3.p12". Required if
-        "com.openexchange.filestore.s3.[filestoreID].encryption" is set to "rsa".
+        [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
       defaultValue: 
       version: 
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
@@ -132,12 +131,12 @@ properties:
         Specifies the password used when creating the referenced keystore containing
         public-/private-key pair to use for encryption. Note that blank or null
         passwords are in violation of the PKCS #12 specifications. Required if
-        "com.openexchange.filestore.s3.[filestoreID].encryption" is set to "rsa".
+        [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
       defaultValue: 
       version: 
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore", "Credential"]
@@ -150,9 +149,9 @@ properties:
         automatically, however, auto-detection only works properly for the "vanilla"
         Amazon S3, and may lead to unwanted results when targeting an S3
         implementation where not all signature types are supported.
-        Possible values include "S3SignerType" to enforce the AWS signature v2, and
-        "AWSS3V4SignerType" for AWS signature v4.
-        For backwards compatibility, the setting defaults to "S3SignerType", and
+        Possible values include <code>S3SignerType<code> to enforce the AWS signature v2, and
+        <code>AWSS3V4SignerType</code> for AWS signature v4.
+        For backwards compatibility, the setting defaults to <code>S3SignerType</code>, and
         needs to be adjusted explicitly when targeting the newer "v4-only" regions
         like Frankfurt or Beijing.
       defaultValue: S3SignerType

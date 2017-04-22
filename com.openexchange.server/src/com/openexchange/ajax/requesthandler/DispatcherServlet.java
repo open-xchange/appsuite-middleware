@@ -105,6 +105,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.StatusKnowingHttpServletResponse;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -515,6 +516,8 @@ public class DispatcherServlet extends SessionServlet {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
             handleOXException(e, httpRequest, httpResp);
+        } catch (RateLimitedException e) {
+            e.send(httpResponse);
         } catch (RuntimeException e) {
             exc = e;
             logException(e);

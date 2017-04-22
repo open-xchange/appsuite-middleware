@@ -478,7 +478,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         // Get the identifier of the referenced message
         MailPath parentMsgRef = composeMessage.getMsgref();
         MailPath originalMsgRef = null;
-        if (null != compositionSpace) {
+        if (null != parentMsgRef && null != compositionSpace) {
             originalMsgRef = compositionSpace.getReplyFor();
             if (null == originalMsgRef) {
                 Queue<MailPath> queue = compositionSpace.getForwardsFor();

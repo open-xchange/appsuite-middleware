@@ -293,3 +293,16 @@ gblQueryParamScopes:
   type: string
   description: A space-separated list of scopes to be added. Valid scopes are 'calendar', 'contacts', 'mail', 'drive', 'generic'. Note that not all scopes are applicable to every OAuth provider.
   required: true
+gblQueryParamsDecrypt:
+  name: decrypt
+  in: query
+  type: boolean
+  description: If true, and the object is encrypted, an attempt will be made to decrypt the object.  An error will be thrown if needed authentication isn't available. (Guard Required)
+  required: false
+glbQueryParamsCryptoAuth:
+  name: cryptoAuth
+  in: query
+  type: string
+  description: Authentication token used for Guard in order to decrypt or sign items.  Required if the token is not attached to the session and the decrypt flag was sent.
+  required: false
+

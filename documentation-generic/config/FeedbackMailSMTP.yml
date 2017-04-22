@@ -27,7 +27,7 @@ properties:
 
   - key: com.openexchange.userfeedback.mail.exportPrefix
     description: |
-      Prefix for mail attachment
+      Prefix for mail attachment.
     defaultValue: OX_App_Suite_Feedback_Report
     version: 7.8.4
     reloadable: true
@@ -39,7 +39,7 @@ properties:
 
   - key: com.openexchange.userfeedback.smtp.hostname
     description: |
-      The SMTP server to connect to
+      The SMTP server to connect to.
     defaultValue: 
     version: 7.8.4
     reloadable: true
@@ -99,7 +99,7 @@ properties:
 
   - key: com.openexchange.userfeedback.smtp.password
     description: |
-      Password for the provided username
+      Password for the provided username.
     defaultValue: 
     version: 7.8.4
     reloadable: true
@@ -111,7 +111,7 @@ properties:
 
   - key: com.openexchange.userfeedback.pgp.signKeyFile
     description: |
-      Path to PGP secret key used to sign mails
+      Path to PGP secret key used to sign mails.
     defaultValue: 
     version: 7.8.4
     reloadable: true
@@ -123,7 +123,7 @@ properties:
 
   - key: com.openexchange.userfeedback.pgp.signKeyPassword
     description: |
-      Password for PGP secret key used to sign mails
+      Password for PGP secret key used to sign mails.
     defaultValue: 
     version: 7.8.4
     reloadable: true

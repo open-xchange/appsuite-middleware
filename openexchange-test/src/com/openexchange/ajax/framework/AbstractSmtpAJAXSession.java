@@ -53,13 +53,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.test.pool.TestUser;
 
-@RunWith(BlockJUnit4ClassRunner.class)
 public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
 
     private static final AtomicInteger counter = new AtomicInteger();

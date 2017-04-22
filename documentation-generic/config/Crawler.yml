@@ -15,7 +15,7 @@ properties:
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.web.de
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: true
       version: 
       reloadable: true
@@ -26,7 +26,7 @@ properties:
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.gmx.de
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: true
       version: 
       reloadable: true
@@ -37,7 +37,7 @@ properties:
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.msn.de
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true
@@ -48,7 +48,7 @@ properties:
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncontacts
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true
@@ -59,7 +59,7 @@ properties:
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncalendar
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true
@@ -70,7 +70,7 @@ properties:
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suntasks
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true

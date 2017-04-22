@@ -3,7 +3,7 @@ properties:
     - key: CACHED_ITERATOR_FAST_FETCH
       description: |
         By enabling this option you can define the numbers of 
-        pre fetched results with the parameter MAX_PRE_FETCH.
+        pre fetched results with the parameter [[MAX_PRE_FETCH]].
 
         This means that MAX_PRE_FETCH results are gathered in one
         SQL query instead of MAX_PRE_FETCH single SQL queries.
@@ -19,7 +19,7 @@ properties:
       tags: ["Calendar", "Cache"]
     - key: MAX_PRE_FETCH
       description: |
-        By enabling the option CACHED_ITERATOR_FAST_FETCH you
+        By enabling the option [[CACHED_ITERATOR_FAST_FETCH]] you
         can define the numbers of pre fetched results with
         this parameter.
           

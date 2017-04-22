@@ -51,12 +51,10 @@ package com.openexchange.oauth.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -79,13 +77,12 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
 
-    private final Set<OAuthScope> availableScopes;
-
     protected enum OAuthPropertyID {
         apiKey, apiSecret, consumerKey, consumerSecret, redirectUrl, productName;
-    };
+    }
 
     private final Map<OAuthPropertyID, OAuthConfigurationProperty> properties;
+    private final Set<OAuthScope> availableScopes;
 
     protected String id;
     private String name;
@@ -99,8 +96,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     protected AbstractOAuthServiceMetaData(OAuthScope... scopes) {
         super();
         properties = new ConcurrentHashMap<OAuthPropertyID, OAuthConfigurationProperty>(OAuthPropertyID.values().length, 0.9f, 1);
-        Set<OAuthScope> s = new HashSet<>(Arrays.asList(scopes));
-        availableScopes = Collections.unmodifiableSet(s);
+        availableScopes = ImmutableSet.copyOf(scopes);
     }
 
     /**
@@ -218,7 +214,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthServiceMetaData#getProductName()
      */
     @Override
@@ -237,9 +233,8 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         // retrieve name from id
         int index = id.lastIndexOf('.');
         if (index >= 0) {
-            this.name = id.substring(index + 1, id.length());
+            this.name = id.substring(index + 1);
         }
-
     }
 
     /**
@@ -296,14 +291,9 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getAvailableScopes()
-     */
     @Override
     public Set<OAuthScope> getAvailableScopes(int userId, int ctxId) throws OXException {
-        return Collections.unmodifiableSet(OAuthScopeConfigurationService.getInstance().getScopes(availableScopes, userId, ctxId, name));
+        return OAuthScopeConfigurationService.getInstance().getScopes(availableScopes, userId, ctxId, name);
     }
 
     /**

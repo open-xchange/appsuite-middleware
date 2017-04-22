@@ -5,7 +5,7 @@
       - Userfeedback
     summary: Deletes user feedback
     produces:
-      - text/plain
+      - application/json
     parameters:
       - in: path
         name: context-group

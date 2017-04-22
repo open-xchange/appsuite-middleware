@@ -46,7 +46,7 @@ properties:
       tags: ["Data Retention"]
     - key: com.openexchange.dataretention.location
       description: |
-        The location of the system generating the retention data
+        The location of the system generating the retention data.
       defaultValue: DE/Olpe
       version: 
       reloadable: false

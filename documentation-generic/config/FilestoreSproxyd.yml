@@ -1,18 +1,18 @@
 feature_name: Filestore sproxyd
 feature_description: |
-  Configuration file for sproxyd file storages
-  This file provides the configuration of all file storages based on the
+  This properties configure file storages based on the
   Scality sproxyd API. Each connected storage is identified by a so called 
   "filestore ID", which refers to the authority part of the URI configured 
   in the "uri" column in the "filestore" table of the config database, 
-  previously registered using "./registerfilestore -t [filestoreID]".
+  previously registered using:
+  <pre>./registerfilestore -t [filestoreID]</pre>
   For each configured filestore, an own set of the properties may be defined, 
   replacing [filestoreID] with the actual identifier.
 properties:
     - key: com.openexchange.filestore.sproxyd.[filestoreID].protocol
       description: |
         Specifies the protocol to be used for network communication (http or https)
-        Required.
+        This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -27,7 +27,7 @@ properties:
         Specifies the hosts as &lt;hostname&gt;:&lt;port&gt; pairs to be used for network communication.
         At least one host must be provided, multiple hosts can be specified as comma-separated
         list.
-        Required.
+        This property is required.
       defaultValue:
       version: 
       reloadable: false
@@ -42,7 +42,7 @@ properties:
         The path under which sproxyd is available. The path must lead to the namespace under
         which OX related files shall be stored. It is expected that the namespace configuration
         is available under &lt;protocol&gt;://&lt;host&gt;/&lt;path&gt;/.conf.
-        Required.
+        This property is required.
       defaultValue:
       version: 
       reloadable: false
@@ -65,7 +65,7 @@ properties:
       related: 
       file: filestore-sproxyd.properties
       packageName: open-xchange-filestore-sproxyd
-      tags: ["Filestore"]
+      tags: ["Filestore", "Limit"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].maxConnectionsPerHost
       description: |
@@ -78,7 +78,7 @@ properties:
       related: 
       file: filestore-sproxyd.properties
       packageName: open-xchange-filestore-sproxyd
-      tags: ["Filestore"]
+      tags: ["Filestore", "Limit"]
       
     - key: com.openexchange.filestore.sproxyd.[filestoreID].connectionTimeout
       description: |

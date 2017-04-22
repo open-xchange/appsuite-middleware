@@ -589,3 +589,16 @@ CertificateExamineResponse:
   $ref: ./certificate/CertificateExamineResponse.yaml
 CertificatesAllResponse:
   $ref: ./certificate/CertificatesAllResponse.yaml
+# Module: Guard
+GuardSecurityInfo:
+  $ref: ./guard/GuardSecurityInfo.yaml
+GuardSecurityResult:
+  $ref: ./guard/GuardSecurityResult.yaml
+GuardSignatureResult:
+  $ref: ./guard/GuardSignatureResult.yaml
+GuardSendSecurity:
+  $ref: ./guard/GuardSendSecurity.yaml
+
+
+
+

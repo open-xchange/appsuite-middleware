@@ -231,7 +231,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.rootSubfoldersAllowed", view);
             if (null == tmp) {
-                params.rootSubfoldersAllowed = Boolean.FALSE;
+                params.rootSubfoldersAllowed = null;
             } else {
                 params.rootSubfoldersAllowed = Boolean.valueOf(tmp);
 
@@ -266,14 +266,13 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            TIntSet invalidChars;
             String invalids = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.invalidMailboxNameCharacters", view);
             if (Strings.isEmpty(invalids)) {
-                invalidChars = new TIntHashSet(0);
+                params.invalidChars = new TIntHashSet(0);
             } else {
                 final String[] sa = Strings.splitByWhitespaces(Strings.unquote(invalids));
                 final int length = sa.length;
-                invalidChars = new TIntHashSet(length);
+                TIntSet invalidChars = new TIntHashSet(length);
                 for (int i = 0; i < length; i++) {
                     invalidChars.add(sa[i].charAt(0));
                 }

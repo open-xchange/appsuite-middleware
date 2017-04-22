@@ -1,3 +1,15 @@
 type: object
 properties:
   $ref: ./RawMailData.yaml
+  security_info:
+    type: array
+    description: Information if mail is encrypted or signed.  Requires Guard
+    items:
+      $ref: "#/definitions/GuardSecurityInfo"
+  security:
+    type: array
+    description: Information regarding signature verification or decryption type after processed by Guard
+    items:
+      $ref: "#/definitions/GuardSecurityResult"
+
+

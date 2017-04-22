@@ -46,6 +46,8 @@
         type: boolean
         description:  Nested messages are parsed into full JSON objects. Can lead to longer loading times, for multiple nested messages.
         required: false    
+      - $ref: "#/parameters/gblQueryParamsDecrypt"
+      - $ref: "#/parameters/glbQueryParamsCryptoAuth"
     responses:
       200:
         description: The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.
@@ -108,3 +110,4 @@
                 filename:
                   type: string
                   description: Name of the newly created drive file.
+

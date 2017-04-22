@@ -115,7 +115,7 @@ properties:
         specified with one of the units "B" (bytes), "kB" (kilobyte), "MB"
         (Megabyte) or "GB" (Gigabyte), e.g. "10 MB". Must fit into the "Integer"
         range, i.e. the configured number of bytes has to be be smaller than 2^31.
-        "-1" means no limitations.
+        <code>-1</code> means no limitations.
       defaultValue: -1
       version:
       reloadable: false
@@ -134,7 +134,7 @@ properties:
         the units "B" (bytes), "kB" (kilobyte), "MB" (Megabyte) or "GB" (Gigabyte),
         e.g. "500 kB". Must fit into the "Integer" range, i.e. the configured
         number of bytes has to be be smaller than 2^31. 
-        "-1" means no limitations.
+        <code>-1</code> means no limitations.
       defaultValue: -1
       version:
       reloadable: false
@@ -150,7 +150,7 @@ properties:
         server accepts concurrently. While the limit is reached, further
         synchronization requests are rejected in a HTTP 503 manner (service
         unavailable), and the client is instructed to try again at a later time.
-        "-1" means no limitations.
+        <code>-1</code> means no limitations.
       defaultValue: -1
       version:
       reloadable: false
@@ -162,7 +162,7 @@ properties:
     - key: com.openexchange.drive.maxDirectories
       description: |
         Defines the maximum number of synchronizable directories per root folder. A
-        value of "-1" disables the limitation.
+        value of <code>-1</code> disables the limitation.
       defaultValue: 65535
       version:
       reloadable: false
@@ -174,7 +174,7 @@ properties:
     - key: com.openexchange.drive.maxFilesPerDirectory
       description: |
         Defines the maximum number of synchronizable files per root folder. A
-        value of "-1" disables the limitation.
+        value of <code>-1</code> disables the limitation.
       defaultValue: 65535
       version:
       reloadable: false
@@ -222,16 +222,15 @@ properties:
         (typically "http" or "https").  
         [hostname] should be replaced with the server's canonical host name (if not,
         the server tries to determine the hostname on it's own),  
-        [uiwebpath] is replaced with the value of "com.openexchange.UIWebPath" as defined in
-        "server.properties", while [dispatcherPrefix] is replaced with the value of
-        "com.openexchange.dispatcher.prefix" ("server.properties", too).  
+        [uiwebpath] is replaced with the value of [[com.openexchange.UIWebPath]], while [dispatcherPrefix] is replaced with the value of
+        [[com.openexchange.dispatcher.prefix]].  
         [contextid], [userid] and [login] are replaced to reflect the values of the
         current user.     
       defaultValue: "[protocol]://[hostname]"
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.UIWebPath","com.openexchange.dispatcher.prefix"]
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Host"]
@@ -247,16 +246,15 @@ properties:
         (typically "http" or "https").  
         [hostname] should be replaced with the server's canonical host name (if not,
         the server tries to determine the hostname on it's own),  
-        [uiwebpath] is replaced with the value of "com.openexchange.UIWebPath" as defined in
-        "server.properties", while [dispatcherPrefix] is replaced with the value of
-        "com.openexchange.dispatcher.prefix" ("server.properties", too).  
+        [uiwebpath] is replaced with the value of [[com.openexchange.UIWebPath]], while [dispatcherPrefix] is replaced with the value of
+        [[com.openexchange.dispatcher.prefix]].  
         [contextid], [userid] and [login] are replaced to reflect the values of the
         current user.   
       defaultValue: "[protocol]://[hostname]/[uiwebpath]/help-drive/l10n/[locale]/index.html"
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.UIWebPath","com.openexchange.dispatcher.prefix"]
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Host"]
@@ -264,13 +262,13 @@ properties:
       description: |
         Enables or disables push event notifications to clients using the Apple Push
         Notification service (APNS) for iOS devices. This requires a valid
-        configuration for the APNS certificate and keys, see either options below,
+        configuration for the APNS certificate and keys,
         or install the restricted components packages for drive.  
       defaultValue: false
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.drive.events.apn.ios.keystore", "com.openexchange.drive.events.apn.ios.password"]
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
@@ -279,7 +277,7 @@ properties:
         Specifies the path to the local keystore file (PKCS #12) containing the APNS
         certificate and keys for the iOS application, e.g.
         "/opt/open-xchange/etc/drive-apns.p12". Required if
-        "com.openexchange.drive.events.apn.ios.enabled" is "true" and the package
+        [[com.openexchange.drive.events.apn.ios.enabled]] is <code>true</code> and the package
         containing the restricted drive components is not installed.
       defaultValue:
       version:
@@ -294,7 +292,7 @@ properties:
         Specifies the password used when creating the referenced keystore containing
         the certificate of the iOS application. Note that blank or null passwords
         are in violation of the PKCS #12 specifications. Required if
-        "com.openexchange.drive.events.apn.ios.enabled" is "true" and the package
+        [[com.openexchange.drive.events.apn.ios.enabled]] is <code>true</code> and the package
         containing the restricted drive components is not installed.
       defaultValue:
       version:
@@ -307,8 +305,8 @@ properties:
     - key: com.openexchange.drive.events.apn.ios.production
       description: |
         Indicates which APNS service is used when sending push notifications to iOS
-        devices. A value of "true" will use the production service, a value of
-        "false" the sandbox service.
+        devices. A value of <code>true</code> will use the production service, a value of
+        <code>false</code> the sandbox service.
       defaultValue: true
       version:
       reloadable: false
@@ -337,13 +335,13 @@ properties:
       description: |
         Enables or disables push event notifications to clients using the Apple Push
         Notification service (APNS) for Mac OS devices. This requires a valid
-        configuration for the APNS certificate and keys, see either options below,
+        configuration for the APNS certificate and keys,
         or install the restricted components packages for drive.
       defaultValue: false
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.drive.events.apn.macos.keystore","com.openexchange.drive.events.apn.macos.password"]
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
@@ -352,7 +350,7 @@ properties:
         Specifies the path to the local keystore file (PKCS #12) containing the APNS
         certificate and keys for the Mac OS application, e.g.
         "/opt/open-xchange/etc/drive-apns.p12". Required if
-        "com.openexchange.drive.events.apn.macos.enabled" is "true" and the package
+        [[com.openexchange.drive.events.apn.macos.enabled]] is <code>true</code> and the package
         containing the restricted drive components is not installed.
       defaultValue:
       version:
@@ -367,7 +365,7 @@ properties:
         Specifies the password used when creating the referenced keystore containing
         the certificate of the Mac OS application. Note that blank or null passwords
         are in violation of the PKCS #12 specifications. Required if
-        "com.openexchange.drive.events.apn.macos.enabled" is "true" and the package
+        [[com.openexchange.drive.events.apn.macos.enabled]] is <code>true</code> and the package
         containing the restricted drive components is not installed.
       defaultValue:
       version:
@@ -380,8 +378,8 @@ properties:
     - key: com.openexchange.drive.events.apn.macos.production
       description: |
         Indicates which APNS service is used when sending push notifications to Mac
-        OS devices. A value of "true" will use the production service, a value of
-        "false" the sandbox service.
+        OS devices. A value of <code>true</code> will use the production service, a value of
+        <code>false</code> the sandbox service.
       defaultValue: true
       version:
       reloadable: false
@@ -410,19 +408,19 @@ properties:
       description: |
         Enables or disables push event notifications to clients using the Google
         Cloud Messaging (GCM) service. This requires a valid configuration for the
-        GCM API key, see options below.
+        GCM API key.
       defaultValue: false
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.drive.events.gcm.key"]
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Android"]
     - key: com.openexchange.drive.events.gcm.key
       description: |
         Specifies the API key of the server application. Required if
-        "com.openexchange.drive.events.gcm.enabled" is "true" and the package
+        [[com.openexchange.drive.events.gcm.enabled]] is <code>true</code> and the package
         containing the restricted drive components is not installed.
       defaultValue:
       version:
@@ -438,7 +436,7 @@ properties:
         to clients may be used as fallback when no other long polling handlers are
         available due to missing support of the HTTP service. Handling long polling
         in a blocking manner consumes a server thread, and should therefore only be
-        enabled for testing purposes. Defaults to "false".
+        enabled for testing purposes.
       defaultValue: false
       version:
       reloadable: false

@@ -54,11 +54,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -69,7 +69,6 @@ import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
-
 
 /**
  * {@link DeleteUserFeedbackService}
@@ -89,7 +88,7 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
 
     @DELETE
     @Path("/{context-group}/{type}")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response delete(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
         FeedbackService service = getService(FeedbackService.class);
         FeedbackFilter filter = new FeedbackFilter() {
@@ -130,7 +129,8 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
 
             service.delete(contextGroup, filter);
             ResponseBuilder builder = Response.ok();
-            builder.entity(new GenericEntity<String>(getPositiveRespone(filter, contextGroup), String.class));
+            JSONObject response = createResponse(filter, contextGroup);
+            builder.entity(response);
             resp = builder.build();
         } catch (OXException e) {
             JSONObject errorJson = generateError(e);
@@ -151,9 +151,21 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
         return resp;
     }
 
-    private String getPositiveRespone(FeedbackFilter filter, String contextGroup) {
-        String result = "Feedback data deleted for type: " + filter.getType() + ", context group: " + contextGroup + (filter.start() != Long.MIN_VALUE ? (", start time: " + filter.start()) : "") + (filter.end() != Long.MAX_VALUE ? (", end time: " + filter.end()) : "");
-        return result;
+    private JSONObject createResponse(FeedbackFilter filter, String contextGroup) {
+        JSONObject resp = new JSONObject();
+        try {
+            resp.put("successful", "true");
+            resp.put("type", filter.getType());
+            resp.put("contextGroup", contextGroup);
+            if (filter.start() != Long.MIN_VALUE) {
+                resp.put("start", filter.start());
+            }
+            if (filter.end() != Long.MAX_VALUE) {
+                resp.put("end", filter.end());
+            }
+        } catch (JSONException e) {
+            LOG.error("", e);
+        }
+        return resp;
     }
-
 }

@@ -13,43 +13,86 @@ properties:
       tags: ["Mail","REST"]
     - key: com.openexchange.dovecot.doveadm.endpoints
       description: |
-        Specifies the URIs to the Dovecot DoveAdm REST interface end-points. 
-        e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"
+        Specifies the URIs to the Dovecot DoveAdm REST interface end-points.  
+        e.g. <code>http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081</code>  
+        Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior.
 
-        Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior
-        com.openexchange.dovecot.doveadm.endpoints.totalConnections :
-        The number of total connections held in HTTP connection pool.
-
-        com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute :  
-        The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining.
-
-        com.openexchange.dovecot.doveadm.endpoints.readTimeout :  
-        The read time-out in milliseconds (default is 10sec).
-
-        com.openexchange.dovecot.doveadm.endpoints.connectTimeout :  
-        The connect time-out in milliseconds (default is 3sec).
-
-        com.openexchange.dovecot.doveadm.endpoints.checkInterval :  
-        The time interval in milliseconds when to check if a previously black-listed end-point is re-available again (default is 60sec).
-          
-
-        "Full example :"  
-        com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081  
-        com.openexchange.dovecot.doveadm.endpoints.totalConnections=100  
-        com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)  
-        com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000  
-        com.openexchange.dovecot.doveadm.endpoints.connectTimeout=3000  
-        com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000  
-
-        The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.
+        Full example :  
+        <pre>
+        com.openexchange.dovecot.doveadm.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081
+        com.openexchange.dovecot.doveadm.endpoints.totalConnections=100
+        com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute=0
+        com.openexchange.dovecot.doveadm.endpoints.readTimeout=10000
+        com.openexchange.dovecot.doveadm.endpoints.connectTimeout=3000
+        com.openexchange.dovecot.doveadm.endpoints.checkInterval=60000
+        </pre>
       defaultValue: 
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.dovecot.doveadm.endpoints.totalConnections", 
+                "com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute",
+                "com.openexchange.dovecot.doveadm.endpoints.readTimeout", 
+                "com.openexchange.dovecot.doveadm.endpoints.connectTimeout",
+                "com.openexchange.dovecot.doveadm.endpoints.checkInterval"]
       file: doveadm.properties
       packageName: open-xchange-core
       tags: ["Mail","REST", "Host"]
+    - key: com.openexchange.dovecot.doveadm.endpoints.totalConnections
+      description: |
+        The number of total connections held in HTTP connection pool.
+      defaultValue: 100
+      version: 7.8.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.dovecot.doveadm.endpoints
+      file: doveadm.properties
+      packageName: open-xchange-core
+      tags: ["Mail","REST"]
+    - key: com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute
+      description: |
+        The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining.
+      defaultValue: 0
+      version: 7.8.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.dovecot.doveadm.endpoints
+      file: doveadm.properties
+      packageName: open-xchange-core
+      tags: ["Mail","REST", "Limit"]
+    - key: com.openexchange.dovecot.doveadm.endpoints.readTimeout
+      description: |
+        The read time-out in milliseconds.
+      defaultValue: 10000
+      version: 7.8.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.dovecot.doveadm.endpoints
+      file: doveadm.properties
+      packageName: open-xchange-core
+      tags: ["Mail","REST", "Timeout"]
+    - key: com.openexchange.dovecot.doveadm.endpoints.connectTimeout
+      description: |
+         The connect time-out in milliseconds.
+      defaultValue: 3000
+      version: 7.8.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.dovecot.doveadm.endpoints
+      file: doveadm.properties
+      packageName: open-xchange-core
+      tags: ["Mail","REST", "Timeout"]
+    - key: com.openexchange.dovecot.doveadm.endpoints.checkInterval
+      description: |
+         The time interval in milliseconds when to check if a previously black-listed end-point is re-available again.
+      defaultValue: 60000
+      version: 7.8.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.dovecot.doveadm.endpoints
+      file: doveadm.properties
+      packageName: open-xchange-core
+      tags: ["Mail","REST"]
     - key: com.openexchange.dovecot.doveadm.apiSecret
       description: |
         Specifies the API secret to communicate with the Dovecot DoveAdm REST interface.
@@ -63,8 +106,8 @@ properties:
       tags: ["Mail","REST", "Credential"]
     - key: com.openexchange.dovecot.doveadm.proxyDelimiter
       description: |
-        Specifies the proxy delimiter to use in case created users use login names for proxy authentication; e.g. "user1@domain.com*master@super.net"
-        Default is empty (no proxy delimiter is used) 
+        Specifies the proxy delimiter to use in case created users use login names for proxy authentication; e.g. <code>user1@domain.com*master@super.net</code>.
+        If not specified not proxy delimiter is used.
       defaultValue: 
       version: 7.8.4
       reloadable: true

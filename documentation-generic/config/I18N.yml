@@ -4,7 +4,7 @@ feature_description: |
 properties:
     - key: i18n.language.path
       description: |
-        Specifies the path to *.po files
+        Specifies the path to *.po files.
       defaultValue: "@oxgroupwaresysconfdir@/../i18n/"
       version: 
       reloadable: false

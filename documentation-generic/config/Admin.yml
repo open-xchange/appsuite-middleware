@@ -100,7 +100,7 @@ properties:
       tags: ["Admin", "Timezone", "User", "Provisioning"]
     - key: AUTO_TO_LOWERCASE_UID
       description: |
-        This check will be performed on user names in case CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS is set to <code>true</code>.
+        This check will be performed on user names in case [[CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS]] is set to <code>true</code>.
       defaultValue: "[$@%\\.+a-zA-Z0-9_-]"
       version: 7.8.3
       reloadable: false
@@ -122,7 +122,7 @@ properties:
       tags: ["Admin"]
     - key: CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS
       description: |
-        This will check the user name using the check defined in CHECK_USER_UID_REGEXP.
+        This will check the user name using the check defined in [[CHECK_USER_UID_REGEXP]].
       defaultValue: true
       version: 7.8.3
       reloadable: false
@@ -133,7 +133,7 @@ properties:
       tags: ["Admin", "User"]
     - key: CHECK_USER_UID_REGEXP
       description: |
-        This check will be performed on user names in case CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS is set to <code>true</code>.
+        This check will be performed on user names in case [[CHECK_USER_UID_FOR_NOT_ALLOWED_CHARS]] is set to <code>true</code>.
       defaultValue: "[$@%\\.+a-zA-Z0-9_-]"
       version: 7.8.3
       reloadable: false

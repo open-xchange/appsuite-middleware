@@ -3,7 +3,7 @@ properties:
     - key: java.naming.provider.url
       description: |
         URL of the LDAP server to connect to for authenticating users.
-        ldaps is supported.
+        "ldaps" is supported.
       defaultValue: ldap://localhost:389/dc=example,dc=com
       version:
       reloadable: false
@@ -48,7 +48,7 @@ properties:
       tags: ["LDAP", "Authentication", "Timeout"]
     - key: useFullLoginInfo
       description: |
-        Set to true to authenticate with the string entered in the login name field, e.g.
+        Set to <code>true</code> to authenticate with the string entered in the login name field, e.g.
         "user@domain" instead of just "user" against ldap server.
       defaultValue: false
       version:
@@ -62,8 +62,8 @@ properties:
       description: |
         This attribute is used for login. E.g. uid=<login>,baseDN
 
-        NOTE:  
-        If the attribute is not part of the user dn, you need to set bindOnly=false.
+        Note:  
+        If the attribute is not part of the user dn, you need to set [[bindOnly]] to <code>false</code>.
       defaultValue: uid
       version:
       reloadable: false
@@ -100,7 +100,7 @@ properties:
       description: |
         This option activates a special ADS bind. It allows the user to
         authenticate at the ADS with only the displayName or by using the syntax
-        <code>DOMAIN\Samaccountname</code>.  
+        <pre>DOMAIN\Samaccountname</pre>.  
         Note that "\" cannot be used in user names when this option is activated.
       defaultValue: false
       version:
@@ -112,11 +112,11 @@ properties:
       tags: ["LDAP", "Authentication"]
     - key: bindOnly
       description: |
-        Set bindonly to false if the user entries are not directly contained in the
+        Set this to <code>false</code> if the user entries are not directly contained in the
         entry of the dn, and you have to search within ldap, change ldapScope
         in order to define the search depth.
 
-        NOTE:  
+        Note:  
         When two users exist with the same uidAttribute, authentication
         will be refused, though.
       defaultValue: true
@@ -129,8 +129,13 @@ properties:
       tags: ["LDAP", "Authentication"]
     - key: ldapScope
       description: |
-        Set the ldap search scope in case bindOnly is set to false
-        must be one of subtree, onelevel or base.
+        Set the ldap search scope in case [[bindOnly]] is set to <code>false</code>.
+        Possible values:
+        <ul>
+          <li><code>subtree</code></li>
+          <li><code>onelevel</code></li>
+          <li><code>base</code></li>
+        </ul>
       defaultValue: subtree
       version:
       reloadable: false
@@ -181,7 +186,12 @@ properties:
       description: |
         This option configures how to handle the chasing of referrals in LDAP 
         (see http://java.sun.com/products/jndi/tutorial/ldap/referral/overview.html).
-        possible values: ignore, follow, throw
+        possible values:
+        <ul>
+          <li><code>ignore</code></li>
+          <li><code>follow</code></li>
+          <li><code>throw</code></li>
+        </ul>
       defaultValue: follow
       version:
       reloadable: false
@@ -203,13 +213,13 @@ properties:
       tags: ["LDAP", "Authentication", "Credential"]
     - key: proxyDelimiter
       description: |
-        Define a delimiter to be used to seperate Proxy from Userlogin
+        Define a delimiter to be used to seperate Proxy from Userlogin.
         If defined, a proxy user can login on behalf of a user using the form:  
-        &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;
+        <pre>&lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;</pre>
 
-        NOTES:
+        NoteS:
           <ol>
-            <li>The underlying Mailserver must support SASL AUTHPROXYING.
+            <li>The underlying Mailserver must support SASL AUTHPROXYING.  
                 The open-xchange mailfilterbundle does not support it, so it will
                 raise errors.</li>
             <li>The same option has to be set in mail.properties</li>

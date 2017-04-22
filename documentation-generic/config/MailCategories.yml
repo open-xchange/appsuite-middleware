@@ -14,7 +14,7 @@ feature_description: |
 properties:
     - key: com.openexchange.mail.categories
       description: |
-        General capability to enable/disable mail categories for primary inbox
+        General capability to enable/disable mail categories for primary inbox.
       defaultValue: false
       version: 7.8.2
       reloadable: true
@@ -27,24 +27,24 @@ properties:
       description: |
         Switch to show or hide mail categories feature during the first start. 
         Notice that this property only influence the starting value. 
-        Changing this value will probably have no effect on users with already have "com.openexchange.mail.categories" set to true.
+        Changing this value will probably have no effect on users with already have [[com.openexchange.mail.categories]] set to <code>true</code>.
       defaultValue: true
       version: 7.8.2
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.mail.categories
       file: mail-categories.properties
       packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.forced
       description: |
         Switch to force showing the mail categories feature. 
-        If set to true, the com.openexchange.mail.categories.enabled property is always true and can't be changed.
+        If set to <code>true</code>, the [[com.openexchange.mail.categories.enabled]] property is always true and can't be changed.
       defaultValue: false
       version: 7.8.2
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.mail.categories.enabled
       file: mail-categories.properties
       packageName: open-xchange-mail-categories
       tags: ["Mail Categories", "Mail"]
@@ -64,7 +64,7 @@ properties:
         For each language which should be supported a translated name for the general category should be defined.
         For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO-3166 country code (e.g. de_DE or en_US)
 
-        NOTE:  
+        Note:  
         Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
       defaultValue:
       version: 7.8.2
@@ -104,8 +104,10 @@ properties:
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].flag
       description: |
-        Specifies the category's flag name that is supposed to be used for filter/search expressions executed by mail back-end;
-        e.g. "com.openexchange.mail.categories.offers.flag=$offers"
+        Specifies the category's flag name that is supposed to be used for filter/search expressions executed by mail back-end;e.g. 
+        <pre>
+        "com.openexchange.mail.categories.offers.flag=$offers"
+        </pre>
         This property is required.  
         [category] must be replaced with the actual category identifier.
       defaultValue:
@@ -119,8 +121,7 @@ properties:
     - key: com.openexchange.mail.categories.[category].force
       description: |
         Specifies whether the category is forced; meaning a user is not allowed to disable the category.  
-        This property is required.  
-        Only for system categories.  
+        This property is required and only valid for system categories.  
         [category] must be replaced with the actual category identifier.
       defaultValue: false
       version: 7.8.2
@@ -132,7 +133,7 @@ properties:
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.[category].active
       description: |
-        Specifies whether the category is activated/deactivate for a user. Only effective if "force" is set to "false".
+        Specifies whether the category is activated/deactivate for a user. Only effective if [[com.openexchange.mail.categories.[category].force]] is set to <code>false</code>.
         This setting can be set by a user.  
         This property is required.  
         [category] must be replaced with the actual category identifier.
@@ -160,10 +161,11 @@ properties:
     - key: com.openexchange.mail.categories.[category].name.[locale]
       description: |
         For each language which should be supported a translated name for the category should be defined.
-        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).  
+        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore 
+        followed by a ISO 3166 country code (e.g. de_DE or en_US).  
         [category] must be replaced with the actual category identifier.
         
-        NOTE:  
+        Note:  
         Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
       defaultValue:
       version: 7.8.2
@@ -187,10 +189,11 @@ properties:
     - key: com.openexchange.mail.categories.[category].description.[locale]
       description: |
         For each language which should be supported a translated description for the category should be defined.
-        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO 3166 country code (e.g. de_DE or en_US).  
+        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore 
+        followed by a ISO 3166 country code (e.g. de_DE or en_US).  
         [category] must be replaced with the actual category identifier.
         
-        NOTE:  
+        Note:  
         Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
       defaultValue:
       version: 7.8.2
@@ -202,7 +205,7 @@ properties:
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.categories.apply.ox.rules
       description: |
-        It is possible to create some predefined rules for the system categories (see com.openexchange.mail.categories.rules.[category]).
+        It is possible to create some predefined rules for the system categories (see [[com.openexchange.mail.categories.rules.[category] ]]).
         This rules will be added for each user which has the mail_categories capability and has the mail_categories feature enabled.
         This property enables/disables this feature. Nevertheless it is strongly recommended to use system wide rules instead.
 
@@ -219,7 +222,7 @@ properties:
     - key: com.openexchange.mail.categories.rules.[category]
       description: |
         For each system category a comma separated list of mail addresses can be defined. 
-        This addresses will be used to create a starting rule for this category if com.openexchange.mail.categories.apply.ox.rules is set to 'true'.  
+        This addresses will be used to create a starting rule for this category if [[com.openexchange.mail.categories.apply.ox.rules]] is set to <code>true</code>.  
         It is also possible to use mail address parts here. For example "@amazon.com".
       defaultValue:
       version: 7.8.2

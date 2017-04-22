@@ -98,6 +98,8 @@ public class SmtpMockSetup {
             startSmtpMockServerAndSetNoReply(testUser, testContext.getNoReplyUser().getLogin());
 
             List<TestUser> allUsers = testContext.getCopyOfAll();
+
+            LOG.info("Start SMTP Mock for users {} in context {}", Strings.concat(",", allUsers), testContext.toString());
             for (TestUser user : allUsers) {
                 startSmtpMockServer(user);
             }
@@ -110,6 +112,7 @@ public class SmtpMockSetup {
             StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), noReplyAddress);
 
             SMTPInitResponse response = client.execute(request);
+            LOG.info("Started SMTP Mock for user {} and set no-reply address to {}.", user.getLogin(), noReplyAddress);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
         }
@@ -120,6 +123,7 @@ public class SmtpMockSetup {
             AJAXClient client = new AJAXClient(user);
             StartSMTPRequest request = new StartSMTPRequest(true); //FIXME: maybe we have to set noreplyadress also here?
             SMTPInitResponse response = client.execute(request);
+            LOG.info("Started SMTP Mock for user {}.", user.getLogin());
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
         }
@@ -156,10 +160,6 @@ public class SmtpMockSetup {
             LOG.error("", e);
         }
     }
-
-    
-    
-    
 
     //    private static void startSmtpMockForAllContexts() {
     //        contextsWithStartedMock = TestContextPool.getAllTimeAvailableContexts();

@@ -1,18 +1,18 @@
 feature_name: Filestore SWIFT
 feature_description: |
-  Configuration file for SWIFT file storages
-  This file provides the configuration of all file storages based on the
+  This properties configure file storages based on the
   OpenStack Swift API. Each connected storage is identified by a "filestore ID",
   which refers to the authority part of the URI configured  in the "uri" column
-  in the "filestore" table of the config database  
-  (previously registered using "./registerfilestore -t [filestoreID]").
+  in the "filestore" table of the config database.  
+  Previously registered using:
+  <pre>./registerfilestore -t [filestoreID]</pre>
   For each configured filestore, an own set of the properties may be defined, 
   replacing [filestoreID] with the actual identifier.
 properties:
     - key: com.openexchange.filestore.swift.[filestoreID].protocol
       description: |
         Specifies the protocol to be used for network communication (http or https)
-        Required.
+        This property is required.
       defaultValue: https
       version: 
       reloadable: false
@@ -26,7 +26,7 @@ properties:
       description: |
         Specifies the API end-point pairs to be used. At least one host must be provided.
         Multiple hosts can be specified as comma-separated list; e.g. "my1.clouddrive.invalid, my2.clouddrive.invalid"
-        Required.
+        This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -39,7 +39,7 @@ properties:
     - key: com.openexchange.filestore.swift.[filestoreID].path
       description: |
         The path consisting of API version and tenant identifier; e.g. "/v1/MyFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
-        Required.
+        This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -52,7 +52,7 @@ properties:
     - key: com.openexchange.filestore.swift.[filestoreID].userName
       description: |
         Specifies the user name to use for authentication.
-        Required.
+        This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -65,7 +65,7 @@ properties:
     - key: com.openexchange.filestore.swift.[filestoreID].tenantName
       description: |
         Specifies the tenant name to use for authentication.
-        Required.
+        This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -79,7 +79,7 @@ properties:
       description: |
         Specifies the authentication type to use for authentication against Identity API v2.0;
         see (http://developer.openstack.org/api-ref-identity-v2.html)
-        Required.
+        This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -93,7 +93,7 @@ properties:
       description: |
         Specifies the authentication value to use for authentication against Identity API v2.0;
         see (http://developer.openstack.org/api-ref-identity-v2.html)
-        Required.
+        This property is required.
       defaultValue: 
       version: 
       reloadable: false
@@ -105,9 +105,9 @@ properties:
 
     - key: com.openexchange.filestore.swift.[filestoreID].identityUrl
       description: |
-        The URL for the Identity API v2.0 end-point; e.g. "https://identity.api.mycloud.invalid/v2.0/tokens"
-        Not needed in case "authType" is set to "raxkey" (implicitly set to "https://identity.api.rackspacecloud.com/v2.0/tokens").
-        Required (for "authType" different from "raxkey")
+        The URL for the Identity API v2.0 end-point; e.g. "https://identity.api.mycloud.invalid/v2.0/tokens".
+        Not needed in case [[com.openexchange.filestore.swift.[filestoreID].authValue]] is set to <code>raxkey</code> (implicitly set to "https://identity.api.rackspacecloud.com/v2.0/tokens").
+        This property is required (for [[com.openexchange.filestore.swift.[filestoreID].authValue]] different from <code>raxkey</code>).
       defaultValue: 
       version: 
       reloadable: false
@@ -129,7 +129,7 @@ properties:
       related: 
       file: filestore-swift.properties
       packageName: open-xchange-filestore-swift
-      tags: ["Filestore"]
+      tags: ["Filestore", "Limit"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].maxConnectionsPerHost
       description: |
@@ -142,7 +142,7 @@ properties:
       related: 
       file: filestore-swift.properties
       packageName: open-xchange-filestore-swift
-      tags: ["Filestore"]
+      tags: ["Filestore", "Limit"]
 
     - key: com.openexchange.filestore.swift.[filestoreID].connectionTimeout
       description: |

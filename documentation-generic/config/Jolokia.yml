@@ -48,7 +48,7 @@ properties:
       tags: ["Jolokia"]
     - key: com.openexchange.jolokia.maxDepth
       description: |
-        Maximum depth when traversing bean properties. If set to 0, depth checking is disabled.
+        Maximum depth when traversing bean properties. If set to <code>0</code>, depth checking is disabled.
       defaultValue: 0
       version:
       reloadable: false
@@ -60,7 +60,7 @@ properties:
     - key: com.openexchange.jolokia.maxObjects
       description: |
         Maximum number of objects which are traversed when serializing a single response.
-        Use this as an airbag to avoid boosting your memory and network traffic. Nevertheless, when set to 0 no limit is imposed.
+        Use this as an airbag to avoid boosting your memory and network traffic. Nevertheless, when set to <code>0</code> no limit is imposed.
       defaultValue: 100000
       version:
       reloadable: false
@@ -72,9 +72,9 @@ properties:
     - key: com.openexchange.jolokia.restrict.to.localhost
       description: |
         This setting will restrict jolokia access to localhost. It is completly ignored when a jolokia-access.xml is present.
-        It is also a second guard and bound to com.openexchange.connector.networkListenerHost inside server.properties
+        It is also a second guard and bound to [[com.openexchange.connector.networkListenerHost]].
         As Jolokia uses the http interface, it is bound to the host for the connector's http network listener
-        which is configured by com.openexchange.connector.networkListenerHost.
+        which is configured by [[com.openexchange.connector.networkListenerHost]].
       defaultValue: true
       version:
       reloadable: false
