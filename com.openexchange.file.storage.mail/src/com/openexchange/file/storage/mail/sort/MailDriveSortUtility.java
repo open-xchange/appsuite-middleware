@@ -168,7 +168,7 @@ public enum MailDriveSortUtility {
      * @return The message range or <code>null</code> if ESORT command does not succeed
      * @throws MessagingException If ESORT command failed fatally
      */
-    public static Message[] performEsort(SortTerm[] sortTerms, SearchTerm searchTerm, int startIndex, int endIndex, IMAPFolder imapFolder) throws MessagingException {
+    public static int[] performEsortAndGetSeqNums(SortTerm[] sortTerms, SearchTerm searchTerm, int startIndex, int endIndex, IMAPFolder imapFolder) throws MessagingException {
         SortPartialResult result = IMAPSort.sortReturnPartial(sortTerms, searchTerm, new IndexRange(startIndex, endIndex), imapFolder);
         switch (result.reason) {
             case SUCCESS:
@@ -176,7 +176,7 @@ public enum MailDriveSortUtility {
                     int[] seqNums = result.seqnums;
                     if (null != seqNums) {
                         // SORT RETURN PARTIAL command succeeded
-                        return imapFolder.getMessages(seqNums);
+                        return seqNums;
                     }
                 }
                 break;
@@ -191,6 +191,27 @@ public enum MailDriveSortUtility {
                 break;
             default:
                 break;
+        }
+        return null;
+    }
+
+    /**
+     * Performs an ESORT command with sorting by given sort term expressions, optionally filtering by specified search term and providing
+     * the defined range from given IMAP folder.
+     *
+     * @param sortTerms The sort term expressions
+     * @param searchTerm The optional search term to filter by
+     * @param startIndex The range start index
+     * @param endIndex The range end index (exclusive)
+     * @param imapFolder The IMAP folder to sort/search in
+     * @return The message range or <code>null</code> if ESORT command does not succeed
+     * @throws MessagingException If ESORT command failed fatally
+     */
+    public static Message[] performEsort(SortTerm[] sortTerms, SearchTerm searchTerm, int startIndex, int endIndex, IMAPFolder imapFolder) throws MessagingException {
+        int[] seqNums = performEsortAndGetSeqNums(sortTerms, searchTerm, startIndex, endIndex, imapFolder);
+        if (null != seqNums) {
+            // SORT RETURN PARTIAL command succeeded
+            return imapFolder.getMessages(seqNums);
         }
         return null;
     }
