@@ -81,6 +81,10 @@ public class DefaultAttribute<V> implements Attribute<V> {
          * The client identifier.
          */
         CLIENT("client"),
+        /**
+         * The session identifier.
+         */
+        SESSION_ID("session"),
         ;
 
         private final String id;

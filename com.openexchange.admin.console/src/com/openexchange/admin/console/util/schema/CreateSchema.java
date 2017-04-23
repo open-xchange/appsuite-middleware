@@ -82,7 +82,7 @@ public class CreateSchema extends BasicCommandlineOptions {
     private final String OPT_DB_ID_LONG = "id";
     private final String OPT_DB_ID_DESCRIPTION = "An optional database id";
     private final String USAGE = "-A <masteradmin> -P <password> [-i <db_id>] [--csv]";
-    private final String DESCRIPTION = "Creates additional database schemata which can be used during the creation of contexts.";
+    private final String DESCRIPTION = "Creates additional database schemata, which can be used for the creation of contexts.\n ---=== /!\\ ===--- NOTE: In order to use that schema for a new context, the returned schema name is supposed to be used for the \"schema\" option ---=== /!\\ ===--- ";
 
     private CLIOption optDBIdOption;
     private static final List<String> COLUMNS;
@@ -92,80 +92,94 @@ public class CreateSchema extends BasicCommandlineOptions {
         COLUMNS.add("Scheme");
     }
 
+    public static void main(String[] args) {
+        new CreateSchema().execute(args);
+    }
 
+    public void execute(String[] args) {
+        final AdminParser parser = new AdminParser("createschema");
+        parser.setUsage(USAGE);
+        parser.setCltDescription(DESCRIPTION);
+        try {
+            setOptions(parser);
+            parser.ownparse(args);
+            Credentials creds = credentialsparsing(parser);
 
- public static void main(String [] args){
-     new CreateSchema().execute(args);
- }
+            Integer id;
+            {
+                String id_str = (String) parser.getOptionValue(optDBIdOption);
+                if (Strings.isEmpty(id_str)) {
+                    id = null;
+                } else {
+                    id_str = id_str.trim();
+                    try {
+                        id = Integer.valueOf(id_str);
+                    } catch (NumberFormatException e) {
+                        printError("Invalid database id: " + id_str, parser);
+                        sysexit(1);
+                        return;
+                    }
+                }
+            }
 
+            OXUtilInterface oxUtil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
+            Database db = oxUtil.createSchema(creds, id);
 
- public void execute(String [] args) {
-     final AdminParser parser = new AdminParser("createschema");
-     parser.setUsage(USAGE);
-     parser.setCltDescription(DESCRIPTION);
-     try {
-        setOptions(parser);
-        parser.ownparse(args);
-        Credentials creds = credentialsparsing(parser);
-        String id_str = (String) parser.getOptionValue(optDBIdOption);
-        Integer id = Strings.isEmpty(id_str) ? null : Integer.valueOf(id_str);
-        OXUtilInterface oxUtil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
-        Database db = oxUtil.createSchema(creds, id);
+            if (null == parser.getOptionValue(this.csvOutputOption)) {
+                System.out.printf("Created a new schema with name \"%s\" in database with id %s \n", db.getScheme(), db.getId());
+                return;
+            }
 
-
-        if(null!= parser.getOptionValue(this.csvOutputOption)){
+            // CSV output...
             ArrayList<ArrayList<String>> data = new ArrayList<>(1);
             ArrayList<String> row = new ArrayList<>(2);
             row.add(String.valueOf(db.getId()));
             row.add(db.getScheme());
             data.add(row);
             doCSVOutput(COLUMNS, data);
-        } else {
-            System.out.printf("Created a new schema with name \"%s\" in database with id %s \n", db.getScheme(), db.getId());
+        } catch (CLIParseException e) {
+            printError("Parsing command-line failed : " + e.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+        } catch (CLIIllegalOptionValueException e) {
+            printError("Illegal option value : " + e.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+        } catch (CLIUnknownOptionException e) {
+            printError("Unrecognized options on the command line: " + e.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_UNKNOWN_OPTION);
+        } catch (MissingOptionException e) {
+            printError(e.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (MalformedURLException e) {
+            printServerException(e, parser);
+            sysexit(1);
+        } catch (RemoteException e) {
+            printServerException(e, parser);
+            sysexit(SYSEXIT_REMOTE_ERROR);
+        } catch (NotBoundException e) {
+            printServerException(e, parser);
+            sysexit(1);
+        } catch (StorageException e) {
+            printServerException(e, parser);
+            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
+        } catch (InvalidCredentialsException e) {
+            printServerException(e, parser);
+            sysexit(SYSEXIT_INVALID_CREDENTIALS);
+        } catch (InvalidDataException e) {
+            printServerException(e, parser);
+            sysexit(SYSEXIT_INVALID_DATA);
         }
-    } catch (CLIParseException e) {
-        printError("Parsing command-line failed : " + e.getMessage(), parser);
-        parser.printUsage();
-        sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-    } catch (CLIIllegalOptionValueException e) {
-        printError("Illegal option value : " + e.getMessage(), parser);
-        parser.printUsage();
-        sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-    } catch (CLIUnknownOptionException e) {
-        printError("Unrecognized options on the command line: " + e.getMessage(), parser);
-        parser.printUsage();
-        sysexit(SYSEXIT_UNKNOWN_OPTION);
-    } catch (MissingOptionException e) {
-        printError(e.getMessage(), parser);
-        parser.printUsage();
-        sysexit(SYSEXIT_MISSING_OPTION);
-    } catch (MalformedURLException e) {
-        printServerException(e, parser);
-        sysexit(1);
-    } catch (RemoteException e) {
-        printServerException(e, parser);
-        sysexit(SYSEXIT_REMOTE_ERROR);
-    } catch (NotBoundException e) {
-        printServerException(e, parser);
-        sysexit(1);
-    } catch (StorageException e) {
-        printServerException(e, parser);
-        sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-    } catch (InvalidCredentialsException e) {
-        printServerException(e, parser);
-        sysexit(SYSEXIT_INVALID_CREDENTIALS);
-    } catch (InvalidDataException e) {
-        printServerException(e, parser);
-        sysexit(SYSEXIT_INVALID_DATA);
+
     }
 
- }
-
- private void setOptions(final AdminParser parser) {
-     this.adminUserOption = setShortLongOpt(parser, OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, "Master admin user", true, AdminParser.NeededQuadState.needed);
-     this.adminPassOption = setShortLongOpt(parser, OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, "Master admin password", true, AdminParser.NeededQuadState.needed);
-     this.optDBIdOption = setShortLongOpt(parser, OPT_DB_ID_SHORT, OPT_DB_ID_LONG, OPT_DB_ID_DESCRIPTION, true, AdminParser.NeededQuadState.notneeded);
-     setCSVOutputOption(parser);
- }
+    private void setOptions(final AdminParser parser) {
+        this.adminUserOption = setShortLongOpt(parser, OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, "Master admin user", true, AdminParser.NeededQuadState.needed);
+        this.adminPassOption = setShortLongOpt(parser, OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, "Master admin password", true, AdminParser.NeededQuadState.needed);
+        this.optDBIdOption = setShortLongOpt(parser, OPT_DB_ID_SHORT, OPT_DB_ID_LONG, OPT_DB_ID_DESCRIPTION, true, AdminParser.NeededQuadState.notneeded);
+        setCSVOutputOption(parser);
+    }
 
 }
