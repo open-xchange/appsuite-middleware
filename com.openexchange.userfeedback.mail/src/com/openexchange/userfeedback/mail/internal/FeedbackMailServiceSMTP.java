@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.mail.internal;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,8 +101,11 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
-        InputStream data = FeedbackMimeMessageUtility.getFeedbackfile(filter);
-        result = sendMail(data, filter);
+        try (InputStream data = FeedbackMimeMessageUtility.getFeedbackFile(filter)) {
+            result = sendMail(data, filter);
+        } catch (IOException e) {
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e);
+        }
         return result;
     }
 
