@@ -24,9 +24,14 @@ properties:
         permission = ("admin_")? ("group_" | "user_") entity(int) "@" rights
         rights = (folder-permission(int) "." read-permission(int) "." write-permission(int) "." delete-permission(int)) | ("viewer" | "writer" | "author")
         </pre>
-        Examples:  
-        2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8  
-        2=group_2@viewer,admin_user_5@author|15=admin_group_2@writer  
+        Example 1:
+        <pre>
+        com.openexchange.folderstorage.defaultPermissions=2=group_2@2.4.0.0,admin_user_5@8.4.4.4|15=admin_group_2@8.8.8.8
+        </pre>
+        Example 2:
+        <pre>
+        com.openexchange.folderstorage.defaultPermissions=2=group_2@viewer,admin_user_5@author|15=admin_group_2@writer  
+        </pre>
       defaultValue: No defaut value
       version: 7.8.4
       reloadable: true

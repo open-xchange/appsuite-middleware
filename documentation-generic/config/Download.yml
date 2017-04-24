@@ -37,9 +37,11 @@ properties:
         deny) incoming download requests for known (guests) guest users.
         That rate limit acts like a sliding window time frame; meaning that it considers only
         requests that fit into time windows specified through [[com.openexchange.download.limit.guests.timeFrame]]  
-        from current time stamp:  
-        window-end := $now  
-        window-start := $window-end - $timeFrame  
+        from current time stamp:
+        <pre>
+        window-end := $now
+        window-start := $window-end - $timeFrame
+        </pre>
         If you only want to specify only one limit (size or count) you have to set a time frame and specify the desired.
       defaultValue: 3600000
       version: 
@@ -56,9 +58,11 @@ properties:
         deny) incoming download requests for anonymous (links) guest users.
         That rate limit acts like a sliding window time frame; meaning that it considers only
         requests that fit into time windows specified through [[com.openexchange.download.limit.links.timeFrame]]  
-        from current time stamp:  
-        window-end := $now  
-        window-start := $window-end - $timeFrame  
+        from current time stamp:
+        <pre>
+        window-end := $now
+        window-start := $window-end - $timeFrame
+        </pre>
         If you only want to specify only one limit (size or count) you have to set a time frame and specify the desired.
       defaultValue: 3600000
       version: 

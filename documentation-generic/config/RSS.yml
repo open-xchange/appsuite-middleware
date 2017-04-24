@@ -13,7 +13,7 @@ properties:
       tags: ["RSS"]
     - key: com.openexchange.rss
       description: |
-        If set to false disables the rss capability.
+        If set to <code>false</code> disables the rss capability.
       defaultValue: true
       version: 7.2.1
       reloadable: true

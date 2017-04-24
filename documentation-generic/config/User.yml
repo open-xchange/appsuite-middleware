@@ -27,7 +27,9 @@ properties:
     - key: com.openexchange.user.contactCollectOnMailAccess
       description: |
         Define the default behavior whether to collect contacts on mail access.
-        Note: Appropriate user access permission still needs to be granted in order to take effect.
+
+        Note:  
+        Appropriate user access permission still needs to be granted in order to take effect.
       defaultValue: false
       version: 
       reloadable: true
@@ -39,7 +41,9 @@ properties:
     - key: com.openexchange.user.contactCollectOnMailTransport
       description: |
         Define the default behavior whether to collect contacts on mail transport.
-        Note: Appropriate user access permission still needs to be granted in order to take effect.
+
+        Note:  
+        Appropriate user access permission still needs to be granted in order to take effect.
       defaultValue: false
       version: 
       reloadable: true

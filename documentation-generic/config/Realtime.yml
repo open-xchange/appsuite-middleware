@@ -4,7 +4,7 @@ feature_description: |
 properties:
     - key: com.openexchange.realtime.isTraceAllUsersEnabled
       description: |
-        Tracing:
+        Tracing:  
         Tracing is done by adding a unique tracer to the client message that enables you
         to follow the path of a realtime tracer/message as it is handled by different
         parts of the server stack. This done by logging a status message at the info
@@ -21,7 +21,7 @@ properties:
       tags: ["Realtime", "Logging"]
     - key: com.openexchange.realtime.usersToTrace
       description: |
-        Enable tracing only for a set of users by using the userID@contextID notation e.g.: 1@1, 2@1, 3@1
+        Enable tracing only for a set of users by using the userID@contextID notation. E.g.: <pre>1@1, 2@1, 3@1</pre>
       defaultValue:
       version:
       reloadable: true

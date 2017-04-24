@@ -239,7 +239,7 @@ properties:
         Email address to use for SMTP MAIL command. This sets the envelope return address.
          Defaults to msg.getFrom() or InternetAddress.getLocalAddress(). 
 
-         NOTE:  
+         Note:  
          [[mail.smtp.user]] was previously used for this. 
       defaultValue: 
       version: 
@@ -265,7 +265,7 @@ properties:
 
     - key: mail.smtp.ehlo
       description: |
-        If false, do not attempt to sign on with the EHLO command. Normally failure of the EHLO command will
+        If <code>false</code>, do not attempt to sign on with the EHLO command. Normally failure of the EHLO command will
         fallback to the HELO command; this property exists only for servers that don't fail EHLO properly or
         don't implement EHLO properly.
       defaultValue: true
@@ -279,7 +279,7 @@ properties:
 
     - key: mail.smtp.auth
       description: |
-        If true, attempt to authenticate the user using the AUTH command.
+        If <code>true</code>, attempt to authenticate the user using the AUTH command.
       defaultValue: false
       version: 
       reloadable: false

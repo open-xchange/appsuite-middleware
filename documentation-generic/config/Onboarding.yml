@@ -4,7 +4,7 @@ feature_description: |
 properties:
     - key: com.openexchange.client.onboarding.enabled
       description: |
-        The main switch to enabled/disable client on-boarding
+        The main switch to enabled/disable client on-boarding.
       defaultValue: true
       version:
       reloadable: false
@@ -191,8 +191,8 @@ properties:
       tags: ["Onboarding", "Apple", "PList"]
     - key: com.openexchange.client.onboarding.sms.ratelimit
       description: |
-        Define the time (in milliseconds) which must pass by before a new sms can be sent
-        A value of 0 disables the limit.
+        Define the time (in milliseconds) which must pass by before a new sms can be sent.
+        A value of <code>0</code> disables the limit.
       defaultValue: 0
       version:
       reloadable: true
@@ -204,7 +204,7 @@ properties:
     - key: com.openexchange.client.onboarding.sms.defaultCountry
       description: |
         Defines the default country as a two letter code.
-        For all codes see ISO 3166-1
+        For all codes see ISO 3166-1.
       defaultValue: DE
       version:
       reloadable: true
@@ -232,7 +232,7 @@ properties:
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
-        The administrator has ensure that end-point is reachable by a well-known path;
+        The administrator has ensure that end-point is reachable by a well-known path;  
         E.g. "PROPFIND /dav.example.com%3A8800/.well-known/caldav HTTP/1.1"
       defaultValue:
       version:
@@ -244,8 +244,8 @@ properties:
       tags: ["Onboarding", "CalDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.caldav.login.customsource
       description: |
-        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
-        If available, then the login string is taken from such a custom login source
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered.
+        If available, then the login string is taken from such a custom login source.
       defaultValue: false
       version:
       reloadable: true
@@ -262,7 +262,7 @@ properties:
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
-        The administrator has ensure that end-point is reachable by a well-known path;
+        The administrator has ensure that end-point is reachable by a well-known path;  
         E.g. "PROPFIND /dav.example.com%3A8843/.well-known/carddav HTTP/1.1"
       defaultValue:
       version:
@@ -274,8 +274,8 @@ properties:
       tags: ["Onboarding", "CardDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.carddav.login.customsource
       description: |
-        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
-        If available, then the login string is taken from such a custom login source
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered.
+        If available, then the login string is taken from such a custom login source.
       defaultValue: false
       version:
       reloadable: true
@@ -336,8 +336,8 @@ properties:
       tags: ["Onboarding", "EAS", "Host", "Port"]
     - key: com.openexchange.client.onboarding.eas.login.customsource
       description: |
-        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
-        If available, then the login string is taken from such a custom login source
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered.
+        If available, then the login string is taken from such a custom login source.
       defaultValue: false
       version:
       reloadable: true
@@ -386,7 +386,7 @@ properties:
         Specifies whether a secure connection is supposed to established to access the IMAP server.
         If not set, falls-back to internal settings for accessing the primary account.
         
-        Possible values: true|false
+        Possible values: <code>true</code> or <code>false</code>
       defaultValue:
       version:
       reloadable: true
@@ -424,7 +424,7 @@ properties:
         Specifies whether a secure connection is supposed to established to access the SMTP server.
         If not set, falls-back to internal settings for accessing the primary account.
         
-        Possible values: true|false
+        Possible values: <code>true</code> or <code>false</code>
       defaultValue:
       version:
       reloadable: true

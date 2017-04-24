@@ -1,7 +1,6 @@
 feature_name: Participant
 feature_description: |
-  This file must be named "participant.properties". Otherwise its contents are
-  not read.
+  The participant properties must be defined in a file named "participant.properties". Otherwise the properties will not be applied.
 properties:
     - key: com.openexchange.participant.ShowWithoutEmail
       description: |
@@ -20,7 +19,7 @@ properties:
       description: |
         When searching for participants and the participants selection dialog is
         opened this option defines if initially all users, groups and resources are
-        displayed or not. If this option is true every opening of the dialog triggers
+        displayed or not. If this option is <code>true</code> every opening of the dialog triggers
         a search request on the server.
       defaultValue: true
       version:

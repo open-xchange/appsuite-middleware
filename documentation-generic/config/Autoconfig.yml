@@ -29,7 +29,10 @@ properties:
       description: |
         Provides the possibility to specify a proxy that is used to access any HTTP end-points. If empty, no proxy is used.
 
-        Notation is: &lt;optional-protocol&gt; + "://" + &lt;proxy-host&gt; + ":" + &lt;proxy-port&gt;  
+        Notation is: 
+        <pre>
+        &lt;optional-protocol&gt; + "://" + &lt;proxy-host&gt; + ":" + &lt;proxy-port&gt;  
+        </pre>
         With "http" as fall-back protocol.
         
         E.g. <code>67.177.104.230:58720</code> (using HTTP protocol) or <code>https://78.0.25.45:8345</code> (using HTTPS protocol)

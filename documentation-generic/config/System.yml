@@ -2,7 +2,7 @@ feature_name: System
 properties:
   - key: com.openexchange.caching.configfile
     description: |
-      Location of default cache configuration file
+      Location of default cache configuration file.
     defaultValue: cache.ccf
     version: 
     reloadable: true
@@ -16,30 +16,30 @@ properties:
       Enabled/disable service usage inspection. If enabled, all services
       obtained and managed by ServiceHolder class will be tracked to ensure
       all services are put back (via unget) within a certain amount of time.
-      The time range can be defined through property 'serviceUsageTimeout'.
+      The time range can be defined through property [[serviceUsageTimeout]].
     defaultValue: false
     version: 
     reloadable: false
     configcascadeAware: false
-    related: 
+    related: serviceUsageTimeout
     file: system.properties
     packageName: open-xchange-core
     tags: ["System"] 
   - key: serviceUsageTimeout
     description: |
       The service usage timeout in milliseconds. This property only has
-      effect if property 'serviceUsageInspection' is set to 'true'.
+      effect if property [[serviceUsageInspection]] is set to <code>true</code>.
     defaultValue: 10000
     version: 
     reloadable: false
     configcascadeAware: false
-    related: 
+    related: serviceUsageInspection
     file: system.properties
     packageName: open-xchange-core
     tags: ["System", "Timeout"] 
   - key: MimeTypeFileName
     description: |
-      Name of the MIME type file
+      Name of the MIME type file.
     defaultValue: mime.types
     version: 
     reloadable: true
@@ -51,7 +51,7 @@ properties:
   - key: UserConfigurationStorage
     description: |
       Name of the class implementing the UserConfigurationStorage.
-      "Currently known aliases:" Caching, DB
+      Currently known aliases: <code>Caching</code>, <code>DB</code>.
     defaultValue: Caching
     version: 
     reloadable: false
@@ -63,7 +63,7 @@ properties:
   - key: Cache
     description: |
       Switch for enabling caching in the groupware. Normally this should be set to
-      true or the database will get a lot more load.
+      <code>true</code> or the database will get a lot more load.
     defaultValue: true
     version: 
     reloadable: false
@@ -89,7 +89,7 @@ properties:
   - key: SERVER_NAME
     description: |
       Server name registered by registerserver in the configuration database
-      can be read with listservers
+      can be read with listservers.
     defaultValue: local
     version: 
     reloadable: false
@@ -100,7 +100,7 @@ properties:
     tags: ["System"] 
   - key: com.openexchange.config.cascade.scopes
     description: |
-      The scopes to use in the config cascade, and their precedence
+      The scopes to use in the config cascade, and their precedence.
     defaultValue: user, context, contextSets, server
     version: 
     reloadable: false

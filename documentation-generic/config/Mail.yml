@@ -258,7 +258,7 @@ properties:
         & Trash) are going to be placed right below folder "INBOX" even if
         feature "altNamespace" is enabled. 
 
-        NOTE:  
+        Note:  
         This property requires that subfolders are still permitted below initial folder "INBOX" even though
         "altNamespace" is enabled.
       defaultValue: false
@@ -528,7 +528,7 @@ properties:
         <pre>
         &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;
         </pre>
-        NOTE:  
+        Note:  
         The underlying Mailserver must support <code>SASL AUTHPROXYING</code>.
         The open-xchange mailfilterbundle does not support it, so it will raise errors.
       defaultValue: 
@@ -550,7 +550,7 @@ properties:
       related: 
       file: mail.properties
       packageName: open-xchange-core
-      tags: ["Mail"]
+      tags: ["Mail", "Limit"]
     - key: com.openexchange.mail.hideDetailsForDefaultAccount
       description: |
         Whether to hide rather technical data from JSON representation of the primary mail account
@@ -774,9 +774,19 @@ properties:
         The value is supposed to be comma-separated list of folder paths. An entry in the CSV list is either a full path of a folder in the 
         primary mail account (e.g. "INBOX/Malware") or a reserved identifier denoting the standard folder and its sub-folders of every 
         mail account (incl. Unified Mail).  
-        Supported reserved identifiers are: <code>$Spam</code>, <code>$Drafts</code>, <code>$Sent</code>, <code>$Trash</code>, <code>$Confirmed-spam</code>, <code>$Confirmed-ham</code>.
-
-        Example: <code>$Spam, INBOX/Malware</code>  
+        Supported reserved identifiers are: 
+        <ul>
+          <li><code>$Spam</code></li>
+          <li><code>$Drafts</code></li>
+          <li><code>$Sent</code></li>
+          <li><code>$Trash</code></li>
+          <li><code>$Confirmed-spam</code></li>
+          <li><code>$Confirmed-ham</code></li>
+        </ul>
+        Example:
+        <pre>
+        com.openexchange.mail.maliciousFolders.listing=$Spam, INBOX/Malware
+        </pre>
         Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.
       defaultValue: $Spam, $Confirmed-spam
       version: 7.8.4
@@ -818,7 +828,7 @@ properties:
         context by checking the login mappings. That mechanism does only work if Open-Xchange setup strictly defines a dedicated and unique domain
         per context. Otherwise that look-up mechanism will lead to wrong results.
         
-        Setting this option to <code>false<code> means that the mail address is going to be looked-up on a per database schema basis. For each known schema
+        Setting this option to <code>false</code> means that the mail address is going to be looked-up on a per database schema basis. For each known schema
         a query is performed to check whether there is such an internal user.
       defaultValue: false
       version: 
