@@ -154,104 +154,10 @@ public class SmtpMockSetup {
     private static void stopSMTPMockServer(TestUser user) {
         try {
             AJAXClient client = new AJAXClient(user);
-            StopSMTPRequest request = new StopSMTPRequest(true);
+            StopSMTPRequest request = new StopSMTPRequest(false);
             SMTPInitResponse response = client.execute(request);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
         }
     }
-
-    //    private static void startSmtpMockForAllContexts() {
-    //        contextsWithStartedMock = TestContextPool.getAllTimeAvailableContexts();
-    //        LOG.info("Retrieved {} contexts to start SMTP mock server for.", contextsWithStartedMock.size());
-    //
-    //        for (TestContext testContext : contextsWithStartedMock) {
-    //            TestUser noReplyUser = testContext.getNoReplyUser();
-    //            SmtpMockConfig smtpMockConfig = startSmtpMockServerAndSetNoReply(noReplyUser);
-    //
-    //            List<TestUser> allUsers = testContext.getCopyOfAll();
-    //            for (TestUser user : allUsers) {
-    //                rewriteMailAccountConfig(user, smtpMockConfig);
-    //            }
-    //        }
-    //    }
-    //
-    //    private static SmtpMockConfig startSmtpMockServerAndSetNoReply(TestUser userNoReply) {
-    //        LOG.info("Try to start SMTP mock server for user {} in context {}.", userNoReply.getLogin(), userNoReply.getContext());
-    //        try {
-    //            AJAXClient client = new AJAXClient(userNoReply);
-    //            StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), userNoReply.getLogin());
-    //
-    //            SMTPInitResponse response = client.execute(request);
-    //            return new SmtpMockConfig(response.getHostname(), response.getPort());
-    //        } catch (OXException | IOException | JSONException e) {
-    //            LOG.error("", e);
-    //        }
-    //        return null;
-    //    }
-    //
-    //    private static void rewriteMailAccountConfig(TestUser user, SmtpMockConfig config) {
-    //        Validate.notNull(user);
-    //        Validate.notNull(config);
-    //        try {
-    //            AJAXClient client = new AJAXClient(user);
-    //            SMTPInitResponse response = client.execute(new UpdateMailAccountRequest(config.getHostname(), config.getPort()));
-    //        } catch (OXException | IOException | JSONException e) {
-    //            LOG.error("", e);
-    //        }
-    //    }
-    //
-    //    public static void restore() {
-    //        synchronized (SmtpMockSetup.class) {
-    //            if (initialized.get()) {
-    //                stopSMTPMockForAllContexts();
-    //
-    //                initialized.compareAndSet(true, false);
-    //            }
-    //        }
-    //    }
-    //
-    //    private static void stopSMTPMockForAllContexts() {
-    //        List<TestContext> testContexts = contextsWithStartedMock;
-    //
-    //        for (TestContext testContext : testContexts) {
-    //            SmtpMockConfig smtpMockConfig = stopSMTPMockServer(testContext.getNoReplyUser());
-    //
-    //            List<TestUser> allUsers = testContext.getCopyOfAll();
-    //            for (TestUser user : allUsers) {
-    //                rewriteMailAccountConfig(user, smtpMockConfig);
-    //            }
-    //        }
-    //    }
-    //
-    //    private static SmtpMockConfig stopSMTPMockServer(TestUser user) {
-    //        try {
-    //            AJAXClient client = new AJAXClient(user);
-    //            StopSMTPRequest request = new StopSMTPRequest(true);
-    //            SMTPInitResponse response = client.execute(request);
-    //            return new SmtpMockConfig(response.getHostname(), response.getPort());
-    //        } catch (OXException | IOException | JSONException e) {
-    //            LOG.error("", e);
-    //        }
-    //        return null;
-    //    }
-
-    //    private static class SmtpMockConfig {
-    //
-    //        private final int port;
-    //        private final String hostname;
-    //
-    //        public SmtpMockConfig(String hostname, int port) {
-    //            this.port = port;
-    //            this.hostname = hostname;
-    //        }
-    //
-    //        public int getPort() {
-    //            return port;
-    //        }
-    //
-    //        public String getHostname() {
-    //            return hostname;
-    //        }
-    //    }
 }
