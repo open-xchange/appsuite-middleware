@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -80,7 +81,7 @@ public class TestContextPool {
         remember(context);
         contexts.add(context);
         startWatcher();
-        LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
+        LOG.info("Added context '{}' with id {} and users {} to pool.", context.getName(), context.getId(), Strings.concat(",", context.getCopyOfAll()));
     }
 
     private static void remember(TestContext context) {
