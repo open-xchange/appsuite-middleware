@@ -296,7 +296,7 @@ public class TestCommand extends Command {
 
         /**
          * Specifies the ':zone' and ':originalzone' argument as described in
-         * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone Arguments</a>
+         * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone arguments</a>
          *
          * @return A hashtable with the argument
          */
@@ -309,7 +309,7 @@ public class TestCommand extends Command {
         
         /**
          * Specifies the ':zone' argument as described in
-         * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone Arguments</a>
+         * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone arguments</a>
          *
          * @return A hashtable with the argument
          */
