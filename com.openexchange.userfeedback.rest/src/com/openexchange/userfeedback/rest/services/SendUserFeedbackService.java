@@ -96,7 +96,7 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
     @POST
     @Path("/{context-group}/{type}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response sendMail(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, String json) {
         JSONObject requestBody = null;
         String subject = null;
