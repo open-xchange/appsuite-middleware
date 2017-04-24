@@ -55,6 +55,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.java.Strings;
@@ -88,7 +89,7 @@ public class TestContextPool {
         if (allTimeContexts.contains(context)) {
             return;
         }
-        allTimeContexts.add(context);
+        allTimeContexts.add((TestContext) SerializationUtils.clone(context));
         LOG.info("Added context {} to all time available context list.", context.getName());
     }
 
