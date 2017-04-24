@@ -13,11 +13,11 @@
         type: string
       - 
         name: body
-        in: formData
-        description: JSONArray describing the advertisement configuration
+        in: body
+        description: JSONObject describing the advertisement configuration
         required: true
-        type: string 
-        format: JSON
+        schema:
+          type: string
 
     responses:
       200:
