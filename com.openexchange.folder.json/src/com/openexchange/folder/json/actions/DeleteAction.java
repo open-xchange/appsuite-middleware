@@ -93,6 +93,7 @@ public final class DeleteAction extends AbstractFolderAction {
     private static final String PATH = "path";
     private static final String HAS_FAILED = "hasFailed";
     private static final String IS_TRASHED = "isTrashed";
+    private static final String SUPPORTED = "isSuppoprted";
     private static final String EXTENDED_RESPONSE = "extendedResponse";
 
     /**
@@ -165,7 +166,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     if(response == null){
                         response = folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
                         if(extendedResponse){
-                            trashResults.add(new TrashResult(folderId, false));
+                            trashResults.add(TrashResult.createUnsupportedTrashResult());
                         }
                     } else {
                         trashResults.add((TrashResult)response.getResponse());
@@ -253,34 +254,49 @@ public final class DeleteAction extends AbstractFolderAction {
         if (failOnError) {
 
             for (TrashResult trashResult : results) {
-                JSONObject obj = new JSONObject(3);
-                if (trashResult.isTrashed()) {
-                    obj.put(IS_TRASHED, true);
-                    obj.put(NEW_PATH, trashResult.getNewPath());
-                    obj.put(PATH, trashResult.getOldPath());
-                } else {
-                    obj.put(IS_TRASHED, false);
-                    obj.put(PATH, trashResult.getOldPath());
-                }
-                resultArray.put(obj);
-            }
-        } else {
-            for (TrashResult trashResult : results) {
-                JSONObject obj = new JSONObject(3);
-                if (trashResult.hasFailed()) {
-                    obj.put(HAS_FAILED, true);
-                    obj.put(PATH, trashResult.getOldPath());
-                } else {
+                if(trashResult.isSupported()){
+                    JSONObject obj = new JSONObject(3);
+                    obj.put(SUPPORTED, true);
                     if (trashResult.isTrashed()) {
                         obj.put(IS_TRASHED, true);
-                        obj.put(PATH, trashResult.getOldPath());
                         obj.put(NEW_PATH, trashResult.getNewPath());
+                        obj.put(PATH, trashResult.getOldPath());
                     } else {
                         obj.put(IS_TRASHED, false);
                         obj.put(PATH, trashResult.getOldPath());
                     }
+                    resultArray.put(obj);
+                } else {
+                    JSONObject obj = new JSONObject(1);
+                    obj.put(SUPPORTED, false);
+                    resultArray.put(obj);
                 }
-                resultArray.put(obj);
+            }
+        } else {
+            for (TrashResult trashResult : results) {
+                if(trashResult.isSupported()){
+                    JSONObject obj = new JSONObject(3);
+                    obj.put(SUPPORTED, true);
+                    if (trashResult.hasFailed()) {
+                        obj.put(HAS_FAILED, true);
+                        obj.put(PATH, trashResult.getOldPath());
+                    } else {
+                        if (trashResult.isTrashed()) {
+                            obj.put(IS_TRASHED, true);
+                            obj.put(PATH, trashResult.getOldPath());
+                            obj.put(NEW_PATH, trashResult.getNewPath());
+                        } else {
+                            obj.put(IS_TRASHED, false);
+                            obj.put(PATH, trashResult.getOldPath());
+                        }
+                    }
+                    resultArray.put(obj);
+                } else {
+                    JSONObject obj = new JSONObject(1);
+                    obj.put(SUPPORTED, false);
+                    resultArray.put(obj);
+                }
+
             }
         }
         return new AJAXRequestResult(resultArray);

@@ -62,6 +62,28 @@ public class TrashResult {
     private final String path;
     private final String oldPath;
     private final boolean failed;
+    private boolean isSupported=true;
+
+
+    public static TrashResult createUnsupportedTrashResult(){
+       return new TrashResult();
+    }
+
+    /**
+     * Initializes a new {@link TrashResult}.
+     *
+     * @param path The new path (maybe null)
+     * @param oldPath The old path
+     */
+    public TrashResult() {
+        super();
+        this.trashed = false;
+        this.path = null;
+        this.oldPath = null;
+        this.failed = false;
+        this.isSupported = false;
+    }
+
 
     /**
      * Initializes a new {@link TrashResult}.
@@ -120,6 +142,10 @@ public class TrashResult {
 
     public String getOldPath() {
         return oldPath;
+    }
+
+    public boolean isSupported(){
+        return isSupported;
     }
 
 }
