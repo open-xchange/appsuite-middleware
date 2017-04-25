@@ -6,7 +6,7 @@
     summary: Sets an advertisement configuration for a given user by id
     parameters:
       - 
-        name: ctxId
+        name: contextId
         in: query
         description: The context id
         required: true
@@ -42,7 +42,7 @@
     summary: Remove the current configuration for the user identified by userId
     parameters:
       - 
-        name: ctxId
+        name: contextId
         in: query
         description: The context id
         required: true
