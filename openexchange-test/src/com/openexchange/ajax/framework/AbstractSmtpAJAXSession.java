@@ -59,6 +59,8 @@ import com.openexchange.test.pool.TestUser;
 
 public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractSmtpAJAXSession.class);
+
     private static final AtomicInteger counter = new AtomicInteger();
 
     @BeforeClass
@@ -94,11 +96,10 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
     public static void afterClass() throws Exception {
         synchronized (AbstractSmtpAJAXSession.class) {
             int get = counter.decrementAndGet();
-            System.out.println(get);
             if (get == 0) {
+                LOG.info("No more test running. Going to restore SMTP config.", new Throwable());
                 SmtpMockSetup.restore();
             }
         }
     }
-
 }

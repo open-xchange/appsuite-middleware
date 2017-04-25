@@ -47,68 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.advertisement.actions;
+package com.openexchange.rest.advertisement.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link GetConfigRequest}
+ * {@link GetConfigResponse}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class GetConfigRequest implements AJAXRequest<GetConfigResponse> {
+public class GetConfigResponse extends AbstractAJAXResponse {
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    @Override
-    public String getServletPath() {
-        return "/ajax/advertisement";
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new URLParameter("action", "get") };
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends GetConfigResponse> getParser() {
-        return new Parser(false);
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    private static final class Parser extends AbstractAJAXParser<GetConfigResponse> {
-
-        /**
-         * Initializes a new {@link Parser}.
-         * 
-         * @param failOnError
-         */
-        protected Parser(boolean failOnError) {
-            super(failOnError);
-        }
-
-        @Override
-        protected GetConfigResponse createResponse(Response response) throws JSONException {
-            return new GetConfigResponse(response);
-        }
+    /**
+     * Initializes a new {@link GetConfigResponse}.
+     * 
+     * @param response
+     */
+    protected GetConfigResponse(Response response) {
+        super(response);
     }
 
 }

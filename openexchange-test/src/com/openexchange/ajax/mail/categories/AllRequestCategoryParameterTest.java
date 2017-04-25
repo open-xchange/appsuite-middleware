@@ -50,13 +50,10 @@
 package com.openexchange.ajax.mail.categories;
 
 import static org.junit.Assert.assertTrue;
-import java.io.IOException;
-import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -67,16 +64,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * @since v7.8.2
  */
 public class AllRequestCategoryParameterTest extends AbstractMailCategoriesTest {
-
-    /**
-     * Initializes a new {@link AllRequestCategoryParameterTest}.
-     * 
-     * @param name
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
-     */
-    public AllRequestCategoryParameterTest() {}
 
     @Test
     public void testAllRequest() throws Exception {
