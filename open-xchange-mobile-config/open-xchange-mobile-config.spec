@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 26
+%define        ox_release 27
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -68,6 +68,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Tue Apr 18 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-04-21 (4079)
 * Fri Mar 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-04-03 (4047)
 * Fri Feb 24 2017 Marcus Klein <marcus.klein@open-xchange.com>

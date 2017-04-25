@@ -224,4 +224,15 @@ public class UploadFileImpl implements UploadFile {
         this.tmpFile = tmpFile;
     }
 
+    @Override
+    public String toString() {
+        String fileName = getPreparedFileName();
+        if (fileName != null) {
+            return fileName;
+        } else if (fieldName != null) {
+            return fieldName;
+        }
+        return super.toString();
+    }
+
 }
