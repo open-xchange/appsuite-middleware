@@ -34,20 +34,6 @@
         type: integer
         format: int64
       - 
-        name: subject
-        in: body
-        description: "The mail subject. Default: User Feedback Report: [time range]"
-        required: false
-        schema:
-          type: string
-      - 
-        name: body
-        in: body
-        description: The mail body (plain text).
-        required: false
-        schema:
-          type: string
-      - 
         name: compress
         in: body
         description: "Compress exported feedback. Default: false."
@@ -55,9 +41,9 @@
         schema:
           type: boolean
       - 
-        name: recipients
+        name: requestBody
         in: body
-        description: JSON Array containing address, display name and PGP key (if available) for every recipient.
+        description: JSONObject with fields "subject", "body" and "recipients" (an JSON Array containing address, display name and PGP key (if available) for every recipient).
         required: true
         schema:
           type: string
