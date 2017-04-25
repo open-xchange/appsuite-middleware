@@ -130,6 +130,19 @@ public interface CalendarCollectionService {
 
     public boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException;
 
+    /**
+     * Checks the read permission
+     *
+     * @param oid The object id
+     * @param fid The folder id
+     * @param so The session of the current user
+     * @param ctx The context of the current user
+     * @param checkPrivate Whether to check for private flag
+     * @return true if the user is allowed to read the folder
+     * @throws OXException
+     */
+    public boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx, final boolean checkPrivate) throws OXException;
+
     public boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException;
 
     public boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up);
