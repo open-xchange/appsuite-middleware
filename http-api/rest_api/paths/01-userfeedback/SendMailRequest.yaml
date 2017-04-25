@@ -34,16 +34,9 @@
         type: integer
         format: int64
       - 
-        name: compress
-        in: body
-        description: "Compress exported feedback. Default: false."
-        required: false
-        schema:
-          type: boolean
-      - 
         name: requestBody
         in: body
-        description: JSONObject with fields "subject", "body" and "recipients" (an JSON Array containing address, display name and PGP key (if available) for every recipient).
+        description: JSONObject with fields "subject" for custom mail subject, "body" for custom mail body, boolean "compress" to compress the mail attachment and "recipients" (an JSON Array containing address, display name and PGP key (if available) for every recipient).
         required: true
         schema:
           type: string
@@ -74,6 +67,7 @@
                  POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799
                  {"subject":"User Feedback",
                   "body":"User Feedback",
+                  "compress":true,
                   "recipients": [
                     {"address":"user1@example.org",
                      "displayName":"User 1",
