@@ -51,7 +51,7 @@ properties:
       tags: ["Mail","REST"]
     - key: com.openexchange.dovecot.doveadm.endpoints.maxConnectionsPerRoute
       description: |
-        The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining.
+        The number of connections per route held in HTTP connection pool; or less than/equal to <code>0</code> (zero) for auto-determining.
       defaultValue: 0
       version: 7.8.3
       reloadable: false

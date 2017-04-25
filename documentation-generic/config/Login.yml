@@ -103,7 +103,7 @@ properties:
   - key: com.openexchange.ajax.login.formatstring.login
     description: |
       Specifies the format for a logged login.  
-      If left empty the default format string <code>$login $ip $auth $agent $client $c $u $s<code> is used.
+      If left empty the default format string <code>$login $ip $auth $agent $client $c $u $s</code> is used.
 
       $s - session information  
       $c - context information  
@@ -164,10 +164,11 @@ properties:
   
       A client that exceeds that limit will receive a "429 Too Many Requests" HTTP error code.
       That rate limit acts like a sliding window time frame; meaning that it considers only
-      requests that fit into time windows specified through [[com.openexchange.ajax.login.maxRateTimeWindow]] from current time stamp:  
+      requests that fit into time windows specified through [[com.openexchange.ajax.login.maxRateTimeWindow]] from current time stamp:
+      <pre>  
       window-end := $now  
       window-start := $window-end - $maxRateTimeWindow
-
+      </pre>
       The general rate limiter behavior is specified through "com.openexchange.servlet.maxRate*" properties.
     defaultValue: 50
     version: 

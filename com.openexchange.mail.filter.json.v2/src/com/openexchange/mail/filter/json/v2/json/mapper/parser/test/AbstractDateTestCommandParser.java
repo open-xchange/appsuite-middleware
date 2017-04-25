@@ -111,9 +111,9 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         if (jsonObject.hasAndNotNull(DateTestField.zone.name())) {
             String zone = CommandParserJSONUtil.getString(jsonObject, DateTestField.zone.name(), commandName);
             if ("original".equals(zone)) {
-                argList.add(ArgumentUtil.createTagArgument("originalzone"));
+                argList.add(ORIGINAL_ZONE_TAG);
             } else {
-                argList.add(ArgumentUtil.createTagArgument("zone"));
+                argList.add(ZONE_TAG);
                 argList.add(CommandParserJSONUtil.stringToList(zone));
             }
         } else {
@@ -141,43 +141,31 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         final String comparisonTag = CommandParserJSONUtil.getString(jsonObject, DateTestField.comparison.name(), commandName);
         String normalizedMatcher = MatchType.getNormalName(comparisonTag);
         if (normalizedMatcher != null) {
-            Comparison comparison = Comparison.valueOf(normalizedMatcher);
-
-            switch (comparison) {
-                case ge:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("ge"));
-                    break;
-                case is:
-                    argList.add(ArgumentUtil.createTagArgument(comparison.name()));
-                    break;
-                case le:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("le"));
-                    break;
-                default:
-                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
-            }
+            addComparatorToArgumentList(argList, commandName, normalizedMatcher);
             return true;
-        } else {
-            Comparison comparison = Comparison.valueOf(comparisonTag);
+        } 
+        
+        addComparatorToArgumentList(argList, commandName, comparisonTag);
+        return false;
+    }
 
-            switch (comparison) {
-                case ge:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("ge"));
-                    break;
-                case is:
-                    argList.add(ArgumentUtil.createTagArgument(comparison.name()));
-                    break;
-                case le:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("le"));
-                    break;
-                default:
-                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
-            }
-            return false;
+    private void addComparatorToArgumentList(List<Object> argList, String commandName, final String comparisonTag) throws OXException {
+        Comparison comparison = Comparison.valueOf(comparisonTag);
+   
+        switch (comparison) {
+            case ge:
+                argList.add(ArgumentUtil.createTagArgument("value"));
+                argList.add(CommandParserJSONUtil.stringToList("ge"));
+                break;
+            case is:
+                argList.add(ArgumentUtil.createTagArgument(comparison.name()));
+                break;
+            case le:
+                argList.add(ArgumentUtil.createTagArgument("value"));
+                argList.add(CommandParserJSONUtil.stringToList("le"));
+                break;
+            default:
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
         }
     }
 

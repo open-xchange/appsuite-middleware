@@ -17,7 +17,7 @@ properties:
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
-      related: 
+      related: c.o.some.property
       file:
       packageName: open-xchange-core
       tags:[]
@@ -29,7 +29,7 @@ properties:
       version: 7.8.0
       reloadable: true
       configcascadeAware: true
-      related: c.o.some.property
+      related: ["c.o.some.property1","c.o.some.property2"]
       file: somefile.properties
       packageName: open-xchange-packageB
       tags: ["tagA","tagB"]
@@ -37,6 +37,5 @@ properties:
 
 If you would like to add a reference to another property in the same file use the following approach:
 
-  * tag the destination property key by using `<a name="com.openexchange.foo">com.openexchange.foo</a>`
-  * reference the tagged property by adding it to the 'related' column like `<a href="#com.openexchange.foo">com.openexchange.foo</a>`
+  * tag the destination property key by using: [[com.openexchange.foo]]
 

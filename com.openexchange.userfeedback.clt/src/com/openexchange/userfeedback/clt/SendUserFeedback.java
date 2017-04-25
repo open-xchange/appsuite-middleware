@@ -190,8 +190,58 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             array.add(0, extractSingleRecipient(recipients));
         }
         requestBody.put("recipients", array);
-        InputStream response = context.post(Entity.json(requestBody.toString()), InputStream.class);
-        System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
+        InputStream response = null;
+        response = context.post(Entity.json(requestBody.toString()), InputStream.class);
+        StringBuilder sb = new StringBuilder();
+        try {
+            JSONObject json = new JSONObject(new String(IOUtils.toCharArray(new AsciiReader(response))));
+            if (json.hasAndNotNull("pgp")) {
+                sb.append("A PGP-signed/encrypted email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("pgp");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("sign")) {
+                sb.append("A PGP-signed email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("sign");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("encrypt")) {
+                sb.append("A PGP-encrypted email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("encrypt");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("normal")) {
+                sb.append("An email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("normal");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("fail")) {
+                sb.append("The following addresses are invalid and therefore ignored\n");
+                JSONArray a = json.getJSONArray("fail");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("pgpFail")) {
+                sb.append("The following addresses are linked with an invalid PGP key and therefore ignored\n");
+                JSONArray a = json.getJSONArray("pgpFail");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+        } catch (JSONException e) {
+            // will not happen
+        }
+        System.out.println(sb.toString());
+        System.exit(0);
         return null;
     }
 

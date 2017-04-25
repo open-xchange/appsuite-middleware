@@ -35,11 +35,13 @@ properties:
       been bounced to the target eMail address. If no option is configured the
       selected mails will be moved to the users trash folder. 
 
-      Possible options are:  
-      0 = Do not move the message at all  
-      1 = User's trash folder  
-      2 = User's SPAM folder  
-      3 = Subscribed confirmed-spam folder (experimental)
+      Possible options are:
+      <ul>
+        <li><code>0</code> - Do not move the message at all.</li>
+        <li><code>1</code> - User's trash folder.</li>
+        <li><code>2</code> - User's SPAM folder.</li>
+        <li><code>3</code> - Subscribed confirmed-spam folder (experimental).</li>
+      </ul>
     defaultValue: 2
     version: 
     reloadable: true

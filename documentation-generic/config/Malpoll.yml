@@ -27,8 +27,10 @@ properties:
       description: |
         Whether the tasks executed by global timer are executed concurrently
         or by calling timer's thread.
-        Note: This property only has effect if "com.openexchange.push.malpoll.global"
-        is set to "true"
+
+        Note:  
+        This property only has effect if [[com.openexchange.push.malpoll.global]]
+        is set to <code>true</code>.
       defaultValue: true
       version:
       reloadable: false

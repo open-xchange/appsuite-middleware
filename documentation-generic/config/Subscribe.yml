@@ -91,7 +91,8 @@ properties:
       packageName: open-xchange-subscribe
       tags: ["MS Live Connect", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.contacts.http
-      description:
+      description: |
+        Enables / disables the microformats contacts subscription.
       defaultValue: true
       version:
       reloadable: true
@@ -101,7 +102,8 @@ properties:
       packageName: open-xchange-subscribe
       tags: ["Microformats", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.infostore.http
-      description:
+      description: |
+        Enables / disables the microformats infostore subscription.
       defaultValue: true
       version:
       reloadable: true
@@ -135,7 +137,7 @@ properties:
     - key: com.openexchange.subscribe.microformats.allowedHosts
       description: |
         Optionally specifies the list of accepted host names allowed being subscribed.
-        If property is empty, there is no restriction for such subscriptions.
+        If left empty, there is no restriction for such subscriptions.
         Otherwise non-matching host names are rejected. 
       defaultValue:
       version:
@@ -148,7 +150,7 @@ properties:
     - key: com.openexchange.subscribe.microformats.createModifyEnabled
       description: |
         Enabled/disables the possibility to create/modify subscriptions.
-        Default is false, because the new sharing module is supposed to be used and this module is considered as deprecated.
+        Should be set to false, because the new sharing module is supposed to be used and this module is considered as deprecated.
       defaultValue: false
       version:
       reloadable: true

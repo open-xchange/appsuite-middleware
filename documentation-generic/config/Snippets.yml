@@ -16,7 +16,7 @@ properties:
     - key: com.openexchange.snippet.quota.limit
       description: |
         Specify the maximum number of snippets that are allowed being created by a single user.
-        A value of less than 0 (zero) means unlimited.
+        A value of less than <code>0</code> (zero) means unlimited.
       defaultValue: -1
       version:
       reloadable: true

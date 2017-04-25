@@ -52,9 +52,9 @@ package com.openexchange.oauth.linkedin;
 import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.LinkedInApi;
+import org.scribe.builder.api.LinkedInApi20;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthServiceMetaData {
+public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
         super(services, KnownApi.LINKEDIN, LinkedInOAuthScope.values());
@@ -77,7 +77,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
 
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.emptyList();
+        return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
 
     @Override
@@ -86,12 +86,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
     }
 
     @Override
-    public boolean needsRequestToken() {
-        return true;
-    }
-
-    @Override
     public Class<? extends Api> getScribeService() {
-        return LinkedInApi.class;
+        return LinkedInApi20.class;
     }
 }

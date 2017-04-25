@@ -1,17 +1,21 @@
 feature_name: No-Reply
 feature_description: |
   The properties for the special "no-reply" SMTP account used for system-initiated messages.
-  All properties are config-cascade-enabled and can be overridden for the scopes "Server",
-  "ContextSet" and "Context".
 properties:
     - key: com.openexchange.noreply.address
       description: |
         Specifies the E-Mail address for the no-reply account that is used as "From" header for
         system-initiated messages. Values must apply to the syntax defined in RFC 822, section 6.
         Examples:
-          - noreply@example.com
-          - OX App Suite <noreply@example.com>
-          - "App Suite, OX" <noreply@example.com>
+        <pre>
+        com.openexchange.noreply.address=noreply@example.com
+        </pre>
+        <pre>
+        com.openexchange.noreply.address=OX App Suite &lt;noreply@example.com&gt;
+        </pre>
+        <pre>
+        com.openexchange.noreply.address="App Suite, OX" &lt;noreply@example.com&gt;
+        </pre>
       defaultValue:
       version:
       reloadable: true
@@ -68,7 +72,7 @@ properties:
     - key: com.openexchange.noreply.secureMode
       description: |
         Specifies the secure mode for the no-reply account;
-        supported values are either "SSL", "TLS" or "plain".
+        supported values are either <code>SSL</code>, <code>TLS</code> or <code>plain</code>.
       defaultValue: plain
       version:
       reloadable: true

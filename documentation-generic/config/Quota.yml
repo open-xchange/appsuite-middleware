@@ -2,7 +2,7 @@ feature_name: Quota
 properties:
     - key: com.openexchange.quota.calendar
       description: |
-        Specifies the quota for the number of appointments that are allowed being created within a single context (tenant-wise scope).
+        Specifies the quota for the number of appointments that are allowed being created within a single context.
 
         The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
         Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
@@ -18,7 +18,7 @@ properties:
       tags: ["Quota", "Appointment", "Limit"]
     - key: com.openexchange.quota.task
       description: |
-        Specifies the quota for the number of tasks that are allowed being created within a single context (tenant-wise scope).
+        Specifies the quota for the number of tasks that are allowed being created within a single context.
         
         The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
         Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
@@ -34,7 +34,7 @@ properties:
       tags: ["Quota", "Task", "Limit"]
     - key: com.openexchange.quota.contact
       description: |
-        Specifies the quota for the number of contacts that are allowed being created within a single context (tenant-wise scope).
+        Specifies the quota for the number of contacts that are allowed being created within a single context.
         
         The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
         Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
@@ -50,7 +50,7 @@ properties:
       tags: ["Quota", "Contact", "Limit"]
     - key: com.openexchange.quota.infostore
       description: |
-        Specifies the quota for the number of documents that are allowed being created within a single context (tenant-wise scope).
+        Specifies the quota for the number of documents that are allowed being created within a single context.
         
         The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
         Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
@@ -66,7 +66,7 @@ properties:
       tags: ["Quota", "Infostore", "Limit"]
     - key: com.openexchange.quota.attachment
       description: |
-        Specifies the quota for the number of attachments bound to PIM objects that are allowed being created within a single context (tenant-wise scope).
+        Specifies the quota for the number of attachments bound to PIM objects that are allowed being created within a single context.
         
         The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
         Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),

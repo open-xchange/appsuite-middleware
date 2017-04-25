@@ -71,7 +71,7 @@ properties:
           <li><code>empty</code> - No discovery for single-node setups</li>
           <li><code>static</code> - Fixed set of cluster member nodes</li>
           <li><code>multicast</code> - Automatic discovery of other nodes via multicast</li>
-        <ul>
+        </ul>
         Depending on the specified value, further configuration might be needed.
       defaultValue:
       version:
@@ -84,7 +84,8 @@ properties:
     - key: com.openexchange.hazelcast.network.join.static.nodes
       description: |
         Configures a comma-separated list of IP addresses / hostnames of possible nodes in the cluster, 
-        e.g. <code>10.20.30.12, 10.20.30.13:5701, 192.178.168.110</code>.  
+        e.g. <code>10.20.30.12, 10.20.30.13:5701, 192.178.168.110</code>.
+        
         Only used if [[com.openexchange.hazelcast.network.join]] is set to <code>static</code>. 
         It doesn't hurt if the address of the local host appears in the list, so that it's still possible to use the same list throughout all nodes in the cluster.
       defaultValue:

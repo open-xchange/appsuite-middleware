@@ -84,7 +84,7 @@ properties:
       description: |
         The api key of your [serviceId] application.
 
-        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
       defaultValue: 
       version:
       reloadable: true
@@ -97,7 +97,7 @@ properties:
       description: |
         The api secret of your [serviceId] application.
 
-        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
       defaultValue: 
       version:
       reloadable: true
@@ -111,7 +111,7 @@ properties:
         The redirect url of your [serviceId] application.  
         E.g. "https://myappsuite.mydomain.invalid/ajax/defer"
 
-        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
       defaultValue: 
       version:
       reloadable: true
@@ -124,7 +124,7 @@ properties:
       description: |
         The product name of your [serviceId] application.
 
-        See com.openexchange.oauth.[serviceId] for a list of currently known service ids.
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
       defaultValue: 
       version:
       reloadable: true
@@ -146,7 +146,7 @@ properties:
       tags: ["OAuth", "Xing", "Credential"]
     - key: com.openexchange.oauth.xing.consumerSecret
       description: |
-        The consumer secret (for upsell)
+        The consumer secret (for upsell).
       defaultValue: 
       version:
       reloadable: true

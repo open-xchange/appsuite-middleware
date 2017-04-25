@@ -13,7 +13,7 @@ properties:
         Leave blank or fill in value <code>application</code> to sort within application (slower but good quality).
         The sorting is done on IMAP server if a mailbox size exceeds the [[com.openexchange.mail.mailFetchLimit]].
 
-        NOTE:  
+        Note:  
         This value is going to be set to <code>application</code> if IMAP server capabilities do not contain the string "SORT".
         Moreover, please also refer to property [[com.openexchange.imap.fallbackOnFailedSORT]] to specify how to react to a possible "NO" response.
       defaultValue: imap
@@ -28,10 +28,10 @@ properties:
       description: |
         Define where to search for emails:
         <ul>
-         <li>Use value <code>imap<code> to let the IMAP Server search. The search is done on IMAP server if a mailbox size exceeds the [[com.openexchange.mail.mailFetchLimit]].</li>
+         <li>Use value <code>imap</code> to let the IMAP Server search. The search is done on IMAP server if a mailbox size exceeds the [[com.openexchange.mail.mailFetchLimit]].</li>
          <li>Use value <code>force-imap</code> to let the IMAP Server search in every case.</li>
          <li>Leave blank or fill in value <code>application</code> to search within application.</li>
-        <ul>
+        </ul>
       defaultValue: force-imap
       version: 
       reloadable: true
@@ -60,7 +60,7 @@ properties:
         If disabled only the necessary fields are used as command arguments,
         which is slower but needs less memory.
 
-        NOTE:  
+        Note:  
         See property [[com.openexchange.mail.mailFetchLimit]] to know which mail folders are
         treated as large mail folders.
       defaultValue: true
@@ -73,9 +73,9 @@ properties:
       tags: ["Mail","IMAP"]
     - key: com.openexchange.imap[.primary].imapSupportsACL
       description: |
-        Define if IMAP server supports ACLs. Possible values: <code>true</code>, <code>false</code>, <code>auto<//code>
+        Define if IMAP server supports ACLs. Possible values: <code>true</code>, <code>false</code>, <code>auto</code>
 
-        NOTE:  
+        Note:  
         Value <code>auto</code> means to use server-defined ACL support as indicated
         through response to IMAP command "CAPABILITY".
       defaultValue: auto

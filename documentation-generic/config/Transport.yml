@@ -27,8 +27,8 @@ properties:
     - key: com.openexchange.mail.transport.publishingPublicInfostoreFolder
       description: |
         Specify the name of the publishing infostore folder which is created below public infostore folder.
-        The denoted folder is created if absent only if "com.openexchange.mail.transport.enablePublishOnExceededQuota" is enabled.
-        The special identifier "i18n-defined" indicates to use translation of text "E-Mail attachments".
+        The denoted folder is created if absent only if [[com.openexchange.mail.transport.enablePublishOnExceededQuota]] is enabled.
+        The special identifier <code>i18n-defined</code> indicates to use translation of text "E-Mail attachments".
       defaultValue: i18n-defined
       version:
       reloadable: true
@@ -40,8 +40,8 @@ properties:
     - key: com.openexchange.mail.transport.removeMimeVersionInSubParts
       description: |
         Specify whether to strictly obey suggestion in RFC 2045.
-        The MIME-Version header field is required at the top level of a message, but is _not_ required for each body part of a multipart entity.
-        If set to "true", each message is processed to not contain a MIME-Version header in sub-parts.
+        The MIME-Version header field is required at the top level of a message, but is <b>not</b> required for each body part of a multipart entity.
+        If set to <code>true</code>, each message is processed to not contain a MIME-Version header in sub-parts.
       defaultValue: false
       version:
       reloadable: true

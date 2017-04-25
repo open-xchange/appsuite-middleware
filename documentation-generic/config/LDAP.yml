@@ -99,8 +99,10 @@ properties:
     - key: adsBind
       description: |
         This option activates a special ADS bind. It allows the user to
-        authenticate at the ADS with only the displayName or by using the syntax
-        <pre>DOMAIN\Samaccountname</pre>.  
+        authenticate at the ADS with only the displayName or by using the syntax:
+        <pre>
+        DOMAIN\Samaccountname
+        </pre>
         Note that "\" cannot be used in user names when this option is activated.
       defaultValue: false
       version:
@@ -185,8 +187,8 @@ properties:
     - key: referral
       description: |
         This option configures how to handle the chasing of referrals in LDAP 
-        (see http://java.sun.com/products/jndi/tutorial/ldap/referral/overview.html).
-        possible values:
+        (see http://java.sun.com/products/jndi/tutorial/ldap/referral/overview.html).  
+        Possible values:
         <ul>
           <li><code>ignore</code></li>
           <li><code>follow</code></li>
@@ -215,9 +217,10 @@ properties:
       description: |
         Define a delimiter to be used to seperate Proxy from Userlogin.
         If defined, a proxy user can login on behalf of a user using the form:  
-        <pre>&lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;</pre>
-
-        NoteS:
+        <pre>
+        &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;
+        </pre>
+        Note:
           <ol>
             <li>The underlying Mailserver must support SASL AUTHPROXYING.  
                 The open-xchange mailfilterbundle does not support it, so it will

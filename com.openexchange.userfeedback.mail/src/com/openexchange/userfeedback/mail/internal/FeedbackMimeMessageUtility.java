@@ -184,7 +184,7 @@ public class FeedbackMimeMessageUtility {
      * @return a file with all user feedback for the given filter
      * @throws OXException, when something during the export goes wrong
      */
-    public static InputStream getFeedbackfile(FeedbackMailFilter filter) throws OXException {
+    public static InputStream getFeedbackFile(FeedbackMailFilter filter) throws OXException {
         FeedbackService feedbackService = Services.getService(FeedbackService.class);
         ExportResultConverter feedbackProvider = feedbackService.export(filter.getCtxGroup(), filter);
         ExportResult feedbackResult = feedbackProvider.get(ExportType.CSV);

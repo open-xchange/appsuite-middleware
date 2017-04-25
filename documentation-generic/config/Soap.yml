@@ -29,7 +29,7 @@ properties:
         Default is 128000, which is considered to be a pretty large number for any real life application.
         
         However, if any application does need to have a higher limit, this property (which maps to 'entityExpansionLimit' system property)
-        can be increased to the desired size. Setting it to 0 (zero) means unlimited.
+        can be increased to the desired size. Setting it to <code>0</code> (zero) means unlimited.
       defaultValue: 128000
       version: 
       reloadable: false

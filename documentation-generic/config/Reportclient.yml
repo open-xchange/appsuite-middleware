@@ -6,7 +6,7 @@ feature_description: |
 properties:
     - key: com.openexchange.report.client.proxy.useproxy
       description: |
-        Determine wether a proxy should be used or not. If set to true, the related properties have to be set also.
+        Determine wether a proxy should be used or not. If set to <code>true</code>, the related properties also have to be set.
       defaultValue: false
       version:
       reloadable: false
@@ -39,7 +39,7 @@ properties:
       tags: ["Report", "Proxy", "Port"]
     - key: com.openexchange.report.client.proxy.authrequired
       description: |
-        Is authorisation required to use the proxy. If set to true, the related properties have to be set also.
+        Is authorisation required to use the proxy. If set to <code>true</code>, the related properties have alsos to be set.
       defaultValue: false
       version:
       reloadable: false

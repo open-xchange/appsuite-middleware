@@ -3,17 +3,22 @@ feature_description: |
   To differentiate between settings that apply all SMTP accounts or settings that only apply to the primary account
   each property containing the "[.primary]" suffix allows to specify a value only applicable to the primary account
   by appending the "primary." suffix to properties' common "com.openexchange.smtp." prefix.  
-  E.g.  
-  "com.openexchange.smtp.smtpTimeout=50000" specifies 50sec read timeout for every SMTP account  
-  "com.openexchange.smtp.primary.smtpTimeout=20000" specifies 20sec read timeout for primary-only SMTP account  
+  E.g.
+  <pre>
+  com.openexchange.smtp.smtpTimeout=50000 
+  # specifies 50sec read timeout for every SMTP account  
+
+  com.openexchange.smtp.primary.smtpTimeout=20000 
+  # specifies 20sec read timeout for primary-only SMTP account  
+  </pre>
 properties:
     - key: com.openexchange.smtp[.primary].smtpLocalhost
       description: |
         The localhost name that is going to be used on SMTP's HELO or EHLO command.
         The default is set to InetAddress.getLocalHost().getHostName() but if either JDK or name service are not
         configured properly, this routine fails and the HELO or EHLO command is send without a name which
-        leads to an error: "501 HELO requires domain address"
-        The value "null" falls back to InetAddress.getLocalHost().getHostName() which works in most cases.
+        leads to an error: "501 HELO requires domain address".
+        The value <code>null</code> falls back to InetAddress.getLocalHost().getHostName() which works in most cases.
       defaultValue: null
       version: 
       reloadable: true
@@ -37,7 +42,7 @@ properties:
       description: |
         Defines if SMTP header ENVELOPE-FROM should be explicitly set to
         user's primary email address or not.
-        Applies only to primary SMTP account; considered as "false" for every external SMTP account.
+        Applies only to primary SMTP account; considered as <code>false</code> for every external SMTP account.
       defaultValue: false
       version: 
       reloadable: true
@@ -73,7 +78,7 @@ properties:
     - key: com.openexchange.smtp.logTransport
       description: |
         Specifies whether a transported message shall be logged providing "Message-Id" header, login, and SMTP server information.
-        Applies only to primary SMTP account; considered as "false" for every external SMTP account.
+        Applies only to primary SMTP account; considered as <code>false</code> for every external SMTP account.
       defaultValue: false
       version: 
       reloadable: true
@@ -99,7 +104,7 @@ properties:
         
         Check "http://&lt;ox-grizzly-hostname&gt;:&lt;ox-grizzly-port&gt;/stats/diagnostic?param=ciphersuites" to check available cipher suites.
         
-        If set to empty the current JVM's default SSL cipher suite is used.
+        If left empty the current JVM's default SSL cipher suite is used.
       defaultValue: 
       version: 
       reloadable: true

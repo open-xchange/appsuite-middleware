@@ -4,7 +4,7 @@ properties:
       description: |
         Specifies the name of the spam handler to use for the primary mail account. The special name "NoSpamHandler" explicitly sets no spam handler
         If such a setting is not specified, the spam handler as configured through the mail bundle is used;
-        e.g. "com.openexchange.imap.spamHandler" in file 'imap.properties'
+        e.g. [[com.openexchange.imap.spamHandler]].
       defaultValue: false
       version: 7.8.4
       reloadable: true
@@ -15,14 +15,16 @@ properties:
       tags: ["Spam Handler", "Mail"]
     - key: com.openexchange.spamhandler.enabled
       description: |
-        Allows to enable/disable spam handling per user/context/server via ConfigCascade (based on the configured spam handler).
+        Allows to enable/disable spam handling (based on the configured spam handler).
         If no configuration is available (for the mentioned property) the previously configured user setting mail permission bit will be taken into account. 
-        If there is a configuration for "com.openexchange.spamhandler.enabled" available these will be used for the defined scope.
+        If there is a configuration for [[com.openexchange.spamhandler.enabled]] available these will be used for the defined scope.
 
         <b>Caution:</b>  
         If the property has been set via ConfigCascade only these source will be used. 
         Changing the user configuration afterwards via  
-        <code>/opt/open-xchange/sbin/changeuser ... --gui_spam_filter_capabilities_enabled true/false</code>  
+        <pre>
+        /opt/open-xchange/sbin/changeuser ... --gui_spam_filter_capabilities_enabled true/false
+        </pre>
         will have no effect! You can change it for instance on a user base as described <a href=http://oxpedia.org/wiki/index.php?title=ConfigCascade>here</a>. 
         If you remove the property from ConfigCascade sources the formerly overwritten permission bit will be used.
       defaultValue: UserSettingMail permission bit from database

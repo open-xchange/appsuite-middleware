@@ -3,7 +3,7 @@ properties:
     - key: com.openexchange.threadpool.corePoolSize
       description: |
         The number of threads to keep in the pool, even if they are idle.
-        If unsure follow this rule: Number of CPUs + 1.
+        If unsure follow this rule: Size = Number of CPUs + 1.
       defaultValue: 3
       version:
       reloadable: false
@@ -51,15 +51,15 @@ properties:
     - key: com.openexchange.threadpool.workQueue
       description: |
         The queue type to use for holding tasks before they are executed. This queue will
-        hold only the tasks submitted by the execute method.
-        Supported values: synchronous and linked
+        hold only the tasks submitted by the execute method.  
+        Supported values: <code>synchronous</code> and <code>linked</code>
 
-        A synchronous queue is an appropriate choice when "com.openexchange.threadpool.maximumPoolSize"
+        A synchronous queue is an appropriate choice when [[com.openexchange.threadpool.maximumPoolSize]]
         is unlimited and possible rejection of tasks is allowed. A synchronous queue has no capacity,
         it rather acts as a direct hand-off of tasks to an already waiting worker thread and will deny
         the task if there is no further worker thread to process the task.
 
-        A linked queue is an appropriate choice when "com.openexchange.threadpool.maximumPoolSize"
+        A linked queue is an appropriate choice when [[com.openexchange.threadpool.maximumPoolSize]]
         is limited and rejection of tasks is prohibited. A linked queue has a (fixed) capacity to store
         submitted tasks which have to wait for a worker thread to become ready.
       defaultValue: synchronous
@@ -73,8 +73,10 @@ properties:
     - key: com.openexchange.threadpool.workQueueSize
       description: |
         The size of the work queue. Zero means unlimited size.
-        Note: If this property is set to a value greater than zero, property "com.openexchange.threadpool.workQueue"
-        is implicitly set to "linked" to accomplish a fixed-size work queue.
+
+        Note:  
+        If this property is set to a value greater than zero, property [[com.openexchange.threadpool.workQueue]]
+        is implicitly set to <code>linked</code> to accomplish a fixed-size work queue.
       defaultValue: 0
       version:
       reloadable: false

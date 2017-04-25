@@ -2,7 +2,7 @@ feature_name: Resource
 properties:
     - key: CHECK_RES_UID_FOR_NOT_ALLOWED_CHARS
       description: |
-        Specifies whether to check the resource name using the check in CHECK_RES_UID_REGEXP.
+        Specifies whether to check the resource name by using the check in [[CHECK_RES_UID_REGEXP]].
       defaultValue: true
       version: 
       reloadable: false
@@ -13,7 +13,7 @@ properties:
       tags: ["Resource"]
     - key: CHECK_RES_UID_REGEXP
       description: |
-        Specifies a check to perform for resource names in case CHECK_RES_UID_FOR_NOT_ALLOWED_CHARS is set to true.
+        Specifies a check to perform for resource names in case [[CHECK_RES_UID_FOR_NOT_ALLOWED_CHARS]] is set to <code>true</code>.
       defaultValue: "[ $@%\\.+a-zA-Z0-9_-]"
       version: 
       reloadable: false

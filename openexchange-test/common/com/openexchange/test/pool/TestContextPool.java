@@ -55,8 +55,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -80,14 +82,14 @@ public class TestContextPool {
         remember(context);
         contexts.add(context);
         startWatcher();
-        LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
+        LOG.info("Added context '{}' with id {} and users {} to pool.", context.getName(), context.getId(), Strings.concat(",", context.getCopyOfAll()));
     }
 
     private static void remember(TestContext context) {
         if (allTimeContexts.contains(context)) {
             return;
         }
-        allTimeContexts.add(context);
+        allTimeContexts.add((TestContext) SerializationUtils.clone(context));
         LOG.info("Added context {} to all time available context list.", context.getName());
     }
 

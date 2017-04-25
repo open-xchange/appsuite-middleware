@@ -2,7 +2,7 @@ feature_name: Sms-tools
 properties:
   - key: com.openexchange.sms.userlimit.enabled
     description: |
-      Enables or disables the user sms limit
+      Enables or disables the user sms limit.
     defaultValue: true
     version: 
     reloadable: true
@@ -13,7 +13,7 @@ properties:
     tags: ["Sms-tools"] 
   - key: com.openexchange.sms.userlimit
     description: |
-      Defines the maximum number of sms messages a user can send
+      Defines the maximum number of sms messages a user can send.
     defaultValue: 5
     version: 
     reloadable: true

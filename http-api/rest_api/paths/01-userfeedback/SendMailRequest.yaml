@@ -38,19 +38,22 @@
         in: body
         description: "The mail subject. Default: User Feedback Report: [time range]"
         required: false
-        type: string
+        schema:
+          type: string
       - 
         name: body
         in: body
         description: The mail body (plain text).
         required: false
-        type: string
+        schema:
+          type: string
       - 
         name: compress
         in: body
         description: "Compress exported feedback. Default: false."
         required: false
-        type: boolean
+        schema:
+          type: boolean
       - 
         name: recipients
         in: body

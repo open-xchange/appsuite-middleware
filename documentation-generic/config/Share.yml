@@ -2,8 +2,8 @@ feature_name: Share
 properties:
     - key: com.openexchange.share.notification.usePersonalEmailAddress
       description: |
-        Specifies whether the user's personal E-Mail address (true) or the configured no-reply address (false) is supposed to be used in case a user
-        without mail permission sends out a sharing invitation
+        Specifies whether the user's personal E-Mail address (<code>true</code>) or the configured no-reply address (<code>false</code>) is supposed to be used in case a user
+        without mail permission sends out a sharing invitation.
       defaultValue: false
       version: 7.8.4
       reloadable: true
@@ -15,13 +15,13 @@ properties:
 
     - key: com.openexchange.share.userAgentBlacklist.enabled
       description: |
-        Enables (default) or disables black-listing of User-Agents that are about to access a share link.
-        If enabled the "com.openexchange.share.userAgentBlacklist.values" configuration option specifies what User-Agents to black-list.
+        Enables or disables black-listing of User-Agents that are about to access a share link.
+        If enabled the [[com.openexchange.share.userAgentBlacklist.values]] configuration option specifies what User-Agents to black-list.
       defaultValue: true
       version: 7.8.4
       reloadable: true
       configcascadeAware: false
-      related: 
+      related: com.openexchange.share.userAgentBlacklist.values
       file: share.properties
       packageName: open-xchange-core
       tags: ["Share", "Black List"]
@@ -29,8 +29,8 @@ properties:
     - key: com.openexchange.share.userAgentBlacklist.values
       description: |
         Specifies a comma-separated list (ignore-case) of such User-Agents that are supposed to receive a "404 Not Found" when trying to
-        access a share link. White-card notation is supported; e.g. "*aolbuild*".
-        This configuration option is only effective if "com.openexchange.share.userAgentBlacklist.enabled" is set to "true".
+        access a share link. Wild-card notation is supported; e.g. "*aolbuild*".
+        This configuration option is only effective if [[com.openexchange.share.userAgentBlacklist.enabled]] is set to <code>true</code>.
       defaultValue: "*aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*"
       version: 7.8.4
       reloadable: true
@@ -49,12 +49,11 @@ properties:
         installation like "share.example.com", and is defined as an additional named
         virtual host pointing to the web client's document root in the webserver's 
         configuration.
-        This property may defined statically here, overridden via config cascade, or
-        be provided through an additionally installed hostname service.
+        This property can also be provided through an additionally installed hostname service.
       defaultValue: 
       version: 
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: 
       file: share.properties
       packageName: open-xchange-core
@@ -66,12 +65,11 @@ properties:
         removed from the system. "Unused" time starts after the last share to the 
         guest user has been revoked. This setting only affects "named" guest users,
         i.e. users that were invited explicitly and authenticate using their 
-        e-mail-address.
+        eMail-address.
         The value can be defined using units of measurement: "D" (=days), 
-        "W" (=weeks) and "H" (=hours). Defaults to "2W" (two weeks), with a minimum 
-        of "1D" (one day). A value of "0" disables the delayed guest user deletion, 
-        so that guest users are deleted right after the last share to them was 
-        removed.  
+        "W" (=weeks) and "H" (=hours), with a minimum 
+        of "1D" (one day). A value of <code>0</code> disables the delayed guest user deletion, 
+        so that guest users are deleted right after the last share to them was removed.  
       defaultValue: 2W
       version: 
       reloadable: false
@@ -87,10 +85,9 @@ properties:
         sharing-related cleanup operations like removal of expired shares or final
         deletion of no longer used guest users. The task is executed only once per 
         interval in the cluster, so this value should be equally defined on each
-        node.
-        The value can be defined using units of measurement: "D" (=days), 
-        "W" (=weeks) and "H" (=hours). Defaults to "1D" (one day), with a minimum 
-        of "1H" (one hour). A value of "0" disables the periodic background task.
+        node. The value can be defined using units of measurement: "D" (=days), 
+        "W" (=weeks) and "H" (=hours), with a minimum of "1H" (one hour). 
+        A value of <code>0</code> disables the periodic background task.
       defaultValue: 1D
       version: 
       reloadable: true
@@ -103,7 +100,7 @@ properties:
     - key: com.openexchange.quota.share_links
       description: |
         Specifies the quota for the number of share links that are allowed being 
-        created by one user. A value < 0 means unlimited.
+        created by one user. A value < <code>0</code> means unlimited.
       defaultValue: 100
       version: 
       reloadable: true
@@ -111,12 +108,12 @@ properties:
       related: 
       file: share.properties
       packageName: open-xchange-core
-      tags: ["Share", "Quota"]
+      tags: ["Share", "Quota", "Limit"]
 
     - key: com.openexchange.quota.invite_guests
       description: |
         Specifies the quota for the number of guest users that are allowed being 
-        created by one user. A value < 0 means unlimited.
+        created by one user. A value < <code>0</code> means unlimited.
       defaultValue: 100
       version: 
       reloadable: true
@@ -124,7 +121,7 @@ properties:
       related: 
       file: share.properties
       packageName: open-xchange-core
-      tags: ["Share", "Quota"]
+      tags: ["Share", "Quota", "Limit"]
 
     - key: com.openexchange.share.modulemapping
       description: |
@@ -144,8 +141,8 @@ properties:
       description: |
         Defines a key that is used to encrypt the password/pin of anonymously 
         accessible shares in the database.  
-        Defaults to "erE2e8OhAo71", and should be changed before the creation of the
-        first share on the system.
+        The property should be changed before the creation of the
+        first share on the system!
       defaultValue: erE2e8OhAo71
       version: 
       reloadable: false
@@ -160,7 +157,7 @@ properties:
         Defines up to which time in the future appointments and tasks are included 
         when accessing an iCal-serializable share with a client requesting the 
         "text/calendar" representation of the resource.
-        Possible values are "one_month", "six_months", "one_year" and "two_years".
+        Possible values are <code>one_month</code>, <code>six_months</code>, <code>one_year</code> and <code>two_years</code>.
       defaultValue: one_year
       version: 
       reloadable: true
@@ -175,7 +172,7 @@ properties:
         Defines up to which time in the past appointments and tasks are included 
         when accessing an iCal-serializable share with a client requesting the 
         "text/calendar" representation of the resource.
-        Possible values are "two_weeks", "one_month", "six_months" and "one_year".
+        Possible values are <code>two_weeks</code>, <code>one_month</code>, <code>six_months</code> and <code>one_year</code>.
       defaultValue: two_weeks
       version: 
       reloadable: true
@@ -189,10 +186,9 @@ properties:
       description: |
         Specifies the location to redirect to when accessing a share link that 
         requires authentication. This is usually the default login page that will 
-        then perform the "anonymous" or "guest" login action.
-        [uiwebpath] is replaced with the value of "com.openexchange.UIWebPath" as 
-        defined in "server.properties", trimmed by leading and trailing '/' 
-        characters.
+        then perform the "anonymous" or "guest" login action.  
+        [uiwebpath] is replaced with the value of [[com.openexchange.UIWebPath]],
+        trimmed by leading and trailing '/' characters.
       defaultValue: /[uiwebpath]/ui
       version: 
       reloadable: false
@@ -237,19 +233,18 @@ properties:
         which define the enabled feature set. Basically guest users contain a set
         of capabilities that allows them to read or write the items that have been
         shared with them. Additionally it is possible to define further capabilities
-        to let guests have some more of the installed features enabled. This setting
-        can also be changed via config cascade for certain contexts and context sets.
-        One of three different modes can be chosen:  
-          - deny_all: guest users have no additional capabilities applied  
-          - static:   every guest user obtains a statically configured set of
-                capabilities (com.openexchange.share.staticGuestCapabilities)  
-          - inherit:  guest users inherit the capabilities of the user who created
-                the (initial) according share
+        to let guests have some more of the installed features enabled.  
+        One of three different modes can be chosen:
+        <ul>
+          <li><code>deny_all</code> - Guest users have no additional capabilities applied.</li> 
+          <li><code>static</code> - Every guest user obtains a statically configured set of capabilities ([[com.openexchange.share.staticGuestCapabilities]]).</li>
+          <li><code>inherit</code> - Guest users inherit the capabilities of the user who created the (initial) according share.</li>
+        </ul>
       defaultValue: static
       version: 
-      reloadable: false
-      configcascadeAware: false
-      related: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.share.staticGuestCapabilities
       file: share.properties
       packageName: open-xchange-core
       tags: ["Share"]
@@ -257,13 +252,16 @@ properties:
     - key: com.openexchange.share.staticGuestCapabilities
       description: |
         Defines the static set of capabilities that shall be given to guests with
-        capability mode 'static'. Capabilities must be specified as a comma-separated
-        string (e.g. "drive, document_preview"; without the double quotes).
+        capability mode <code>static</code>. Capabilities must be specified as a comma-separated
+        string. E.g.:
+        <pre>
+        com.openexchange.share.staticGuestCapabilities=drive, document_preview
+        </pre>
       defaultValue: 
       version: 
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.share.guestCapabilityMode
       file: share.properties
       packageName: open-xchange-core
       tags: ["Share"]
@@ -285,10 +283,10 @@ properties:
     - key: com.openexchange.share.autoLogin
       description: |
         Enables/disables the auto-login functionality for guest sessions. A value of 
-        "true" will instruct the client to store an additional cookie, which is then 
+        <code>true</code> will instruct the client to store an additional cookie, which is then 
         considered to lookup an existing session when the client is reloaded. 
-        Possible values are "true", "false", or an empty value (the default) to 
-        inherit from "com.openexchange.sessiond.autologin".
+        Possible values are <code>true</code>, <code>false</code>, or an empty value to 
+        inherit from [[com.openexchange.sessiond.autologin]].
       defaultValue: 
       version: 
       reloadable: true
@@ -304,8 +302,8 @@ properties:
         cookies used within guest sessions. The value can be defined using units of 
         measurement: "D" (=days), "W" (=weeks) and "H" (=hours). Additionally, to 
         enforce a "session" cookie lifetime (i.e. cookies are deleted once the client
-        is quit), the value "-1" or "web-browser" may be specified. An empty value 
-        will let this setting inherit from "com.openexchange.cookie.ttl". 
+        is quit), the value <code>-1</code> or <code>web-browser</code> may be specified. An empty value 
+        will let this setting inherit from [[com.openexchange.cookie.ttl]]. 
       defaultValue: -1
       version: 
       reloadable: true

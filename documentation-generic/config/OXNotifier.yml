@@ -29,7 +29,7 @@ properties:
 
     - key: com.openexchange.oxnotifier.icon
       description: |
-        Bytecode of an icon that can be displayed in the updater for this product next to the update entry
+        Bytecode of an icon that can be displayed in the updater for this product next to the update entry.
       defaultValue: 
       version: 
       reloadable: true

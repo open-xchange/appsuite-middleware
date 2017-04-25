@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.mail.internal;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -100,8 +104,11 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     @Override
     public String sendFeedbackMail(FeedbackMailFilter filter) throws OXException {
         String result = "Sending email(s) failed for unkown reason, please contact the administrator or see the server logs";
-        InputStream data = FeedbackMimeMessageUtility.getFeedbackfile(filter);
-        result = sendMail(data, filter);
+        try (InputStream data = FeedbackMimeMessageUtility.getFeedbackFile(filter)) {
+            result = sendMail(data, filter);
+        } catch (IOException e) {
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e);
+        }
         return result;
     }
 
@@ -131,7 +138,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         Properties smtpProperties = getSMTPProperties(leanConfig);
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
-        StringBuilder result = new StringBuilder();
+        JSONObject result = new JSONObject();
 
         try {
             MimeMessage mail = FeedbackMimeMessageUtility.createMailMessage(data, filter, smtpSession);
@@ -171,6 +178,9 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             }
             appendWarnings(result, invalidAddresses, pgpFailedAddresses);
             return result.toString();
+        } catch (JSONException e) {
+            // will not happen
+            return null;
         } catch (OXException e) {
             if (PGPCoreExceptionCodes.BAD_PASSWORD.equals(e)) {
                 throw FeedbackExceptionCodes.INVALID_PGP_CONFIGURATION.create(e, e.getMessage());
@@ -185,28 +195,28 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     }
 
     /**
-     * Appends the sending result to the specified {@link StringBuilder}
+     * Appends the sending result to the specified {@link JSONObject}
      *
      * @param recipients The recipients
-     * @param builder The {@link StringBuilder}
+     * @param result The {@link JSONObject}
      * @param pgpSign If PGP was used to sign the feedback mail
      * @param pgpEncrypt If PGP was used to encrypt the feedback mail
      */
-    private void appendPositiveSendingResult(Address[] recipients, StringBuilder builder, boolean pgpSign, boolean pgpEncrypt) {
+    private void appendPositiveSendingResult(Address[] recipients, JSONObject result, boolean pgpSign, boolean pgpEncrypt) throws JSONException {
         if (null != recipients && recipients.length > 0) {
-            if (pgpSign && pgpEncrypt) {
-                builder.append("A PGP-signed/encrypted email with user feedback was send to \n");
-            } else if (pgpSign && !pgpEncrypt) {
-                builder.append("A PGP-signed email with user feedback was send to \n");
-            } else if (!pgpSign && pgpEncrypt) {
-                builder.append("A PGP-encrypted email with user feedback was send to \n");
-            } else {
-                builder.append("An email with user feedback was send to \n");
-            }
+            JSONArray array = new JSONArray(recipients.length);
             for (int i = 0; i < recipients.length; i++) {
                 InternetAddress address = (InternetAddress) recipients[i];
-                String personalPart = address.getPersonal();
-                builder.append(address.getAddress()).append(" ").append(personalPart != null && !personalPart.isEmpty() ? personalPart : "").append("\n");
+                array.add(i, address.getAddress());
+            }
+            if (pgpSign && pgpEncrypt) {
+                result.put("pgp", array);
+            } else if (pgpSign && !pgpEncrypt) {
+                result.put("sign", array);
+            } else if (!pgpSign && pgpEncrypt) {
+                result.put("encrypt", array);
+            } else {
+                result.put("normal", array);
             }
         }
     }
@@ -240,22 +250,24 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     }
 
     /**
-     * Appends any warnings to the specified {@link StringBuilder}
+     * Appends any warnings to the specified {@link JSONObject}
      *
-     * @param builder The {@link StringBuilder} to append the warnings to
+     * @param result The {@link JSONObject} to append the warnings to
      */
-    private void appendWarnings(StringBuilder builder, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) {
+    private void appendWarnings(JSONObject result, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) throws JSONException {
         if (invalidAddresses.size() > 0) {
-            builder.append("\nThe following addresses are invalid and therefore ignored\n=======================\n");
+            JSONArray array = new JSONArray(invalidAddresses.size());
             for (InternetAddress internetAddress : invalidAddresses) {
-                builder.append(internetAddress.getAddress()).append("\n");
+                array.add(0, internetAddress.getAddress());
             }
+            result.put("fail", array);
         }
         if (pgpFailedAddresses.size() > 0) {
-            builder.append("\nThe following addresses are linked with an invalid PGP key and therefore ignored\n=======================\n");
+            JSONArray array = new JSONArray(pgpFailedAddresses.size());
             for (InternetAddress internetAddress : pgpFailedAddresses) {
-                builder.append(internetAddress.getAddress()).append("\n");
+                array.add(0, internetAddress.getAddress());
             }
+            result.put("pgpFail", array);
         }
     }
 

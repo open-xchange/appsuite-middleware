@@ -2,7 +2,7 @@ feature_name: Twitter
 properties:
     - key: com.openexchange.twitter.clientVersion
       description: |
-        The client version string
+        The client version string.
       defaultValue: 2.2.3
       version:
       reloadable: false
