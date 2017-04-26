@@ -3295,7 +3295,21 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
         final boolean onlyAlarmChange = modified_userparticipants == null;
-        modified_userparticipants = COLLECTION.checkAndModifyAlarm(cdao, modified_userparticipants, uid, new HashSet<UserParticipant>(Arrays.asList(edao.getUsers())));
+        Set<UserParticipant> check = modified_userparticipants;
+        if (null == check) {
+            check = new HashSet<UserParticipant>();
+            UserParticipant currentUser = null;
+            if (null != users) {
+                for (UserParticipant user : users) {
+                    if (user.getIdentifier() == uid) {
+                        currentUser = user;
+                        break;
+                    }
+                }
+            }
+            check.add(null == currentUser ? new UserParticipant(uid) : currentUser);
+        }
+        modified_userparticipants = COLLECTION.checkAndModifyAlarm(cdao, check, uid, new HashSet<UserParticipant>(Arrays.asList(edao.getUsers())));
 
         if (check_up < 1) {
             throw OXCalendarExceptionCodes.UPDATE_WITHOUT_PARTICIPANTS.create();
