@@ -8,6 +8,9 @@ feature_description: |
   <pre>./registerfilestore -t [filestoreID]</pre>
   For each configured filestore, an own set of the properties may be defined, 
   replacing [filestoreID] with the actual identifier.
+
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/filestore.html]] for more informations
+  about filestores.
 properties:
     - key: com.openexchange.filestore.swift.[filestoreID].protocol
       description: |

@@ -1,4 +1,7 @@
 feature_name: OAuth
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth.html]] and
+  [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth_provider.html]] for mor informations.
 properties:
     - key: com.openexchange.oauth.modules.enabled.[oauth_provider]
       description: |

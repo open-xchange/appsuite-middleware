@@ -1,9 +1,11 @@
 feature_name: Mail compose
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/drivemail.html]] for more informations.
 properties:
     - key: com.openexchange.mail.compose.share.enabled
       description: |
         The main switch to enable/disable to send composed share messages.
-        
+
         Note:  
         In order to effectively enable composed share messages, the "infostore" and "share_links" capabilities need also to be available.
       defaultValue: true

@@ -26,7 +26,7 @@ properties:
     - key: com.openexchange.soap.cxf.entityExpansionLimit
       description: |
         Java platform limits the number of entity expansions that are allowed for a single XML document.
-        Default is 128000, which is considered to be a pretty large number for any real life application.
+        Default is <code>128000</code>, which is considered to be a pretty large number for any real life application.
         
         However, if any application does need to have a higher limit, this property (which maps to 'entityExpansionLimit' system property)
         can be increased to the desired size. Setting it to <code>0</code> (zero) means unlimited.

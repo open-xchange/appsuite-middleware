@@ -3,6 +3,8 @@ feature_description: |
   The first part defines if a proxy server should be used to establish the http connection
   to the Open-Xchange report server, and if which server and proxy details to use.
   The second part configures report serialization.
+
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/report_client.html]] for more informations.
 properties:
     - key: com.openexchange.report.client.proxy.useproxy
       description: |

@@ -1,4 +1,6 @@
 feature_name: Saml
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/saml.html]] for more informations.
 properties:
     - key: com.openexchange.saml.enabled
       description: |

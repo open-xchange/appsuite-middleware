@@ -11,6 +11,8 @@ feature_description: |
   User categories are a finite set of categories which can be used by the user to create own categories.
   Thats means that there are no predefined rules. This categories cannot be forced, but they can be renamed by the user. 
   The hoster should nevertheless give them some meaningful names to help the users. E.g. "Friends".
+
+  For more informations about mail catgeories see [[https://documentation.open-xchange.com/{{version}}/middleware/components/mail_categories.html]].
 properties:
     - key: com.openexchange.mail.categories
       description: |

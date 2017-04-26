@@ -1,4 +1,7 @@
 feature_name: Audit
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/auditlogging.html]] 
+  for more informations about audit logging.
 properties:
     - key: com.openexchange.audit.logging.AuditFileHandler.enabled
       description: |

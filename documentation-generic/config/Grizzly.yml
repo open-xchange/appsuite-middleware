@@ -4,6 +4,8 @@ feature_description: |
   open-xchange-grizzly. In your OX setup grizzly is located behind the
   load-balancer and accepts incoming client requests. Communication with the
   load balancer is done via http, e.g via Apache's mod_proxy_http.
+
+  For more informations see [[https://documentation.open-xchange.com/{{version}}/middleware/components/grizzly.html]].
 properties:
     - key: com.openexchange.http.grizzly.wsTimeoutMillis
       description: |
