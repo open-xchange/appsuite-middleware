@@ -503,10 +503,6 @@ public class CachingUserStorage extends UserStorage {
             identifier = tmp.intValue();
         }
         return identifier;
-        // }
-        // catch (final OXException e) {
-        // throw LdapExceptionCode.CACHE_PROBLEM.create(e).setPrefix("USR");
-        // }
     }
 
     @Override
