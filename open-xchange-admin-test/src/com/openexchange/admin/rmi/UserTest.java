@@ -83,6 +83,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -779,8 +780,8 @@ public class UserTest extends AbstractTest {
             fail("Expected to get correct changed user data");
         }
     }
-    
-    @Test(expected=StorageException.class)
+
+    @Test(expected = StorageException.class)
     public void testChangeAliasTooLong() throws Exception {
         // Try to change alias with too long name (Bug 52763) 
 
@@ -821,7 +822,7 @@ public class UserTest extends AbstractTest {
         } else {
             fail("Expected to get correct changed user data");
         }
-        
+
         // check if you can still change alias (Bug 52763)
         srv_loaded.addAlias("foobar@example.net");
         // submit changes
@@ -1202,10 +1203,10 @@ public class UserTest extends AbstractTest {
 
     private class MethodMapObject {
 
-        private Method getter              = null;
-        private Method setter              = null;
+        private Method getter = null;
+        private Method setter = null;
         private String methodParameterType = null;
-        private String methodName          = null;
+        private String methodName = null;
 
         /**
          * @return the getter
@@ -1539,8 +1540,10 @@ public class UserTest extends AbstractTest {
         usr.setEmail2("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail3("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
 
-        usr.setFilestoreId(null);
-        usr.setFilestore_name(null);
+        if (context != null) {
+            usr.setFilestoreId(context.getFilestoreId());
+            usr.setFilestore_name(context.getFilestore_name());
+        }
 
         final HashSet<String> aliase = new HashSet<String>();
         aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
@@ -1816,11 +1819,11 @@ public class UserTest extends AbstractTest {
         final Hashtable<String, OXCommonExtension> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
-            //          for (int i = 0; i < aexts.size(); i++) {
-            //          final OXCommonExtensionInterface aext = aexts.get(i);
-            //          final OXCommonExtensionInterface bext = bexts.get(i);
-            //          assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-            //          }
+            for (int i = 0; i < aexts.size(); i++) {
+                final OXCommonExtensionInterface aext = aexts.get(i);
+                final OXCommonExtensionInterface bext = bexts.get(i);
+                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+            }
         }
 
         assertEquals("User Attributes not equal", a.getUserAttributes(), b.getUserAttributes());
