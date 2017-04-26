@@ -120,6 +120,7 @@ import com.openexchange.java.Collators;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
@@ -1460,7 +1461,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException {
+    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
@@ -1508,7 +1509,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     originalMails[i] = origMail;
                 }
             }
-            return mailAccess.getLogicTools().getFowardMessage(originalMails, usm, setFrom);
+            return mailAccess.getLogicTools().getFowardMessage(originalMails, usm, fromAddressProvider);
         }
         MailMessage[] originalMails = new MailMessage[folders.length];
         {
@@ -1546,7 +1547,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < accountIDs.length; i++) {
             accountIDs[i] = arguments[i].getAccountId();
         }
-        return MimeForward.getFowardMail(originalMails, session, accountIDs, usm, setFrom);
+        return MimeForward.getFowardMail(originalMails, session, accountIDs, usm, fromAddressProvider);
     }
 
     @Override
@@ -2703,7 +2704,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException {
+    public MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2712,7 +2713,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == originalMail) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(replyMsgUID, fullName);
         }
-        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm, setFrom);
+        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm, fromAddressProvider);
     }
 
     @Override

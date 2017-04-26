@@ -144,6 +144,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
@@ -914,7 +915,7 @@ public class Mail extends PermissionServlet {
                 }
                 data = MessageWriter.writeMailMessage(
                     mailInterface.getAccountID(),
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave, false),
+                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave, FromAddressProvider.none()),
                     displayMode,
                     false,
                     true,
