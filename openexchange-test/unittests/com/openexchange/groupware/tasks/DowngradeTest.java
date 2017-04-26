@@ -99,7 +99,7 @@ public class DowngradeTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
 
