@@ -385,7 +385,7 @@ public final class HtmlServices {
         if (null == maxLength) {
             synchronized (HtmlServices.class) {
                 i = maxLength;
-                if (null == maxLength) {
+                if (null == i) {
                     // Default is 1MB
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     int defaultMaxLength = 1048576;
@@ -413,7 +413,7 @@ public final class HtmlServices {
         if (null == maxCssLength) {
             synchronized (HtmlServices.class) {
                 i = maxCssLength;
-                if (null == maxCssLength) {
+                if (null == i) {
                     // Default is 96KB
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     int defaultMaxLength = 98304;
@@ -426,6 +426,32 @@ public final class HtmlServices {
             }
         }
         return i.intValue();
+    }
+
+    private static volatile Boolean useJericho;
+
+    /**
+     * Checks whether to use Jericho HTML parser or Jsoup (<code>"<i>com.openexchange.html.jericho</i>"</code> property).
+     *
+     * @return <code>true</code> for Jericho; otherwise <code>false</code>
+     */
+    public static boolean useJericho() {
+        Boolean i = useJericho;
+        if (null == useJericho) {
+            synchronized (HtmlServices.class) {
+                i = useJericho;
+                if (null == i) {
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    boolean def = true;
+                    if (null == service) {
+                        return def;
+                    }
+                    i = Boolean.valueOf(service.getBoolProperty("com.openexchange.html.jericho", def));
+                    useJericho = i;
+                }
+            }
+        }
+        return i.booleanValue();
     }
 
     // ------------------------------------------------------------------------------------------------------------------------ //
