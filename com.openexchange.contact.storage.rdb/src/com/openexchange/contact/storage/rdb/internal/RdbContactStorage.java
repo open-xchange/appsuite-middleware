@@ -1080,11 +1080,13 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 return;
             }
 
+            String formatName = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
             byte[] transformedImage = RdbServiceLookup.getService(ImageTransformationService.class, true)
                 .transfom(imageBytes)
                 .rotate()
                 .scale(image_width, image_height, type, true)
-                .getBytes("jpeg");
+                .getBytes(formatName)
+            ;
             if (transformedImage != null && transformedImage.length != 0) {
                 contact.setImage1(transformedImage);
             }
