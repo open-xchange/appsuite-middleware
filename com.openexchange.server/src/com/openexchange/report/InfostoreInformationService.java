@@ -300,9 +300,4 @@ public interface InfostoreInformationService {
      */
     public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
 
-    /**
-     * Return all used connections to the pool. Should be called after the last metric has been calculated.
-     */
-    public void closeAllDBConnections();
-
 }
