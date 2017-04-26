@@ -46,11 +46,15 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi;
 
+import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
  *
@@ -58,17 +62,22 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
  */
 public abstract class AbstractTest {
 
-    protected  static String TEST_DOMAIN = "example.org";
-    protected  static String change_suffix = "-changed";
+    protected static String TEST_DOMAIN = "example.org";
+    protected static String change_suffix = "-changed";
 
-    protected static String getRMIHostUrl(){
+    @Before
+    public void setUp() throws Exception {
+        AJAXConfig.init();
+    }
+
+    protected static String getRMIHostUrl() {
         String host = getRMIHost();
 
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
+        if (!host.startsWith("rmi://")) {
+            host = "rmi://" + host;
         }
-        if(!host.endsWith("/")){
-            host = host+"/";
+        if (!host.endsWith("/")) {
+            host = host + "/";
         }
         return host;
     }
@@ -78,13 +87,15 @@ public abstract class AbstractTest {
 
         if (System.getProperty("rmi_test_host") != null) {
             host = System.getProperty("rmi_test_host");
+        } else if (AJAXConfig.getProperty(Property.RMI_HOST) != null) {
+            host = AJAXConfig.getProperty(Property.RMI_HOST);
         }
 
         return host;
     }
 
-    public static Credentials DummyCredentials(){
-        return new Credentials("oxadmin","secret");
+    public static Credentials DummyCredentials() {
+        return new Credentials("oxadmin", "secret");
     }
 
     // The throwing of the exception is necessary to be able to let methods which override
@@ -106,14 +117,14 @@ public abstract class AbstractTest {
     }
 
     public static String getChangedEmailAddress(String address, String changed) {
-        return address.replaceFirst("@", changed+"@");
+        return address.replaceFirst("@", changed + "@");
     }
 
     public static Credentials DummyMasterCredentials() {
         String mpw = "secret";
-        if(System.getProperty("rmi_test_masterpw")!=null){
+        if (System.getProperty("rmi_test_masterpw") != null) {
             mpw = System.getProperty("rmi_test_masterpw");
         }
-        return new Credentials("oxadminmaster",mpw);
+        return new Credentials("oxadminmaster", mpw);
     }
 }

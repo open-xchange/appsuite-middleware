@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.advertisement;
+package com.openexchange.rest.advertisement;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

@@ -66,57 +66,32 @@ import com.openexchange.server.ServiceLookup;
 public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     /**
-     * Initialises a new {@link DropboxOAuthServiceMetaData}.
+     * Initializes a new {@link DropboxOAuthServiceMetaData}.
      */
     public DropboxOAuthServiceMetaData(ServiceLookup serviceLookup) {
         super(serviceLookup, KnownApi.DROPBOX, DropboxOAuthScope.values());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.ScribeAware#getScribeService()
-     */
     @Override
     public Class<? extends Api> getScribeService() {
         return DropboxApi2.class;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getAPI()
-     */
     @Override
     public API getAPI() {
         return KnownApi.DROPBOX;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
-     */
     @Override
     protected String getPropertyId() {
         return "dropbox";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#needsRequestToken()
-     */
     @Override
     public boolean needsRequestToken() {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
-     */
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         Collection<OAuthPropertyID> propertyNames = new ArrayList<OAuthPropertyID>(2);

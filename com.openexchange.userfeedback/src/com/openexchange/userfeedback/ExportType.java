@@ -59,8 +59,8 @@ public enum ExportType {
     RAW("application", "json"),
     CSV("text", "csv");
 
-    private String mediaType;
-    private String mediaSubType;
+    private final String mediaType;
+    private final String mediaSubType;
 
     private ExportType(String mediaType, String mediaSubType) {
         this.mediaType = mediaType;

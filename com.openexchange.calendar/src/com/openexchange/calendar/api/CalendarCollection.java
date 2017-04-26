@@ -1648,7 +1648,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
 
                     final EffectivePermission oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
-                    if (oclp.canReadAllObjects() || oclp.canReadOwnObjects()) {
+                    if (oclp.canReadAllObjects() || (oclp.canReadOwnObjects() && cdao.getCreatedBy()==so.getUserId())) {
                         return true;
                     }
                 }
@@ -1740,7 +1740,12 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
 
     @Override
-    public boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx)
+    public boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
+      return getReadPermission(oid, fid, so, ctx, false);
+    }
+
+    @Override
+    public boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx, boolean checkPrivate)
         throws OXException {
         try {
             // final OXFolderAccess access = new OXFolderAccess(ctx);
@@ -1750,7 +1755,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             // if (type != FolderObject.SHARED) {
             //     return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
             // }
-            return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
+            return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ, checkPrivate);
         } catch (final OXException e) {
             throw e;
         } catch (final SQLException ex) {
@@ -1769,7 +1774,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             // if (type != FolderObject.SHARED) {
             //     return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
             // }
-            return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
+            return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE, false);
         } catch (final OXException e) {
             throw e;
         } catch (final SQLException ex) {
@@ -1777,13 +1782,17 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
 
-    private boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final Context ctx, final int type) throws OXException, SQLException {
+    private boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final Context ctx, final int type, boolean checkPrivate) throws OXException, SQLException {
         Connection readcon = null;
         try {
             readcon = DBPool.pickup(ctx);
             final CalendarSql csql = new CalendarSql(so);
             final CalendarDataObject cdao = csql.getObjectById(oid, fid);
-            return checkPermissions(cdao, so, ctx, readcon, type, fid);
+            boolean result = checkPermissions(cdao, so, ctx, readcon, type, fid);
+            if(result && checkPrivate){
+                return checkPrivatePermission(cdao, so.getUserId());
+            }
+            return result;
         } catch (final OXException x) {
             if (x.isGeneric(Generic.NO_PERMISSION)) {
                 return false; // Thrown when the user has no READ access.
@@ -1795,6 +1804,30 @@ public final class CalendarCollection implements CalendarCollectionService {
                 DBPool.push(ctx, readcon);
             }
         }
+    }
+
+    /**
+     * Checks if the appointment is private and the user should not be allowed to see sensitive informations. E.g. attachments
+     *
+     * @param cdao The appointment to check
+     * @param uid The id of the user
+     * @return true if the user is allowed to see sensitive information
+     */
+    private boolean checkPrivatePermission(Appointment cdao, int uid) {
+            if (!cdao.getPrivateFlag()) {
+                return true;
+            }
+
+            if (cdao.getCreatedBy() == uid) {
+                return true;
+            }
+
+            for (UserParticipant user : cdao.getUsers()) {
+                if (user.getIdentifier() == uid) {
+                    return true;
+                }
+            }
+            return false;
     }
 
     @Override

@@ -51,7 +51,6 @@ package com.openexchange.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
@@ -126,7 +125,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     // TODO: enable
     DriveAJAXSuite.class,
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    AdvertisementTestSuite.class,
     OAuthProviderTests.class,
     com.openexchange.ajax.userfeedback.StoreTest.class,
 })

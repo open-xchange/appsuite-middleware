@@ -111,7 +111,6 @@ import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.ajax.subscribe.actions.AllSubscriptionsRequest;
 import com.openexchange.ajax.subscribe.actions.AllSubscriptionsResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -143,8 +142,6 @@ public class RoundtripTest extends AbstractRMITest {
 
     private OXUserInterface ui;
 
-    private final OXUserCopyInterface oxu;
-
     private User admin;
 
     private Context srcCtx;
@@ -159,15 +156,9 @@ public class RoundtripTest extends AbstractRMITest {
 
     private AJAXClient userClient, origClient, copiedClient;
 
-    public RoundtripTest() throws Exception {
-        super();
-        oxu = getUserCopyClient();
-    }
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        AJAXConfig.init();
         superAdminCredentials = AbstractTest.DummyMasterCredentials();
         ci = getContextInterface();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
@@ -364,14 +355,13 @@ public class RoundtripTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUser() throws Throwable {
-        moved = oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
+        moved = getUserCopyClient().copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
         final User dstUser = ui.getData(dstCtx, moved, getCredentials());
         compareUsers(srcUser, dstUser);
     }
 
     @After
-    public void tearDown()
- throws Exception {
+    public void tearDown() throws Exception {
         if (ui != null) {
             try {
                 ui.delete(srcCtx, srcUser, null, getCredentials());

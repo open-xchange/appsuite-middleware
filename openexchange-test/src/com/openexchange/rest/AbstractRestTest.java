@@ -52,9 +52,7 @@ package com.openexchange.rest;
 import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.test.JerseyTest;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -98,7 +96,7 @@ public abstract class AbstractRestTest extends JerseyTest {
         return ajaxClient2;
     }
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         ProvisioningSetup.init();
 
@@ -133,7 +131,7 @@ public abstract class AbstractRestTest extends JerseyTest {
         return this.protocol + "://" + this.hostname + ":8009";
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (ajaxClient1 != null) {
