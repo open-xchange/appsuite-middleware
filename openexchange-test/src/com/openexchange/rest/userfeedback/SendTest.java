@@ -139,6 +139,8 @@ public class SendTest extends AbstractUserFeedbackTest {
         requestBody.put("subject", subject);
         String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0));
         assertEquals(200, getRestClient().getStatusCode());
+        JSONObject resp = new JSONObject(send);
+        assertFalse(resp.hasAndNotNull("fail"));
 
         AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
         AllResponse response = getAjaxClient().execute(all);
