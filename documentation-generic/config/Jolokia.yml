@@ -1,6 +1,8 @@
 feature_name: Jolokia
 feature_description: |
   This page describes the properties for jolokia contained in the com.openexchange.jolokia bundle.
+
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/jolokia.html]] for more informations.
 properties:
     - key: com.openexchange.jolokia.start
       description: |

@@ -49,9 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -97,6 +95,7 @@ public class Bug44167Test extends CalDAVTest {
     private String sharedFolderID;
     private AJAXClient client3;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -124,6 +123,7 @@ public class Bug44167Test extends CalDAVTest {
         sharedFolderID = String.valueOf(folder.getObjectID());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -185,8 +185,16 @@ public class Bug44167Test extends CalDAVTest {
         calendar.add(Calendar.SECOND, 17);
         Date acknowledgedDate = calendar.getTime();
         iCalResource.getVEvent().getComponents().clear();
-        String iCal = "BEGIN:VALARM\r\n" + "ACKNOWLEDGED:" + formatAsUTC(acknowledgedDate) + "\r\n" + "ACTION:DISPLAY\r\n" + "DESCRIPTION:Alarm\r\n" + "TRIGGER:-PT15M\r\n" + "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "END:VALARM\r\n";
-        ;
+        String iCal =  // @formatter:off
+            "BEGIN:VALARM\r\n" +
+            "ACKNOWLEDGED:" + formatAsUTC(acknowledgedDate) + "\r\n" +
+            "ACTION:DISPLAY\r\n" +
+            "DESCRIPTION:Alarm\r\n" +
+            "TRIGGER:-PT15M\r\n" +
+            "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
+            "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
+            "END:VALARM\r\n";
+        ; // @formatter:on
         Component vAlarm = SimpleICal.parse(iCal, "VALARM");
         iCalResource.getVEvent().getComponents().add(vAlarm);
         assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, putICalUpdate(iCalResource));

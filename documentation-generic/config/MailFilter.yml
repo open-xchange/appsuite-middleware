@@ -196,7 +196,7 @@ properties:
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.useSIEVEResponseCodes
       description: |
-        Interpret SIEVE Response Codes, see https://tools.ietf.org/html/rfc5804#section-1.3
+        Interpret SIEVE Response Codes, see [[https://tools.ietf.org/html/rfc5804#section-1.3]].
         In most cases, this option must be kept to <code>false</code>.
       defaultValue: false
       version:

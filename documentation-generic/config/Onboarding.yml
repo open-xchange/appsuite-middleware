@@ -226,14 +226,23 @@ properties:
       tags: ["Onboarding"]
     - key: com.openexchange.client.onboarding.caldav.url
       description: |
-        Specifies the URL to the CalDAV end-point; e.g. "dav.open-xchange.invalid" or "http://dav.open-xchange.invalid".
+        Specifies the URL to the CalDAV end-point; e.g.: 
+        <pre>
+        com.openexchange.client.onboarding.caldav.url=dav.open-xchange.invalid
+        </pre>
+        <pre>
+        com.openexchange.client.onboarding.caldav.url=http://dav.open-xchange.invalid
+        </pre>
         
-        Note:
+        Note:  
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
         The administrator has ensure that end-point is reachable by a well-known path;  
-        E.g. "PROPFIND /dav.example.com%3A8800/.well-known/caldav HTTP/1.1"
+        E.g.: 
+        <pre>
+        PROPFIND /dav.example.com%3A8800/.well-known/caldav HTTP/1.1
+        </pre>
       defaultValue:
       version:
       reloadable: true
@@ -258,12 +267,15 @@ properties:
       description: |
         Specifies the URL to the CardDAV end-point; e.g. "dav.open-xchange.invalid" or "http://dav.open-xchange.invalid".
         
-        Note:
+        Note:  
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
         The administrator has ensure that end-point is reachable by a well-known path;  
-        E.g. "PROPFIND /dav.example.com%3A8843/.well-known/carddav HTTP/1.1"
+        E.g.:
+        <pre>
+        PROPFIND /dav.example.com%3A8843/.well-known/carddav HTTP/1.1
+        </pre>
       defaultValue:
       version:
       reloadable: true
@@ -319,9 +331,15 @@ properties:
       tags: ["Onboarding", "Drive", "Apple"]
     - key: com.openexchange.client.onboarding.eas.url
       description: |
-        Specifies the URL to the EAS end-point; e.g. "eas.open-xchange.invalid" or "http://eas.open-xchange.invalid".
+        Specifies the URL to the EAS end-point; e.g.:
+        <pre>
+        com.openexchange.client.onboarding.eas.url=eas.open-xchange.invalid
+        </pre>
+        <pre>
+        com.openexchange.client.onboarding.eas.url=http://eas.open-xchange.invalid
+        </pre>
         
-        Note:
+        Note:  
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.

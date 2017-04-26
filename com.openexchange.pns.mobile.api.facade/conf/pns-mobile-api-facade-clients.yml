@@ -1,0 +1,16 @@
+# The YAML configuration file for the Mobile API Facade denoting the brand-specific client identifiers for the Push Notification Service
+#
+# Notation/meaning is:
+# <brand-specific-client-identifier>:
+#     enabled: <true|false>
+#       Boolean. If set to "false" the client identifier will not be available.
+#                Default is "true".
+#
+#     description: <description>
+#       String. A short description for the brand-specific client
+
+# Only an example
+mycompany-open-xchange-mobile-api-facade:
+    # Disabled...
+    enabled: false
+    description: The Mobile API Facade client for My Company

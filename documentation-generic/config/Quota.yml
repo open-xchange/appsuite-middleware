@@ -1,4 +1,6 @@
 feature_name: Quota
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/quota.html]] for more informations.
 properties:
     - key: com.openexchange.quota.calendar
       description: |

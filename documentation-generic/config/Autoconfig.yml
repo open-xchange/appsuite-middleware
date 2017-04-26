@@ -3,7 +3,7 @@ properties:
     - key: com.openexchange.mail.autoconfig.path
       description: |
         Path to the local configuration files for mail domains.
-        See https://developer.mozilla.org/en/Thunderbird/Autoconfiguration
+        See [[https://developer.mozilla.org/en/Thunderbird/Autoconfiguration]].
       defaultValue: /opt/open-xchange/ispdb
       version:
       reloadable: true

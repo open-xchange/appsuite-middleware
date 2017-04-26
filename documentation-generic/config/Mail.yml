@@ -8,7 +8,12 @@ properties:
         If <code>mail</code> is set, then user's individual primary email address is taken.  
         If <code>name</code> is set, then user's individual system's user name is taken.
 
-        Currently known values: <code>login</code>, <code>mail</code> and <code>name</code>
+        Currently known values: 
+        <ul>
+          <li><code>login</code></li>
+          <li><code>mail</code></li>
+          <li><code>name</code></li>
+        </ul>
       defaultValue: login
       version: 
       reloadable: true
@@ -24,7 +29,11 @@ properties:
         If <code>session</code> is set, then user's individual system's password is taken.  
         If <code>global</code> is set, then the value specified through property [[com.openexchange.mail.masterPassword]] is taken.
 
-        Currently known values: <code>session</code> and <code>global</code>
+        Currently known values: 
+        <ul>
+          <li><code>session</code></li>
+          <li><code>global</code></li>
+        </ul>
       defaultValue: session
       version: 
       reloadable: true
@@ -40,7 +49,11 @@ properties:
         Set to <code>global</code> to take the value specified through property [[com.openexchange.mail.mailServer]].  
         Set to <code>user</code> to take user's individual mail server settings as specified in storage.
 
-        Currently known values: <code>user</code> and <code>global</code>
+        Currently known values: 
+        <ul>
+          <li><code>user</code></li>
+          <li><code>global</code></li>
+        </ul>
       defaultValue: user
       version: 
       reloadable: true
@@ -56,7 +69,11 @@ properties:
         Set to <code>global</code> to take the value specified through property [[com.openexchange.mail.transportServer]].  
         Set to <code>user</code> to take user's individual transport server settings as specified in storage.
 
-        Currently known values: <code>user</code> and <code>global</code>
+        Currently known values: 
+        <ul>
+          <li><code>user</code></li>
+          <li><code>global</code></li>
+        </ul>
       defaultValue: user
       version: 
       reloadable: true
@@ -406,7 +423,7 @@ properties:
         Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary
         IMAP server. Only applicable for primary IMAP server!
         
-        The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
+        The regular expression is supposed to be specified in Java notation: [[http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html]]
         
         Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.
         I.e. "Dovecot at ([0-9a-zA-Z._-]*) is ready", then the capturing group is supposed to extract the host name/IP address information
@@ -483,7 +500,7 @@ properties:
 
         Note:  
         Client MUST provide appropriate value in "sendtype" field;  
-        see http://oxpedia.org/wiki/index.php?title=HTTP_API#Send_a_mail
+        see [[http://oxpedia.org/wiki/index.php?title=HTTP_API#Send_a_mail]]
       defaultValue: false
       version: 
       reloadable: true
@@ -524,7 +541,7 @@ properties:
     - key: com.openexchange.mail.authProxyDelimiter
       description: |
         Define a delimiter to be used to seperate Proxy from Userlogin
-        If defined, a proxy user can login on behalf of a user using the form
+        If defined, a proxy user can login on behalf of a user using the form:
         <pre>
         &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;
         </pre>
@@ -576,7 +593,10 @@ properties:
       tags: ["Mail", "Limit"]
     - key: com.openexchange.mail.account.blacklist
       description: |
-        Specifies a black-list for those hosts that are covered by denoted IP range; e.g. "127.0.0.1-127.255.255.255, localhost, internal.domain.org"
+        Specifies a black-list for those hosts that are covered by denoted IP range; e.g.:
+        <pre>
+        com.openexchange.mail.account.blacklist=127.0.0.1-127.255.255.255, localhost, internal.domain.org
+        </pre>
         Creation of mail accounts with this hosts will be prevented. Also the validation of those accounts will fail.
         An empty value means no black-listing is active.
       defaultValue: 127.0.0.1-127.255.255.255,localhost
@@ -738,7 +758,8 @@ properties:
       tags: ["Mail"]
     - key: com.openexchange.mail.flagging.color
       description: |
-        Specifies the color which should be added to colorless flagged mails in case the flagging mode is "flaggedImplicit". Only values from <code>1</code> to <code>10</code> are allowed.
+        Specifies the color which should be added to colorless flagged mails in case [[com.openexchange.mail.flagging.mode]] is set to 
+        <code>flaggedImplicit</code>. Only values from <code>1</code> to <code>10</code> are allowed.
       defaultValue: 1
       version: 7.8.4
       reloadable: true

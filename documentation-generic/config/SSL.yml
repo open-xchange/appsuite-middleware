@@ -1,4 +1,6 @@
 feature_name: SSL
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/trusted_connections.html]] for more informations.
 properties:
     - key: com.openexchange.net.ssl.default.truststore.enabled
       description: |

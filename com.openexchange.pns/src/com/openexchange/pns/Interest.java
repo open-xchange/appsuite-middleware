@@ -118,7 +118,21 @@ public class Interest {
                 if (null == prefixes) {
                     prefixes = new LinkedHashSet<>(size);
                 }
-                prefixes.add(topic.substring(0, topic.length() - 1));
+                String prefixToAdd = topic.substring(0, topic.length() - 1);
+                boolean add = true;
+                for (Iterator<String> iter = prefixes.iterator(); add && iter.hasNext(); ) {
+                    String existentPrefix = iter.next();
+                    if (prefixToAdd.startsWith(existentPrefix)) {
+                        // A more generic one already exists
+                        add = false;
+                    } else if (existentPrefix.startsWith(prefixToAdd)) {
+                        // A more generic one is about to be added
+                        iter.remove();
+                    }
+                }
+                if (add) {
+                    prefixes.add(prefixToAdd);
+                }
             } else {
                 if (null == exacts) {
                     exacts = new LinkedHashSet<>(size);

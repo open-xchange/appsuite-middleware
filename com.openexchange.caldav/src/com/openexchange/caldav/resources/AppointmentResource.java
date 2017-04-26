@@ -277,7 +277,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             int ownPermissions = parent.getFolder().getOwnPermission().getWritePermission();
             if (Permission.WRITE_OWN_OBJECTS > ownPermissions ||
                 Permission.WRITE_OWN_OBJECTS == ownPermissions && originalAppointment.getCreatedBy() != factory.getSession().getUserId()) {
-                throw protocolException(getUrl(), OXException.noPermissionForFolder(), HttpServletResponse.SC_CONFLICT);
+                throw protocolException(getUrl(), OXException.noPermissionForFolder(), HttpServletResponse.SC_FORBIDDEN);
             }
             if (false == phantomMaster && null != appointmentToSave) {
                 /*

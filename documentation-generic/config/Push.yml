@@ -1,4 +1,6 @@
 feature_name: Push
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/pns.html]] for more informations.
 properties:
     - key: com.openexchange.pns.delayDuration
       description: |
@@ -450,7 +452,7 @@ properties:
         localpart.
         When using a multidomain setup where the imap login is an email address,
         this should be set to <code>true</code>.
-        If not, login might not be unique because foo@example.com and foo@example.net
+        If not, login might not be unique because 'foo@example.com' and 'foo@example.net'
         might be different users.
 
         Note:  
