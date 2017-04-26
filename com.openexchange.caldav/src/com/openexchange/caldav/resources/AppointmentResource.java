@@ -963,8 +963,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
      * @throws WebdavProtocolException If not handled
      */
     private void handleOnCreate(WebdavProtocolException e) throws WebdavProtocolException {
-        if (null != e && null != e.getCause() && OXException.class.isInstance(e.getCause()) &&
-            "APP-0100".equals(((OXException)e.getCause()).getErrorCode())) {
+        if (null == e) {
+            return;
+        }
+        if ("APP-0100".equals(e.getErrorCode()) ||
+            null != e.getCause() && OXException.class.isInstance(e.getCause()) && "APP-0100".equals(((OXException)e.getCause()).getErrorCode())) {
             /*
              * Cannot insert appointment (...). An appointment with the unique identifier (...) already exists.
              */
@@ -974,10 +977,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     CalendarDataObject existingAppointment = getAppointmentInterface().getObjectById(objectID);
                     if (isUpdate(appointmentToSave, existingAppointment) &&
                         PrivateType.getInstance().equals(parent.getFolder().getType())) {
-                        LOG.debug("Considering appointment with UID '{}', sequence {} as update for appointment with object ID {}, sequence {}.", appointmentToSave.getUid(), appointmentToSave.getSequence(), objectID, existingAppointment.getSequence());
+                        LOG.debug("Considering appointment with UID '{}', sequence {} as update for appointment with object ID {}, sequence {}.",
+                            appointmentToSave.getUid(), appointmentToSave.getSequence(), objectID, existingAppointment.getSequence());
                         this.object = existingAppointment;
                         appointmentToSave.setObjectID(objectID);
-                        appointmentToSave.removeParentFolderID();
+                        appointmentToSave.setParentFolderID(parentFolderID);
                         this.saveObject(false); // update instead of create
                         return; // handled
                     }
