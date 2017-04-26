@@ -78,7 +78,7 @@ properties:
     - key: com.openexchange.filestore.swift.[filestoreID].authType
       description: |
         Specifies the authentication type to use for authentication against Identity API v2.0;
-        see (http://developer.openstack.org/api-ref-identity-v2.html)
+        see [[http://developer.openstack.org/api-ref-identity-v2.html]].
         This property is required.
       defaultValue: 
       version: 
@@ -92,7 +92,7 @@ properties:
     - key: com.openexchange.filestore.swift.[filestoreID].authValue
       description: |
         Specifies the authentication value to use for authentication against Identity API v2.0;
-        see (http://developer.openstack.org/api-ref-identity-v2.html)
+        see [[http://developer.openstack.org/api-ref-identity-v2.html]].
         This property is required.
       defaultValue: 
       version: 

@@ -64,7 +64,10 @@ properties:
         is always registered with '{prefix}/saml/acs' as servlet alias.
         
         This property is mandatory.  
-        Example: 'https://appsuite.example.com/appsuite/api/saml/acs'
+        Example: 
+        <pre>
+        com.openexchange.saml.acsURL=https://appsuite.example.com/appsuite/api/saml/acs
+        </pre>
       defaultValue: 
       version: 
       reloadable: false
@@ -80,7 +83,10 @@ properties:
         The according endpoint is always registered with '{prefix}/saml/sls' as servlet alias.
 
         This property is mandatory if [[com.openexchange.saml.enableSingleLogout]] is <code>true</code>.  
-        Example: 'https://appsuite.example.com/appsuite/api/saml/sls'
+        Example:
+        <pre>
+        com.openexchange.saml.slsURL=https://appsuite.example.com/appsuite/api/saml/sls
+        </pre>
       defaultValue:
       version: 
       reloadable: false
@@ -92,7 +98,7 @@ properties:
     - key: com.openexchange.saml.logoutResponseBinding
       description: |
         The binding via which logout responses shall be sent to the IdP on IdP-initiated single
-        logout flows. Must be <code>http-redirect</code> or <code>http-post</code>
+        logout flows. Must be <code>http-redirect</code> or <code>http-post</code>.
         
         This property is mandatory if [[com.openexchange.saml.enableSingleLogout]] is <code>true</code>.
       defaultValue: http-redirect

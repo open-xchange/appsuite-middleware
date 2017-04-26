@@ -90,7 +90,10 @@ properties:
       tags: ["Mail Categories", "Mail"]
     - key: com.openexchange.mail.user.categories.identifiers
       description: |
-        Specifies a comma separated list of user category identifiers ([category]). E.g.: "uc1,uc2,uc3"
+        Specifies a comma separated list of user category identifiers ([category]). E.g.: 
+        <pre>
+        com.openexchange.mail.user.categories.identifiers=uc1,uc2,uc3
+        </pre>
 
         User categories can be renamed but not be forced.  
         Please note that the use of "general" is prohibited!

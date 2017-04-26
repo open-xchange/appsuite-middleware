@@ -80,7 +80,8 @@ properties:
       The max. HTTP body size.
       Zero or less means infinite.
 
-      <b>Deprecated</b>: Use [[com.openexchange.servlet.maxBodySize]] instead.
+      <b>Deprecated</b>:  
+      Use [[com.openexchange.servlet.maxBodySize]] instead.
     defaultValue: 0
     version: 
     reloadable: true
@@ -347,7 +348,7 @@ properties:
   - key: com.openexchange.servlet.contentSecurityPolicy
     description: |
        The value of Content-Security-Policy header.
-       Please refer to an Introduction to Content Security Policy (http://www.html5rocks.com/en/tutorials/security/content-security-policy/).
+       Please refer to an Introduction to Content Security Policy ([[http://www.html5rocks.com/en/tutorials/security/content-security-policy/]]).
        A empty value means no Content-Security-Policy header.
     defaultValue: empty
     version: 

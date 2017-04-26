@@ -187,7 +187,7 @@ properties:
     - key: referral
       description: |
         This option configures how to handle the chasing of referrals in LDAP 
-        (see http://java.sun.com/products/jndi/tutorial/ldap/referral/overview.html).  
+        (see [[http://java.sun.com/products/jndi/tutorial/ldap/referral/overview.html]]).  
         Possible values:
         <ul>
           <li><code>ignore</code></li>

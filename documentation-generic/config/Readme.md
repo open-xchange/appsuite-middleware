@@ -75,6 +75,7 @@ This chapter provides recommendations about how a property description should be
 Some general guidelines:
 
 * Don't describe default values in the description field, so if someone has to change the default value he doesn't need to change the description too.
+* Don't forget to use punctuation.
 * If you want to add a note or warning or something similar please use the following form:
 
 ```

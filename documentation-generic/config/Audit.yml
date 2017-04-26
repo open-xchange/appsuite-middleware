@@ -178,7 +178,7 @@ properties:
           <li>[[com.openexchange.log.audit.slf4j.file.count]] - defines the max. number of files to use for rotation</li>
           <li>[[com.openexchange.log.audit.slf4j.file.pattern]] - defines the layout pattern of the log entry</li>
         </ul>
-        For more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
+        For more patterns see [[http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout]]
       defaultValue: GMT
       version:
       reloadable: false
@@ -212,7 +212,7 @@ properties:
     - key: com.openexchange.log.audit.slf4j.file.pattern
       description: |
         Defines the layout pattern of the log entry.
-        For more patterns see http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout
+        For more patterns see [[http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout]]
       defaultValue: "\"%sanitisedMessage%n\""
       version:
       reloadable: false

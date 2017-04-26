@@ -450,7 +450,7 @@ properties:
         localpart.
         When using a multidomain setup where the imap login is an email address,
         this should be set to <code>true</code>.
-        If not, login might not be unique because foo@example.com and foo@example.net
+        If not, login might not be unique because 'foo@example.com' and 'foo@example.net'
         might be different users.
 
         Note:  

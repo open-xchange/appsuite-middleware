@@ -124,7 +124,7 @@ properties:
         The maximum header size for an HTTP request in bytes. Make sure to increase
         this value for all components of your infrastructure when you are forced to
         deal with enormous headers. For Apache as our default balancer see
-        http://httpd.apache.org/docs/current/mod/core.html#limitrequestfieldsize
+        [[http://httpd.apache.org/docs/current/mod/core.html#limitrequestfieldsize]]
       defaultValue: 8192
       version:
       reloadable: false
