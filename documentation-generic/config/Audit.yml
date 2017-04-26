@@ -125,7 +125,7 @@ properties:
     - key: com.openexchange.log.audit.slf4j.date.pattern
       description: |
         Specifies the optional date pattern to use.
-        Accepts a pattern according to: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html. 
+        Accepts a pattern according to: [[https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html]]. 
 
         An empty value means standard ISO-8601 formatting is used and accompanying properties
         [[com.openexchange.log.audit.slf4j.date.locale]] and [[com.openexchange.log.audit.slf4j.date.timezone]] are ignored.

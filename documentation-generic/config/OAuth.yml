@@ -108,8 +108,10 @@ properties:
       tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].redirectUrl
       description: |
-        The redirect url of your [serviceId] application.  
-        E.g. "https://myappsuite.mydomain.invalid/ajax/defer"
+        The redirect url of your [serviceId] application. E.g.:
+        <pre>
+        com.openexchange.oauth.[serviceId].redirectUrl=https://myappsuite.mydomain.invalid/ajax/defer
+        </pre>
 
         See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
       defaultValue: 

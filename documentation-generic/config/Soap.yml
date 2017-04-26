@@ -40,7 +40,7 @@ properties:
       tags: ["SOAP", "Limit"]
     - key: com.openexchange.soap.cxf.disableAddressUpdates
       description: |
-        This is a workaround for the known side-effect in CXF 2.7.x described in CXF-5737 issue (https://issues.apache.org/jira/browse/CXF-5737)
+        This is a workaround for the known side-effect in CXF 2.7.x described in CXF-5737 issue ([[https://issues.apache.org/jira/browse/CXF-5737]])
         The endpoint address gets manipulating after accessing it via multiple aliases.
         This is disabled by default in the upcoming versions of CXF.
       defaultValue: true

@@ -145,7 +145,7 @@ properties:
     - key: com.openexchange.http.grizzly.enabledCipherSuites
       description: |
         Comma-separated list of cipher suites that should be used for secure connections.
-        See https://www.openssl.org/docs/manmaster/apps/ciphers.html
+        See [[https://www.openssl.org/docs/manmaster/apps/ciphers.html]].
         No value means system-default.
       defaultValue:
       version:
