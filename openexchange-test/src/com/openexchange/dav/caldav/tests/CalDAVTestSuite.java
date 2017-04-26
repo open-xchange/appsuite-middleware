@@ -59,8 +59,17 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @RunWith(ParallelSuite.class)
-@SuiteClasses({ NewTest.class, FreeBusyTest.class, MkCalendarTest.class, CookieTest.class, ConfirmationTest.class, AlarmTestEMClient.class, AlarmTestMacCalendar.class, AlarmTestLightning.class, AlarmTestIOSCalendar.class
-})
+@SuiteClasses({ // @formatter:off
+    NewTest.class,
+    FreeBusyTest.class,
+    MkCalendarTest.class,
+    CookieTest.class,
+    ConfirmationTest.class,
+    AlarmTestEMClient.class,
+    AlarmTestMacCalendar.class,
+    AlarmTestLightning.class,
+    AlarmTestIOSCalendar.class
+}) // @formatter:on
 public final class CalDAVTestSuite {
 
 }
