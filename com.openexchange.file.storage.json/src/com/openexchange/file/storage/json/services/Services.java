@@ -52,7 +52,6 @@ package com.openexchange.file.storage.json.services;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -167,11 +166,6 @@ public class Services {
     public static ThreadControlService getThreadControlService() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(ThreadControlService.class);
-    }
-
-    public static CapabilityService getCapabilityService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(CapabilityService.class);
     }
 
 }
