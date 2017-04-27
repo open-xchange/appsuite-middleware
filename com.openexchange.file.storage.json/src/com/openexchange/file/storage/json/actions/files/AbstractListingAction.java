@@ -311,7 +311,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
         }
 
         private void triggerFor(final String id, File fileMetadata) {
-            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileMetadata.getFileName(), PreviewOutput.IMAGE);
+            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileMetadata.getFileName(), PreviewOutput.IMAGE, session);
             if (null != candidate) {
                 // Create appropriate IFileHolder instance
                 IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {

@@ -89,4 +89,13 @@ public interface InternalPreviewService extends PreviewService {
      * @return <code>true</code> this service is able to detect the content type of an input stream; otherwise <code>false</code>
      */
     boolean canDetectContentType();
+
+    /**
+     * Checks if this <tt>PreviewService</tt> is supported for session-associated user
+     *
+     * @param session The session to check by
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isSupportedFor(Session session) throws OXException;
 }
