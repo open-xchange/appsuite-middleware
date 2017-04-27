@@ -70,7 +70,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -94,24 +94,24 @@ import com.openexchange.java.util.TimeZones;
  */
 public class UserTest extends AbstractTest {
 
-    public final static String NAMED_ACCESS_COMBINATION_BASIC = "all";
+    public final String NAMED_ACCESS_COMBINATION_BASIC = "all";
     // list of chars that must be valid
     //    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
-    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    protected final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     // global setting for stored password
-    protected static final String pass = "foo-user-pass";
+    protected final String pass = "foo-user-pass";
 
-    protected static final String TOO_LONG = "royyxgoyxrixllsguvhsyazyboliexlgfcvzckxnxqwffwctvafzxxxxkjzawrwrqqzxlgizevqzfwtapzokcyijvxmujlecmwgjkaiwfablzgiqabzwthazawcuffplpcuairrcllnhrckbxfvxmfefdpnxzvjpkpheptvdsolsuwycsrsmmbspnrcgocfmstdcaaeizshmkdvdzdwpbwevbheasogpilbzhytvfleisuhbzgyodisehdhjieqwnyznuskktlblreghauwjcthltvnagasntwtguclpsqmmvhnfiynnwhnealxbezqegmocfoxxdwlxeetcoayuwuaxoiqgfckglcwbqtsqmgnxhaamalmtruidkefxfcoavcrsfuyujcoucygszoaafkgzjysvgffhaukyewjxpwtadmbkzulehmqqdjlyqacethsyuvawkvfivyzvbrlrhpoiinxtbbnxoultmgkgjctkiboaovfukjdaiigcptesqhlpdcccmusfiauvwwdvvddupolqvnuewzapcpdlsqxdgsowrgekxyyczhgtbrhqfqbpkjdgikzsbegzlvmavjsgltxiobbzhcqawplhqatbxmxmrhfesaupggpznosrjtnfcbujppgnhxxqkznaeiifcakvsnudvxaxiwowdailfltbtvnujbrszzotsvqovpryrsjypydfuhwseibpgmbdrjhkswpolymyjpjrpgfpkfxgtekukctlnjhxjqyegiutwbpingdaymrbvhhqboyxophfauqtweebaphuajytvbmwkktnvqjdrziayzojlmghzbspvepazyxjdbxwnjeafruoeiujbwmbrwyojljjntzaonolgfhxpwtmasimaxwuzhyhwshphtoqjochgzvcchcumppckexrlujgkatilsvwwfxhwfvzhfimsoanxrmkgzlwswedpiovjewxrpmltwqwhalgojcpzwutecxrhpnebcgxsiynfkuqhsvnnwznwwpwjvrubytdzmwfoipkykoprhhzzcqcfzvowtfudfqhyaptbqdqqitkxeihjqdosbafmlljadrlvfkqjcvovqyctnvmgynmycmxtqfdyecpnaxlgstyxtsxlvibuuzibbaewsocpdeosbtbdbugrwrpvugtyltrnzxzndsflpnbogiymbcgksjdnchvcmqiavrojrffsuchzmkvyhexklueuuwxvkyrvwkiezqkhebpiarcgdamlqtpagjtrypdwxbopozobgadjvrkisckejdhabanhespbioebfexakannwutaizcroqlfabfvhfonytwthsunlrqdrypjhtaectwflmgijijdhphhjmacqotxwigsnnxqrbzgyplubwvwwycbhhqjrestclarzkiwyvlysgegkcjxlyzjfgfrxnbygpwlgpbwfpivmehhpcctqwrjscbxanjmkrfrdlcjwqppowbujhiocrazuniiycgakgkcuawkwbvuwoqaurdzobelhmqropiazzcehvblylpuhusbfmshczonqwklasghfwwssfotwfajrwwfiixdfremujvcwyzizwdauqomgzswzdqduvqjfovrnygblvtgsctisgrqtgkodvltjpnunjcjvkinlbhzkmiebfqgvqayqglcjunqvstaiyvpsxhtwpynbdlorutovplochscyynyuqsydwarhflhhyvvsezhvrkjurscqofdrepaaostqbkpkrkwscxzrzcdharhdfeqomdxiwjnqtzwuymtqmgiuaeaeegucxvhelnnwwqqlguglbrhesbfqhpltnesgaauqshhbgymhbkhxgpjnwltyjpbnxjykycevndesugkshhutisvklbvohulprepljqybzxrpmratiybjfbjiqzjrxxdajkrsinzkewvkwkmsplvjanfrpfobpmbvvhjtwfmnxxxzyyftbsbwpgkxsltugjokboizhgolfqmcfhqoyswcayqpacyfhnwezecvxgazdakidjmifeiygxuglkoxgjmlrzkcmsclukqlgoqfuotxkgqxyzyosywyxxozwgqykhehhecypblllvhfowmjjdepffbyyvzegmodfzwrdqzblvrgdqkaxomsorzyggrybhxhrddrtkdloqpxnvrwsrxwrvogrjplvbwdjztwxdxpjdtimumxmtjslndnwalkpyznksvxgqdtmftuedofhaohfifwxkepqqbzatnqljvaqjbblyfankuoypbvbjahoneoxbckvgetwrntjahoewoabdlghpdqjvlgpeginhgebfpunllglltvcuhcunevihvmwulmcysfeoipdfxbohncfbqdvheumleetpvvxjgoiykxnzayjivsaclhlrjllsyqvoxfagkczlxsvshyjnmfexmnbuwtajacxjcfphuuekutsffbgvzkxhexmxegecjbjymslmrvmrmegpmavhkohfzcdmnzhdpnkvpoblplpjssyqanwnwzyvapwgdkkvsuyqlgcxegkdiaqgscvqqyxbwcihjfnjnsnfjtkdfhzvwjxkhtkprchrzxldwqdesxkwmkkfntffclyyievdkrqalgjrvddkpuhgradpanyqnorjwsapvcifinqnpqyatkiafaynjlkyztgbhovvvrdmswygvadyevajkjcxjqlmalfzsmaadefqirwfbvptxadkqjzbzhzwfxrrgybyevdpwkmptceccqebzawrsdjsfthgkmxiuabhrlmldmualjpkwidnevzrgkgzpieqbjxukbjnbsvryegegdgdlpkqirjvfxvtefyegbegyfylavjsvxseoivkmtkemluthuqpnrugqhwpalwqoriwvbjubjvbbdvzwpzyghvdjrutxlnkwncqvtarizhvrzsqhlxvuqqqaxkpijnmvpkerjyadsumdgdmapqbxrmpqzqevcbeykkjhygxktvcedyjlnmqwrcxcabfuejvffqbwcefmqmprahrbqezhoxllxqacneoynvmzlehajoflbnxmorydpqdcnvjztqdjpitazuunlkhrryjdnapccqzlvsjtjqnsrujllscamzjkkbdcpmzelcolmacjsawqyxucidijnlpfedkjjdsgkohlurjahynqiakqrgxswnzsdpcivaznkgsirbfwmpfiqwlfvzqujkzwrtuyhybssnooialbcyjxiyupolvmdoirfzqcwhsoefuwoadfjswbjyahgzedijxyuzenurmceqhyhluptswxmsvvyoaqtkexuykmbrvzcjrivwujxzitqfywztlwohqnaovykwplynkrhrqphdmrkwjuohvbzypqjdkubayhiyskzwvxsuawwwtyfdvczsbwqxmtzbakoltilvvwpaqtipqpxzkrmkuamynknlxuomlzfioixgnehidwvumswcalggqrygweuvnetgiwizvujvocwwmelikeclynxfahevnesdvwnlfzibovbopjrnofgbqipspnxfyvbtfrjjootuiqjzmxsmigpzormbgplggikvldtuojptyootvqpgabhwgpsnjwoklngypnlnqjknqocyqnjwlyiljztfhnlqkrakeiremqzymwrynqsnupicufmgxebposdrzpskxnqujtgjubxzclunotakupvjcfqaasksanhbyzngeevsbkmlpzheghqvbwczsdzvbtwgyhrtseynoctskiegablmcbegrezhphkleulojzjycrncdojbvueipyvyiopmldtdtpbobfkgfweospddnhxzscceblvwbocwgvrubjlerdhftzuteaexwbkptyfbdgrlvmsewoupwokofdafrrpzfytbqeuarihalxcisdpcxtdxfpmauwvmrpsngjmaohiaukgctczdlcnojojstatihepxexvlzupqmlkyzdwqdbepvgftlvgmtkmmchoozwynybmfevaoyvictlbzqxbrjafmooazcaugynewnhlpxxmlx@test.net";
+    protected final String TOO_LONG = "royyxgoyxrixllsguvhsyazyboliexlgfcvzckxnxqwffwctvafzxxxxkjzawrwrqqzxlgizevqzfwtapzokcyijvxmujlecmwgjkaiwfablzgiqabzwthazawcuffplpcuairrcllnhrckbxfvxmfefdpnxzvjpkpheptvdsolsuwycsrsmmbspnrcgocfmstdcaaeizshmkdvdzdwpbwevbheasogpilbzhytvfleisuhbzgyodisehdhjieqwnyznuskktlblreghauwjcthltvnagasntwtguclpsqmmvhnfiynnwhnealxbezqegmocfoxxdwlxeetcoayuwuaxoiqgfckglcwbqtsqmgnxhaamalmtruidkefxfcoavcrsfuyujcoucygszoaafkgzjysvgffhaukyewjxpwtadmbkzulehmqqdjlyqacethsyuvawkvfivyzvbrlrhpoiinxtbbnxoultmgkgjctkiboaovfukjdaiigcptesqhlpdcccmusfiauvwwdvvddupolqvnuewzapcpdlsqxdgsowrgekxyyczhgtbrhqfqbpkjdgikzsbegzlvmavjsgltxiobbzhcqawplhqatbxmxmrhfesaupggpznosrjtnfcbujppgnhxxqkznaeiifcakvsnudvxaxiwowdailfltbtvnujbrszzotsvqovpryrsjypydfuhwseibpgmbdrjhkswpolymyjpjrpgfpkfxgtekukctlnjhxjqyegiutwbpingdaymrbvhhqboyxophfauqtweebaphuajytvbmwkktnvqjdrziayzojlmghzbspvepazyxjdbxwnjeafruoeiujbwmbrwyojljjntzaonolgfhxpwtmasimaxwuzhyhwshphtoqjochgzvcchcumppckexrlujgkatilsvwwfxhwfvzhfimsoanxrmkgzlwswedpiovjewxrpmltwqwhalgojcpzwutecxrhpnebcgxsiynfkuqhsvnnwznwwpwjvrubytdzmwfoipkykoprhhzzcqcfzvowtfudfqhyaptbqdqqitkxeihjqdosbafmlljadrlvfkqjcvovqyctnvmgynmycmxtqfdyecpnaxlgstyxtsxlvibuuzibbaewsocpdeosbtbdbugrwrpvugtyltrnzxzndsflpnbogiymbcgksjdnchvcmqiavrojrffsuchzmkvyhexklueuuwxvkyrvwkiezqkhebpiarcgdamlqtpagjtrypdwxbopozobgadjvrkisckejdhabanhespbioebfexakannwutaizcroqlfabfvhfonytwthsunlrqdrypjhtaectwflmgijijdhphhjmacqotxwigsnnxqrbzgyplubwvwwycbhhqjrestclarzkiwyvlysgegkcjxlyzjfgfrxnbygpwlgpbwfpivmehhpcctqwrjscbxanjmkrfrdlcjwqppowbujhiocrazuniiycgakgkcuawkwbvuwoqaurdzobelhmqropiazzcehvblylpuhusbfmshczonqwklasghfwwssfotwfajrwwfiixdfremujvcwyzizwdauqomgzswzdqduvqjfovrnygblvtgsctisgrqtgkodvltjpnunjcjvkinlbhzkmiebfqgvqayqglcjunqvstaiyvpsxhtwpynbdlorutovplochscyynyuqsydwarhflhhyvvsezhvrkjurscqofdrepaaostqbkpkrkwscxzrzcdharhdfeqomdxiwjnqtzwuymtqmgiuaeaeegucxvhelnnwwqqlguglbrhesbfqhpltnesgaauqshhbgymhbkhxgpjnwltyjpbnxjykycevndesugkshhutisvklbvohulprepljqybzxrpmratiybjfbjiqzjrxxdajkrsinzkewvkwkmsplvjanfrpfobpmbvvhjtwfmnxxxzyyftbsbwpgkxsltugjokboizhgolfqmcfhqoyswcayqpacyfhnwezecvxgazdakidjmifeiygxuglkoxgjmlrzkcmsclukqlgoqfuotxkgqxyzyosywyxxozwgqykhehhecypblllvhfowmjjdepffbyyvzegmodfzwrdqzblvrgdqkaxomsorzyggrybhxhrddrtkdloqpxnvrwsrxwrvogrjplvbwdjztwxdxpjdtimumxmtjslndnwalkpyznksvxgqdtmftuedofhaohfifwxkepqqbzatnqljvaqjbblyfankuoypbvbjahoneoxbckvgetwrntjahoewoabdlghpdqjvlgpeginhgebfpunllglltvcuhcunevihvmwulmcysfeoipdfxbohncfbqdvheumleetpvvxjgoiykxnzayjivsaclhlrjllsyqvoxfagkczlxsvshyjnmfexmnbuwtajacxjcfphuuekutsffbgvzkxhexmxegecjbjymslmrvmrmegpmavhkohfzcdmnzhdpnkvpoblplpjssyqanwnwzyvapwgdkkvsuyqlgcxegkdiaqgscvqqyxbwcihjfnjnsnfjtkdfhzvwjxkhtkprchrzxldwqdesxkwmkkfntffclyyievdkrqalgjrvddkpuhgradpanyqnorjwsapvcifinqnpqyatkiafaynjlkyztgbhovvvrdmswygvadyevajkjcxjqlmalfzsmaadefqirwfbvptxadkqjzbzhzwfxrrgybyevdpwkmptceccqebzawrsdjsfthgkmxiuabhrlmldmualjpkwidnevzrgkgzpieqbjxukbjnbsvryegegdgdlpkqirjvfxvtefyegbegyfylavjsvxseoivkmtkemluthuqpnrugqhwpalwqoriwvbjubjvbbdvzwpzyghvdjrutxlnkwncqvtarizhvrzsqhlxvuqqqaxkpijnmvpkerjyadsumdgdmapqbxrmpqzqevcbeykkjhygxktvcedyjlnmqwrcxcabfuejvffqbwcefmqmprahrbqezhoxllxqacneoynvmzlehajoflbnxmorydpqdcnvjztqdjpitazuunlkhrryjdnapccqzlvsjtjqnsrujllscamzjkkbdcpmzelcolmacjsawqyxucidijnlpfedkjjdsgkohlurjahynqiakqrgxswnzsdpcivaznkgsirbfwmpfiqwlfvzqujkzwrtuyhybssnooialbcyjxiyupolvmdoirfzqcwhsoefuwoadfjswbjyahgzedijxyuzenurmceqhyhluptswxmsvvyoaqtkexuykmbrvzcjrivwujxzitqfywztlwohqnaovykwplynkrhrqphdmrkwjuohvbzypqjdkubayhiyskzwvxsuawwwtyfdvczsbwqxmtzbakoltilvvwpaqtipqpxzkrmkuamynknlxuomlzfioixgnehidwvumswcalggqrygweuvnetgiwizvujvocwwmelikeclynxfahevnesdvwnlfzibovbopjrnofgbqipspnxfyvbtfrjjootuiqjzmxsmigpzormbgplggikvldtuojptyootvqpgabhwgpsnjwoklngypnlnqjknqocyqnjwlyiljztfhnlqkrakeiremqzymwrynqsnupicufmgxebposdrzpskxnqujtgjubxzclunotakupvjcfqaasksanhbyzngeevsbkmlpzheghqvbwczsdzvbtwgyhrtseynoctskiegablmcbegrezhphkleulojzjycrncdojbvueipyvyiopmldtdtpbobfkgfweospddnhxzscceblvwbocwgvrubjlerdhftzuteaexwbkptyfbdgrlvmsewoupwokofdafrrpzfytbqeuarihalxcisdpcxtdxfpmauwvmrpsngjmaohiaukgctczdlcnojojstatihepxexvlzupqmlkyzdwqdbepvgftlvgmtkmmchoozwynybmfevaoyvictlbzqxbrjafmooazcaugynewnhlpxxmlx@test.net";
 
-    protected static OXUserInterface getUserClient() throws Exception {
+    protected OXUserInterface getUserClient() throws Exception {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
 
-    private static List<User> toDeleteUsers = new ArrayList<User>();
+    private List<User> toDeleteUsers = new ArrayList<User>();
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         final OXUserInterface oxu = getUserClient();
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
@@ -767,7 +767,7 @@ public class UserTest extends AbstractTest {
         // now change data
         String alias = generateRandomAlias(44);
         srv_loaded = changeUserAlias(srv_loaded, alias);
-        
+
         // submit changes
         oxu.change(ctx, srv_loaded, cred);
 
@@ -783,7 +783,7 @@ public class UserTest extends AbstractTest {
             fail("Expected to get correct changed user data");
         }
     }
-    
+
     @Test
     public void testChangeAliasTooLong() throws Exception {
         // Try to change alias with too long name (Bug 52763) 
@@ -823,15 +823,15 @@ public class UserTest extends AbstractTest {
         if (canary) {
             fail("Expected an Storage Exception");
         }
-        
+
         // remove flawed alias
         srv_loaded.removeAlias(alias);
-        
+
         // no assertion needed since no data changed on server
         // check if you can still change alias (Bug 52763)
         alias = generateRandomAlias(44);
         srv_loaded = changeUserAlias(srv_loaded, alias);
-        
+
         // submit changes
         oxu.change(ctx, srv_loaded, cred);
 
@@ -1176,10 +1176,10 @@ public class UserTest extends AbstractTest {
         // first fill setter and other infos in map object
         for (Method method : theMethods) {
             String method_name = method.getName();
-            if(method_name.equals("setPrimaryAccountName")) {
+            if (method_name.equals("setPrimaryAccountName")) {
                 // Drop unsupported changes in user class
                 continue;
-            }            
+            }
             if (method_name.startsWith("set")) {
                 // check if it is a type we support
                 if (method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")) {
@@ -1674,16 +1674,9 @@ public class UserTest extends AbstractTest {
         return usr;
     }
 
-    public static User getTestUserObject() {
+    public User getTestUserObject() {
         return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange", null);
     }
-
-    //    private static int getContextID() throws Exception {
-    //        final Credentials cred = DummyCredentials();
-    //        final Context ctx = ContextTest.getTestContextObject(ContextTest.createNewContextID(cred), 10);
-    //        final int id = ContextTest.addContext(ctx, getRMIHostUrl(), cred);
-    //        return id;
-    //    }
 
     public static void compareUser(final User a, final User b) {
         System.out.println("USERA" + a.toString());
@@ -1856,18 +1849,12 @@ public class UserTest extends AbstractTest {
         assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
     }
 
-    public static User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
+    public User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
         // create new user
         final OXUserInterface oxu = getUserClient();
         return oxu.create(ctx, usr, access, DummyCredentials());
     }
 
-    //Uncomment this to use another context that 1
-    //    public static Context getTestContextObject(final Credentials cred) {
-    //        return getTestContextObject(1, 50);
-    //    }
-
-    
     private String generateRandomAlias(long length) {
         String mail = "@test.org";
         StringBuffer buf = new StringBuffer();
@@ -1892,7 +1879,7 @@ public class UserTest extends AbstractTest {
 
         return retval;
     }
-    
+
     private User createChangeUserData(final User usr) throws CloneNotSupportedException, URISyntaxException {
 
         // change all fields of the user
