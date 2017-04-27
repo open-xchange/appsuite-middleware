@@ -84,6 +84,8 @@ public final class Constants {
 
     /** The field for file size */
     public static final String FIELD_FILE_SIZE = "file_size";
+    
+    public static final String FIELD_FILE_EXTENSION = "file_extension";
 
     // ---------------------------------------------------------------------------------------------------------- //
 
@@ -121,31 +123,96 @@ public final class Constants {
         "video/*"
     };
     
-    /** The patterns used match {@link Type#DOC_TEXT}. */
-    public static final String[] FILETYPE_PATTERNS_DOCUMENTS_TEXT = {
-        "application/*msword*",
-        "application/*ms-word*",
-        "application/*opendocument.text",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml*",
-        "text/*rtf*"
-    };    
+    /** The file extension used match {@link Type#DOC_TEXT}. */
+    public static final String[] FILE_EXTENSION_TEXT = {
+        "*.docx",
+        "*.docm",
+        "*.dotx",
+        "*.dotm",
+        "*.odt",
+        "*.ott",
+        "*.doc",
+        "*.dot",
+        "*.txt",
+        "*.rtf"
+    };
     
-    /** The patterns used match {@link Type#DOC_SPREADSHEET}. */
-    public static final String[] FILETYPE_PATTERNS_DOCUMENTS_SPREADSHEET = {
-        "application/*excel*",
-        "application/*opendocument.spreadsheet",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml*"
+    /** The file extension used match {@link Type#DOC_SPREADSHEET}. */
+    public static final String[] FILE_EXTENSION_SPREADSHEET = {
+        "*.xlsx",
+        "*.xlsm",
+        "*.xltx",
+        "*.xltm",
+        "*.xlsb",
+        "*.ods",
+        "*.ots",
+        "*.xls",
+        "*.xlt",
+        "*.xla"
+    };
+    
+    /** The file extension used match {@link Type#DOC_PRESENTATION}. */    
+    public static final String[] FILE_EXTENSION_PRESENTATION = {
+        "*.pptx",
+        "*.pptm",
+        "*.potx",
+        "*.potx",
+        "*.ppsx",
+        "*.ppsm",
+        "*.ppam",
+        "*.odp",
+        "*.otp",
+        "*.ppt",
+        "*.pot",
+        "*.pps",
+        "*.ppa"
+    };
+    
+    /** The file extension used match {@link Type#PDF}. */    
+    public static final String[] FILE_EXTENSION_PDF = {
+        "*.pdf"
+    };
+    
+    /** The file extension used match {@link Type#IMAGE}. */    
+    public static final String[] FILE_EXTENSION_IMAGE = {
+        "*.png",
+        "*.jpg",
+        "*.jpeg",
+        "*.gif",
+        "*.tiff",
+        "*.bmp"
+    };   
+    
+    /** The file extension used match {@link Type#VIDEO}. */    
+    public static final String[] FILE_EXTENSION_VIDEO = {
+        "*.m4v",
+        "*.ogv",
+        "*.webm",
+        "*.mov",
+        "*.avi",
+        "*.wmv",
+        "*.wma",
+        "*.mpg",
+        "*.mpeg",
+        "*.mp4",
+        "*.mpg"
     };  
     
-    /** The patterns used match {@link Type#DOC_PRESENTATION}. */
-    public static final String[] FILETYPE_PATTERNS_DOCUMENTS_PRESENTATION = {
-        "application/vnd.openxmlformats-officedocument.presentationml*",
-        "application/*powerpoint*",
-        "application/*opendocument.presentation*"
-    };    
-
-    /** The patterns used match {@link Type#PDF}. */
-    public static final String[] FILETYPE_PATTERNS_PDF = {
-        "application/pdf"
-    };    
+    /** The file extension used match {@link Type#MUSIC}. */    
+    public static final String[] FILE_EXTENSION_AUDIO = {
+        "*.mp3",
+        "*.m4a",
+        "*.m4b",
+        "*.ogg",
+        "*.aac",
+        "*.wav",
+        "*.wma",
+        "*.mid",
+        "*.ra",
+        "*.ram",
+        "*.rm",
+        "*.m3u",
+        "*.mp4a",
+        "*.mpga"
+    };  
 }

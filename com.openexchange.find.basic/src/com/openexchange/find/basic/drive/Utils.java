@@ -91,7 +91,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.TimeZones;
 
-
 /**
  * {@link Utils} - Utilities for drive search.
  *
@@ -282,6 +281,8 @@ public final class Utils {
 
             };
             return new FileSizeTerm(pattern);
+        } else if (Constants.FIELD_FILE_EXTENSION.equals(field)) {
+            return buildFileExtensionTerm(query);
         } else if (CommonConstants.FIELD_DATE.equals(field)) {
             final Pair<Comparison, Long> pair = parseDateQuery(query);
             if (null != pair) {
@@ -432,7 +433,7 @@ public final class Utils {
                 return ComparisonType.GREATER_THAN;
             } else if ("<".equals(comparison)) {
                 return ComparisonType.LESS_THAN;
-            } else if ("=".equals(comparison)){
+            } else if ("=".equals(comparison)) {
                 return ComparisonType.EQUALS;
             }
         }
@@ -476,76 +477,76 @@ public final class Utils {
     private static SearchTerm<?> buildDateTerm(final Comparison comparison, final long timestamp) {
         ComparablePattern<Date> pattern = null;
         switch (comparison) {
-        case EQUALS:
-            pattern = new ComparablePattern<Date>() {
+            case EQUALS:
+                pattern = new ComparablePattern<Date>() {
 
-                @Override
-                public Date getPattern() {
-                    return new Date(timestamp);
-                }
+                    @Override
+                    public Date getPattern() {
+                        return new Date(timestamp);
+                    }
 
-                @Override
-                public ComparisonType getComparisonType() {
-                    return ComparisonType.EQUALS;
-                }
-            };
-            break;
-        case GREATER_THAN:
-            pattern = new ComparablePattern<Date>() {
+                    @Override
+                    public ComparisonType getComparisonType() {
+                        return ComparisonType.EQUALS;
+                    }
+                };
+                break;
+            case GREATER_THAN:
+                pattern = new ComparablePattern<Date>() {
 
-                @Override
-                public Date getPattern() {
-                    return new Date(timestamp);
-                }
+                    @Override
+                    public Date getPattern() {
+                        return new Date(timestamp);
+                    }
 
-                @Override
-                public ComparisonType getComparisonType() {
-                    return ComparisonType.GREATER_THAN;
-                }
-            };
-            break;
-        case LOWER_THAN:
-            pattern = new ComparablePattern<Date>() {
+                    @Override
+                    public ComparisonType getComparisonType() {
+                        return ComparisonType.GREATER_THAN;
+                    }
+                };
+                break;
+            case LOWER_THAN:
+                pattern = new ComparablePattern<Date>() {
 
-                @Override
-                public Date getPattern() {
-                    return new Date(timestamp);
-                }
+                    @Override
+                    public Date getPattern() {
+                        return new Date(timestamp);
+                    }
 
-                @Override
-                public ComparisonType getComparisonType() {
-                    return ComparisonType.LESS_THAN;
-                }
-            };
-            break;
-        case GREATER_EQUALS:
-            pattern = new ComparablePattern<Date>() {
+                    @Override
+                    public ComparisonType getComparisonType() {
+                        return ComparisonType.LESS_THAN;
+                    }
+                };
+                break;
+            case GREATER_EQUALS:
+                pattern = new ComparablePattern<Date>() {
 
-                @Override
-                public Date getPattern() {
-                    return new Date(timestamp - 1);
-                }
+                    @Override
+                    public Date getPattern() {
+                        return new Date(timestamp - 1);
+                    }
 
-                @Override
-                public ComparisonType getComparisonType() {
-                    return ComparisonType.GREATER_THAN;
-                }
-            };
-            break;
-        case LOWER_EQUALS:
-            pattern = new ComparablePattern<Date>() {
+                    @Override
+                    public ComparisonType getComparisonType() {
+                        return ComparisonType.GREATER_THAN;
+                    }
+                };
+                break;
+            case LOWER_EQUALS:
+                pattern = new ComparablePattern<Date>() {
 
-                @Override
-                public Date getPattern() {
-                    return new Date(timestamp + 1);
-                }
+                    @Override
+                    public Date getPattern() {
+                        return new Date(timestamp + 1);
+                    }
 
-                @Override
-                public ComparisonType getComparisonType() {
-                    return ComparisonType.LESS_THAN;
-                }
-            };
-            break;
+                    @Override
+                    public ComparisonType getComparisonType() {
+                        return ComparisonType.LESS_THAN;
+                    }
+                };
+                break;
         }
 
         return null == pattern ? null : new LastModifiedTerm(pattern);
@@ -569,11 +570,7 @@ public final class Utils {
             patterns = Constants.FILETYPE_PATTERNS_AUDIO;
         } else if (FileType.OTHER.getIdentifier().equals(query)) {
             // negate all other patterns
-            String[][] patternsToNegate = {
-                Constants.FILETYPE_PATTERNS_DOCUMENTS,
-                Constants.FILETYPE_PATTERNS_IMAGES,
-                Constants.FILETYPE_PATTERNS_VIDEO,
-                Constants.FILETYPE_PATTERNS_AUDIO
+            String[][] patternsToNegate = { Constants.FILETYPE_PATTERNS_DOCUMENTS, Constants.FILETYPE_PATTERNS_IMAGES, Constants.FILETYPE_PATTERNS_VIDEO, Constants.FILETYPE_PATTERNS_AUDIO
             };
             List<SearchTerm<?>> searchTerms = new ArrayList<SearchTerm<?>>();
             for (String[] toNegate : patternsToNegate) {
@@ -582,14 +579,6 @@ public final class Utils {
                 }
             }
             return new NotTerm(new OrTerm(searchTerms));
-        } else if (FileType.DOC_TEXT.getIdentifier().equals(query)) { 
-            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_TEXT;
-        } else if (FileType.DOC_SPREADSHEET.getIdentifier().equals(query)) { 
-            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_SPREADSHEET;
-        } else if (FileType.DOC_PRESENTATION.getIdentifier().equals(query)) { 
-            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_PRESENTATION;
-        } else if (FileType.PDF.getIdentifier().equals(query)) { 
-            patterns = Constants.FILETYPE_PATTERNS_PDF;
         } else {
             patterns = null;
         }
@@ -604,6 +593,38 @@ public final class Utils {
             }
             return new OrTerm(searchTerms);
         }
+    }
+
+    private static SearchTerm<?> buildFileExtensionTerm(String query) {
+        String[] patterns;
+        if (FileType.AUDIO.getIdentifier().equals(query)) {
+            patterns = Constants.FILE_EXTENSION_AUDIO;
+        } else if (FileType.VIDEO.getIdentifier().equals(query)) {
+            patterns = Constants.FILE_EXTENSION_VIDEO;
+        } else if (FileType.IMAGES.getIdentifier().equals(query)) {
+            patterns = Constants.FILE_EXTENSION_IMAGE;
+        } else if (FileType.DOC_TEXT.getIdentifier().equals(query)) {
+            patterns = Constants.FILE_EXTENSION_TEXT;
+        } else if (FileType.DOC_SPREADSHEET.getIdentifier().equals(query)) {
+            patterns = Constants.FILE_EXTENSION_SPREADSHEET;
+        } else if (FileType.DOC_PRESENTATION.getIdentifier().equals(query)) {
+            patterns = Constants.FILE_EXTENSION_PRESENTATION;
+        } else if (FileType.PDF.getIdentifier().equals(query)) {
+            patterns = Constants.FILE_EXTENSION_PDF;
+        } else {
+            patterns = null;
+        }
+        if (null == patterns || 0 == patterns.length) {
+            return new FileNameTerm("*"); // fall back to query
+        }
+        
+        List<SearchTerm<?>> searchTerms = new ArrayList<SearchTerm<?>>(patterns.length);
+        for (String extension : patterns) {
+            searchTerms.add(new FileNameTerm(extension, true, false));
+            searchTerms.add(new FileNameTerm(extension + ".pgp", true, false));
+        }
+        return new OrTerm(searchTerms);
+
     }
 
 }
