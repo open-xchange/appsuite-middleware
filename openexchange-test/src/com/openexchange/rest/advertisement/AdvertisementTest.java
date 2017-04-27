@@ -57,14 +57,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.codec.binary.Base64;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.advertisement.json.AdConfigRestService;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.framework.ProvisioningSetup;
@@ -102,6 +103,11 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
     private Context old;
     private static final String reloadables = "AdvertisementPackageServiceImpl";
     private static final String DEFAULT = "default";
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(AdConfigRestService.class);
+    }
 
     @Parameter(value = 0)
     public String packageScheme;
@@ -152,7 +158,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
             case "TaxonomyTypes":
                 // Add taxonomy types
-                Context ctx = new Context(getClient().getValues().getContextId());
+                Context ctx = new Context(getAjaxClient().getValues().getContextId());
                 ctx.setUserAttribute("taxonomy", "types", taxonomyTypes);
                 TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
                 Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
@@ -167,12 +173,6 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     private void initREST() throws OXException {
         ProvisioningSetup.init();
-
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        Assert.assertNotNull("Unable to retrieve a context!", testContext);
-        testUser = testContext.acquireUser();
-        testUser2 = testContext.acquireUser();
-        admin = testContext.getAdmin();
 
         restClient = new ApiClient();
         restClient.setBasePath(getBasePath());
@@ -189,8 +189,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         return protocol + "://" + hostname + ":8009";
     }
 
-    @After
-    public void after() throws Exception {
+    @Override
+    public void tearDown() throws Exception {
         try {
             switch (packageScheme) {
                 case "Global":
@@ -216,8 +216,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     @Test
     public void configByUserIdTest() throws Exception {
-        Long contextId = new Long(getClient().getValues().getContextId());
-        Long userId = new Long(getClient().getValues().getUserId());
+        Long contextId = new Long(getAjaxClient().getValues().getContextId());
+        Long userId = new Long(getAjaxClient().getValues().getUserId());
 
         JSONValue adConfig = generateAdConfig();
         try {
@@ -225,7 +225,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertTrue("Unexpected status: " + restClient.getStatusCode(), Arrays.contains(new int[] { 200, 201 }, restClient.getStatusCode()));
 
             GetConfigRequest req = new GetConfigRequest();
-            GetConfigResponse response = getClient().execute(req);
+            GetConfigResponse response = getAjaxClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
 
@@ -259,7 +259,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertTrue("Unexpected status: " + restClient.getStatusCode(), Arrays.contains(new int[] { 200, 201 }, restClient.getStatusCode()));
 
             GetConfigRequest req = new GetConfigRequest();
-            GetConfigResponse response = getClient().execute(req);
+            GetConfigResponse response = getAjaxClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
         } catch (Exception e) {
@@ -290,7 +290,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         assertTrue("Unexpected status: " + restClient.getStatusCode(), Arrays.contains(new int[] { 200, 201 }, restClient.getStatusCode()));
         // Check if configuration is available
         GetConfigRequest req = new GetConfigRequest();
-        GetConfigResponse response = getClient().execute(req);
+        GetConfigResponse response = getAjaxClient().execute(req);
         assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
         assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
         // Remove configuration again
@@ -298,7 +298,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
         assertEquals("Deletion of ad config failed: " + restClient.getStatusCode(), 204, restClient.getStatusCode());
         // Check if configuration is gone
-        GetConfigResponse response2 = getClient().execute(req);
+        GetConfigResponse response2 = getAjaxClient().execute(req);
         assertTrue("Expecting a response with an error.", response2.hasError());
     }
 
@@ -321,21 +321,21 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             int statusLine = restClient.getStatusCode();
             assertTrue("Unexpected status: " + statusLine, Arrays.contains(new int[] { 200, 201 }, statusLine));
             GetConfigRequest req = new GetConfigRequest();
-            GetConfigResponse response = getClient().execute(req);
+            GetConfigResponse response = getAjaxClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
 
             // Create Preview
             JSONValue previewConfig = generateAdConfig();
-            Long ctxId = new Long(getClient().getValues().getContextId());
-            Long userId = new Long(getClient().getValues().getUserId());
+            Long ctxId = new Long(getAjaxClient().getValues().getContextId());
+            Long userId = new Long(getAjaxClient().getValues().getUserId());
             advertisementApi.put_2(ctxId, userId, adConfig.toString());
             statusLine = restClient.getStatusCode();
             assertTrue("Unexpected status: " + statusLine, Arrays.contains(new int[] { 200, 201 }, statusLine));
 
             // Check if preview configuration is available
             req = new GetConfigRequest();
-            response = getClient().execute(req);
+            response = getAjaxClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertEquals("The server returned the wrong configuration.", previewConfig, response.getData());
 
@@ -344,7 +344,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertEquals("Deletion of ad config failed: " + restClient.getStatusCode(), 204, restClient.getStatusCode());
 
             // Check if configuration is back to the old one again
-            response = getClient().execute(req);
+            response = getAjaxClient().execute(req);
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
         } catch (Exception e) {

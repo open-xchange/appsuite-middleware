@@ -70,7 +70,7 @@ public class ThreadedMailCategoriesTest extends AbstractMailCategoriesTest {
 
     @Test
     public void conversationTest() throws Exception {
-        MailTestManager manager = new MailTestManager(getClient(), false);
+        MailTestManager manager = new MailTestManager(getAjaxClient(), false);
         AJAXClient user2Client = new AJAXClient(testContext.acquireUser());
         String send2 = getSendAddress(user2Client);
 
@@ -83,8 +83,8 @@ public class ThreadedMailCategoriesTest extends AbstractMailCategoriesTest {
         final String eml2 = "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + send2 + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
 
         for (int i = 0; i < numOfMails; i++) {
-            getClient().execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml, -1, true));
-            user2Client.execute(new NewMailRequest(getClient().getValues().getInboxFolder(), eml2, -1, true));
+            getAjaxClient().execute(new NewMailRequest(getAjaxClient().getValues().getInboxFolder(), eml, -1, true));
+            user2Client.execute(new NewMailRequest(getAjaxClient().getValues().getInboxFolder(), eml2, -1, true));
         }
 
         String origin = values.getInboxFolder();
