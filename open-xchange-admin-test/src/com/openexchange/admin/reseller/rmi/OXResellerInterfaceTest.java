@@ -80,14 +80,15 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
-    private static Stack<Context> restrictionContexts = null;
+    private Stack<Context> restrictionContexts = null;
 
-    private static OXResellerInterface oxresell = null;
+    private OXResellerInterface oxresell = null;
 
-    private static OXContextInterface oxctx = null;
+    private OXContextInterface oxctx = null;
 
     @Override
-    public void setUp() throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException, MalformedURLException, NotBoundException {
+    public void setUp() throws Exception {
+        super.setUp();
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }
@@ -96,7 +97,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     public final void tearDown() throws Exception {
         final Credentials creds = DummyMasterCredentials();
 
-        final ResellerAdmin[] adms = oxresell.list("*", creds);
+        final ResellerAdmin[] adms = oxresell.list("test*", creds);
         for (final ResellerAdmin adm : adms) {
             oxresell.delete(adm, creds);
         }
