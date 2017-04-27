@@ -4,6 +4,8 @@ feature_description: |
   open-xchange-grizzly. In your OX setup grizzly is located behind the
   load-balancer and accepts incoming client requests. Communication with the
   load balancer is done via http, e.g via Apache's mod_proxy_http.
+
+  For more informations see [[https://documentation.open-xchange.com/{{version}}/middleware/components/grizzly.html]].
 properties:
     - key: com.openexchange.http.grizzly.wsTimeoutMillis
       description: |
@@ -124,7 +126,7 @@ properties:
         The maximum header size for an HTTP request in bytes. Make sure to increase
         this value for all components of your infrastructure when you are forced to
         deal with enormous headers. For Apache as our default balancer see
-        http://httpd.apache.org/docs/current/mod/core.html#limitrequestfieldsize
+        [[http://httpd.apache.org/docs/current/mod/core.html#limitrequestfieldsize]]
       defaultValue: 8192
       version:
       reloadable: false
@@ -145,7 +147,7 @@ properties:
     - key: com.openexchange.http.grizzly.enabledCipherSuites
       description: |
         Comma-separated list of cipher suites that should be used for secure connections.
-        See https://www.openssl.org/docs/manmaster/apps/ciphers.html
+        See [[https://www.openssl.org/docs/manmaster/apps/ciphers.html]].
         No value means system-default.
       defaultValue:
       version:

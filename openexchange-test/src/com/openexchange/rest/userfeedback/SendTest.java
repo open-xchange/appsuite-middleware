@@ -137,8 +137,10 @@ public class SendTest extends AbstractUserFeedbackTest {
     public void testSend_everythingFine_returnMessageAndVerifyMail() throws OXException, IOException, JSONException, AddressException, ApiException {
         String subject = RandomString.generateChars(35);
         requestBody.put("subject", subject);
-        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0), Boolean.FALSE);
+        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0));
         assertEquals(200, getRestClient().getStatusCode());
+        JSONObject resp = new JSONObject(send);
+        assertFalse(resp.hasAndNotNull("fail"));
 
         AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
         AllResponse response = getAjaxClient().execute(all);
@@ -150,7 +152,7 @@ public class SendTest extends AbstractUserFeedbackTest {
     @Test
     public void testSend_subjectNull_sentWithDefaultSubject() throws ApiException, OXException, IOException, JSONException, AddressException {
         requestBody.remove("subject");
-        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0), Boolean.TRUE);
+        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0));
         assertEquals(200, getRestClient().getStatusCode());
 
         AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
@@ -165,7 +167,7 @@ public class SendTest extends AbstractUserFeedbackTest {
         String subject = RandomString.generateChars(35);
         requestBody.put("subject", subject);
         requestBody.remove("body");
-        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0), Boolean.FALSE);
+        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0));
         assertEquals(200, getRestClient().getStatusCode());
 
         AllRequest all = new AllRequest(getAjaxClient().getValues().getInboxFolder(), listAttributes, 0, Order.DESCENDING, true);
@@ -188,7 +190,7 @@ public class SendTest extends AbstractUserFeedbackTest {
         requestBody.put("subject", subject);
         requestBody.put("compress", true);
 
-        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0), Boolean.FALSE);
+        String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0));
 
         assertEquals(200, getRestClient().getStatusCode());
 
@@ -211,7 +213,7 @@ public class SendTest extends AbstractUserFeedbackTest {
 
 
         try {
-            String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0), Boolean.FALSE);
+            String send = userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(0));
             fail();
         } catch (ApiException e) {
             assertEquals(400, getRestClient().getStatusCode());
@@ -223,7 +225,7 @@ public class SendTest extends AbstractUserFeedbackTest {
     @Test
     public void testSend_unknownContextGroup_return404() throws JSONException {
         try {
-            userfeedbackApi.send("unknown", type, requestBody.toString(), new Long(0), new Long(0), Boolean.FALSE);
+            userfeedbackApi.send("unknown", type, requestBody.toString(), new Long(0), new Long(0));
             fail();
         } catch (ApiException e) {
             assertEquals(404, getRestClient().getStatusCode());
@@ -233,7 +235,7 @@ public class SendTest extends AbstractUserFeedbackTest {
     @Test
     public void testSend_unknownFeefdbackType_return404() throws JSONException {
         try {
-            userfeedbackApi.send("default", "schalke-rating", requestBody.toString(), new Long(0), new Long(0), Boolean.FALSE);
+            userfeedbackApi.send("default", "schalke-rating", requestBody.toString(), new Long(0), new Long(0));
             fail();
         } catch (ApiException e) {
             assertEquals(404, getRestClient().getStatusCode());
@@ -243,7 +245,7 @@ public class SendTest extends AbstractUserFeedbackTest {
     @Test
     public void testSend_negativeStart_return404() throws JSONException {
         try {
-            userfeedbackApi.send("default", type, requestBody.toString(), new Long(-11111), new Long(0), Boolean.FALSE);
+            userfeedbackApi.send("default", type, requestBody.toString(), new Long(-11111), new Long(0));
             fail();
         } catch (ApiException e) {
             assertEquals(400, getRestClient().getStatusCode());
@@ -253,7 +255,7 @@ public class SendTest extends AbstractUserFeedbackTest {
     @Test
     public void testSend_negativeEnd_return404() throws JSONException {
         try {
-            userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(-11111), Boolean.FALSE);
+            userfeedbackApi.send("default", type, requestBody.toString(), new Long(0), new Long(-11111));
             fail();
         } catch (ApiException e) {
             assertEquals(400, getRestClient().getStatusCode());
@@ -263,7 +265,7 @@ public class SendTest extends AbstractUserFeedbackTest {
     @Test
     public void testSend_endBeforeStart_return404() throws JSONException {
         try {
-            userfeedbackApi.send("default", type, requestBody.toString(), new Long(222222222), new Long(11111), Boolean.FALSE);
+            userfeedbackApi.send("default", type, requestBody.toString(), new Long(222222222), new Long(11111));
             fail();
         } catch (ApiException e) {
             assertEquals(400, getRestClient().getStatusCode());

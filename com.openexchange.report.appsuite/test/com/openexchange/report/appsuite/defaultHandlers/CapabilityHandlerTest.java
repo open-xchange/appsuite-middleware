@@ -227,9 +227,6 @@ public class CapabilityHandlerTest {
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
 
-            @Override
-            public void closeAllDBConnections() {}
-
         };
 
         PowerMockito.mockStatic(Services.class);
@@ -309,9 +306,6 @@ public class CapabilityHandlerTest {
                 }
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
-
-            @Override
-            public void closeAllDBConnections() {}
 
         };
 

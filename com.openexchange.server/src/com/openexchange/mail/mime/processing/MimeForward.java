@@ -79,6 +79,7 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
@@ -157,6 +158,23 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @throws OXException If forward mail cannot be composed
      */
     public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int accountID, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getFowardMail(originalMails, session, accountID, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
+     * <p>
+     * If multiple messages are given these messages are forwarded as attachments.
+     *
+     * @param originalMails The referenced original mails
+     * @param session The session containing needed user data
+     * @param accountID The account ID of the referenced original mails
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param fromAddressProvider The provider for <code>"From"</code> address
+     * @return An instance of {@link MailMessage} representing an user-editable forward mail
+     * @throws OXException If forward mail cannot be composed
+     */
+    public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int accountID, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         for (MailMessage cur : originalMails) {
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountID) {
                 cur.setAccountId(accountID);
@@ -165,7 +183,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         /*
          * Compose forward message
          */
-        return getFowardMail0(originalMails, new int[] {accountID}, session, usm, setFrom);
+        return getFowardMail0(originalMails, new int[] {accountID}, session, usm, fromAddressProvider);
     }
 
     /**
@@ -183,6 +201,24 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @throws OXException If forward mail cannot be composed
      */
     public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int[] accountIDs, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getFowardMail(originalMails, session, accountIDs, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Composes a forward message from specified original messages taken from possibly differing accounts based on MIME objects from
+     * <code>JavaMail</code> API.
+     * <p>
+     * If multiple messages are given these messages are forwarded as attachments.
+     *
+     * @param originalMails The referenced original mails
+     * @param session The session containing needed user data
+     * @param accountIDs The account IDs of the referenced original mails
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param fromAddressProvider The provider for <code>"From"</code> address
+     * @return An instance of {@link MailMessage} representing an user-editable forward mail
+     * @throws OXException If forward mail cannot be composed
+     */
+    public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int[] accountIDs, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         for (int i = 0; i < originalMails.length; i++) {
             MailMessage cur = originalMails[i];
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountIDs[i]) {
@@ -192,7 +228,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         /*
          * Compose forward message
          */
-        return getFowardMail0(originalMails, accountIDs, session, usm, setFrom);
+        return getFowardMail0(originalMails, accountIDs, session, usm, fromAddressProvider);
     }
 
     /**
@@ -204,11 +240,11 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @param accountIds The account identifiers
      * @param session The session containing needed user data
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
-     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @param fromAddressProvider The provider for <code>"From"</code> address
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws OXException If forward mail cannot be composed
      */
-    private static MailMessage getFowardMail0(MailMessage[] originalMsgs, int[] accountIds, Session session, UserSettingMail userSettingMail, boolean setFrom) throws OXException {
+    private static MailMessage getFowardMail0(MailMessage[] originalMsgs, int[] accountIds, Session session, UserSettingMail userSettingMail, FromAddressProvider fromAddressProvider) throws OXException {
         try {
             /*
              * Clone them to ensure consistent data
@@ -241,11 +277,19 @@ public final class MimeForward extends AbstractMimeProcessing {
              */
             {
                 boolean fromSet = false;
-                if (setFrom) {
-                    InternetAddress from = MimeProcessingUtility.determinePossibleFrom(true, origMsgs[0], accountIds[0], session, ctx);
-                    if (null != from) {
-                        forwardMsg.setFrom(from);
-                        fromSet = true;
+                if (null != fromAddressProvider) {
+                    if (fromAddressProvider.isDetectBy()) {
+                        InternetAddress from = MimeProcessingUtility.determinePossibleFrom(true, origMsgs[0], accountIds[0], session, ctx);
+                        if (null != from) {
+                            forwardMsg.setFrom(from);
+                            fromSet = true;
+                        }
+                    } else if (fromAddressProvider.isSpecified()) {
+                        InternetAddress from = fromAddressProvider.getFromAddress();
+                        if (null != from) {
+                            forwardMsg.setFrom(from);
+                            fromSet = true;
+                        }
                     }
                 }
                 if (!fromSet) {

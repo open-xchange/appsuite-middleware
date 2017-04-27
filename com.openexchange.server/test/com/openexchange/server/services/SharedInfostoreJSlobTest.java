@@ -149,7 +149,7 @@ public class SharedInfostoreJSlobTest {
     public void testGetJSlob_fine_attachmentQuotaSet() throws OXException, JSONException {
         JSlob jSlob = sharedInfostoreJSlob.getJSlob(session);
 
-        Assert.assertEquals(0L, jSlob.getJsonObject().get("attachmentQuota"));
+        Assert.assertEquals(-1L, jSlob.getJsonObject().get("attachmentQuota"));
     }
 
     @Test

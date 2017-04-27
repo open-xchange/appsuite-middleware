@@ -1,4 +1,7 @@
 feature_name: OAuth
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth.html]] and
+  [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth_provider.html]] for mor informations.
 properties:
     - key: com.openexchange.oauth.modules.enabled.[oauth_provider]
       description: |
@@ -108,8 +111,10 @@ properties:
       tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].redirectUrl
       description: |
-        The redirect url of your [serviceId] application.  
-        E.g. "https://myappsuite.mydomain.invalid/ajax/defer"
+        The redirect url of your [serviceId] application. E.g.:
+        <pre>
+        com.openexchange.oauth.[serviceId].redirectUrl=https://myappsuite.mydomain.invalid/ajax/defer
+        </pre>
 
         See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
       defaultValue: 

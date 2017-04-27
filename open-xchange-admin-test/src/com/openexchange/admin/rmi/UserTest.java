@@ -69,6 +69,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 import org.junit.AfterClass;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -83,6 +84,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -763,7 +765,9 @@ public class UserTest extends AbstractTest {
         }
 
         // now change data
-        srv_loaded.addAlias("newAlias123@test.com");
+        String alias = generateRandomAlias(44);
+        srv_loaded = changeUserAlias(srv_loaded, alias);
+        
         // submit changes
         oxu.change(ctx, srv_loaded, cred);
 
@@ -780,7 +784,7 @@ public class UserTest extends AbstractTest {
         }
     }
     
-    @Test(expected=StorageException.class)
+    @Test
     public void testChangeAliasTooLong() throws Exception {
         // Try to change alias with too long name (Bug 52763) 
 
@@ -804,26 +808,30 @@ public class UserTest extends AbstractTest {
         }
 
         // now change data
-        srv_loaded.addAlias(TOO_LONG);
+        String alias = generateRandomAlias(4096);
+        srv_loaded = changeUserAlias(srv_loaded, alias);
+
         // submit changes, should throw StorageException
-        oxu.change(ctx, srv_loaded, cred);
+        boolean canary = true;
+        try {
+            oxu.change(ctx, srv_loaded, cred);
+        } catch (StorageException e) {
+            canary = false;
+        }
 
-        // load again - should not be changed
-        final User user_not_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
-
-        // remove deleted dynamic attribute for verification
-        srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
-        // remove flawed alias
-        srv_loaded.removeAlias(TOO_LONG);
-        if (srv_loaded.getId().equals(user_not_changed_loaded.getId())) {
-            //verify data
-            compareUser(srv_loaded, user_not_changed_loaded);
-        } else {
-            fail("Expected to get correct changed user data");
+        // Check if exception was thrown
+        if (canary) {
+            fail("Expected an Storage Exception");
         }
         
+        // remove flawed alias
+        srv_loaded.removeAlias(alias);
+        
+        // no assertion needed since no data changed on server
         // check if you can still change alias (Bug 52763)
-        srv_loaded.addAlias("foobar@example.net");
+        alias = generateRandomAlias(44);
+        srv_loaded = changeUserAlias(srv_loaded, alias);
+        
         // submit changes
         oxu.change(ctx, srv_loaded, cred);
 
@@ -1168,6 +1176,10 @@ public class UserTest extends AbstractTest {
         // first fill setter and other infos in map object
         for (Method method : theMethods) {
             String method_name = method.getName();
+            if(method_name.equals("setPrimaryAccountName")) {
+                // Drop unsupported changes in user class
+                continue;
+            }            
             if (method_name.startsWith("set")) {
                 // check if it is a type we support
                 if (method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")) {
@@ -1202,10 +1214,10 @@ public class UserTest extends AbstractTest {
 
     private class MethodMapObject {
 
-        private Method getter              = null;
-        private Method setter              = null;
+        private Method getter = null;
+        private Method setter = null;
         private String methodParameterType = null;
-        private String methodName          = null;
+        private String methodName = null;
 
         /**
          * @return the getter
@@ -1539,8 +1551,10 @@ public class UserTest extends AbstractTest {
         usr.setEmail2("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail3("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
 
-        usr.setFilestoreId(null);
-        usr.setFilestore_name(null);
+        if (context != null) {
+            usr.setFilestoreId(context.getFilestoreId());
+            usr.setFilestore_name(context.getFilestore_name());
+        }
 
         final HashSet<String> aliase = new HashSet<String>();
         aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
@@ -1816,11 +1830,11 @@ public class UserTest extends AbstractTest {
         final Hashtable<String, OXCommonExtension> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
-            //          for (int i = 0; i < aexts.size(); i++) {
-            //          final OXCommonExtensionInterface aext = aexts.get(i);
-            //          final OXCommonExtensionInterface bext = bexts.get(i);
-            //          assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-            //          }
+            for (int i = 0; i < aexts.size(); i++) {
+                final OXCommonExtensionInterface aext = aexts.get(i);
+                final OXCommonExtensionInterface bext = bexts.get(i);
+                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+            }
         }
 
         assertEquals("User Attributes not equal", a.getUserAttributes(), b.getUserAttributes());
@@ -1853,6 +1867,32 @@ public class UserTest extends AbstractTest {
     //        return getTestContextObject(1, 50);
     //    }
 
+    
+    private String generateRandomAlias(long length) {
+        String mail = "@test.org";
+        StringBuffer buf = new StringBuffer();
+        Random r = new Random();
+        for (long l = 0; l <= (length - mail.length()); l++) {
+            buf.append((char) (r.nextInt(26) + 'a'));
+        }
+        buf.append(mail);
+        return buf.toString();
+    }
+
+    private User changeUserAlias(final User usr, String alias) throws CloneNotSupportedException {
+        final User retval = (User) usr.clone();
+
+        // Change alias and remove attributes to meet later compare action
+        retval.addAlias(alias);
+        retval.setFilestoreId(null);
+        retval.setPasswordMech(null);
+        retval.setUserAttribute("com.openexchange.test", "simpleValue", usr.getUserAttribute("com.openexchange.test", "simpleValue") + change_suffix);
+        retval.setUserAttribute("com.openexchange.test", "newValue", change_suffix);
+        retval.setUserAttribute("com.openexchange.test", "deleteMe", null);
+
+        return retval;
+    }
+    
     private User createChangeUserData(final User usr) throws CloneNotSupportedException, URISyntaxException {
 
         // change all fields of the user

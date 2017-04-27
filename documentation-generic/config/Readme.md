@@ -75,6 +75,7 @@ This chapter provides recommendations about how a property description should be
 Some general guidelines:
 
 * Don't describe default values in the description field, so if someone has to change the default value he doesn't need to change the description too.
+* Don't forget to use punctuation.
 * If you want to add a note or warning or something similar please use the following form:
 
 ```
@@ -86,6 +87,18 @@ Note to leave in the next line with a simple linebreak before.
 ```
 * If you want to reference the property itself use "this property" or something similar instead of the property name.
 * If you use the property name of another property write the complete property name (key) surrounded by two square brackets. E.g. [[com.openexchange.feature.property]]
+* You also link to html pages this way. You only need to start the link with either "http://" or "https://".
+* You can also use `{{version}}` as a placeholder for the current version. E.g.:
+```
+[[https://documentation.open-xchange.com/{{version}}/middleware/components/saml.html]]
+```
+will be replace for 7.8.4 with:
+```
+<a href=https://documentation.open-xchange.com/7.8.4/middleware/components/saml.html>
+https://documentation.open-xchange.com/7.8.4/middleware/components/saml.html
+</a>
+```
+
 
 ## Linebreaks
 

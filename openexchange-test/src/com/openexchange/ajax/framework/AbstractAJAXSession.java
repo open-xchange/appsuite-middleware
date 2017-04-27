@@ -73,7 +73,7 @@ import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 
 @RunWith(ConcurrentTestRunner.class)
-@Concurrent(count = 10)
+@Concurrent(count = 5)
 public abstract class AbstractAJAXSession {
 
     private AJAXClient client;
@@ -97,7 +97,7 @@ public abstract class AbstractAJAXSession {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name name of the test.
      */
     protected AbstractAJAXSession() {

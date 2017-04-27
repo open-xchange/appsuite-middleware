@@ -116,6 +116,8 @@ import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
+import com.openexchange.html.internal.jsoup.JsoupParser;
+import com.openexchange.html.internal.jsoup.handler.FilterJsoupHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
@@ -557,7 +559,8 @@ public final class HtmlServiceImpl implements HtmlService {
             }
 
             // CSS- and tag-wise sanitizing
-            {
+            boolean useJericho = HtmlServices.useJericho();
+            if (useJericho) {
                 // Initialize the handler
                 FilterJerichoHandler handler = getHandlerFor(html.length(), options.getOptConfigName());
                 handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
@@ -574,6 +577,31 @@ public final class HtmlServiceImpl implements HtmlService {
 
                 // Parse the HTML content
                 JerichoParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
+
+                // Check if modified by handler
+                if (options.isDropExternalImages() && null != modified) {
+                    modified[0] |= handler.isImageURLFound();
+                }
+
+                // Get HTML content
+                html = handler.getHTML();
+                htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+            } else {
+                FilterJsoupHandler handler = getJsoupHandlerFor(html.length(), options.getOptConfigName());
+                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
+
+                // Drop external images using regular expression
+                boolean[] modified = options.getModified();
+                if (options.isDropExternalImages()) {
+                    DroppingImageHandler imageHandler = new DroppingImageHandler();
+                    html = ImageProcessor.getInstance().replaceImages(html, imageHandler);
+                    if (null != modified) {
+                        modified[0] |= imageHandler.isModified();
+                    }
+                }
+
+                // Parse the HTML content
+                JsoupParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
 
                 // Check if modified by handler
                 if (options.isDropExternalImages() && null != modified) {
@@ -602,6 +630,14 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         String definition = getConfiguration().getText(optionalConfigName.endsWith(".properties") ? optionalConfigName : optionalConfigName + ".properties");
         return null == definition ? new FilterJerichoHandler(initialCapacity, this) : new FilterJerichoHandler(initialCapacity, definition, this);
+    }
+
+    private FilterJsoupHandler getJsoupHandlerFor(int initialCapacity, String optionalConfigName) {
+        if (null == optionalConfigName) {
+            return new FilterJsoupHandler(initialCapacity, this);
+        }
+        String definition = getConfiguration().getText(optionalConfigName.endsWith(".properties") ? optionalConfigName : optionalConfigName + ".properties");
+        return null == definition ? new FilterJsoupHandler(initialCapacity, this) : new FilterJsoupHandler(initialCapacity, definition, this);
     }
 
     private static final Pattern PATTERN_FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/+([a-zA-Z_0-9-][^>]+)");

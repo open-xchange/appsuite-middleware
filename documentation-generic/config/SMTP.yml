@@ -115,8 +115,7 @@ properties:
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.sendPartial
       description: |
-        Whether partial send is allowed or message transport is supposed to be aborted
-        Default is "false"
+        Whether partial send is allowed or message transport is supposed to be aborted.
       defaultValue: false
       version: 
       reloadable: true
