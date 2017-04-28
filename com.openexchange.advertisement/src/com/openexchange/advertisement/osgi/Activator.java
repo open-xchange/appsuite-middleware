@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.internal.AdvertisementPackageServiceImpl;
@@ -83,6 +84,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        LoggerFactory.getLogger(Activator.class).info("starting bundle com.openexchange.advertisement");
         Services.setServiceLookup(this);
 
         final String sCapability = "ads";
@@ -139,6 +141,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        LoggerFactory.getLogger(Activator.class).info("stopping bundle com.openexchange.advertisement");
+
         super.stopBundle();
         Services.setServiceLookup(null);
     }
