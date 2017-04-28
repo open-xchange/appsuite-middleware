@@ -399,6 +399,34 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return Boolean.valueOf(validated);
     }
 
+    /**
+     * Validates mail transport from specified account description.
+     *
+     * @param accountDescription The account description
+     * @param session The associated session
+     * @param ignoreInvalidTransport
+     * @param warnings The warnings list
+     * @param errorOnDenied <code>true</code> to throw an error in case account description is denied (either by host or port); otherwise <code>false</code>
+     * @return <code>true</code> for successful validation; otherwise <code>false</code>
+     * @throws OXException If an severe error occurs
+     */
+    public static Boolean actionValidateMailTransportBoolean(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+        // Check for primary account
+        if (MailAccount.DEFAULT_ID == accountDescription.getId()) {
+            return Boolean.TRUE;
+        }
+        // Check transport server URL, if a transport server is present
+        boolean validated = true;
+        if (!isEmpty(accountDescription.getTransportServer())) {
+            validated = checkTransportServerURL(accountDescription, session, warnings, errorOnDenied);
+            if (!validated) {
+                checkForCommunicationProblem(warnings, true, accountDescription);
+                return Boolean.FALSE;
+            }
+        }
+        return Boolean.valueOf(validated);
+    }
+
     private static String generateMailServerURL(JSONObject jAccount) throws OXException {
         String mailServer = jAccount.optString(MailAccountFields.MAIL_SERVER, null);
         if (com.openexchange.java.Strings.isEmpty(mailServer)) {
