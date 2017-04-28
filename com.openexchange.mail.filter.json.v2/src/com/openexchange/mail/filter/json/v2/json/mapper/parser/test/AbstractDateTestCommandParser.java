@@ -143,15 +143,15 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         if (normalizedMatcher != null) {
             addComparatorToArgumentList(argList, commandName, normalizedMatcher);
             return true;
-        } 
-        
+        }
+
         addComparatorToArgumentList(argList, commandName, comparisonTag);
         return false;
     }
 
     private void addComparatorToArgumentList(List<Object> argList, String commandName, final String comparisonTag) throws OXException {
         Comparison comparison = Comparison.valueOf(comparisonTag);
-   
+
         switch (comparison) {
             case ge:
                 argList.add(ArgumentUtil.createTagArgument("value"));
@@ -239,7 +239,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         }
 
         if (MatchType.value.name().equals(comparison) || MatchType.value.getNotName().equals(comparison)) {
-            int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
+            int compPos = command.getArgumentPosition(ArgumentUtil.createTagArgument("value")) + 1;
             String resultMatchTtype = ((List<String>) command.getArguments().get(compPos)).get(0);
             if (transformToNotMatcher) {
                 resultMatchTtype = MatchType.valueOf(resultMatchTtype).getNotName();

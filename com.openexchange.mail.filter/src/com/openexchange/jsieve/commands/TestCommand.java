@@ -306,7 +306,7 @@ public class TestCommand extends Command {
             arguments.put(":originalzone", "");
             return arguments;
         }
-        
+
         /**
          * Specifies the ':zone' argument as described in
          * <a href="https://tools.ietf.org/html/rfc5260#section-4.1">RFC-5260: Zone and Originalzone arguments</a>
@@ -675,6 +675,21 @@ public class TestCommand extends Command {
      */
     public final List<Object> getArguments() {
         return arguments;
+    }
+
+    /**
+     * Retrieves the position of an argument
+     *
+     * @param arg The argument
+     * @return The position or -1
+     */
+    public int getArgumentPosition(Object arg) {
+        for (int x = 0; x < arguments.size(); x++) {
+            if (arg.equals(arguments.get(x))) {
+                return x;
+            }
+        }
+        return -1;
     }
 
     /**
