@@ -651,9 +651,15 @@ public class IMAPDefaultFolderChecker {
                 }
 
                 // Check against account data
-                if ((null != toSet) && (null != checkedFullName) && (false == isEmpty(fullName)) && !checkedFullName.equals(fullName)) {
-                    toSet.put(index, checkedFullName);
-                    added = true;
+                if (null != toSet && (null != checkedFullName)) {
+                    if (isEmpty(fullName)) {
+                        // No full-name set before
+                        toSet.put(index, checkedFullName);
+                        added = true;
+                    } else if (!checkedFullName.equals(fullName)) {
+                        // Strange...
+                        LOG.warn("Invalid {} full-name in settings of external account for login {} (account={}) on IMAP server {}. Should be \"{}\", but is \"{}\" (user={}, context={})", getFallbackName(index), imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), fullName, checkedFullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    }
                 }
             }
 

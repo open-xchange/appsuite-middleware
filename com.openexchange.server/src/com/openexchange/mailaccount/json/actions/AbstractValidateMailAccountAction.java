@@ -358,7 +358,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         }
     }
 
-    private static boolean seemsValid(final String str) {
+    static boolean seemsValid(final String str) {
         if (isEmpty(str)) {
             return false;
         }
