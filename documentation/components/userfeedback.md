@@ -6,7 +6,9 @@ title: User feedback services
 
 For software improvement purposes, it is necessary to collect qualified feedback from the users of OX software and services. Therefore a set of tools is provided to store this feedback on server side, export it in a CSV-File, encrypt and send it via email to a set of recipients. If feedback data is no longer needed, the stored data can also be deleted by a qualified administrator.
 
-The feedback feature needs a correct configured **global database (globaldb)**, because all data is stored there. You can find detailed informations on this topic [here](https://oxpedia.org/wiki/index.php?title=AppSuite:CrossContextDatabase). Since one of various filters is the **context-group**, the user of the provided tools should also know what context groups are. Further information can be found [here](https://oxpedia.org/wiki/index.php?title=AppSuite:CrossContextDatabase).
+The feedback feature needs a correct configured **global database (globaldb)**, because all data is stored there. Until 7.8.4 the globaldb has only be used to store small data pieces related to sharing and OAuth. With user feedback there might be a high amount of data that becomes persisted. Make sure that your global database is dimensioned appropriately. You can find detailed informations on this topic [here](https://oxpedia.org/wiki/index.php?title=AppSuite:CrossContextDatabase). 
+
+Since one of various filters is the **context-group**, the user of the provided tools should also know what context groups are. Further information can be found [here](https://oxpedia.org/wiki/index.php?title=AppSuite:CrossContextDatabase).
 
 As dealing with stored feedback is based on REST calls the open-xchange-rest package is a required dependency and will also be installed when open-xchange-userfeedback should be installed.
 
