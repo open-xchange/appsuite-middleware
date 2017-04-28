@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-20 09:20+0200\n"
+"PO-Revision-Date: 2017-04-28 11:03+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3343,14 +3343,10 @@ msgstr "Der HTML-Inhalt ist ungültig und kann nicht angezeigt werden"
 msgid "The HTML content cannot be safely displayed"
 msgstr "Der HTML-Inhalt kann nicht sicher angezeigt werden"
 
-#. Thrown when parser failed or timed-out while processing HTML, in turn it cannot be safely displayed
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
-msgid ""
-"The HTML content cannot be safely displayed. The content is displayed as "
-"plain text instead."
-msgstr ""
-"Der HTML-Inhalt kann nicht sicher angezeigt werden. Der Inhalt wird "
-"stattdessen als Klartext angezeigt."
+msgid "This message can only be displayed as plain text"
+msgstr "Diese Nachricht kann nur als reine Textnachricht angezeigt werden"
 
 #. *
 #. * No connection available to access mailbox
@@ -13353,6 +13349,13 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The HTML content cannot be safely displayed. The content is displayed as "
+#~ "plain text instead."
+#~ msgstr ""
+#~ "Der HTML-Inhalt kann nicht sicher angezeigt werden. Der Inhalt wird "
+#~ "stattdessen als Klartext angezeigt."
 
 #~ msgid "The provided feedback does not contain required key \"%s\"."
 #~ msgstr ""
