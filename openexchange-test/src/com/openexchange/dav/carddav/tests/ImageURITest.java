@@ -49,10 +49,7 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.net.URI;
 import java.util.Date;
 import java.util.Map;
@@ -219,7 +216,7 @@ public class ImageURITest extends CardDAVTest {
          */
         vCard.getVCard().removePhoto(vCard.getVCard().getPhotos().get(0));
         PhotoType photo = new PhotoType();
-        photo.setImageMediaType(ImageMediaType.SGIF);
+        photo.setImageMediaType(new ImageMediaType("GIF", "image/gif", "gif"));
         photo.setEncodingType(EncodingType.BINARY);
         photo.setPhoto(Photos.GIF_100x100);
         vCard.getVCard().addPhoto(photo);
