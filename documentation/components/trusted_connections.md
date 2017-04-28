@@ -70,3 +70,6 @@ The JVM's default trust store can be disabled. In this case, a custom trust stor
 
 ## Mailaccount autoconfiguration
 External mail accounts can be autoconfigured by using a database hosted by Mozilla Messaging. The certificate for domain ``live.mozillamessaging.com`` must be added to a custom trust store, if JVM's default trust store is disabled.
+
+## Certificate incompatibility with Java 7
+It might happen that handshaking fails and connections cannot be established due to incompatibility of cipher suites for the certificate in combination with Java 7. For instance running the Open-Xchange server on Java 7 and trying to connect to a server that provides a certificate with no support for any SHA-1 ciphers will result in a HandshakeException. 
