@@ -49,7 +49,7 @@
 
 package com.openexchange.html.internal.jsoup;
 
-import org.jsoup.Jsoup;
+import java.util.Map;
 import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
@@ -58,7 +58,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
+import org.jsoup.parser.InterruptedParsingException;
+import org.jsoup.parser.InterruptibleHtmlTreeBuilder;
+import org.jsoup.parser.ParseErrorList;
 import org.jsoup.select.NodeVisitor;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlExceptionCodes;
@@ -152,8 +156,8 @@ public class JsoupParser {
             return;
         }
 
-        // TODO: Run as a task
-        doParse(html, handler);
+        // Run as a monitored task
+        new JsoupParseTask(html, handler, timeout, this).call();
     }
 
     /**
@@ -164,46 +168,105 @@ public class JsoupParser {
      * @throws OXException If specified HTML content cannot be parsed
      */
     public void doParse(String html, JsoupHandler handler) throws OXException {
-        Document document = Jsoup.parse(html);
-        document.traverse(new JsoupNodeVisitor(handler));
+        try {
+            // Parse HTML input to a Jsoup document
+            InterruptibleHtmlTreeBuilder treeBuilder = new InterruptibleHtmlTreeBuilder();
+            Document document = treeBuilder.parse(html, "", ParseErrorList.noTracking(), treeBuilder.defaultSettings());
+
+            // Traverse document, giving call-backs to specified handler
+            document.traverse(new InterruptibleJsoupNodeVisitor(handler));
+        } catch (InterruptedParsingException e) {
+            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
+        } catch (StackOverflowError parserOverflow) {
+            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser overflow detected.", parserOverflow);
+        }
     }
 
-    private static final class JsoupNodeVisitor implements NodeVisitor {
+    private static final class InterruptibleJsoupNodeVisitor implements NodeVisitor {
+
+        private static interface Invoker {
+
+            void invoke(Node node, JsoupHandler handler);
+        }
+
+        private static final Map<Class<?>, Invoker> CALLS = ImmutableMap.<Class<?>, Invoker> builder()
+            .put(Element.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    handler.handleElementStart((Element) node);
+                }
+            })
+            .put(TextNode.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    handler.handleTextNode((TextNode) node);
+                }
+            })
+            .put(Comment.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    handler.handleComment((Comment) node);
+                }
+            })
+            .put(DataNode.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    handler.handleDataNode((DataNode) node);
+                }
+            })
+            .put(DocumentType.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    handler.handleDocumentType((DocumentType) node);
+                }
+            })
+            .put(Document.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    // Nothing
+                }
+            })
+            .put(XmlDeclaration.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    handler.handleXmlDeclaration((XmlDeclaration) node);
+                }
+            })
+            .build();
 
         private final JsoupHandler handler;
 
-        JsoupNodeVisitor(JsoupHandler handler) {
+        InterruptibleJsoupNodeVisitor(JsoupHandler handler) {
             super();
             this.handler = handler;
         }
 
         @Override
         public void head(Node node, int depth) {
-            if (node instanceof Element) {
-                Element element = (Element) node;
-                handler.handleElementStart(element);
-            } else if (node instanceof TextNode) {
-                TextNode textNode = (TextNode) node;
-                handler.handleTextNode(textNode);
-            } else if (node instanceof Comment) {
-                Comment comment = (Comment) node;
-                handler.handleComment(comment);
-            } else if (node instanceof DataNode) {
-                DataNode dataNode = (DataNode) node;
-                handler.handleDataNode(dataNode);
-            } else if (node instanceof DocumentType) {
-                DocumentType documentType = (DocumentType) node;
-                handler.handleDocumentType(documentType);
-            } else if (node instanceof Document) {
-                // Ignore root
-            } else if (node instanceof XmlDeclaration) {
-                XmlDeclaration xmlDeclaration = (XmlDeclaration) node;
-                handler.handleXmlDeclaration(xmlDeclaration);
+            if (Thread.interrupted()) { // clears flag if set
+                throw new InterruptedParsingException();
+            }
+
+            Invoker invoker = CALLS.get(node.getClass());
+            if (null != invoker) {
+                invoker.invoke(node, handler);
+            } else {
+                LOG.warn("Unexpected node: {}", node.getClass().getName());
             }
         }
 
         @Override
         public void tail(Node node, int depth) {
+            if (Thread.interrupted()) { // clears flag if set
+                throw new InterruptedParsingException();
+            }
             if (node instanceof Element) {
                 Element element = (Element) node;
                 handler.handleElementEnd(element);

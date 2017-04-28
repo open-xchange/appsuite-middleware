@@ -66,15 +66,15 @@ public class TrainTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testTrain() throws Exception {
-        MailTestManager manager = new MailTestManager(getClient(), false);
-        getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
+        MailTestManager manager = new MailTestManager(getAjaxClient(), false);
+        getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         manager.trainCategory(CAT_1, false, true, getSendAddress());
         MailMessage[] messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_GENERAL);
         assertTrue("General category should still contain the old email!", messages.length == 1);
         messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_1);
         assertTrue("Category 1 should contain no email!", messages.length == 0);
-        getClient().execute(new NewMailRequest(null, EML, -1, true));
+        getAjaxClient().execute(new NewMailRequest(null, EML, -1, true));
         messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_GENERAL);
         assertTrue("General category should still contain only the old email!", messages.length == 1);
         messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_1);
@@ -83,8 +83,8 @@ public class TrainTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testReorganize() throws Exception {
-        MailTestManager manager = new MailTestManager(getClient(), false);
-        getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
+        MailTestManager manager = new MailTestManager(getAjaxClient(), false);
+        getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         manager.trainCategory(CAT_1, true, false, getSendAddress());
         MailMessage[] messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_GENERAL);
@@ -95,8 +95,8 @@ public class TrainTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testDuplicateTrain() throws Exception {
-        MailTestManager manager = new MailTestManager(getClient(), false);
-        getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
+        MailTestManager manager = new MailTestManager(getAjaxClient(), false);
+        getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         manager.trainCategory(CAT_1, false, true, getSendAddress());
         manager.trainCategory(CAT_2, false, true, getSendAddress());
@@ -106,7 +106,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
         assertTrue("Category 1 should contain no email!", messages.length == 0);
         messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_2);
         assertTrue("Category 2 should contain no email!", messages.length == 0);
-        getClient().execute(new NewMailRequest(null, EML, -1, true));
+        getAjaxClient().execute(new NewMailRequest(null, EML, -1, true));
         messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_GENERAL);
         assertTrue("General category should still contain only the old email!", messages.length == 1);
         messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_1);

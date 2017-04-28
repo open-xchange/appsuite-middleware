@@ -47,66 +47,23 @@
  *
  */
 
-package com.openexchange.admin.console;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+package org.jsoup.parser;
 
 
 /**
- * {@link AppRunner}
+ * Special runtime exception signaling that parsing HTML input has been interrupted
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AppRunner {
-    private static final String MAIN = "main";
+public class InterruptedParsingException extends RuntimeException {
 
-    private static final ExecutorService executionService = Executors.newSingleThreadExecutor();
-    
-    public void run(Class<?> klass, String...arguments) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, InterruptedException {
-        Method method = grabMain(klass);
-        executeMain(method, arguments);
+    private static final long serialVersionUID = 7727208506308108226L;
+
+    /**
+     * Initializes a new {@link InterruptedParsingException}.
+     */
+    public InterruptedParsingException() {
+        super("Interrupted while tokenizing HTML input", new InterruptedException());
     }
 
-    private void executeMain(Method mainMethod, String[] arguments) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InterruptedException {
-        List<Callable<Object>> list = new ArrayList<Callable<Object>>();
-        list.add(new MethodCall(mainMethod, null, (Object) arguments));
-        
-        List<Future<Object>> all = executionService.invokeAll(list, 60  , TimeUnit.SECONDS);
-        if(!all.get(0).isDone()) {
-            throw new IllegalStateException("Execution was terminated prematurely.");
-        }
-    
-    }
-
-    private Method grabMain(Class<?> klass) throws SecurityException, NoSuchMethodException {
-        return klass.getMethod(MAIN, String[].class);
-    }
-    
-    private static final class MethodCall implements Callable<Object> {
-
-        private final Method method;
-        private final Object object;
-        private final Object[] arguments;
-        
-        public MethodCall(Method method, Object object, Object...arguments) {
-            this.method = method;
-            this.object = object;
-            this.arguments = arguments;
-        }
-        
-        @Override
-        public Object call() throws Exception {
-            return method.invoke(object, arguments);
-        }
-        
-    }
 }

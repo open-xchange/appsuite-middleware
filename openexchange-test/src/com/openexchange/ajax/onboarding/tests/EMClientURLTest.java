@@ -92,7 +92,7 @@ public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
     @Test
     public void testEMClientURL() throws Exception {
         ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
-        OnboardingTestResponse response = getClient().execute(req);
+        OnboardingTestResponse response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         if (response.hasError()) {
             fail("The response has an unexpected error: " + response.getException().getMessage());

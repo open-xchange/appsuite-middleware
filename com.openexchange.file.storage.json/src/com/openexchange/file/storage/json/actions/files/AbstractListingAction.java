@@ -64,7 +64,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -106,22 +105,6 @@ public abstract class AbstractListingAction extends AbstractFileAction {
         super();
     }
 
-    private boolean hasDocumentPreviewCapability(InfostoreRequest request) throws OXException {
-        CapabilityService capabilityService = Services.getCapabilityService();
-        if (null == capabilityService) {
-            return false;
-        }
-
-        String capability = "document_preview";
-        ServerSession session = request.getSession();
-        try {
-            return capabilityService.getCapabilities(session).contains(capability);
-        } catch (Exception e) {
-            LOGGER.error("Failed to check for \"{}\" capability for user {} in context {}. Assuming false...", capability, session.getUserId(), session.getContextId(), e);
-            return false;
-        }
-    }
-
     /**
      * Wraps the supplied timed file result into an appropriate AJAX request result.
      *
@@ -133,7 +116,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws OXException {
         TimedResult<File> timedResult = documents;
 
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData()) && hasDocumentPreviewCapability(request)) {
+        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -170,7 +153,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult results(final SearchIterator<File> searchIterator, final long timestamp, final InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
 
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData()) && hasDocumentPreviewCapability(request)) {
+        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -203,7 +186,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
 
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData()) && hasDocumentPreviewCapability(request)) {
+        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -328,7 +311,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
         }
 
         private void triggerFor(final String id, File fileMetadata) {
-            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileMetadata.getFileName(), PreviewOutput.IMAGE);
+            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileMetadata.getFileName(), PreviewOutput.IMAGE, session);
             if (null != candidate) {
                 // Create appropriate IFileHolder instance
                 IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {

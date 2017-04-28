@@ -1472,8 +1472,17 @@ public final class MimeMessageUtility {
         if (isEmpty(fileName)) {
             // Then look-up content-type
             fileName = mailPart.getContentType().getNameParameter();
+            return decodeMultiEncodedHeader(fileName);
         }
-        return decodeMultiEncodedHeader(fileName);
+        fileName = decodeMultiEncodedHeader(fileName);
+        if (fileName.indexOf('.') < 0) {
+            // No file extension given. Check if "name" parameter from Content-Type provides a better "alternative" value
+            String name = mailPart.getContentType().getNameParameter();
+            if (Strings.isNotEmpty(name) && name.indexOf('.') > 0) {
+                fileName = MimeMessageUtility.decodeMultiEncodedHeader(name);
+            }
+        }
+        return fileName;
     }
 
     /**

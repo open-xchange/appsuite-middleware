@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -1080,14 +1081,21 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 return;
             }
 
-            String formatName = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
-            byte[] transformedImage = RdbServiceLookup.getService(ImageTransformationService.class, true)
-                .transfom(imageBytes)
-                .rotate()
-                .scale(image_width, image_height, type, true)
-                .getBytes(formatName)
-            ;
-            if (transformedImage != null && transformedImage.length != 0) {
+            byte[] transformedImage;
+            {
+                ImageTransformationService transformationService = RdbServiceLookup.getService(ImageTransformationService.class, true);
+                BufferedImage originalImage = transformationService.transfom(imageBytes).getImage();
+                if (null == originalImage || originalImage.getWidth() <= image_width && originalImage.getHeight() <= image_height) {
+                    return;
+                }
+                String formatName = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
+                transformedImage = transformationService.transfom(originalImage)
+                    .rotate()
+                    .scale(image_width, image_height, type, true)
+                    .getBytes(formatName)
+                ;
+            }
+            if (null != transformedImage && 0 < transformedImage.length) {
                 contact.setImage1(transformedImage);
             }
         } catch (OXException | IOException | NumberFormatException ex) {

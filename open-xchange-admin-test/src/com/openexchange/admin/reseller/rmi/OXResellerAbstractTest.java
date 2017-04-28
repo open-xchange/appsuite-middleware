@@ -77,7 +77,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static final String TESTUSER = "testuser";
     protected static final String TESTCHANGEUSER = "testchange";
-    protected static final String CHANGEDNAME = "changedchangedagain";
+    protected static final String CHANGEDNAME = "testchangedchangedagain";
     protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
     protected static final String TESTRESTCHANGERICTIONUSER = "testchangewithrestriction";
 

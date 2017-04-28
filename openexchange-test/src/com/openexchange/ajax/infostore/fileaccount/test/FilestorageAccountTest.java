@@ -49,8 +49,7 @@
 
 package com.openexchange.ajax.infostore.fileaccount.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -71,11 +70,18 @@ import com.openexchange.file.storage.FileStorageCapability;
  */
 public final class FilestorageAccountTest extends AbstractAJAXSession {
 
-    private static final String[] POSSIBLE_CAPABILITIES = new String[] { FileStorageCapability.FILE_VERSIONS.name(), FileStorageCapability.EXTENDED_METADATA.name(), FileStorageCapability.RANDOM_FILE_ACCESS.name(), FileStorageCapability.LOCKS.name(), FileStorageCapability.AUTO_NEW_VERSION.name(), FileStorageCapability.ZIPPABLE_FOLDER.name() };
+    private static final String[] POSSIBLE_CAPABILITIES;
+    static {
+        FileStorageCapability[] allCapabilities = FileStorageCapability.values();
+        POSSIBLE_CAPABILITIES = new String[allCapabilities.length];
+        for (int i = 0; i < allCapabilities.length; i++) {
+            POSSIBLE_CAPABILITIES[i] = allCapabilities[i].name();
+        }
+    }
 
     /**
      * Initializes a new {@link FilestorageAccountTest}.
-     * 
+     *
      * @param name
      */
     public FilestorageAccountTest() {

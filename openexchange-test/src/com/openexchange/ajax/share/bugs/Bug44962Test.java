@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,6 +84,7 @@ public class Bug44962Test extends ShareTest {
     private AJAXClient client2;
     private Map<Integer, FolderObject> foldersToDelete;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -93,6 +92,7 @@ public class Bug44962Test extends ShareTest {
         client2 = new AJAXClient(testContext.acquireUser());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -196,7 +196,7 @@ public class Bug44962Test extends ShareTest {
 
     @Test
     public void testDontInviteGuestToPublicPimFolderWithInviteGuests() throws Exception {
-        inviteGuestToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
+        inviteGuestToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0005");
     }
 
     @Test
@@ -211,12 +211,12 @@ public class Bug44962Test extends ShareTest {
 
     @Test
     public void testDontInviteUserToPublicPimFolder() throws Exception {
-        inviteUserToPublicFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0010");
+        inviteUserToPublicFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0005");
     }
 
     @Test
     public void testDontInviteUserToPublicPimFolderWithInviteGuests() throws Exception {
-        inviteUserToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
+        inviteUserToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0005");
     }
 
     private void setReadCreateSharedFoldersAndEditPublicFolders(boolean readCreateSharedFolders, boolean editPublicFolders) throws Exception {

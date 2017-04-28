@@ -52,8 +52,8 @@ package com.openexchange.html.internal.jsoup.control;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.internal.jericho.JerichoHandler;
-import com.openexchange.html.internal.jericho.JerichoParser;
+import com.openexchange.html.internal.jsoup.JsoupHandler;
+import com.openexchange.html.internal.jsoup.JsoupParser;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -66,7 +66,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
 
     /** The special poison task to stop taking from queue */
-    public static final JsoupParseTask POISON = new JsoupParseTask(null, null, false, 0, null) {
+    public static final JsoupParseTask POISON = new JsoupParseTask(null, null, 0, null) {
 
         @Override
         public int compareTo(Delayed o) {
@@ -82,9 +82,8 @@ public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
     // ---------------------------------------------------------------------------------------------------------------------------
 
     private final String html;
-    private final JerichoHandler handler;
-    private final boolean checkSize;
-    private final JerichoParser parser;
+    private final JsoupHandler handler;
+    private final JsoupParser parser;
     private final int timeoutSec;
     private volatile long stamp;
     private volatile Thread worker;
@@ -98,11 +97,10 @@ public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
      * @param timeoutSec The timeout seconds
      * @param parser The parser instance
      */
-    public JsoupParseTask(String html, JerichoHandler handler, boolean checkSize, int timeoutSec, JerichoParser parser) {
+    public JsoupParseTask(String html, JsoupHandler handler, int timeoutSec, JsoupParser parser) {
         super();
         this.html = html;
         this.handler = handler;
-        this.checkSize = checkSize;
         this.timeoutSec = timeoutSec;
         this.parser = parser;
     }
@@ -122,7 +120,7 @@ public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
 
     @Override
     public void setThreadName(ThreadRenamer threadRenamer) {
-        threadRenamer.renamePrefix("JerichoParser");
+        threadRenamer.renamePrefix("JsoupParser");
     }
 
     @Override
@@ -132,7 +130,7 @@ public class JsoupParseTask extends AbstractTask<Void> implements Delayed {
         worker = Thread.currentThread();
         control.add(this);
         try {
-            parser.doParse(html, handler, checkSize);
+            parser.doParse(html, handler);
             return null;
         } finally {
             control.remove(this);
