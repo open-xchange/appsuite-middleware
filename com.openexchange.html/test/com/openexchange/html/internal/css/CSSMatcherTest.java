@@ -67,7 +67,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
+import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -253,9 +253,9 @@ public class CSSMatcherTest {
      public void testDoCheckCss_includesActiveForHTags() {
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
 
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        CSSMatcher.doCheckCss(cssBld, FilterMaps.getStaticStyleMap(), "123456", true);
         String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
 
         String content = "#123456 h1 a:active , #123456 h2 a:active , #123456 h3 a:active , #123456 h4 a:active";
@@ -267,9 +267,9 @@ public class CSSMatcherTest {
      public void testDoCheckCss_includesCSSParamsWithPrefix() {
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
 
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        CSSMatcher.doCheckCss(cssBld, FilterMaps.getStaticStyleMap(), "123456", true);
         String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
 
         String content = "#123456 .123456-top , #123456 .123456-footer a:link , #123456 .123456-footer a:visited , #123456 .123456-footer a:active { color: #a9a9a9; }";
@@ -281,9 +281,9 @@ public class CSSMatcherTest {
      public void testDoCheckCss_removeBodyTag() {
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
 
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.doCheckCss(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456", true);
+        CSSMatcher.doCheckCss(cssBld, FilterMaps.getStaticStyleMap(), "123456", true);
         String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
 
         String content = "#123456  {width: 100%;}".replaceAll("\\s+", " ");
@@ -301,9 +301,9 @@ public class CSSMatcherTest {
             "    mso-font-pitch:fixed;\n" +
             "    mso-font-signature:-536870145 1791491579 18 0 131231 0;"));
 
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
 
         String content = "font-family: \"MS Mincho\";";
         Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
@@ -313,9 +313,9 @@ public class CSSMatcherTest {
      public void testDoCheckCss_bug35001() {
         Stringer cssBld = new StringBufferStringer(new StringBuffer("border-collapse: collapse; table-layout: auto; background-image: url(http://images.host.invalid/images/clients/{100974df-02f4-aaef-be13-9eb464b5ab91}_image-3BG.png)"));
 
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        checkCSS(cssBld, FilterJerichoHandler.getImageStyleMap(), true, false);
+        checkCSS(cssBld, FilterMaps.getImageStyleMap(), true, false);
 
         String content = "border-collapse: collapse; table-layout: auto;";
         Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
@@ -323,15 +323,15 @@ public class CSSMatcherTest {
 
      @Test
      public void testDoCheckCss_bug37078() {
-        FilterJerichoHandler.loadWhitelist();
+         FilterMaps.loadWhitelist();
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer("background-position: right -38px;"));
-        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
         String content = "background-position: right -38px;";
         Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
 
         cssBld = new StringBufferStringer(new StringBuffer("background:radial-gradient(at top, #3C73AA, #052D4B, #052D4B) repeat scroll 0% 0% transparent;"));
-        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
         content = "background: radial-gradient(at top, #3C73AA, #052D4B, #052D4B) repeat scroll 0% 0% transparent;";
         Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
     }
@@ -346,9 +346,9 @@ public class CSSMatcherTest {
         PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, false);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, false);
 
         Mockito.verify(threadPoolService, Mockito.times(1)).submit((Task<Boolean>) Matchers.any());
     }
@@ -363,9 +363,9 @@ public class CSSMatcherTest {
         PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, true);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, true);
 
         Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
     }
@@ -380,9 +380,9 @@ public class CSSMatcherTest {
         PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, false);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, false);
 
         Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
     }
@@ -397,9 +397,9 @@ public class CSSMatcherTest {
         PowerMockito.when(future.get(Matchers.anyLong(), (TimeUnit) Matchers.any())).thenReturn(Boolean.TRUE);
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer(bug34659CSS));
-        FilterJerichoHandler.loadWhitelist();
+        FilterMaps.loadWhitelist();
 
-        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), "123456-prefix", true, true);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), "123456-prefix", true, true);
 
         Mockito.verify(threadPoolService, Mockito.never()).submit((Task<Boolean>) Matchers.any());
     }
