@@ -161,7 +161,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         if (!pop3) {
             session.setParameter("mail-account.validate.type", "create");
             try {
-                if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings, true).booleanValue()) {
+                if (!ValidateAction.actionValidateBoolean(accountDescription, session, true, warnings, true).booleanValue()) {
                     valid = false;
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                     warning.setCategory(Category.CATEGORY_WARNING);
