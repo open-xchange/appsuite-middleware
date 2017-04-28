@@ -63,6 +63,9 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
 
     private static final AtomicInteger counter = new AtomicInteger();
 
+    protected TestUser noReplyUser;
+    private AJAXClient noReplyClient;
+
     @BeforeClass
     public static void before() throws Exception {
         counter.incrementAndGet();
@@ -76,6 +79,9 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
         for (TestUser user : copyOfAll) {
             new AJAXClient(user).execute(new ClearMailsRequest());
         }
+        noReplyUser = testContext.getNoReplyUser();
+        noReplyClient = new AJAXClient(noReplyUser);
+        getNoReplyClient().execute(new ClearMailsRequest());
     }
 
     @Override
@@ -101,5 +107,9 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
                 SmtpMockSetup.restore();
             }
         }
+    }
+
+    public AJAXClient getNoReplyClient() {
+        return noReplyClient;
     }
 }
