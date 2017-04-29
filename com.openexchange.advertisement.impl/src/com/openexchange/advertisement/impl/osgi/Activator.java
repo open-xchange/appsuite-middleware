@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.RemoteAdvertisementService;
 import com.openexchange.advertisement.impl.rmi.RemoteAdvertisementServiceImpl;
@@ -86,6 +87,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        LoggerFactory.getLogger(Activator.class).info("starting bundle com.openexchange.advertisement.impl");
+
         Services.setServiceLookup(this);
 
         // Define cache regions
@@ -122,6 +125,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        LoggerFactory.getLogger(Activator.class).info("stopping bundle com.openexchange.advertisement.impl");
+
         super.stopBundle();
         Services.setServiceLookup(null);
     }

@@ -61,6 +61,7 @@ import org.jsoup.nodes.XmlDeclaration;
 import org.jsoup.parser.InterruptedParsingException;
 import org.jsoup.parser.InterruptibleHtmlTreeBuilder;
 import org.jsoup.parser.ParseErrorList;
+import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
@@ -172,6 +173,19 @@ public class JsoupParser {
             // Parse HTML input to a Jsoup document
             InterruptibleHtmlTreeBuilder treeBuilder = new InterruptibleHtmlTreeBuilder();
             Document document = treeBuilder.parse(html, "", ParseErrorList.noTracking(), treeBuilder.defaultSettings());
+
+            // Check <style> tag sizes against threshold
+            {
+                int cssThreshold = HtmlServices.cssThreshold();
+                if (cssThreshold > 0) {
+                    Elements styleTags = document.getElementsByTag("style");
+                    for (Element styleTag : styleTags) {
+                        if (styleTag.html().length() > cssThreshold) {
+                            styleTag.remove();
+                        }
+                    }
+                }
+            }
 
             // Traverse document, giving call-backs to specified handler
             document.traverse(new InterruptibleJsoupNodeVisitor(handler));

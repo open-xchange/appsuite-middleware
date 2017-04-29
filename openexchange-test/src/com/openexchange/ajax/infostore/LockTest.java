@@ -49,81 +49,62 @@
 
 package com.openexchange.ajax.infostore;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.io.File;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class LockTest extends InfostoreAJAXTest {
 
-    protected File testFile;
     private InfostoreTestManager itm2;
     private FolderTestManager ftm2;
+    private com.openexchange.file.storage.File file;
+    private FolderObject folder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        
-        final int secondUserId = getClient2().getValues().getUserId();
-        // TODO create folder in one step with correct permissions.
-        FolderObject client1InfostoreFolder = ftm.getFolderFromServer(getClient().getValues().getPrivateInfostoreFolder());
-//        client1InfostoreFolder.addPermission(new OCLPermission(secondUserId, folderId));
-        client1InfostoreFolder.setLastModified(Calendar.getInstance().getTime());
-        
-        FolderObject create = FolderTestManager.createNewFolderObject("NewInfostoreFolder"+System.currentTimeMillis(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, getClient().getValues().getUserId(), client1InfostoreFolder.getObjectID());
-        create.addPermission(new OCLPermission(secondUserId, client1InfostoreFolder.getObjectID()));
-        create.setLastModified(Calendar.getInstance().getTime());
-        folderId = ftm.insertFolderOnServer(create).getObjectID();
-//        folderId = ftm.updateFolderOnServer(client1InfostoreFolder).getObjectID();
-
-        com.openexchange.file.storage.File data = createFile(create.getObjectID(), "test upload");
-        data.setFileMIMEType("text/plain");
-        itm.newAction(data, testFile);
-        assertFalse(itm.getLastResponse().hasError());
-
-        String c = data.getId();
-
-        com.openexchange.file.storage.File org = itm.getAction(c);
-        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
-
-        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
-
-        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
-
-        itm.updateAction(org, testFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
-        
         itm2 = new InfostoreTestManager(getClient2());
         ftm2 = new FolderTestManager(getClient2());
+        /*
+         * create folder shared to user 2 and a file inside the folder
+         */
+        folder = FolderTestManager.createNewFolderObject(
+            UUID.randomUUID().toString(), FolderObject.INFOSTORE, FolderObject.PUBLIC, getClient().getValues().getUserId(), folderId);
+        OCLPermission permission1 = FolderTestManager.createPermission(
+            getClient().getValues().getUserId(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, true);
+        OCLPermission permission2 = FolderTestManager.createPermission(
+            getClient2().getValues().getUserId(), false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS, false);
+        folder.setPermissionsAsArray(new OCLPermission[] { permission1, permission2 });
+        folder = ftm.insertFolderOnServer(folder);
+        /*
+         * create a file with multiple versions in the folder
+         */
+        File testFile = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        file = itm.createFileOnServer(folder.getObjectID(), "test.bin", "application/octet-stream");
+        for (int i = 0; i < 5; i++) {
+            itm.updateAction(file, testFile, new com.openexchange.file.storage.File.Field[] {}, itm.getLastResponse().getTimestamp());
+            assertFalse(itm.getLastResponse().hasError());
+        }
     }
 
     @Test
     public void testLock() throws Exception {
-        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        String id = file.getId();
         com.openexchange.file.storage.File file = itm.getAction(id);
         Date lastModified = file.getLastModified();
 
@@ -134,6 +115,7 @@ public class LockTest extends InfostoreAJAXTest {
         file = itm.getAction(id);
         assertFalse(itm.getLastResponse().hasError());
         assertLocked((JSONObject) itm.getLastResponse().getData());
+        lastModified = file.getLastModified();
 
         // BUG 4232
         itm.updateAction(file, new Field[] { Field.ID }, new Date(lastModified.getTime()));
@@ -146,36 +128,33 @@ public class LockTest extends InfostoreAJAXTest {
         itm2.updateAction(file, new Field[] { Field.ID, Field.TITLE }, new Date(Long.MAX_VALUE));
         assertTrue(itm2.getLastResponse().hasError());
 
-        file.setFolderId(Integer.toString(getClient2().getValues().getPrivateInfostoreFolder()));
-
         // Object may not be moved
+        file.setFolderId(Integer.toString(getClient2().getValues().getPrivateInfostoreFolder()));
         itm2.updateAction(file, new Field[] { Field.ID, Field.FOLDER_ID }, new Date(Long.MAX_VALUE));
         assertTrue(itm2.getLastResponse().hasError());
 
         // Object may not be removed
-        itm2.deleteAction(Collections.singletonList(id), Collections.singletonList(folderId), new Date(Long.MAX_VALUE));
+        itm2.deleteAction(Collections.singletonList(id), Collections.singletonList(String.valueOf(folder.getObjectID())), new Date(Long.MAX_VALUE));
         assertTrue(itm2.getLastResponse().hasError());
 
         // Versions may not be removed
         int[] notDetached = ftm2.detach(id, new Date(Long.MAX_VALUE), new int[] { 4 });
-        assertNull(notDetached);
-        assertTrue(ftm2.getLastResponse().hasError());
+        assertEquals(1, notDetached.length);
+        assertEquals(4, notDetached[0]);
 
         // Object may not be locked
         itm2.lock(id);
-        assertTrue(itm.getLastResponse().hasError());
+        assertTrue(itm2.getLastResponse().hasError());
 
         // Object may not be unlocked
         itm2.unlock(id);
-        assertTrue(itm.getLastResponse().hasError());
+        assertTrue(itm2.getLastResponse().hasError());
 
         // Lock owner may update
         file.setTitle("Hallo");
         itm.updateAction(file, new Field[] { Field.ID, Field.TITLE }, new Date(Long.MAX_VALUE));
         assertFalse(itm.getLastResponse().hasError());
-
         com.openexchange.file.storage.File reload = itm.getAction(id);
-
         assertEquals("Hallo", reload.getTitle());
 
         //Lock owner may detach
@@ -186,7 +165,7 @@ public class LockTest extends InfostoreAJAXTest {
 
     @Test
     public void testUnlock() throws Exception {
-        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        final String id = file.getId();
         itm.lock(id);
         assertFalse(itm.getLastResponse().hasError());
 
@@ -201,23 +180,21 @@ public class LockTest extends InfostoreAJAXTest {
         itm.unlock(id);
         assertFalse(itm.getLastResponse().hasError());
         assertNotNull(itm.getLastResponse().getTimestamp());
-
         file = itm.getAction(id);
-        //        assertUnlocked(file);
+        assertUnlocked(file);
 
-        itm.setClient(getClient2());
-        itm.lock(id);
-        assertFalse(itm.getLastResponse().hasError());
+        // Object may be locked now
+        itm2.lock(id);
+        assertFalse(itm2.getLastResponse().hasError());
 
+        // Object may not be modified
         file.setTitle("Hallo");
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
         assertTrue(itm.getLastResponse().hasError());
 
         // Owner may unlock
-        itm.setClient(getClient());
-        itm.unlock(id);
-        assertFalse(itm.getLastResponse().hasError());
-
+        itm2.unlock(id);
+        assertFalse(itm2.getLastResponse().hasError());
         file = itm.getAction(id);
         assertUnlocked(file);
     }

@@ -67,10 +67,12 @@ import org.scribe.utils.OAuthEncoder;
  * {@link YahooApi2}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class YahooApi2 extends DefaultApi20 {
 
     private static final String AUTHORIZE_URL = "https://api.login.yahoo.com/oauth2/request_auth?client_id=%s&redirect_uri=%s&response_type=code";
+    private static final String AUTHORIZE_URL_WITH_SCOPE = AUTHORIZE_URL + "&scope=%s";
 
     /**
      * Initialises a new {@link YahooApi2}.
@@ -81,7 +83,7 @@ public class YahooApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAccessTokenEndpoint()
      */
     @Override
@@ -91,17 +93,21 @@ public class YahooApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAuthorizationUrl(org.scribe.model.OAuthConfig)
      */
     @Override
     public String getAuthorizationUrl(OAuthConfig config) {
+        if (config.hasScope()) {
+            return String.format(AUTHORIZE_URL_WITH_SCOPE, config.getApiKey(), OAuthEncoder.encode(config.getCallback()), OAuthEncoder.encode(config.getScope()));
+        }
+
         return String.format(AUTHORIZE_URL, config.getApiKey(), OAuthEncoder.encode(config.getCallback()));
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#createService(org.scribe.model.OAuthConfig)
      */
     @Override
@@ -111,7 +117,7 @@ public class YahooApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAccessTokenVerb()
      */
     @Override
@@ -121,7 +127,7 @@ public class YahooApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAccessTokenExtractor()
      */
     @Override
@@ -135,12 +141,12 @@ public class YahooApi2 extends DefaultApi20 {
      */
     public static class YahooOAuth2Service extends OAuth20ServiceImpl {
 
-        private DefaultApi20 api;
-        private OAuthConfig config;
+        private final DefaultApi20 api;
+        private final OAuthConfig config;
 
         /**
          * Initialises a new {@link YahooOAuth2Service}.
-         * 
+         *
          * @param api
          * @param config
          */
@@ -152,7 +158,7 @@ public class YahooApi2 extends DefaultApi20 {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.scribe.oauth.OAuth20ServiceImpl#getAccessToken(org.scribe.model.Token, org.scribe.model.Verifier)
          */
         @Override

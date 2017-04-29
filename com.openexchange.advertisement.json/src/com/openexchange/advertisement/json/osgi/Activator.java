@@ -49,9 +49,10 @@
 
 package com.openexchange.advertisement.json.osgi;
 
+import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementPackageService;
-import com.openexchange.advertisement.json.AdvertisementActionFactory;
 import com.openexchange.advertisement.json.AdConfigRestService;
+import com.openexchange.advertisement.json.AdvertisementActionFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 
 /**
@@ -71,6 +72,8 @@ public class Activator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        LoggerFactory.getLogger(Activator.class).info("starting bundle com.openexchange.advertisement.json");
+
         Services.setServiceLookup(this);
         registerModule(AdvertisementActionFactory.getInstance(), MODULE);
         registerService(AdConfigRestService.class, new AdConfigRestService());
@@ -78,7 +81,9 @@ public class Activator extends AJAXModuleActivator {
     
     @Override
     protected void stopBundle() throws Exception {
-    	super.stopBundle();
+        LoggerFactory.getLogger(Activator.class).info("stopping bundle com.openexchange.advertisement.json");
+
+        super.stopBundle();
     	Services.setServiceLookup(null);
     }
 

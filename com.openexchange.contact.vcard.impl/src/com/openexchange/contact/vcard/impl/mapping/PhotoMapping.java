@@ -232,7 +232,13 @@ public class PhotoMapping extends AbstractMapping {
     }
 
     private static String getMimeType(ImageType imageType) {
-        return null != imageType ? imageType.getMediaType() : ImageType.JPEG.getMediaType();
+        if (null != imageType) {
+            String mediaType = imageType.getMediaType();
+            if (null != mediaType) {
+                return mediaType;
+            }
+        }
+        return ImageType.JPEG.getMediaType();
     }
 
     private static String getFormatName(ImageType imageType) {

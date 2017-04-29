@@ -188,7 +188,7 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     private PWResetData getConfirmationToken() throws Exception {
-        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getNoReplyClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         Message message = messages.get(0);
         String url = message.getHeaders().get("X-Open-Xchange-Share-Reset-PW-URL");

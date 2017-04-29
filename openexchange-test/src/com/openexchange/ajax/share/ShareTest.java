@@ -71,7 +71,6 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -158,7 +157,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
     private Map<Integer, FolderObject> foldersToDelete;
     private Map<String, File> filesToDelete;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
