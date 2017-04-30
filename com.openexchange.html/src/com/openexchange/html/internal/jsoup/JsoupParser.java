@@ -189,6 +189,7 @@ public class JsoupParser {
 
             // Traverse document, giving call-backs to specified handler
             document.traverse(new InterruptibleJsoupNodeVisitor(handler));
+            handler.finished(document);
         } catch (InterruptedParsingException e) {
             throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
         } catch (StackOverflowError parserOverflow) {

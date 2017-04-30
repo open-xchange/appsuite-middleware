@@ -51,6 +51,7 @@ package com.openexchange.html.internal.jsoup;
 
 import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
@@ -79,5 +80,7 @@ public interface JsoupHandler {
     void handleElementEnd(Element element);
 
     void markBodyAbsent();
+
+    void finished(Document document);
 
 }
