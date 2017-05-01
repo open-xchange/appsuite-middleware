@@ -57,12 +57,15 @@ import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -74,6 +77,7 @@ import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
 import com.google.common.collect.ImmutableSet;
@@ -90,11 +94,11 @@ import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.HTMLElements;
 
 /**
- * {@link FilterJsoupHandler}
+ * {@link CleaningJsoupHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FilterJsoupHandler implements JsoupHandler {
+public final class CleaningJsoupHandler implements JsoupHandler {
 
     private static final CellPadding CELLPADDING_EMPTY = new CellPadding(null);
 
@@ -132,11 +136,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
     private final Map<String, Map<String, Set<String>>> htmlMap;
     private final Map<String, Set<String>> styleMap;
 
-    private final StringBuilder htmlBuilder;
-    private final StringBuilder attrBuilder;
     private final StringBuilder urlBuilder;
-
-    private final HtmlServiceImpl htmlService;
 
     private boolean body;
     private boolean isCss;
@@ -147,19 +147,13 @@ public final class FilterJsoupHandler implements JsoupHandler {
      */
     private int skipLevel;
 
-    /**
-     * Used to track script/svg tags
-     */
-    private boolean insideScriptTag = false;
+    private final Set<Node> keepChildrenNodes;
+    private final Set<Node> removedNodes;
+    private final Map<Node, Node> replaceWith;
 
-    private final Set<Element> removedTags;
-    private boolean hasRemovedTags;
-
-    /**
-     * The max. content size (-1 or >=10000)
-     */
+    /** The max. content size (-1 or >=10000) */
     private int maxContentSize;
-
+    private int curContentSize;
     private boolean maxContentSizeExceeded;
 
     private boolean dropExternalImages;
@@ -170,39 +164,39 @@ public final class FilterJsoupHandler implements JsoupHandler {
     private final LinkedList<CellPadding> tablePaddings;
     private final boolean changed = false;
 
+    private Document document;
+
 
     /**
-     * Initializes a new {@link FilterJsoupHandler}.
+     * Initializes a new {@link CleaningJsoupHandler}.
      */
-    public FilterJsoupHandler(final int capacity, final HtmlServiceImpl htmlService) {
+    public CleaningJsoupHandler() {
         super();
-        removedTags = new HashSet<>(4, 0.9F);
+        removedNodes = new HashSet<>(16, 0.9F);
+        keepChildrenNodes = new HashSet<>(16, 0.9F);
+        replaceWith = new HashMap<>(16, 0.9F);
         tablePaddings = new LinkedList<>();
-        this.htmlService = htmlService;
         this.maxContentSize = -1;
         this.maxContentSizeExceeded = false;
         this.urlBuilder = new StringBuilder(256);
         this.cssBuffer = new StringBuilderStringer(new StringBuilder(256));
-        this.htmlBuilder = new StringBuilder(capacity);
-        this.attrBuilder = new StringBuilder(128);
         this.htmlMap = FilterMaps.getStaticHTMLMap();
         this.styleMap = FilterMaps.getStaticStyleMap();
     }
 
     /**
-     * Initializes a new {@link FilterJsoupHandler}.
+     * Initializes a new {@link CleaningJsoupHandler}.
      */
-    public FilterJsoupHandler(final int capacity, final String mapStr, final HtmlServiceImpl htmlService) {
+    public CleaningJsoupHandler(String mapStr) {
         super();
-        removedTags = new HashSet<>(4, 0.9F);
+        removedNodes = new HashSet<>(16, 0.9F);
+        keepChildrenNodes = new HashSet<>(16, 0.9F);
+        replaceWith = new HashMap<>(16, 0.9F);
         tablePaddings = new LinkedList<>();
-        this.htmlService = htmlService;
         this.maxContentSize = -1;
         this.maxContentSizeExceeded = false;
         this.urlBuilder = new StringBuilder(256);
         this.cssBuffer = new StringBuilderStringer(new StringBuilder(256));
-        this.htmlBuilder = new StringBuilder(capacity);
-        this.attrBuilder = new StringBuilder(128);
         final Map<String, Map<String, Set<String>>> map = FilterMaps.parseHTMLMap(mapStr);
         if (!map.containsKey("html")) {
             map.put("html", null);
@@ -228,7 +222,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
      * @param maxContentSize The max. content size to set
      * @return This handler with new behavior applied
      */
-    public FilterJsoupHandler setMaxContentSize(final int maxContentSize) {
+    public CleaningJsoupHandler setMaxContentSize(final int maxContentSize) {
         if ((maxContentSize >= 10000) || (maxContentSize <= 0)) {
             this.maxContentSize = maxContentSize;
         } else {
@@ -245,7 +239,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
      * @param suppressLinks <code>true</code> to suppress links; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
-    public FilterJsoupHandler setSuppressLinks(boolean suppressLinks) {
+    public CleaningJsoupHandler setSuppressLinks(boolean suppressLinks) {
         this.suppressLinks = suppressLinks;
         return this;
     }
@@ -256,7 +250,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
      * @param cssPrefix The CSS prefix to set
      * @return This handler with new behavior applied
      */
-    public FilterJsoupHandler setCssPrefix(final String cssPrefix) {
+    public CleaningJsoupHandler setCssPrefix(final String cssPrefix) {
         this.cssPrefix = cssPrefix;
         return this;
     }
@@ -276,7 +270,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
      * @param replaceUrls <code>true</code> to replace URLs; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
-    public FilterJsoupHandler setReplaceUrls(final boolean replaceUrls) {
+    public CleaningJsoupHandler setReplaceUrls(final boolean replaceUrls) {
         this.replaceUrls = replaceUrls;
         return this;
     }
@@ -287,7 +281,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
      * @param dropExternalImages <code>true</code> to replace image URLs; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
-    public FilterJsoupHandler setDropExternalImages(final boolean dropExternalImages) {
+    public CleaningJsoupHandler setDropExternalImages(final boolean dropExternalImages) {
         this.dropExternalImages = dropExternalImages;
         return this;
     }
@@ -315,33 +309,6 @@ public final class FilterJsoupHandler implements JsoupHandler {
     }
 
     /**
-     * Gets the filtered HTML content.
-     *
-     * @return The filtered HTML content
-     */
-    public String getHTML() {
-        return htmlBuilder.toString();
-    }
-
-    /**
-     * Marks specified element as being removed.
-     */
-    private void mark(Element element) {
-        if (removedTags.add(element)) {
-            hasRemovedTags = true;
-        }
-    }
-
-    /**
-     * Checks if given element has previously been marked as being removed
-     *
-     * @return <code>true</code> if element was marked as removed; otherwise <code>false</code>
-     */
-    private boolean getAndUnmark(Element element) {
-        return hasRemovedTags ? false : removedTags.remove(element);
-    }
-
-    /**
      * Checks if max. allowed content size is exceeded.
      *
      * @param addLen The expected length the content will grow
@@ -355,13 +322,31 @@ public final class FilterJsoupHandler implements JsoupHandler {
             return false;
         }
 
-        maxContentSizeExceeded = htmlBuilder.length() + addLen > maxContentSize;
+        curContentSize += addLen;
+        maxContentSizeExceeded = curContentSize > maxContentSize;
         return !maxContentSizeExceeded;
+    }
+
+    public String getHTML() {
+        return document.toString();
     }
 
     @Override
     public void finished(Document document) {
-        // Nothing
+        for (Node node : removedNodes) {
+            node.remove();
+        }
+        for (Node node : keepChildrenNodes) {
+            List<Node> nodes = new ArrayList<>(node.childNodes());
+
+            Node pred = node;
+            for (Node child : nodes) {
+                pred.after(child);
+                pred = child;
+            }
+            node.remove();
+        }
+        this.document = document;
     }
 
     @Override
@@ -378,13 +363,15 @@ public final class FilterJsoupHandler implements JsoupHandler {
                     cssBuffer.setLength(0);
                 }
                 if (checkMaxContentSize(checkedCSS.length())) {
-                    htmlBuilder.append(checkedCSS);
+                    replaceWith.put(comment, new Comment(checkedCSS, ""));
+                } else {
+                    removedNodes.add(comment);
                 }
             }
         } else {
             String cmt = comment.toString();
-            if (checkMaxContentSize(cmt.length())) {
-                htmlBuilder.append(cmt);
+            if (false == checkMaxContentSize(cmt.length())) {
+                removedNodes.add(comment);
             }
         }
     }
@@ -408,13 +395,15 @@ public final class FilterJsoupHandler implements JsoupHandler {
                         cssBuffer.setLength(0);
                     }
                     if (checkMaxContentSize(checkedCSS.length())) {
-                        htmlBuilder.append(checkedCSS);
+                        replaceWith.put(dataNode, new DataNode(checkedCSS, ""));
+                    } else {
+                        removedNodes.add(dataNode);
                     }
                 }
             } else {
                 String cdata = dataNode.toString();
-                if (checkMaxContentSize(cdata.length())) {
-                    htmlBuilder.append(cdata);
+                if (false == checkMaxContentSize(cdata.length())) {
+                    removedNodes.add(dataNode);
                 }
             }
         }
@@ -422,7 +411,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
 
     @Override
     public void handleDocumentType(DocumentType documentType) {
-        htmlBuilder.append(documentType);
+        // Don't care
     }
 
     @Override
@@ -443,13 +432,15 @@ public final class FilterJsoupHandler implements JsoupHandler {
                         cssBuffer.setLength(0);
                     }
                     if (checkMaxContentSize(checkedCSS.length())) {
-                        htmlBuilder.append(checkedCSS);
+                        replaceWith.put(textNode, new TextNode(checkedCSS, ""));
+                    } else {
+                        removedNodes.add(textNode);
                     }
                 }
             } else {
                 String content = textNode.toString();
-                if (checkMaxContentSize(content.length())) {
-                    htmlBuilder.append(content);
+                if (false == checkMaxContentSize(content.length())) {
+                    removedNodes.add(textNode);
                 }
             }
         }
@@ -457,7 +448,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
 
     @Override
     public void handleXmlDeclaration(XmlDeclaration xmlDeclaration) {
-        htmlBuilder.append(xmlDeclaration);
+        // Don't care
     }
 
     @Override
@@ -475,12 +466,8 @@ public final class FilterJsoupHandler implements JsoupHandler {
                 // Ignore end tags in CSS content
                 return;
             }
-            if (!getAndUnmark(element)) {
-                htmlBuilder.append("</").append(element.tagName()).append('>');
-            }
         } else {
             skipLevel--;
-            insideScriptTag = false;
         }
     }
 
@@ -488,14 +475,12 @@ public final class FilterJsoupHandler implements JsoupHandler {
     public void handleElementStart(Element element) {
         if (maxContentSizeExceeded) {
             // Do not append more elements
-            return;
-        }
-        if (insideScriptTag) {
-            // Ignore script tags completely
+            removedNodes.add(element);
             return;
         }
         if (isCss) {
             // Ignore tags in CSS content
+            removedNodes.add(element);
             return;
         }
 
@@ -508,6 +493,8 @@ public final class FilterJsoupHandler implements JsoupHandler {
             }
             if (htmlMap.containsKey(tagName)) {
                 addStartTag(element, tagName, true, htmlMap.get(tagName));
+            } else {
+                removedNodes.add(element);
             }
             return;
         }
@@ -518,6 +505,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
                 skipLevel++;
                 return;
             }
+            // <body> tag...
             skipLevel = 0;
         }
         if (htmlMap.containsKey(tagName)) {
@@ -532,23 +520,24 @@ public final class FilterJsoupHandler implements JsoupHandler {
                 /*
                  * Remove whole tag incl. subsequent content and tags
                  */
+                removedNodes.add(element);
                 skipLevel++;
             } else if (isMSTag(tagName)) {
                 /*
                  * Just remove tag definition: "<tag>text<subtag>text</subtag></tag>" would be "text<subtag>text</subtag>"
                  */
-                mark(element);
+                keepChildrenNodes.add(element);
             } else if (isRemoveWholeTag(tagName)) {
                 /*
                  * Remove whole tag incl. subsequent content and tags
                  */
-                insideScriptTag = true;
+                removedNodes.add(element);
                 skipLevel++;
             } else {
                 /*
                  * Just remove tag definition: "<tag>text<subtag>text</subtag></tag>" would be "text<subtag>text</subtag>"
                  */
-                mark(element);
+                keepChildrenNodes.add(element);
             }
         }
     }
@@ -581,60 +570,58 @@ public final class FilterJsoupHandler implements JsoupHandler {
      * @param allowedAttributes The allowed tag's attributes or <code>null</code> to allow all
      */
     private void addStartTag(Element startTag, String tagName, final boolean simple, final Map<String, Set<String>> allowedAttributes) {
-        attrBuilder.setLength(0);
-
+        Attributes attributes = startTag.attributes();
         if (simple && "meta".equals(tagName) && allowedAttributes.containsKey("http-equiv")) {
-            Attributes attributes = startTag.attributes();
             if (attributes.hasKeyIgnoreCase("http-equiv")) {
                 /*
                  * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
                  */
+                boolean isFine = true;
                 for (final Attribute attribute : attributes) {
                     final String val = attribute.getValue();
                     if (isNonJavaScriptURL(val, tagName, "url=")) {
-                        attrBuilder.append(' ').append(attribute.getKey()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
+                        // Nothing
                     } else {
-                        attrBuilder.setLength(0);
+                        isFine = false;
                         break;
                     }
                 }
-                if (attrBuilder.length() > 0) {
-                    htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+                if (false == isFine) {
+                    removedNodes.add(startTag);
                 }
                 return;
             }
         }
 
         // Handle start tag
-        Map<String, String> attrMap = createMapFrom(startTag.attributes());
         if ("img".equals(tagName)) {
-            String width = attrMap.get("width");
+            String width = attributes.get("width");
             if (null != width) {
-                String height = attrMap.get("height");
+                String height = attributes.get("height");
                 if (null != height) {
-                    prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attrMap);
+                    prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attributes, startTag);
                 }
             }
         } else if ("table".equals(tagName)) {
-            addTableTag(attrMap);
+            addTableTag(attributes, startTag);
         } else if ("td".equals(tagName) || "th".equals(tagName)) {
             CellPadding cellPadding = tablePaddings.peek();
             if (CELLPADDING_EMPTY != cellPadding && null != cellPadding) {
-                String style = attrMap.get("style");
-                if (null == style || style.indexOf("padding") < 0) {
-                    prependToStyle("padding: " + cellPadding.cellPadding + "px;", attrMap);
+                String style = attributes.get("style");
+                if (Strings.isEmpty(style) || style.indexOf("padding") < 0) {
+                    prependToStyle("padding: " + cellPadding.cellPadding + "px;", attributes, startTag);
                 }
             }
         } else if (suppressLinks) {
-            if (isHrefTag(tagName) && attrMap.containsKey("href")) {
-                attrMap.put("href", "#");
-                attrBuilder.append(' ').append("onclick=\"return false\"");
-                attrBuilder.append(' ').append("data-disabled=\"true\"");
+            if (isHrefTag(tagName) && attributes.hasKeyIgnoreCase("href")) {
+                startTag.attr("href", "#");
+                startTag.attr("onclick", "return false");
+                startTag.attr("data-disabled", "true");
             }
         }
 
-        Set<String> uriAttributes = replaceUrls ? setForUriAttributes(startTag.attributes()) : Collections.<String> emptySet();
-        for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
+        Set<String> uriAttributes = replaceUrls ? setForUriAttributes(attributes) : Collections.<String> emptySet();
+        for (Attribute attribute : attributes.clone()) {
             String attr = attribute.getKey();
             if (false == Strings.asciiLowerCase(attr).startsWith("on")) {
                 if ("style".equals(attr)) {
@@ -653,90 +640,74 @@ public final class FilterJsoupHandler implements JsoupHandler {
                         }
                     }
                     if (containsCSSElement(css)) {
-                        if (css.indexOf('"') == -1) {
-                            attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
-                        } else {
-                            attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
-                        }
+                        startTag.attr("style", css);
+                    } else {
+                        startTag.removeAttr(attr);
                     }
                 } else if ("class".equals(attr) || "id".equals(attr)) {
-                    final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
-                    attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
+                    String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
+                    startTag.attr(attribute.getKey(), value);
                 } else {
                     final String val = attribute.getValue();
                     if (null == allowedAttributes) { // No restrictions
-                        if (isSafe(val, tagName)) {
-                            if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
-                                attrBuilder.append(' ').append(attr).append("=\"\"");
-                                imageURLFound = true;
-                            } else if (dropExternalImages && ("img".equals(tagName) || "input".equals(tagName)) && "src".equals(attr)) {
-                                if (isInlineImage(val)) {
-                                    // Allow inline images
-                                    attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                                } else {
-                                    attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
-                                    imageURLFound = true;
-                                    // return;
-                                }
-                            } else {
-                                if (replaceUrls && uriAttributes.contains(attribute)) {
-                                    attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
-                                } else {
-                                    attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                                }
-                            }
+                        if (false == isSafeAttributeValue(tagName, startTag, attribute, attr, val)) {
+                            startTag.removeAttr(attr);
                         }
                     } else {
                         if (allowedAttributes.containsKey(attr)) {
                             if (null == val) {
-                                attrBuilder.append(' ').append(attr);
+                                // Nothing
                             } else {
-                                final Set<String> allowedValues = allowedAttributes.get(attr);
+                                Set<String> allowedValues = allowedAttributes.get(attr);
                                 if (null == allowedValues || allowedValues.contains(toLowerCase(val))) {
-                                    if (isSafe(val, tagName)) {
-                                        if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
-                                            attrBuilder.append(' ').append(attr).append("=\"\"");
-                                            imageURLFound = true;
-                                        } else if (dropExternalImages && ("img".equals(tagName) || "input".equals(tagName)) && "src".equals(attr)) {
-                                            if (isInlineImage(val)) {
-                                                // Allow inline images
-                                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                                            } else {
-                                                attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
-                                                imageURLFound = true;
-                                                // return;
-                                            }
-                                        } else {
-                                            if (replaceUrls && uriAttributes.contains(attribute)) {
-                                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
-                                            } else {
-                                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                                            }
-                                        }
+                                    if (false == isSafeAttributeValue(tagName, startTag, attribute, attr, val)) {
+                                        startTag.removeAttr(attr);
                                     }
                                 } else if (FilterMaps.getNumAttribs() == allowedValues) {
                                     /*
                                      * Only numeric attribute value allowed
                                      */
-                                    if (PAT_NUMERIC.matcher(val.trim()).matches()) {
-                                        attrBuilder.append(' ').append(attr).append("=\"").append(val).append('"');
+                                    if (false == PAT_NUMERIC.matcher(val.trim()).matches()) {
+                                        startTag.removeAttr(attr);
                                     }
                                 }
                             }
                         }
-                    } // End of else
+                    }
                 }
             }
         }
+    }
 
-        htmlBuilder.append('<').append(startTag.tagName()).append(attrBuilder.toString());
-        /*-
-         *
-        if (startTag.isEmptyElementTag() && !startTag.isEndTagForbidden()) {
-            htmlBuilder.append('/');
+    private boolean isSafeAttributeValue(String tagName, Element el, Attribute attribute, String attr, String val) {
+        if (false == isSafe(val, tagName)) {
+            // Unsafe value
+            return false;
         }
-        */
-        htmlBuilder.append('>');
+
+        if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
+            attribute.setValue("");
+            imageURLFound = true;
+            return true;
+        }
+
+        if (dropExternalImages && ("img".equals(tagName) || "input".equals(tagName)) && "src".equals(attr)) {
+            if (isInlineImage(val)) {
+                // Allow inline images
+                return true;
+            }
+
+            attribute.setValue("");
+            el.attr("data-original-src", val);
+            imageURLFound = true;
+            return true;
+        }
+
+        if (replaceUrls && URI_ATTRS.contains(attr)) {
+            attribute.setValue(checkPossibleURL(val));
+        }
+
+        return true;
     }
 
     private static final Set<String> URI_ATTRS = ImmutableSet.of("action","archive","background","cite","href","longdesc","src","usemap");
@@ -776,17 +747,15 @@ public final class FilterJsoupHandler implements JsoupHandler {
 
     /**
      * Prepares the environment and output based on the given table tag.
-     *
-     * @param attrMap
      */
-    private void addTableTag(Map<String, String> attrMap) {
+    private void addTableTag(Attributes attributes, Element startTag) {
         // Has attribute "bgcolor"
-        String bgcolor = attrMap.get("bgcolor");
-        if (null != bgcolor) {
-            prependToStyle("background-color: " + bgcolor + ';', attrMap);
+        String bgcolor = attributes.get("bgcolor");
+        if (Strings.isNotEmpty(bgcolor)) {
+            prependToStyle("background-color: " + bgcolor + ';', attributes, startTag);
         }
 
-        handleTableCellpaddingAttribute(attrMap);
+        handleTableCellpaddingAttribute(attributes, startTag);
     }
 
     /**
@@ -796,16 +765,16 @@ public final class FilterJsoupHandler implements JsoupHandler {
      *
      * @param attrMap - map containing attributes of the 'table' tag
      */
-    protected void handleTableCellpaddingAttribute(Map<String, String> attrMap) {
-        if (attrMap == null) {
+    protected void handleTableCellpaddingAttribute(Attributes attributes, Element startTag) {
+        if (attributes == null) {
             return;
         }
 
         // Has attribute "cellpadding"?
-        String cellpadding = attrMap.get("cellpadding");
+        String cellpadding = attributes.get("cellpadding");
         if (null == cellpadding) {
-            String style = attrMap.get("style");
-            if (null == style || style.indexOf("padding") < 0) {
+            String style = attributes.get("style");
+            if (Strings.isEmpty(style) || style.indexOf("padding") < 0) {
                 tablePaddings.addFirst(CELLPADDING_EMPTY);
             } else {
                 boolean found = false;
@@ -821,8 +790,8 @@ public final class FilterJsoupHandler implements JsoupHandler {
                 }
             }
         } else {
-            if ("0".equals(attrMap.get("cellspacing"))) {
-                prependToStyle("border-collapse: collapse;", attrMap);
+            if ("0".equals(attributes.get("cellspacing"))) {
+                prependToStyle("border-collapse: collapse;", attributes, startTag);
             }
 
             // Table has cell padding -> Remember it for all child elements
@@ -830,19 +799,19 @@ public final class FilterJsoupHandler implements JsoupHandler {
         }
     }
 
-    private void prependToStyle(String stylePrefix, Map<String, String> attrMap) {
-        String style = attrMap.get("style");
-        if (null == style) {
+    private void prependToStyle(String stylePrefix, Attributes attributes, Element startTag) {
+        String style = attributes.get("style");
+        if (Strings.isEmpty(style)) {
             style = stylePrefix;
         } else {
             style = stylePrefix + " " + style;
         }
-        attrMap.put("style", style);
+        startTag.attr("style", style);
     }
 
-    private void prependWidthHeightToStyleIfAbsent(Map<String, String> styleNvps, Map<String, String> attrMap) {
-        String style = attrMap.get("style");
-        if (null == style) {
+    private void prependWidthHeightToStyleIfAbsent(Map<String, String> styleNvps, Attributes attributes, Element startTag) {
+        String style = attributes.get("style");
+        if (Strings.isEmpty(style)) {
             style = generateStyleString(styleNvps);
         } else {
             // Filter out all, but "width"/"height"
@@ -866,7 +835,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
              *
              */
         }
-        attrMap.put("style", style);
+        startTag.attr("style", style);
     }
 
     private String generateStyleString(Map<String, String> styleNvps) {
@@ -885,14 +854,6 @@ public final class FilterJsoupHandler implements JsoupHandler {
             sb.append(nvp.getKey()).append(": ").append(nvp.getValue()).append(';');
         }
         return sb.toString();
-    }
-
-    private Map<String, String> createMapFrom(Attributes attributes) {
-        Map<String, String> map = new LinkedHashMap<>(attributes.size());
-        for (Attribute attribute : attributes) {
-            map.put(attribute.getKey(), attribute.getValue());
-        }
-        return map;
     }
 
     private Map<String, String> mapFor(String... args) {
