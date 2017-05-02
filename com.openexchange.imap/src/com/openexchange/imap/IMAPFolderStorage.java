@@ -2004,6 +2004,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
                                 throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, updateMe.getFullName());
                             }
+                            if (!NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName, imapStore, true, session, accountId) && !NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName, imapStore, true, session, accountId) && !stillHoldsAdministerRights(updateMe, newACLs, aclExtension)) {
+                                throw IMAPException.create(IMAPException.Code.OWNER_MUST_BE_ADMIN, imapConfig, session, updateMe.getFullName());
+                            }
                             /*
                              * Check new ACLs
                              */
@@ -2916,6 +2919,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         final Rights fullRights = aclExtension.getFullRights();
         for (final ACL newACL : newACLs) {
             if (newACL.getName().equals(ownerACLName) && newACL.getRights().contains(fullRights)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean stillHoldsAdministerRights(final IMAPFolder imapFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws OXException {
+        /*
+         * Ensure that owner still holds full rights
+         */
+        String ownerACLName = getEntity2ACL().getACLName(session.getUserId(), ctx, IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig));
+        for (ACL newACL : newACLs) {
+            if (newACL.getName().equals(ownerACLName) && aclExtension.containsFolderAdminRights(newACL.getRights())) {
                 return true;
             }
         }
