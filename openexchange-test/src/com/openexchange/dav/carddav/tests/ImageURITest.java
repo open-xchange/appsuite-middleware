@@ -216,9 +216,9 @@ public class ImageURITest extends CardDAVTest {
          */
         vCard.getVCard().removePhoto(vCard.getVCard().getPhotos().get(0));
         PhotoType photo = new PhotoType();
-        photo.setImageMediaType(new ImageMediaType("GIF", "image/gif", "gif"));
+        photo.setImageMediaType(ImageMediaType.PNG);
         photo.setEncodingType(EncodingType.BINARY);
-        photo.setPhoto(Photos.GIF_100x100);
+        photo.setPhoto(Photos.PNG_200x200);
         vCard.getVCard().addPhoto(photo);
         putVCardUpdate(uid, vCard.toString(), vCard.getETag());
         /*
@@ -226,11 +226,11 @@ public class ImageURITest extends CardDAVTest {
          */
         contact = getContact(uid);
         assertNotNull(contact);
-        Assert.assertArrayEquals("image data wrong", Photos.GIF_100x100, contact.getImage1());
+        Assert.assertArrayEquals("image data wrong", Photos.PNG_200x200, contact.getImage1());
         /*
          * get & verify photo in vCard
          */
-        verifyPhoto(href, Photos.GIF_100x100, prefer);
+        verifyPhoto(href, Photos.PNG_200x200, prefer);
     }
 
     private void testRemoveOnClient(String prefer) throws Exception {
