@@ -80,6 +80,27 @@ public interface QuotaBackendService extends QuotaMode {
     long getUsage(int userId, int contextId) throws OXException;
 
     /**
+     * Sets the usage to the given value for specified user
+     *
+     * @param usage The usage bytes to increment by
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If usage cannot be updated
+     */
+    void setUsage(long usage, int userId, int contextId) throws OXException;
+
+    /**
+     * Increments the usage by the given value for specified user or sets it to specified usage if there is yet no usage entry
+     *
+     * @param required The required bytes to increment by
+     * @param newUsage The new usage to set (if absent)
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If usage cannot be updated
+     */
+    void incrementUsageCreateIfAbsent(long required, long newUsage, int userId, int contextId) throws OXException;
+
+    /**
      * Increments the usage by the given value for specified user
      *
      * @param required The required bytes to increment by

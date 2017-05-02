@@ -296,7 +296,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                     }
 
                     // Increment usage
-                    backendService.incrementUsage(required, effectiveUserId, contextId);
+                    backendService.incrementUsageCreateIfAbsent(required, newUsageForDb, effectiveUserId, contextId);
                     toDecrement = Long.valueOf(required);
                 } else {
                     long quota = getQuota();
@@ -660,6 +660,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
         }
 
+        QuotaBackendService backendService = null;
+        Long toRestore = null;
+
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
         PreparedStatement stmt = null;
@@ -667,6 +670,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         try {
             con.setAutoCommit(false);
             rollback = true;
+
+            backendService = getHighestRankedBackendService(effectiveUserId, contextId);
+            if (backendService != null) {
+                long effectiveOldUsage = backendService.getUsage(effectiveUserId, contextId);
+                backendService.setUsage(entireFileSize, effectiveUserId, contextId);
+                toRestore = Long.valueOf(effectiveOldUsage);
+            }
 
             stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             stmt.setLong(1, entireFileSize);
@@ -689,6 +699,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         } finally {
             if (rollback) {
                 Databases.rollback(con);
+
+                if (null != backendService && null != toRestore) {
+                    backendService.setUsage(toRestore.longValue(), effectiveUserId, contextId);
+                }
             }
             Databases.autocommit(con);
             Databases.closeSQLStuff(stmt);
