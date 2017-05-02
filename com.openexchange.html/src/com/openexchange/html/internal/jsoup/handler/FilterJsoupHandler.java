@@ -553,12 +553,6 @@ public final class FilterJsoupHandler implements JsoupHandler {
         }
     }
 
-    @Override
-    public void markBodyAbsent() {
-        // If there is no body tag, assume parsing starts in body
-        body = true;
-    }
-
     private static boolean isMSTag(String tagName) {
         final char c;
         if (tagName.length() < 2 || ':' != tagName.charAt(1) || (('w' != (c = tagName.charAt(0))) && ('W' != c) && ('o' != c) && ('O' != c))) {

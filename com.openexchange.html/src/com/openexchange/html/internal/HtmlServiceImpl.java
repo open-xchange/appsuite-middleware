@@ -102,7 +102,7 @@ import org.htmlcleaner.Serializer;
 import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.nodes.Document;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -119,6 +119,7 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
 import com.openexchange.html.internal.jsoup.JsoupParser;
 import com.openexchange.html.internal.jsoup.handler.CleaningJsoupHandler;
+import com.openexchange.html.internal.jsoup.handler.UrlReplacerJsoupHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
@@ -589,34 +590,33 @@ public final class HtmlServiceImpl implements HtmlService {
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } else {
                 // Check if input is a full HTML document or a fragment of HTML to parse
-                if (html.indexOf("<body") < 0 && html.indexOf("<BODY") < 0) {
-                    html = Jsoup.clean(html, Whitelist.relaxed());
-                } else {
-                    CleaningJsoupHandler handler = getJsoupHandlerFor(html.length(), options.getOptConfigName());
-                    handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
+                boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
-                    // Drop external images using regular expression
-                    boolean[] modified = options.getModified();
-                    if (options.isDropExternalImages()) {
-                        DroppingImageHandler imageHandler = new DroppingImageHandler();
-                        html = ImageProcessor.getInstance().replaceImages(html, imageHandler);
-                        if (null != modified) {
-                            modified[0] |= imageHandler.isModified();
-                        }
+                CleaningJsoupHandler handler = getJsoupHandlerFor(html.length(), options.getOptConfigName());
+                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
+
+                // Drop external images using regular expression
+                boolean[] modified = options.getModified();
+                if (options.isDropExternalImages()) {
+                    DroppingImageHandler imageHandler = new DroppingImageHandler();
+                    html = ImageProcessor.getInstance().replaceImages(html, imageHandler);
+                    if (null != modified) {
+                        modified[0] |= imageHandler.isModified();
                     }
-
-                    // Parse the HTML content
-                    JsoupParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
-
-                    // Check if modified by handler
-                    if (options.isDropExternalImages() && null != modified) {
-                        modified[0] |= handler.isImageURLFound();
-                    }
-
-                    // Get HTML content
-                    html = handler.getHTML();
-                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                 }
+
+                // Parse the HTML content
+                JsoupParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
+
+                // Check if modified by handler
+                if (options.isDropExternalImages() && null != modified) {
+                    modified[0] |= handler.isImageURLFound();
+                }
+
+                // Get HTML content
+                Document document = handler.getDocument();
+                html = hasBody ? document.toString() : document.body().html();
+                htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             }
 
             // Replace HTML entities
@@ -1700,9 +1700,16 @@ public final class HtmlServiceImpl implements HtmlService {
 
         // Check URLs
         if (replaceUrls) {
-            UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
-            JerichoParser.getInstance().parse(html, handler, false);
-            html = handler.getHTML();
+            boolean useJericho = HtmlServices.useJericho();
+            if (useJericho) {
+                UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
+                JerichoParser.getInstance().parse(html, handler, false);
+                html = handler.getHTML();
+            } else {
+                UrlReplacerJsoupHandler handler = new UrlReplacerJsoupHandler();
+                JsoupParser.getInstance().parse(html, handler, false);
+                html = handler.getDocument().toString();
+            }
         }
 
         return html;

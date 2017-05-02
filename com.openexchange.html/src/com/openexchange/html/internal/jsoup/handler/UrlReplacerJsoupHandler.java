@@ -47,8 +47,12 @@
  *
  */
 
-package com.openexchange.html.internal.jsoup;
+package com.openexchange.html.internal.jsoup.handler;
 
+import static com.openexchange.html.internal.jsoup.handler.CleaningJsoupHandler.checkPossibleURL;
+import java.util.Set;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
@@ -56,29 +60,83 @@ import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
+import com.openexchange.html.internal.jsoup.JsoupHandler;
+
 
 /**
- * {@link JsoupHandler}
+ * {@link UrlReplacerJsoupHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
+ * @since v7.8.0
  */
-public interface JsoupHandler {
+public class UrlReplacerJsoupHandler implements JsoupHandler {
 
-    void handleComment(Comment comment);
+    private static final Set<String> URI_ATTRS = CleaningJsoupHandler.URI_ATTRS;
 
-    void handleDataNode(DataNode dataNode);
+    private final StringBuilder urlBuilder;
+    private Document document;
 
-    void handleDocumentType(DocumentType documentType);
+    /**
+     * Initializes a new {@link UrlReplacerJsoupHandler}.
+     */
+    public UrlReplacerJsoupHandler() {
+        super();
+        this.urlBuilder = new StringBuilder(256);
+    }
 
-    void handleTextNode(TextNode textNode);
+    /**
+     * Gets the HTML document
+     *
+     * @return The HTML document
+     */
+    public Document getDocument() {
+        return document;
+    }
 
-    void handleXmlDeclaration(XmlDeclaration xmlDeclaration);
+    @Override
+    public void handleComment(Comment comment) {
+        // Ignore
+    }
 
-    void handleElementStart(Element element);
+    @Override
+    public void handleDataNode(DataNode dataNode) {
+        // Ignore
+    }
 
-    void handleElementEnd(Element element);
+    @Override
+    public void handleDocumentType(DocumentType documentType) {
+        // Ignore
+    }
 
-    void finished(Document document);
+    @Override
+    public void handleTextNode(TextNode textNode) {
+        // Ignore
+    }
+
+    @Override
+    public void handleXmlDeclaration(XmlDeclaration xmlDeclaration) {
+        // Ignore
+    }
+
+    @Override
+    public void handleElementStart(Element element) {
+        Attributes attributes = element.attributes();
+        for (Attribute attribute : attributes) {
+            String attr = attribute.getKey();
+            if (URI_ATTRS.contains(attr)) {
+                attribute.setValue(checkPossibleURL(attribute.getValue(), urlBuilder));
+            }
+        }
+    }
+
+    @Override
+    public void handleElementEnd(Element element) {
+        // Ignore
+    }
+
+    @Override
+    public void finished(Document document) {
+        this.document = document;
+    }
 
 }
