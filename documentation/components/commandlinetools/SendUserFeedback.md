@@ -50,7 +50,7 @@ addressTwo@none.com
 **CSV-file with PGP public keys**
 
 ```
-addressOne@example.com:/path/to/addressOne.pub.asc,Displayname
-addressTwo@none.com:/path/to/addressTwo.pub.asc,
+addressOne@example.com,Displayname,/path/to/addressOne.pub.asc
+addressTwo@none.com,,/path/to/addressTwo.pub.asc
 
 ```
