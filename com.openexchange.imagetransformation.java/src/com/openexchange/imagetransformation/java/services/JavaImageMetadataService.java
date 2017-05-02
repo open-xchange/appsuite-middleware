@@ -47,43 +47,51 @@
  *
  */
 
-package com.openexchange.imagetransformation.java.osgi;
+package com.openexchange.imagetransformation.java.services;
 
-import com.openexchange.config.ConfigurationService;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getImageInputStream;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getImageReader;
+import java.awt.Dimension;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import com.openexchange.imagetransformation.ImageMetadataService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
-import com.openexchange.imagetransformation.java.impl.JavaImageTransformationProvider;
-import com.openexchange.imagetransformation.java.scheduler.Scheduler;
-import com.openexchange.imagetransformation.java.services.JavaImageMetadataService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.processing.ProcessorService;
-import com.openexchange.timer.TimerService;
+import com.openexchange.java.Streams;
 
 
 /**
- * {@link ImageTransformationActivator}
+ * {@link JavaImageMetadataService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class ImageTransformationActivator extends HousekeepingActivator {
+public class JavaImageMetadataService implements ImageMetadataService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
+    /**
+     * Initializes a new {@link JavaImageMetadataService}.
+     */
+    public JavaImageMetadataService() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationProvider(), 0);
-        registerService(ImageMetadataService.class, new JavaImageMetadataService());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
-        super.stopBundle();
+    public Dimension getDimensionFor(InputStream imageStream, String mimeType, String name) throws IOException {
+        ImageInputStream imageInputStream = null;
+        ImageReader reader = null;
+        try {
+            imageInputStream = getImageInputStream(imageStream);
+            reader = getImageReader(imageInputStream, mimeType, name);
+            reader.setInput(imageInputStream);
+            int width = reader.getWidth(0);
+            int height = reader.getHeight(0);
+            return new Dimension(width, height);
+        } finally {
+            if (null != reader) {
+                reader.dispose();
+            }
+            Streams.close(imageInputStream, imageStream);
+        }
     }
 
 }

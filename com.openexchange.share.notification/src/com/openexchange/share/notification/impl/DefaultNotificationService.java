@@ -340,10 +340,19 @@ public class DefaultNotificationService implements ShareNotificationService {
         // remove sharing user if he somehow made it into the list of recipients
         usersById.remove(session.getUserId());
 
+        // get underlying share & check session user's permissions
         ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
         ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
+        try {
+            if (false == moduleSupport.mayAdjust(srcTarget, session)) {
+                throw ShareNotifyExceptionCodes.INSUFFICIENT_PERMISSIONS.create(srcTarget);
+            }
+        } catch (OXException e) {
+            collectWarning(warnings, e);
+            return warnings;
+        }
 
+        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
         TIntObjectIterator<UserDetail> it = usersById.iterator();
         for (int i = usersById.size(); i-- > 0; ) {
             it.advance();
