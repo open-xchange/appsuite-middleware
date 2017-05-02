@@ -78,7 +78,7 @@ public class DAVSyncProfileTest extends AbstractSmtpAJAXSession {
         ExecuteRequest req = new ExecuteRequest("apple.mac/davsync", "email", body, false);
         getClient().execute(req);
         GetMailsRequest mailReq = new GetMailsRequest();
-        GetMailsResponse mailResp = getClient().execute(mailReq);
+        GetMailsResponse mailResp = getNoReplyClient().execute(mailReq);
         List<Message> messages = mailResp.getMessages();
         assertNotNull(messages);
         assertEquals(1, messages.size());
