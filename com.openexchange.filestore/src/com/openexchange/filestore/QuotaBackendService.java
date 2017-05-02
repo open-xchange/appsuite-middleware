@@ -59,6 +59,9 @@ import com.openexchange.exception.OXException;
  */
 public interface QuotaBackendService extends QuotaMode {
 
+    /** The service identifier for App Suite Drive module */
+    public static final String SERVICE_ID_APPSUITE_DRIVE = "appsuite_drive";
+
     /**
      * Gets the current limit for specified user.
      *
@@ -70,7 +73,7 @@ public interface QuotaBackendService extends QuotaMode {
     long getLimit(int userId, int contextId) throws OXException;
 
     /**
-     * Gets the current usage for specified user.
+     * Gets the current usage for specified user including all contributing services.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -80,45 +83,50 @@ public interface QuotaBackendService extends QuotaMode {
     long getUsage(int userId, int contextId) throws OXException;
 
     /**
-     * Sets the usage to the given value for specified user
+     * Gets the current usage for specified user, except for specified services.
      *
-     * @param usage The usage bytes to increment by
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @throws OXException If usage cannot be updated
+     * @return The current usage for specified user
+     * @throws OXException If current usage cannot be returned
      */
-    void setUsage(long usage, int userId, int contextId) throws OXException;
+    long getUsageExceptFor(int userId, int contextId, String... toExclude) throws OXException;
 
     /**
-     * Increments the usage by the given value for specified user or sets it to specified usage if there is yet no usage entry
+     * Sets the usage for specified service contributor to the given value for specified user
      *
-     * @param required The required bytes to increment by
-     * @param newUsage The new usage to set (if absent)
+     * @param usage The usage bytes to set
+     * @param serviceId The identifier of the service contributor
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return <code>true</code> if new usage has been successfully applied; otherwise <code>false</code> if there was a concurrent modification
      * @throws OXException If usage cannot be updated
      */
-    void incrementUsageCreateIfAbsent(long required, long newUsage, int userId, int contextId) throws OXException;
+    boolean setUsage(long usage, String serviceId, int userId, int contextId) throws OXException;
 
     /**
      * Increments the usage by the given value for specified user
      *
      * @param required The required bytes to increment by
+     * @param serviceId The identifier of the service contributor
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return <code>true</code> if usage has been successfully incremented; otherwise <code>false</code> if there was a concurrent modification
      * @throws OXException If usage cannot be updated
      */
-    void incrementUsage(long required, int userId, int contextId) throws OXException;
+    boolean incrementUsage(long required, String serviceId, int userId, int contextId) throws OXException;
 
     /**
      * Decrements the usage by the given value for specified user
      *
      * @param released The released bytes to decrement by
+     * @param serviceId The identifier of the service contributor
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return <code>true</code> if usage has been successfully decremented; otherwise <code>false</code> if there was a concurrent modification
      * @throws OXException If usage cannot be updated
      */
-    void decrementUsage(long released, int userId, int contextId) throws OXException;
+    boolean decrementUsage(long released, String serviceId, int userId, int contextId) throws OXException;
 
     /**
      * Checks if this usage service is applicable for given user

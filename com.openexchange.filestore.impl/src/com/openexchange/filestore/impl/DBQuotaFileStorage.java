@@ -95,6 +95,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     private static final long serialVersionUID = -4048657112670657310L;
 
+    private static final String SERVICE_ID_APPSUITE_DRIVE = QuotaBackendService.SERVICE_ID_APPSUITE_DRIVE;
+
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     // -------------------------------------------------------------------------------------------------------------
@@ -251,7 +253,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
 
-        Long toDecrement = null;
+        Long toRestore = null;
         QuotaBackendService backendService = null;
 
         PreparedStatement sstmt = null;
@@ -283,21 +285,25 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             } else {
                 backendService = getHighestRankedBackendService(effectiveUserId, contextId);
                 if (backendService != null) {
-                    long effectiveOldUsage = backendService.getUsage(effectiveUserId, contextId);
-                    long effectiveNewUsage = effectiveOldUsage + required;
-                    long effectiveLimit = getQuota();
-                    if (checkExceededQuota(id, effectiveLimit, required, effectiveNewUsage, effectiveOldUsage)) {
-                        return true;
-                    }
+                    boolean keepOn = true;
+                    while (keepOn) {
+                        long otherUsages = backendService.getUsageExceptFor(effectiveUserId, contextId, SERVICE_ID_APPSUITE_DRIVE);
+                        long oldTotalUsage = otherUsages + oldUsageFromDb;
+                        long newTotalUsage = otherUsages + newUsageForDb;
+                        long effectiveLimit = getQuota();
+                        if (checkExceededQuota(id, effectiveLimit, required, newTotalUsage, oldTotalUsage)) {
+                            return true;
+                        }
 
-                    // Advertise usage increment to listeners
-                    for (QuotaFileStorageListener listener : listeners) {
-                        listener.onUsageIncrement(id, required, effectiveOldUsage, effectiveLimit, ownerId, contextId);
-                    }
+                        // Advertise usage increment to listeners
+                        for (QuotaFileStorageListener listener : listeners) {
+                            listener.onUsageIncrement(id, required, oldTotalUsage, effectiveLimit, ownerId, contextId);
+                        }
 
-                    // Increment usage
-                    backendService.incrementUsageCreateIfAbsent(required, newUsageForDb, effectiveUserId, contextId);
-                    toDecrement = Long.valueOf(required);
+                        // Increment usage
+                        keepOn = !backendService.setUsage(newUsageForDb, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                    }
+                    toRestore = Long.valueOf(oldUsageFromDb);
                 } else {
                     long quota = getQuota();
                     if (checkExceededQuota(id, quota, required, newUsageForDb, oldUsageFromDb)) {
@@ -330,8 +336,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             if (rollback) {
                 Databases.rollback(con);
 
-                if (null != backendService && null != toDecrement) {
-                    backendService.decrementUsage(toDecrement.longValue(), effectiveUserId, contextId);
+                if (null != backendService && null != toRestore) {
+                    backendService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 }
             }
             Databases.autocommit(con);
@@ -409,7 +415,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
 
-        Long toIncrement = null;
+        Long toRestore = null;
         QuotaBackendService backendService = null;
 
         PreparedStatement sstmt = null;
@@ -443,38 +449,22 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 LOGGER.error("", e);
             }
 
+            // Check whether to mirror new usage to possible QuotaBackendService
             backendService = getHighestRankedBackendService(effectiveUserId, contextId);
             if (backendService != null) {
-                long effectiveOldUsage = backendService.getUsage(effectiveUserId, contextId);
-                long effectiveToReleasedBy = toReleaseBy;
-                long effectiveNewUsage = effectiveOldUsage - effectiveToReleasedBy;
-                if (effectiveNewUsage < 0) {
-                    effectiveNewUsage = 0;
-                    effectiveToReleasedBy = effectiveOldUsage;
-                    final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(ownerId), I(contextId));
-                    LOGGER.error("", e);
+                boolean keepOn = true;
+                while (keepOn) {
+                    keepOn = !backendService.setUsage(newUsageForDb, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 }
+                toRestore = Long.valueOf(oldUsageFromDb);
+            }
 
-                // Advertise usage decrement to listeners
-                for (QuotaFileStorageListener listener : listeners) {
-                    try {
-                        listener.onUsageDecrement(ids, toReleaseBy, effectiveOldUsage, getQuota(), ownerId, contextId);
-                    } catch (Exception e) {
-                        LOGGER.warn("", e);
-                    }
-                }
-
-                // Decrement usage
-                backendService.decrementUsage(effectiveToReleasedBy, effectiveUserId, contextId);
-                toIncrement = Long.valueOf(effectiveToReleasedBy);
-            } else {
-                // Advertise usage increment to listeners
-                for (QuotaFileStorageListener listener : listeners) {
-                    try {
-                        listener.onUsageDecrement(ids, toReleaseBy, oldUsageFromDb, getQuota(), ownerId, contextId);
-                    } catch (Exception e) {
-                        LOGGER.warn("", e);
-                    }
+            // Advertise usage increment to listeners
+            for (QuotaFileStorageListener listener : listeners) {
+                try {
+                    listener.onUsageDecrement(ids, toReleaseBy, oldUsageFromDb, getQuota(), ownerId, contextId);
+                } catch (Exception e) {
+                    LOGGER.warn("", e);
                 }
             }
 
@@ -499,8 +489,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             if (rollback) {
                 Databases.rollback(con);
 
-                if (null != backendService && null != toIncrement) {
-                    backendService.incrementUsage(toIncrement.longValue(), effectiveUserId, contextId);
+                if (null != backendService && null != toRestore) {
+                    backendService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 }
             }
             Databases.autocommit(con);
@@ -674,7 +664,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             backendService = getHighestRankedBackendService(effectiveUserId, contextId);
             if (backendService != null) {
                 long effectiveOldUsage = backendService.getUsage(effectiveUserId, contextId);
-                backendService.setUsage(entireFileSize, effectiveUserId, contextId);
+                backendService.setUsage(entireFileSize, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 toRestore = Long.valueOf(effectiveOldUsage);
             }
 
@@ -701,7 +691,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 Databases.rollback(con);
 
                 if (null != backendService && null != toRestore) {
-                    backendService.setUsage(toRestore.longValue(), effectiveUserId, contextId);
+                    backendService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 }
             }
             Databases.autocommit(con);
