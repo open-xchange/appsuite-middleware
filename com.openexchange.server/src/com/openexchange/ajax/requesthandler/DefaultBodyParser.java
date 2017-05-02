@@ -60,6 +60,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.java.UnsynchronizedStringReader;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DefaultBodyParser} - The default body parser.
@@ -127,7 +128,7 @@ public class DefaultBodyParser implements BodyParser {
                     try {
                         retval.setData(JSONObject.parse(reader));
                     } catch (final JSONException e) {
-                        retval.setData(AJAXServlet.readFrom(reader));
+                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e, new Object[0]);
                     }
                 } else {
                     retval.setData(AJAXServlet.readFrom(reader));
