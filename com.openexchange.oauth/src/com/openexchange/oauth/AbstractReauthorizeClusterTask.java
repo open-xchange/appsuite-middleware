@@ -180,7 +180,7 @@ public abstract class AbstractReauthorizeClusterTask {
         dbAccount = getDBAccount();
 
         // Cached account does not match the database account. DB account is always considered to be up-to-date, thus return it
-        if (!(dbAccount.getToken().equals(cachedAccount.getToken()) && dbAccount.getSecret().equals(cachedAccount.getSecret()))) {
+        if (!(dbAccount.getToken().equals(cachedAccount.getToken()) && !dbAccount.getSecret().equals(cachedAccount.getSecret()))) {
             return dbAccount;
         }
 
