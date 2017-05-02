@@ -79,6 +79,9 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
+                    if (isReadOnlySharing(module) && false == isReadOnly(guestPermission)) {
+                        continue;
+                    }
                     testCreateSharedFolder(api, module, guestPermission);
                 }
             }

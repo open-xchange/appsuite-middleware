@@ -88,4 +88,8 @@ public class RedeemResponse extends AbstractAJAXResponse {
         return properties.get("target");
     }
 
+    public String getStatus() {
+        return properties.get("status");
+    }
+
 }
