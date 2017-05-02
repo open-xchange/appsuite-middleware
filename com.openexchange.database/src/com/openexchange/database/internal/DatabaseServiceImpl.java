@@ -250,6 +250,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
         configDatabaseService.lock(con, writePoolId);
     }
 
+    @Override
+    public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
+        return configDatabaseService.getAllSchemata(con);
+    }
+
     // Delegate global database service methods.
 
     @Override
