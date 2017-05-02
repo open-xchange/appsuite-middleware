@@ -138,7 +138,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
     private Map<String, List<Integer>> rootTasks = new HashMap<String, List<Integer>>();
 
     private Map<Integer, Task> tasks = new HashMap<Integer, Task>();
-
+    
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -151,7 +151,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             LOG.error("Exception while setting up FindTasksTestEnvironment.", e);
             fail(e.getMessage());
         }
-    }
+    }    
 
     /**
      * Initialize the users
@@ -184,6 +184,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userAprivateTestFolder, false);
             insertResponseResp = getClient().execute(insertRequestReq);
             insertResponseResp.fillObject(userAprivateTestFolder);
+            fttm.rememberFolderFromClientA(userAprivateTestFolder);
+//            ftm.rememberCreatedItems(userAprivateTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -198,6 +200,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         String userAPublicTaskFolder = "UserA - findAPIPublicTaskFolder-" + UUID.randomUUID().toString();
         try {
             userApublicTestFolder = Create.createPublicFolder(getClient(), userAPublicTaskFolder, FolderObject.TASK, false);
+            fttm.rememberFolderFromClientA(userApublicTestFolder);
+//            ftm.rememberCreatedItems(userApublicTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -216,6 +220,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, false);
             insertResponseResp = getClient2().execute(insertRequestReq);
             insertResponseResp.fillObject(userBsharedTestFolderRO);
+            fttm.rememberFolderFromClientB(userBsharedTestFolderRO);
+//            ftm.rememberCreatedItems(userBsharedTestFolderRO);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -228,7 +234,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
         try {
             //share read only folder to userA
-            FolderTools.shareFolder(getClient2(), EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+            FolderTools.shareFolder(getClient2(), EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);           
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -243,6 +249,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRW, false);
             insertResponseResp = getClient2().execute(insertRequestReq);
             insertResponseResp.fillObject(userBsharedTestFolderRW);
+            fttm.rememberFolderFromClientB(userBsharedTestFolderRW);
+//            ftm.rememberCreatedItems(userBsharedTestFolderRW);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -270,6 +278,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBprivateTestFolder, false);
             insertResponseResp = getClient2().execute(insertRequestReq);
             insertResponseResp.fillObject(userBprivateTestFolder);
+            fttm.rememberFolderFromClientB(userBprivateTestFolder);
+//            ftm.rememberCreatedItems(userBprivateTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -284,6 +294,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         try {
             //create public test folder for user B
             userBpublicTestFolder = Create.createPublicFolder(getClient2(), userBPublicTaskFolder, FolderObject.TASK, false);
+            fttm.rememberFolderFromClientB(userBpublicTestFolder);
+//            ftm.rememberCreatedItems(userBpublicTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -293,6 +305,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         if (userBpublicTestFolder.getObjectID() == 0) {
             userBpublicTestFolder.setObjectID(foldersB.get(userBPublicTaskFolder).getObjectID());
         }
+        
+//        fttm.setClient2(getClient2());
     }
 
     /**
@@ -398,6 +412,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         list.add(usrPartA);
         list.add(extPart);
         insertTask(getClient(), FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), list, true, false);
+        
+        ttm.setClient2(getClient2());
     }
 
     /**
@@ -486,6 +502,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         t = client.execute(new com.openexchange.ajax.task.actions.GetRequest(folder, t.getObjectID())).getTask(client.getValues().getTimeZone());
 
         tasks.put(t.getObjectID(), t);
+        ttm.addEntities(t);
 
         return t;
     }
