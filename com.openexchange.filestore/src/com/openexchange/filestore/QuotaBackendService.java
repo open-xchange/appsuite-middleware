@@ -87,6 +87,7 @@ public interface QuotaBackendService extends QuotaMode {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param toExclude The identifier of such service contributors to exclude
      * @return The current usage for specified user
      * @throws OXException If current usage cannot be returned
      */
