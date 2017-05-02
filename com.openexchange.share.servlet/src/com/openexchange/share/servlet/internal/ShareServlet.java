@@ -145,7 +145,7 @@ public class ShareServlet extends AbstractShareServlet {
                     String userAgent = request.getHeader("User-Agent");
                     if (userAgentBlacklist.isBlacklisted(userAgent)) {
                         LOG.info("User-Agent black-listed: '{}'", userAgent);
-                        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_ACCESSIBLE);
+                        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_ACCESSIBLE, "client_blacklisted");
                         return;
                     }
                 }
@@ -216,6 +216,7 @@ public class ShareServlet extends AbstractShareServlet {
             } else {
                 LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
                 LoginLocation location = new LoginLocation()
+                    .status("internal_error")
                     .loginType(LoginType.MESSAGE)
                     .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                 LoginLocationRegistry.getInstance().putAndRedirect(location, response);
@@ -249,7 +250,7 @@ public class ShareServlet extends AbstractShareServlet {
      * @param translator The translator
      */
     private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException {
-        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_FOUND);
+        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_FOUND, "not_found");
     }
 
     /**
@@ -258,9 +259,12 @@ public class ShareServlet extends AbstractShareServlet {
      * @param response The HTTP servlet response to redirect
      * @param translator The translator
      * @param displayMessage The message displayed to the user
+     * @param status The status to signal
      */
-    private static void sendNotFound(HttpServletResponse response, Translator translator, String displayMessage) throws IOException {
+    private static void sendNotFound(HttpServletResponse response, Translator translator, String displayMessage, String status) throws IOException {
         LoginLocation location = new LoginLocation()
+            .status(status)
+            .parameter("status", status)
             .loginType(LoginType.MESSAGE)
             .message(MessageType.ERROR, translator.translate(displayMessage));
         LoginLocationRegistry.getInstance().putAndRedirect(location, response);
