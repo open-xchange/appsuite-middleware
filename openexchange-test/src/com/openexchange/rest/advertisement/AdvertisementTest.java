@@ -63,11 +63,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.DisableOnDebug;
-import org.junit.rules.TestRule;
-import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -96,9 +92,6 @@ import com.openexchange.tools.arrays.Arrays;
  */
 @RunWith(Parameterized.class)
 public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
-
-    @Rule
-    public TestRule timeout = new DisableOnDebug(new Timeout(20000000));
 
     private String taxonomyTypes = "groupware_premium";
     private Context old;
