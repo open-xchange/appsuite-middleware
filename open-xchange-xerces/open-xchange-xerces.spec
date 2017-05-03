@@ -29,8 +29,8 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Xerces Compat for Sun Java
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
-Conflicts:     open-xchange-xerces-ibm
-Conflicts:     open-xchange-xerces-sun
+Obsoletes:     open-xchange-xerces-ibm
+Obsoletes:     open-xchange-xerces-sun
 
 %description
 Xerces compatibility for OX installations on Sun JVM.
