@@ -17,13 +17,13 @@ public class DeleteTest extends AttachmentTest {
 
     @Test
     public void testDeleteAttachment() throws Exception {
-        final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
+        final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         final int contactFolderId = folderObj.getObjectID();
         final Contact contactObj = new Contact();
         contactObj.setSurName("testDeleteAttachment");
         contactObj.setParentFolderID(contactFolderId);
 
-        final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         final AttachmentMetadata attachmentObj = new AttachmentImpl();
         attachmentObj.setFilename(System.currentTimeMillis() + "test.txt");
@@ -40,6 +40,6 @@ public class DeleteTest extends AttachmentTest {
 
         attachmentObj.setId(attachmentId);
 
-        deleteAttachment(webCon, attachmentObj, getHostName(), getLogin(), getPassword());
+        deleteAttachment(webCon, attachmentObj, getHostName(), getLogin() + "@" + context, getPassword());
     }
 }
