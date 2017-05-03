@@ -615,7 +615,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
                 // Get HTML content
                 Document document = handler.getDocument();
-                html = hasBody ? document.toString() : document.body().html();
+                html = hasBody ? document.outerHtml() : document.body().html();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             }
 
