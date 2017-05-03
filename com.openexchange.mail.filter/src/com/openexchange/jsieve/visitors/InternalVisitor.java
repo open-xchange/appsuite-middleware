@@ -188,10 +188,7 @@ public class InternalVisitor implements SieveParserVisitor {
             return visitChildren;
         } else {
             final Object value = node.getValue();
-            if (value instanceof TagArgument) {
-                ((ArrayList<Object>) data).add(value);
-                return data;
-            } else if (value instanceof NumberArgument) {
+            if (value instanceof TagArgument || value instanceof NumberArgument) {
                 ((ArrayList<Object>) data).add(value);
                 return data;
             } else {
