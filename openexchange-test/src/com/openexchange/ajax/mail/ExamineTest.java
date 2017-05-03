@@ -91,6 +91,7 @@ public class ExamineTest extends AbstractMailTest {
     public void tearDown() throws Exception {
         try {
             if (subFolder != null) {
+                subFolder.setLastModified(new Date(0));
                 com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
                 getClient().execute(fDel);
             }
