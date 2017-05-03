@@ -66,9 +66,9 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageListener;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.QuotaBackendService;
 import com.openexchange.filestore.StorageInfo;
 import com.openexchange.filestore.impl.osgi.Services;
+import com.openexchange.filestore.unified.UnifiedQuotaBackendService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.FileStorageInfo;
 import com.openexchange.groupware.filestore.Filestore;
@@ -88,7 +88,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
     private final FileStorageService fileStorageService;
     private final ServiceListing<QuotaFileStorageListener> listeners;
-    private final ServiceListing<QuotaBackendService> backendServices;
+    private final ServiceListing<UnifiedQuotaBackendService> backendServices;
     private final String regionName = "QuotaFileStorages";
 
     /**
@@ -98,7 +98,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
      * @param listeners The listeners
      * @param fileStorageService The file storage service
      */
-    public DBQuotaFileStorageService(ServiceListing<QuotaBackendService> backendServices, ServiceListing<QuotaFileStorageListener> listeners, FileStorageService fileStorageService) {
+    public DBQuotaFileStorageService(ServiceListing<UnifiedQuotaBackendService> backendServices, ServiceListing<QuotaFileStorageListener> listeners, FileStorageService fileStorageService) {
         super();
         this.backendServices = backendServices;
         this.listeners = listeners;

@@ -5,14 +5,19 @@ Bundle-SymbolicName: com.openexchange.filestore.impl
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.collect,
+Import-Package: com.google.common.cache;version="19.0.0",
+ com.google.common.collect,
+ com.openexchange.admin.tools.filestore,
  com.openexchange.caching,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.filestore,
+ com.openexchange.filestore.unified,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
  com.openexchange.groupware.filestore,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.settings,

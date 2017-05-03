@@ -47,20 +47,21 @@
  *
  */
 
-package com.openexchange.filestore;
+package com.openexchange.filestore.unified;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.QuotaMode;
 
 /**
- * {@link QuotaBackendService} - Provides methods to query and increment/decrement the file storage usage as well as to query the file storage limit.
+ * {@link UnifiedQuotaBackendService} - Provides methods to query and increment/decrement a service-associated usage as well as to query its limit that contribute to a unified quota.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public interface QuotaBackendService extends QuotaMode {
+public interface UnifiedQuotaBackendService extends QuotaMode {
 
-    /** The service identifier for App Suite Drive module */
-    public static final String SERVICE_ID_APPSUITE_DRIVE = "appsuite_drive";
+    /** The mode for Unified Quota */
+    public static final String MODE = "unified";
 
     /**
      * Gets the current limit for specified user.
@@ -80,7 +81,7 @@ public interface QuotaBackendService extends QuotaMode {
      * @return The current usage for specified user
      * @throws OXException If current usage cannot be returned
      */
-    long getUsage(int userId, int contextId) throws OXException;
+    UsageResult getUsage(int userId, int contextId) throws OXException;
 
     /**
      * Gets the current usage for specified user, except for specified services.
@@ -91,7 +92,7 @@ public interface QuotaBackendService extends QuotaMode {
      * @return The current usage for specified user
      * @throws OXException If current usage cannot be returned
      */
-    long getUsageExceptFor(int userId, int contextId, String... toExclude) throws OXException;
+    UsageResult getUsageExceptFor(int userId, int contextId, String... toExclude) throws OXException;
 
     /**
      * Sets the usage for specified service contributor to the given value for specified user
@@ -138,5 +139,24 @@ public interface QuotaBackendService extends QuotaMode {
      * @throws OXException If applicability cannot be checked
      */
     boolean isApplicableFor(int userId, int contextId) throws OXException;
+
+    // ---------------------------------------------------------------------------------------------------------
+
+    /**
+     * Deletes the usage entries for specified context.
+     *
+     * @param contextId The context identifier
+     * @throws OXException If delete attempt fails
+     */
+    void deleteEntryFor(int contextId) throws OXException;
+
+    /**
+     * Deletes the usage entries for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If delete attempt fails
+     */
+    void deleteEntryFor(int userId, int contextId) throws OXException;
 
 }
