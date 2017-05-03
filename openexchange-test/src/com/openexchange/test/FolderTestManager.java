@@ -640,5 +640,8 @@ public class FolderTestManager implements TestManager {
         oclp.setDeleteObjectPermission(odp);
         return oclp;
     }
-
+    
+    public List<FolderObject> getCreatedItems() {
+        return createdItems;
+    }    
 }

@@ -91,6 +91,6 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
     @Override
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(ExistsTestField.headers.name(), command.getArguments().get(0));
+        jsonObject.put(ExistsTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(0)));
     }
 }

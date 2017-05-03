@@ -195,7 +195,12 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
     protected void parseDatePart(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException, JSONException {
         // Parse the date part
         final String datepart = CommandParserJSONUtil.getString(jsonObject, DateTestField.datepart.name(), commandName);
-        DatePart datePart = DatePart.valueOf(datepart);
+        DatePart datePart;
+        try {
+            datePart = DatePart.valueOf(datepart);
+        } catch (IllegalArgumentException ex) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Date rule: The datepart \"" + datepart + "\" is not a valid datepart");
+        }
         switch (datePart) {
             case date:
                 argList.add(CommandParserJSONUtil.stringToList(datepart));
@@ -304,8 +309,12 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         final List<String> value = (List<String>) command.getArguments().get(command.getArguments().size() - 2);
         String datepart = value.get(0);
         jsonObject.put(DateTestField.datepart.name(), datepart);
-
-        DatePart datePart = DatePart.valueOf(datepart);
+        DatePart datePart;
+        try {
+             datePart = DatePart.valueOf(datepart);
+        } catch(IllegalArgumentException ex) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Date rule: The datepart \"" + datepart + "\" is not a valid datepart");
+        }
         int index = command.getArguments().size() - 1;
         switch (datePart) {
             case date:

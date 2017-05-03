@@ -827,12 +827,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                  */
                 OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
                 OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceMetaData);
-                OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
-                // No need to re-authorise if access not present
-                if (access != null) {
-                    // Initialise the access with the new access token
-                    access.initialize();
-                }
                 /*
                  * Signal re-authorized event
                  */
@@ -844,6 +838,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                  * Commit
                  */
                 writeCon.commit();
+                
+                // No need to re-authorise if access not present
+                OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
+                if (access != null) {
+                    // Initialise the access with the new access token
+                    access.initialize();
+                }
                 rollback = false;
             } catch (SQLException e) {
                 LOG.error(e.toString());

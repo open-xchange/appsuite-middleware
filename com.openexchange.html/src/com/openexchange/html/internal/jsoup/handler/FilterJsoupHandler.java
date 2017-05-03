@@ -553,12 +553,6 @@ public final class FilterJsoupHandler implements JsoupHandler {
         }
     }
 
-    @Override
-    public void markBodyAbsent() {
-        // If there is no body tag, assume parsing starts in body
-        body = true;
-    }
-
     private static boolean isMSTag(String tagName) {
         final char c;
         if (tagName.length() < 2 || ':' != tagName.charAt(1) || (('w' != (c = tagName.charAt(0))) && ('W' != c) && ('o' != c) && ('O' != c))) {
@@ -679,7 +673,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
                                     // return;
                                 }
                             } else {
-                                if (replaceUrls && uriAttributes.contains(attribute)) {
+                                if (replaceUrls && uriAttributes.contains(attr)) {
                                     attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                 } else {
                                     attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
@@ -707,7 +701,7 @@ public final class FilterJsoupHandler implements JsoupHandler {
                                                 // return;
                                             }
                                         } else {
-                                            if (replaceUrls && uriAttributes.contains(attribute)) {
+                                            if (replaceUrls && uriAttributes.contains(attr)) {
                                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                             } else {
                                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');

@@ -79,8 +79,6 @@ public interface JsoupHandler {
 
     void handleElementEnd(Element element);
 
-    void markBodyAbsent();
-
     void finished(Document document);
 
 }

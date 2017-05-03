@@ -47,38 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.onboarding;
+package com.openexchange.test;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.onboarding.tests.ConfigTest;
-import com.openexchange.ajax.onboarding.tests.DAVSyncProfileTest;
-import com.openexchange.ajax.onboarding.tests.EASSyncProfileTest;
-import com.openexchange.ajax.onboarding.tests.EMClientURLTest;
-import com.openexchange.ajax.onboarding.tests.MailSyncProfileTest;
-import com.openexchange.ajax.onboarding.tests.PlistSMSRateLimitTest;
-import com.openexchange.ajax.onboarding.tests.PlistSMSTest;
-import com.openexchange.ajax.onboarding.tests.PlistSMSUserLimitTest;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.ConcurrentLinkedList;
 
 /**
- * {@link OnboardingAJAXSuite}
+ * {@link FolderTaskTestManager}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ConfigTest.class,
-    DAVSyncProfileTest.class,
-    EASSyncProfileTest.class,
-    EMClientURLTest.class,
-    PlistSMSTest.class,
-    PlistSMSUserLimitTest.class,
-    PlistSMSRateLimitTest.class,
-    MailSyncProfileTest.class,
-
-})
-public class OnboardingAJAXSuite {
-
+public class FolderTaskTestManager extends FolderTestManager {
+    private AJAXClient client1;
+    private AJAXClient client2;
+    
+    private List<FolderObject> createdItems2;    
+    
+    public FolderTaskTestManager(final AJAXClient client, final AJAXClient client2) {        
+        super(client);
+        this.client1 = client;
+        this.client2 = client2;
+        createdItems2 = new ConcurrentLinkedList<FolderObject>(); 
+    }
+    
+    @Override
+    public void cleanUp(){
+        super.cleanUp();                
+        deleteFolder(client2, createdItems2);
+        createdItems2 = new ConcurrentLinkedList<FolderObject>();
+        this.setClient(client1);
+    }
+    
+    public void deleteFolder(final AJAXClient client, List<FolderObject> list){
+        this.setClient(client);
+        final Vector<FolderObject> deleteMe = new Vector<FolderObject>(list);       
+        try {
+            for (final FolderObject folder : deleteMe) {
+                folder.setLastModified(new Date(Long.MAX_VALUE));
+                deleteFolderOnServer(folder, Boolean.TRUE);
+                if (getLastResponse().hasError()) {
+                    org.slf4j.LoggerFactory.getLogger(FolderTestManager.class).warn("Unable to delete the folder with id {} in folder {} with name '{}': {}", folder.getObjectID(), folder.getParentFolderID(), folder.getFolderName(), getLastResponse().getException().getMessage());
+                }
+            }            
+        } catch (final Exception e){
+            doExceptionHandling(e, "clean-up");
+        }        
+    }
+    
+    public void rememberFolderFromClientA(final FolderObject folderObject){
+        this.getCreatedItems().add(folderObject);
+    }
+    
+    public void rememberFolderFromClientB(final FolderObject folderObject){
+        createdItems2.add(folderObject);
+    }
 
 }

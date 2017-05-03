@@ -58,8 +58,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import javax.ws.rs.core.Application;
-import javax.ws.rs.core.HttpHeaders;
-import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,16 +75,12 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.advertisement.json.AdConfigRestService;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.rest.advertisement.actions.GetConfigRequest;
 import com.openexchange.rest.advertisement.actions.GetConfigResponse;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
-import com.openexchange.testing.restclient.invoker.ApiClient;
 import com.openexchange.testing.restclient.modules.AdvertisementApi;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -136,15 +130,12 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
     }
 
     protected AdvertisementApi advertisementApi;
-    private ApiClient restClient;
-    private TestUser restUser;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        initREST();
 
-        advertisementApi = new AdvertisementApi(restClient);
+        advertisementApi = new AdvertisementApi(getRestClient());
 
         random = new Random();
         setUpConfiguration();
@@ -169,24 +160,6 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             default:
                 fail("Unknown package scheme.");
         }
-    }
-
-    private void initREST() throws OXException {
-        ProvisioningSetup.init();
-
-        restClient = new ApiClient();
-        restClient.setBasePath(getBasePath());
-        restUser = TestContextPool.getRestUser();
-        restClient.setUsername(restUser.getUser());
-        restClient.setPassword(restUser.getPassword());
-        String authorizationHeaderValue = "Basic " + Base64.encodeBase64String((restUser.getUser() + ":" + restUser.getPassword()).getBytes(Charsets.UTF_8));
-        restClient.addDefaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
-    }
-
-    protected String getBasePath() {
-        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
-        return protocol + "://" + hostname + ":8009";
     }
 
     @Override
@@ -222,7 +195,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         JSONValue adConfig = generateAdConfig();
         try {
             advertisementApi.put_2(contextId, userId, adConfig.toString());
-            assertTrue("Unexpected status: " + restClient.getStatusCode(), Arrays.contains(new int[] { 200, 201 }, restClient.getStatusCode()));
+            assertTrue("Unexpected status: " + getRestClient().getStatusCode(), Arrays.contains(new int[] { 200, 201 }, getRestClient().getStatusCode()));
 
             GetConfigRequest req = new GetConfigRequest();
             GetConfigResponse response = getAjaxClient().execute(req);
@@ -236,7 +209,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
         } finally {
             advertisementApi.delete_1(contextId, userId);
-            assertEquals("Deletion of ad config failed: " + restClient.getStatusCode(), 204, restClient.getStatusCode());
+            assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
         }
     }
 
@@ -256,7 +229,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         JSONValue adConfig = generateAdConfig();
         try {
             advertisementApi.put_0(DEFAULT, pack, adConfig.toString());
-            assertTrue("Unexpected status: " + restClient.getStatusCode(), Arrays.contains(new int[] { 200, 201 }, restClient.getStatusCode()));
+            assertTrue("Unexpected status: " + getRestClient().getStatusCode(), Arrays.contains(new int[] { 200, 201 }, getRestClient().getStatusCode()));
 
             GetConfigRequest req = new GetConfigRequest();
             GetConfigResponse response = getAjaxClient().execute(req);
@@ -266,7 +239,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
         } finally {
             advertisementApi.delete_0(DEFAULT, pack);
-            assertEquals("Deletion of ad config failed: " + restClient.getStatusCode(), 204, restClient.getStatusCode());
+            assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
         }
     }
 
@@ -287,7 +260,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
         // create configuration
         advertisementApi.put_0(DEFAULT, pack, adConfig.toString());
-        assertTrue("Unexpected status: " + restClient.getStatusCode(), Arrays.contains(new int[] { 200, 201 }, restClient.getStatusCode()));
+        assertTrue("Unexpected status: " + getRestClient().getStatusCode(), Arrays.contains(new int[] { 200, 201 }, getRestClient().getStatusCode()));
         // Check if configuration is available
         GetConfigRequest req = new GetConfigRequest();
         GetConfigResponse response = getAjaxClient().execute(req);
@@ -296,7 +269,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         // Remove configuration again
         advertisementApi.delete_0(DEFAULT, pack);
 
-        assertEquals("Deletion of ad config failed: " + restClient.getStatusCode(), 204, restClient.getStatusCode());
+        assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
         // Check if configuration is gone
         GetConfigResponse response2 = getAjaxClient().execute(req);
         assertTrue("Expecting a response with an error.", response2.hasError());
@@ -315,10 +288,12 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
         }
 
+        Long ctxId = new Long(getAjaxClient().getValues().getContextId());
+        Long userId = new Long(getAjaxClient().getValues().getUserId());
         JSONValue adConfig = generateAdConfig();
         try {
             advertisementApi.put_0(DEFAULT, pack, adConfig.toString());
-            int statusLine = restClient.getStatusCode();
+            int statusLine = getRestClient().getStatusCode();
             assertTrue("Unexpected status: " + statusLine, Arrays.contains(new int[] { 200, 201 }, statusLine));
             GetConfigRequest req = new GetConfigRequest();
             GetConfigResponse response = getAjaxClient().execute(req);
@@ -327,10 +302,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
             // Create Preview
             JSONValue previewConfig = generateAdConfig();
-            Long ctxId = new Long(getAjaxClient().getValues().getContextId());
-            Long userId = new Long(getAjaxClient().getValues().getUserId());
-            advertisementApi.put_2(ctxId, userId, adConfig.toString());
-            statusLine = restClient.getStatusCode();
+            advertisementApi.put_2(ctxId, userId, previewConfig.toString());
+            statusLine = getRestClient().getStatusCode();
             assertTrue("Unexpected status: " + statusLine, Arrays.contains(new int[] { 200, 201 }, statusLine));
 
             // Check if preview configuration is available
@@ -341,7 +314,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
             // Remove preview configuration
             advertisementApi.delete_1(ctxId, userId);
-            assertEquals("Deletion of ad config failed: " + restClient.getStatusCode(), 204, restClient.getStatusCode());
+            assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
 
             // Check if configuration is back to the old one again
             response = getAjaxClient().execute(req);
@@ -352,6 +325,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             fail(e.getMessage());
         } finally {
             advertisementApi.delete_0(DEFAULT, pack);
+            advertisementApi.delete_1(ctxId, userId);
         }
     }
 

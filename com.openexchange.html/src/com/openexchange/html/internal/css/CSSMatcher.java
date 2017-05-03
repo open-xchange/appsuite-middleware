@@ -452,7 +452,7 @@ public final class CSSMatcher {
 
         // Check for internal invocation and thread pool availability
         ThreadPoolService threadPool = ThreadPools.getThreadPool();
-        if (internallyInvoked || (threadPool == null) || (Thread.currentThread().getName().startsWith("JerichoParser"))) {
+        if (internallyInvoked || (threadPool == null) || isAsyncParserThread()) {
             boolean retval = doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent);
             cssBuilder.append(cssBld);
             return retval;
@@ -493,6 +493,11 @@ public final class CSSMatcher {
             f.cancel(true);
             return false;
         }
+    }
+
+    private static boolean isAsyncParserThread() {
+        String threadName = Thread.currentThread().getName();
+        return threadName.startsWith("JerichoParser") || threadName.startsWith("JsoupParser");
     }
 
     /**

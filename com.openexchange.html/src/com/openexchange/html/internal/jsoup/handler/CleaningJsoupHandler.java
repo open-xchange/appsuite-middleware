@@ -61,9 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +112,8 @@ public final class CleaningJsoupHandler implements JsoupHandler {
 
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
-    private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_', '/', ';', '=', ' ' };
+    /** Such attributes that possibly contain an URI as value */
+    public static final Set<String> URI_ATTRS = ImmutableSet.of("action","archive","background","cite","href","longdesc","src","usemap");
 
     // A decimal digit: [0-9]
     private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
@@ -327,12 +326,20 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         return !maxContentSizeExceeded;
     }
 
-    public String getHTML() {
-        return document.toString();
+    /**
+     * Gets the sanitized HTML document
+     *
+     * @return The HTML document
+     */
+    public Document getDocument() {
+        return document;
     }
 
     @Override
     public void finished(Document document) {
+        for (Map.Entry<Node, Node> toReplace : replaceWith.entrySet()) {
+            toReplace.getKey().replaceWith(toReplace.getValue());
+        }
         for (Node node : removedNodes) {
             node.remove();
         }
@@ -542,12 +549,6 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         }
     }
 
-    @Override
-    public void markBodyAbsent() {
-        // If there is no body tag, assume parsing starts in body
-        body = true;
-    }
-
     private static boolean isMSTag(String tagName) {
         final char c;
         if (tagName.length() < 2 || ':' != tagName.charAt(1) || (('w' != (c = tagName.charAt(0))) && ('W' != c) && ('o' != c) && ('O' != c))) {
@@ -595,10 +596,10 @@ public final class CleaningJsoupHandler implements JsoupHandler {
 
         // Handle start tag
         if ("img".equals(tagName)) {
-            String width = attributes.get("width");
-            if (null != width) {
-                String height = attributes.get("height");
-                if (null != height) {
+            String width = attributes.getIgnoreCase("width");
+            if (Strings.isNotEmpty(width)) {
+                String height = attributes.getIgnoreCase("height");
+                if (Strings.isNotEmpty(height)) {
                     prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attributes, startTag);
                 }
             }
@@ -607,7 +608,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         } else if ("td".equals(tagName) || "th".equals(tagName)) {
             CellPadding cellPadding = tablePaddings.peek();
             if (CELLPADDING_EMPTY != cellPadding && null != cellPadding) {
-                String style = attributes.get("style");
+                String style = attributes.getIgnoreCase("style");
                 if (Strings.isEmpty(style) || style.indexOf("padding") < 0) {
                     prependToStyle("padding: " + cellPadding.cellPadding + "px;", attributes, startTag);
                 }
@@ -620,8 +621,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             }
         }
 
-        Set<String> uriAttributes = replaceUrls ? setForUriAttributes(attributes) : Collections.<String> emptySet();
-        for (Attribute attribute : attributes.clone()) {
+        for (Attribute attribute : listFor(attributes)) {
             String attr = attribute.getKey();
             if (false == Strings.asciiLowerCase(attr).startsWith("on")) {
                 if ("style".equals(attr)) {
@@ -679,6 +679,14 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         }
     }
 
+    private List<Attribute> listFor(Attributes attributes) {
+        List<Attribute> copy = new ArrayList<>(attributes.size());
+        for (Attribute attribute : attributes) {
+            copy.add(attribute);
+        }
+        return copy;
+    }
+
     private boolean isSafeAttributeValue(String tagName, Element el, Attribute attribute, String attr, String val) {
         if (false == isSafe(val, tagName)) {
             // Unsafe value
@@ -704,33 +712,10 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         }
 
         if (replaceUrls && URI_ATTRS.contains(attr)) {
-            attribute.setValue(checkPossibleURL(val));
+            attribute.setValue(checkPossibleURL(val, urlBuilder));
         }
 
         return true;
-    }
-
-    private static final Set<String> URI_ATTRS = ImmutableSet.of("action","archive","background","cite","href","longdesc","src","usemap");
-
-    private Set<String> setForUriAttributes(Attributes attributes) {
-        if (null == attributes) {
-            return Collections.emptySet();
-        }
-
-        int size = attributes.size();
-        if (size <= 0) {
-            return Collections.emptySet();
-        }
-
-        Set<String> names = new LinkedHashSet<>(size);
-        Iterator<Attribute> iter = attributes.iterator();
-        for (int i = size; i-- > 0;) {
-            String attrName = iter.next().getKey();
-            if (URI_ATTRS.contains(attrName)) {
-                names.add(attrName);
-            }
-        }
-        return names;
     }
 
     private static final Set<String> HREF_TAGS = ImmutableSet.of("a","area","base","link");
@@ -750,7 +735,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
      */
     private void addTableTag(Attributes attributes, Element startTag) {
         // Has attribute "bgcolor"
-        String bgcolor = attributes.get("bgcolor");
+        String bgcolor = attributes.getIgnoreCase("bgcolor");
         if (Strings.isNotEmpty(bgcolor)) {
             prependToStyle("background-color: " + bgcolor + ';', attributes, startTag);
         }
@@ -771,9 +756,9 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         }
 
         // Has attribute "cellpadding"?
-        String cellpadding = attributes.get("cellpadding");
-        if (null == cellpadding) {
-            String style = attributes.get("style");
+        String cellpadding = attributes.getIgnoreCase("cellpadding");
+        if (Strings.isEmpty(cellpadding)) {
+            String style = attributes.getIgnoreCase("style");
             if (Strings.isEmpty(style) || style.indexOf("padding") < 0) {
                 tablePaddings.addFirst(CELLPADDING_EMPTY);
             } else {
@@ -790,7 +775,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 }
             }
         } else {
-            if ("0".equals(attributes.get("cellspacing"))) {
+            if ("0".equals(attributes.getIgnoreCase("cellspacing"))) {
                 prependToStyle("border-collapse: collapse;", attributes, startTag);
             }
 
@@ -800,7 +785,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
     }
 
     private void prependToStyle(String stylePrefix, Attributes attributes, Element startTag) {
-        String style = attributes.get("style");
+        String style = attributes.getIgnoreCase("style");
         if (Strings.isEmpty(style)) {
             style = stylePrefix;
         } else {
@@ -810,7 +795,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
     }
 
     private void prependWidthHeightToStyleIfAbsent(Map<String, String> styleNvps, Attributes attributes, Element startTag) {
-        String style = attributes.get("style");
+        String style = attributes.getIgnoreCase("style");
         if (Strings.isEmpty(style)) {
             style = generateStyleString(styleNvps);
         } else {
@@ -925,7 +910,14 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         return DOT.matcher(word).replaceAll('.' + cssPrefix + '-');
     }
 
-    private String checkPossibleURL(final String val) {
+    /**
+     * Checks specified attribute value if it possibly is an URI.
+     *
+     * @param val The value to check
+     * @param urlBuilder The <code>StringBuilder</code> to use
+     * @return The checked attribute value
+     */
+    public static String checkPossibleURL(String val, StringBuilder urlBuilder) {
         final Matcher m = PATTERN_URL_SOLE.matcher(val);
         if (!m.matches()) {
             return val;

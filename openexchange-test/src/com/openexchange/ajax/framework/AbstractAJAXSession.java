@@ -63,6 +63,7 @@ import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.test.AttachmentTestManager;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
+import com.openexchange.test.FolderTaskTestManager;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.ReminderTestManager;
 import com.openexchange.test.ResourceTestManager;
@@ -92,6 +93,7 @@ public abstract class AbstractAJAXSession {
     protected ResourceTestManager resTm;
     protected AttachmentTestManager atm;
     protected MailTestManager mtm;
+    protected FolderTaskTestManager fttm;
 
     private List<TestManager> testManager = new ArrayList<>();
 
@@ -152,6 +154,8 @@ public abstract class AbstractAJAXSession {
         testManager.add(resTm);
         remTm = new ReminderTestManager(client);
         testManager.add(remTm);
+        fttm = new FolderTaskTestManager(client, client2);
+        testManager.add(fttm);
     }
 
     @After

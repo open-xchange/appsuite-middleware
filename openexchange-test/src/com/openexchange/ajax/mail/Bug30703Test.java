@@ -54,8 +54,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -75,11 +76,12 @@ import com.openexchange.mailaccount.MailAccountDescription;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class Bug30703Test extends AbstractAJAXSession {
 
     private MailAccountDescription mailAccountDescription;
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             try {

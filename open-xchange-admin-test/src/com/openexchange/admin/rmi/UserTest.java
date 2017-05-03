@@ -101,9 +101,7 @@ public class UserTest extends AbstractTest {
 
     // global setting for stored password
     protected final String pass = "foo-user-pass";
-
-    protected final String TOO_LONG = "royyxgoyxrixllsguvhsyazyboliexlgfcvzckxnxqwffwctvafzxxxxkjzawrwrqqzxlgizevqzfwtapzokcyijvxmujlecmwgjkaiwfablzgiqabzwthazawcuffplpcuairrcllnhrckbxfvxmfefdpnxzvjpkpheptvdsolsuwycsrsmmbspnrcgocfmstdcaaeizshmkdvdzdwpbwevbheasogpilbzhytvfleisuhbzgyodisehdhjieqwnyznuskktlblreghauwjcthltvnagasntwtguclpsqmmvhnfiynnwhnealxbezqegmocfoxxdwlxeetcoayuwuaxoiqgfckglcwbqtsqmgnxhaamalmtruidkefxfcoavcrsfuyujcoucygszoaafkgzjysvgffhaukyewjxpwtadmbkzulehmqqdjlyqacethsyuvawkvfivyzvbrlrhpoiinxtbbnxoultmgkgjctkiboaovfukjdaiigcptesqhlpdcccmusfiauvwwdvvddupolqvnuewzapcpdlsqxdgsowrgekxyyczhgtbrhqfqbpkjdgikzsbegzlvmavjsgltxiobbzhcqawplhqatbxmxmrhfesaupggpznosrjtnfcbujppgnhxxqkznaeiifcakvsnudvxaxiwowdailfltbtvnujbrszzotsvqovpryrsjypydfuhwseibpgmbdrjhkswpolymyjpjrpgfpkfxgtekukctlnjhxjqyegiutwbpingdaymrbvhhqboyxophfauqtweebaphuajytvbmwkktnvqjdrziayzojlmghzbspvepazyxjdbxwnjeafruoeiujbwmbrwyojljjntzaonolgfhxpwtmasimaxwuzhyhwshphtoqjochgzvcchcumppckexrlujgkatilsvwwfxhwfvzhfimsoanxrmkgzlwswedpiovjewxrpmltwqwhalgojcpzwutecxrhpnebcgxsiynfkuqhsvnnwznwwpwjvrubytdzmwfoipkykoprhhzzcqcfzvowtfudfqhyaptbqdqqitkxeihjqdosbafmlljadrlvfkqjcvovqyctnvmgynmycmxtqfdyecpnaxlgstyxtsxlvibuuzibbaewsocpdeosbtbdbugrwrpvugtyltrnzxzndsflpnbogiymbcgksjdnchvcmqiavrojrffsuchzmkvyhexklueuuwxvkyrvwkiezqkhebpiarcgdamlqtpagjtrypdwxbopozobgadjvrkisckejdhabanhespbioebfexakannwutaizcroqlfabfvhfonytwthsunlrqdrypjhtaectwflmgijijdhphhjmacqotxwigsnnxqrbzgyplubwvwwycbhhqjrestclarzkiwyvlysgegkcjxlyzjfgfrxnbygpwlgpbwfpivmehhpcctqwrjscbxanjmkrfrdlcjwqppowbujhiocrazuniiycgakgkcuawkwbvuwoqaurdzobelhmqropiazzcehvblylpuhusbfmshczonqwklasghfwwssfotwfajrwwfiixdfremujvcwyzizwdauqomgzswzdqduvqjfovrnygblvtgsctisgrqtgkodvltjpnunjcjvkinlbhzkmiebfqgvqayqglcjunqvstaiyvpsxhtwpynbdlorutovplochscyynyuqsydwarhflhhyvvsezhvrkjurscqofdrepaaostqbkpkrkwscxzrzcdharhdfeqomdxiwjnqtzwuymtqmgiuaeaeegucxvhelnnwwqqlguglbrhesbfqhpltnesgaauqshhbgymhbkhxgpjnwltyjpbnxjykycevndesugkshhutisvklbvohulprepljqybzxrpmratiybjfbjiqzjrxxdajkrsinzkewvkwkmsplvjanfrpfobpmbvvhjtwfmnxxxzyyftbsbwpgkxsltugjokboizhgolfqmcfhqoyswcayqpacyfhnwezecvxgazdakidjmifeiygxuglkoxgjmlrzkcmsclukqlgoqfuotxkgqxyzyosywyxxozwgqykhehhecypblllvhfowmjjdepffbyyvzegmodfzwrdqzblvrgdqkaxomsorzyggrybhxhrddrtkdloqpxnvrwsrxwrvogrjplvbwdjztwxdxpjdtimumxmtjslndnwalkpyznksvxgqdtmftuedofhaohfifwxkepqqbzatnqljvaqjbblyfankuoypbvbjahoneoxbckvgetwrntjahoewoabdlghpdqjvlgpeginhgebfpunllglltvcuhcunevihvmwulmcysfeoipdfxbohncfbqdvheumleetpvvxjgoiykxnzayjivsaclhlrjllsyqvoxfagkczlxsvshyjnmfexmnbuwtajacxjcfphuuekutsffbgvzkxhexmxegecjbjymslmrvmrmegpmavhkohfzcdmnzhdpnkvpoblplpjssyqanwnwzyvapwgdkkvsuyqlgcxegkdiaqgscvqqyxbwcihjfnjnsnfjtkdfhzvwjxkhtkprchrzxldwqdesxkwmkkfntffclyyievdkrqalgjrvddkpuhgradpanyqnorjwsapvcifinqnpqyatkiafaynjlkyztgbhovvvrdmswygvadyevajkjcxjqlmalfzsmaadefqirwfbvptxadkqjzbzhzwfxrrgybyevdpwkmptceccqebzawrsdjsfthgkmxiuabhrlmldmualjpkwidnevzrgkgzpieqbjxukbjnbsvryegegdgdlpkqirjvfxvtefyegbegyfylavjsvxseoivkmtkemluthuqpnrugqhwpalwqoriwvbjubjvbbdvzwpzyghvdjrutxlnkwncqvtarizhvrzsqhlxvuqqqaxkpijnmvpkerjyadsumdgdmapqbxrmpqzqevcbeykkjhygxktvcedyjlnmqwrcxcabfuejvffqbwcefmqmprahrbqezhoxllxqacneoynvmzlehajoflbnxmorydpqdcnvjztqdjpitazuunlkhrryjdnapccqzlvsjtjqnsrujllscamzjkkbdcpmzelcolmacjsawqyxucidijnlpfedkjjdsgkohlurjahynqiakqrgxswnzsdpcivaznkgsirbfwmpfiqwlfvzqujkzwrtuyhybssnooialbcyjxiyupolvmdoirfzqcwhsoefuwoadfjswbjyahgzedijxyuzenurmceqhyhluptswxmsvvyoaqtkexuykmbrvzcjrivwujxzitqfywztlwohqnaovykwplynkrhrqphdmrkwjuohvbzypqjdkubayhiyskzwvxsuawwwtyfdvczsbwqxmtzbakoltilvvwpaqtipqpxzkrmkuamynknlxuomlzfioixgnehidwvumswcalggqrygweuvnetgiwizvujvocwwmelikeclynxfahevnesdvwnlfzibovbopjrnofgbqipspnxfyvbtfrjjootuiqjzmxsmigpzormbgplggikvldtuojptyootvqpgabhwgpsnjwoklngypnlnqjknqocyqnjwlyiljztfhnlqkrakeiremqzymwrynqsnupicufmgxebposdrzpskxnqujtgjubxzclunotakupvjcfqaasksanhbyzngeevsbkmlpzheghqvbwczsdzvbtwgyhrtseynoctskiegablmcbegrezhphkleulojzjycrncdojbvueipyvyiopmldtdtpbobfkgfweospddnhxzscceblvwbocwgvrubjlerdhftzuteaexwbkptyfbdgrlvmsewoupwokofdafrrpzfytbqeuarihalxcisdpcxtdxfpmauwvmrpsngjmaohiaukgctczdlcnojojstatihepxexvlzupqmlkyzdwqdbepvgftlvgmtkmmchoozwynybmfevaoyvictlbzqxbrjafmooazcaugynewnhlpxxmlx@test.net";
-
+  
     protected OXUserInterface getUserClient() throws Exception {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
@@ -1065,6 +1063,7 @@ public class UserTest extends AbstractTest {
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestore_name");
         notallowed.add("setFilestoreOwner");
+        notallowed.add("setPrimaryAccountName");
         return notallowed;
     }
 
@@ -1117,6 +1116,11 @@ public class UserTest extends AbstractTest {
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestoreOwner");
         notallowed.add("setFilestore_name");
+        
+        notallowed.add("setPrimaryAccountName");
+        notallowed.add("setDriveFolderMode");
+        
+        
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
 
@@ -1130,7 +1134,7 @@ public class UserTest extends AbstractTest {
                     } else if (map_obj.getMethodName().toLowerCase().contains("mail")) {
                         map_obj.getSetter().invoke(tmp_usr, getChangedEmailAddress(oldvalue, "_singlechange"));
                     } else {
-                        map_obj.getSetter().invoke(tmp_usr, oldvalue + "-singlechange");
+                        map_obj.getSetter().invoke(tmp_usr, oldvalue == null ? "singlechanged" : oldvalue + "-singlechange");
                     }
                     //System.out.println("Setting String via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                 }
@@ -1176,10 +1180,6 @@ public class UserTest extends AbstractTest {
         // first fill setter and other infos in map object
         for (Method method : theMethods) {
             String method_name = method.getName();
-            if (method_name.equals("setPrimaryAccountName")) {
-                // Drop unsupported changes in user class
-                continue;
-            }
             if (method_name.startsWith("set")) {
                 // check if it is a type we support
                 if (method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")) {

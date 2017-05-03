@@ -280,12 +280,21 @@ public class DefaultShareService implements ShareService {
             try {
                 return getOrCreateLink(session, target);
             } catch (OXException e) {
-                /*
-                 * try again in case of concurrent modifications
-                 */
-                if (++count < MAX_RETRIES && ("IFO-1302".equals(e.getErrorCode()) || "FLD-1022".equals(e.getErrorCode()))) {
-                    LOG.info("Detected concurrent modification during link creation: \"{}\" - trying again ({}/{})...", e.getMessage(), I(count), I(MAX_RETRIES));
-                    continue;
+                if (++count < MAX_RETRIES) {
+                    /*
+                     * try again in case of concurrent modifications
+                     */
+                    if ("IFO-1302".equals(e.getErrorCode()) || "FLD-1022".equals(e.getErrorCode())) {
+                        LOG.info("Detected concurrent modification during link creation: \"{}\" - trying again ({}/{})...", e.getMessage(), I(count), I(MAX_RETRIES));
+                        continue;
+                    }
+                    /*
+                     * try again in case of a concurrent guest deletion
+                     */
+                    if ("USR-0010".equals(e.getErrorCode())) {
+                        LOG.info("Detected stale reference to no longer existing user during link creation: \"{}\" - trying again ({}/{})...", e.getMessage(), I(count), I(MAX_RETRIES));
+                        continue;
+                    }
                 }
                 throw e;
             }

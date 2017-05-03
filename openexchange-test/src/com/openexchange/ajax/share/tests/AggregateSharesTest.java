@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +63,6 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
@@ -251,16 +248,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */
-        FolderObject folderA = Create.createPrivateFolder(randomUID(), module1, client1.getValues().getUserId(), guestPermission);
-        folderA.setParentFolderID(getDefaultFolder(client1, module1));
-        InsertRequest insertRequest1 = new InsertRequest(api, folderA);
-        insertRequest1.setNotifyPermissionEntities(Transport.MAIL);
-        InsertResponse insertResponse1 = client1.execute(insertRequest1);
-        insertResponse1.fillObject(folderA);
+        FolderObject folderA = insertSharedFolder(client1, api, module1, getDefaultFolder(client1, module1), guestPermission);
         clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
-        GetResponse getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
-        folderA = getResponse1.getFolder();
-        folderA.setLastModified(getResponse1.getTimestamp());
         /*
          * check permissions
          */
@@ -282,16 +271,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
-        FolderObject folderB = Create.createPrivateFolder(randomUID(), module2, client2.getValues().getUserId(), guestPermission);
-        folderB.setParentFolderID(getDefaultFolder(client2, module2));
-        InsertRequest insertRequest2 = new InsertRequest(api, folderB);
-        insertRequest2.setNotifyPermissionEntities(Transport.MAIL);
-        InsertResponse insertResponse2 = client2.execute(insertRequest2);
-        insertResponse2.fillObject(folderB);
+        FolderObject folderB = insertSharedFolder(client2, api, module2, getDefaultFolder(client2, module2), guestPermission);
         clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
-        GetResponse getResponse2 = client2.execute(new GetRequest(api, folderB.getObjectID()));
-        folderB = getResponse2.getFolder();
-        folderB.setLastModified(getResponse2.getTimestamp());
         /*
          * check permissions
          */
@@ -336,12 +317,7 @@ public class AggregateSharesTest extends ShareTest {
          * update folder A, revoke guest permissions
          */
         folderA.getPermissions().remove(matchingPermissionA);
-        insertResponse1 = client1.execute(new UpdateRequest(api, folderA));
-        insertResponse1.fillObject(folderA);
-        clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
-        getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
-        folderA = getResponse1.getFolder();
-        folderA.setLastModified(getResponse1.getTimestamp());
+        folderA = updateFolder(client1, api, folderA);
         /*
          * check permissions
          */

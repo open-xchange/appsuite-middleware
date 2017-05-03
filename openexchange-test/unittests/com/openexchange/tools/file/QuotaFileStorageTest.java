@@ -481,6 +481,12 @@ public class QuotaFileStorageTest {
         public boolean isGlobalDatabaseAvailable() {
             return false;
         }
+
+        @Override
+        public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
     private static void rmdir(final File tempFile) {
