@@ -96,49 +96,51 @@ final class VisitorUtil {
      * @throws SieveException if a parsing error is occurred
      */
     static TestCommand visit(final ASTtest node, final Object data, final String name, final ITestCommand command, SieveParserVisitor sieveParserVisitor) throws SieveException {
+        if (!command.getCommandName().equals(name)) {
+            return null;
+        }
+        
         TestCommand testCommand = null;
-        if (command.getCommandName().equals(name)) {
-            final Object visitChildren = visitChildren(node, data, sieveParserVisitor);
-            if (visitChildren instanceof ArrayList) {
-                final ArrayList<String> tagargs = new ArrayList<String>();
-                final ArrayList<Object> arguments = new ArrayList<Object>();
-                final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
-                for (final Object obj : ((ArrayList<Object>) visitChildren)) {
-                    if (obj instanceof TagArgument) {
-                        final TagArgument tag = (TagArgument) obj;
-                        final String string = tag.toString();
-                        tagargs.add(string);
-                        arguments.add(tag);
-                    } else if (obj instanceof ArrayList) {
-                        // Here we have to determine which type is inside, so we must check 
-                        // the size first and then get first element
-                        final ArrayList<Object> array = (ArrayList<Object>) obj;
-                        if (!array.isEmpty()) {
-                            final Object object = array.get(0);
-                            if (object instanceof TestCommand) {
-                                testcommands.addAll((ArrayList<TestCommand>) obj);
-                            } else if (object instanceof String) {
-                                arguments.add(obj);
-                            }
+        final Object visitChildren = visitChildren(node, data, sieveParserVisitor);
+        if (visitChildren instanceof ArrayList) {
+            final ArrayList<String> tagargs = new ArrayList<String>();
+            final ArrayList<Object> arguments = new ArrayList<Object>();
+            final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
+            for (final Object obj : ((ArrayList<Object>) visitChildren)) {
+                if (obj instanceof TagArgument) {
+                    final TagArgument tag = (TagArgument) obj;
+                    final String string = tag.toString();
+                    tagargs.add(string);
+                    arguments.add(tag);
+                } else if (obj instanceof ArrayList) {
+                    // Here we have to determine which type is inside, so we must check 
+                    // the size first and then get first element
+                    final ArrayList<Object> array = (ArrayList<Object>) obj;
+                    if (!array.isEmpty()) {
+                        final Object object = array.get(0);
+                        if (object instanceof TestCommand) {
+                            testcommands.addAll((ArrayList<TestCommand>) obj);
+                        } else if (object instanceof String) {
+                            arguments.add(obj);
                         }
-                    } else if (obj instanceof TestCommand) {
-                        final TestCommand testcommand = (TestCommand) obj;
-                        testcommands.add(testcommand);
-                    } else if (obj instanceof NumberArgument) {
-                        final NumberArgument numberarg = (NumberArgument) obj;
-                        arguments.add(numberarg);
-                    } else {
-                        final ArrayList<String> array = new ArrayList<String>(1);
-                        array.add(obj.toString());
-                        arguments.add(array);
                     }
+                } else if (obj instanceof TestCommand) {
+                    final TestCommand testcommand = (TestCommand) obj;
+                    testcommands.add(testcommand);
+                } else if (obj instanceof NumberArgument) {
+                    final NumberArgument numberarg = (NumberArgument) obj;
+                    arguments.add(numberarg);
+                } else {
+                    final ArrayList<String> array = new ArrayList<String>(1);
+                    array.add(obj.toString());
+                    arguments.add(array);
                 }
-                testCommand = new TestCommand(command, arguments, testcommands);
-            } else if (visitChildren instanceof TestCommand) {
-                final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
-                testcommands.add((TestCommand) visitChildren);
-                testCommand = new TestCommand(command, new ArrayList<Object>(), testcommands);
             }
+            testCommand = new TestCommand(command, arguments, testcommands);
+        } else if (visitChildren instanceof TestCommand) {
+            final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
+            testcommands.add((TestCommand) visitChildren);
+            testCommand = new TestCommand(command, new ArrayList<Object>(), testcommands);
         }
         return testCommand;
     }
