@@ -2,11 +2,7 @@
 package com.openexchange.webdav.xml;
 
 import static com.openexchange.webdav.xml.framework.RequestTools.addElement2PropFind;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -128,7 +124,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 
     @Test
     public void testSearchResourceGroup() throws Exception {
-        searchResourcegroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+        searchResourcegroup(webCon, "*", new Date(0), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 
     @Test
@@ -276,7 +272,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         return resourceArray;
     }
 
-    public static ResourceGroup[] searchResourcegroup(final WebConversation webCon, final String searchpattern, final Date modified, String host, final String login, final String password) throws Exception {
+    public static ResourceGroup[] searchResourcegroup(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password, String context) throws Exception {
         host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final Element eResourceGroups = new Element("resourcegroup", XmlServlet.NS);
@@ -292,8 +288,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
         baos.flush();
 
         final HttpClient httpclient = new HttpClient();
-
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login + "@" + context, password));
         final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
         propFindMethod.setDoAuthentication(true);
 
