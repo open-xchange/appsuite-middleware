@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.jsieve.visitors;
 
 import java.util.ArrayList;
@@ -81,26 +82,41 @@ import com.openexchange.mailfilter.services.Services;
  * representation via the visitor pattern
  *
  * @author d7
- *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class InternalVisitor implements SieveParserVisitor {
 
-    private boolean commented;
-
-    protected Object visitChildren(final SimpleNode node, final Object data) throws SieveException {
-        Object jjtAccept = data;
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            final Node child = node.jjtGetChild(i);
-            jjtAccept = child.jjtAccept(this, jjtAccept);
-        }
-        return jjtAccept;
+    /**
+     * {@link NodeType} - Used to distinguish between the main control blocks in a sieve script
+     */
+    private enum NodeType {
+        REQUIRE, IF, ELSIF, ELSE, OTHER;
     }
 
+    private boolean commented;
+
+    /**
+     * Initialises a new {@link InternalVisitor}.
+     */
+    public InternalVisitor() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.SimpleNode, java.lang.Object)
+     */
     @Override
     public Object visit(final SimpleNode node, final Object data) throws SieveException {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTstart, java.lang.Object)
+     */
     @Override
     public Object visit(final ASTstart node, final Object data) throws SieveException {
         if (data instanceof Boolean) {
@@ -115,6 +131,11 @@ public class InternalVisitor implements SieveParserVisitor {
         return visitChildren;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTcommands, java.lang.Object)
+     */
     @Override
     public Object visit(final ASTcommands node, final Object data) throws SieveException {
         if (null != data) {
@@ -126,114 +147,91 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTcommand, java.lang.Object)
+     */
     @Override
     public Object visit(final ASTcommand node, final Object data) throws SieveException {
         final String name = node.getName();
-        if ("require".equals(name)) {
-            final ArrayList<Command> commands;
-            try {
-                final RequireCommand requireCommand = new RequireCommand((ArrayList<ArrayList<String>>) visitChildren(node, null));
-                commands = new ArrayList<Command>();
-                commands.add(requireCommand);
-                ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
-            } catch (final SieveException e) {
-                ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
-            }
-        } else if ("if".equals(name)) {
-            try {
-                final IfOrElseIfCommand ifCommand = new IfCommand();
-                for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-                    final Node child = node.jjtGetChild(i);
-                    final Object jjtAccept = child.jjtAccept(this, data);
-                    if (jjtAccept instanceof TestCommand) {
-                        final TestCommand command = (TestCommand) jjtAccept;
-                        ifCommand.setTestcommand(command);
-                    } else if (jjtAccept instanceof ArrayList) {
-                        final ArrayList command = (ArrayList) jjtAccept;
-                        for (Object o : command) {
-                            if (o instanceof Rule) {
-                                throw new SieveException("Nested 'if' commands are not supported by this implementation");
+        NodeType nodeType;
+        try {
+            nodeType = NodeType.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            nodeType = NodeType.OTHER;
+        }
+        switch (nodeType) {
+            case REQUIRE:
+                final ArrayList<Command> commands;
+                try {
+                    final RequireCommand requireCommand = new RequireCommand((ArrayList<ArrayList<String>>) visitChildren(node, null));
+                    commands = new ArrayList<Command>();
+                    commands.add(requireCommand);
+                    ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
+                } catch (final SieveException e) {
+                    ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
+                }
+                break;
+            case IF:
+                try {
+                    final IfOrElseIfCommand ifCommand = new IfCommand();
+                    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+                        final Node child = node.jjtGetChild(i);
+                        final Object jjtAccept = child.jjtAccept(this, data);
+                        if (jjtAccept instanceof TestCommand) {
+                            final TestCommand command = (TestCommand) jjtAccept;
+                            ifCommand.setTestcommand(command);
+                        } else if (jjtAccept instanceof ArrayList) {
+                            final ArrayList command = (ArrayList) jjtAccept;
+                            for (Object o : command) {
+                                if (o instanceof Rule) {
+                                    throw new SieveException("Nested 'if' commands are not supported by this implementation");
+                                }
                             }
+                            ifCommand.setActionCommands(command);
                         }
-                        ifCommand.setActionCommands(command);
                     }
+                    final ArrayList<Command> commandList = new ArrayList<Command>();
+                    commandList.add(ifCommand);
+                    ((ArrayList<Rule>) data).add(new Rule(commandList, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
+                } catch (final SieveException e) {
+                    ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
                 }
-                final ArrayList<Command> commands = new ArrayList<Command>();
-                commands.add(ifCommand);
-                ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
-            } catch (final SieveException e) {
-                ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
-            }
-        } else if ("elsif".equals(name)) {
-            ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), "elsif is not support by this implementation."));
-//            throw new SieveException("elsif is not support by this implementation.");
-//            final IfOrElseIfCommand elsifCommand = new ElsifCommand();
-//            for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-//                final Node child = node.jjtGetChild(i);
-//                final Object jjtAccept = child.jjtAccept(this, data);
-//                if (jjtAccept instanceof TestCommand) {
-//                    TestCommand command = (TestCommand) jjtAccept;
-//                    elsifCommand.setTestcommand(command);
-//                } else if (jjtAccept instanceof ArrayList) {
-//                    ArrayList command = (ArrayList) jjtAccept;
-//                    elsifCommand.setActioncommands(command);
-//                }
-//            }
-//
-//            // Elseif makes only sense in conjunction with an if beforehand, so
-//            // we check this here, and add
-//            // the command to the corresponding rule
-//            final Rule rule = ((ArrayList<Rule>) data).get(((ArrayList<Rule>) data).size() - 1);
-//            final ArrayList<Command> commands = rule.getCommands();
-//            final Command command = commands.get(0);
-//            if (!(command instanceof IfCommand)) {
-//                throw new SieveException("Found elsif without if before. Line " + node.getCoordinate().getStartLineNumber());
-//            }
-//            commands.add(elsifCommand);
-        } else if ("else".equals(name)) {
-            ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), "else is not support by this implementation."));
-//            throw new SieveException("else is not supported by this implementation");
-//            final IfStructureCommand elseCommand = new ElseCommand();
-//            for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-//                final Node child = node.jjtGetChild(i);
-//                final Object jjtAccept = child.jjtAccept(this, data);
-//                if (jjtAccept instanceof ArrayList) {
-//                    ArrayList command = (ArrayList) jjtAccept;
-//                    elseCommand.setActioncommands(command);
-//                }
-//            }
-//
-//            // Elseif makes only sense in conjunction with an if beforehand, so
-//            // we check this here, and add
-//            // the command to the corresponding rule
-//            final Rule rule = ((ArrayList<Rule>) data).get(((ArrayList<Rule>) data).size() - 1);
-//            final ArrayList<Command> commands = rule.getCommands();
-//            final Command command = commands.get(commands.size() - 1);
-//            if (!(command instanceof IfCommand) && !(command instanceof ElsifCommand)) {
-//                throw new SieveException("Found else without if or elsif before. Line " + node.getCoordinate().getStartLineNumber());
-//            }
-//            commands.add(elseCommand);
-        } else {
-            try {
-                final ArrayList<Object> visitChildren = (ArrayList<Object>) visitChildren(node, data);
-                final ArrayList<Object> arguments = new ArrayList<Object>();
-                for (final Object obj : visitChildren) {
-                    if (obj instanceof TagArgument) {
-                        final TagArgument tag = (TagArgument) obj;
-                        arguments.add(tag);
-                    } else if (obj instanceof NumberArgument) {
-                        final NumberArgument numberarg = (NumberArgument) obj;
-                        arguments.add(numberarg);
-                    } else if (obj instanceof ArrayList) {
-                        arguments.add(obj);
-                    } else {
-                        final ArrayList<String> arrayList = new ArrayList<String>();
-                        arrayList.add(obj.toString());
-                        arguments.add(arrayList);
+                break;
+            case ELSIF:
+                ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), "elsif is not support by this implementation."));
+                break;
+            case ELSE:
+                ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), "else is not support by this implementation."));
+                break;
+            case OTHER:
+                // Fall through
+            default:
+                try {
+                    final ArrayList<Object> visitChildren = (ArrayList<Object>) visitChildren(node, data);
+                    final ArrayList<Object> arguments = new ArrayList<Object>();
+                    for (final Object obj : visitChildren) {
+                        if (obj instanceof TagArgument) {
+                            final TagArgument tag = (TagArgument) obj;
+                            arguments.add(tag);
+                        } else if (obj instanceof NumberArgument) {
+                            final NumberArgument numberarg = (NumberArgument) obj;
+                            arguments.add(numberarg);
+                        } else if (obj instanceof ArrayList) {
+                            arguments.add(obj);
+                        } else {
+                            final ArrayList<String> arrayList = new ArrayList<String>();
+                            arrayList.add(obj.toString());
+                            arguments.add(arrayList);
+                        }
                     }
-                }
-                for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
-                    if (command.getCommandName().equals(name)) {
+                    for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
+                        if (!command.getCommandName().equals(name)) {
+                            // What the hell....
+                            continue;
+                        }
+
                         final ActionCommand actionCommand = new ActionCommand(command, arguments);
                         // Here we have to decide if we are on the base level or
                         // inside a control command. If we are inside
@@ -248,33 +246,48 @@ public class InternalVisitor implements SieveParserVisitor {
                             final IfOrElseIfCommand ifCommand = new IfCommand();
                             ifCommand.setTestcommand(new TestCommand(TestCommand.Commands.TRUE, new ArrayList<Object>(), new ArrayList<TestCommand>()));
                             ifCommand.setActionCommands(actionCommands);
-                            final ArrayList<Command> commands = new ArrayList<Command>();
-                            commands.add(ifCommand);
-                            ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
-//                            ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), commented));
-//                            throw new SieveException("Action commands are not allowed on base level, line " + node.getCoordinate().getStartLineNumber());
-                        } else {
-                            // What the hell....
+                            final ArrayList<Command> cmds = new ArrayList<Command>();
+                            cmds.add(ifCommand);
+                            ((ArrayList<Rule>) data).add(new Rule(cmds, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
+                            //                            ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), commented));
+                            //                            throw new SieveException("Action commands are not allowed on base level, line " + node.getCoordinate().getStartLineNumber());
                         }
                     }
+                } catch (final SieveException e) {
+                    ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
                 }
-            } catch (final SieveException e) {
-                ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
-            }
+                break;
         }
+
         return data;
+
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTblock, java.lang.Object)
+     */
     @Override
     public Object visit(final ASTblock node, final Object data) throws SieveException {
         return visitChildren(node, new ArrayList<ActionCommand>());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTarguments, java.lang.Object)
+     */
     @Override
     public Object visit(final ASTarguments node, final Object data) throws SieveException {
         return visitChildren(node, new ArrayList<Object>());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTargument, java.lang.Object)
+     */
     @Override
     public Object visit(final ASTargument node, final Object data) throws SieveException {
         if (0 < node.jjtGetNumChildren()) {
@@ -301,6 +314,11 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTtest, java.lang.Object)
+     */
     @Override
     public Object visit(final ASTtest node, final Object data) throws SieveException {
         final String name = node.getName();
@@ -316,6 +334,89 @@ public class InternalVisitor implements SieveParserVisitor {
         throw new SieveException("Found not known test name: " + name + " in line " + node.getCoordinate().getStartLineNumber());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTtest_list, java.lang.Object)
+     */
+    @Override
+    public Object visit(final ASTtest_list node, final Object data) throws SieveException {
+        final ArrayList<TestCommand> list = new ArrayList<TestCommand>();
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            final Node child = node.jjtGetChild(i);
+            final TestCommand test = (TestCommand) child.jjtAccept(this, null);
+            list.add(test);
+        }
+        ((ArrayList<Object>) data).add(list);
+        return data;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTstring, java.lang.Object)
+     */
+    @Override
+    public Object visit(final ASTstring node, final Object data) throws SieveException {
+        final Object value = node.getValue();
+        final String string = value.toString();
+        if (string.charAt(0) == '\"') {
+            return string.substring(1, string.length() - 1).replace("\\\"", "\"").replace("\\\\", "\\");
+        } else {
+            final int linebreak = string.indexOf("\n");
+            // Here we have to cut 5 chars from the end, because a linebreak in
+            // a sieve script
+            // consists of CRLF and the "text:" tag finishes with an empty "."
+            // after the text
+            return string.substring(linebreak + 1, string.length() - 5).replace("\\\"", "\"").replace("\\\\", "\\");
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTstring_list, java.lang.Object)
+     */
+    @Override
+    public Object visit(final ASTstring_list node, final Object data) throws SieveException {
+        final ArrayList<String> list = new ArrayList<String>();
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            final Node child = node.jjtGetChild(i);
+            final String string = (String) child.jjtAccept(this, null);
+            list.add(string);
+        }
+        return list;
+    }
+
+    ////////////////////////////////////////// HELPERS //////////////////////////////////////////////
+
+    /**
+     * Visits the specified {@link SimpleNode}
+     * 
+     * @param node The simple node to visit
+     * @param data The data
+     * @return
+     * @throws SieveException if a parsing error is occurred
+     */
+    protected Object visitChildren(final SimpleNode node, final Object data) throws SieveException {
+        Object jjtAccept = data;
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            final Node child = node.jjtGetChild(i);
+            jjtAccept = child.jjtAccept(this, jjtAccept);
+        }
+        return jjtAccept;
+    }
+
+    /**
+     * Visits the specified {@link ASTtest} node and parses the specifie {@link ITestCommand}
+     * 
+     * @param node The node to visit
+     * @param data The rest of the data
+     * @param name The name of the command
+     * @param command The command to parse
+     * @return The parsed {@link TestCommand}
+     * @throws SieveException if a parsing error is occurred
+     */
     private TestCommand visit0(final ASTtest node, final Object data, final String name, final ITestCommand command) throws SieveException {
         TestCommand testCommand = null;
         if (command.getCommandName().equals(name)) {
@@ -355,53 +456,13 @@ public class InternalVisitor implements SieveParserVisitor {
                         arguments.add(array);
                     }
                 }
-                testCommand =  new TestCommand(command, arguments, testcommands);
+                testCommand = new TestCommand(command, arguments, testcommands);
             } else if (visitChildren instanceof TestCommand) {
                 final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
                 testcommands.add((TestCommand) visitChildren);
-                testCommand =  new TestCommand(command, new ArrayList<Object>(), testcommands);
+                testCommand = new TestCommand(command, new ArrayList<Object>(), testcommands);
             }
         }
         return testCommand;
     }
-
-    @Override
-    public Object visit(final ASTtest_list node, final Object data) throws SieveException {
-        final ArrayList<TestCommand> list = new ArrayList<TestCommand>();
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            final Node child = node.jjtGetChild(i);
-            final TestCommand test = (TestCommand) child.jjtAccept(this, null);
-            list.add(test);
-        }
-        ((ArrayList<Object>) data).add(list);
-        return data;
-    }
-
-    @Override
-    public Object visit(final ASTstring node, final Object data) throws SieveException {
-        final Object value = node.getValue();
-        final String string = value.toString();
-        if (string.charAt(0) == '\"') {
-            return string.substring(1, string.length() - 1).replace("\\\"", "\"").replace("\\\\", "\\");
-        } else {
-            final int linebreak = string.indexOf("\n");
-            // Here we have to cut 5 chars from the end, because a linebreak in
-            // a sieve script
-            // consists of CRLF and the "text:" tag finishes with an empty "."
-            // after the text
-            return string.substring(linebreak + 1, string.length() - 5).replace("\\\"", "\"").replace("\\\\", "\\");
-        }
-    }
-
-    @Override
-    public Object visit(final ASTstring_list node, final Object data) throws SieveException {
-        final ArrayList<String> list = new ArrayList<String>();
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            final Node child = node.jjtGetChild(i);
-            final String string = (String) child.jjtAccept(this, null);
-            list.add(string);
-        }
-        return list;
-    }
-
 }
