@@ -111,11 +111,7 @@ public class InternalVisitor implements SieveParserVisitor {
     public Object visit(final ASTstart node, final Object data) throws SieveException {
         if (data instanceof Boolean) {
             final Boolean value = (Boolean) data;
-            if (value) {
-                commented = true;
-            } else {
-                commented = false;
-            }
+            commented = value.booleanValue();
         }
         final Object visitChildren = VisitorUtil.visitChildren(node, null, this);
         return visitChildren;
