@@ -81,6 +81,9 @@ public class FolderTaskTestManager extends FolderTestManager {
         this.setClient(getClient());
     }
     
+    /**
+     * Method to clean up folders from multi-clients after a find task test was invoked
+     */
     public void deleteFolder(final AJAXClient client, List<FolderObject> list){
         this.setClient(client);
         final Vector<FolderObject> deleteMe = new Vector<FolderObject>(list);       
