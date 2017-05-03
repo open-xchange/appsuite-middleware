@@ -141,11 +141,9 @@ public class Visitor implements SieveParserVisitor {
     @Override
     public Object visit(final ASTcommands node, final Object data) throws SieveException {
         if (null != data) {
-            final Object visitChildren = visitChildren(node, data);
-            return visitChildren;
+            return visitChildren(node, data);
         } else {
-            final Object visitChildren = visitChildren(node, new ArrayList<OwnType>(node.jjtGetNumChildren()));
-            return visitChildren;
+            return visitChildren(node, new ArrayList<OwnType>(node.jjtGetNumChildren()));
         }
     }
 
