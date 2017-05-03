@@ -74,7 +74,7 @@ import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTa
 import com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable;
 import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaDeleteListener;
 import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener;
-import com.openexchange.filestore.unified.UnifiedQuotaBackendService;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -110,7 +110,7 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         // Service trackers
-        RankingAwareNearRegistryServiceTracker<UnifiedQuotaBackendService> unifiedQuotaServices = new RankingAwareNearRegistryServiceTracker<>(context, UnifiedQuotaBackendService.class, 0);
+        RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> unifiedQuotaServices = new RankingAwareNearRegistryServiceTracker<>(context, UnifiedQuotaService.class, 0);
         rememberTracker(unifiedQuotaServices);
         {
             QuotaFileStorageListenerTracker listenerTracker = new QuotaFileStorageListenerTracker(context);

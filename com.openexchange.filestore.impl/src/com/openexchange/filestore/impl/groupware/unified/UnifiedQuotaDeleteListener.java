@@ -51,7 +51,7 @@ package com.openexchange.filestore.impl.groupware.unified;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.unified.UnifiedQuotaBackendService;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.osgi.ServiceListing;
@@ -64,12 +64,12 @@ import com.openexchange.osgi.ServiceListing;
  */
 public class UnifiedQuotaDeleteListener implements DeleteListener {
 
-    private final ServiceListing<UnifiedQuotaBackendService> unifiedQuotaServices;
+    private final ServiceListing<UnifiedQuotaService> unifiedQuotaServices;
 
     /**
      * Initializes a new {@link UnifiedQuotaDeleteListener}.
      */
-    public UnifiedQuotaDeleteListener(ServiceListing<UnifiedQuotaBackendService> unifiedQuotaService) {
+    public UnifiedQuotaDeleteListener(ServiceListing<UnifiedQuotaService> unifiedQuotaService) {
         super();
         this.unifiedQuotaServices = unifiedQuotaService;
     }
@@ -77,11 +77,11 @@ public class UnifiedQuotaDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_CONTEXT) {
-            for (UnifiedQuotaBackendService backendService : unifiedQuotaServices) {
+            for (UnifiedQuotaService backendService : unifiedQuotaServices) {
                 backendService.deleteEntryFor(deleteEvent.getContext().getContextId());
             }
         } else if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            for (UnifiedQuotaBackendService unifiedQuotaService : unifiedQuotaServices) {
+            for (UnifiedQuotaService unifiedQuotaService : unifiedQuotaServices) {
                 unifiedQuotaService.deleteEntryFor(deleteEvent.getId(), deleteEvent.getContext().getContextId());
             }
         }

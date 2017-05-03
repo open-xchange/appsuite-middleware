@@ -53,12 +53,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.QuotaMode;
 
 /**
- * {@link UnifiedQuotaBackendService} - Provides methods to query and increment/decrement a service-associated usage as well as to query its limit that contribute to a unified quota.
+ * {@link UnifiedQuotaService} - Provides methods to query and increment/decrement a service-associated usage as well as to query its limit that contribute to a unified quota.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public interface UnifiedQuotaBackendService extends QuotaMode {
+public interface UnifiedQuotaService extends QuotaMode {
 
     /** The mode for Unified Quota */
     public static final String MODE = "unified";

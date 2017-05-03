@@ -54,7 +54,7 @@ import java.net.URI;
 import com.openexchange.admin.tools.filestore.FilestoreDataMoveListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.QuotaFileStorage;
-import com.openexchange.filestore.unified.UnifiedQuotaBackendService;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.osgi.ServiceListing;
 
 /**
@@ -65,12 +65,12 @@ import com.openexchange.osgi.ServiceListing;
  */
 public class UnifiedQuotaFilestoreDataMoveListener implements FilestoreDataMoveListener {
 
-    private final ServiceListing<UnifiedQuotaBackendService> unifiedQuotaServices;
+    private final ServiceListing<UnifiedQuotaService> unifiedQuotaServices;
 
     /**
      * Initializes a new {@link UnifiedQuotaFilestoreDataMoveListener}.
      */
-    public UnifiedQuotaFilestoreDataMoveListener(ServiceListing<UnifiedQuotaBackendService> unifiedQuotaServices) {
+    public UnifiedQuotaFilestoreDataMoveListener(ServiceListing<UnifiedQuotaService> unifiedQuotaServices) {
         super();
         this.unifiedQuotaServices = unifiedQuotaServices;
     }
