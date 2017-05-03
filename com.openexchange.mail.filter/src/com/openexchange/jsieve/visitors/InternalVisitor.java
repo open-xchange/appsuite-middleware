@@ -233,10 +233,8 @@ public class InternalVisitor implements SieveParserVisitor {
                         }
 
                         final ActionCommand actionCommand = new ActionCommand(command, arguments);
-                        // Here we have to decide if we are on the base level or
-                        // inside a control command. If we are inside
-                        // a control command the parent-parent node is a block, so
-                        // test this
+                        // Here we have to decide if we are on the base level or inside a control command. 
+                        // If we are inside a control command the parent-parent node is a block, so test this.
                         if (node.jjtGetParent().jjtGetParent() instanceof ASTblock) {
                             ((ArrayList<ActionCommand>) data).add(actionCommand);
                         } else if (node.jjtGetParent().jjtGetParent() instanceof ASTstart) {
@@ -249,8 +247,6 @@ public class InternalVisitor implements SieveParserVisitor {
                             final ArrayList<Command> cmds = new ArrayList<Command>();
                             cmds.add(ifCommand);
                             ((ArrayList<Rule>) data).add(new Rule(cmds, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
-                            //                            ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), commented));
-                            //                            throw new SieveException("Action commands are not allowed on base level, line " + node.getCoordinate().getStartLineNumber());
                         }
                     }
                 } catch (final SieveException e) {
@@ -432,9 +428,8 @@ public class InternalVisitor implements SieveParserVisitor {
                         tagargs.add(string);
                         arguments.add(tag);
                     } else if (obj instanceof ArrayList) {
-                        // Here we have to determine which type is inside,
-                        // so we must check the size first and then get
-                        // first element
+                        // Here we have to determine which type is inside, so we must check 
+                        // the size first and then get first element
                         final ArrayList<Object> array = (ArrayList<Object>) obj;
                         if (!array.isEmpty()) {
                             final Object object = array.get(0);
