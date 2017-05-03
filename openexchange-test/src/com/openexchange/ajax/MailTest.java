@@ -201,11 +201,6 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testNewMailsInInbox() {
-        assertTrue(true);
-    }
-
-    @Test
     public void testGetMails() throws IOException, SAXException, JSONException, Exception {
         AbstractAJAXResponse jResp = null;
         final JSONObject mailObj = new JSONObject();
@@ -278,10 +273,5 @@ public class MailTest extends AbstractAJAXSession {
         assertFalse(mtm.getLastResponse().hasError());
         assertTrue(mails != null);
         assertNotNull(mails[0].getSource());
-    }
-
-    @Test
-    public void testReplyMail() {
-        assertTrue(true);
     }
 }
