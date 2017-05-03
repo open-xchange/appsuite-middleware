@@ -237,6 +237,7 @@ public class GuestClient extends AJAXClient {
     public GuestClient(ClientConfig config) throws Exception {
         super(getOrCreateSession(config), config.mustLogout);
         prepareClient(getHttpClient(), config.username, config.password);
+        Assert.assertNotNull("Share-URL not set", config.url);
         setHostname(new URI(config.url).getHost());
         setProtocol(new URI(config.url).getScheme());
         /*
