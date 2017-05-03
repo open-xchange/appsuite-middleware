@@ -299,7 +299,11 @@ public final class MessageWriter {
             }
             if (null != params.getWarnings()) {
                 List<OXException> list = parser.getWarnings();
-                if (!list.isEmpty()) {
+                if (null != list && !list.isEmpty()) {
+                    params.getWarnings().addAll(list);
+                }
+                list = handler.getWarnings();
+                if (null != list && !list.isEmpty()) {
                     params.getWarnings().addAll(list);
                 }
             }
@@ -615,14 +619,20 @@ public final class MessageWriter {
                     String subject = mail.getSubject();
                     if (withKey) {
                         if (subject != null) {
-                            subject = decodeMultiEncodedHeader(subject);
+                            // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
+                            if (false == mail.isSubjectDecoded()) {
+                                subject = decodeMultiEncodedHeader(subject);
+                            }
                             jsonContainer.toObject().put(MailJSONField.SUBJECT.getKey(), subject.trim());
                         }
                     } else {
                         if (subject == null) {
                             jsonContainer.toArray().put(JSONObject.NULL);
                         } else {
-                            subject = decodeMultiEncodedHeader(subject);
+                            // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
+                            if (false == mail.isSubjectDecoded()) {
+                                subject = decodeMultiEncodedHeader(subject);
+                            }
                             jsonContainer.toArray().put(subject.trim());
                         }
                     }

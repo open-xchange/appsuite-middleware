@@ -68,22 +68,17 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.Constants;
 import com.openexchange.imagetransformation.ImageInformation;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
-import com.openexchange.imagetransformation.ImageTransformationReloadable;
 import com.openexchange.imagetransformation.ImageTransformationSignaler;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
-import com.openexchange.imagetransformation.java.osgi.Services;
+import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.DefaultTransformedImageCreator;
 import com.openexchange.tools.stream.CountingInputStream;
@@ -102,111 +97,20 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationsImpl.class);
 
-    private static volatile Integer waitTimeoutSeconds;
     static int waitTimeoutSeconds() {
-        Integer tmp = waitTimeoutSeconds;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = waitTimeoutSeconds;
-                if (null == tmp) {
-                    int defaultValue = 10;
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    tmp = Integer.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.waitTimeoutSeconds", defaultValue));
-                    waitTimeoutSeconds = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
+        return Utility.waitTimeoutSeconds();
     }
 
-    private static volatile Long maxSize;
     static long maxSize() {
-        Long tmp = maxSize;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = maxSize;
-                if (null == tmp) {
-                    int defaultValue = 5242880; // 5 MB
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxSize", defaultValue));
-                    maxSize = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
+        return Utility.maxSize();
     }
 
-    private static volatile Long maxResolution;
     static long maxResolution() {
-        Long tmp = maxResolution;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = maxResolution;
-                if (null == tmp) {
-                    int defaultValue = 12087962; // 4064 x 2704 (11.1 megapixels) + 10%
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxResolution", defaultValue));
-                    maxResolution = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
+        return Utility.maxResolution();
     }
 
-    private static volatile Float preferThumbnailThreshold;
     static float preferThumbnailThreshold() {
-        Float tmp = preferThumbnailThreshold;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = preferThumbnailThreshold;
-                if (null == tmp) {
-                    float defaultValue = 0.8f;
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    try {
-                        tmp = Float.valueOf(configService.getProperty("com.openexchange.tools.images.transformations.preferThumbnailThreshold", String.valueOf(defaultValue)));
-                        preferThumbnailThreshold = tmp;
-                    } catch (NumberFormatException e) {
-                        LOG.warn("error parsing \"com.openexchange.tools.images.transformations.preferThumbnailThreshold\", sticking to defaults.", e);
-                    }
-                }
-            }
-        }
-        return tmp.floatValue();
-    }
-
-    static {
-        ImageTransformationReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                waitTimeoutSeconds = null;
-                maxSize = null;
-                maxResolution = null;
-                preferThumbnailThreshold = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties(
-                    "com.openexchange.tools.images.transformations.preferThumbnailThreshold",
-                    "com.openexchange.tools.images.transformations.maxResolution",
-                    "com.openexchange.tools.images.transformations.maxSize",
-                    "com.openexchange.tools.images.transformations.waitTimeoutSeconds"
-                    );
-            }
-        });
+        return Utility.preferThumbnailThreshold();
     }
 
     private static final IOExceptionCreator IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR = new IOExceptionCreator() {

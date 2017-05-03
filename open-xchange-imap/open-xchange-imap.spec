@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 22
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -115,6 +115,9 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "SSLv3 TLSv1" = "$VALUE" ]; then
         ox_set_property com.openexchange.imap.ssl.protocols "" $PFILE
     fi
+
+    # SoftwareChange_Request-4092
+    ox_add_property com.openexchange.imap.overwritePreLoginCapabilities false $PFILE
 fi
 
 %clean
@@ -130,6 +133,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Apr 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-05-02 (4113)
 * Wed Apr 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-04-18 (4084)
 * Fri Mar 31 2017 Marcus Klein <marcus.klein@open-xchange.com>

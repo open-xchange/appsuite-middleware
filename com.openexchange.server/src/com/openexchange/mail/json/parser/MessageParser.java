@@ -604,7 +604,7 @@ public final class MessageParser {
          * Subject, etc.
          */
         if (jsonObj.hasAndNotNull(MailJSONField.SUBJECT.getKey())) {
-            mail.setSubject(jsonObj.getString(MailJSONField.SUBJECT.getKey()));
+            mail.setSubject(jsonObj.getString(MailJSONField.SUBJECT.getKey()), true);
         }
         /*
          * Size

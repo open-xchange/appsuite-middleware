@@ -945,7 +945,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             // Size unavailable
             mailMessage.setSize(-1);
         }
-        mailMessage.setSubject(MimeMessageConverter.getSubject(im));
+        mailMessage.setSubject(MimeMessageConverter.getSubject(im), true);
         mailMessage.setUnreadMessages(unread);
         return mailMessage;
     }

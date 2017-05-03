@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,31 @@
  *
  */
 
-package com.openexchange.html.internal.jericho;
+package com.openexchange.imagetransformation;
 
-import net.htmlparser.jericho.CharacterReference;
-import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.StartTag;
-import net.htmlparser.jericho.Tag;
-
+import java.awt.Dimension;
+import java.io.IOException;
+import java.io.InputStream;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link JerichoHandler}
+ * {@link ImageMetadataService} - A service for providing several meta-data information for an image.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public interface JerichoHandler {
+@SingletonService
+public interface ImageMetadataService {
 
     /**
-     * Handles the DOCTYPE declaration. Specified value is without leading "&lt;!DOCTYPE" and without trailing "&gt;"; e.g.
+     * Gets the {@link Dimension dimension} for specified image data.
      *
-     * <pre>
-     * '&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
-     *  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;'
-     * </pre>
-     *
-     * yields
-     *
-     * <pre>
-     *  ' html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
-     *  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;'
-     * </pre>
-     *
-     * @param docDecl
+     * @param imageStream The image data
+     * @param mimeType The image MIME type
+     * @param name The image name
+     * @return The dimension
+     * @throws IOException If dimension cannot be returned
      */
-    void handleDocDeclaration(String docDecl);
-
-    void handleCharacterReference(CharacterReference characterReference);
-
-    void handleSegment(CharSequence content);
-
-    void handleStartTag(StartTag startTag);
-
-    void handleEndTag(EndTag endTag);
-
-    void handleCData(String cdata);
-
-    void handleComment(String comment);
-
-    void handleUnknownTag(Tag tag);
-
-    void markCssStart(StartTag startTag);
-
-    void markCssEnd(EndTag endTag);
-
-    void markBodyAbsent();
+    Dimension getDimensionFor(InputStream imageStream, String mimeType, String name) throws IOException;
 
 }

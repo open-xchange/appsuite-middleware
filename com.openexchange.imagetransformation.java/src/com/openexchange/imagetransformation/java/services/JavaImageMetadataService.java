@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,51 @@
  *
  */
 
-package com.openexchange.html.internal.jericho;
+package com.openexchange.imagetransformation.java.services;
 
-import net.htmlparser.jericho.CharacterReference;
-import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.StartTag;
-import net.htmlparser.jericho.Tag;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getImageInputStream;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getImageReader;
+import java.awt.Dimension;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import com.openexchange.imagetransformation.ImageMetadataService;
+import com.openexchange.java.Streams;
 
 
 /**
- * {@link JerichoHandler}
+ * {@link JavaImageMetadataService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public interface JerichoHandler {
+public class JavaImageMetadataService implements ImageMetadataService {
 
     /**
-     * Handles the DOCTYPE declaration. Specified value is without leading "&lt;!DOCTYPE" and without trailing "&gt;"; e.g.
-     *
-     * <pre>
-     * '&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
-     *  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;'
-     * </pre>
-     *
-     * yields
-     *
-     * <pre>
-     *  ' html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
-     *  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;'
-     * </pre>
-     *
-     * @param docDecl
+     * Initializes a new {@link JavaImageMetadataService}.
      */
-    void handleDocDeclaration(String docDecl);
+    public JavaImageMetadataService() {
+        super();
+    }
 
-    void handleCharacterReference(CharacterReference characterReference);
-
-    void handleSegment(CharSequence content);
-
-    void handleStartTag(StartTag startTag);
-
-    void handleEndTag(EndTag endTag);
-
-    void handleCData(String cdata);
-
-    void handleComment(String comment);
-
-    void handleUnknownTag(Tag tag);
-
-    void markCssStart(StartTag startTag);
-
-    void markCssEnd(EndTag endTag);
-
-    void markBodyAbsent();
+    @Override
+    public Dimension getDimensionFor(InputStream imageStream, String mimeType, String name) throws IOException {
+        ImageInputStream imageInputStream = null;
+        ImageReader reader = null;
+        try {
+            imageInputStream = getImageInputStream(imageStream);
+            reader = getImageReader(imageInputStream, mimeType, name);
+            reader.setInput(imageInputStream);
+            int width = reader.getWidth(0);
+            int height = reader.getHeight(0);
+            return new Dimension(width, height);
+        } finally {
+            if (null != reader) {
+                reader.dispose();
+            }
+            Streams.close(imageInputStream, imageStream);
+        }
+    }
 
 }

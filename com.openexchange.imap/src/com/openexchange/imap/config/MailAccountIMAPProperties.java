@@ -399,6 +399,23 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public boolean isOverwritePreLoginCapabilities() {
+        String tmp = properties.get("com.openexchange.imap.overwritePreLoginCapabilities");
+        if (null != tmp) {
+            return Boolean.parseBoolean(tmp.trim());
+        }
+
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.imap.primary.overwritePreLoginCapabilities");
+            if (null != tmp) {
+                return Boolean.parseBoolean(tmp.trim());
+            }
+        }
+
+        return IMAPProperties.getInstance().isOverwritePreLoginCapabilities();
+    }
+
+    @Override
     public Set<String> getPropagateHostNames() {
         String tmp = properties.get("com.openexchange.imap.propagateHostNames");
         if (null != tmp) {
