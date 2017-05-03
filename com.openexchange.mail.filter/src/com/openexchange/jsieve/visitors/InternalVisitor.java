@@ -113,8 +113,7 @@ public class InternalVisitor implements SieveParserVisitor {
             final Boolean value = (Boolean) data;
             commented = value.booleanValue();
         }
-        final Object visitChildren = VisitorUtil.visitChildren(node, null, this);
-        return visitChildren;
+        return VisitorUtil.visitChildren(node, null, this);
     }
 
     /*
@@ -125,11 +124,9 @@ public class InternalVisitor implements SieveParserVisitor {
     @Override
     public Object visit(final ASTcommands node, final Object data) throws SieveException {
         if (null != data) {
-            final Object visitChildren = VisitorUtil.visitChildren(node, data, this);
-            return visitChildren;
+            return VisitorUtil.visitChildren(node, data, this);
         } else {
-            final Object visitChildren = VisitorUtil.visitChildren(node, new ArrayList<Rule>(node.jjtGetNumChildren()), this);
-            return visitChildren;
+            return VisitorUtil.visitChildren(node, new ArrayList<Rule>(node.jjtGetNumChildren()), this);
         }
     }
 
