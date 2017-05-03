@@ -54,7 +54,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,14 +76,13 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 
     private int folderId;
 
-    public VCardImportExportServletTest() {
-        super();
-    }
-
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderId = createFolder("vcard-contact-roundtrip-" + UUID.randomUUID().toString(), FolderObject.CONTACT);
+        FolderObject folder = ftm.insertFolderOnServer(ftm.generatePrivateFolder("vcard-contact-roundtrip-" + UUID.randomUUID().toString(),
+            FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId()));
+        folderId = folder.getObjectID();
     }
 
     @Test
@@ -158,15 +156,6 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
                     break;
                 }
             }
-        }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            removeFolder(folderId);
-        } finally {
-            super.tearDown();
         }
     }
 
