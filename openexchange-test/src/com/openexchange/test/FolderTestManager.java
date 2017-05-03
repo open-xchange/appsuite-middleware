@@ -110,6 +110,10 @@ public class FolderTestManager implements TestManager {
     public void setClient(AJAXClient client) {
         this.client = client;
     }
+    
+    public AJAXClient getClient() {
+        return client;
+    }
 
     @Override
     public void setFailOnError(final boolean failOnError) {

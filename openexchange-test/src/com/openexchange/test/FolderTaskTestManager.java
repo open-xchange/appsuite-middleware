@@ -62,14 +62,13 @@ import com.openexchange.java.ConcurrentLinkedList;
  * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
  */
 public class FolderTaskTestManager extends FolderTestManager {
-    private AJAXClient client1;
+
     private AJAXClient client2;
     
     private List<FolderObject> createdItems2;    
     
     public FolderTaskTestManager(final AJAXClient client, final AJAXClient client2) {        
         super(client);
-        this.client1 = client;
         this.client2 = client2;
         createdItems2 = new ConcurrentLinkedList<FolderObject>(); 
     }
@@ -79,7 +78,7 @@ public class FolderTaskTestManager extends FolderTestManager {
         super.cleanUp();                
         deleteFolder(client2, createdItems2);
         createdItems2 = new ConcurrentLinkedList<FolderObject>();
-        this.setClient(client1);
+        this.setClient(getClient());
     }
     
     public void deleteFolder(final AJAXClient client, List<FolderObject> list){
