@@ -51,8 +51,8 @@ package com.openexchange.filestore.impl.groupware.unified;
 
 import static com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils.isUnifiedQuotaEnabledFor;
 import java.net.URI;
-import com.openexchange.admin.tools.filestore.FilestoreDataMoveListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FilestoreDataMoveListener;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.osgi.ServiceListing;

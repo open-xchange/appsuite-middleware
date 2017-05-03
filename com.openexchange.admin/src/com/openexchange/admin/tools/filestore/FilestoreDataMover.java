@@ -89,6 +89,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FilestoreDataMoveListener;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.java.Streams;
