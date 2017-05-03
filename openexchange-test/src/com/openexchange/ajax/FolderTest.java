@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -217,11 +214,16 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testFolderNamesShouldBeEqualRegardlessOfRequestMethod() {
-        final FolderObject[] rootFolders = ftm.listRootFoldersOnServer();
-        for (final FolderObject rootFolder : rootFolders) {
-            final FolderObject individuallyLoaded = ftm.getFolderFromServer(rootFolder.getObjectID());
-            assertEquals("Foldernames differ : " + rootFolder.getFolderName() + " != " + individuallyLoaded.getFolderName(), rootFolder.getFolderName(), individuallyLoaded.getFolderName());
+    public void testFolderNamesShouldBeEqualRegardlessOfRequestMethod() throws Exception {
+        for (boolean altNames : new boolean[] { true, false}) {
+            for (FolderObject rootFolder : ftm.listRootFoldersOnServer(altNames)) {
+                GetRequest request = new GetRequest(EnumAPI.OX_OLD, rootFolder.getObjectID(), FolderObject.ALL_COLUMNS);
+                request.setAltNames(altNames);
+                GetResponse getResponse = getClient().execute(request);
+                assertFalse(getResponse.hasError());
+                FolderObject folder = getResponse.getFolder();
+                assertEquals("Foldernames differ : " + rootFolder.getFolderName() + " != " + folder.getFolderName(), rootFolder.getFolderName(), folder.getFolderName());
+            }
         }
     }
 

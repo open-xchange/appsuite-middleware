@@ -401,9 +401,25 @@ public class FolderTestManager implements TestManager {
         return folderArray;
     }
 
+    /**
+     * Executes the <code>root</code> action in the folder module and gets the parsed folders of the result.
+     *
+     * @return The resulting folders
+     */
     public FolderObject[] listRootFoldersOnServer() {
+        return listRootFoldersOnServer(true);
+    }
+
+    /**
+     * Executes the <code>root</code> action in the folder module and gets the parsed folders of the result.
+     *
+     * @param altNames <code>true</code> to request the alternative folder names, <code>false</code>, otherwise
+     * @return The resulting folders
+     */
+    public FolderObject[] listRootFoldersOnServer(boolean altNames) {
         final Vector<FolderObject> allFolders = new Vector<FolderObject>();
         final RootRequest request = new RootRequest(EnumAPI.OX_OLD, new int[] { FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS }, ignoreMailFolders);
+        request.setAltNames(altNames);
         try {
             final ListResponse response = client.execute(request);
             setLastResponse(response);
@@ -549,7 +565,7 @@ public class FolderTestManager implements TestManager {
 
     /**
      * Generates a folder with admin permissions for all given userIDs.
-     * 
+     *
      * @param name Name of the folder
      * @param moduleID moduleID of the folder (calendar, task, etc... from FolderObject, not from any other class)
      * @param parentID the parent folder's ID
@@ -640,8 +656,8 @@ public class FolderTestManager implements TestManager {
         oclp.setDeleteObjectPermission(odp);
         return oclp;
     }
-    
+
     public List<FolderObject> getCreatedItems() {
         return createdItems;
-    }    
+    }
 }
