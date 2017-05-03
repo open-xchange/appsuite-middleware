@@ -60,8 +60,8 @@ import com.openexchange.oauth.scope.OAuthScope;
 public enum MSLiveConnectOAuthScope implements OAuthScope {
     calendar_ro("wl.calendars wl.offline_access", OXScope.calendar_ro),
     calendar("wl.calendars_update wl.offline_access", OXScope.calendar),
-    contacts_ro("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts_ro),
-    contacts("wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts),
+    contacts_ro("wl.basic wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts_ro),
+    contacts("wl.basic wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts),
     drive("wl.skydrive wl.skydrive_update wl.offline_access", OXScope.drive);
 
     private final String mapping;
