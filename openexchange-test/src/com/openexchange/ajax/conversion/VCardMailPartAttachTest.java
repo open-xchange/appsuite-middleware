@@ -49,25 +49,22 @@
 
 package com.openexchange.ajax.conversion;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.mail.MailJSONField;
+import com.openexchange.test.ContactTestManager;
 
 /**
  * {@link VCardMailPartAttachTest}
@@ -100,16 +97,12 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
              */
             final int objectId;
             final int folderId = getPrivateContactFolder();
-            final CommonAllResponse allR = Executor.execute(getSession(), new AllRequest(folderId, new int[] { DataObject.OBJECT_ID }));
-            final ListIDs listIDs = allR.getListIDs();
-            if (listIDs.size() == 0) {
-                /*
-                 * TODO: Create a contact and remember its object-id
-                 */
-                objectId = -1;
-
+            Contact[] contacts = cotm.allAction(folderId, new int[] { DataObject.OBJECT_ID });
+            if (0 == contacts.length) {
+                Contact contact = cotm.newAction(ContactTestManager.generateContact(folderId));
+                objectId = contact.getObjectID();
             } else {
-                objectId = Integer.parseInt(listIDs.get(0).getObject());
+                objectId = contacts[0].getObjectID();
             }
 
             String[] mailFolderAndMailID = null;
