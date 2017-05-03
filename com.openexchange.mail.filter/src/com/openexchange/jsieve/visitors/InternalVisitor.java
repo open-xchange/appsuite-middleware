@@ -144,7 +144,11 @@ public class InternalVisitor implements SieveParserVisitor {
         } catch (IllegalArgumentException e) {
             nodeType = NodeType.OTHER;
         }
-        nodeType.parse(node, data, commented, this);
+        try {
+            nodeType.parse(node, data, commented, this);
+        } catch (SieveException e) {
+            ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
+        }
         return data;
     }
 
