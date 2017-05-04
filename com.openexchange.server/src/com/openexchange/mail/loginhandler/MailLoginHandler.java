@@ -107,10 +107,6 @@ public final class MailLoginHandler implements LoginHandlerService {
 
 	@Override
     public void handleLogout(final LoginResult logout) throws OXException {
-		// Time-out mail access cache
-		final Session session = logout.getSession();
-		MailAccess.getMailAccessCache().clearUserEntries(session);
-		// AttachmentTokenRegistry.getInstance().dropFor(session);
-
+	    // Nothing
 	}
 }
