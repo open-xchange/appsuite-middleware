@@ -31,6 +31,6 @@ com.openexchange.mail.authType = <either "xoauth2" or "oauthbearer">
 com.openexchange.mail.transport.authType = <either "xoauth2" or "oauthbearer">
 ```
 If those properties are configured the ox middleware tries to connect to the primary mail account via oauth.
-In order to do this it uses the session property 'com.openexchange.saml.AccessToken' which needs to contain a valid oauth access token.
+In order to do this it uses the session property `com.openexchange.saml.AccessToken` which needs to contain a valid oauth access token.
 
 Therefore the session needs to be enhanced with this token during the authentication process.

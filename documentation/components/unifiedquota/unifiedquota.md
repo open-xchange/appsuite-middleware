@@ -12,10 +12,10 @@ If unified quota is enabled/available for a certain user, the value ``"unified"`
 
 Setup & configure the Cassandra connector through installing package `open-xchange-cassandra` and setting the properties:
 
- - `com.openexchange.nosql.cassandra.clusterContactPoints`
- - `com.openexchange.nosql.cassandra.port`
+ - [com.openexchange.nosql.cassandra.clusterContactPoints](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.nosql.cassandra.clusterContactPoints)
+ - [com.openexchange.nosql.cassandra.port](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.nosql.cassandra.port)
 
-*(There a more Cassandra properties to set)*
+*(There a more Cassandra properties to set. See [Cassandra configuration](https://documentation.open-xchange.com/components/middleware/config/develop/index.html#mode=features&feature=Cassandra))*
 
 ## Installation
 
@@ -26,4 +26,3 @@ Enable to use Cassandra in Cloud-Plugins' configuration:
  - `com.openexchange.cloudplugins.useCassandra=true` in file `cloudplugins-cassandra.properties`
 
 As stated before, unified quota is only applicable for contexts/tenants, in which every user has its own Drive quota configured. Moreover, those users are required to have `com.openexchange.unifiedquota.enabled` configuration option be set to `true` (which is [config-cascade aware](http://oxpedia.org/wiki/index.php?title=ConfigCascade)).
-
