@@ -70,6 +70,7 @@ import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
