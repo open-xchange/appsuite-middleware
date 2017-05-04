@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.task;
 
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -65,6 +69,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Checks if bug 11650 appears again.
@@ -72,6 +77,9 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug11650Test extends AbstractTaskTest {
+
+    private TestUser owner;
+    private TestUser sharee;
 
     /**
      * Default constructor.
@@ -82,6 +90,26 @@ public class Bug11650Test extends AbstractTaskTest {
         super();
     }
 
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        // Get users
+        owner = testContext.acquireUser();
+        sharee = testContext.acquireUser();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        //Return users to pool
+        if (null != owner) {
+            testContext.backUser(owner);
+        }
+        if (null != sharee) {
+            testContext.backUser(sharee);
+        }
+        super.tearDown();
+    }
+
     /**
      * Checks if the search in shared task folder is broken.
      * 
@@ -89,13 +117,21 @@ public class Bug11650Test extends AbstractTaskTest {
      */
     @Test
     public void testSearchInSharedFolder() throws Throwable {
-        final AJAXClient anton = getClient();
-        final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
-        final FolderObject folder = createFolder(anton.getValues().getUserId(), berta.getValues().getUserId());
-        folder.setParentFolderID(antonFID);
+        final AJAXClient client;
+        final AJAXClient client2;
+        if (null == owner || null == sharee) {
+            // Use fallback in case of missing user(s)
+            client = getClient();
+            client2 = getClient2();
+        } else {
+            client = new AJAXClient(owner);
+            client2 = new AJAXClient(sharee);
+        }
+        final int privateTaskFID = client.getValues().getPrivateTaskFolder();
+        final FolderObject folder = createFolder(client.getValues().getUserId(), client2.getValues().getUserId());
+        folder.setParentFolderID(privateTaskFID);
         // Share a folder.
-        final CommonInsertResponse fResponse = anton.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
+        final CommonInsertResponse fResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         fResponse.fillObject(folder);
         final Task task = Create.createWithDefaults();
         task.setTitle("Bug11650Test");
@@ -103,7 +139,7 @@ public class Bug11650Test extends AbstractTaskTest {
         try {
             {
                 // Insert a task for searching for it.
-                final InsertResponse insert = Executor.execute(anton, new InsertRequest(task, anton.getValues().getTimeZone()));
+                final InsertResponse insert = Executor.execute(client, new InsertRequest(task, client.getValues().getTimeZone()));
                 insert.fillTask(task);
             }
             {
@@ -111,26 +147,27 @@ public class Bug11650Test extends AbstractTaskTest {
                 final TaskSearchObject search = new TaskSearchObject();
                 search.setPattern("*");
                 search.addFolder(folder.getObjectID());
-                final SearchResponse response = Executor.execute(berta, new SearchRequest(search, SearchRequest.GUI_COLUMNS));
-                assertFalse("Searching for tasks in a shared folder failed.", response.hasError());
+                final SearchResponse response = Executor.execute(client2, new SearchRequest(search, SearchRequest.GUI_COLUMNS));
+                assertThat("Searching for tasks in a shared folder failed.", !response.hasError());
             }
         } finally {
-            anton.execute(new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+            client.execute(new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
         }
     }
 
-    private static FolderObject createFolder(final int anton, final int berta) {
+    private static FolderObject createFolder(final int owner, final int sharee) {
+        assertThat("Owner and sharee are the same. Sharing is not possible", owner, is(not(sharee)));
         final FolderObject folder = new FolderObject();
         folder.setFolderName("Bug 11650 folder");
         folder.setModule(FolderObject.TASK);
         folder.setType(FolderObject.PRIVATE);
         final OCLPermission perm1 = new OCLPermission();
-        perm1.setEntity(anton);
+        perm1.setEntity(owner);
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
         perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         final OCLPermission perm2 = new OCLPermission();
-        perm2.setEntity(berta);
+        perm2.setEntity(sharee);
         perm2.setGroupPermission(false);
         perm2.setFolderAdmin(false);
         perm2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
