@@ -88,6 +88,11 @@ if [ ${1:-0} -eq 2 ]; then
             ox_remove_property ${OLDNAMES[$I-1]} $PFILE
         fi
     done
+
+    # SoftwareChange_Request-4123
+    PFILE=/opt/open-xchange/etc/linkedinoauth.properties
+    ox_add_property com.openexchange.oauth.linkedin.redirectUrl REPLACE_THIS_WITH_YOUR_LINKEDIN_REDIRECT_URI ${PFILE}
+
 fi
 
 %clean
