@@ -154,7 +154,7 @@ public class SmtpMockSetup {
     private static void stopSMTPMockServer(TestUser user) {
         try {
             AJAXClient client = new AJAXClient(user);
-            StopSMTPRequest request = new StopSMTPRequest(false);
+            StopSMTPRequest request = new StopSMTPRequest(true);
             SMTPInitResponse response = client.execute(request);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
