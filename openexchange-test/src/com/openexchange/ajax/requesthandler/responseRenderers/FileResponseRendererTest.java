@@ -523,14 +523,9 @@ public class FileResponseRendererTest {
         fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
 
-        // Faked SVG image should be processed as XML, which is output as HTML in case inline/view requested
-
         assertNotNull("Header content-type not found", resp.getContentType());
-        assertTrue("Wrong Content-Type", resp.getContentType().startsWith("application/html"));
-
-        String content = new String(servletOutputStream.toByteArray());
-        assertTrue("Processed XML/SVG content contains JavaScript content, but shouldn't:\n" + content, content.indexOf("<script") < 0);
-        assertTrue("Processed XML/SVG content contains unsanitized JavaScript content, but shouldn't:\n" + content, content.indexOf("&lt;/script&gt;") > 0);
+        assertTrue("Wrong Content-Type", resp.getContentType().startsWith("application/xml"));
+        assertTrue("Wrong content-disposition", resp.getHeader("content-disposition").startsWith("attachment"));
     }
 
     @Test
