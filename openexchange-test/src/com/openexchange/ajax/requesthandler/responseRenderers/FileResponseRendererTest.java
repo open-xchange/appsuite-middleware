@@ -75,6 +75,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Delivery;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Disposition;
 import com.openexchange.config.ConfigurationService;
@@ -391,8 +392,8 @@ public class FileResponseRendererTest {
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
-        final String expectedCD = "attachment"; // force download
-        assertTrue("Wrong Content-Disposition: " + resp.getHeader("Content-Disposition") + "; expected: " + expectedCD, resp.getHeader("Content-Disposition").startsWith(expectedCD));
+        assertTrue("Wrong status code", resp.getStatus() == 403);
+        assertTrue("Wrong status message", resp.getStatusMessage().equals("Denied to output possibly harmful content"));
     }
 
     @Test
