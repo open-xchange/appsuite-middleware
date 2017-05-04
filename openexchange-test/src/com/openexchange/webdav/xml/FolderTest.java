@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
@@ -77,7 +78,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.FolderFields;
 import com.openexchange.webdav.xml.folder.FolderTools;
 import com.openexchange.webdav.xml.folder.actions.AbstractFolderRequest;
@@ -204,14 +204,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER);
 
         assertEquals("check response", 1, response.length);
-
-        if (response[0].hasError()) {
-            throw new TestException(response[0].getErrorMessage());
-        }
-
-        if (response[0].getStatus() != 200) {
-            throw new TestException(response[0].getErrorMessage());
-        }
+        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        assertEquals("Request returned with wrong status: " + response[0].getErrorMessage(), 200, response[0].getStatus());
 
         folderObj = (FolderObject) response[0].getDataObject();
         objectId = folderObj.getObjectID();
@@ -259,10 +253,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
         if (response[0].hasError()) {
             fail("xml error: " + response[0].getErrorMessage());
         }
-
-        if (response[0].getStatus() != 200) {
-            throw new TestException(response[0].getErrorMessage());
-        }
+        assertEquals("Request returned with wrong status: " + response[0].getErrorMessage(), 200, response[0].getStatus());
     }
 
     public static int[] deleteFolder(final WebConversation webCon, final int[] id, final String host, final String login, final String password, String context) throws Exception, OXException {
@@ -311,10 +302,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
                 final FolderObject folderObj = (FolderObject) response[a].getDataObject();
                 idList.add(Integer.valueOf(folderObj.getObjectID()));
             }
-
-            if (response[0].getStatus() != 200) {
-                throw new TestException(response[0].getErrorMessage());
-            }
+            assertEquals("Request returned with wrong status: " + response[0].getErrorMessage(), 200, response[0].getStatus());
         }
 
         final int[] failed = new int[idList.size()];
@@ -368,9 +356,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
                 idList.add(Integer.valueOf(folderObj.getObjectID()));
             }
 
-            if (response[0].getStatus() != 200) {
-                throw new TestException(response[0].getErrorMessage());
-            }
+            assertEquals("Request returned with wrong status: " + response[0].getStatus(), 200, response[0].getStatus());
         }
 
         final int[] failed = new int[idList.size()];
@@ -541,9 +527,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
         final FolderObject[] folderArray = new FolderObject[response.length];
         for (int a = 0; a < folderArray.length; a++) {
-            if (response[a].hasError()) {
-                throw new TestException(response[a].getErrorMessage());
-            }
+            assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
 
             folderArray[a] = (FolderObject) response[a].getDataObject();
         }

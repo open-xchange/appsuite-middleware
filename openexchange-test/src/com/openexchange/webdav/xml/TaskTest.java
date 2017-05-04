@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -80,7 +81,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -207,15 +207,13 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         assertEquals("check response", 1, response.length);
 
-        if (response[0].hasError()) {
-            throw new TestException(response[0].getErrorMessage());
-        } else {
-            taskObj = (Task) response[0].getDataObject();
-            objectId = taskObj.getObjectID();
+        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
 
-            assertNotNull("last modified is null", taskObj.getLastModified());
-            assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
-        }
+        taskObj = (Task) response[0].getDataObject();
+        objectId = taskObj.getObjectID();
+
+        assertNotNull("last modified is null", taskObj.getLastModified());
+        assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 
         assertEquals("check response status", 200, response[0].getStatus());
 
@@ -261,17 +259,14 @@ public class TaskTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
 
         assertEquals("check response", tasks.length, response.length);
+        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
 
         for (int i = 0; i < tasks.length; i++) {
-            if (response[i].hasError()) {
-                throw new TestException(response[i].getErrorMessage());
-            } else {
-                final Task taskObj = (Task) response[i].getDataObject();
-                objectIds[i] = taskObj.getObjectID();
+            final Task taskObj = (Task) response[i].getDataObject();
+            objectIds[i] = taskObj.getObjectID();
 
-                assertNotNull("last modified is null", taskObj.getLastModified());
-                assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
-            }
+            assertNotNull("last modified is null", taskObj.getLastModified());
+            assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
         }
 
         return objectIds;
@@ -312,15 +307,12 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         assertEquals("check response", 1, response.length);
 
-        if (response[0].hasError()) {
-            throw new TestException(response[0].getErrorMessage());
-        } else {
-            taskObj = (Task) response[0].getDataObject();
-            objectId = taskObj.getObjectID();
+        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        taskObj = (Task) response[0].getDataObject();
+        objectId = taskObj.getObjectID();
 
-            assertNotNull("last modified is null", taskObj.getLastModified());
-            assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
-        }
+        assertNotNull("last modified is null", taskObj.getLastModified());
+        assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 
         assertEquals("check response status", 200, response[0].getStatus());
     }
@@ -377,10 +369,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
         bais = new ByteArrayInputStream(resp.getText().getBytes());
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
 
-        if (response[0].hasError()) {
-            throw new TestException(response[0].getErrorMessage());
-        }
-
+        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
@@ -610,11 +599,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK);
 
         assertEquals("check response", 1, response.length);
-
-        if (response[0].hasError()) {
-            throw new TestException(response[0].getErrorMessage());
-        }
-
+        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
         assertEquals("check response status", 200, response[0].getStatus());
 
         return (Task) response[0].getDataObject();

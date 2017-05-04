@@ -77,16 +77,14 @@ public class SmtpMockSetup {
     private static List<TestContext> contextsWithStartedMock;
 
     public static void init() throws OXException {
-        synchronized (SmtpMockSetup.class) {
-            if (!initialized.get()) {
-                LOG.info("Starting SMTP mock initialization.");
-                ProvisioningSetup.init();
+        if (!initialized.get()) {
+            LOG.info("Starting SMTP mock initialization.");
+            ProvisioningSetup.init();
 
-                startSmtpMockForAllContexts();
+            startSmtpMockForAllContexts();
 
-                initialized.compareAndSet(false, true);
-                LOG.info("Finished initialization of the following contexts: {}.", Strings.concat(",", contextsWithStartedMock));
-            }
+            initialized.compareAndSet(false, true);
+            LOG.info("Finished initialization of the following contexts: {}.", Strings.concat(",", contextsWithStartedMock));
         }
     }
 
@@ -130,12 +128,10 @@ public class SmtpMockSetup {
     }
 
     public static void restore() {
-        synchronized (SmtpMockSetup.class) {
-            if (initialized.get()) {
-                stopSMTPMockForAllContexts();
+        if (initialized.get()) {
+            stopSMTPMockForAllContexts();
 
-                initialized.compareAndSet(true, false);
-            }
+            initialized.compareAndSet(true, false);
         }
     }
 

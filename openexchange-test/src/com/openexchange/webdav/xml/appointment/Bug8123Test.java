@@ -14,12 +14,6 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class Bug8123Test extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8123Test.class);
-
-    public Bug8123Test() {
-        super();
-    }
-
     @Test
     public void testBug8123() throws Exception {
         final Resource[] resource = GroupUserTest.searchResource(getWebConversation(), "*", new Date(0), getHostName(), getLogin(), getPassword(), context);
@@ -52,7 +46,7 @@ public class Bug8123Test extends AppointmentTest {
 
         final Date modified = new Date(loadAppointment.getCreationDate().getTime() - 1000);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         compareObject(appointmentObj, loadAppointment);
 
         deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);

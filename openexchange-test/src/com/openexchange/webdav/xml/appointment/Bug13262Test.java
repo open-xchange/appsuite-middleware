@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -75,11 +74,7 @@ public class Bug13262Test extends AppointmentTest {
     private Appointment appointment;
     private Calendar thirdOccurrence;
 
-    public Bug13262Test() {
-        super();
-    }
-
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 

@@ -20,7 +20,7 @@ public class Bug8196Test extends AppointmentTest {
 
     @Test
     public void testBug8196() throws Exception {
-        final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostName(), getSecondLogin(), getPassword(), context);
+        final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
         final int secondAppointmentFolderId = folderObj.getObjectID();
         final int secondUserId = folderObj.getCreatedBy();
 
@@ -48,20 +48,20 @@ public class Bug8196Test extends AppointmentTest {
 
         appointmentObj.removeAlarm();
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
 
         appointmentObj.removeAlarm();
         appointmentObj.setAlarmFlag(false);
         appointmentObj.setParentFolderID(secondAppointmentFolderId);
 
-        Appointment loadAppointment = loadAppointment(getSecondWebConversation(), objectId, secondAppointmentFolderId, getHostName(), getSecondLogin(), getPassword(), context);
+        Appointment loadAppointment = loadAppointment(getSecondWebConversation(), objectId, secondAppointmentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
         compareObject(appointmentObj, loadAppointment);
 
         final Date modified = new Date(loadAppointment.getLastModified().getTime() - 1000);
 
-        loadAppointment = loadAppointment(getSecondWebConversation(), objectId, secondAppointmentFolderId, modified, getHostName(), getSecondLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getSecondWebConversation(), objectId, secondAppointmentFolderId, modified, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
         compareObject(appointmentObj, loadAppointment);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
     }
 }

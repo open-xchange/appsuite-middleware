@@ -53,7 +53,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceGroup;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.types.Response;
@@ -82,7 +81,7 @@ public class ResponseParser {
             if (responseElements.size() == 1) {
                 response = parseGroupUserResponse((Element) responseElements.get(0));
             } else {
-                throw new TestException("invalid number of response elements in response!");
+                throw OXException.general("invalid number of response elements in response!");
             }
         } else {
             response = new Response[responseElements.size()];
@@ -118,7 +117,7 @@ public class ResponseParser {
                     response.setDataObject(parseTaskResponse(eProp));
                     break;
                 default:
-                    throw new TestException("invalid module!");
+                    throw OXException.general("invalid module!");
             }
         }
 
