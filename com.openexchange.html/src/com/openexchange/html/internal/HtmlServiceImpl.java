@@ -578,7 +578,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
 
                 // Parse the HTML content
-                JerichoParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
+                JerichoParser.getInstance().parse(html, handler, true);
 
                 // Check if modified by handler
                 if (options.isDropExternalImages() && null != modified) {
@@ -606,7 +606,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
 
                 // Parse the HTML content
-                JsoupParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
+                JsoupParser.getInstance().parse(html, handler, true);
 
                 // Check if modified by handler
                 if (options.isDropExternalImages() && null != modified) {
