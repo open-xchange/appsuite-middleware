@@ -287,7 +287,9 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         assertEquals("check response", 1, response.length);
 
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         appointmentObj = (Appointment) response[0].getDataObject();
         objectId = appointmentObj.getObjectID();
 
@@ -393,7 +395,9 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         bais = new ByteArrayInputStream(resp.getText().getBytes());
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.APPOINTMENT);
 
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
     }
 
     public void confirmAppointment(final WebConversation webCon, final int objectId, final int confirm, final String confirmMessage, String host, final String login, final String password, String context) throws Exception {
@@ -630,7 +634,9 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.APPOINTMENT);
 
         assertEquals("check response", 1, response.length);
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         assertEquals("check response status", 200, response[0].getStatus());
 
         return (Appointment) response[0].getDataObject();

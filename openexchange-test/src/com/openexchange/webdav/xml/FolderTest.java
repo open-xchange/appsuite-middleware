@@ -78,6 +78,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.FolderFields;
 import com.openexchange.webdav.xml.folder.FolderTools;
 import com.openexchange.webdav.xml.folder.actions.AbstractFolderRequest;
@@ -527,8 +528,9 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
         final FolderObject[] folderArray = new FolderObject[response.length];
         for (int a = 0; a < folderArray.length; a++) {
-            assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
-
+            if (response[0].hasError()) {
+                throw new TestException(response[0].getErrorMessage());
+            }
             folderArray[a] = (FolderObject) response[a].getDataObject();
         }
 

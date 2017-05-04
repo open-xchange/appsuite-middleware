@@ -94,16 +94,9 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.dav.carddav.bugs.CardDAVBugSuite.class,
     
     com.openexchange.grizzly.GrizzlyTestSuite.class,
-    
-    com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.class,
-    com.openexchange.webdav.xml.contact.ContactWebdavSuite.class,
-    com.openexchange.webdav.xml.folder.FolderWebdavSuite.class,
-    com.openexchange.webdav.xml.task.TaskWebdavSuite.class,
-    com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.class,
+
     com.openexchange.ajax.resource.ResourceSuite.class,
-    
     com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.class,
-    com.openexchange.webdav.xml.GroupUserTest.class,
     /*
      * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
      * com.openexchange.webdav.client.NaughtyClientTest.class,
@@ -126,6 +119,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     OAuthProviderTests.class,
     com.openexchange.ajax.userfeedback.StoreTest.class,
+
 })
 public final class MainInterfaceTests {
 

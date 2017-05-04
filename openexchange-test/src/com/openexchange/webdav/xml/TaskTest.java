@@ -81,6 +81,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -206,9 +207,9 @@ public class TaskTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
 
         assertEquals("check response", 1, response.length);
-
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
-
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         taskObj = (Task) response[0].getDataObject();
         objectId = taskObj.getObjectID();
 
@@ -307,7 +308,9 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         assertEquals("check response", 1, response.length);
 
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         taskObj = (Task) response[0].getDataObject();
         objectId = taskObj.getObjectID();
 
@@ -369,7 +372,9 @@ public class TaskTest extends AbstractWebdavXMLTest {
         bais = new ByteArrayInputStream(resp.getText().getBytes());
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
 
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
@@ -599,7 +604,9 @@ public class TaskTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK);
 
         assertEquals("check response", 1, response.length);
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         assertEquals("check response status", 200, response[0].getStatus());
 
         return (Task) response[0].getDataObject();

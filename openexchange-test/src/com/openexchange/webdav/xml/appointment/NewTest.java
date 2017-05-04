@@ -226,6 +226,7 @@ public class NewTest extends AppointmentTest {
     public void testDailyRecurrence() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
+        c.setTime(startTime);
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);

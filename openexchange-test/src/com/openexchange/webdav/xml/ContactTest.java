@@ -2,7 +2,6 @@
 package com.openexchange.webdav.xml;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -33,6 +32,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -321,7 +321,9 @@ public class ContactTest extends AbstractWebdavXMLTest {
         final InputStream input = resp.getInputStream();
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(input), Types.CONTACT);
         assertEquals("Response of insert strangely contains more than 1 response entities.", 1, response.length);
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         assertEquals("check response status", 200, response[0].getStatus());
         final Contact contactObj2 = (Contact) response[0].getDataObject();
         final int objectId = contactObj2.getObjectID();
@@ -368,7 +370,9 @@ public class ContactTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
 
         assertEquals("check response", 1, response.length);
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         contactObj = (Contact) response[0].getDataObject();
         objectId = contactObj.getObjectID();
 
@@ -423,7 +427,9 @@ public class ContactTest extends AbstractWebdavXMLTest {
         bais = new ByteArrayInputStream(resp.getText().getBytes());
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
         assertEquals("Response of delete strangely contains more than 1 response entities.", 1, response.length);
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
@@ -556,7 +562,9 @@ public class ContactTest extends AbstractWebdavXMLTest {
         final InputStream input = propFindMethod.getResponseBodyAsStream();
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(input), Types.CONTACT);
         assertEquals("check response", 1, response.length);
-        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
+        if (response[0].hasError()) {
+            throw new TestException(response[0].getErrorMessage());
+        }
         // This status must be checked after throwing OXException.
         assertEquals("check response status", 200, response[0].getStatus());
         return (Contact) response[0].getDataObject();

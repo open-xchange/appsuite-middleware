@@ -47,22 +47,26 @@
  *
  */
 
-package com.openexchange.webdav.xml.appointment;
+package com.openexchange.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 
+/**
+ * Test suite for all AJAX interface tests.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ConfirmTest.class,
-    DeleteTest.class,
-    ListTest.class,
-    NewTest.class,
-    UpdateTest.class,
-    AppointmentBugTestSuite.class,
-    RecurrenceTestSuite.class,
-
+// remove the following tests when interface has been removed (hopefully with 7.10)
+    com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.class,
+    com.openexchange.webdav.xml.contact.ContactWebdavSuite.class,
+    com.openexchange.webdav.xml.folder.FolderWebdavSuite.class,
+    com.openexchange.webdav.xml.task.TaskWebdavSuite.class,
+    com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.class,
+    com.openexchange.webdav.xml.GroupUserTest.class
 })
-public class AppointmentWebdavSuite {
+public final class SequentialInterfaceTests {
+
 }

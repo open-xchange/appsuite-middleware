@@ -66,6 +66,7 @@ public class DeleteTest extends AppointmentTest {
     public void testDeleteRecurrenceWithDatePosition() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
+        c.setTime(startTime);
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
@@ -104,6 +105,7 @@ public class DeleteTest extends AppointmentTest {
     public void testDeleteRecurrenceWithDeleteExceptions() throws Exception {
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
+        c.setTime(startTime);
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
