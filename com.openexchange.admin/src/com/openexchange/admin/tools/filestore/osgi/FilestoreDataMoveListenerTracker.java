@@ -50,7 +50,7 @@
 package com.openexchange.admin.tools.filestore.osgi;
 
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.tools.filestore.FilestoreDataMoveListener;
+import com.openexchange.filestore.FilestoreDataMoveListener;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 

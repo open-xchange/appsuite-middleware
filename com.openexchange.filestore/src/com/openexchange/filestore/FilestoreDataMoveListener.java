@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.tools.filestore;
+package com.openexchange.filestore;
 
 import java.net.URI;
 import com.openexchange.exception.OXException;

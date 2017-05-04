@@ -7,7 +7,6 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.cache;version="19.0.0",
  com.google.common.collect,
- com.openexchange.admin.tools.filestore,
  com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.config.cascade,
