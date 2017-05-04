@@ -62,7 +62,6 @@ import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.test.ContactTestManager;
 
@@ -95,15 +94,9 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
             /*
              * Find a valid contact
              */
-            final int objectId;
-            final int folderId = getPrivateContactFolder();
-            Contact[] contacts = cotm.allAction(folderId, new int[] { DataObject.OBJECT_ID });
-            if (0 == contacts.length) {
-                Contact contact = cotm.newAction(ContactTestManager.generateContact(folderId));
-                objectId = contact.getObjectID();
-            } else {
-                objectId = contacts[0].getObjectID();
-            }
+            int folderId = getPrivateContactFolder();
+            Contact contact = cotm.newAction(ContactTestManager.generateContact(folderId));
+            int objectId = contact.getObjectID();
 
             String[] mailFolderAndMailID = null;
             try {
