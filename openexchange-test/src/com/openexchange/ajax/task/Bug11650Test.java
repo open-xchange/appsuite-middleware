@@ -100,13 +100,7 @@ public class Bug11650Test extends AbstractTaskTest {
 
     @After
     public void tearDown() throws Exception {
-        //Return users to pool
-        if (null != owner) {
-            testContext.backUser(owner);
-        }
-        if (null != sharee) {
-            testContext.backUser(sharee);
-        }
+        // Context cleared, so need to back user
         super.tearDown();
     }
 
