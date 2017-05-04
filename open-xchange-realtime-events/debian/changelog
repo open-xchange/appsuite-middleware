@@ -1,3 +1,9 @@
+open-xchange-realtime-events (7.8.4-2) stable; urgency=medium
+
+  * Second preview of 7.8.4 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Thu, 04 May 2017 15:14:24 +0200
+
 open-xchange-realtime-events (7.8.4-1) stable; urgency=medium
 
   * First preview of 7.8.4 release
