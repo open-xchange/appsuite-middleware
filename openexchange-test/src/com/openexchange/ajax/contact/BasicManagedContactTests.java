@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -222,6 +219,8 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
 
     @Test
     public void testAllWithGBK() throws Exception {
+        cotm.newAction(ContactTestManager.generateContact(getClient().getValues().getPrivateContactFolder()));
+
         //{"action":"all","module":"contacts","columns":"20,1,5,2,602","folder":"66","collation":"gbk","sort":"502","order":"asc"}
         Contact[] allAction = cotm.allAction(getClient().getValues().getPrivateContactFolder(), new int[] { 20, 1, 5, 2, 602 }, 502, Order.ASCENDING, "gbk");
         assertTrue("Should find more than 0 contacts in the private contact folder", allAction.length > 0);

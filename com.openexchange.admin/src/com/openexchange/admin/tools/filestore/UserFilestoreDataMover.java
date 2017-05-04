@@ -73,6 +73,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FilestoreDataMoveListener;
 import com.openexchange.osgi.ServiceListing;
 
 /**

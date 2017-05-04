@@ -52,10 +52,7 @@ package com.openexchange.ajax.session;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.ChangeIPRequest;
 import com.openexchange.ajax.session.actions.ChangeIPResponse;
@@ -72,40 +69,19 @@ import com.openexchange.sessiond.SessionExceptionCodes;
  */
 public final class ChangeIPTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    public ChangeIPTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-        client = null;
-    } finally {
-        super.tearDown();
-    }
-    }
-
     @Test
     public void testIPChange() throws Throwable {
         String ipAdress = "192.168.123.321";
         final ChangeIPRequest request1 = new ChangeIPRequest(ipAdress, false);
-        final ChangeIPResponse response1 = client.execute(request1);
+        final ChangeIPResponse response1 = getClient().execute(request1);
         assertFalse("Change IP response contains an exception.", response1.hasError());
         assertTrue("Change IP response contains wrong data.", response1.hasCorrectResponse());
         final RefreshSecretRequest request2 = new RefreshSecretRequest(false);
-        final RefreshSecretResponse response2 = client.execute(request2);
+        final RefreshSecretResponse response2 = getClient().execute(request2);
         assertTrue("Refresh request should be denied because of wrong IP.", response2.hasError());
         final OXException e = response2.getException();
-        assertEquals("Wrong exception message.", SessionExceptionCodes.WRONG_CLIENT_IP.getPrefix(), e.getPrefix());
+        assertEquals("Wrong exception message.", SessionExceptionCodes.SESSION_EXPIRED.getPrefix(), e.getPrefix());
         assertEquals("Wrong exception message.", Category.CATEGORY_TRY_AGAIN, e.getCategory());
-        assertEquals("Wrong exception message.", SessionExceptionCodes.WRONG_CLIENT_IP.getNumber(), e.getCode());
+        assertEquals("Wrong exception message.", SessionExceptionCodes.SESSION_EXPIRED.getNumber(), e.getCode());
     }
 }

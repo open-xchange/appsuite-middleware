@@ -57,9 +57,9 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.jslob.actions.SetRequest;
-import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -75,31 +75,33 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
  */
 public class UseCountTest extends ContactTest {
 
-    private MailTestManager mtm;
     private String address;
     private int folderId;
+    private AJAXClient client;
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        FolderObject folder = ftm.generatePrivateFolder("useCountTest" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        client = getClient();
+
+        FolderObject folder = ftm.generatePrivateFolder("useCountTest" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderId = folder.getObjectID();
         Contact c1 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
-        c1.setEmail1("useCount1@ox.invalid");
+        c1.setEmail1(modifyMailAddress(client.getValues().getDefaultAddress()));
         c1 = cotm.newAction(c1);
         Contact c2 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
-        c2.setEmail1("useCount2@ox.invalid");
+        c2.setEmail1(modifyMailAddress(client.getValues().getDefaultAddress()));
         c2 = cotm.newAction(c2);
 
         SetRequest req = new SetRequest("io.ox/mail", "{\"contactCollectOnMailTransport\": true}", true);
-        getClient().execute(req);
+        client.execute(req);
 
-        mtm = new MailTestManager(getClient());
         address = c2.getEmail1();
-        mtm.send(new TestMail(getClient().getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
+        // If an exception occurred while sending the mail might be null 
+        assertNotNull("Mail could not be send", mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test")));
     }
 
     @Override
@@ -119,7 +121,7 @@ public class UseCountTest extends ContactTest {
         Contact firstResult = null;
         CommonSearchResponse response;
         do {
-            response = getClient().execute(request);
+            response = client.execute(request);
             assertFalse(response.getErrorMessage(), response.hasError());
             JSONArray jsonArray = (JSONArray) response.getData();
             assertNotNull(jsonArray);
@@ -133,5 +135,26 @@ public class UseCountTest extends ContactTest {
         } while (System.currentTimeMillis() < until);
         assertEquals(address, firstResult.getEmail1());
     }
+    
+    /**
+     * Modify given mail address to create new unique address
+     * 
+     * @param mailAdress The original mail address
+     * @return unique mail address
+     */
+    private String modifyMailAddress(String mailAddress) {
+        StringBuilder sb = new StringBuilder();
+        int at;
 
+        // Check if given mail address is 'valid'  
+        if ((at = mailAddress.indexOf("@")) < 0) {
+            return mailAddress;
+        }
+
+        // Generate random address
+        sb.append(UUID.randomUUID().toString().replaceAll("-", ""));
+        sb.append(mailAddress.substring(at));
+
+        return sb.toString();
+    }
 }

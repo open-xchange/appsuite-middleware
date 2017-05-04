@@ -381,6 +381,7 @@ public class TaskTestManager implements TestManager {
             }
 
         }
+        createdEntities = new ConcurrentLinkedList<Task>();
     }
 
     /**

@@ -108,9 +108,9 @@ public class Bug33697Test extends AbstractAppointmentTest {
         userValuesY = clientY.getValues();
         userValuesZ = clientZ.getValues();
 
-        bug33697SubfolderX = createCalendarSubFolder(clientX, "Bug33697SubfolderX", createOwnerPermission(userValuesX.getUserId()), createAuthorPermission(userValuesY.getUserId()));
-        bug33697SubfolderY = createCalendarSubFolder(clientY, "Bug33697SubfolderY", createOwnerPermission(userValuesY.getUserId()));
-        bug33697SubfolderZ = createCalendarSubFolder(clientZ, "Bug33697SubfolderZ", createOwnerPermission(userValuesZ.getUserId()), createAuthorPermission(userValuesY.getUserId()));
+        bug33697SubfolderX = createCalendarSubFolder(clientX, "Bug33697SubfolderX " + System.currentTimeMillis(), createOwnerPermission(userValuesX.getUserId()), createAuthorPermission(userValuesY.getUserId()));
+        bug33697SubfolderY = createCalendarSubFolder(clientY, "Bug33697SubfolderY " + System.currentTimeMillis(), createOwnerPermission(userValuesY.getUserId()));
+        bug33697SubfolderZ = createCalendarSubFolder(clientZ, "Bug33697SubfolderZ " + System.currentTimeMillis(), createOwnerPermission(userValuesZ.getUserId()), createAuthorPermission(userValuesY.getUserId()));
 
         AppointmentRange dateRange = appointmentRangeGenerator.getDateRange();
         bug33697Appointment = createSingle(dateRange.startDate, dateRange.endDate, "Bug33697Appointment");

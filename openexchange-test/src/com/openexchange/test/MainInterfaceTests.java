@@ -85,7 +85,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.publish.PublishTestSuite.class,
     com.openexchange.ajax.subscribe.SubscribeTestSuite.class,
     com.openexchange.ajax.user.UserAJAXSuite.class,
-    com.openexchange.subscribe.google.GoogleTestSuite.class,
     // TODO: enable when MSLiveOAuthClient is implemented
     // com.openexchange.subscribe.mslive.MSLiveTestSuite.class,
     
