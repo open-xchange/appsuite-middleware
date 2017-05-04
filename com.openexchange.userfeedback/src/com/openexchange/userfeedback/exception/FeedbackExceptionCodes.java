@@ -113,6 +113,11 @@ public enum FeedbackExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_PGP_CONFIGURATION("Provided PGP configuration is invalid, unable to sign mail.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 10),
 
+    /**
+     * No mail address with valid PGP public key, unable to send PGP-encrypted mail.
+     */
+    INVALID_EMAIL_ADDRESSES_PGP("No mail address with valid PGP public key found, unable to send PGP-encrypted mail.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 11),
+
     ;
 
     /**

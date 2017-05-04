@@ -168,6 +168,10 @@ public class SendUserFeedbackService extends AbstractUserFeedbackService {
                 ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
                 builder.entity(errorJson);
                 return builder.build();
+            } else if (FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES_PGP.equals(e)) {
+                ResponseBuilder builder = Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON);
+                builder.entity(errorJson);
+                return builder.build();
             } else if (FeedbackExceptionCodes.INVALID_SMTP_CONFIGURATION.equals(e)) {
                 LOG.error(DEFAULT_CONFIG_ERROR_MESSAGE, e);
                 ResponseBuilder builder = Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON);

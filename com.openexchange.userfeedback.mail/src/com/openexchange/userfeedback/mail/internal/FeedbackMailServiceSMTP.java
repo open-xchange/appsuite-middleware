@@ -147,6 +147,9 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
             recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
             if (recipients.length == 0 && (null == pgpRecipients || pgpRecipients.size() == 0)) {
+                if (null != pgpFailedAddresses && pgpFailedAddresses.size() > 0) {
+                    throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES_PGP.create();
+                }
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
             }
             mail.addRecipients(RecipientType.TO, recipients);
