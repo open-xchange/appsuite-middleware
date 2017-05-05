@@ -60,7 +60,6 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -75,9 +74,7 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug42775Test extends AbstractAJAXSession {
 
-    private AJAXClient client2;
-    private CalendarTestManager ctm1;
-    private CalendarTestManager ctm2;
+    private CalendarTestManager catm2;
     private String origtz1;
     private String origtz2;
     private Appointment appointment;
@@ -89,11 +86,9 @@ public class Bug42775Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
-        ctm1 = new CalendarTestManager(getClient());
-        ctm1.setFailOnError(true);
-        ctm2 = new CalendarTestManager(client2);
-        ctm2.setFailOnError(true);
+        catm.setFailOnError(true);
+        catm2 = new CalendarTestManager(getClient2());
+        catm2.setFailOnError(true);
 
         GetRequest getRequest = new GetRequest(Tree.TimeZone);
         GetResponse getResponse = getClient().execute(getRequest);
@@ -104,10 +99,10 @@ public class Bug42775Test extends AbstractAJAXSession {
 
         SetRequest setRequest = new SetRequest(Tree.TimeZone, "Europe/Berlin");
         getClient().execute(setRequest);
-        ctm1.setTimezone(TimeZone.getTimeZone("Europe/Berlin"));
+        catm.setTimezone(TimeZone.getTimeZone("Europe/Berlin"));
         setRequest = new SetRequest(Tree.TimeZone, "US/Pacific-New");
-        client2.execute(setRequest);
-        ctm2.setTimezone(TimeZone.getTimeZone("US/Pacific-New"));
+        getClient2().execute(setRequest);
+        catm2.setTimezone(TimeZone.getTimeZone("US/Pacific-New"));
 
         appointment = new Appointment();
         appointment.setTitle("Bug 42775 Test");
@@ -118,9 +113,9 @@ public class Bug42775Test extends AbstractAJAXSession {
         appointment.setDays(Appointment.THURSDAY);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        appointment.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        appointment.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(getClient2().getValues().getUserId()) });
 
-        ctm1.insert(appointment);
+        catm.insert(appointment);
     }
 
     @Test
@@ -128,11 +123,11 @@ public class Bug42775Test extends AbstractAJAXSession {
         Appointment update = new Appointment();
         update.setObjectID(appointment.getObjectID());
         update.setLastModified(new Date(Long.MAX_VALUE));
-        update.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        update.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         update.setAlarm(15);
-        ctm2.update(update);
+        catm2.update(update);
 
-        Appointment loaded = ctm1.get(getClient().getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
+        Appointment loaded = catm.get(getClient().getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         assertEquals("Wrong start date.", appointment.getStartDate(), loaded.getStartDate());
         assertEquals("Wrong end date.", appointment.getEndDate(), loaded.getEndDate());
     }
@@ -143,9 +138,8 @@ public class Bug42775Test extends AbstractAJAXSession {
             SetRequest setRequest = new SetRequest(Tree.TimeZone, origtz1);
             getClient().execute(setRequest);
             setRequest = new SetRequest(Tree.TimeZone, origtz2);
-            client2.execute(setRequest);
-            ctm1.cleanUp();
-            ctm2.cleanUp();
+            getClient2().execute(setRequest);
+            catm2.cleanUp();
         } finally {
             super.tearDown();
         }

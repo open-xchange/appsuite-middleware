@@ -5,38 +5,24 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
-import org.junit.After;
-import org.junit.Before;
+import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.FolderTestManager;
 
 public class ChangePermissionsTest extends AbstractAJAXSession {
 
-    private AJAXClient client2;
     private FolderObject folder;
-    private FolderObject secondFolder;
-    private FolderTestManager ftm1;
-    private FolderTestManager ftm2;
-    private String folderName;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        folderName = "ChangePermissionsTest Folder" + System.currentTimeMillis();
-        client2 = new AJAXClient(testContext.acquireUser());
-        ftm1 = new FolderTestManager(getClient());
-    }
+    
 
     public void notestChangePermissionsSuccess() throws Exception {
-        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), new int[] { getClient().getValues().getUserId() });
+        String folderName = "ChangePermissionsTest Folder" + UUID.randomUUID().toString().replaceAll("-", "");
+        folder = ftm.generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), new int[] { getClient().getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
         final InsertResponse insertFolderResp = getClient().execute(insertFolderReq);
 
@@ -55,7 +41,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
             }
             {
                 OCLPermission permissions = new OCLPermission();
-                permissions.setEntity(client2.getValues().getUserId());
+                permissions.setEntity(getClient2().getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(false);
                 permissions.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
@@ -64,13 +50,14 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
             folder.setPermissions(allPermissions);
         }
 
-        folder = ftm1.updateFolderOnServer(folder);
+        folder = ftm.updateFolderOnServer(folder);
         assertTrue("Unexpected number of permissions", 2 == folder.getNonSystemPermissionsAsArray().length);
     }
 
     @Test
     public void testChangePermissionsFail() throws Exception {
-        folder = ftm1.generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getInfostoreTrashFolder(), new int[] { getClient().getValues().getUserId() });
+        String folderName = "ChangePermissionsTest Folder" + UUID.randomUUID().toString().replaceAll("-", "");
+        folder = ftm.generatePublicFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getInfostoreTrashFolder(), new int[] { getClient().getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
         final InsertResponse insertFolderResp = getClient().execute(insertFolderReq);
 
@@ -89,7 +76,7 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
             }
             {
                 OCLPermission permissions = new OCLPermission();
-                permissions.setEntity(client2.getValues().getUserId());
+                permissions.setEntity(getClient2().getValues().getUserId());
                 permissions.setGroupPermission(false);
                 permissions.setFolderAdmin(false);
                 permissions.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
@@ -98,19 +85,8 @@ public class ChangePermissionsTest extends AbstractAJAXSession {
             folder.setPermissions(allPermissions);
         }
 
-        folder = ftm1.updateFolderOnServer(folder, false);
-        AbstractAJAXResponse lastResponse = ftm1.getLastResponse();
+        folder = ftm.updateFolderOnServer(folder, false);
+        AbstractAJAXResponse lastResponse = ftm.getLastResponse();
         assertNotNull("Updating trash folder permissions not denied, but should.", lastResponse.getException());
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ftm1.deleteFolderOnServer(folder);
-            client2.logout();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

@@ -96,7 +96,7 @@ public class Bug24502Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        clientA = getClient();
+        clientA = new AJAXClient(testContext.acquireUser());
         clientB = new AJAXClient(testContext.acquireUser());
         clientC = new AJAXClient(testContext.acquireUser());
 

@@ -54,8 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -71,7 +69,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug6825Test}
@@ -80,27 +77,8 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug6825Test extends AbstractAJAXSession {
 
-    private FolderTestManager folderTestManager;
-
     public Bug6825Test() {
         super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        folderTestManager = new FolderTestManager(getClient());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != folderTestManager) {
-                folderTestManager.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -108,8 +86,8 @@ public class Bug6825Test extends AbstractAJAXSession {
         /*
          * import vCard with too long field values
          */
-        FolderObject folder = folderTestManager.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        folder = folderTestManager.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CONTACTS.getFolderConstant(), getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         String originalSurname = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz00000000001111111111222222222233333333334444444444455555555556666666666777777777788888888889999999999";
         String expectedSurname = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmm";
         String vCard = "BEGIN:VCARD\nVERSION:3.0\n\nN:" + originalSurname + ";givenName;;;\nEND:VCARD\n";
@@ -131,8 +109,8 @@ public class Bug6825Test extends AbstractAJAXSession {
         /*
          * import iCal with too long fiel values
          */
-        FolderObject folder = folderTestManager.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
-        folder = folderTestManager.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePrivateFolder(UUIDs.getUnformattedStringFromRandom(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         String testMailAddress = "test@example.com";
         String originalTitle = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
         String expectedTitle = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen";

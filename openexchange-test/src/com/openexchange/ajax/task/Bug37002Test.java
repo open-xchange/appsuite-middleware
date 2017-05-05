@@ -88,7 +88,7 @@ public class Bug37002Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
         Participant participant = new UserParticipant(client2.getValues().getUserId());
 
         timeZone = getClient().getValues().getTimeZone();

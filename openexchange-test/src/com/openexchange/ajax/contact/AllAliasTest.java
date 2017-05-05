@@ -66,8 +66,6 @@ import com.openexchange.ajax.framework.CommonAllResponse;
  */
 public class AllAliasTest extends ContactTest {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link AllAliasTest}.
      *
@@ -77,14 +75,10 @@ public class AllAliasTest extends ContactTest {
         super();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = new AJAXClient(testUser);
-    }
 
     @Test
     public void testAllAlias() throws Exception {
+        AJAXClient client = getClient();
         final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateContactFolder(), "all");
         final CommonAllResponse allAliasResponse = client.execute(allAliasRequest);
         final Object[][] aliasContacts = allAliasResponse.getArray();
