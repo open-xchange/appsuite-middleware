@@ -75,7 +75,6 @@ import com.openexchange.test.CalendarTestManager;
 public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
 
     private String origTimeZone;
-    private CalendarTestManager ctm;
     private Appointment appointment;
     private TimeZone tz;
 
@@ -99,8 +98,7 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         SetRequest setRequest = new SetRequest(Tree.TimeZone, tz.getID());
         getClient().execute(setRequest);
 
-        ctm = new CalendarTestManager(getClient());
-        ctm.setTimezone(tz);
+        catm.setTimezone(tz);
         appointment = new Appointment();
         appointment.setTitle("hiliowequhe234123.3");
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -115,9 +113,9 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         appointment.setStartDate(D("06.01.2015 15:30", tz));
         appointment.setEndDate(D("06.01.2015 16:30", tz));
         appointment.setTimezone(tz.getID());
-        ctm.insert(appointment);
+        catm.insert(appointment);
 
-        Appointment loaded = ctm.get(appointment.getParentFolderID(), appointment.getObjectID());
+        Appointment loaded = catm.get(appointment.getParentFolderID(), appointment.getObjectID());
         assertEquals("Wrong start date.", D("06.01.2015 15:30", tz), loaded.getStartDate());
         assertEquals("Wrong end date.", D("06.01.2015 16:30", tz), loaded.getEndDate());
     }
@@ -125,12 +123,10 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm.cleanUp();
             SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
             getClient().execute(setRequest);
         } finally {
             super.tearDown();
         }
     }
-
 }

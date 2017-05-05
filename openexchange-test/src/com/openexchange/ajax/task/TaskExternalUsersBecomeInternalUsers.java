@@ -18,7 +18,7 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         int user2id = client2.getValues().getUserId();
         GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();
@@ -84,7 +84,7 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         int user2id = client2.getValues().getUserId();
         GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();
