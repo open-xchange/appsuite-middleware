@@ -994,15 +994,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final boolean restoreConstraints = disableForeignKeyChecks(con);
         PreparedStatement stmt = null;
         try {
-            // A POP3 account?
-            final String pop3Path = getPOP3Path(id, userId, contextId, con);
-            if (null != pop3Path) {
-                try {
-                    cleanseFromPrimary(pop3Path, userId, contextId);
-                } catch (final OXException e) {
-                    LOG.warn("Couldn't delete POP3 backup folders in primary mail account", e);
-                }
-            }
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
             registry.triggerOnBeforeDeletion(id, properties, userId, contextId, con);
             // First delete properties
@@ -1080,22 +1071,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-        }
-    }
-
-    private static void cleanseFromPrimary(final String path, final int userId, final int contextId) throws OXException {
-        if (isEmpty(path)) {
-            return;
-        }
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
-        try {
-            defaultMailAccess = MailAccess.getInstance(userId, contextId);
-            defaultMailAccess.connect(false);
-            defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-        } finally {
-            if (null != defaultMailAccess) {
-                defaultMailAccess.close(false);
-            }
         }
     }
 

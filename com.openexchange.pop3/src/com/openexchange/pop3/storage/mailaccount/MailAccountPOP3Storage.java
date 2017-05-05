@@ -281,7 +281,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e) || (e.getCode()==MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() && e.getPrefix().equals("IMAP"))) {
                         // Ignore
                         LOG.trace("", e);
                     } else {
