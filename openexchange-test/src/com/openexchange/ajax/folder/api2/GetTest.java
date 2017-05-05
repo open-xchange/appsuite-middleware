@@ -52,12 +52,10 @@ package com.openexchange.ajax.folder.api2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -68,28 +66,11 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class GetTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    /**
-     * Initializes a new {@link GetTest}.
-     *
-     * @param name name of the test.
-     */
-    public GetTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
     @Test
     public void testGetRoot() throws Throwable {
         // Get root folder
         final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), true);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
 
@@ -100,7 +81,7 @@ public class GetTest extends AbstractAJAXSession {
     public void testGetPrivate() throws Throwable {
         // Get private folder
         final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), true);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
 
@@ -112,7 +93,7 @@ public class GetTest extends AbstractAJAXSession {
     public void testGetPublic() throws Throwable {
         // Get public folder
         final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), true);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
 
@@ -124,7 +105,7 @@ public class GetTest extends AbstractAJAXSession {
     public void testGetShared() throws Throwable {
         // Get shared folder
         final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), true);
-        final GetResponse response = client.execute(request);
+        final GetResponse response = getClient().execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
 

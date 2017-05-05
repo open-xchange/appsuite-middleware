@@ -94,7 +94,7 @@ public class ListTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
     }
 
     @Test

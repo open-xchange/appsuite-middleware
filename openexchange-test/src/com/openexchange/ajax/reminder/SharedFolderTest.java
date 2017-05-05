@@ -110,7 +110,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
         client = getClient();
         tz = client.getValues().getTimeZone();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
         tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder
@@ -223,7 +223,6 @@ public class SharedFolderTest extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         try {
             client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
-            client2.logout();
         } finally {
             super.tearDown();
         }
