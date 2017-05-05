@@ -176,13 +176,13 @@ public class RoundtripTest extends AbstractRMITest {
         dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
 
         ui = getUserInterface();
-        final User test = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
-        test.setImapServer("devel-mail.netline.de");
-        test.setImapLogin("steffen.templin424242669");
-        test.setSmtpServer("devel-mail.netline.de");
-        srcUser = ui.create(srcCtx, test, getCredentials());
+        User tmpUser = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+        tmpUser.setImapServer("example.com");
+        tmpUser.setImapLogin("oxuser");
+        tmpUser.setSmtpServer("example.com");
+        srcUser = ui.create(srcCtx, tmpUser, getCredentials());
 
-        userSession = performLogin("user@" + srcCtx.getName(), "secret");
+        userSession = performLogin(tmpUser.getName() + "@" + srcCtx.getName(), "secret");
         userClient = new AJAXClient(userSession, false);
 
         Create.createPrivateFolder("Private folder test", Types.APPOINTMENT, userClient.getValues().getUserId());
