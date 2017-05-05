@@ -68,9 +68,9 @@ import com.openexchange.test.fixtures.ajax.FixtureLoaderFactory;
 public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
 
     private final String dirName;
-    private final Class aClass;
+    private final Class<?> aClass;
 
-    public AbstractDirectoryRunner(String name, String dirName, Class aClass) {
+    public AbstractDirectoryRunner(String name, String dirName, Class<?> aClass) {
         super();
         this.dirName = dirName;
         this.aClass = aClass;

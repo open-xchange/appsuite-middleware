@@ -54,12 +54,9 @@ import java.util.List;
 import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link AbstractInfostoreThirdpartyTest}
@@ -77,23 +74,6 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
         super();
     }
 
-    public FolderTestManager fMgr;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        fMgr = new FolderTestManager(getClient());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            fMgr.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
     /**
      * Gets all infostore ids of the connected thirdparty filestores
      *
@@ -108,7 +88,7 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
 
         String folderId = null;
 
-        FolderObject[] fObjs = fMgr.listFoldersOnServer(1, columns);
+        FolderObject[] fObjs = ftm.listFoldersOnServer(1, columns);
         for (FolderObject fObj : fObjs) {
             if (fObj.getFullName() != null) {
                 for (OAuthService authProvider : OAuthService.values()) {

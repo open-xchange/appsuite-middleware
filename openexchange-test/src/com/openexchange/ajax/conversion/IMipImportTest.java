@@ -105,7 +105,7 @@ public class IMipImportTest extends AbstractConversionTest {
         super.setUp();
 
         client1 = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
 
         uuid = UUID.randomUUID().toString();
 

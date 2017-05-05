@@ -19,9 +19,6 @@ import com.openexchange.test.OXTestToolkit;
  */
 public class Bug4409Test extends AbstractContactTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4409Test.class);
-    private int objectId = -1;
-
     @Test
     public void testBug4409() throws Exception {
         /*
