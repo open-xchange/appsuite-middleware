@@ -11,17 +11,12 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug6535Test extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6535Test.class);
-
-    public Bug6535Test() {
-        super();
-    }
-
     @Test
     public void testBug6535() throws Exception {
         final TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 
         final Calendar calendar = Calendar.getInstance(timeZoneUTC);
+        calendar.setTime(startTime);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);

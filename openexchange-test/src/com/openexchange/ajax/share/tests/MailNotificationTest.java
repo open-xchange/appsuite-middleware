@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -308,6 +306,8 @@ public class MailNotificationTest extends ShareTest {
                 public void customize(UpdateInfostoreRequest request) {
                     if (notify) {
                         request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    } else {
+                        request.setNotifyPermissionEntities(null);
                     }
                 }
             });
@@ -324,6 +324,8 @@ public class MailNotificationTest extends ShareTest {
                 public void customize(UpdateRequest request) {
                     if (notify) {
                         request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    } else {
+                        request.setNotifyPermissionEntities(null);
                     }
                 }
             });

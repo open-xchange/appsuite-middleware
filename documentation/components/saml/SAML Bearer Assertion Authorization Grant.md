@@ -3,7 +3,7 @@ Title: SAML Bearer Assertion Authorization Grant
 ---
 
 With version 7.8.4 the middleware supports OAuth authentication for the primary mail account via SAML Bearer Assertion Authorization Grant.
-This document describes how to configure the middleware to use an rfc6749 compliant token endpoint to gain oauth token pair.
+This document describes how to configure the middleware to use an rfc6749 compliant token endpoint to gain oauth token pairs.
 Furthermore this document describes how to extend a custom SAML implementation to support OAuth authentication.
 
 
@@ -25,6 +25,9 @@ com.openexchange.saml.oauth.token = <the token endpoint url>
 com.openexchange.saml.oauth.clientId = <the client id>
 com.openexchange.saml.oauth.clientSecret = <the client secret>
 ```
+
+For more informations about the properties see [mail configuration](https://documentation.open-xchange.com/components/middleware/config/develop/index.html#mode=features&feature=Mail) 
+and [saml configuration](https://documentation.open-xchange.com/components/middleware/config/develop/index.html#mode=features&feature=Saml).
 
 Once configured the flow is the following:
 

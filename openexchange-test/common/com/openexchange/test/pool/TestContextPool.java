@@ -107,7 +107,7 @@ public class TestContextPool {
             Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
             context.setAcquiredBy(acquiredBy);
             contextWatcher.get().contextInUse(context);
-            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
+            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy);
             return context;
         } catch (InterruptedException e) {
             // should not happen

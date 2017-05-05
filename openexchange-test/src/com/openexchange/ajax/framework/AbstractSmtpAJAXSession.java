@@ -87,9 +87,10 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         try {
-            List<TestUser> copyOfAll = testContext.getCopyOfAll();
-            for (TestUser user : copyOfAll) {
-                new AJAXClient(user).logout();
+            if (noReplyClient != null) {
+                // Client can be null if setUp() fails
+                noReplyClient.logout();
+                noReplyClient = null;
             }
         } catch (Exception e) {
             LoggerFactory.getLogger(AbstractSmtpAJAXSession.class).error("Unable to correctly tear down test setup.", e);

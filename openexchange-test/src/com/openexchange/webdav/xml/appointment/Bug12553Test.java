@@ -18,12 +18,6 @@ import com.openexchange.webdav.xml.AppointmentTest;
  */
 public class Bug12553Test extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug12553Test.class);
-
-    public Bug12553Test() {
-        super();
-    }
-
     @Test
     public void testBug12553() throws Exception {
         int objectId = -1;
@@ -31,6 +25,7 @@ public class Bug12553Test extends AppointmentTest {
             final TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 
             final Calendar calendar = Calendar.getInstance(timeZoneUTC);
+            calendar.setTime(startTime);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
@@ -39,9 +34,7 @@ public class Bug12553Test extends AppointmentTest {
             calendar.add(Calendar.DAY_OF_MONTH, 2);
 
             final Date recurrenceDatePosition = calendar.getTime();
-
             calendar.add(Calendar.DAY_OF_MONTH, 3);
-
             final Date until = calendar.getTime();
 
             /*

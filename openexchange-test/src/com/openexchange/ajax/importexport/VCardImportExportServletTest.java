@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.UUID;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -77,7 +76,6 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
     private int folderId;
 
     @Override
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         FolderObject folder = ftm.insertFolderOnServer(ftm.generatePrivateFolder("vcard-contact-roundtrip-" + UUID.randomUUID().toString(),

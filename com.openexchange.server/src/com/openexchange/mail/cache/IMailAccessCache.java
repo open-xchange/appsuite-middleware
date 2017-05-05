@@ -93,10 +93,11 @@ public interface IMailAccessCache {
     /**
      * Clears the cache entries kept for specified user.
      *
-     * @param session The session
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws OXException If clearing user entries fails
      */
-    public void clearUserEntries(final Session session) throws OXException;
+    public void clearUserEntries(int userId, int contextId) throws OXException;
 
     /**
      * Gets the number of cached, user-bound mail accesses for specified account.

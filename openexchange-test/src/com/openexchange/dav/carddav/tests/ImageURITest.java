@@ -159,7 +159,14 @@ public class ImageURITest extends CardDAVTest {
          */
         String uid = randomUID();
         String href = "/carddav/Contacts/" + uid + ".vcf";
-        VCardResource vCard = new VCardResource("BEGIN:VCARD" + "\r\n" + "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" + "VERSION:3.0" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + formatAsUTC(new Date()) + "\r\n" + "END:VCARD" + "\r\n", href, null);
+        VCardResource vCard = new VCardResource(
+            "BEGIN:VCARD" + "\r\n" +
+            "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" +
+            "VERSION:3.0" + "\r\n" +
+            "UID:" + uid + "\r\n" +
+            "REV:" + formatAsUTC(new Date()) + "\r\n" +
+            "END:VCARD" + "\r\n", href, null)
+        ;
         PhotoType photo = new PhotoType();
         photo.setImageMediaType(ImageMediaType.PNG);
         photo.setEncodingType(EncodingType.BINARY);

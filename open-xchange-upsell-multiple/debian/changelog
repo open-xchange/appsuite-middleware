@@ -1,3 +1,9 @@
+open-xchange-upsell-multiple (7.8.4-2) stable; urgency=medium
+
+  * Second preview of 7.8.4 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 04 May 2017 15:14:39 +0200
+
 open-xchange-upsell-multiple (7.8.4-1) stable; urgency=medium
 
   * First preview of 7.8.4 release

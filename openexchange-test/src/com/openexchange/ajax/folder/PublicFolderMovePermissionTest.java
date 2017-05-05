@@ -85,7 +85,7 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(testUser2);
+        client2 = getClient2();
 
         permission = new OCLPermission();
         permission.setEntity(client2.getValues().getUserId());
@@ -198,6 +198,15 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
                 return true;
             }
         }
+        // Debug logging
+        System.out.println("PublicFolderMovePermissionTest start");
+        System.out.println("Parent permissions:");
+        for (OCLPermission p2 : parent) {
+            System.out.println(p2);
+        }
+        System.out.println("Permission:");
+        System.out.println(p);
+        System.out.println("PublicFolderMovePermissionTest end");
         return false;
     }
 

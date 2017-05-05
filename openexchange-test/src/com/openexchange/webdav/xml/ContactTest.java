@@ -370,16 +370,14 @@ public class ContactTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
 
         assertEquals("check response", 1, response.length);
-
         if (response[0].hasError()) {
             throw new TestException(response[0].getErrorMessage());
-        } else {
-            contactObj = (Contact) response[0].getDataObject();
-            objectId = contactObj.getObjectID();
-
-            assertNotNull("last modified is null", contactObj.getLastModified());
-            assertTrue("last modified is not > 0", contactObj.getLastModified().getTime() > 0);
         }
+        contactObj = (Contact) response[0].getDataObject();
+        objectId = contactObj.getObjectID();
+
+        assertNotNull("last modified is null", contactObj.getLastModified());
+        assertTrue("last modified is not > 0", contactObj.getLastModified().getTime() > 0);
 
         assertEquals("check response status", 200, response[0].getStatus());
     }

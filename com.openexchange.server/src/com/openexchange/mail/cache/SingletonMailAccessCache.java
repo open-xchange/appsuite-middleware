@@ -234,22 +234,12 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         return (timeoutMap.get(getUserKey(session.getUserId(), accountId, session.getContextId())) != null);
     }
 
-    /**
-     * Clears the cache entries kept for specified user.
-     *
-     * @param session The session
-     * @throws OXException If clearing user entries fails
-     */
     @Override
-    public void clearUserEntries(final Session session) throws OXException {
-        final int user = session.getUserId();
-        final int cid = session.getContextId();
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-            MailAccountStorageService.class,
-            true);
-        final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+    public void clearUserEntries(int userId, int contextId) throws OXException {
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId);
         for (final MailAccount mailAccount : accounts) {
-            timeoutMap.timeout(getUserKey(user, mailAccount.getId(), cid));
+            timeoutMap.timeout(getUserKey(userId, mailAccount.getId(), contextId));
         }
     }
 
@@ -260,28 +250,22 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     private static final class Key {
 
         private final int user;
-
         private final int cid;
-
         private final int accountId;
-
         private final int hash;
 
-        public Key(final int user, final int cid, final int accountId) {
+        Key(final int user, final int cid, final int accountId) {
             super();
             this.user = user;
             this.cid = cid;
             this.accountId = accountId;
-            hash = hashCode0();
-        }
 
-        private int hashCode0() {
-            final int prime = 31;
+            int prime = 31;
             int result = 1;
             result = prime * result + accountId;
             result = prime * result + cid;
             result = prime * result + user;
-            return result;
+            hash = result;
         }
 
         @Override

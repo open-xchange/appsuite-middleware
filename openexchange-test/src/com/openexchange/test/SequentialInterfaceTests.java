@@ -47,55 +47,26 @@
  *
  */
 
-package com.openexchange.grizzly;
+package com.openexchange.test;
 
-import static org.junit.Assert.assertEquals;
-import java.util.Map;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.simple.AbstractSimpleClientTest;
-import com.openexchange.ajax.simple.SimpleResponse;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * {@link ProcessingTest} - Simple test that exceeds the default apache timeout of 100s and thus triggers the http processing ping
+ * Test suite for all AJAX interface tests.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ProcessingTest extends AbstractSimpleClientTest {
-
-    private final int TIMEOUT = 120;
-    private JSONObject simplePayload;
-    private final String key1 = "a";
-    private final int value1 = 1;
-    private final String key2 = "b";
-    private final int value2 = 2;
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @Before
-    public void setUp() throws Exception {
-        simplePayload = new JSONObject();
-        simplePayload.put(key1, value1);
-        simplePayload.put(key2, value2);
-    }
-
-    /**
-     * Tests that the connection isn't closed by apache and we receive bac the payload we initially provided.
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void testSimpleProcessing() throws Exception {
-        as(USER1);
-        SimpleResponse response = callGeneral("grizzlytest", "processing", "timeout", TIMEOUT, "payload", simplePayload);
-        Map<String, Object> objectData = response.getObjectData();
-        Map<String, Object> payloadData = (Map<String, Object>) objectData.get("payload");
-        Object responseValue1 = payloadData.get(key1);
-        Object responseValue2 = payloadData.get(key2);
-        assertEquals(responseValue1, value1);
-        assertEquals(responseValue2, value2);
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+// remove the following tests when interface has been removed (hopefully with 7.10)
+    com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.class,
+    com.openexchange.webdav.xml.contact.ContactWebdavSuite.class,
+    com.openexchange.webdav.xml.folder.FolderWebdavSuite.class,
+    com.openexchange.webdav.xml.task.TaskWebdavSuite.class,
+    com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.class,
+    com.openexchange.webdav.xml.GroupUserTest.class
+})
+public final class SequentialInterfaceTests {
 
 }

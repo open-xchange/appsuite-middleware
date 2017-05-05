@@ -64,10 +64,6 @@ import com.openexchange.webdav.xml.AppointmentTest;
  */
 public class Bug13260Test extends AppointmentTest {
 
-    public Bug13260Test() {
-        super();
-    }
-
     @Test
     public void testBugAsWritten() throws Exception {
         test(true, false);

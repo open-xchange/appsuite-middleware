@@ -55,6 +55,7 @@ import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.FormElement;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
@@ -206,6 +207,13 @@ public class JsoupParser {
 
         private static final Map<Class<?>, Invoker> CALLS = ImmutableMap.<Class<?>, Invoker> builder()
             .put(Element.class, new Invoker() {
+
+                @Override
+                public void invoke(Node node, JsoupHandler handler) {
+                    handler.handleElementStart((Element) node);
+                }
+            })
+            .put(FormElement.class, new Invoker() {
 
                 @Override
                 public void invoke(Node node, JsoupHandler handler) {

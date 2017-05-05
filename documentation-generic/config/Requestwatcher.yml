@@ -24,7 +24,7 @@ properties:
     tags: ["Requestwatcher"] 
   - key: com.openexchange.requestwatcher.maxRequestAge
     description: |
-      Define the requestwatcher's frequency in milliseconds.
+      Define the maximum allowed age of requests in milliseconds.
     defaultValue: 60000
     version: 
     reloadable: false

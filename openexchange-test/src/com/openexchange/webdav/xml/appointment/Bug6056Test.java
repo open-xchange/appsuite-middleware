@@ -12,12 +12,6 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug6056Test extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6056Test.class);
-
-    public Bug6056Test() {
-        super();
-    }
-
     @Test
     public void testBug6065() throws Exception {
         final FolderObject folderObj = new FolderObject();
@@ -46,7 +40,7 @@ public class Bug6056Test extends AppointmentTest {
         deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword(), context);
 
         boolean found = false;
-        final Appointment[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), newFolderId, lastModified, false, true, getHostName(), getLogin(), getPassword(), context);
+        final Appointment[] appointmentArray = listAppointment(getWebConversation(), newFolderId, lastModified, false, true, getHostName(), getLogin(), getPassword(), context);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 found = true;
