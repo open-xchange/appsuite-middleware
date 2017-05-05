@@ -55,9 +55,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.After;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -85,29 +83,31 @@ public class AdminListTest extends AbstractMailFilterTest {
     private int rid = -1;
     private AJAXClient adminClient;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         adminClient = new AJAXClient(admin);
-        Context ctx = new Context(testContext.getId(), admin.getContext());
+        Context ctx = new Context(getClient().getValues().getContextId());
         ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
 
-        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
+        TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+        Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
         OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
         ctxInterface.change(ctx, credentials);
 
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
         Set<String> cap = new HashSet<String>(1);
         cap.add("webmail");
+        Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         Set<String> emptySet = Collections.emptySet();
-        usrInterface.changeCapabilities(new Context(testContext.getId()), user, cap, emptySet, emptySet, credentials);
+        usrInterface.changeCapabilities(new Context(getClient().getValues().getContextId()), user, cap, emptySet, emptySet, userCreds);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
-            Context ctx = new Context(testContext.getId());
+            Context ctx = new Context(getClient().getValues().getContextId());
             ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "false");
             TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
             Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());

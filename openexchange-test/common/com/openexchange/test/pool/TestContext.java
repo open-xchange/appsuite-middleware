@@ -148,7 +148,7 @@ public class TestContext implements Serializable {
         }
     }
 
-    public int getId() {
+    protected int getId() {
         return id;
     }
 
