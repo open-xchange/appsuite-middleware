@@ -55,19 +55,88 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.session.Session;
 
 /**
- * {@link OAuthUtil}
+ * {@link OAuthUtil} - Utility class for OAuth.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class OAuthUtil {
+
+    /**
+     * Checks that specified scopes are both - available and enabled.
+     *
+     * @param oauthAccount The OAuth account providing enabled scopes
+     * @param session The session providing user data
+     * @param scopes The scopes to check
+     * @throws OXException If one of specified scopes is either not availabke or not enabled
+     */
+    public static void checkScopesAvailableAndEnabled(OAuthAccount oauthAccount, Session session, OXScope... scopes) throws OXException {
+        checkScopesAvailableAndEnabled(oauthAccount, session.getUserId(), session.getContextId(), scopes);
+    }
+
+    /**
+     * Checks that specified scopes are both - available and enabled.
+     *
+     * @param oauthAccount The OAuth account providing enabled scopes
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param scopes The scopes to check
+     * @throws OXException If one of specified scopes is either not availabke or not enabled
+     */
+    public static void checkScopesAvailableAndEnabled(OAuthAccount oauthAccount, int userId, int contextId, OXScope... scopes) throws OXException {
+        if (null == oauthAccount) {
+            return;
+        }
+        if (null == scopes || scopes.length <= 0) {
+            return;
+        }
+
+        OAuthServiceMetaData oAuthServiceMetaData = oauthAccount.getMetaData();
+
+        // Check the scopes permitted through "com.openexchange.oauth.modules.enabled + <service>" property
+        {
+            Set<OAuthScope> availableScopes = oAuthServiceMetaData.getAvailableScopes(userId, contextId);
+            for (OXScope oxScope : scopes) {
+                OAuthScope foundScope = null;
+                for (Iterator<OAuthScope> it = availableScopes.iterator(); null == foundScope && it.hasNext();) {
+                    OAuthScope scope = it.next();
+                    if (oxScope == scope.getOXScope()) {
+                        foundScope = scope;
+                    }
+                }
+                if (null == foundScope) {
+                    throw OAuthExceptionCodes.NO_SUCH_SCOPE_AVAILABLE.create(oxScope.getDisplayName());
+                }
+            }
+        }
+
+        // Check the scopes enabled for the account
+        {
+            Set<OAuthScope> enabledScopes = oauthAccount.getEnabledScopes();
+            for (OXScope oxScope : scopes) {
+                boolean supported = false;
+                for (Iterator<OAuthScope> it = enabledScopes.iterator(); !supported && it.hasNext();) {
+                    if (oxScope == it.next().getOXScope()) {
+                        supported = true;
+                    }
+                }
+                if (false == supported) {
+                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(oAuthServiceMetaData.getDisplayName(), oxScope.getDisplayName());
+                }
+            }
+        }
+    }
 
     /**
      * Parses the specified {@link Set} with {@link OAuthScope}s and returns
