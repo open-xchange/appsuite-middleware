@@ -10,7 +10,6 @@ import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 public class ConfigurationTest extends AbstractAJAXSession {
@@ -21,7 +20,6 @@ public class ConfigurationTest extends AbstractAJAXSession {
 
     @Test
     public void testEnableAttribute() throws Throwable {
-        final AJAXClient client = getClient();
         SetRequest setRequest = new SetRequest(Tree.ContactCollectEnabled, true);
         SetResponse setResponse = getClient().execute(setRequest);
         assertFalse(setResponse.hasError());
@@ -41,7 +39,6 @@ public class ConfigurationTest extends AbstractAJAXSession {
 
     @Test
     public void testFolderId() throws Throwable {
-        final AJAXClient client = getClient();
         SetRequest setRequest = new SetRequest(Tree.ContactCollectFolder, 100);
         SetResponse setResponse = getClient().execute(setRequest);
         assertFalse(setResponse.hasError());

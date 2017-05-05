@@ -62,10 +62,8 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
@@ -80,8 +78,6 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class ClearTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link ClearTest}.
      *
@@ -91,14 +87,9 @@ public class ClearTest extends AbstractAJAXSession {
         super();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
     @Test
     public void testClearPrivate() throws Throwable {
+        AJAXClient client = getClient();
         // Get root folder
         String newId = null;
         try {
@@ -125,10 +116,7 @@ public class ClearTest extends AbstractAJAXSession {
             if (!protocol.endsWith("://")) {
                 protocol = protocol + "://";
             }
-            final String hostname = null == client.getHostname() ? AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME) : client.getHostname();
 
-            final AJAXSession session = client.getSession();
-            final UserValues values = client.getValues();
             final long s = System.currentTimeMillis();
             {
                 final Appointment appointmentObj = new Appointment();

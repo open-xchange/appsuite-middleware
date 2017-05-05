@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import java.util.List;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -76,8 +75,6 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
 
     private static final int[] COLUMNS = { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS };
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link GetSortedMailFolderTest}.
      * 
@@ -87,14 +84,9 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
         super();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
     @Test
     public void testGetSortedMailFolder() throws Throwable {
+        AJAXClient client = getClient();
         ListRequest request = new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
