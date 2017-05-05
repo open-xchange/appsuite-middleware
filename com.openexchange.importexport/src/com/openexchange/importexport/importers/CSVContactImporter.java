@@ -89,6 +89,7 @@ import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.groupware.importexport.csv.CsvExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
@@ -320,11 +321,15 @@ public class CSVContactImporter extends AbstractImporter {
             }
         } catch (final OXException e) {
             if (e.getCategory() != Category.CATEGORY_TRUNCATED || (e.getCategory() == Category.CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)) {
-                result.setException(e);
+                result.setException(wrapException(e, lineNumber, session));
                 addErrorInformation(result, lineNumber, fields);
             }
         }
         return new ImportIntention(result);
+    }
+
+    private OXException wrapException(OXException ex, int lineNumber, ServerSession session){
+        return CsvExceptionCodes.NESTED_ERROR.create(lineNumber, ex.getDisplayMessage(session.getUser().getLocale()));
     }
 
     public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {

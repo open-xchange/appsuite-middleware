@@ -74,8 +74,10 @@ public enum CsvExceptionCodes implements DisplayableOXExceptionCode {
     IOEXCEPTION_WHILE_CONVERTING("Encountered IO error while trying to read stream", CATEGORY_ERROR, 1002),
     
     /** Parsing %1$s to a number failed. */
-    NUMBER_FAILED("Parsing %1$s to a number failed.", CATEGORY_ERROR, 207);
+    NUMBER_FAILED("Parsing %1$s to a number failed.", CATEGORY_ERROR, 207),
 
+    /** Error at row %1$s: %2$s */
+    NESTED_ERROR("Error at row %1$s: %2$s",CsvExceptionMessages.NESTED_ERROR_MSG, CATEGORY_USER_INPUT, 1003);
 
     public static String PREFIX = "CSV";
 
