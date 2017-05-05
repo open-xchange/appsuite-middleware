@@ -49,8 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -86,6 +85,9 @@ public class AddGuestPermissionTest extends ShareTest {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
+                    if (isReadOnlySharing(module) && false == isReadOnly(guestPermission)) {
+                        continue;
+                    }
                     testUpdateSharedFolder(api, module, guestPermission);
                 }
             }
