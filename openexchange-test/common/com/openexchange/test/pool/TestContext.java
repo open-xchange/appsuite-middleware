@@ -76,8 +76,6 @@ public class TestContext implements Serializable {
 
     private final String name;
 
-    private final Integer id;
-
     private String acquiredBy;
 
     private volatile ConcurrentHashSet<TestUser> acquiredUsers = new ConcurrentHashSet<TestUser>(); //required for reset
@@ -95,9 +93,8 @@ public class TestContext implements Serializable {
 
     private AtomicReference<TestUser> noReplyUser = new AtomicReference<>();
 
-    public TestContext(String name, int id) {
+    public TestContext(String name) {
         this.name = name;
-        this.id = id;
     }
 
     public void setAdmin(TestUser lAdmin) {
@@ -148,10 +145,6 @@ public class TestContext implements Serializable {
         }
     }
 
-    protected int getId() {
-        return id;
-    }
-
     public String getName() {
         return name;
     }
@@ -197,7 +190,6 @@ public class TestContext implements Serializable {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -220,13 +212,6 @@ public class TestContext implements Serializable {
         } else if (!name.equalsIgnoreCase(other.name)) {
             return false;
         }
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
         return true;
     }
 
@@ -247,9 +232,6 @@ public class TestContext implements Serializable {
         }
         if (Strings.isNotEmpty(acquiredBy)) {
             builder.append("acquiredBy=").append(acquiredBy).append(", ");
-        }
-        if (id != null) {
-            builder.append("id=").append(id);
         }
         builder.append("]");
         return builder.toString();

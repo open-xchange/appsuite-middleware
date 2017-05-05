@@ -82,7 +82,7 @@ public class TestContextPool {
         remember(context);
         contexts.add(context);
         startWatcher();
-        LOG.info("Added context '{}' with id {} and users {} to pool.", context.getName(), context.getId(), Strings.concat(",", context.getCopyOfAll()));
+        LOG.info("Added context '{}' with users {} to pool.", context.getName(), Strings.concat(",", context.getCopyOfAll()));
     }
 
     private static void remember(TestContext context) {
@@ -107,7 +107,7 @@ public class TestContextPool {
             Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
             context.setAcquiredBy(acquiredBy);
             contextWatcher.get().contextInUse(context);
-            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy);
+            LOG.debug("Context '{}' has been acquired by {}.", context.getName(), acquiredBy);
             return context;
         } catch (InterruptedException e) {
             // should not happen
