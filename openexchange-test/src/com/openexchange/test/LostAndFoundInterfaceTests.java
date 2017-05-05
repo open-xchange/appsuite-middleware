@@ -72,7 +72,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.contact.Bug18862Test.class,
     com.openexchange.ajax.contact.Bug19543Test_DeletingContactsInDistributionList.class,
     com.openexchange.ajax.contact.Bug19984Test.class,
-    com.openexchange.ajax.contact.ChangePrimaryMailTest.class,
     com.openexchange.ajax.contact.GetTest.class,
     com.openexchange.ajax.contact.ManagedSearchTests.class,
     com.openexchange.ajax.contact.TermSearchTest.class,
