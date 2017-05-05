@@ -83,6 +83,7 @@ public class Bug53073Test extends AbstractAJAXSession {
     private CalendarTestManager catm2;
     private FolderTestManager ftm2;
 	private FolderTestManager ftm;
+	private CalendarTestManager catm;
 
     @Override
     @Before
@@ -94,6 +95,7 @@ public class Bug53073Test extends AbstractAJAXSession {
         catm2 = new CalendarTestManager(client2);
         ftm2 = new FolderTestManager(client2);
         ftm = new FolderTestManager(client);
+        catm = new CalendarTestManager(client);
     }
 
     @Test
