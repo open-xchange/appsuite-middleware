@@ -79,6 +79,7 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.filtering.FilterMaps;
@@ -623,30 +624,32 @@ public final class CleaningJsoupHandler implements JsoupHandler {
 
         for (Attribute attribute : listFor(attributes)) {
             String attr = attribute.getKey();
-            if (false == Strings.asciiLowerCase(attr).startsWith("on")) {
-                if ("style".equals(attr)) {
-                    /*
-                     * Handle style attribute
-                     */
-                    String css = attribute.getValue();
-                    if (!Strings.isEmpty(css)) {
-                        checkCSS(cssBuffer.append(css), styleMap, true);
+            if ("style".equals(attr)) {
+                /*
+                 * Handle style attribute
+                 */
+                String css = attribute.getValue();
+                if (!Strings.isEmpty(css)) {
+                    checkCSS(cssBuffer.append(css), styleMap, true);
+                    css = cssBuffer.toString();
+                    cssBuffer.setLength(0);
+                    if (dropExternalImages) {
+                        imageURLFound |= checkCSS(cssBuffer.append(css), FilterMaps.getImageStyleMap(), true, false);
                         css = cssBuffer.toString();
                         cssBuffer.setLength(0);
-                        if (dropExternalImages) {
-                            imageURLFound |= checkCSS(cssBuffer.append(css), FilterMaps.getImageStyleMap(), true, false);
-                            css = cssBuffer.toString();
-                            cssBuffer.setLength(0);
-                        }
                     }
-                    if (containsCSSElement(css)) {
-                        startTag.attr("style", css);
-                    } else {
-                        startTag.removeAttr(attr);
-                    }
-                } else if ("class".equals(attr) || "id".equals(attr)) {
-                    String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
-                    startTag.attr(attribute.getKey(), value);
+                }
+                if (containsCSSElement(css)) {
+                    startTag.attr("style", css);
+                } else {
+                    startTag.removeAttr(attr);
+                }
+            } else if ("class".equals(attr) || "id".equals(attr)) {
+                String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
+                startTag.attr(attribute.getKey(), value);
+            } else {
+                if (HtmlServices.containsEventHandler(attr)) {
+                    startTag.removeAttr(attr);
                 } else {
                     final String val = attribute.getValue();
                     if (null == allowedAttributes) { // No restrictions
@@ -672,6 +675,8 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                                     }
                                 }
                             }
+                        } else {
+                            startTag.removeAttr(attr);
                         }
                     }
                 }
