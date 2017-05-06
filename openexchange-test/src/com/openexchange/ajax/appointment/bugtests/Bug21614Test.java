@@ -95,7 +95,7 @@ public class Bug21614Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
 
         List<Participant> participants = new ArrayList<Participant>();
         Participant p = new UserParticipant(clientB.getValues().getUserId());

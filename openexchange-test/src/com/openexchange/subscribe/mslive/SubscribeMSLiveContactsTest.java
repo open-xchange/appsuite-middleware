@@ -58,8 +58,6 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link SubscribeMSLiveContactsTest}
@@ -70,24 +68,15 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
 
     protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.mslive.contact";
 
-    private FolderTestManager folderMgr;
-
-    private ContactTestManager contactMgr;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MSLiveSubscribeTestEnvironment.getInstance().init();
-        folderMgr = new FolderTestManager(getClient());
-        contactMgr = new ContactTestManager(getClient());
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            if (folderMgr != null) {
-                folderMgr.cleanUp();
-            }
             MSLiveSubscribeTestEnvironment.getInstance().cleanup();
         } finally {
             super.tearDown();
@@ -104,7 +93,7 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
 
     @Test
     public void testSubscribe() throws OXException, IOException, JSONException, Exception {
-        Contact[] contacts = contactMgr.allAction(getContactTestFolderID(), Contact.ALL_COLUMNS);
+        Contact[] contacts = cotm.allAction(getContactTestFolderID(), Contact.ALL_COLUMNS);
 
         // represents a full supported contact mapping
         final String testAccount1 = "Dr. Test Testerson";

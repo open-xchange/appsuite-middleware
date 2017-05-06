@@ -77,6 +77,7 @@ import net.htmlparser.jericho.HTMLElements;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.filtering.FilterMaps;
@@ -665,33 +666,33 @@ public final class FilterJerichoHandler implements JerichoHandler {
         Set<String> uriAttributes = replaceUrls ? setFor(startTag.getURIAttributes()) : Collections.<String> emptySet();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
-            if (false == Strings.asciiLowerCase(attr).startsWith("on")) {
-                if ("style".equals(attr)) {
-                    /*
-                     * Handle style attribute
-                     */
-                    String css = attribute.getValue();
-                    if (!Strings.isEmpty(css)) {
-                        checkCSS(cssBuffer.append(css), styleMap, true);
+            if ("style".equals(attr)) {
+                /*
+                 * Handle style attribute
+                 */
+                String css = attribute.getValue();
+                if (!Strings.isEmpty(css)) {
+                    checkCSS(cssBuffer.append(css), styleMap, true);
+                    css = cssBuffer.toString();
+                    cssBuffer.setLength(0);
+                    if (dropExternalImages) {
+                        imageURLFound |= checkCSS(cssBuffer.append(css), FilterMaps.getImageStyleMap(), true, false);
                         css = cssBuffer.toString();
                         cssBuffer.setLength(0);
-                        if (dropExternalImages) {
-                            imageURLFound |= checkCSS(cssBuffer.append(css), FilterMaps.getImageStyleMap(), true, false);
-                            css = cssBuffer.toString();
-                            cssBuffer.setLength(0);
-                        }
                     }
-                    if (containsCSSElement(css)) {
-                        if (css.indexOf('"') == -1) {
-                            attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
-                        } else {
-                            attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
-                        }
+                }
+                if (containsCSSElement(css)) {
+                    if (css.indexOf('"') == -1) {
+                        attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
+                    } else {
+                        attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
                     }
-                } else if ("class".equals(attr) || "id".equals(attr)) {
-                    final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
-                    attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
-                } else {
+                }
+            } else if ("class".equals(attr) || "id".equals(attr)) {
+                final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
+                attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
+            } else {
+                if (false == HtmlServices.containsEventHandler(attr)) {
                     final String val = attribute.getValue();
                     if (null == allowedAttributes) { // No restrictions
                         if (isSafe(val, tagName)) {

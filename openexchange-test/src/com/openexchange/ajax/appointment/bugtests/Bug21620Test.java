@@ -90,7 +90,7 @@ public class Bug21620Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        clientA = getClient();
+        clientA = new AJAXClient(testContext.acquireUser());
         clientB = new AJAXClient(testContext.acquireUser());
         clientC = new AJAXClient(testContext.acquireUser());
 
@@ -144,7 +144,7 @@ public class Bug21620Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            getClient().execute(new DeleteRequest(appointment));
+            clientA.execute(new DeleteRequest(appointment));
         } finally {
             super.tearDown();
         }

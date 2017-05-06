@@ -622,7 +622,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      */
     protected FolderObject updateFolder(AJAXClient client, EnumAPI api, FolderObject folder, RequestCustomizer<UpdateRequest> customizer) throws Exception {
         UpdateRequest request = new UpdateRequest(api, folder);
-        // request.setNotifyPermissionEntities(Transport.MAIL);
+        request.setNotifyPermissionEntities(Transport.MAIL);
         if (customizer != null) {
             customizer.customize(request);
         }
@@ -862,11 +862,20 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The message, or <code>null</code> if not found
      */
     protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
-        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        return discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+    }
+
+    /**
+     * Discovers the invitation message sent to a specific recipient.
+     *
+     * @param messages The e-mail messages to check
+     * @param emailAddress The guest's e-mail address to search for
+     * @return The message, or <code>null</code> if not found
+     */
+    protected Message discoverInvitationMessage(List<Message> messages, String emailAddress) throws Exception {
         for (Message message : messages) {
-            Map<String, String> headers = message.getHeaders();
-            String toHeader = headers.get("To");
-            if (false == Strings.isEmpty(toHeader)) {
+            String toHeader = message.getHeaders().get("To");
+            if (Strings.isNotEmpty(toHeader)) {
                 InternetAddress[] addresses = null;
                 try {
                     addresses = InternetAddress.parseHeader(toHeader, false);
@@ -1022,7 +1031,9 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return An authenticated guest client being able to access the share
      */
     protected GuestClient resolveShare(ExtendedPermissionEntity guestPermission, ShareRecipient recipient) throws Exception {
-        return new GuestClient(discoverShareURL(guestPermission), recipient);
+        String shareURL = discoverShareURL(guestPermission);
+        assertNotNull("Got no share URL for " + recipient, shareURL);
+        return new GuestClient(shareURL, recipient);
     }
 
     /**

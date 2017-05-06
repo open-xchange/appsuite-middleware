@@ -67,7 +67,6 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug47012Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
     private Appointment app;
 
     public Bug47012Test() {
@@ -77,7 +76,6 @@ public class Bug47012Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(getClient());
         app = new Appointment();
         app.setTitle("Bug 47012 Test");
         app.setStartDate(TimeTools.D("07.07.2016 08:00"));
@@ -87,70 +85,60 @@ public class Bug47012Test extends AbstractAJAXSession {
         app.setInterval(1);
         app.setIgnoreConflicts(true);
         app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(app);
+        catm.insert(app);
     }
 
     @Test
     public void testChangeStartDate() throws Exception {
-        Appointment changeException = ctm.createIdentifyingCopy(app);
+        Appointment changeException = catm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setStartDate(TimeTools.D("07.07.2016 08:30"));
         changeException.setIgnoreConflicts(true);
-        ctm.update(changeException);
+        catm.update(changeException);
 
-        Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
+        Appointment loadedException = catm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertEquals("Wrong start date.", changeException.getStartDate(), loadedException.getStartDate());
         assertEquals("Wrong end date.", TimeTools.D("07.07.2016 09:00"), loadedException.getEndDate());
     }
 
     @Test
     public void testChangeEndDate() throws Exception {
-        Appointment changeException = ctm.createIdentifyingCopy(app);
+        Appointment changeException = catm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setEndDate(TimeTools.D("07.07.2016 09:30"));
         changeException.setIgnoreConflicts(true);
-        ctm.update(changeException);
+        catm.update(changeException);
 
-        Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
+        Appointment loadedException = catm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertEquals("Wrong start date.", TimeTools.D("07.07.2016 08:00"), loadedException.getStartDate());
         assertEquals("Wrong end date.", changeException.getEndDate(), loadedException.getEndDate());
     }
 
     @Test
     public void testChangeStartAndEndDate() throws Exception {
-        Appointment changeException = ctm.createIdentifyingCopy(app);
+        Appointment changeException = catm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setStartDate(TimeTools.D("07.07.2016 08:30"));
         changeException.setEndDate(TimeTools.D("07.07.2016 09:30"));
         changeException.setIgnoreConflicts(true);
-        ctm.update(changeException);
+        catm.update(changeException);
 
-        Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
+        Appointment loadedException = catm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertEquals("Wrong start date.", changeException.getStartDate(), loadedException.getStartDate());
         assertEquals("Wrong end date.", changeException.getEndDate(), loadedException.getEndDate());
     }
 
     @Test
     public void testMakeFulltime() throws Exception {
-        Appointment changeException = ctm.createIdentifyingCopy(app);
+        Appointment changeException = catm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setFullTime(true);
         changeException.setIgnoreConflicts(true);
-        ctm.update(changeException);
+        catm.update(changeException);
 
-        Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
+        Appointment loadedException = catm.get(changeException.getParentFolderID(), changeException.getObjectID());
         assertTrue("Expected fulltime appointment.", loadedException.getFullTime());
         assertEquals("Wrong start date.", TimeTools.D("07.07.2016 00:00"), loadedException.getStartDate());
         assertEquals("Wrong end date.", TimeTools.D("08.07.2016 00:00"), loadedException.getEndDate());
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

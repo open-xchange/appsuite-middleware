@@ -90,7 +90,7 @@ public class DeleteMultipleReminderTest extends ReminderTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(testUser);
+        client = getClient();
         timeZone = client.getValues().getTimeZone();
 
         task = new Task();

@@ -90,7 +90,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
 
         folder = new FolderObject();
         folder.setFolderName("Bug 12509 Test Folder" + UUID.randomUUID().toString());

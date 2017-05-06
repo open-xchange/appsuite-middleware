@@ -77,7 +77,9 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
         super.setUp();
         List<TestUser> copyOfAll = testContext.getCopyOfAll();
         for (TestUser user : copyOfAll) {
-            new AJAXClient(user).execute(new ClearMailsRequest());
+            AJAXClient currentClient =  new AJAXClient(user);
+            currentClient.execute(new ClearMailsRequest());
+            currentClient.logout();
         }
         noReplyUser = testContext.getNoReplyUser();
         noReplyClient = new AJAXClient(noReplyUser);

@@ -16,7 +16,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -36,7 +35,6 @@ public final class Bug12463Test extends AbstractAJAXSession {
 
     @Test
     public void testBugAsWritte() throws Throwable {
-        final AJAXClient client = getClient();
         final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment sequence = new Appointment();

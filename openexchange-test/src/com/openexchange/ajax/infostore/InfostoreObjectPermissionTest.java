@@ -66,7 +66,6 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
@@ -85,7 +84,6 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link InfostoreObjectPermissionTest}
@@ -94,11 +92,9 @@ import com.openexchange.test.FolderTestManager;
  */
 public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
-    private AJAXClient client2;
     private InfostoreTestManager itm;
     private Map<String, Boolean> shareStates;
     private Map<String, File> allFiles;
-    private FolderTestManager ftm;
     private FolderObject testFolder;
 
     /**
@@ -113,8 +109,6 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
-        ftm = new FolderTestManager(getClient());
         String folderName = "InfostoreObjectPermissionTest_" + System.currentTimeMillis();
         testFolder = ftm.generatePrivateFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         testFolder = ftm.insertFolderOnServer(testFolder);
@@ -130,7 +124,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             boolean shared = false;
             List<FileStorageObjectPermission> objectPermissions = null;
             if (r.nextBoolean()) {
-                objectPermissions = Collections.<FileStorageObjectPermission> singletonList(new DefaultFileStorageObjectPermission(client2.getValues().getUserId(), false, FileStorageObjectPermission.READ));
+                objectPermissions = Collections.<FileStorageObjectPermission> singletonList(new DefaultFileStorageObjectPermission(getClient2().getValues().getUserId(), false, FileStorageObjectPermission.READ));
                 shared = true;
             }
             File newDocument = newDocument(testFolder.getObjectID(), objectPermissions);
@@ -145,12 +139,6 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         try {
             if (itm != null) {
                 itm.cleanUp();
-            }
-            if (ftm != null) {
-                ftm.cleanUp();
-            }
-            if (client2 != null) {
-                client2.logout();
             }
         } finally {
             super.tearDown();
@@ -182,7 +170,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             listItems.add(new ListItem(Integer.toString(testFolder.getObjectID()), id.toString()));
         }
 
-        ListInfostoreResponse listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), false));
+        ListInfostoreResponse listResp = getClient2().execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), false));
         exception = listResp.getException();
         assertNotNull(exception);
         // TODO: check code
@@ -195,7 +183,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
          */
         listItems.clear();
         for (String id : sharedFiles) {
-            GetInfostoreResponse getResp = client2.execute(new GetInfostoreRequest(id));
+            GetInfostoreResponse getResp = getClient2().execute(new GetInfostoreRequest(id));
             File doc = getResp.getDocumentMetadata();
             assertNotNull(doc);
             assertEquals(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Integer.valueOf(doc.getFolderId()).intValue());
@@ -204,7 +192,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
         }
 
-        listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
+        listResp = getClient2().execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
         Object[][] array = listResp.getArray();
         for (int i = 0; i < array.length; i++) {
             Object[] doc = array[i];
@@ -227,7 +215,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         for (String id : otherFiles) {
             GetInfostoreRequest req = new GetInfostoreRequest(id);
             req.setFailOnError(false);
-            GetInfostoreResponse getResp = client2.execute(req);
+            GetInfostoreResponse getResp = getClient2().execute(req);
             OXException exception2 = getResp.getException();
             assertNotNull(exception2);
             // TODO: check code
@@ -235,7 +223,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             listItems.add(new ListItem(allFiles.get(id)));
         }
 
-        listResp = client2.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), false));
+        listResp = getClient2().execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), false));
         exception = listResp.getException();
         assertNotNull(exception);
         // TODO: check code

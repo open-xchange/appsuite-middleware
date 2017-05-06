@@ -1050,7 +1050,7 @@ public final class MailMessageParser {
             filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
             if (filename.indexOf('.') < 0) {
                 // No file extension given. Check if "name" parameter from Content-Type provides a better "alternative" value
-                String name = contentType.getNameParameter();
+                String name = null == contentType ? null : contentType.getNameParameter();
                 if (Strings.isNotEmpty(name) && name.indexOf('.') > 0) {
                     filename = MimeMessageUtility.decodeMultiEncodedHeader(name);
                 }

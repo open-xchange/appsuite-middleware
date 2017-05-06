@@ -77,7 +77,6 @@ public class Bug13214Test extends AbstractAJAXSession {
 
     @Test
     public void testBugAsWritten() throws Exception {
-        final AJAXClient client = getClient();
         final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment appointment = new Appointment();

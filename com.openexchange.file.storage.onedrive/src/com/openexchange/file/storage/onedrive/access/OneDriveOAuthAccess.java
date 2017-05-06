@@ -81,6 +81,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
@@ -120,7 +121,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             {
                 OAuthService oAuthService = Services.getService(OAuthService.class);
                 liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
-                verifyAccount(liveconnectOAuthAccount);
+                verifyAccount(liveconnectOAuthAccount, OXScope.drive);
             }
             setOAuthAccount(liveconnectOAuthAccount);
 
@@ -216,7 +217,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.openexchange.cluster.lock.ClusterTask#perform()
          */
         @Override

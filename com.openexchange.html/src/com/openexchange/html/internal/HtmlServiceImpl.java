@@ -530,40 +530,39 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String html = htmlContent;
 
-            // Normalize the string
-            {
-                Matcher matcher = PATTERN_URL.matcher(html);
-                if (matcher.find()) {
-                    StringBuffer sb = new StringBuffer(html.length());
-                    do {
-                        matcher.appendReplacement(sb, Matcher.quoteReplacement(normalize(matcher.group())));
-                    } while (matcher.find());
-                    matcher.appendTail(sb);
-                    html = sb.toString();
-                }
-            }
-
-            // Perform one-shot sanitizing
-            html = replacePercentTags(html);
-            html = replaceHexEntities(html);
-            html = processDownlevelRevealedConditionalComments(html);
-            html = dropWeirdXmlNamespaceDeclarations(html);
-            html = dropDoubleAccents(html);
-            html = dropSlashedTags(html);
-            html = dropExtraChar(html);
-
-            // Repetitive sanitizing until no further replacement/changes performed
-            final boolean[] sanitized = new boolean[] { true };
-            while (sanitized[0]) {
-                sanitized[0] = false;
-                // Start sanitizing round
-                html = SaneScriptTags.saneScriptTags(html, sanitized);
-            }
-
-            // CSS- and tag-wise sanitizing
             boolean useJericho = HtmlServices.useJericho();
             if (useJericho) {
-                // Initialize the handler
+                // Normalize the string
+                {
+                    Matcher matcher = PATTERN_URL.matcher(html);
+                    if (matcher.find()) {
+                        StringBuffer sb = new StringBuffer(html.length());
+                        do {
+                            matcher.appendReplacement(sb, Matcher.quoteReplacement(normalize(matcher.group())));
+                        } while (matcher.find());
+                        matcher.appendTail(sb);
+                        html = sb.toString();
+                    }
+                }
+
+                // Perform one-shot sanitizing
+                html = replacePercentTags(html);
+                html = replaceHexEntities(html);
+                html = processDownlevelRevealedConditionalComments(html);
+                html = dropWeirdXmlNamespaceDeclarations(html);
+                html = dropDoubleAccents(html);
+                html = dropSlashedTags(html);
+                html = dropExtraChar(html);
+
+                // Repetitive sanitizing until no further replacement/changes performed
+                final boolean[] sanitized = new boolean[] { true };
+                while (sanitized[0]) {
+                    sanitized[0] = false;
+                    // Start sanitizing round
+                    html = SaneScriptTags.saneScriptTags(html, sanitized);
+                }
+
+                // // CSS- and tag-wise sanitizing -- Initialize the handler
                 FilterJerichoHandler handler = getHandlerFor(html.length(), options.getOptConfigName());
                 handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
 
@@ -595,15 +594,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 CleaningJsoupHandler handler = getJsoupHandlerFor(html.length(), options.getOptConfigName());
                 handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
 
-                // Drop external images using regular expression
                 boolean[] modified = options.getModified();
-                if (options.isDropExternalImages()) {
-                    DroppingImageHandler imageHandler = new DroppingImageHandler();
-                    html = ImageProcessor.getInstance().replaceImages(html, imageHandler);
-                    if (null != modified) {
-                        modified[0] |= imageHandler.isModified();
-                    }
-                }
 
                 // Parse the HTML content
                 JsoupParser.getInstance().parse(html, handler, true);

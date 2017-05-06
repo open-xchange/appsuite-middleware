@@ -103,7 +103,7 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public boolean isForceHttps() {
-        return ((Boolean) mappings.get("forceHttps")).booleanValue();
+        return ((Boolean) mappings.get("forceHTTPS")).booleanValue();
     }
 
     @Override

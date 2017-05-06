@@ -115,9 +115,14 @@ public final class Bug12614Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        boss = getClient();
+        boss = new AJAXClient(testContext.acquireUser());
         secretary = new AJAXClient(testContext.acquireUser());
         thirdUser = new AJAXClient(testContext.acquireUser());
+        
+        assertFalse("Could not acquire enough users", boss == null);
+        assertFalse("Could not acquire enough users", secretary == null );
+        assertFalse("Could not acquire enough users", thirdUser == null);
+        
         secTZ = secretary.getValues().getTimeZone();
         bossSharesPrivateFolder();
         secretaryCreatesSeries();

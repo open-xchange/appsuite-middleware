@@ -62,6 +62,7 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 
 /**
@@ -88,7 +89,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             // Grab Google OAuth account
             int oauthAccountId = getAccountId();
             OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, getSession(), false);
-            verifyAccount(oauthAccount);
+            verifyAccount(oauthAccount, OXScope.drive);
             setOAuthAccount(oauthAccount);
 
             {

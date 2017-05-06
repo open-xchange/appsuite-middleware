@@ -56,6 +56,8 @@ public class CsvExceptionMessages implements LocalizableStrings {
 
     public static final String BROKEN_CSV_MSG = "Broken CSV file.";
 
+    public static final String NESTED_ERROR_MSG = "Error at row %1$s: %2$s";
+
     private CsvExceptionMessages() {
         super();
     }

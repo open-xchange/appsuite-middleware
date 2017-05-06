@@ -97,8 +97,8 @@ public class PrivateTests extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client1 = getClient();
-        client2 = getClient2();
+        client1 = new AJAXClient(testContext.acquireUser());
+        client2 = new AJAXClient(testContext.acquireUser());
         client3 = new AJAXClient(testContext.acquireUser());
         client4 = new AJAXClient(testContext.acquireUser());
 
@@ -234,6 +234,22 @@ public class PrivateTests extends AbstractAJAXSession {
         try {
             client1.execute(new DeleteRequest(app));
             client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder));
+            if(null != client1){
+                client1.logout();
+                client1 = null;
+            }
+            if(null != client2){
+                client2.logout();
+                client2 = null;
+            }
+            if(null != client3){
+                client3.logout();
+                client3 = null;
+            }
+            if(null != client4){
+                client4.logout();
+                client4 = null;
+            }
         } finally {
             super.tearDown();
         }

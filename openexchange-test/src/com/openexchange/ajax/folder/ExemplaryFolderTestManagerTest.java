@@ -52,14 +52,12 @@ package com.openexchange.ajax.folder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * This class contains some examples of tests created for FolderTestManager
@@ -68,13 +66,8 @@ import com.openexchange.test.FolderTestManager;
  */
 public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
 
-    private FolderTestManager manager;
-
-    private AJAXClient client;
-
-    FolderObject folderObject1;
-
-    FolderObject folderObject2;
+    private FolderObject folderObject1;
+    private FolderObject folderObject2;
 
     public ExemplaryFolderTestManagerTest() {
         super();
@@ -83,8 +76,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        manager = new FolderTestManager(getClient());
+        AJAXClient client = getClient();
         // create a folder
         folderObject1 = new FolderObject();
         folderObject1.setFolderName("ExemplaryFolderTestManagerTest-folder1" + System.currentTimeMillis());
@@ -98,7 +90,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         perm1.setFolderAdmin(true);
         perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1 });
-        manager.insertFolderOnServer(folderObject1);
+        ftm.insertFolderOnServer(folderObject1);
 
         // create another folder
         folderObject2 = new FolderObject();
@@ -113,21 +105,12 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         perm2.setFolderAdmin(true);
         perm2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folderObject2.setPermissionsAsArray(new OCLPermission[] { perm2 });
-        manager.insertFolderOnServer(folderObject2);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
+        ftm.insertFolderOnServer(folderObject2);
     }
 
     @Test
     public void testCreatedFoldersAreReturnedByGetRequest() throws Exception {
-        final FolderObject fo = manager.getFolderFromServer(folderObject1.getObjectID());
+        final FolderObject fo = ftm.getFolderFromServer(folderObject1.getObjectID());
         assertEquals("The folder was not returned.", fo.getFolderName(), folderObject1.getFolderName());
     }
 
@@ -135,7 +118,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
     public void testCreatedFoldersAppearInListRequest() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
-        final FolderObject[] allFolders = manager.listFoldersOnServer(client.getValues().getPrivateInfostoreFolder());
+        final FolderObject[] allFolders = ftm.listFoldersOnServer(getClient().getValues().getPrivateInfostoreFolder());
         for (int i = 0; i < allFolders.length; i++) {
             final FolderObject fo = allFolders[i];
             if (fo.getObjectID() == folderObject1.getObjectID()) {
@@ -155,7 +138,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         boolean found2 = false;
         final Date date = new Date();
         date.setDate(date.getDate() - 1);
-        final FolderObject[] allFolders = manager.getUpdatedFoldersOnServer(date);
+        final FolderObject[] allFolders = ftm.getUpdatedFoldersOnServer(date);
         for (int i = 0; i < allFolders.length; i++) {
             final FolderObject co = allFolders[i];
             if (co.getObjectID() == folderObject1.getObjectID()) {

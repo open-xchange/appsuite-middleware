@@ -71,10 +71,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link ChangePrimaryKeyForUserAttribute} - Changes the PRIMARY KEY of the <code>"user_attribute"</code> table from ("cid", "uuid") to ("cid", "id", "name").
@@ -150,7 +153,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         dropAllAliasEntries(con);
 
         // Check for duplicate entries
-        boolean useGroupBy = true;
+        boolean useGroupBy = false;
         if (useGroupBy) {
             checkAndResolveDuplicateEntries(con);
         } else {
@@ -170,34 +173,60 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, id, name, value, uuid FROM user_attribute");
+            // Extract all distinct context identifiers
+            stmt = con.prepareStatement("SELECT DISTINCT cid FROM user_attribute");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
-                // No rows
+                // No rows available in connection-associated schema
                 return;
             }
 
-            Map<Duplicate, Values> mapping = new HashMap<>();
+            // Put context identifiers into a light-weight list
+            TIntList contextIds = new TIntArrayList(512);
             do {
-                Duplicate d = new Duplicate(rs.getInt(1), rs.getInt(2), rs.getString(3));
-                Values values = mapping.get(d);
-                if (null == values) {
-                    values = new Values();
-                    mapping.put(d, values);
-                }
-                values.addValue(new Value(rs.getString(4), UUIDs.toUUID(rs.getBytes(5))));
+                contextIds.add(rs.getInt(1));
             } while (rs.next());
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
+            // Chunk-wise query user attributes
+            Map<Duplicate, Values> mapping;
+            {
+                int limit = Databases.IN_LIMIT;
+                int length = contextIds.size();
+                mapping = new HashMap<>(length);
+                for (int off = 0; off < length; off += limit) {
+                    int clen = off + limit > length ? length - off : limit;
+                    stmt = con.prepareStatement(DBUtils.getIN("SELECT cid, id, name, value, uuid FROM user_attribute WHERE cid IN (", clen));
+                    int pos = 1;
+                    for (int j = 0; j < clen; j++) {
+                        stmt.setInt(pos++, contextIds.get(off+j));
+                    }
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        Duplicate d = new Duplicate(rs.getInt(1), rs.getInt(2), rs.getString(3));
+                        Values values = mapping.get(d);
+                        if (null == values) {
+                            values = new Values();
+                            mapping.put(d, values);
+                        }
+                        values.addValue(new Value(rs.getString(4), UUIDs.toUUID(rs.getBytes(5))));
+                    }
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+                }
+                contextIds = null; // Might help GC
+            }
+
+            // Handle multiple values associated with the same name for a user
             for (Map.Entry<Duplicate, Values> entry : mapping.entrySet()) {
                 Values dupValues = entry.getValue();
                 if (dupValues.size() > 1) {
                     handleDuplicateValues(entry.getKey(), dupValues, con);
                 }
             }
-
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -351,12 +380,13 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             super();
             this.contextId = contextId;
             this.userId = userId;
-            this.name = name;
+            String lowerCaseName = Strings.asciiLowerCase(name);
+            this.name = lowerCaseName;
 
             int prime = 31;
             int result = prime * 1 + contextId;
             result = prime * result + userId;
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + ((lowerCaseName == null) ? 0 : lowerCaseName.hashCode());
             this.hash = result;
         }
 
@@ -430,66 +460,15 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         }
     }
 
-    private static class Attribute {
+    private static class UserAndContext {
 
         final int contextId;
         final int userId;
-        final String name;
-        final String value;
-        private final int hash;
 
-        Attribute(int contextId, int userId, String name, String value) {
+        UserAndContext(int contextId, int userId, String name, String value) {
             super();
             this.contextId = contextId;
             this.userId = userId;
-            this.name = name;
-            this.value = value;
-            int prime = 31;
-            int result = prime * 1 + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
-            result = prime * result + ((value == null) ? 0 : value.hashCode());
-            this.hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            Attribute other = (Attribute) obj;
-            if (contextId != other.contextId) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            if (name == null) {
-                if (other.name != null) {
-                    return false;
-                }
-            } else if (!name.equals(other.name)) {
-                return false;
-            }
-            if (value == null) {
-                if (other.value != null) {
-                    return false;
-                }
-            } else if (!value.equals(other.value)) {
-                return false;
-            }
-            return true;
         }
     }
 

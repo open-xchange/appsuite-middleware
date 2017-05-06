@@ -1,5 +1,5 @@
 /advertisement?action=get:
-  put:
+  get:
     operationId: getAdvertisementConfig
     tags: 
       - Advertisement

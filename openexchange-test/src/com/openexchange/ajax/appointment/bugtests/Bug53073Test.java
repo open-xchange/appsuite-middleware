@@ -125,9 +125,11 @@ public class Bug53073Test extends AbstractAJAXSession {
     @Override
     @After
     public void tearDown() throws Exception {
-        catm2.cleanUp();
-        ftm2.cleanUp();
-        super.tearDown();
+        try {
+            catm2.cleanUp();
+            ftm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
-
 }

@@ -63,7 +63,6 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.SubscribeRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -76,8 +75,6 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link MultipleSubscribeWithoutParentTest}.
      *
@@ -87,11 +84,6 @@ public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
         super();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
 
     private String createPrivateCalendarFolder(final String prefix, final int parentId) throws Throwable {
         final FolderObject fo = new FolderObject();
@@ -100,13 +92,13 @@ public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
         fo.setModule(FolderObject.CALENDAR);
 
         final OCLPermission oclP = new OCLPermission();
-        oclP.setEntity(client.getValues().getUserId());
+        oclP.setEntity(getClient().getValues().getUserId());
         oclP.setGroupPermission(false);
         oclP.setFolderAdmin(true);
         oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         fo.setPermissionsAsArray(new OCLPermission[] { oclP });
         final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
-        final InsertResponse response = client.execute(request);
+        final InsertResponse response = getClient().execute(request);
         return (String) response.getResponse().getData();
     }
 
@@ -129,10 +121,10 @@ public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
 
             SubscribeRequest subscribeRequest = new SubscribeRequest(EnumAPI.EAS_FOLDERS, newId, true);
             subscribeRequest.addFolderId(newSubId, true);
-            client.execute(subscribeRequest);
+            getClient().execute(subscribeRequest);
 
             ListRequest listRequest = new ListRequest(EnumAPI.EAS_FOLDERS, newId);
-            ListResponse listResponse = client.execute(listRequest);
+            ListResponse listResponse = getClient().execute(listRequest);
             boolean found = false;
             for (final Object[] vals : listResponse.getArray()) {
                 if (newSubId.equals(vals[0].toString())) {
@@ -143,7 +135,7 @@ public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
             assertTrue("Subscribed subfolder not found.", found);
 
             listRequest = new ListRequest(EnumAPI.EAS_FOLDERS, parent);
-            listResponse = client.execute(listRequest);
+            listResponse = getClient().execute(listRequest);
             found = false;
             for (final Object[] vals : listResponse.getArray()) {
                 if (newId.equals(vals[0].toString())) {
@@ -159,10 +151,10 @@ public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
 
             subscribeRequest = new SubscribeRequest(EnumAPI.EAS_FOLDERS, newId, true);
             subscribeRequest.addFolderId(newSubId, false);
-            client.execute(subscribeRequest);
+            getClient().execute(subscribeRequest);
 
             listRequest = new ListRequest(EnumAPI.EAS_FOLDERS, newId);
-            listResponse = client.execute(listRequest);
+            listResponse = getClient().execute(listRequest);
             found = false;
             for (final Object[] vals : listResponse.getArray()) {
                 if (newSubId.equals(vals[0].toString())) {
@@ -179,12 +171,12 @@ public class MultipleSubscribeWithoutParentTest extends AbstractAJAXSession {
                 {
                     final SubscribeRequest subscribeRequest = new SubscribeRequest(EnumAPI.EAS_FOLDERS, parent, true);
                     subscribeRequest.addFolderId(id, false);
-                    client.execute(subscribeRequest);
+                    getClient().execute(subscribeRequest);
                 }
                 // Delete folder
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, id, new Date());
-                    client.execute(deleteRequest);
+                    getClient().execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

@@ -61,7 +61,6 @@ import com.openexchange.ajax.contact.action.SearchRequest;
 import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.search.ContactSearchObject;
  */
 public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private Contact contact1;
     private Contact contact2;
     private FolderObject newFolder;
@@ -87,9 +85,8 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         //create a new folder
-        newFolder = Create.createPublicFolder(client, "SearchInAllFoldersTest (" + new Date().getTime() + ")", FolderObject.CONTACT);
+        newFolder = Create.createPublicFolder(getClient(), "SearchInAllFoldersTest (" + new Date().getTime() + ")", FolderObject.CONTACT);
         //create a contact in the private folder
         contact1 = new Contact();
         contact1.setDisplayName("Herbert Meier");

@@ -87,7 +87,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
 
         {
             createdPrivateFolder = new FolderObject();

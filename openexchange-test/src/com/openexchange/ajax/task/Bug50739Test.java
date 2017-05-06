@@ -65,7 +65,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug50739Test}
@@ -79,7 +78,6 @@ public class Bug50739Test extends AbstractAJAXSession {
 
     private AJAXClient client1;
     private AJAXClient client2;
-    FolderTestManager folderTestManager;
     FolderObject privateFolder;
     FolderObject sharedFolder;
 
@@ -88,23 +86,10 @@ public class Bug50739Test extends AbstractAJAXSession {
         super.setUp();
         client1 = getClient();
         client2 = getClient2();
-        folderTestManager = new FolderTestManager(client1);
-        privateFolder = folderTestManager.insertFolderOnServer(folderTestManager.generatePrivateFolder(
+        privateFolder = ftm.insertFolderOnServer(ftm.generatePrivateFolder(
             UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK, client1.getValues().getPrivateTaskFolder(), client1.getValues().getUserId()));
-        sharedFolder = folderTestManager.insertFolderOnServer(folderTestManager.generateSharedFolder(
+        sharedFolder = ftm.insertFolderOnServer(ftm.generateSharedFolder(
             UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK, client1.getValues().getPrivateTaskFolder(), client1.getValues().getUserId(), client2.getValues().getUserId()));
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (null != folderTestManager) {
-            folderTestManager.cleanUp();
-        }
-        if (null != client2) {
-            client2.logout();
-            client2 = null;
-        }
-        super.tearDown();
     }
 
     @Test

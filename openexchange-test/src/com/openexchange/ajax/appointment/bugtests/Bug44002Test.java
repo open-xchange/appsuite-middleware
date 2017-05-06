@@ -53,13 +53,11 @@ import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug44002Test}
@@ -73,7 +71,6 @@ public class Bug44002Test extends AbstractAJAXSession {
 
     private Appointment conflict;
     private Appointment series;
-    private CalendarTestManager ctm;
 
     public Bug44002Test() {
         super();
@@ -82,7 +79,7 @@ public class Bug44002Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(getClient());
+       
         conflict = new Appointment();
         series = new Appointment();
 
@@ -115,8 +112,8 @@ public class Bug44002Test extends AbstractAJAXSession {
         conflict.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         conflict.setAlarm(15);
 
-        ctm.insert(series);
-        ctm.insert(conflict);
+        catm.insert(series);
+        catm.insert(conflict);
     }
 
     /**
@@ -129,7 +126,7 @@ public class Bug44002Test extends AbstractAJAXSession {
             series.setRecurrenceType(Appointment.NO_RECURRENCE);
             series.removeInterval();
             series.removeDays();
-            ctm.update(series);
+            catm.update(series);
         } else {
             Appointment updateForSeries = new Appointment();
             updateForSeries.setParentFolderID(series.getParentFolderID());
@@ -137,24 +134,15 @@ public class Bug44002Test extends AbstractAJAXSession {
             updateForSeries.setRecurrenceType(Appointment.NO_RECURRENCE);
             updateForSeries.setLastModified(series.getLastModified());
             updateForSeries.setIgnoreConflicts(false);
-            ctm.update(updateForSeries);
+            catm.update(updateForSeries);
         }
-        List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
+        List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
         if (conflicts != null) {
             for (ConflictObject conf : conflicts) {
                 if (conf.getId() == conflict.getObjectID()) {
                     fail("Should not conflict with appointment.");
                 }
             }
-        }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
         }
     }
 }

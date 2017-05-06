@@ -129,7 +129,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         }
 
         if (!service.isEnabled(user, contextId)) {
-            throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
+            throw OAuthExceptionCodes.DISABLED_OAUTH_SERVICE_META_DATA.create(service.getDisplayName(), user, contextId);
         }
 
         return service;

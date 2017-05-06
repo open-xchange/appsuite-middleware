@@ -55,8 +55,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -65,7 +63,6 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -76,26 +73,6 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PermissionsHandDownTest extends AbstractAJAXSession {
-
-    private AJAXClient client2;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != client2) {
-                client2.logout();
-                client2 = null;
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 
     /**
      * testPermissionsHandDown
@@ -143,7 +120,7 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
             folder = Create.createPrivateFolder(name, FolderObject.TASK, getClient().getValues().getUserId());
             folder.setObjectID(objectId);
             {
-                folder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
+                folder.addPermission(Create.ocl(getClient2().getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
                 folder.setLastModified(timestamp);
                 getClient().execute(new UpdateRequest(EnumAPI.OUTLOOK, folder).setHandDown(true));
             }
@@ -162,7 +139,7 @@ public final class PermissionsHandDownTest extends AbstractAJAXSession {
 
             found = false;
             for (int i = 0; !found && i < pSize; i++) {
-                found = permissions.get(i).getEntity() == client2.getValues().getUserId();
+                found = permissions.get(i).getEntity() == getClient2().getValues().getUserId();
             }
             assertTrue("Second user not found in permissions", found);
 

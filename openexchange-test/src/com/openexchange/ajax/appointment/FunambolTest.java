@@ -63,7 +63,6 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.container.Appointment;
  */
 public final class FunambolTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private int folderId;
     private TimeZone timeZone;
     private List<Appointment> toDelete;
@@ -88,9 +86,8 @@ public final class FunambolTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        folderId = client.getValues().getPrivateAppointmentFolder();
-        timeZone = client.getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
+        timeZone = getClient().getValues().getTimeZone();
         toDelete = new ArrayList<Appointment>();
     }
 
@@ -108,7 +105,7 @@ public final class FunambolTest extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         try {
             for (Appointment app : toDelete) {
-                client.execute(new DeleteRequest(app));
+                getClient().execute(new DeleteRequest(app));
             }
         } finally {
             super.tearDown();
@@ -127,17 +124,17 @@ public final class FunambolTest extends AbstractAJAXSession {
             Appointment appointment = getAppointment();
             // Sometimes requests are really, really fast and time of first insert is same as this time. Maybe it is more a problem of XEN and a
             // frozen clock there.
-            timeBeforeCreation = new Date(client.getValues().getServerTime().getTime() - 1);
+            timeBeforeCreation = new Date(getClient().getValues().getServerTime().getTime() - 1);
 
-            final CommonInsertResponse insertResponse = client.execute(new InsertRequest(appointment, timeZone));
+            final CommonInsertResponse insertResponse = getClient().execute(new InsertRequest(appointment, timeZone));
             insertResponse.fillObject(appointment);
-            final GetResponse response = client.execute(new GetRequest(appointment));
+            final GetResponse response = getClient().execute(new GetRequest(appointment));
             reload = response.getAppointment(timeZone);
             // reload.getCreationDate() does not have milliseconds.
             lastModified = reload.getLastModified();
 
             // This request is responded even faster than creating an appointment. Therefore this must be the second request.
-            timeAfterCreation = new Date(client.getValues().getServerTime().getTime() + 1);
+            timeAfterCreation = new Date(getClient().getValues().getServerTime().getTime() + 1);
 
             System.out.println(lastModified.getTime());
             if (lastModified.getTime() % 1000 >= 500) {

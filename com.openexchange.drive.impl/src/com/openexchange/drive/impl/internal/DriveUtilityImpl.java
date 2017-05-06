@@ -297,7 +297,7 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
-    public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException {
+    public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, JSONObject jsonObject, final boolean cascadePermissions, NotificationParameters parameters) throws OXException {
         final FileStorageFolder folder = DirectoryMetadataParser.parse(jsonObject);
         final SyncSession syncSession = new SyncSession(session);
         syncSession.trace("About to update metadata for directory [" + directoryVersion + "]: " + jsonObject);
@@ -318,7 +318,7 @@ public class DriveUtilityImpl implements DriveUtility {
                  */
                 DefaultFileStorageFolder updatedFolder = new DefaultFileStorageFolder();
                 updatedFolder.setPermissions(folder.getPermissions());
-                folderID = syncSession.getStorage().getFolderAccess().updateFolder(folderID, updatedFolder);
+                folderID = syncSession.getStorage().getFolderAccess().updateFolder(folderID, updatedFolder, cascadePermissions);
                 /*
                  * re-get updated folder to determine added permissions as needed
                  */

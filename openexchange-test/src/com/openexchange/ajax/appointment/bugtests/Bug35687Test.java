@@ -92,7 +92,6 @@ public class Bug35687Test extends AbstractAJAXSession {
         app.setIgnoreConflicts(true);
 
         app = catm.insert(app);
-        System.out.println("hello");
     }
 
     @Test

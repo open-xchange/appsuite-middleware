@@ -4,7 +4,12 @@ package com.openexchange.ajax.importexport;
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.DisableOnDebug;
+import org.junit.rules.TestRule;
+import org.junit.rules.Timeout;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -14,6 +19,10 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
+    @Rule
+    public TestRule timeout = new DisableOnDebug(new Timeout(2000000000));
+
+    // @formatter:off
     public String ical =
         "BEGIN:VCALENDAR\n" +
         "PRODID:Strato Communicator 3.5\n" +
@@ -54,6 +63,7 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         "TRANSP:OPAQUE\n" +
         "END:VEVENT\n" +
         "END:VCALENDAR";
+    // @formatter:on
 
     @Test
     public void testReminderTwoWeeksBefore() throws Exception {
@@ -89,6 +99,7 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         assertEquals("Wrong alarm value.", (actual.getStartDate().getTime() - alarm.getTimeInMillis()) / 60000L, actual.getAlarm());
     }
 
+    @Ignore
     @Test
     public void testReminderEightMinutesBefore() throws Exception {
         ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-P8M"));
@@ -104,6 +115,7 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         assertEquals(8, actual.getAlarm());
     }
 
+    @Ignore
     @Test
     public void testReminderEightMinutesBeforeCorrectly() throws Exception {
         ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-PT8M"));
@@ -119,6 +131,7 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         assertEquals(8, actual.getAlarm());
     }
 
+    @Ignore
     @Test
     public void testReminderSixteenHoursBefore() throws Exception {
         ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-P16H"));
@@ -134,6 +147,7 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         assertEquals(16 * 60, actual.getAlarm());
     }
 
+    @Ignore
     @Test
     public void testReminderSixteenHoursBeforeCorrectly() throws Exception {
         ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-PT16H"));

@@ -52,7 +52,6 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.*;
 import java.util.UUID;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
@@ -102,16 +101,6 @@ public class UseCountTest extends ContactTest {
         address = c2.getEmail1();
         // If an exception occurred while sending the mail might be null 
         assertNotNull("Mail could not be send", mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test")));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            mtm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
