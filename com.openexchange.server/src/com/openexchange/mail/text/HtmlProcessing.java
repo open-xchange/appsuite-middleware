@@ -325,7 +325,7 @@ public final class HtmlProcessing {
                             retval.setContent(filterInlineImages(retval.getContent(), session, mailPath));
                         }
                     }
-                    if (embedded) {
+                    if (embedded && !retval.isBodyReplacedWithDiv()) {
                         /*
                          * Replace <body> with <div>
                          */
