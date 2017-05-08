@@ -175,11 +175,19 @@ public class CassandraServiceImpl implements CassandraService {
                 return session;
             }
 
-            // If none exists, connect
-            Future<Session> newSession = cluster.connectAsync(keyspace);
-            // Cache the new session
-            asynchronousSessions.put(keyspace, newSession);
-            return newSession;
+            try {
+                // If none exists, connect
+                Future<Session> newSession = cluster.connectAsync(keyspace);
+                // Cache the new session
+                asynchronousSessions.put(keyspace, newSession);
+                return newSession;
+            } catch (NoHostAvailableException e) {
+                throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.create(e, initializer.getContactPoints());
+            } catch (IllegalStateException e) {
+                throw CassandraServiceExceptionCodes.CANNOT_INITIALISE_CLUSTER.create(e, e.getMessage());
+            } catch (RuntimeException e) {
+                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
     }
 
