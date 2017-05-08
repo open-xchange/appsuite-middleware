@@ -56,8 +56,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -82,21 +80,19 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     private ResellerAdmin randomAdmin;
 
-    @BeforeClass
-    public static void startup() throws MalformedURLException, RemoteException, NotBoundException {
+    @Override
+    public final void setUp() throws Exception {
+        super.setUp();
+
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-    }
-
-    @Before
-    public final void setupAdmin() throws Exception {
         randomAdmin = RandomAdmin();
 
         oxresell.create(randomAdmin, DummyMasterCredentials());
     }
 
     @After
-    public final void deleteAdmin() throws Exception {
+    public final void tearDown() throws Exception {
         final Credentials creds = DummyMasterCredentials();
 
         final ResellerAdmin[] adms = oxresell.list(randomAdmin.getName(), creds);
