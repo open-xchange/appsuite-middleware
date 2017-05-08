@@ -178,8 +178,8 @@ public class Bug17264Test extends AbstractAJAXSession {
 
     private void checkAlarm(AJAXClient client, int folderId, int alarm) throws Exception {
         GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
-        GetResponse getResponse = getClient().execute(getRequest);
-        Appointment app = getResponse.getAppointment(getClient().getValues().getTimeZone());
+        GetResponse getResponse = clientA.execute(getRequest);
+        Appointment app = getResponse.getAppointment(clientA.getValues().getTimeZone());
         assertEquals("Wrong alarm value", alarm, app.getAlarm());
     }
 
