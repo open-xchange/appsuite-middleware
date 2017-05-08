@@ -104,7 +104,7 @@ public class CassandraActivator extends HousekeepingActivator {
                 throw e;
             }
             // Create a self-cancelling task to initialise the cassandra service
-            LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), DELAY, e);
+            LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), TimeUnit.MILLISECONDS.toSeconds(DELAY), e);
             TimerService service = getService(TimerService.class);
             timerTask = service.scheduleAtFixedRate(new CassandraInitialiser((CassandraServiceImpl) cassandraService), DELAY, DELAY, TimeUnit.MILLISECONDS);
         }
@@ -174,7 +174,7 @@ public class CassandraActivator extends HousekeepingActivator {
                 timerTask.cancel();
             } catch (OXException e) {
                 if (CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.equals(e)) {
-                    LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), DELAY, e);
+                    LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), TimeUnit.MILLISECONDS.toSeconds(DELAY), e);
                 }
             }
         }
