@@ -63,6 +63,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -116,6 +117,14 @@ import com.openexchange.tools.session.ServerSession;
 public class CSVContactImporter extends AbstractImporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactImporter.class);
+
+    /**
+     * A list of fields which should not be imported and dropped silently
+     */
+    protected static final EnumSet<ContactField> UNSUPPORTED_FIELDS = EnumSet.of(
+        ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY,
+        ContactField.FOLDER_ID
+    );
 
     private LinkedList<ContactFieldMapper> mappers;
 
@@ -348,6 +357,17 @@ public class CSVContactImporter extends AbstractImporter {
                 markAsDistributionlist = true;
             }
 
+            // skip unsupported import fields
+            boolean skip = false;
+            for(ContactField field: UNSUPPORTED_FIELDS){
+                if(field.getReadableName().equals(fieldName)){
+                    skip=true;
+                    break;
+                }
+            }
+            if(skip){
+                continue;
+            }
             final ContactField currField = getRelevantField(fieldName);
             if (currField == null) {
                 final boolean worked = conSet._unknownfield(contactObj, fieldName, currEntry);
