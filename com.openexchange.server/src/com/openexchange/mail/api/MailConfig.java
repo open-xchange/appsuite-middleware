@@ -366,12 +366,6 @@ public abstract class MailConfig {
         mailConfig.parseServerURL(urlInfo);
         mailConfig.doCustomParsing(mailAccount, session);
 
-        if (accountId == MailAccount.DEFAULT_ID) {
-            mailConfig.login = "thorben";
-            mailConfig.password = "netline";
-            mailConfig.parseServerURL(new UrlInfo("imap://mail.devel.open-xchange.com:143", false));
-        }
-
         return mailConfig;
     }
 
