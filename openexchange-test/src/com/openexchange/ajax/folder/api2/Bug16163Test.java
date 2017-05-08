@@ -88,7 +88,7 @@ public class Bug16163Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.CALENDAR);
         appointmentFolder = client.getValues().getPrivateAppointmentFolder();
