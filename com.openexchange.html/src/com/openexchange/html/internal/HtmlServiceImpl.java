@@ -605,9 +605,15 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
 
                 // Get HTML content
-                Document document = handler.getDocument();
-                html = hasBody ? document.outerHtml() : document.body().html();
-                htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                if (null == options.getCssPrefix()) {
+                    Document document = handler.getDocument();
+                    html = hasBody ? document.outerHtml() : document.body().html();
+                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                } else {
+                    html = handler.getHtml();
+                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                }
             }
 
             // Replace HTML entities

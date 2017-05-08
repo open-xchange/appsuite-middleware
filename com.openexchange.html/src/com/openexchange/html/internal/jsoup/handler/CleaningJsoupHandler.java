@@ -165,6 +165,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
     private final boolean changed = false;
 
     private Document document;
+    private Element div;
 
 
     /**
@@ -336,6 +337,17 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         return document;
     }
 
+    /**
+     * Gets the sanitized HTML
+     * <p>
+     * Either the full HTML document or only the <code>&lt;div&gt;</code> fragment in case a CSS prefix was specified
+     *
+     * @return The HTML
+     */
+    public String getHtml() {
+        return null == div ? document.outerHtml() : div.outerHtml();
+    }
+
     @Override
     public void finished(Document document) {
         for (Map.Entry<Node, Node> toReplace : replaceWith.entrySet()) {
@@ -354,6 +366,27 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             }
             node.remove();
         }
+
+        if (null != cssPrefix) {
+            Attributes attributes = new Attributes();
+            attributes.put("id", cssPrefix);
+            Element div = new Element(org.jsoup.parser.Tag.valueOf("div"), "", attributes);
+
+            Element head = document.head();
+            for (Element el : head.children()) {
+                if ("style".equals(el.tagName())) {
+                    div.appendChild(el);
+                }
+            }
+
+            Element body = document.body();
+            for (Node child : new ArrayList<>(body.childNodes())) {
+                div.appendChild(child);
+            }
+
+            this.div = div;
+        }
+
         this.document = document;
     }
 
