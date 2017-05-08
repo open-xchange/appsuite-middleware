@@ -1,3 +1,9 @@
+open-xchange-linkedin (7.8.3-23) stable; urgency=medium
+
+  * Build for patch 2017-05-15 (4132)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 08 May 2017 13:56:07 +0200
+
 open-xchange-linkedin (7.8.3-22) stable; urgency=medium
 
   * Build for patch 2017-05-02 (4113)
