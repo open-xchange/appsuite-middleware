@@ -47,7 +47,7 @@ public class Bug8453Test extends AppointmentTest {
 
         appointmentObj.setUsers(users);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
 
         final Appointment recurrenceUpdate = new Appointment();
         recurrenceUpdate.setTitle("testBug8453 - exception");
@@ -60,17 +60,17 @@ public class Bug8453Test extends AppointmentTest {
         recurrenceUpdate.setUsers(users);
         recurrenceUpdate.setAlarm(60);
 
-        updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         compareObject(appointmentObj, loadAppointment);
 
         final Date modified = loadAppointment.getLastModified();
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostURI(), getLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostURI(), getLogin(), getPassword());
         compareObject(appointmentObj, loadAppointment);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
     }
 }

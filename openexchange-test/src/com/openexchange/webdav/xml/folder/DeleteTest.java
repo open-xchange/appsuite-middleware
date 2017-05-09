@@ -10,10 +10,10 @@ public class DeleteTest extends FolderTest {
     @Test
     public void testDeleteFolder() throws Exception {
         FolderObject folderObj = createFolderObject(userId, "testDeleteFolder1", FolderObject.CALENDAR, false);
-        final int objectId1 = insertFolder(webCon, folderObj, getHostURI(), login, password, context);
+        final int objectId1 = insertFolder(webCon, folderObj, getHostURI(), login, password);
         folderObj = createFolderObject(userId, "testDeleteFolder2", FolderObject.CALENDAR, false);
-        final int objectId2 = insertFolder(webCon, folderObj, getHostURI(), login, password, context);
+        final int objectId2 = insertFolder(webCon, folderObj, getHostURI(), login, password);
 
-        deleteFolder(webCon, new int[] { objectId1, objectId2 }, getHostURI(), login, password, context);
+        deleteFolder(webCon, new int[] { objectId1, objectId2 }, getHostURI(), login, password);
     }
 }

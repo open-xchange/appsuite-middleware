@@ -23,7 +23,7 @@ public class FreeBusyTest extends AbstractWebdavTest {
 
     @Test
     public void testConnect() throws Exception {
-        final int contextId = GroupUserTest.getContextId(getWebConversation(), getHostURI(), getLogin(), getPassword(), context);
+        final int contextId = GroupUserTest.getContextId(getWebConversation(), getHostURI(), getLogin(), getPassword());
 
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 7));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 7));

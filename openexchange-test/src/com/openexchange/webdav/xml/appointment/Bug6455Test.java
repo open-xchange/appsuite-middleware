@@ -32,14 +32,14 @@ public class Bug6455Test extends AppointmentTest {
         int objectId = 0;
 
         try {
-            objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
+            objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "APP-0072");
         }
 
         if (objectId > 0) {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         }
     }
 }

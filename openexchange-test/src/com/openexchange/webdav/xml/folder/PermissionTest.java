@@ -13,7 +13,7 @@ public class PermissionTest extends FolderTest {
 
     @Test
     public void testInsertPrivateFolderWithoutPermission() throws Exception {
-        GroupUserTest.getUserId(getSecondWebConversation(), getHostURI(), getSecondLogin(), getPassword(), context);
+        GroupUserTest.getUserId(getSecondWebConversation(), getHostURI(), getSecondLogin(), getPassword());
 
         FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -26,23 +26,23 @@ public class PermissionTest extends FolderTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int objectId = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword(), context);
+        final int objectId = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
         folderObj = createFolderObject(userId, "testInsertPrivateFolderWithoutPermission", FolderObject.TASK, false);
         folderObj.setParentFolderID(objectId);
         try {
-            final int subFolderId1 = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword(), context);
-            deleteFolder(getWebConversation(), new int[] { subFolderId1 }, getHostURI(), getLogin(), getPassword(), context);
+            final int subFolderId1 = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
+            deleteFolder(getWebConversation(), new int[] { subFolderId1 }, getHostURI(), getLogin(), getPassword());
             fail("conflict permission expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), 1002);
         }
 
-        deleteFolder(getWebConversation(), new int[] { objectId }, getHostURI(), getLogin(), getPassword(), context);
+        deleteFolder(getWebConversation(), new int[] { objectId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
     public void testInsertPublicFolderWithoutPermission() throws Exception {
-        GroupUserTest.getUserId(getSecondWebConversation(), getHostURI(), getSecondLogin(), getPassword(), context);
+        GroupUserTest.getUserId(getSecondWebConversation(), getHostURI(), getSecondLogin(), getPassword());
 
         FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testInsertPublicFolderWithoutPermission" + System.currentTimeMillis());
@@ -55,17 +55,17 @@ public class PermissionTest extends FolderTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int objectId = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword(), context);
+        final int objectId = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
         folderObj = createFolderObject(userId, "testInsertPublicFolderWithoutPermission", FolderObject.TASK, true);
         folderObj.setParentFolderID(objectId);
         try {
-            final int subFolderId1 = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword(), context);
-            deleteFolder(getWebConversation(), new int[] { subFolderId1 }, getHostURI(), getLogin(), getPassword(), context);
+            final int subFolderId1 = insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
+            deleteFolder(getWebConversation(), new int[] { subFolderId1 }, getHostURI(), getLogin(), getPassword());
             fail("conflict permission expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), 1002);
         }
 
-        deleteFolder(getWebConversation(), new int[] { objectId }, getHostURI(), getLogin(), getPassword(), context);
+        deleteFolder(getWebConversation(), new int[] { objectId }, getHostURI(), getLogin(), getPassword());
     }
 }

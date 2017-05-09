@@ -33,7 +33,7 @@ public class Bug4395Test extends AppointmentTest {
     public void tearDown() throws Exception {
         if (null != folderObj) {
             if (0 != parentFolderId) {
-                FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, getHostURI(), getSecondLogin(), getPassword(), context);
+                FolderTest.deleteFolder(getSecondWebConversation(), new int[] { parentFolderId }, getHostURI(), getSecondLogin(), getPassword());
             }
         }
 
@@ -41,7 +41,7 @@ public class Bug4395Test extends AppointmentTest {
 
     @Test
     public void testBug4395() throws Exception {
-        final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostURI(), getSecondLogin(), getPassword(), context);
+        final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostURI(), getSecondLogin(), getPassword());
         final int secondUserId = sharedFolderObject.getCreatedBy();
 
         folderObj = new FolderObject();
@@ -57,7 +57,7 @@ public class Bug4395Test extends AppointmentTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        parentFolderId = FolderTest.insertFolder(getSecondWebConversation(), folderObj, getHostURI(), getSecondLogin(), getPassword(), context);
+        parentFolderId = FolderTest.insertFolder(getSecondWebConversation(), folderObj, getHostURI(), getSecondLogin(), getPassword());
 
         permission = new OCLPermission[] { FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false), FolderTest.createPermission(secondUserId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, true),
         };
@@ -65,7 +65,7 @@ public class Bug4395Test extends AppointmentTest {
         folderObj.setPermissionsAsArray(permission);
         folderObj.setObjectID(parentFolderId);
 
-        FolderTest.updateFolder(getSecondWebConversation(), folderObj, getHostURI(), getSecondLogin(), getPassword(), context);
+        FolderTest.updateFolder(getSecondWebConversation(), folderObj, getHostURI(), getSecondLogin(), getPassword());
 
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug4395");
@@ -75,10 +75,10 @@ public class Bug4395Test extends AppointmentTest {
         appointmentObj.setParentFolderID(parentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int appointmentObjectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
+        final int appointmentObjectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
         appointmentObj.setObjectID(appointmentObjectId);
 
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), appointmentObjectId, parentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), appointmentObjectId, parentFolderId, getHostURI(), getLogin(), getPassword());
         compareObject(appointmentObj, loadAppointment);
     }
 }

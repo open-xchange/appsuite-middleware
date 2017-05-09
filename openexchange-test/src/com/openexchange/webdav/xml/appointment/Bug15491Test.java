@@ -86,20 +86,20 @@ public class Bug15491Test extends AppointmentTest {
     @After
     public void tearDown() throws Exception {
         if (objectId != -1) {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         }
     }
 
     @Test
     public void testRead() throws Exception {
-        objectId = insertAppointment(getWebConversation(), appointment, getHostURI(), getLogin(), getPassword(), context);
+        objectId = insertAppointment(getWebConversation(), appointment, getHostURI(), getLogin(), getPassword());
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         assertNotNull("Loaded Appointment is null", loadAppointment);
         assertNotNull("Uid is null", loadAppointment.getUid());
         assertFalse("Uid is empty", loadAppointment.getUid().trim().equals(""));
         Date date = new Date(loadAppointment.getLastModified().getTime() - 1);
-        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, getHostURI(), getLogin(), getPassword(), context);
+        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, getHostURI(), getLogin(), getPassword());
 
         boolean found = false;
         for (Appointment current : listAppointments) {
@@ -116,16 +116,16 @@ public class Bug15491Test extends AppointmentTest {
     @Test
     public void testWrite() throws Exception {
         appointment.setUid("ichbineineuid");
-        objectId = insertAppointment(getWebConversation(), appointment, getHostURI(), getLogin(), getPassword(), context);
+        objectId = insertAppointment(getWebConversation(), appointment, getHostURI(), getLogin(), getPassword());
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         assertNotNull("Loaded Appointment is null", loadAppointment);
         assertNotNull("Uid is null", loadAppointment.getUid());
         assertEquals("Wrong Uid", "ichbineineuid", loadAppointment.getUid());
 
         Date date = new Date(loadAppointment.getLastModified().getTime() - 1);
 
-        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, getHostURI(), getLogin(), getPassword(), context);
+        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, date, true, true, getHostURI(), getLogin(), getPassword());
 
         boolean found = false;
         for (Appointment current : listAppointments) {

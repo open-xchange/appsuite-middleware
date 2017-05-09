@@ -50,10 +50,7 @@
 package com.openexchange.webdav;
 
 import static org.junit.Assert.assertTrue;
-import javax.xml.parsers.SAXParserFactory;
 import org.jdom2.Namespace;
-import org.jdom2.input.SAXBuilder;
-import org.jdom2.input.sax.XMLReaders;
 import org.junit.Before;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
@@ -125,41 +122,29 @@ public abstract class AbstractWebdavTest {
 
         testContext = TestContextPool.getAllTimeAvailableContexts().get(0);
         TestUser testUser = testContext.acquireUser();
-        login = testUser.getUser();
+        login = testUser.getLogin();
         password = testUser.getPassword();
         context = testContext.getName();
 
         TestUser testUser2 = testContext.acquireUser();
-        secondlogin = testUser2.getUser();
+        secondlogin = testUser2.getLogin();
 
         hostName = AJAXConfig.getProperty(Property.PROTOCOL) + "://" + AJAXConfig.getProperty(Property.HOSTNAME);
 
-        userParticipant2 = testContext.getUserParticipants().get(1);
-        userParticipant3 = testContext.getUserParticipants().get(2);
-        groupParticipant = testContext.getGroupParticipants().get(0);
-        resourceParticipant = testContext.getResourceParticipants().get(0);
+        userParticipant2 = testContext.getUserParticipants().get(1) + "@" + context;
+        userParticipant3 = testContext.getUserParticipants().get(2) + "@" + context;
+        groupParticipant = testContext.getGroupParticipants().get(0) + "@" + context;
+        resourceParticipant = testContext.getResourceParticipants().get(0) + "@" + context;
 
-        try {
-            SAXParserFactory fac = SAXParserFactory.newInstance();
-            fac.setNamespaceAware(true);
-            fac.setValidating(false);
-            XMLReaders nonvalidating = XMLReaders.NONVALIDATING;
-            new SAXBuilder();
-        } catch (Throwable t) {
-            throw new Exception(t);
-        }
-        userId = GroupUserTest.getUserId(getWebConversation(), getHostURI(), getLogin(), getPassword(), context);
+        userId = GroupUserTest.getUserId(getWebConversation(), getHostURI(), getLogin(), getPassword());
         assertTrue("user not found", userId != -1);
 
-        authData = getAuthData(login, password, context);
+        authData = getAuthData(login, password);
     }
 
-    protected static String getAuthData(String login, String password, String context) throws Exception {
+    protected static String getAuthData(String login, String password) throws Exception {
         if (password == null) {
             password = "";
-        }
-        if (context != null && context.length() > 0) {
-            login = login + "@" + context;
         }
         return new String(Base64.encode(login + ":" + password));
     }

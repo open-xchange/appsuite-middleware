@@ -39,7 +39,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
 
         final Date exceptionStartDate = simpleDateFormatUTC.parse("2007-06-06 00:00:00");
         final Date exceptionEndDate = simpleDateFormatUTC.parse("2007-06-07 00:00:00");
@@ -56,20 +56,20 @@ public class Bug8447Test extends AbstractRecurrenceTest {
         exceptionAppointmentObject.setParentFolderID(appointmentFolderId);
         exceptionAppointmentObject.setIgnoreConflicts(true);
 
-        final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
         appointmentObj.setObjectID(objectId);
         appointmentObj.setDeleteExceptions(new Date[] { recurrenceDatePosition });
 
-        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
         try {
-            loadAppointment(webCon, exceptionObjectId, appointmentFolderId, getHostURI(), login, password, context);
+            loadAppointment(webCon, exceptionObjectId, appointmentFolderId, getHostURI(), login, password);
             fail("object not found exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
     }
 }
