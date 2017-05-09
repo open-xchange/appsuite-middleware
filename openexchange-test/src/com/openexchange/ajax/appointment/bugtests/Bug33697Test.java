@@ -97,11 +97,10 @@ public class Bug33697Test extends AbstractAppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        userY = testContext.acquireUser();
         userZ = testContext.acquireUser();
 
         clientX = getClient();
-        clientY = new AJAXClient(userY);
+        clientY = getClient2();
         clientZ = new AJAXClient(userZ);
 
         userValuesX = clientX.getValues();
@@ -125,9 +124,11 @@ public class Bug33697Test extends AbstractAppointmentTest {
             deleteCalendarFolder(clientX, bug33697SubfolderX);
             deleteCalendarFolder(clientY, bug33697SubfolderY);
             deleteCalendarFolder(clientZ, bug33697SubfolderZ);
-            clientX.logout();
-            clientY.logout();
-            clientZ.logout();
+            
+            if (null != clientZ) {
+                clientZ.logout();
+                clientZ = null;
+            }
         } finally {
             super.tearDown();
         }

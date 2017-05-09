@@ -81,6 +81,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -163,6 +166,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -1759,7 +1763,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
             // Permissions
             Permission[] perms = folder.getPermissions();
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
+            UpdatedFolderHandler handler = updatedFolderHandlerFor(storageParameters);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, Collections.singleton(handler), con, con);
             boolean isUpdated = false;
             if (null != perms) {
                 final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
@@ -1806,6 +1811,35 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 inheritPublicFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis);
             }
         }
+    }
+
+    private UpdatedFolderHandler updatedFolderHandlerFor(final StorageParameters storageParameters) {
+        return new UpdatedFolderHandler() {
+
+            @Override
+            public void onFolderUpdated(FolderObject fo, Connection con) {
+                CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        User user = storageParameters.getUser();
+                        Context ctx = storageParameters.getContext();
+                        UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+
+                        boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                        DatabaseFolder f = DatabaseFolderConverter.convert(fo, user, userPermissionBits, ctx, storageParameters.getSession(), altNames, con);
+                        f.setTreeID(REAL_TREE_ID);
+
+                        if (f.isCacheable()) {
+                            Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                            CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(fo.getObjectID()));
+                            globalCache.putInGroup(cacheKey, Integer.toString(storageParameters.getContextId()), f, true);
+                        }
+                    } catch (final OXException e) {
+                        LOG.warn("", e);
+                    }
+                }
+            }
+        };
     }
 
     private List<OCLPermission> getCombinedFolderPermissions(FolderObject folder, FolderObject parent) {

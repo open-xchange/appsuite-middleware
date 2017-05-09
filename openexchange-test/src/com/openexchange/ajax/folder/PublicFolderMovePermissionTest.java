@@ -65,7 +65,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * {@link PublicFolderMovePermissionTest}
@@ -79,7 +79,6 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
     private AJAXClient client2;
     private FolderObject folder;
     private FolderObject toMove;
-    private OCLPermission permission;
 
     @Override
     public void setUp() throws Exception {
@@ -87,7 +86,7 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         client = getClient();
         client2 = getClient2();
 
-        permission = new OCLPermission();
+        OCLPermission permission = new OCLPermission();
         permission.setEntity(client2.getValues().getUserId());
         permission.setFolderAdmin(false);
         permission.setGroupPermission(false);
@@ -149,7 +148,7 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         Assert.assertNotNull(f);
         List<OCLPermission> perms = f.getPermissions();
         for (OCLPermission parentPerm : parent.getPermissions()) {
-            Assert.assertTrue(comparePermissions(perms, parentPerm));
+            assertThat("Permissions were not equal", comparePermissions(perms, parentPerm));
         }
     }
 
@@ -182,12 +181,17 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         Assert.assertNotNull(f);
         List<OCLPermission> perms = f.getPermissions();
         for (OCLPermission parentPerm : parent.getPermissions()) {
-            Assert.assertTrue(comparePermissions(perms, parentPerm));
+            assertThat("Permissions were not equal", comparePermissions(perms, parentPerm));
         }
     }
 
     private boolean comparePermissions(List<OCLPermission> parent, OCLPermission p) {
+        // Debug logging
+        System.out.println("PublicFolderMovePermissionTest start");
+        System.out.println("Parent permissions:");
         for (OCLPermission p2 : parent) {
+            // Debug logging
+            System.out.println(p2);
             if ((p2.getEntity() == p.getEntity()) &&
             (p2.getFolderPermission() == p.getFolderPermission()) &&
             (p2.getReadPermission() == p.getReadPermission()) &&
@@ -198,12 +202,8 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
                 return true;
             }
         }
+
         // Debug logging
-        System.out.println("PublicFolderMovePermissionTest start");
-        System.out.println("Parent permissions:");
-        for (OCLPermission p2 : parent) {
-            System.out.println(p2);
-        }
         System.out.println("Permission:");
         System.out.println(p);
         System.out.println("PublicFolderMovePermissionTest end");

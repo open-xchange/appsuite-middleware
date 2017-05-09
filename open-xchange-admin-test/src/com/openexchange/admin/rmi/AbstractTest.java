@@ -83,7 +83,15 @@ public abstract class AbstractTest {
     }
 
     protected static String getRMIHost() {
-        return AJAXConfig.getProperty(Property.RMI_HOST);
+        String host = "localhost";
+
+        if (System.getProperty("rmi_test_host") != null) {
+            host = System.getProperty("rmi_test_host");
+        } else if (AJAXConfig.getProperty(Property.RMI_HOST) != null) {
+            host = AJAXConfig.getProperty(Property.RMI_HOST);
+        }
+
+        return host;
     }
 
     public static Credentials DummyCredentials() {

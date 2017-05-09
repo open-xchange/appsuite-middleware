@@ -72,16 +72,16 @@ import com.openexchange.test.TestManager;
 
 /**
  * {@link MoveTestNew} This test describes the current status of the calendar implementation. It does not cover any user stories or expected
- * bahaviours. This is just to ensure, no unintended sideffects occur during calendar changes. It's subject to change, if the behaviour
+ * behaviours. This is just to ensure, no unintended side effects occur during calendar changes. It's subject to change, if the behaviour
  * should change.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MoveTestNew extends AbstractAppointmentTest {
 
-    private AJAXClient clientB, clientC;
+    private AJAXClient clientC;
 
-    private UserValues valuesB, valuesC;
+    private UserValues valuesC;
 
     private CalendarTestManager ctmB, ctmC;
 
@@ -97,22 +97,20 @@ public class MoveTestNew extends AbstractAppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        clientB = getClient2();
         clientC = new AJAXClient(testContext.acquireUser());
 
-        valuesB = clientB.getValues();
         valuesC = clientC.getValues();
 
-        idB = valuesB.getUserId();
+        idB = getClient2().getValues().getUserId();
         idC = valuesC.getUserId();
 
-        ctmB = new CalendarTestManager(clientB);
+        ctmB = new CalendarTestManager(getClient2());
         ctmC = new CalendarTestManager(clientC);
 
         tm.add(ctmB);
         tm.add(ctmC);
 
-        ftmB = new FolderTestManager(clientB);
+        ftmB = new FolderTestManager(getClient2());
         ftmC = new FolderTestManager(clientC);
 
         tm.add(ftmB);
@@ -126,11 +124,11 @@ public class MoveTestNew extends AbstractAppointmentTest {
         folderA1 = createPrivateFolder("SubfolderA1" + UUID.randomUUID().toString(), ftm, getClient());
         ftm.insertFolderOnServer(folderA1);
 
-        folderB = ftmB.getFolderFromServer(valuesB.getPrivateAppointmentFolder());
+        folderB = ftmB.getFolderFromServer(getClient2().getValues().getPrivateAppointmentFolder());
         addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
-        folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, clientB, getClient());
+        folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, getClient2(), getClient());
         ftmB.insertFolderOnServer(folderB1);
-        folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, clientB, getClient());
+        folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, getClient2(), getClient());
         ftmB.insertFolderOnServer(folderB2);
 
         folderC = ftmC.getFolderFromServer(valuesC.getPrivateAppointmentFolder());
@@ -161,6 +159,11 @@ public class MoveTestNew extends AbstractAppointmentTest {
             for (TestManager manager : tm) {
                 manager.cleanUp();
             }
+            
+            if(null != clientC) {
+                clientC.logout();
+                clientC = null;
+            }            
         } finally {
             super.tearDown();
         }

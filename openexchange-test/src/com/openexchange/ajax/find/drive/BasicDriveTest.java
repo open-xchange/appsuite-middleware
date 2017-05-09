@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
@@ -73,7 +72,6 @@ import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
@@ -117,8 +115,6 @@ public class BasicDriveTest extends AbstractFindTest {
 
     private FolderObject testFolder;
 
-    private InfostoreTestManager manager;
-
     private static final String SEARCH = "BasicDriveTest";
     private static final String SUBFOLDER_SEARCH = "jpg";
 
@@ -132,27 +128,15 @@ public class BasicDriveTest extends AbstractFindTest {
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
         testFolder = ftm.generatePrivateFolder(folderName, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), getClient().getValues().getUserId());
         testFolder = ftm.insertFolderOnServer(testFolder);
-
-        manager = new InfostoreTestManager(getClient());
+        
         metadata = new DefaultFile();
         metadata.setFileName(file.getName());
         metadata.setTitle(file.getName());
         metadata.setDescription("Test file for testing new find api");
         metadata.setFolderId(String.valueOf(testFolder.getObjectID()));
         metadata.setMeta(Collections.singletonMap("key", (Object) "value"));
-        manager.newAction(metadata, file);
+        itm.newAction(metadata, file);
 
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (manager != null) {
-                manager.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -185,7 +169,7 @@ public class BasicDriveTest extends AbstractFindTest {
             f.setDescription("No desc");
             f.setFolderId(String.valueOf(parentId));
             f.setMeta(Collections.singletonMap("key", (Object) "value"));
-            manager.newAction(f);
+            itm.newAction(f);
             files.add(f);
             f = new DefaultFile();
             name = (fileCounter++) + ".jpg";
@@ -194,7 +178,7 @@ public class BasicDriveTest extends AbstractFindTest {
             f.setDescription("No desc");
             f.setFolderId(String.valueOf(parentId));
             f.setMeta(Collections.singletonMap("key", (Object) "value"));
-            manager.newAction(f);
+            itm.newAction(f);
             files.add(f);
         }
 
@@ -366,7 +350,7 @@ public class BasicDriveTest extends AbstractFindTest {
 
     @Test
     public void testFolderTypeFacet() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         try {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
             AJAXClient[] clients = new AJAXClient[] { getClient(), getClient(), client2 };
@@ -385,9 +369,9 @@ public class BasicDriveTest extends AbstractFindTest {
             documents[2] = new DefaultFile(metadata);
             documents[2].setTitle(randomUID());
             documents[2].setFolderId(String.valueOf(folders[2].getObjectID()));
-            manager.newAction(documents[0]);
-            manager.newAction(documents[1]);
-            manager.newAction(documents[2]);
+            itm.newAction(documents[0]);
+            itm.newAction(documents[1]);
+            itm.newAction(documents[2]);
 
             for (int i = 0; i < 3; i++) {
                 FolderType folderType = typesInOrder[i];
@@ -441,7 +425,7 @@ public class BasicDriveTest extends AbstractFindTest {
         File deletedDocument = new DefaultFile(metadata);
         deletedDocument.setTitle(randomUID());
         deletedDocument.setFolderId(String.valueOf(deletedFolder.getObjectID()));
-        manager.newAction(deletedDocument);
+        itm.newAction(deletedDocument);
         ftm.deleteFolderOnServer(deletedFolder);
         Folder reloadedFolder = getClient().execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getStorageFolder();
         FolderObject trashFolder = getClient().execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentID())).getFolder();
