@@ -777,9 +777,15 @@ public class TestCommand extends Command {
             retval.addAll(command.getRequired());
         }
         for (final String text : this.tagArguments) {
-            final String string = this.command.getMatchTypes().get(text);
+            String string = this.command.getMatchTypes().get(text);
             if (null != string && (0 != string.length())) {
                 retval.add(string);
+                continue;
+            }
+            string = this.command.getAddress().get(text);
+            if (null != string && (0 != string.length())) {
+                retval.add(string);
+                continue;
             }
         }
 
