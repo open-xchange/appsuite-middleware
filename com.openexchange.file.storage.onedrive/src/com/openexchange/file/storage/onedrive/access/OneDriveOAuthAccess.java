@@ -125,7 +125,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             }
             setOAuthAccount(liveconnectOAuthAccount);
 
-            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, getSession());
+            OAuthAccount newAccount = recreateTokenIfExpired(liveconnectOAuthAccount, getSession());
             if (newAccount != null) {
                 setOAuthAccount(newAccount);
             }
@@ -185,25 +185,27 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     /**
      * Re-creates the token if expired
      *
-     * @param considerExpired
      * @param liveconnectOAuthAccount
      * @param session
      * @return
      * @throws OXException
      */
-    private OAuthAccount recreateTokenIfExpired(boolean considerExpired, OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
-        // Create Scribe Microsoft OneDrive OAuth service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
-        serviceBuilder.apiKey(liveconnectOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(liveconnectOAuthAccount.getMetaData().getAPISecret(session));
-        MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
-
+    private OAuthAccount recreateTokenIfExpired(OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
         // Check expiration
-        if (considerExpired || scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken())) {
+        if (isExpired(liveconnectOAuthAccount, session)) {
             // Expired...
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
             return clusterLockService.runClusterTask(new OneDriveReauthorizeClusterTask(session, liveconnectOAuthAccount), new ExponentialBackOffRetryPolicy());
         }
         return null;
+    }
+
+    private boolean isExpired(OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
+        // Create Scribe Microsoft OneDrive OAuth service
+        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+        serviceBuilder.apiKey(liveconnectOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(liveconnectOAuthAccount.getMetaData().getAPISecret(session));
+        MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
+        return scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken());
     }
 
     private class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
