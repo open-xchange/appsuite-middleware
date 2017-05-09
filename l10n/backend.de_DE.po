@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-28 11:03+0200\n"
+"PO-Revision-Date: 2017-05-09 09:03+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3616,6 +3616,13 @@ msgstr ""
 "Derzeit kann keine neue Verbindung zum Server %1$s mit dem Login %2$s "
 "hergestellt werden. Bitte versuchen Sie es erneut."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+msgid ""
+"Update of folder failed. Owner is required to keep administrative rights."
+msgstr ""
+"Die Aktualisierung des Ordners ist fehlgeschlagen. Der Eigentümer ist "
+"verpflichtet, die Adminrechte zu behalten."
+
 #. The specified group \"%4$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
 msgid "The specified group \"%4$s\" is not supported."
@@ -4305,8 +4312,14 @@ msgstr "Sie müssen %1$s explizit ermächtigen, %2$s zu abonnieren"
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
-msgid "The scope %1$s is not supported by the provider"
-msgstr "%1$s wird vom Provider nicht unterstützt"
+msgid "The scope %1$s is not supported by the provider or has been disabled"
+msgstr ""
+"Der Bereich %1$s wird vom Provider nicht unterstützt oder wurde deaktiviert"
+
+#. Thrown in case OAuth for a certain provider access has been disabled for a user
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
+msgid "'%1$s' OAuth service is not enabled for you."
+msgstr "'%1$s' OAuth-Service ist für Sie nicht aktiviert."
 
 #. *
 #. * New password too short.
@@ -5509,14 +5522,14 @@ msgid "Appointments must have at least one participant."
 msgstr "Termine müssen mindestens einen Teilnehmer haben."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
-#, fuzzy
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen von Terminen in "
+"Sie haben keine ausreichenden Berechtigungen zum Lesen von Terminen in "
 "diesem Ordner."
 
 #. *
@@ -5996,6 +6009,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
 msgid "The pattern \"%1$s\" has been ignored during search."
 msgstr "Das Muster \"%1$s\" wurde während der Suche ignoriert."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
+msgid "Invalid number of properties for distribution list."
+msgstr "Ungültige Anzahl von Eigenschaften für die Verteilerliste."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
@@ -7497,6 +7514,10 @@ msgstr "Gast"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:57
 msgid "Broken CSV file."
 msgstr "Kaputte CSV-Datei."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
+msgid "Error at row %1$s: %2$s"
+msgstr "Fehler in Zeile %1$s: %2$s"
 
 #. The document you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
@@ -13349,6 +13370,17 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The scope %1$s is not supported by the provider"
+#~ msgstr "%1$s wird vom Provider nicht unterstützt"
+
+#, fuzzy
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Lesen von Terminen "
+#~ "in diesem Ordner."
 
 #~ msgid ""
 #~ "The HTML content cannot be safely displayed. The content is displayed as "
