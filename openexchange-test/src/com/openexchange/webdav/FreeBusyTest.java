@@ -23,7 +23,7 @@ public class FreeBusyTest extends AbstractWebdavTest {
 
     @Test
     public void testConnect() throws Exception {
-        final int contextId = GroupUserTest.getContextId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int contextId = GroupUserTest.getContextId(getWebConversation(), getHostURI(), getLogin(), getPassword(), context);
 
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 7));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 7));
@@ -35,7 +35,7 @@ public class FreeBusyTest extends AbstractWebdavTest {
         parameter.setParameter("username", getLogin());
         parameter.setParameter("server", "open-xchange.tux");
 
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FREEBUSY_URL + parameter.getURLParameters());
+        final WebRequest req = new GetMethodWebRequest(getHostURI() + FREEBUSY_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());

@@ -33,7 +33,7 @@ public class Bug7915Test extends AbstractRecurrenceTest {
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
 
         final Date exceptionStartDate = simpleDateFormatUTC.parse("2007-06-06 00:00:00");
         final Date exceptionEndDate = simpleDateFormatUTC.parse("2007-06-07 00:00:00");
@@ -50,26 +50,26 @@ public class Bug7915Test extends AbstractRecurrenceTest {
         exceptionAppointmentObject.setParentFolderID(appointmentFolderId);
         exceptionAppointmentObject.setIgnoreConflicts(true);
 
-        final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+        final int exceptionObjectId = updateAppointment(getWebConversation(), exceptionAppointmentObject, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
 
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
         compareObject(appointmentObj, loadAppointment);
 
         final Date modified = loadAppointment.getLastModified();
 
         exceptionAppointmentObject.setObjectID(exceptionObjectId);
-        loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
 
         // Loaded exception MUST NOT contains any recurrence information except recurrence identifier and position.
         compareObject(exceptionAppointmentObject, loadAppointment);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostURI(), getLogin(), getPassword(), context);
         compareObject(appointmentObj, loadAppointment);
 
-        loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, decrementDate(modified), getHostURI(), getLogin(), getPassword(), context);
         compareObject(exceptionAppointmentObject, loadAppointment);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
     }
 }

@@ -70,7 +70,7 @@ import com.openexchange.ajax.snippet.actions.ListSnippetRequest;
 import com.openexchange.ajax.snippet.actions.ListSnippetResponse;
 import com.openexchange.ajax.snippet.actions.NewSnippetRequest;
 import com.openexchange.ajax.snippet.actions.NewSnippetResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 
 /**
@@ -159,7 +159,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         try {
             byte[] buffer = new byte[4096];
             ous = new ByteArrayOutputStream();
-            ios = new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename));
+            ios = new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename));
             int read = 0;
             while ((read = ios.read(buffer)) != -1) {
                 ous.write(buffer, 0, read);

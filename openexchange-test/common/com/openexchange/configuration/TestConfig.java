@@ -76,18 +76,6 @@ public class TestConfig extends AbstractConfig {
          */
         PROV_PROPS("provisioningFile"),
         /**
-         * mail.properties
-         */
-        MAIL_PROPS("mailPropertiesFile"),
-        /**
-         * pubsub.properties
-         */
-        PUBSUB_PROPS("pubsubPropertiesFile"),
-        /**
-         * webdav.properties
-         */
-        WEBDAV_PROPS("webdavPropertiesFile"),
-        /**
          * googletest.properties
          */
         GOOGLE_PROPS("googlePropertiesFile"),

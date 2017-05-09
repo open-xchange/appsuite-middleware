@@ -61,7 +61,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import org.junit.After;
 import org.junit.Before;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -115,15 +115,15 @@ public abstract class AbstractMailTest {
         /*
          * Init test environment
          */
-        MailConfig.init();
-        server = MailConfig.getProperty(MailConfig.Property.SERVER);
-        port = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT));
-        login = MailConfig.getProperty(MailConfig.Property.LOGIN);
-        secondUser = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.SECOND_USER));
-        password = MailConfig.getProperty(MailConfig.Property.PASSWORD);
-        user = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.USER));
-        cid = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.CONTEXT));
-        testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        AJAXConfig.init();
+        server = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        port = Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.MAIL_PORT));
+        login = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
+        secondUser = Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER));
+        password = AJAXConfig.getProperty(AJAXConfig.Property.PASSWORD);
+        user = 3; //FIXME get user/context dynamically
+        cid = 1; //FIXME get user/context dynamically
+        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
     }
 
     @After

@@ -93,7 +93,7 @@ public final class Bug10859Test2 extends AbstractWebDAVSession {
         appointment.setMonth(-1);
         appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
         appointment.setIgnoreConflicts(true);
-        //        final int objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
-        //        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        //        final int objectId = insertAppointment(getWebConversation(), appointment, getHostName(), getLogin(), getPassword());
+        //        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
     }
 }

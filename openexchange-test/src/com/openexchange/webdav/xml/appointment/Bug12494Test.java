@@ -56,7 +56,7 @@ public class Bug12494Test extends AppointmentTest {
 
             appointmentObj.setUsers(users);
 
-            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
 
             /*
              * Create a change exception
@@ -71,7 +71,7 @@ public class Bug12494Test extends AppointmentTest {
             recurrenceUpdate.setIgnoreConflicts(true);
             recurrenceUpdate.setUsers(users);
             //recurrenceUpdate.setAlarm(60);
-            final int exceptionId = updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+            final int exceptionId = updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
 
             /*
              * Update change exception's time frame
@@ -81,16 +81,16 @@ public class Bug12494Test extends AppointmentTest {
             recurrenceUpdate.setEndDate(new Date(endTime.getTime() + 1200000));
             recurrenceUpdate.removeRecurrenceDatePosition();
             recurrenceUpdate.setIgnoreConflicts(true);
-            updateAppointment(getWebConversation(), recurrenceUpdate, exceptionId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+            updateAppointment(getWebConversation(), recurrenceUpdate, exceptionId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
 
             /*
              * Load updated change exception
              */
-            final Appointment loadedChangeException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            final Appointment loadedChangeException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
             compareObject(recurrenceUpdate, loadedChangeException);
         } finally {
             if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
             }
         }
     }

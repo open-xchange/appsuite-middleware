@@ -78,8 +78,8 @@ import freemarker.template.Configuration;
 
 /**
  * Tests a template for proper rendering of contacts by checking if they can be converted back after being rendered in a template. The tests
- * derived from this class usually depend on properly setting the path to the templates to be tested. This is set in
- * <code>pubsub.properties</code>. The tests are in the general test repository, because they depend both on the publish bundle (for the
+ * derived from this class usually depend on properly setting the path to the templates to be tested.
+ * The tests are in the general test repository, because they depend both on the publish bundle (for the
  * templates), the templating bundle (for templating) and the subscribe bundle (for parsing).
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

@@ -73,7 +73,7 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
@@ -118,7 +118,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
         itm = new InfostoreTestManager(getClient());
         itm.setFailOnError(true);
-        java.io.File upload = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "contact_image.png");
+        java.io.File upload = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "contact_image.png");
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
             boolean shared = false;

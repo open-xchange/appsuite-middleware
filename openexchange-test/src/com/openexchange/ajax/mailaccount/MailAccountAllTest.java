@@ -71,10 +71,6 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class MailAccountAllTest extends AbstractMailAccountTest {
 
-    public MailAccountAllTest() {
-        super();
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp();

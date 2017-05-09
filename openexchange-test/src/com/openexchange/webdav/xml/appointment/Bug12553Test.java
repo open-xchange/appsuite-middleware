@@ -57,7 +57,7 @@ public class Bug12553Test extends AppointmentTest {
 
             appointmentObj.setUsers(users);
 
-            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
 
             /*
              * Create a change exception
@@ -72,7 +72,7 @@ public class Bug12553Test extends AppointmentTest {
             recurrenceUpdate.setIgnoreConflicts(true);
             recurrenceUpdate.setUsers(users);
             // recurrenceUpdate.setAlarm(60);
-            updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+            updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
 
             /*
              * Delete change exception through an update on master recurring
@@ -83,19 +83,19 @@ public class Bug12553Test extends AppointmentTest {
             appointmentObj.setDeleteExceptions(deleteExceptions);
             appointmentObj.setChangeExceptions((Date[]) null);
             appointmentObj.setIgnoreConflicts(true);
-            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
 
             /*
              * Load updated recurring appointment
              */
-            final Appointment loadedRecApp = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            final Appointment loadedRecApp = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
 
             assertEqualsAndNotNull("Unexpected delete exceptions", deleteExceptions, loadedRecApp.getDeleteException());
             final Date[] changeExceptions = loadedRecApp.getChangeException();
             assertTrue("", null == changeExceptions || changeExceptions.length == 0);
         } finally {
             if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword(), context);
             }
         }
     }

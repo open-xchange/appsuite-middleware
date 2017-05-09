@@ -68,14 +68,12 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
-import org.junit.Before;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
@@ -100,22 +98,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     protected int userParticipantId3 = -1;
 
     protected int groupParticipantId1 = -1;
-
-    protected String userParticipant2 = null;
-
-    protected String userParticipant3 = null;
-
-    protected String groupParticipant = null;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
-        userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
-
-        groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
-    }
 
     protected static Date decrementDate(final Date date) {
         return new Date(date.getTime() - 1);
@@ -172,8 +154,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static int insertFolder(final WebConversation webCon, FolderObject folderObj, String host, final String login, final String password, String context) throws Exception, OXException {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         int objectId = 0;
 
         folderObj.removeObjectID();
@@ -217,8 +197,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static void updateFolder(final WebConversation webCon, final FolderObject folderObj, String host, final String login, final String password, String context) throws Exception, OXException {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         final Element eProp = new Element("prop", webdav);
@@ -262,8 +240,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static int[] deleteFolder(final WebConversation webCon, final int[] id, final Date lastModified, String host, final String login, final String password, String context) throws Exception, OXException {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         final Element rootElement = new Element("multistatus", webdav);
         rootElement.addNamespaceDeclaration(XmlServlet.NS);
 
@@ -316,8 +292,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static int[] clearFolder(final WebConversation webCon, final int[] id, final String[] modules, final Date lastModified, String host, final String login, final String password, String context) throws Exception, OXException {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         final Element rootElement = new Element("multistatus", webdav);
         rootElement.addNamespaceDeclaration(XmlServlet.NS);
 
@@ -370,8 +344,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static int[] listFolder(final WebConversation webCon, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         final Element ePropfind = new Element("propfind", webdav);
         final Element eProp = new Element("prop", webdav);
 
@@ -418,8 +390,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static FolderObject[] listFolder(final WebConversation webCon, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         if (!changed && !deleted) {
             return new FolderObject[] {};
         }
@@ -488,8 +458,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static FolderObject loadFolder(final WebConversation webCon, final int objectId, String host, final String login, final String password, String context) throws Exception, OXException {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         final Element ePropfind = new Element("propfind", webdav);
         final Element eProp = new Element("prop", webdav);
 
@@ -541,11 +509,10 @@ public class FolderTest extends AbstractWebdavXMLTest {
 
     public static FolderObject getAppointmentDefaultFolder(final WebConversation webCon, final String host, final String login, final String password, String context) throws Exception {
         final WebDAVClient client = new WebDAVClient(login + "@" + context, password);
-        return new FolderTools(client).getDefaultAppointmentFolder(AbstractWebdavXMLTest.appendPrefix(host));
+        return new FolderTools(client).getDefaultAppointmentFolder(host);
     }
 
     public static FolderObject getContactDefaultFolder(final WebConversation webCon, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
 
         final FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password, context);
 
@@ -563,8 +530,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
     }
 
     public static FolderObject getTaskDefaultFolder(final WebConversation webCon, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
         final FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password, context);
 
         final int userId = GroupUserTest.getUserId(webCon, host, login, password, context);

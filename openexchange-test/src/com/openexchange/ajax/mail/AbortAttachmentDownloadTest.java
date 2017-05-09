@@ -82,7 +82,6 @@ import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 
@@ -122,7 +121,7 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
     public void testAbortedAttachmentDownload() throws OXException, IOException, JSONException {
         JSONArray json;
         {
-            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug31855.eml")), "UTF-8");
+            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug31855.eml")), "UTF-8");
             char[] buf = new char[512];
             int length;
             StringBuilder sb = new StringBuilder();

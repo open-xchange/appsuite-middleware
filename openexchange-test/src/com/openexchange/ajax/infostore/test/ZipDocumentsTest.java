@@ -121,7 +121,7 @@ public final class ZipDocumentsTest extends AbstractObjectCountTest {
                 expected.setFolderId(folder.getID());
                 expected.setTitle("InfostoreCreateDeleteTest File2");
                 expected.setLastModified(new Date());
-                java.io.File file = new java.io.File(TestInit.getTestProperty("webdavPropertiesFile"));
+                java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
                 infostoreTestManager.newAction(expected, file);
                 assertFalse("Creating an entry should work", infostoreTestManager.getLastResponse().hasError());

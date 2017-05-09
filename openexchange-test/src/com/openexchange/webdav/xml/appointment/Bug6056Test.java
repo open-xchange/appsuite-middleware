@@ -25,22 +25,22 @@ public class Bug6056Test extends AppointmentTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), context);
+        final int newFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword(), context);
 
         final Appointment appointmentObj = createAppointmentObject("Bug6065Test");
         appointmentObj.setParentFolderID(newFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword(), context);
         appointmentObj.setObjectID(objectId);
 
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword(), context);
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, getHostURI(), getLogin(), getPassword(), context);
         final Date lastModified = loadAppointment.getLastModified();
 
-        deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), objectId, newFolderId, getHostURI(), getLogin(), getPassword(), context);
 
         boolean found = false;
-        final Appointment[] appointmentArray = listAppointment(getWebConversation(), newFolderId, lastModified, false, true, getHostName(), getLogin(), getPassword(), context);
+        final Appointment[] appointmentArray = listAppointment(getWebConversation(), newFolderId, lastModified, false, true, getHostURI(), getLogin(), getPassword(), context);
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
                 found = true;
@@ -49,6 +49,6 @@ public class Bug6056Test extends AppointmentTest {
 
         assertTrue("object not found in delete response", found);
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostURI(), getLogin(), getPassword(), context);
     }
 }

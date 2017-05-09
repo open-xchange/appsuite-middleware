@@ -58,7 +58,7 @@ import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
 
@@ -68,10 +68,6 @@ import com.openexchange.mailaccount.MailAccountDescription;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateTest extends AbstractMailAccountTest {
-
-    public MailAccountValidateTest() {
-        super();
-    }
 
     @After
     public void tearDown() throws Exception {
@@ -106,75 +102,37 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
          * Init test environment
          */
         try {
-            MailConfig.init();
+            AJAXConfig.init();
         } catch (final OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
 
-        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
-        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
+        mailAccountDescription.setMailServer(AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
+        mailAccountDescription.setMailPort(Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.MAIL_PORT)));
         mailAccountDescription.setMailProtocol("imap");
         mailAccountDescription.setMailSecure(false);
-        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
-        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
+        mailAccountDescription.setLogin(testUser.getLogin());
+        mailAccountDescription.setPassword(testUser.getPassword());
         mailAccountDescription.setTransportServer((String) null);
         response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertTrue("Valid access data in mail account do not pass validation but should: " + response.getResponse().getWarnings(), response.isValidated());
 
-        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
-        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
+        mailAccountDescription.setMailServer(AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
+        mailAccountDescription.setMailPort(Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.MAIL_PORT)));
         mailAccountDescription.setMailProtocol("imap");
         mailAccountDescription.setMailSecure(false);
-        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
-        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
-        mailAccountDescription.setTransportLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
-        mailAccountDescription.setTransportPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
-        mailAccountDescription.setTransportServer(MailConfig.getProperty(MailConfig.Property.SERVER));
+        mailAccountDescription.setLogin(testUser.getLogin());
+        mailAccountDescription.setPassword(testUser.getPassword());
+        mailAccountDescription.setTransportLogin(testUser.getLogin());
+        mailAccountDescription.setTransportPassword(testUser.getPassword());
+        mailAccountDescription.setTransportServer(AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
         mailAccountDescription.setTransportPort(25);
         mailAccountDescription.setTransportProtocol("smtp");
         mailAccountDescription.setTransportSecure(false);
 
         response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertTrue("Valid access data in mail/transport account do not pass validation but should: " + response.getResponse().getWarnings(), response.isValidated());
-        //
-        //        Response resp = response.getResponse();
-        //        assertTrue(resp.hasWarnings());
-        //
-        //        List<OXException> respExceptions = resp.getWarnings();
-        //        for (OXException e : respExceptions) {
-        //            assertEquals("Expected MailAccountValidateRequest to throw MailExceptionCode.NON_SECURE_WARNING warning, but actual warning is " + e,MailExceptionCode.NON_SECURE_WARNING.getNumber(), e.getCode());
-        //        }
-
-        //        assertEquals(, response.getErrorMessage());
-        // With tree parameter
-        //        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
-        //        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
-        //        mailAccountDescription.setMailProtocol("imap");
-        //        mailAccountDescription.setMailSecure(false);
-        //        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
-        //        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
-        //        mailAccountDescription.setTransportServer(MailConfig.getProperty(MailConfig.Property.SERVER));
-        //        mailAccountDescription.setTransportPort(25);
-        //        mailAccountDescription.setTransportProtocol("smtp");
-        //        mailAccountDescription.setTransportSecure(false);
-        //        response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription, true, true));
-        //        assertTrue("Valid access data in mail/transport account do not pass validation but should", response.isValidated());
-        //        final JSONObject tree = response.getTree();
-        //
-        //        assertTrue("Root folder has no subfolders but should.", tree.hasAndNotNull("subfolder_array"));
-        //        final JSONArray subfolders = tree.getJSONArray("subfolder_array");
-        //        final int len = subfolders.length();
-        //        for (int i = 0; i < len; i++) {
-        //            final JSONObject folder = subfolders.getJSONObject(i);
-        //            assertTrue("Subfolder has no fullname but should.", folder.hasAndNotNull("folder_id"));
-        //
-        //            if (folder.hasAndNotNull("subfolders") && folder.getBoolean("subfolders")) {
-        //                assertTrue(
-        //                    "Missing subfolder array although JSON folder indicates presence of subfolders.",
-        //                    folder.hasAndNotNull("subfolder_array"));
-        //            }
-        //        }
     }
 
 }

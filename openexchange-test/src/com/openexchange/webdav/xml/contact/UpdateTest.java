@@ -67,68 +67,68 @@ public class UpdateTest extends ContactTest {
     @Test
     public void testUpdateContact() throws Exception {
         Contact contactObj = createContactObject("testUpdateContact");
-        final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password, context);
 
         contactObj = createContactObject("testUpdateContact");
         contactObj.setEmail1(null);
 
-        updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password, context);
-        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        updateContact(webCon, contactObj, objectId, contactFolderId, getHostURI(), login, password, context);
+        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword(), context);
         compareObject(contactObj, loadContact);
-        deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword(), context);
     }
 
     @Test
     public void testUpdateContactWithImage() throws Exception {
         Contact contactObj = createContactObject("testUpdateContactWithImage");
-        final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password, context);
 
         contactObj = createContactObject("testUpdateContactWithImage");
         contactObj.setEmail1(null);
         contactObj.setImageContentType(CONTENT_TYPE);
         contactObj.setImage1(image);
 
-        updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password, context);
-        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        updateContact(webCon, contactObj, objectId, contactFolderId, getHostURI(), login, password, context);
+        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword(), context);
         contactObj.removeImage1();
         compareObject(contactObj, loadContact);
-        deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword(), context);
     }
 
     @Test
     public void testUpdateConcurentConflict() throws Exception {
         Contact contactObj = createContactObject("testUpdateContactConcurentConflict");
-        final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password, context);
 
         contactObj = createContactObject("testUpdateContactConcurentConflict2");
 
         try {
-            updateContact(webCon, contactObj, objectId, contactFolderId, new Date(0), PROTOCOL + hostName, login, password, context);
+            updateContact(webCon, contactObj, objectId, contactFolderId, new Date(0), getHostURI(), login, password, context);
             fail("expected concurent modification exception!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.MODIFICATION_STATUS);
         }
 
         final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
-        deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
+        deleteContact(webCon, objectIdAndFolderId, getHostURI(), login, password, context);
     }
 
     @Test
     public void testUpdateNotFound() throws Exception {
         Contact contactObj = createContactObject("testUpdateContactNotFound");
-        final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password, context);
 
         contactObj = createContactObject("testUpdateContactNotFound");
 
         try {
-            updateContact(webCon, contactObj, (objectId + 1000), contactFolderId, new Date(0), PROTOCOL + hostName, login, password, context);
+            updateContact(webCon, contactObj, (objectId + 1000), contactFolderId, new Date(0), getHostURI(), login, password, context);
             fail("expected object not found exception!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
         final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
-        deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
+        deleteContact(webCon, objectIdAndFolderId, getHostURI(), login, password, context);
     }
 
 }

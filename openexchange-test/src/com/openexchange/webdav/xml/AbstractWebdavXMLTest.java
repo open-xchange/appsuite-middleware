@@ -174,7 +174,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
     protected int sendPut(final byte b[], final boolean delete) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        req = new PutMethodWebRequest(PROTOCOL + hostName + getURL(), bais, "text/javascript");
+        req = new PutMethodWebRequest(getHostURI() + getURL(), bais, "text/javascript");
         req.setHeaderField("Authorization", "Basic " + authData);
         resp = webCon.getResponse(req);
 
@@ -188,7 +188,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
         final HttpClient httpclient = new HttpClient();
 
         httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
-        final PropFindMethod propFindMethod = new PropFindMethod(PROTOCOL + hostName + getURL());
+        final PropFindMethod propFindMethod = new PropFindMethod(getHostURI() + getURL());
         propFindMethod.setDoAuthentication(true);
 
         InputStream is = new ByteArrayInputStream(requestByte);
@@ -283,13 +283,6 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
     protected String getURL() {
         return "no/url";
-    }
-
-    public static final String appendPrefix(final String host) {
-        if (host.startsWith("http://")) {
-            return host;
-        }
-        return "http://" + host;
     }
 
     public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
