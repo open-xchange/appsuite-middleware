@@ -110,6 +110,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug18490" }));
 
         final int id = mailFilterAPI.createRule(rule);
+        rememberRule(id);
         rule.setId(id);
         rule.setPosition(0);
 
@@ -135,6 +136,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         assertFalse("No mail was found", null == mails);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

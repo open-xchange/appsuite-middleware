@@ -22,6 +22,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -35,6 +36,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
         // Create the rule
         final int id = mailFilterAPI.createRule(rule);
+        rememberRule(id);
         rule.setId(id);
     }
 
