@@ -111,6 +111,8 @@ import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.ajax.subscribe.actions.AllSubscriptionsRequest;
 import com.openexchange.ajax.subscribe.actions.AllSubscriptionsResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -159,6 +161,7 @@ public class RoundtripTest extends AbstractRMITest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        AJAXConfig.init();
         superAdminCredentials = AbstractTest.DummyMasterCredentials();
         ci = getContextInterface();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
@@ -388,7 +391,10 @@ public class RoundtripTest extends AbstractRMITest {
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {
         final AJAXSession session = new AJAXSession();
         final LoginRequest loginRequest = new LoginRequest(login, password, LoginTools.generateAuthId(), "Usermovetest", "6.20");
-        final LoginResponse loginResponse = Executor.execute(session, loginRequest);
+        String protocol = AJAXConfig.getProperty(Property.PROTOCOL);
+        String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
+        org.slf4j.LoggerFactory.getLogger(RoundtripTest.class).info("Try to login to {} with user '{}' and password '{}'", protocol + "://" + hostname, login, password);
+        final LoginResponse loginResponse = Executor.execute(session, loginRequest, protocol, hostname);
         session.setId(loginResponse.getSessionId());
         return session;
     }
