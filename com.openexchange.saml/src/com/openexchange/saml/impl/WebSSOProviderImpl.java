@@ -503,9 +503,18 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         spssoDescriptor.getAssertionConsumerServices().add(acs);
 
         if (config.singleLogoutEnabled()) {
+            String singleLogoutServiceURL = config.getSingleLogoutServiceURL();
+
+            // Set URI for SAML 2 POST binding
             SingleLogoutService slService = openSAML.buildSAMLObject(SingleLogoutService.class);
             slService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-            slService.setLocation(config.getSingleLogoutServiceURL());
+            slService.setLocation(singleLogoutServiceURL);
+            spssoDescriptor.getSingleLogoutServices().add(slService);
+
+            // Set URI for SAML 2 HTTP redirect binding
+            slService = openSAML.buildSAMLObject(SingleLogoutService.class);
+            slService.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+            slService.setLocation(singleLogoutServiceURL);
             spssoDescriptor.getSingleLogoutServices().add(slService);
         }
 
