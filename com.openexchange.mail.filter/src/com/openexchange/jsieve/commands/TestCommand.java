@@ -782,10 +782,12 @@ public class TestCommand extends Command {
                 retval.add(string);
                 continue;
             }
-            string = this.command.getAddress().get(text);
-            if (null != string && (0 != string.length())) {
-                retval.add(string);
-                continue;
+            if (this.command.getAddress() != null) {
+                string = this.command.getAddress().get(text);
+                if (null != string && (0 != string.length())) {
+                    retval.add(string);
+                    continue;
+                }
             }
         }
 
