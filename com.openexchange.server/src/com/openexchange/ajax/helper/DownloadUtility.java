@@ -70,7 +70,6 @@ import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
@@ -605,19 +604,18 @@ public final class DownloadUtility {
          *
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
-        String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
+        String isoFileName = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
         final boolean isAndroid = (null != userAgent && toLowerCase(userAgent).indexOf("android") >= 0);
         if (isAndroid) {
             // myfile.dat => myfile.DAT
-            final int pos = foo.lastIndexOf('.');
+            final int pos = isoFileName.lastIndexOf('.');
             if (pos >= 0) {
-                foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
+                isoFileName = isoFileName.substring(0, pos) + toUpperCase(isoFileName.substring(pos));
             }
-        } else {
-            String encoded = encoder.escape(fn);
-            appendTo.append("; filename*=UTF-8''").append(encoded);
-        }
-        appendTo.append("; filename=\"").append(foo).append('"');
+        } 
+        String encoded = encoder.escape(fn);
+        appendTo.append("; filename*=UTF-8''").append(encoded);
+        appendTo.append("; filename=\"").append(isoFileName).append('"');
     }
 
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
