@@ -195,21 +195,28 @@ public class FeedbackMimeMessageUtility {
         throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create();
     }
 
-    public static byte[] compress(InputStream in) throws OXException {
+    /**
+     * Compress the given {@link InputStream} into a GZIPed {@link ByteArrayOutputStream}.
+     * 
+     * @param toCompress the stream that is supposed to be compressed
+     * @return 
+     * @throws OXException
+     */
+    public static byte[] compress(InputStream toCompress) throws OXException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             GZIPOutputStream compressedStream = new GZIPOutputStream(out);
             try {
                 byte[] buffer = new byte[10240];
-                for (int i = 0; (i = in.read(buffer)) != -1;) {
+                for (int i = 0; (i = toCompress.read(buffer)) != -1;) {
                     compressedStream.write(buffer, 0, i);
                 }
             } finally {
-                Streams.close(in, compressedStream);
+                Streams.close(toCompress, compressedStream);
             }
             return out.toByteArray();
         } catch (IOException e) {
-            Streams.close(in, out);
+            Streams.close(toCompress, out);
             throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -241,6 +248,16 @@ public class FeedbackMimeMessageUtility {
         return validRecipients.toArray(new InternetAddress[validRecipients.size()]);
     }
 
+    /**
+     * Extract all valid addresses with corresponding PGPPublicKeys from a given filter. Also
+     * store all invalid addresses and all PGP-keys, that were not parsed, because of reasons.
+     * 
+     * @param filter the filter with all needed data
+     * @param invalidAddresses the list where all invalid addresses should be stored
+     * @param pgpFailedAddresses the list where all addresses are stored for which the PGP parsing failed
+     * @return a map with all addresses and corresponding {@link PGPPublicKey}
+     * @throws OXException
+     */
     public static Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) throws OXException {
         Map<String, String> pgpKeys = filter.getPgpKeys();
         Map<Address, PGPPublicKey> result = new HashMap<>();
@@ -284,6 +301,13 @@ public class FeedbackMimeMessageUtility {
         }
     }
 
+    /**
+     * Parse the private key for PGP encryption/decryption from a file.
+     * 
+     * @param file path to the file
+     * @return a valid {@link PGPSecretKey}
+     * @throws OXException
+     */
     public static PGPSecretKey parsePrivateKey(String file) throws OXException {
         PGPKeyRingParser parser = Services.getService(PGPKeyRingParser.class);
         FileInputStream in = null;
