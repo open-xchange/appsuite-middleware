@@ -68,6 +68,13 @@ public class RedirectServlet extends HttpServlet {
 
     private static final long serialVersionUID = 6111473866164506367L;
 
+    /**
+     * Initializes a new {@link RedirectServlet}.
+     */
+    public RedirectServlet() {
+        super();
+    }
+
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         // create a new HttpSession if it's missing

@@ -86,6 +86,13 @@ public class DeferrerServlet extends HttpServlet {
      */
     public static final List<CustomRedirectURLDetermination> CUSTOM_HANDLERS = new CopyOnWriteArrayList<CustomRedirectURLDetermination>();
 
+    /**
+     * Initializes a new {@link DeferrerServlet}.
+     */
+    public DeferrerServlet() {
+        super();
+    }
+
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         // Create a new HttpSession if it's missing

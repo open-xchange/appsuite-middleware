@@ -99,7 +99,7 @@ public final class Bug12338Test extends AbstractWebDAVSession {
         response.fillObject(appointment);
         LOG.info("Identifier: " + appointment.getObjectID());
         LOG.info("Timestamp: " + appointment.getLastModified());
-        //        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        //        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
     }
 
     private class SpecialInsertRequest extends InsertRequest {

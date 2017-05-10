@@ -63,6 +63,6 @@ public class AttachmentTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        testFile2 = new File(TestInit.getTestProperty("webdavPropertiesFile"));
+        testFile2 = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
     }
 }

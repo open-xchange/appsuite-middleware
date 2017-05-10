@@ -64,7 +64,7 @@ import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 
@@ -91,7 +91,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f);
         NewInfostoreResponse resp = getClient().execute(req);
         ids.add(resp.getID());
@@ -118,7 +118,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, true);
         NewInfostoreResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
@@ -135,7 +135,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, false);
         NewInfostoreResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());

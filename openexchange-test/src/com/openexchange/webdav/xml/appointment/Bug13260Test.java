@@ -100,7 +100,7 @@ public class Bug13260Test extends AppointmentTest {
                 appointmentObj.setOccurrence(10);
             }
             appointmentObj.setIgnoreConflicts(true);
-            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
 
             // Create DeleteException with update
             Calendar delExceptionDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -111,17 +111,17 @@ public class Bug13260Test extends AppointmentTest {
             delExceptionDate.set(Calendar.MILLISECOND, 0);
 
             appointmentObj.setDeleteExceptions(new Date[] { delExceptionDate.getTime() });
-            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
             // Load Appointment
-            Appointment loadApointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+            Appointment loadApointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
             // Checks
             assertNotNull("DeleteException expected.", loadApointment.getDeleteException());
             assertEquals("Exact 1 DeleteException expected.", 1, loadApointment.getDeleteException().length);
         } finally {
             if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
             }
         }
     }

@@ -64,7 +64,7 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 
 /**
@@ -113,7 +113,7 @@ public class Bug29865Test extends AbstractMailTest {
 
     private static String readFile(String fileName) {
         try {
-            @SuppressWarnings("resource") BufferedReader br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
+            @SuppressWarnings("resource") BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + fileName));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 

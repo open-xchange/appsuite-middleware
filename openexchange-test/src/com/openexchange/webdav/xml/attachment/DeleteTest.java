@@ -17,13 +17,13 @@ public class DeleteTest extends AttachmentTest {
 
     @Test
     public void testDeleteAttachment() throws Exception {
-        final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, getHostURI(), getLogin(), getPassword());
         final int contactFolderId = folderObj.getObjectID();
         final Contact contactObj = new Contact();
         contactObj.setSurName("testDeleteAttachment");
         contactObj.setParentFolderID(contactFolderId);
 
-        final int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int objectId = ContactTest.insertContact(webCon, contactObj, getHostURI(), getLogin(), getPassword());
 
         final AttachmentMetadata attachmentObj = new AttachmentImpl();
         attachmentObj.setFilename(System.currentTimeMillis() + "test.txt");
@@ -35,11 +35,11 @@ public class DeleteTest extends AttachmentTest {
 
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
 
-        final int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
+        final int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostURI(), getLogin(), getPassword());
         assertTrue("attachment is 0", attachmentId > 0);
 
         attachmentObj.setId(attachmentId);
 
-        deleteAttachment(webCon, attachmentObj, getHostName(), getLogin() + "@" + context, getPassword());
+        deleteAttachment(webCon, attachmentObj, getHostURI(), getLogin(), getPassword());
     }
 }

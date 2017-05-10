@@ -58,12 +58,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.google.common.hash.Hashing;
@@ -248,12 +251,30 @@ public class StarRatingV1 extends AbstractFeedbackType {
                     LOG.error("Unable to read feedback with id {}. Won't return it.", id, e);
                 }
             }
+            SortedSet<Feedback> sorted = sort(feedbacks.values());
+            return createExportObject(sorted);
         } catch (final SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
-        return createExportObject(feedbacks.values());
+    }
+
+    private SortedSet<Feedback> sort(Collection<Feedback> collection) {
+        Comparator<Feedback> comparator = new Comparator<Feedback>() {
+
+            @Override
+            public int compare(Feedback o1, Feedback o2) {
+                if (o1.getDate() < o2.getDate()) {
+                    return -1;
+                }
+                return 1;
+
+            }
+        };
+        SortedSet<Feedback> sorted = new TreeSet<Feedback>(comparator);
+        sorted.addAll(collection);
+        return sorted;
     }
 
     /**

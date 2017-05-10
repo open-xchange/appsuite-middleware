@@ -190,7 +190,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         if (folderId == -1) {
             return;
         }
-        FolderTest.deleteFolder(getClient().getSession().getConversation(), new int[] { folderId }, getClient().getHostname(), testUser.getLogin(), testUser.getPassword(), "");
+        FolderTest.deleteFolder(getClient().getSession().getConversation(), new int[] { folderId }, getClient().getHostname(), testUser.getLogin(), testUser.getPassword());
     }
 
     public static void assertEquals(final String message, final List l1, final List l2) {

@@ -104,6 +104,7 @@ import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.osgi.MailJSONActivator;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -112,6 +113,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -2191,10 +2193,20 @@ public final class MimeMessageConverter {
              * Set all cacheable data
              */
             setHeaders(part, mailPart);
+            boolean contentTypeParsed = false;
             {
                 final String[] contentTypeHdr = mailPart.getHeader(CONTENT_TYPE);
                 if (null != contentTypeHdr && contentTypeHdr.length > 0) {
-                    mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(contentTypeHdr[0]));
+                    try {
+                        mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(contentTypeHdr[0]));
+                        contentTypeParsed = true;
+                    } catch (OXException x) {
+                        LOG.debug("Invalid Content-Type value", x);
+                        ContentType ct = new ContentType();
+                        ct.setPrimaryType("application");
+                        ct.setSubType("octet-stream");
+                        mailPart.setContentType(ct);
+                    }
                 } else {
                     String sct = part.getContentType();
                     if (!Strings.isEmpty(sct)) {
@@ -2211,7 +2223,24 @@ public final class MimeMessageConverter {
             {
                 final String[] tmp = mailPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
                 if ((tmp != null) && (tmp.length > 0)) {
-                    mailPart.setContentDisposition(MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]));
+                    try {
+                        String disposition = MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]);
+                        ContentDisposition contentDisposition = new ContentDisposition(disposition);
+                        mailPart.setContentDisposition(contentDisposition);
+
+                        if (false == contentTypeParsed) {
+                            String filename = contentDisposition.getFilenameParameter();
+                            if (false == Strings.isEmpty(filename)) {
+                                String contentType = MimeType2ExtMap.getContentType(filename);
+                                mailPart.setContentType(contentType);
+                            }
+                        }
+                    } catch (OXException x) {
+                        LOG.debug("Invalid Content-Disposition value", x);
+                        ContentDisposition cd = new ContentDisposition();
+                        cd.setAttachment();
+                        mailPart.setContentDisposition(cd);
+                    }
                 }
             }
             {

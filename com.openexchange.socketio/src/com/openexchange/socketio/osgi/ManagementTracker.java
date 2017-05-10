@@ -114,7 +114,7 @@ public class ManagementTracker implements ServiceTrackerCustomizer<ManagementSer
         if (null != managementService) {
             try {
                 managementService.unregisterMBean(Managements.getObjectName(SocketIOMBean.class.getName(), SocketIOMBean.DOMAIN));
-                logger.warn("Unregistered MBean {}", SocketIOMBean.class.getName());
+                logger.info("Unregistered MBean {}", SocketIOMBean.class.getName());
             } catch (Exception e) {
                 logger.warn("Could not un-register MBean {}", SocketIOMBean.class.getName(), e);
             }

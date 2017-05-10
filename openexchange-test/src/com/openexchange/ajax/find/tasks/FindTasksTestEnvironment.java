@@ -77,7 +77,7 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.basic.tasks.TaskType;
 import com.openexchange.find.common.CommonFacetType;
@@ -424,7 +424,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
      * @throws IOException
      */
     private final String readFile(String fileName) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
+        BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + fileName));
         StringBuilder sb = new StringBuilder();
         String line = br.readLine();
 

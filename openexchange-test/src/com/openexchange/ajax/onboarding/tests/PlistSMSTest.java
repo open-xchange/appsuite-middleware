@@ -59,6 +59,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.google.common.io.BaseEncoding;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -136,15 +137,15 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     @Test
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
+        AJAXClient client = getAjaxClient();
+        String url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "mailsync", "apple.iphone");
+        helper.testMailDownload(url, client.getProtocol()+"://"+client.getHostname());
 
-        String url = getURL(getAjaxClient().getValues().getUserId(), getAjaxClient().getValues().getContextId(), "mailsync", "apple.iphone");
-        helper.testMailDownload(url, getAjaxClient().getHostname());
+        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "eassync", "apple.iphone");
+        helper.testEASDownload(url, client.getProtocol()+"://"+client.getHostname());
 
-        url = getURL(getAjaxClient().getValues().getUserId(), getAjaxClient().getValues().getContextId(), "eassync", "apple.iphone");
-        helper.testEASDownload(url, getAjaxClient().getHostname());
-
-        url = getURL(getAjaxClient().getValues().getUserId(), getAjaxClient().getValues().getContextId(), "davsync", "apple.iphone");
-        helper.testDavDownload(url, getAjaxClient().getHostname());
+        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "davsync", "apple.iphone");
+        helper.testDavDownload(url, client.getProtocol()+"://"+client.getHostname());
     }
 
     public String getURL(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException, UnsupportedEncodingException {

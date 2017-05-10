@@ -75,12 +75,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
-import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Delivery;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Disposition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
@@ -615,7 +614,7 @@ public class FileResponseRendererTest {
 
     @Test
     public void testContentLengthMailAttachments_Bug26926() {
-        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         try {
             InputStream is = null;
             is = new FileInputStream(new File(testDataDir + "26926_27394.pdf"));

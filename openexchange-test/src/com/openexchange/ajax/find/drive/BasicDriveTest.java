@@ -77,7 +77,7 @@ import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -121,8 +121,8 @@ public class BasicDriveTest extends AbstractFindTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        MailConfig.init();
-        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        AJAXConfig.init();
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();

@@ -77,7 +77,7 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -115,7 +115,7 @@ public class Bug36333Test extends AbstractMailTest {
 
     @Test
     public void testBug36333() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug36333.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug36333.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -172,7 +172,7 @@ public class Bug36333Test extends AbstractMailTest {
 
     @Test
     public void testBug36333_2() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug36333_2.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug36333_2.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -231,7 +231,7 @@ public class Bug36333Test extends AbstractMailTest {
     public void testBug36333_3() throws OXException, IOException, JSONException {
         JSONArray json;
         {
-            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "bug36333_3.eml")), "UTF-8");
+            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug36333_3.eml")), "UTF-8");
             char[] buf = new char[512];
             int length;
             StringBuilder sb = new StringBuilder();

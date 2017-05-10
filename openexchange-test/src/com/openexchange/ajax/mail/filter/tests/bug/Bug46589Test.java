@@ -73,7 +73,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link Bug46589Test}.
-     * 
+     *
      * @param name Test case's name
      */
     public Bug46589Test() {
@@ -97,6 +97,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
             expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
         }
 
@@ -120,6 +121,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
+            rememberRule(id);
             rule.setId(id);
             rule.setPosition(i);
             expectedRules.add(rule);
@@ -135,6 +137,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
         rule.setTest(new TrueTest());
 
         int id = mailFilterAPI.createRule(rule);
+        rememberRule(id);
         rule.setId(id);
         rule.setPosition(3);
 

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,46 @@
  *
  */
 
-package com.openexchange.configuration;
+package com.openexchange.http.grizzly.service.http;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.conf.AbstractConfig;
+import javax.servlet.Filter;
 
 /**
- * Tests need to be able to find the templates, so this one uses
+ * {@link FilterAndPath}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class PublishConfig extends AbstractConfig {
+public class FilterAndPath {
 
-    private static final TestConfig.Property KEY = TestConfig.Property.PUBSUB_PROPS;
-
-    public static final String TEMPLATE_PATH = "publishTemplatePath";
-
-    private static volatile PublishConfig singleton;
+    private final Filter filter;
+    private final String path;
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link FilterAndPath}.
      */
-    @Override
-    protected String getPropertyFileName() throws OXException {
-        final String fileName = TestConfig.getProperty(KEY);
-        if (null == fileName) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
-        }
-        return fileName;
+    public FilterAndPath(Filter filter, String path) {
+        super();
+        this.filter = filter;
+        this.path = path;
     }
 
     /**
-     * Reads the configuration.
-     * 
-     * @throws OXException if reading configuration fails.
+     * Gets the filter
+     *
+     * @return The filter
      */
-    public static PublishConfig init() throws OXException {
-        TestConfig.init();
-        if (null == singleton) {
-            synchronized (PublishConfig.class) {
-                if (null == singleton) {
-                    singleton = new PublishConfig();
-                    singleton.loadPropertiesInternal();
-                }
-            }
-        }
-        return singleton;
+    public Filter getFilter() {
+        return filter;
     }
 
-    public static String getProperty(final String key) {
-        return singleton.getPropertyInternal(key);
+    /**
+     * Gets the path
+     *
+     * @return The path
+     */
+    public String getPath() {
+        return path;
     }
+
 }

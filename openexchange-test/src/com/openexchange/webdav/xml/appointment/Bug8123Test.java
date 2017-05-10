@@ -16,7 +16,7 @@ public class Bug8123Test extends AppointmentTest {
 
     @Test
     public void testBug8123() throws Exception {
-        final Resource[] resource = GroupUserTest.searchResource(getWebConversation(), "*", new Date(0), getHostName(), getLogin(), getPassword(), context);
+        final Resource[] resource = GroupUserTest.searchResource(getWebConversation(), "*", new Date(0), getHostURI(), getLogin(), getPassword());
 
         if (resource.length == 0) {
             fail("no resource found for this test");
@@ -38,17 +38,17 @@ public class Bug8123Test extends AppointmentTest {
 
         appointmentObj.setParticipants(participant);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
 
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         compareObject(appointmentObj, loadAppointment);
 
         final Date modified = new Date(loadAppointment.getCreationDate().getTime() - 1000);
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostURI(), getLogin(), getPassword());
         compareObject(appointmentObj, loadAppointment);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
     }
 }

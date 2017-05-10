@@ -141,6 +141,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         rule.setTest(new HeaderTest(new IsComparison(), new String[] { "testheader" }, new String[] { "testvalue" }));
 
         rid = mailFilterAPI.createRule(rule);
+        rememberRule(rid);
 
         // Get rules of user
         List<Rule> rules = mailFilterAPI.listRules();

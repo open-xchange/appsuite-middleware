@@ -96,7 +96,7 @@ public class PusNotificationServiceTracker implements ServiceTrackerCustomizer<P
             this.mbean = mbean;
             managementService.registerMBean(objectName, mbean);
             error = false;
-            logger.warn("Registered MBean {}", PushNotificationMBean.class.getName());
+            logger.info("Registered MBean {}", PushNotificationMBean.class.getName());
             return pushNotificationService;
         } catch (Exception e) {
             logger.warn("Could not register MBean {}", PushNotificationMBean.class.getName(), e);
@@ -120,7 +120,7 @@ public class PusNotificationServiceTracker implements ServiceTrackerCustomizer<P
 
         try {
             managementService.unregisterMBean(Managements.getObjectName(PushNotificationMBean.class.getName(), PushNotificationMBean.DOMAIN));
-            logger.warn("Unregistered MBean {}", PushNotificationMBean.class.getName());
+            logger.info("Unregistered MBean {}", PushNotificationMBean.class.getName());
         } catch (Exception e) {
             logger.warn("Could not un-register MBean {}", PushNotificationMBean.class.getName(), e);
         }

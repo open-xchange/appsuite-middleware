@@ -49,6 +49,10 @@
 
 package com.openexchange.test.pool;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -169,6 +173,24 @@ public class TestContextPool {
     }
 
     public static synchronized List<TestContext> getAllTimeAvailableContexts() {
-        return new ArrayList<>(allTimeContexts);
+        List<TestContext> cloned = new ArrayList<>(allTimeContexts.size());
+        for (TestContext current : allTimeContexts) {
+            cloned.add((TestContext) deepClone(current));
+        }
+        return cloned;
+    }
+
+    private static Object deepClone(Object object) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(object);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return ois.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

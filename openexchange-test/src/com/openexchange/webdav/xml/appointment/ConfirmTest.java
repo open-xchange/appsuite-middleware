@@ -14,7 +14,7 @@ public class ConfirmTest extends AppointmentTest {
 
     @Test
     public void testConfirm() throws Exception {
-        final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+        final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), getHostURI(), getSecondLogin(), getPassword());
         final int secondUserId = sharedFolderObject.getCreatedBy();
 
         final Appointment appointmentObj = createAppointmentObject("testConfirm");
@@ -27,11 +27,11 @@ public class ConfirmTest extends AppointmentTest {
 
         appointmentObj.setParticipants(participants);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
 
-        confirmAppointment(getSecondWebConversation(), objectId, Appointment.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+        confirmAppointment(getSecondWebConversation(), objectId, Appointment.ACCEPT, null, getHostURI(), getSecondLogin(), getPassword());
 
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
         boolean found = false;
 
@@ -45,6 +45,6 @@ public class ConfirmTest extends AppointmentTest {
 
         assertTrue("user participant with id " + secondUserId + " not found", found);
 
-        deleteAppointment(getWebConversation(), new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), new int[][] { { objectId, appointmentFolderId } }, getHostURI(), getLogin(), getPassword());
     }
 }

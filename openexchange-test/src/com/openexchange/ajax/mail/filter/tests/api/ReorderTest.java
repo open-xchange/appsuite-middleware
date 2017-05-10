@@ -72,7 +72,7 @@ public class ReorderTest extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link ReorderTest}.
-     * 
+     *
      * @param name
      */
     public ReorderTest() {
@@ -99,6 +99,7 @@ public class ReorderTest extends AbstractMailFilterTest {
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
+            rememberRule(id);
             rule.setId(id);
             rule.setPosition(i);
             expectedRules.add(rule);

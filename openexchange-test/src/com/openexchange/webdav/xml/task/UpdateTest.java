@@ -24,41 +24,41 @@ public class UpdateTest extends TaskTest {
     @Test
     public void testUpdateTask() throws Exception {
         Task taskObj = createTask("testUpdateTask");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
 
         taskObj = createTask("testUpdateTask2");
         taskObj.setNote(null);
 
-        updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
-        deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        updateTask(webCon, taskObj, objectId, taskFolderId, getHostURI(), login, password);
+        deleteTask(getWebConversation(), objectId, taskFolderId, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
     public void testUpdateTaskRemoveAlarm() throws Exception {
         Task taskObj = createTask("testUpdateTaskRemoveAlarm");
         taskObj.setAlarm(new Date(startTime.getTime() - (2 * dayInMillis)));
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
 
         taskObj = createTask("testUpdateTaskRemoveAlarm2");
         taskObj.setNote(null);
         taskObj.setAlarmFlag(false);
 
-        updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
-        final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        updateTask(webCon, taskObj, objectId, taskFolderId, getHostURI(), login, password);
+        final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostURI(), getLogin(), getPassword());
         compareObject(taskObj, loadTask);
-        deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteTask(getWebConversation(), objectId, taskFolderId, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
     public void testUpdateTaskWithParticipants() throws Exception {
         Task taskObj = createTask("testUpdateTask");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
 
         taskObj = createTask("testUpdateTask");
 
-        final int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant3, getPassword(), context);
+        final int userParticipantId = GroupUserTest.getUserId(getWebConversation(), getHostURI(), userParticipant3, getPassword());
         assertTrue("user participant not found", userParticipantId != -1);
-        final Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password, context);
+        final Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), getHostURI(), login, password);
         assertTrue("group array size is not > 0", groupArray.length > 0);
         final int groupParticipantId = groupArray[0].getIdentifier();
 
@@ -69,45 +69,45 @@ public class UpdateTest extends TaskTest {
 
         taskObj.setParticipants(participants);
 
-        updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password, context);
-        final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        updateTask(webCon, taskObj, objectId, taskFolderId, getHostURI(), login, password);
+        final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostURI(), getLogin(), getPassword());
         compareObject(taskObj, loadTask);
-        deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteTask(getWebConversation(), objectId, taskFolderId, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
     public void testUpdateConcurentConflict() throws Exception {
         Task taskObj = createTask("testUpdateTaskConcurentConflict");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
 
         taskObj = createTask("testUpdateTaskConcurentConflict2");
 
         try {
-            updateTask(webCon, taskObj, objectId, taskFolderId, new Date(0), PROTOCOL + hostName, login, password, context);
+            updateTask(webCon, taskObj, objectId, taskFolderId, new Date(0), getHostURI(), login, password);
             fail("expected concurent modification exception!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.MODIFICATION_STATUS);
         }
 
         final int[][] objectIdAndFolderId = { { objectId, taskFolderId } };
-        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
+        deleteTask(webCon, objectIdAndFolderId, getHostURI(), login, password);
     }
 
     @Test
     public void testUpdateNotFound() throws Exception {
         Task taskObj = createTask("testUpdateTaskNotFound");
-        final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password, context);
+        final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
 
         taskObj = createTask("testUpdateTaskNotFound2");
 
         try {
-            updateTask(webCon, taskObj, (objectId + 1000), taskFolderId, new Date(0), PROTOCOL + hostName, login, password, context);
+            updateTask(webCon, taskObj, (objectId + 1000), taskFolderId, new Date(0), getHostURI(), login, password);
             fail("expected object not found exception!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
         }
 
         final int[][] objectIdAndFolderId = { { objectId, taskFolderId } };
-        deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
+        deleteTask(webCon, objectIdAndFolderId, getHostURI(), login, password);
     }
 }
