@@ -1896,17 +1896,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     private boolean isInPublicTree(FolderObject folder, Context context, Connection con, StorageParameters storageParameters) throws OXException {
         int parentId = folder.getParentFolderID();
-        while (parentId != FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID && parentId != FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID && parentId != FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+        while(true) {
+            if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID || parentId == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
+                return false;
+            }
+            if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+                return true;
+            }
             FolderObject parent = getFolderObject(parentId, context, con, storageParameters);
             parentId = parent.getParentFolderID();
         }
-        if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-            return false;
-        }
-        if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
-            return true;
-        }
-        return false;
     }
 
     @Override
