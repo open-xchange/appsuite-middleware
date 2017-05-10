@@ -752,7 +752,7 @@ public class LoginServlet extends AJAXServlet {
 
             String serverName = req.getServerName();
             if ("autologin".equals(action) && null != serverName && !isAutologinActivated(serverName)) {
-                return;
+                throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
             }
 
             if (null != subPath && subPath.startsWith("/httpAuth")) {
