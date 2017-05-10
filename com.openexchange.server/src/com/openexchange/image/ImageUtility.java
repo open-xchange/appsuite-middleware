@@ -146,14 +146,6 @@ public final class ImageUtility {
             }
         });
 
-        map.put(AJAXServlet.PARAMETER_AUTH_TOKEN, new ValueHandler() {
-
-            @Override
-            public void handleValue(String value, ImageLocation.Builder builder) {
-                builder.auth(value);
-            }
-        });
-
         map.put("source", new ValueHandler() {
 
             @Override
