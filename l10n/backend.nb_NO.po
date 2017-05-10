@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-09 15:51+0000\n"
-"PO-Revision-Date: 2017-05-09 12:42+0000\n"
+"POT-Creation-Date: 2017-05-10 07:44+0000\n"
+"PO-Revision-Date: 2017-05-09 19:31+0000\n"
 "Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nb_NO\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1494333751.000000\n"
+"X-POOTLE-MTIME: 1494358260.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -3237,7 +3237,7 @@ msgstr "HTML-innholdet kan ikke vises på en sikker måte"
 #. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
 msgid "This message can only be displayed as plain text"
-msgstr ""
+msgstr "Denne meldingen kan kun vises som ren tekst"
 
 #. *
 #. * No connection available to access mailbox
@@ -3501,6 +3501,7 @@ msgstr ""
 msgid ""
 "Update of folder failed. Owner is required to keep administrative rights."
 msgstr ""
+"Oppdatering av mappen feilet. Eieren må beholde administrative rettigheter."
 
 #. The specified group \"%4$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
@@ -4157,11 +4158,12 @@ msgstr "Du må eksplisitt autorisere %1$s for å abonnere på %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
 msgid "The scope %1$s is not supported by the provider or has been disabled"
 msgstr ""
+"Omfanget %1$s er ikke støttet av leverandøren, eller har blitt deaktivert"
 
 #. Thrown in case OAuth for a certain provider access has been disabled for a user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
 msgid "'%1$s' OAuth service is not enabled for you."
-msgstr ""
+msgstr "OAuth-tjenesten '%1$s' er ikke aktivert for deg."
 
 #. *
 #. * New password too short.
@@ -5294,6 +5296,7 @@ msgid ""
 "You do not have the appropriate permissions to read appointments in that "
 "folder."
 msgstr ""
+"Du har ikke de nødvendige tillatelsene til å lese avtaler i denne mappen."
 
 #. *
 #. * End date must not be before start date.
@@ -5742,7 +5745,7 @@ msgstr "Mønsteret \"%1$s\" har blitt ignorert under søket."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
 msgid "Invalid number of properties for distribution list."
-msgstr ""
+msgstr "Ugyldig antall egenskaper for distribusjonslisten."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
@@ -7238,7 +7241,7 @@ msgstr "Ødelagt CSV-fil."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
 msgid "Error at row %1$s: %2$s"
-msgstr ""
+msgstr "Feil på rad %1$s: %2$s"
 
 #. The document you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
@@ -10627,11 +10630,12 @@ msgstr "Den angitte tilbakemeldingen for nøkkelen 'score\" har en ugyldig type.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
 msgid "The provided feedback does not contain required key '%s'."
 msgstr ""
+"Den angitte tilbakemeldingen inneholder ikke den nødvendige nøkkelen '%s'."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
 msgid "The provided feedback for key '%s' cannot be parsed."
-msgstr ""
+msgstr "Den angitte tilbakemeldingen for nøkkelen '%s' kunne ikke analyseres."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
