@@ -67,18 +67,20 @@ public interface CalendarStorageFactory {
      * Initializes a new {@link CalendarStorage}.
      *
      * @param context The context
-     * @param entityResolver The entity resolver to use
+     * @param accountId The account identifier
+     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      */
-    CalendarStorage create(Context context, EntityResolver entityResolver) throws OXException;
+    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver) throws OXException;
 
     /**
      * Initializes a new {@link CalendarStorage}.
      *
      * @param context The context
-     * @param entityResolver The entity resolver to use
+     * @param accountId The account identifier
+     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      * @param dbProvider The database provider to use
-     * @param The transaction policy
+     * @param txPolicy The transaction policy
      */
-    CalendarStorage create(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
+    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
 
 }

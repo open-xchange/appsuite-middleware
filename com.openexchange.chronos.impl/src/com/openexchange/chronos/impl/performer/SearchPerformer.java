@@ -75,7 +75,7 @@ import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchFilter;
-import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -130,7 +130,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
     public List<Event> perform(String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException {
         List<UserizedFolder> folders = getFolders(folderIDs);
         EventField[] fields = getFields(session);
-        SortOptions sortOptions = new SortOptions(session);
+        SearchOptions sortOptions = new SearchOptions(session);
         List<Event> events = new ArrayList<Event>();
         List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
         for (Event event : readAdditionalEventData(foundEvents, -1, Utils.getFields(session, EventField.ATTENDEES))) {
@@ -144,7 +144,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
                 }
             }
         }
-        return sortEvents(events, new SortOptions(session));
+        return sortEvents(events, new SearchOptions(session));
     }
 
     private SearchTerm<?> buildSearchTerm(List<UserizedFolder> folders, List<String> queries) throws OXException {
@@ -203,7 +203,9 @@ public class SearchPerformer extends AbstractQueryPerformer {
             folderTerm = orTerm;
         }
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0)))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0))))
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, entityID))
         ;
         if (onlyOwn) {

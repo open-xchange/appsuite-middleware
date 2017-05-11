@@ -78,9 +78,6 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -107,19 +104,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventConverter {
-
-    private final ServiceLookup services;
-
-    /**
-     * Initializes a new {@link EventConverter}.
-     *
-     * @param services A service lookup reference
-     */
-    public EventConverter(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
+public abstract class EventConverter {
 
     /**
      * Wraps an exception from <code>com.openexchange.chronos.exception.CalendarExceptionCodes</code> into a similar legacy exception
@@ -149,7 +134,7 @@ public class EventConverter {
                 return OXException.notFound("Object " + firstArg + " in context");
             case 4042: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND
                 return OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
-            case 4044: // com.openexchange.chronos.exception.CalendarExceptionCodes.INVALID_RECURRENCE_ID
+            case 4061: // com.openexchange.chronos.exception.CalendarExceptionCodes.INVALID_RECURRENCE_ID
                 return OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(firstArg);
             case 4090: // com.openexchange.chronos.exception.CalendarExceptionCodes.UID_CONFLICT
                 return OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS.create("", firstArg);
@@ -260,22 +245,60 @@ public class EventConverter {
         }
     }
 
+    protected final ServiceLookup services;
+    protected final Session session;
+
+    /**
+     * Initializes a new {@link EventConverter}.
+     *
+     * @param services A service lookup reference
+     * @param session The session
+     */
+    public EventConverter(ServiceLookup services, Session session) {
+        super();
+        this.services = services;
+        this.session = session;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    /**
+     * Gets a specific event.
+     *
+     * @param eventID The identifier of the event to get
+     * @param fields The event fields to retrieve
+     * @return The event
+     */
+    protected abstract Event getEvent(EventID eventID, EventField... fields) throws OXException;
+
+    /**
+     * Gets the default timezone to use as fallback.
+     *
+     * @return The default timezone
+     */
+    protected abstract TimeZone getDefaultTimeZone() throws OXException;
+
+    protected RecurrenceService getRecurrenceService() {
+        return services.getService(RecurrenceService.class);
+    }
+
     /**
      * Gets the event identifier for the supplied full appointment identifier, optionally resolving a recurrence position to the
      * corresponding recurrence identifier.
      *
-     * @param session The calendar session
      * @param folderID The folder identifier
      * @param objectID The object identifier
      * @param recurrencePosition The recurrence position, or a value <code>< 0</code> if not set
      * @return The event identifier
      */
-    public EventID getEventID(CalendarSession session, String folderID, String objectID, int recurrencePosition) throws OXException {
+    public EventID getEventID(String folderID, String objectID, int recurrencePosition) throws OXException {
         EventID eventID = new EventID(folderID, objectID);
         if (0 >= recurrencePosition) {
             return eventID;
         }
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(session, eventID), recurrencePosition);
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(eventID), recurrencePosition);
         return new EventID(folderID, objectID, recurrenceID);
     }
 
@@ -283,30 +306,28 @@ public class EventConverter {
      * Gets the event identifier for the supplied full appointment identifier, optionally resolving a recurrence date position to the
      * corresponding recurrence identifier.
      *
-     * @param session The calendar session
      * @param folderID The folder identifier
      * @param objectID The object identifier
      * @param recurrenceDatePosition The recurrence date position, or <code>null</code> if not set
      * @return The event identifier
      */
-    public EventID getEventID(CalendarSession session, String folderID, String objectID, Date recurrenceDatePosition) throws OXException {
+    public EventID getEventID(String folderID, String objectID, Date recurrenceDatePosition) throws OXException {
         EventID eventID = new EventID(folderID, objectID);
         if (null == recurrenceDatePosition) {
             return eventID;
         }
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(session, eventID), recurrenceDatePosition);
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(eventID), recurrenceDatePosition);
         return new EventID(folderID, objectID, recurrenceID);
     }
 
     /**
      * Converts the supplied appointment into a corresponding event.
      *
-     * @param session The server session
      * @param appointment The appointment to convert
      * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknwon
      * @return The event
      */
-    public Event getEvent(Session session, Appointment appointment, EventID originalEventID) throws OXException {
+    public Event getEvent(Appointment appointment, EventID originalEventID) throws OXException {
         Event event = new Event();
         RecurrenceData recurrenceData = null;
         if (appointment.containsObjectID()) {
@@ -358,7 +379,7 @@ public class EventConverter {
                 event.setRecurrenceId(null);
             } else {
                 if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                    recurrenceData = loadRecurrenceData(originalEventID);
                 }
                 event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrenceDatePosition()));
             }
@@ -368,7 +389,7 @@ public class EventConverter {
                 event.setRecurrenceId(null);
             } else {
                 if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                    recurrenceData = loadRecurrenceData(originalEventID);
                 }
                 event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrencePosition()));
             }
@@ -378,9 +399,9 @@ public class EventConverter {
                 event.setRecurrenceRule(null);
             } else {
                 if (null == recurrenceData && null != originalEventID) {
-                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                    recurrenceData = loadRecurrenceData(originalEventID);
                 }
-                recurrenceData = getRecurrenceData(session, appointment, recurrenceData);
+                recurrenceData = getRecurrenceData(appointment, recurrenceData);
                 event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
             }
         }
@@ -389,7 +410,7 @@ public class EventConverter {
                 event.setChangeExceptionDates(null);
             } else {
                 if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                    recurrenceData = loadRecurrenceData(originalEventID);
                 }
                 event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
             }
@@ -399,7 +420,7 @@ public class EventConverter {
                 event.setChangeExceptionDates(null);
             } else {
                 if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                    recurrenceData = loadRecurrenceData(originalEventID);
                 }
                 event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
             }
@@ -444,11 +465,10 @@ public class EventConverter {
     /**
      * Converts the supplied event into a corresponding appointment.
      *
-     * @param session The server session
      * @param event The event to convert
      * @return The appointment
      */
-    public CalendarDataObject getAppointment(Session session, Event event) throws OXException {
+    public CalendarDataObject getAppointment(Event event) throws OXException {
         CalendarDataObject appointment = new CalendarDataObject();
         RecurrenceData recurrenceData = null;
         if (event.containsId()) {
@@ -480,7 +500,7 @@ public class EventConverter {
         if (event.containsColor()) {
             appointment.setLabel(Event2Appointment.getColorLabel(event.getColor()));
         } else {
-            //            appointment.setLabel(0);
+            appointment.setLabel(0);
         }
         if (event.containsAttachments()) {
             List<Attachment> attachments = event.getAttachments();
@@ -536,7 +556,7 @@ public class EventConverter {
                         if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                             recurrenceData = (RecurrenceData) event.getRecurrenceId();
                         } else {
-                            recurrenceData = loadRecurrenceData(session, new EventID(event.getFolderId(), event.getSeriesId()));
+                            recurrenceData = loadRecurrenceData(event);
                         }
                     }
                     appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
@@ -554,7 +574,7 @@ public class EventConverter {
                 } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                     recurrenceData = (RecurrenceData) event.getRecurrenceId();
                 } else {
-                    recurrenceData = loadRecurrenceData(session, new EventID(event.getFolderId(), event.getSeriesId()));
+                    recurrenceData = loadRecurrenceData(event);
                 }
             }
             SeriesPattern pattern = Event2Appointment.getSeriesPattern(getRecurrenceService(), recurrenceData);
@@ -747,25 +767,11 @@ public class EventConverter {
      * Extracts the series pattern from the supplied appointment data, optionally merging with the previous series pattern in case of
      * update operations.
      *
-     * @param session The server session
      * @param appointment The appointment to extract the series pattern from
      * @param originalPattern The original pattern, or <code>null</code> if not available
      * @return The series pattern, or <code>null</code> if not set
      */
-    private RecurrenceData getRecurrenceData(Session session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
-        return getRecurrenceData(services.getService(CalendarService.class).init(session), appointment, originalRecurrenceData);
-    }
-
-    /**
-     * Extracts the series pattern from the supplied appointment data, optionally merging with the previous series pattern in case of
-     * update operations.
-     *
-     * @param session The calendar session
-     * @param appointment The appointment to extract the series pattern from
-     * @param originalPattern The original pattern, or <code>null</code> if not available
-     * @return The series pattern, or <code>null</code> if not set
-     */
-    private RecurrenceData getRecurrenceData(CalendarSession session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
+    protected RecurrenceData getRecurrenceData(Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
         /*
          * prepare series pattern & take over original pattern data if available
          */
@@ -813,10 +819,7 @@ public class EventConverter {
             timeZone = TimeZone.getTimeZone(appointment.getTimezone());
         }
         if (null == timeZone) {
-            timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
-            if (null == timeZone) {
-                timeZone = session.getEntityResolver().getTimeZone(session.getUserId());
-            }
+            timeZone = getDefaultTimeZone();
         }
 
         if (appointment.containsRecurringStart() && appointment.containsStartDate()) {
@@ -918,22 +921,21 @@ public class EventConverter {
     /**
      * Loads the recurrence data for an event.
      *
-     * @param session The calendar session
      * @param eventID The identifier of the event to get the recurrence data for
-     * @return The series pattern, or <code>null</code> if not set
+     * @return The recurrence data, or <code>null</code> if not set
      */
-    private RecurrenceData loadRecurrenceData(CalendarSession session, EventID eventID) throws OXException {
+    protected RecurrenceData loadRecurrenceData(EventID eventID) throws OXException {
         EventField [] recurrenceFields = {
             EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY,
             EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
         };
-        Event event = getEvent(session, eventID, recurrenceFields);
-        if (event.getSeriesId() != event.getId()) {
+        Event event = getEvent(eventID, recurrenceFields);
+        if (false == event.getId().equals(event.getSeriesId())) {
             if (null == event.getSeriesId()) {
                 // no recurrence (yet)
                 return new DefaultRecurrenceData(null, event.isAllDay(), event.getStartTimeZone(), event.getStartDate().getTime());
             }
-            event = getEvent(session, new EventID(eventID.getFolderID(), event.getSeriesId()), recurrenceFields);
+            event = getEvent(new EventID(eventID.getFolderID(), event.getSeriesId()), recurrenceFields);
         }
         return new DefaultRecurrenceData(event);
     }
@@ -941,43 +943,22 @@ public class EventConverter {
     /**
      * Loads the recurrence data for an event.
      *
-     * @param session The server session
-     * @param eventID The identifier of the event to get the recurrence data for
-     * @return The series pattern, or <code>null</code> if not set
+     * @param event The event to get the recurrence data for
+     * @return The recurrence data, or <code>null</code> if not set
      */
-    private RecurrenceData loadRecurrenceData(Session session, EventID eventID) throws OXException {
-        return loadRecurrenceData(services.getService(CalendarService.class).init(session), eventID);
-    }
-
-    private RecurrenceService getRecurrenceService() {
-        return services.getService(RecurrenceService.class);
-    }
-
-    /**
-     * Gets a specific event.
-     *
-     * @param session The calendar session
-     * @param eventID The identifier of the event to get
-     * @param fields The event fields to retrieve
-     * @return The event
-     */
-    private Event getEvent(CalendarSession session, EventID eventID, EventField... fields) throws OXException {
-        EventField[] oldFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        Boolean oldRecurrenceMaster = session.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class);
-        Date oldRangeStart = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date oldRangeEnd = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        try {
-            session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
-            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
-            session.set(CalendarParameters.PARAMETER_RANGE_START, null);
-            session.set(CalendarParameters.PARAMETER_RANGE_END, null);
-            return session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID.getObjectID());
-        } finally {
-            session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
-            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, oldRecurrenceMaster);
-            session.set(CalendarParameters.PARAMETER_RANGE_START, oldRangeStart);
-            session.set(CalendarParameters.PARAMETER_RANGE_END, oldRangeEnd);
+    protected RecurrenceData loadRecurrenceData(Event event) throws OXException {
+        EventField [] recurrenceFields = {
+            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY,
+            EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
+        };
+        if (false == event.getId().equals(event.getSeriesId())) {
+            if (null == event.getSeriesId()) {
+                // no recurrence (yet)
+                return new DefaultRecurrenceData(null, event.isAllDay(), event.getStartTimeZone(), event.getStartDate().getTime());
+            }
+            event = getEvent(new EventID(event.getFolderId(), event.getSeriesId()), recurrenceFields);
         }
+        return new DefaultRecurrenceData(event);
     }
 
     /**

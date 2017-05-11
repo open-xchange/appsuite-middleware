@@ -65,41 +65,70 @@ public interface AttendeeStorage {
     /**
      * Loads all attendees for a specific event.
      *
-     * @param objectID The identifier of the event to load the attendees for
+     * @param eventId The identifier of the event to load the attendees for
      * @return The attendees
      */
-    List<Attendee> loadAttendees(String objectID) throws OXException;
+    List<Attendee> loadAttendees(String eventId) throws OXException;
 
     /**
      * Loads the attendees for specific events.
      *
-     * @param objectIDs The identifiers of the events to load the attendees for
+     * @param eventIds The identifiers of the events to load the attendees for
      * @return The attendees, mapped to the identifiers of the corresponding events
      */
-    Map<String, List<Attendee>> loadAttendees(String[] objectIDs) throws OXException;
+    Map<String, List<Attendee>> loadAttendees(String[] eventIds) throws OXException;
 
     /**
      * Loads the attendees for specific events.
      *
-     * @param objectIDs The identifiers of the events to load the attendees for
+     * @param eventIds The identifiers of the events to load the attendees for
      * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
      *            or <code>null</code> to not filter by internal/external
      * @return The attendees, mapped to the identifiers of the corresponding events
      */
-    Map<String, List<Attendee>> loadAttendees(String[] objectIDs, Boolean internal) throws OXException;
+    Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal) throws OXException;
 
-    void deleteAttendees(String objectID) throws OXException;
+    /**
+     * Deletes all attendees for a specific event.
+     *
+     * @param eventId The identifier of the event to delete the attendees for
+     */
+    void deleteAttendees(String eventId) throws OXException;
 
-    void deleteAttendees(String objectID, List<Attendee> attendees) throws OXException;
+    /**
+     * Deletes multiple attendees for a specific event.
+     *
+     * @param eventId The identifier of the event to delete the attendees for
+     * @param attendees The attendees to delete
+     */
+    void deleteAttendees(String eventId, List<Attendee> attendees) throws OXException;
 
-    void insertAttendees(String objectID, List<Attendee> attendees) throws OXException;
+    /**
+     * Inserts attendees for a specific event.
+     *
+     * @param eventId The identifier of the event to insert the attendees for
+     * @param attendees The attendees to insert
+     */
+    void insertAttendees(String eventId, List<Attendee> attendees) throws OXException;
 
-    void updateAttendees(String objectID, List<Attendee> attendees) throws OXException;
+    /**
+     * Updates attendees for a specific event.
+     *
+     * @param eventId The identifier of the event to update the attendees for
+     * @param attendees The attendees to update
+     */
+    void updateAttendees(String eventId, List<Attendee> attendees) throws OXException;
 
-    void updateAttendee(String objectID, Attendee attendee) throws OXException;
+    /**
+     * Updates an attendee for a specific event.
+     *
+     * @param eventId The identifier of the event to update the attendee for
+     * @param attendee The attendee to update
+     */
+    void updateAttendee(String eventId, Attendee attendee) throws OXException;
 
-    void insertTombstoneAttendees(String objectID, List<Attendee> attendees) throws OXException;
+    void insertTombstoneAttendees(String eventId, List<Attendee> attendees) throws OXException;
 
-    void insertTombstoneAttendee(String objectID, Attendee attendee) throws OXException;
+    void insertTombstoneAttendee(String eventId, Attendee attendee) throws OXException;
 
 }

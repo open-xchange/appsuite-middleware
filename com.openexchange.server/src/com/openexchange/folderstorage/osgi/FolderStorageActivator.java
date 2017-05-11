@@ -73,6 +73,7 @@ import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
+import com.openexchange.folderstorage.calendar.osgi.CalendarFolderStorageActivator;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
 import com.openexchange.folderstorage.filestorage.osgi.FileStorageFolderStorageActivator;
 import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
@@ -265,6 +266,7 @@ public final class FolderStorageActivator implements BundleActivator {
             activators.add(new MailFolderStorageActivator()); // Mail impl
             activators.add(new MessagingFolderStorageActivator()); // Messaging impl
             activators.add(new FileStorageFolderStorageActivator()); // File storage impl
+            activators.add(new CalendarFolderStorageActivator()); // Calendar storage impl
             activators.add(new CacheFolderStorageActivator()); // Cache impl
             activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
             activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator

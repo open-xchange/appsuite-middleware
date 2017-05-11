@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.appendTimeRangeTerms;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
@@ -67,7 +66,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -104,9 +103,9 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         /*
          * construct search term
          */
-        CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND)
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId())))
-            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since))
+            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since)
         );
         /*
          * perform search & userize the results for the current session's user
@@ -115,13 +114,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session, EventField.ATTENDEES);
         List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
-            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             readAdditionalEventData(events, session.getUserId(), fields);
             newAndModifiedEvents = postProcess(events, session.getUserId(), true);
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
-            List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SearchOptions(session), fields);
             readAdditionalEventData(events, session.getUserId(), fields);
             deletedEvents = postProcess(events, session.getUserId(), true);
         }
@@ -140,26 +139,32 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         /*
          * construct search term
          */
-        CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND)
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(folder))
-            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since))
+            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since)
         );
         /*
-         * perform search & userize the results
+         * perform search & userize the results based on the requested folder
          */
         String[] ignore = session.get(CalendarParameters.PARAMETER_IGNORE, String[].class);
         EventField[] fields = getFields(session);
         List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
-            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
             newAndModifiedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
-            List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SearchOptions(session), fields);
             readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
-            deletedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
+            Boolean oldRecurrenceMaserParameter = session.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class);
+            try {
+                session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
+                deletedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
+            } finally {
+                session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, oldRecurrenceMaserParameter);
+            }
         }
         return getResult(newAndModifiedEvents, deletedEvents);
     }

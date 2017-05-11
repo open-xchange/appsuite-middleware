@@ -58,16 +58,37 @@ package com.openexchange.chronos;
 public enum AlarmField {
 
     /**
-     * Specifies when an alarm will trigger.
+     * The internal identifier of the alarm.
      */
-    TRIGGER,
+    ID,
     /**
-     * Specifies when an alarm was last sent or acknowledged.
+     * The universal identifier of the alarm.
+     */
+    UID,
+    /**
+     * The relationship between this and other alarms.
+     */
+    RELATED_TO,
+    /**
+     * The time when the alarm was last sent or acknowledged.
      */
     ACKNOWLEDGED,
     /**
-     * Specifies the type of action invoked when the alarm is triggered.
+     * The description of the event.
+     */
+    DESCRIPTION,
+    /**
+     * The type of action invoked when the alarm is triggered.
      */
     ACTION,
+    /**
+     * The additional repetitions of the alarm's trigger.
+     */
+    REPEAT,
+    /**
+     * The moment the alarm will trigger.
+     */
+    TRIGGER,
 
+    ;
 }

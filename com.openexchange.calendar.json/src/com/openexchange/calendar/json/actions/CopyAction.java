@@ -66,8 +66,11 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.IDBasedCalendarAction;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.composition.CompositeEventID;
+import com.openexchange.chronos.provider.composition.CompositeFolderID;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -88,7 +91,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class CopyAction extends ChronosAction {
+public final class CopyAction extends IDBasedCalendarAction {
 
     /**
      * Initializes a new {@link CopyAction}.
@@ -167,6 +170,24 @@ public final class CopyAction extends ChronosAction {
         event.removeUid();
         event.removePublicFolderId();
         CalendarResult result = session.getCalendarService().createEvent(session, targetFolderID, event);
+        if (null != result.getCreations() && 0 < result.getCreations().size()) {
+            String id = result.getCreations().get(0).getCreatedEvent().getId();
+            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
+        }
+        return null; //TODO: conflicts
+    }
+
+    @Override
+    protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
+        access.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(request.getParameter(AppointmentFields.IGNORE_CONFLICTS)));
+        CompositeEventID eventID = CompositeEventID.parse(request.checkParameter(AJAXServlet.PARAMETER_ID));
+        JSONObject jsonObject = request.getData();
+        CompositeFolderID targetFolderID = CompositeFolderID.parse(DataParser.checkString(jsonObject, FolderChildFields.FOLDER_ID));
+        Event event = access.getEvent(eventID);
+        event.removeId();
+        event.removeUid();
+        event.removePublicFolderId();
+        CalendarResult result = access.createEvent(targetFolderID, event);
         if (null != result.getCreations() && 0 < result.getCreations().size()) {
             String id = result.getCreations().get(0).getCreatedEvent().getId();
             return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");

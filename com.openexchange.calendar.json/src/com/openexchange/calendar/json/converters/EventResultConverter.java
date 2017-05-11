@@ -57,8 +57,11 @@ import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -96,16 +99,17 @@ public class EventResultConverter extends AbstractCalendarJSONResultConverter {
         if (null == resultObject) {
             return;
         }
-        EventConverter eventConverter = new EventConverter(services);
+        CalendarSession calendarSession = services.getService(CalendarService.class).init(request.getSession());
+        EventConverter eventConverter = new DefaultEventConverter(services, calendarSession);
         if (Event.class.isInstance(resultObject)) {
-            CalendarDataObject appointment = eventConverter.getAppointment(session, (Event) resultObject);
+            CalendarDataObject appointment = eventConverter.getAppointment((Event) resultObject);
             result.setResultObject(appointment, delegate.getInputFormat());
             delegate.convertCalendar(request, result, session, converter, userTimeZone);
         } else if (Collections.class.isInstance(resultObject)) {
             Collection<?> collection = (Collection<?>) resultObject;
             List<Appointment> appointments = new ArrayList<Appointment>(collection.size());
             for (Object object : collection) {
-                appointments.add(eventConverter.getAppointment(session, (Event) object));
+                appointments.add(eventConverter.getAppointment((Event) object));
             }
             delegate.convert(appointments, request, result, userTimeZone);
         } else {

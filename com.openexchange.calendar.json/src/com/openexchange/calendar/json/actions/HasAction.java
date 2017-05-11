@@ -131,7 +131,6 @@ public final class HasAction extends ChronosAction {
         return OPTIONAL_PARAMETERS;
     }
 
-
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);

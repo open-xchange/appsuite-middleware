@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,6 +63,16 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public interface AlarmStorage {
+
+    /**
+     * Generates the next unique identifier for inserting new alarm data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     *
+     * @return The next unique alarm identifier
+     */
+    int nextId() throws OXException;
 
     void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException;
 
@@ -76,24 +87,24 @@ public interface AlarmStorage {
     /**
      * Deletes all alarms stored for a specific event.
      *
-     * @param objectID The identifier of the event to remove the alarms for
+     * @param eventId The identifier of the event to remove the alarms for
      */
-    void deleteAlarms(String objectID) throws OXException;
+    void deleteAlarms(String eventId) throws OXException;
 
     /**
      * Deletes all alarms of a user stored for a specific event.
      *
-     * @param objectID The identifier of the event to remove the alarms for
-     * @param userID The identifier of the user to remove the alarms for
+     * @param eventId The identifier of the event to remove the alarms for
+     * @param userId The identifier of the user to remove the alarms for
      */
-    void deleteAlarms(String objectID, int userID) throws OXException;
+    void deleteAlarms(String eventId, int userId) throws OXException;
 
     /**
      * Deletes all alarms of multiple users stored for a specific event.
      *
-     * @param objectID The identifier of the event to remove the alarms for
-     * @param userIDs The identifiers of the users to remove the alarms for
+     * @param eventId The identifier of the event to remove the alarms for
+     * @param userIds The identifiers of the users to remove the alarms for
      */
-    void deleteAlarms(String objectID, int[] userIDs) throws OXException;
+    void deleteAlarms(String eventId, int[] userIds) throws OXException;
 
 }

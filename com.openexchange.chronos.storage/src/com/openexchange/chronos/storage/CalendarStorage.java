@@ -49,9 +49,6 @@
 
 package com.openexchange.chronos.storage;
 
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.exception.OXException;
-
 /**
  * {@link CalendarStorage}
  *
@@ -59,16 +56,6 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public interface CalendarStorage {
-
-    /**
-     * Generates the next object unique identifier for inserting new event data.
-     * <p/>
-     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
-     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
-     *
-     * @return The next object identifier
-     */
-    String nextObjectID() throws OXException;
 
     /**
      * Gets the event storage.

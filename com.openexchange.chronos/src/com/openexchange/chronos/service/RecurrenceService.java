@@ -160,4 +160,23 @@ public interface RecurrenceService {
      */
     void validate(RecurrenceData recurrenceData) throws OXException;
 
+    /**
+     * Gets a value indicating whether a specific recurrence rule ends on a specific date or after a number of occurrences or not. I.e.,
+     * whether the rule contains a limiting <code>UNTIL</code> or <code>COUNT</code> part or not.
+     *
+     * @param recurrenceRule The recurrence rule to check
+     * @return <code>true</code> if the recurrence rule is not limited, <code>false</code>, otherwise
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    boolean isUnlimited(String recurrenceRule) throws OXException;
+
+    /**
+     * Calculates the last occurrence of a recurring event series represented by the supplied recurrence data.
+     *
+     * @param recurrenceData The recurrence data to get the last occurrence for
+     * @return The recurrence identifier of the last occurrence, or <code>null</code> for a never ending series
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    RecurrenceId getLastOccurrence(RecurrenceData recurrenceData) throws OXException;
+
 }

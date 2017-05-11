@@ -50,6 +50,7 @@
 package com.openexchange.chronos;
 
 import java.util.Date;
+import java.util.EnumSet;
 
 /**
  * {@link Alarm}
@@ -60,22 +61,24 @@ import java.util.Date;
  */
 public class Alarm {
 
-    int id;
-    String uid;
-    RelatedTo relatedTo;
+    private int id;
+    private String uid;
+    private RelatedTo relatedTo;
 
-    Trigger trigger;
-    Date acknowledged;
-    String description;
-    AlarmAction action;
-    String duration;
-    int repeat;
+    private Trigger trigger;
+    private Date acknowledged;
+    private String description;
+    private AlarmAction action;
+    private Repeat repeat;
+
+    private final EnumSet<AlarmField> setFields;
 
     /**
      * Initializes a new {@link Alarm}.
      */
     public Alarm() {
         super();
+        this.setFields = EnumSet.noneOf(AlarmField.class);
     }
 
     /**
@@ -91,79 +94,161 @@ public class Alarm {
     }
 
     /**
-     * Gets the id
+     * Gets a value indicating whether a specific property is set in the alarm or not.
      *
-     * @return The id
+     * @param field The field to check
+     * @return <code>true</code> if the field is set, <code>false</code>, otherwise
+     */
+    public boolean isSet(AlarmField field) {
+        return setFields.contains(field);
+    }
+
+    /**
+     * Gets the internal identifier of the alarm.
+     *
+     * @return The internal identifier
      */
     public int getId() {
         return id;
     }
 
     /**
-     * Sets the id
+     * Sets the internal identifier of the alarm.
      *
-     * @param id The id to set
+     * @param value The internal identifier to set
      */
-    public void setId(int id) {
-        this.id = id;
+    public void setId(int value) {
+        id = value;
+        setFields.add(AlarmField.ID);
     }
 
     /**
-     * Gets the uid
+     * Removes the internal identifier of the alarm.
+     */
+    public void removeId() {
+        id = 0;
+        setFields.remove(AlarmField.ID);
+    }
+
+    /**
+     * Gets a value indicating whether the internal identifier of the alarm has been set or not.
      *
-     * @return The uid
+     * @return <code>true</code> if the internal identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsId() {
+        return isSet(AlarmField.ID);
+    }
+
+    /**
+     * Gets the universal identifier of the alarm.
+     *
+     * @return The universal identifier
      */
     public String getUid() {
         return uid;
     }
 
     /**
-     * Sets the uid
+     * Sets the universal identifier of the alarm.
      *
-     * @param uid The uid to set
+     * @param value The universal identifier to set
      */
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setUid(String value) {
+        uid = value;
+        setFields.add(AlarmField.UID);
     }
 
     /**
-     * Gets the relatedTo
+     * Removes the universal identifier of the alarm.
+     */
+    public void removeUid() {
+        uid = null;
+        setFields.remove(AlarmField.UID);
+    }
+
+    /**
+     * Gets a value indicating whether the universal identifier of the alarm has been set or not.
      *
-     * @return The relatedTo
+     * @return <code>true</code> if the universal identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsUid() {
+        return setFields.contains(AlarmField.UID);
+    }
+
+    /**
+     * Gets the related-to of the alarm.
+     *
+     * @return The related-to
      */
     public RelatedTo getRelatedTo() {
         return relatedTo;
     }
 
     /**
-     * Sets the relatedTo
+     * Sets the related-to of the alarm.
      *
-     * @param relatedTo The relatedTo to set
+     * @param value The related-to to set
      */
-    public void setRelatedTo(RelatedTo relatedTo) {
-        this.relatedTo = relatedTo;
+    public void setRelatedTo(RelatedTo value) {
+        relatedTo = value;
+        setFields.add(AlarmField.RELATED_TO);
     }
 
     /**
-     * Gets the trigger
-     *
-     * @return The trigger
+     * Removes the related-to of the alarm.
      */
-    public Trigger getTrigger() {
-        return trigger;
+    public void removeRelatedTo() {
+        relatedTo = null;
+        setFields.remove(AlarmField.RELATED_TO);
     }
 
     /**
-     * Sets the trigger
+     * Gets a value indicating whether the related-to of the alarm has been set or not.
      *
-     * @param trigger The trigger to set
+     * @return <code>true</code> if the related-to is set, <code>false</code>, otherwise
      */
-    public void setTrigger(Trigger trigger) {
-        this.trigger = trigger;
+    public boolean containsRelatedTo() {
+        return setFields.contains(AlarmField.RELATED_TO);
     }
 
     /**
-     * Gets the description
+     * Gets the acknowledged date of the alarm.
+     *
+     * @return The acknowledged date
+     */
+    public Date getAcknowledged() {
+        return acknowledged;
+    }
+
+    /**
+     * Sets the acknowledged date of the alarm.
+     *
+     * @param value The acknowledged date to set
+     */
+    public void setAcknowledged(Date value) {
+        acknowledged = value;
+        setFields.add(AlarmField.ACKNOWLEDGED);
+    }
+
+    /**
+     * Removes the acknowledged date of the alarm.
+     */
+    public void removeAcknowledged() {
+        acknowledged = null;
+        setFields.remove(AlarmField.ACKNOWLEDGED);
+    }
+
+    /**
+     * Gets a value indicating whether the acknowledged date of the alarm has been set or not.
+     *
+     * @return <code>true</code> if the acknowledged date is set, <code>false</code>, otherwise
+     */
+    public boolean containsAcknowledged() {
+        return isSet(AlarmField.ACKNOWLEDGED);
+    }
+
+    /**
+     * Gets the description of the alarm.
      *
      * @return The description
      */
@@ -172,16 +257,34 @@ public class Alarm {
     }
 
     /**
-     * Sets the description
+     * Sets the description of the alarm.
      *
-     * @param description The description to set
+     * @param value The description to set
      */
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescription(String value) {
+        description = value;
+        setFields.add(AlarmField.DESCRIPTION);
     }
 
     /**
-     * Gets the action
+     * Removes the description of the alarm.
+     */
+    public void removeDescription() {
+        description = null;
+        setFields.remove(AlarmField.DESCRIPTION);
+    }
+
+    /**
+     * Gets a value indicating whether the description of the alarm has been set or not.
+     *
+     * @return <code>true</code> if the description is set, <code>false</code>, otherwise
+     */
+    public boolean containsDescription() {
+        return setFields.contains(AlarmField.DESCRIPTION);
+    }
+
+    /**
+     * Gets the action of the alarm.
      *
      * @return The action
      */
@@ -190,66 +293,102 @@ public class Alarm {
     }
 
     /**
-     * Sets the action
+     * Sets the action of the alarm.
      *
-     * @param action The action to set
+     * @param value The action to set
      */
-    public void setAction(AlarmAction action) {
-        this.action = action;
+    public void setAction(AlarmAction value) {
+        action = value;
+        setFields.add(AlarmField.ACTION);
     }
 
     /**
-     * Gets the duration
-     *
-     * @return The duration
+     * Removes the action of the alarm.
      */
-    public String getDuration() {
-        return duration;
+    public void removeAction() {
+        action = null;
+        setFields.remove(AlarmField.ACTION);
     }
 
     /**
-     * Sets the duration
+     * Gets a value indicating whether the action of the alarm has been set or not.
      *
-     * @param duration The duration to set
+     * @return <code>true</code> if the action is set, <code>false</code>, otherwise
      */
-    public void setDuration(String duration) {
-        this.duration = duration;
+    public boolean containsAction() {
+        return setFields.contains(AlarmField.ACTION);
     }
 
     /**
-     * Gets the repeat
+     * Gets the additional repetitions of the alarm's trigger.
      *
-     * @return The repeat
+     * @return The additional repetitions
      */
-    public int getRepeat() {
+    public Repeat getRepeat() {
         return repeat;
     }
 
     /**
-     * Sets the repeat
+     * Sets the additional repetitions of the alarm's trigger.
      *
-     * @param repeat The repeat to set
+     * @param value The additional repetitions to set
      */
-    public void setRepeat(int repeat) {
-        this.repeat = repeat;
+    public void setRepeat(Repeat value) {
+        repeat = value;
+        setFields.add(AlarmField.REPEAT);
     }
 
     /**
-     * Gets the acknowledged
-     *
-     * @return The acknowledged
+     * Removes the additional repetitions of the alarm.
      */
-    public Date getAcknowledged() {
-        return acknowledged;
+    public void removeRepeat() {
+        repeat = null;
+        setFields.remove(AlarmField.REPEAT);
     }
 
     /**
-     * Sets the acknowledged
+     * Gets a value indicating whether the additional repetitions of the alarm has been set or not.
      *
-     * @param acknowledged The acknowledged to set
+     * @return <code>true</code> if the additional repetitions is set, <code>false</code>, otherwise
      */
-    public void setAcknowledged(Date acknowledged) {
-        this.acknowledged = acknowledged;
+    public boolean containsRepeat() {
+        return isSet(AlarmField.REPEAT);
+    }
+
+    /**
+     * Gets the trigger of the alarm.
+     *
+     * @return The alarm trigger
+     */
+    public Trigger getTrigger() {
+        return trigger;
+    }
+
+    /**
+     * Sets the trigger of the alarm.
+     *
+     * @param value The alarm trigger to set
+     */
+    public void setTrigger(Trigger value) {
+        trigger = value;
+        setFields.add(AlarmField.TRIGGER);
+    }
+
+    /**
+     * Removes the trigger of the alarm.
+     */
+    public void removeTrigger() {
+        trigger = null;
+        setFields.remove(AlarmField.TRIGGER);
+    }
+
+    /**
+     * Gets a value indicating whether the trigger of the alarm has been set or not.
+     *
+     * @return <code>true</code> if the trigger is set, <code>false</code>, otherwise
+     */
+    public boolean containsTrigger() {
+        return isSet(AlarmField.TRIGGER);
     }
 
     @Override

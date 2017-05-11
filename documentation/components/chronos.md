@@ -132,7 +132,18 @@ While appropriate handling has originally been in place as incoming/outgoing "pa
 
 The legacy *private* flag (``pflag`` in database) is used to hide sensitive details from appointments to other users. Participants of the appointment may always see all details of such appointments, while other users who are able to access such appointments based to their permissions (e.g. in shared folders) will only have a restricted view on them. This basically includes the start- and end-time, identifying properties such as the UID, and the appointment's *shown-as* value. Instead of the appointment title, usually "Private" is shown instead.
 
-In iCalendar, this relates to the classification property of an event, with the possible values ``PUBLIC`` (default), ``PRIVATE`` and ``CONFIDENTIAL``. While documentation about the exact meanings of ``PRIVATE`` and ``CONFIDENTIAL`` are quite rare, but the legacy *private* flag best matches the semantics of ``CONFIDENTIAL``, i.e. only start- and end-times of the events are visible when being read by non-participating users. So, the legacy *private* flag will be converted to the classification ``CONFIDENTIAL``; vice-versa, both ``PRIVATE`` and ``CONFIDENTIAL`` will make the *private* flag ``true``.
+In iCalendar, this relates to the classification property of an event, with the possible values ``PUBLIC`` (default), ``PRIVATE`` and ``CONFIDENTIAL``. While documentation about the exact meanings of ``PRIVATE`` and ``CONFIDENTIAL`` are quite rare, the legacy *private* flag best matches the semantics of ``CONFIDENTIAL``, i.e. only start- and end-times of the events are visible when being read by non-participating users. So, the legacy *private* flag will be converted to the classification ``CONFIDENTIAL``; vice-versa, both ``PRIVATE`` and ``CONFIDENTIAL`` will make the *private* flag ``true``. Consequently, the parameter ``showPrivate`` of the legacy HTTP API is applied to ``CONFIDENTIAL``ly marked events.  
+
+Internally, the following semantics apply for the classifications:
+
+- ``PUBLIC`` (default)
+  No special handling, i.e. all event properties are exposed to non-attending users in shared folders. 
+- ``CONFIDENTIAL``
+  Only certain non-classified event properties are exposed to non-attending users in shared folders (basically all date- and time-related properties as well as administrative fields like identifiers), so that effectively such events appear as anonymous 'blocks' when being viewed in a calendar. The event's summary is replaced with the static text "Private". Additionally, such events are still considered in conflict- and free/busy-queries.
+- ``PRIVATE``
+  Events are not exposed to non-attending users in shared folders at all. Additionally, such events are only considered in conflict- and free/busy-queries in case of an attending resource attendee. 
+
+For synchronization via CalDAV, the event classification is passed and read *as-is*, with the exception of the Apple calendar clients who require some special treatment (in form of a proprietary spec) in this topic. When exporting calendar object resources whose classification is different from ``PUBLIC`` for an Apple client, the parent ``VCALENDAR`` component is decorated with an additional property ``X-CALENDARSERVER-ACCESS``, set to the value of the (series master) event's classification. In the same way during import, the passed value of ``X-CALENDARSERVER-ACCESS`` is considered and transferred from the parent ``VCALENDAR`` component to each contained ``VEVENT``.
 
 ### References / further reading
 - https://tools.ietf.org/html/rfc5545#section-3.8.1.3
@@ -142,6 +153,7 @@ In iCalendar, this relates to the classification property of an event, with the 
 - com.openexchange.chronos.compat.Event2Appointment.getPrivateFlag(Classification)
 - com.openexchange.chronos.compat.Appointment2Event.getClassification(boolean)
 - com.openexchange.chronos.impl.Check.classificationIsValid(Classification, UserizedFolder)
+- com.openexchange.chronos.impl.Utils.NON_CLASSIFIED_FIELDS
 
 
 ## Move between Folders
@@ -233,7 +245,9 @@ In the Chronos stack, a slightly enhanced approach is used so that not necessari
 
 At many places, one needs to differentiate between *internal* and *external* calendar users. Internal calendar users are all provisioned groupware entities within the same context, i.e. all resources, users and groups. All other calendar users are treated as external entities. This is especially also true for entities from other contexts of the same installation.
 
-Currently, all external calendar users require a valid e-mail address that can be used for scheduling via iMIP. This is enforced by validating the URIs of external attendees prior saving.  
+### Scheduling
+
+Currently, all external calendar users require a valid e-mail address that can be used for scheduling via iMIP. This is enforced by validating the URIs of external attendees prior saving. Attempting to save or update an event containing an external calendar user w/o valid e-mail address will fail; the check may be skipped when setting ``com.openexchange.chronos.skipExternalAttendeeURIChecks`` to ``false``.
 
 ### URI Encoding / International Domain Names (IDN)
 

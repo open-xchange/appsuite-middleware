@@ -154,6 +154,7 @@ public final class FreeBusyAction extends ChronosAction {
         return OPTIONAL_PARAMETERS;
     }
 
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
@@ -167,7 +168,7 @@ public final class FreeBusyAction extends ChronosAction {
         }
         Map<Attendee, List<Event>> eventsPerAttendee = freeBusyService.getFreeBusy(session, Collections.singletonList(attendee), from, until);
         List<Event> events = eventsPerAttendee.get(attendee);
-        return getAppointmentResultWithTimestamp(session, null == events ? Collections.<Event> emptyList() : events);
+        return getAppointmentResultWithTimestamp(getEventConverter(session), null == events ? Collections.<Event> emptyList() : events);
     }
 
 }

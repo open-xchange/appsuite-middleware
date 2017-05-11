@@ -219,7 +219,7 @@ public final class SearchAction extends ChronosAction {
         String[] folderIDs = jsonObject.has(AJAXServlet.PARAMETER_INFOLDER) ? new String[] { jsonObject.getString(AJAXServlet.PARAMETER_INFOLDER) } : null;
         String pattern = jsonObject.optString(SearchFields.PATTERN);
         List<Event> events = session.getCalendarService().searchEvents(session, folderIDs, pattern);
-        return getAppointmentResultWithTimestamp(session, events);
+        return getAppointmentResultWithTimestamp(getEventConverter(session), events);
     }
 
 }

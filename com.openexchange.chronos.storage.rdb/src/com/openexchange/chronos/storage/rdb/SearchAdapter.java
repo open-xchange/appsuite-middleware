@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,6 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -85,8 +83,6 @@ import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SearchTerm.OperationPosition;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -102,11 +98,9 @@ public class SearchAdapter {
     private final List<Object> parameters;
     private final String charset;
     private final String prefixEvents;
-    private final String prefixInternalAttendees;
-    private final String prefixExternalAttendees;
+    private final String prefixAttendees;
 
-    private boolean usesInternalAttendees;
-    private boolean usesExternalAttendees;
+    private boolean usesAttendees;
 
     /**
      * Initializes a new {@link SearchAdapter}.
@@ -114,16 +108,15 @@ public class SearchAdapter {
      * @param The context identifier
      * @param charset The optional charset to use for string comparisons, or <code>null</code> if not specified
      * @param prefixEvents The prefix to use when inserting column operands for event fields
-     * @param prefixInternalAttendees The prefix to use when inserting column operands for internal attendee fields
+     * @param prefixAttendees The prefix to use when inserting column operands for internal attendee fields
      * @param prefixExternalAttendees The prefix to use when inserting column operands for external attendee fields
      */
-    public SearchAdapter(int contextID, String charset, String prefixEvents, String prefixInternalAttendees, String prefixExternalAttendees) throws OXException {
+    public SearchAdapter(int contextID, String charset, String prefixEvents, String prefixAttendees) throws OXException {
         super();
         this.contextID = contextID;
         this.charset = charset;
         this.prefixEvents = prefixEvents;
-        this.prefixInternalAttendees = prefixInternalAttendees;
-        this.prefixExternalAttendees = prefixExternalAttendees;
+        this.prefixAttendees = prefixAttendees;
         this.parameters = new ArrayList<Object>();
         this.stringBuilder = new StringBuilder(256);
     }
@@ -161,21 +154,12 @@ public class SearchAdapter {
     }
 
     /**
-     * Gets a value indicating whether properties of internal attendees are present in the search term or not.
+     * Gets a value indicating whether properties of attendees are present in the search term or not.
      *
-     * @return <code>true</code> if internal attendees are used, <code>false</code>, otherwise
+     * @return <code>true</code> if attendees are used, <code>false</code>, otherwise
      */
-    public boolean usesInternalAttendees() {
-        return usesInternalAttendees;
-    }
-
-    /**
-     * Gets a value indicating whether properties of external attendees are present in the search term or not.
-     *
-     * @return <code>true</code> if external attendees are used, <code>false</code>, otherwise
-     */
-    public boolean usesExternalAttendees() {
-        return usesExternalAttendees;
+    public boolean usesAttendees() {
+        return usesAttendees;
     }
 
     /**
@@ -258,26 +242,20 @@ public class SearchAdapter {
 
     private void appendUsers(List<String> queries) throws OXException {
         for (String query : queries) {
-            stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_dates_members WHERE prg_dates_members.cid = ");
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM calendar_attendee WHERE calendar_attendee.cid=");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
-            stringBuilder.append(" AND prg_dates_members.object_id = ").append(prefixEvents).append("intfield01 AND prg_dates_members.member_uid = ");
+            stringBuilder.append(" AND calendar_attendee.account=").append(prefixEvents).append("account AND calendar_attendee.event=").append(prefixEvents).append("id AND calendar_attendee.entity=");
             appendConstantOperand(query, Types.INTEGER);
             stringBuilder.append(')');
         }
     }
 
     private void appendExternalParticipants(List<String> queries) throws OXException {
-        if (1 == queries.size()) {
-            stringBuilder.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ");
+        for (String query : queries) {
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM calendar_attendee WHERE calendar_attendee.cid=");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
-            stringBuilder.append(" AND dateExternal.objectId=").append(prefixEvents).append("intfield01 AND dateExternal.mailAddress = ");
-            appendConstantOperand(queries.get(0), Types.VARCHAR);
-            stringBuilder.append(')');
-        } else {
-            stringBuilder.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ");
-            appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
-            stringBuilder.append(" AND dateExternal.objectId=").append(prefixEvents).append("intfield01 AND ");
-            appendAsInClause(ExternalAttendeeMapper.getInstance().get(AttendeeField.URI), "dateExternal.", new ArrayList<Object>(queries));
+            stringBuilder.append(" AND calendar_attendee.account=").append(prefixEvents).append("account AND calendar_attendee.event=").append(prefixEvents).append("id AND calendar_attendee.uri=");
+            appendConstantOperand(query, Types.VARCHAR);
             stringBuilder.append(')');
         }
     }
@@ -352,17 +330,17 @@ public class SearchAdapter {
         for (int i = 1; i < queries.size(); i++) {
             partStats.add(Enums.parse(ParticipationStatus.class, queries.get(i)));
         }
-        DbMapping<? extends Object, Attendee> entityMapping = InternalAttendeeMapper.getInstance().get(AttendeeField.ENTITY);
-        DbMapping<? extends Object, Attendee> partStatMapping = InternalAttendeeMapper.getInstance().get(AttendeeField.PARTSTAT);
-        stringBuilder.append(" AND (").append(entityMapping.getColumnLabel(prefixInternalAttendees)).append(" = ? AND ");
+        DbMapping<? extends Object, Attendee> entityMapping = AttendeeMapper.getInstance().get(AttendeeField.ENTITY);
+        DbMapping<? extends Object, Attendee> partStatMapping = AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT);
+        stringBuilder.append(" AND (").append(entityMapping.getColumnLabel(prefixAttendees)).append(" = ? AND ");
         parameters.add(Integer.valueOf(entity));
         if (1 == partStats.size()) {
-            stringBuilder.append(partStatMapping.getColumnLabel(prefixInternalAttendees)).append(" = ?");
-            parameters.add(Integer.valueOf(Event2Appointment.getConfirm((ParticipationStatus) partStats.get(0))));
+            stringBuilder.append(partStatMapping.getColumnLabel(prefixAttendees)).append(" = ?");
+            parameters.add(((ParticipationStatus) partStats.get(0)).name());
         } else {
-            appendAsInClause(partStatMapping, prefixInternalAttendees, partStats);
+            appendAsInClause(partStatMapping, prefixAttendees, partStats);
         }
-        usesInternalAttendees = true;
+        usesAttendees = true;
         stringBuilder.append(") ");
     }
 
@@ -370,10 +348,7 @@ public class SearchAdapter {
         if (null != queries && 0 < queries.size()) {
             for (String query : queries) {
                 stringBuilder.append(" AND ");
-                append(new SingleSearchTerm(SingleOperation.EQUALS)
-                    .addOperand(new ColumnFieldOperand<EventField>(field))
-                    .addOperand(new ConstantOperand<String>(query))
-                );
+                append(getSearchTerm(field, SingleOperation.EQUALS, query));
             }
         }
     }
@@ -546,10 +521,10 @@ public class SearchAdapter {
             parameters.add(new Timestamp(((Date) value).getTime()));
         } else if (Date.class.isInstance(value) && Types.BIGINT == sqlType) {
             parameters.add(Long.valueOf(((Date) value).getTime()));
-        } else if (ParticipationStatus.class.isInstance(value) && Types.INTEGER == sqlType) {
-            parameters.add(Event2Appointment.getConfirm((ParticipationStatus) value));
-        } else if (Transp.class.isInstance(value) && Types.INTEGER == sqlType) {
-            parameters.add(Integer.valueOf(Event2Appointment.getShownAs((Transp) value)));
+        } else if (ParticipationStatus.class.isInstance(value) && Types.VARCHAR == sqlType) {
+            parameters.add(((ParticipationStatus) value).name());
+        } else if (Transp.class.isInstance(value) && Types.VARCHAR == sqlType) {
+            parameters.add(((Transp) value).getValue());
         } else {
             // default
             parameters.add(value);
@@ -607,28 +582,15 @@ public class SearchAdapter {
             if (null == mapping) {
                 throw new IllegalArgumentException("No mapping available for: " + value);
             }
-            return Collections.<String, DbMapping<? extends Object, ?>>singletonMap(prefixEvents, mapping);
+            return Collections.<String, DbMapping<? extends Object, ?>> singletonMap(prefixEvents, mapping);
         }
         if (AttendeeField.class.isInstance(value)) {
-            DbMapping<? extends Object, Attendee> internalAttendeeMapping = InternalAttendeeMapper.getInstance().opt((AttendeeField) value);
-            DbMapping<? extends Object, Attendee> externalAttendeeMapping = ExternalAttendeeMapper.getInstance().opt((AttendeeField) value);
-            if (null == internalAttendeeMapping && null == externalAttendeeMapping) {
+            DbMapping<? extends Object, Attendee> attendeeMapping = AttendeeMapper.getInstance().opt((AttendeeField) value);
+            if (null == attendeeMapping) {
                 throw new IllegalArgumentException("No mapping available for: " + value);
             }
-            if (null == internalAttendeeMapping) {
-                usesExternalAttendees = true;
-                return Collections.<String, DbMapping<? extends Object, ?>> singletonMap(prefixExternalAttendees, externalAttendeeMapping);
-            }
-            if (null == externalAttendeeMapping) {
-                usesInternalAttendees = true;
-                return Collections.<String, DbMapping<? extends Object, ?>> singletonMap(prefixInternalAttendees, internalAttendeeMapping);
-            }
-            usesExternalAttendees = true;
-            usesInternalAttendees = true;
-            Map<String, DbMapping<? extends Object, ?>> mappings = new HashMap<String, DbMapping<? extends Object, ?>>(2);
-            mappings.put(prefixInternalAttendees, internalAttendeeMapping);
-            mappings.put(prefixExternalAttendees, externalAttendeeMapping);
-            return mappings;
+            usesAttendees = true;
+            return Collections.<String, DbMapping<? extends Object, ?>> singletonMap(prefixAttendees, attendeeMapping);
         }
         throw new IllegalArgumentException("No mapping available for: " + value);
     }

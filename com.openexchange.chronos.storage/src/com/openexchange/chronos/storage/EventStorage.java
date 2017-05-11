@@ -49,14 +49,14 @@
 
 package com.openexchange.chronos.storage;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.SearchFilter;
-import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
 
@@ -69,58 +69,68 @@ import com.openexchange.search.SearchTerm;
 public interface EventStorage {
 
     /**
+     * Generates the next unique identifier for inserting new event data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     *
+     * @return The next unique event identifier
+     */
+    String nextId() throws OXException;
+
+    /**
      * Loads a specific event.
      *
-     * @param objectID The object identifier of the event to load
+     * @param eventId The identifier of the event to load
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The event
      */
-    Event loadEvent(String objectID, EventField[] fields) throws OXException;
+    Event loadEvent(String eventId, EventField[] fields) throws OXException;
 
     /**
      * Loads a specific exception from a recurring event series.
      *
-     * @param seriesID The object identifier of the event to load
-     * @param recurrenceID The recurrence identifier of the exception to load
+     * @param seriesId The identifier of the event series to load
+     * @param recurrenceId The recurrence identifier of the exception to load
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The event exception
      */
-    Event loadException(String seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException;
+    Event loadException(String seriesId, RecurrenceId recurrenceId, EventField[] fields) throws OXException;
 
     /**
      * Searches for events.
      *
      * @param searchTerm The search term to use
-     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
+     * @param searchOptions The search options to apply, or <code>null</code> if not specified
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The found events
      */
-    List<Event> searchEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
+    List<Event> searchEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
     /**
      * Searches for events.
      *
      * @param searchTerm The search term to use
      * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
-     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
+     * @param searchOptions The search options to apply, or <code>null</code> if not specified
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The found events
      */
-    List<Event> searchEvents(SearchTerm<?> searchTerm, List<SearchFilter> filters, SortOptions sortOptions, EventField[] fields) throws OXException;
+    List<Event> searchEvents(SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
     /**
      * Searches for previously deleted events.
      *
      * @param searchTerm The search term to use
-     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
+     * @param searchOptions The search options to apply, or <code>null</code> if not specified
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The found events
      */
-    List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
+    List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
-    List<Event> searchOverlappingEvents(Date from, Date until, List<Attendee> attendees, boolean includeTransparent, SortOptions sortOptions, EventField[] fields) throws OXException;
+    List<Event> searchOverlappingEvents(List<Attendee> attendees, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
-    List<Event> searchOverlappingEvents(Date from, Date until, Attendee attendee, boolean includeTransparent, boolean includeDeclined, SortOptions sortOptions, EventField[] fields) throws OXException;
+    //    List<Event> searchOverlappingEvents(Date from, Date until, Attendee attendee, boolean includeTransparent, boolean includeDeclined, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
     /**
      * Inserts a new event into the database.
@@ -129,9 +139,19 @@ public interface EventStorage {
      */
     void insertEvent(Event event) throws OXException;
 
+    /**
+     * Updates an existing event.
+     *
+     * @param event The event to update
+     */
     void updateEvent(Event event) throws OXException;
 
-    void deleteEvent(String objectID) throws OXException;
+    /**
+     * Deletes an existing event.
+     *
+     * @param eventId The identifier of the event to delete
+     */
+    void deleteEvent(String eventId) throws OXException;
 
     void insertTombstoneEvent(Event event) throws OXException;
 

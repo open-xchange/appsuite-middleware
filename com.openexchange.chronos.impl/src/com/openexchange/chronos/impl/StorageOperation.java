@@ -56,7 +56,9 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
@@ -98,15 +100,12 @@ public abstract class StorageOperation<T> {
     public T executeUpdate() throws OXException {
         boolean committed = false;
         DatabaseService dbService = Services.getService(DatabaseService.class);
-        CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         Connection writeConnection = null;
         try {
             writeConnection = dbService.getWritable(context);
             writeConnection.setAutoCommit(false);
-            SimpleDBProvider dbProvider = new SimpleDBProvider(writeConnection, writeConnection);
             session.set(PARAM_CONNECTION, writeConnection);
-            CalendarStorage storage = storageFactory.create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-            T result = execute(session, storage);
+            T result = execute(session, initStorage(new SimpleDBProvider(writeConnection, writeConnection)));
             writeConnection.commit();
             committed = true;
             return result;
@@ -134,19 +133,24 @@ public abstract class StorageOperation<T> {
      */
     public T executeQuery() throws OXException {
         DatabaseService dbService = Services.getService(DatabaseService.class);
-        CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         Connection readConnection = null;
         try {
             readConnection = dbService.getReadOnly(context);
-            SimpleDBProvider dbProvider = new SimpleDBProvider(readConnection, null);
             session.set(PARAM_CONNECTION, readConnection);
-            CalendarStorage storage = storageFactory.create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-            return execute(session, storage);
+            return execute(session, initStorage(new SimpleDBProvider(readConnection, null)));
         } finally {
             session.set(PARAM_CONNECTION, null);
             if (null != readConnection) {
                 dbService.backReadOnly(context, readConnection);
             }
+        }
+    }
+
+    private CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
+        if (session.getConfig().isUseLegacyStorage()) {
+            return Services.getService(LegacyCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        } else {
+            return Services.getService(CalendarStorageFactory.class).create(context, 0, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         }
     }
 

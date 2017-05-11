@@ -69,6 +69,7 @@ import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
@@ -114,7 +115,7 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
          */
         EventField[] fields = Utils.getFields(Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]), EventField.ATTENDEES);
         List<Attendee> attendees = Collections.singletonList(session.getEntityResolver().applyEntityData(new Attendee(), userID));
-        List<Event> events = storage.getEventStorage().searchOverlappingEvents(rangeStart, rangeEnd, attendees, true, null, fields);
+        List<Event> events = storage.getEventStorage().searchOverlappingEvents(attendees, true, new SearchOptions().setRange(rangeStart, rangeEnd), fields);
         readAdditionalEventData(events, -1, new EventField[] { EventField.ATTENDEES });
         /*
          * step through events day-wise & check for present events

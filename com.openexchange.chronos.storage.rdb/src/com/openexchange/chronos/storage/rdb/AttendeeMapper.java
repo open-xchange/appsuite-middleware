@@ -54,36 +54,38 @@ import static com.openexchange.java.Autoboxing.i;
 import java.util.EnumMap;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ParticipantRole;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.java.Enums;
 
 /**
- * {@link ExternalAttendeeMapper}
+ * {@link AttendeeMapper}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
+public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
-    private static final ExternalAttendeeMapper INSTANCE = new ExternalAttendeeMapper();
+    private static final AttendeeMapper INSTANCE = new AttendeeMapper();
 
     /**
      * Gets the mapper instance.
      *
      * @return The instance.
      */
-    public static ExternalAttendeeMapper getInstance() {
+    public static AttendeeMapper getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Initializes a new {@link ExternalAttendeeMapper}.
+     * Initializes a new {@link AttendeeMapper}.
      */
-    private ExternalAttendeeMapper() {
+    private AttendeeMapper() {
         super();
     }
 
@@ -101,11 +103,11 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
 	protected EnumMap<AttendeeField, DbMapping<? extends Object, Attendee>> createMappings() {
 		EnumMap<AttendeeField, DbMapping<? extends Object, Attendee>> mappings = new
 			EnumMap<AttendeeField, DbMapping<? extends Object, Attendee>>(AttendeeField.class);
-        mappings.put(AttendeeField.URI, new VarCharMapping<Attendee>("mailAddress", "URI") {
+        mappings.put(AttendeeField.URI, new VarCharMapping<Attendee>("uri", "URI") {
 
             @Override
             public void set(Attendee attendee, String value) {
-                attendee.setUri(Appointment2Event.getURI(value));
+                attendee.setUri(value);
             }
 
             @Override
@@ -115,7 +117,7 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
 
             @Override
             public String get(Attendee attendee) {
-                return Event2Appointment.getEMailAddress(attendee.getUri());
+                return attendee.getUri();
             }
 
             @Override
@@ -123,7 +125,7 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
                 attendee.removeUri();
             }
         });
-        mappings.put(AttendeeField.CN, new VarCharMapping<Attendee>("displayName", "Common name") {
+        mappings.put(AttendeeField.CN, new VarCharMapping<Attendee>("cn", "Common name") {
 
             @Override
             public void set(Attendee attendee, String value) {
@@ -145,11 +147,101 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
                 attendee.removeCn();
             }
         });
-        mappings.put(AttendeeField.PARTSTAT, new IntegerMapping<Attendee>("confirm", "Participation status") {
+        mappings.put(AttendeeField.ENTITY, new IntegerMapping<Attendee>("entity", "Entity") {
 
             @Override
             public void set(Attendee attendee, Integer value) {
-                attendee.setPartStat(null == value ? null : Appointment2Event.getParticipationStatus(i(value)));
+                attendee.setEntity(null == value ? 0 : i(value));
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsEntity();
+            }
+
+            @Override
+            public Integer get(Attendee attendee) {
+                return I(attendee.getEntity());
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeEntity();
+            }
+        });
+        mappings.put(AttendeeField.FOLDER_ID, new VarCharMapping<Attendee>("folder", "Folder ID") {
+
+            @Override
+            public void set(Attendee attendee, String value) {
+                attendee.setFolderID(value);
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsFolderID();
+            }
+
+            @Override
+            public String get(Attendee attendee) {
+                return attendee.getFolderID();
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeFolderID();
+            }
+        });
+        mappings.put(AttendeeField.CU_TYPE, new VarCharMapping<Attendee>("cuType", "Calendaruser Type") {
+
+            @Override
+            public void set(Attendee attendee, String value) {
+                attendee.setCuType(Enums.parse(CalendarUserType.class, value));
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsCuType();
+            }
+
+            @Override
+            public String get(Attendee attendee) {
+                CalendarUserType value = attendee.getCuType();
+                return null == value ? null : value.name();
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeCuType();
+            }
+        });
+        mappings.put(AttendeeField.ROLE, new VarCharMapping<Attendee>("role", "Role") {
+
+            @Override
+            public void set(Attendee attendee, String value) {
+                attendee.setRole(Enums.parse(ParticipantRole.class, value));
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsRole();
+            }
+
+            @Override
+            public String get(Attendee attendee) {
+                ParticipantRole value = attendee.getRole();
+                return null == value ? null : value.name();
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeRole();
+            }
+        });
+        mappings.put(AttendeeField.PARTSTAT, new VarCharMapping<Attendee>("partStat", "Participation Status") {
+
+            @Override
+            public void set(Attendee attendee, String value) {
+                attendee.setPartStat(Enums.parse(ParticipationStatus.class, value));
             }
 
             @Override
@@ -158,8 +250,9 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
             }
 
             @Override
-            public Integer get(Attendee attendee) {
-                return null == attendee.getPartStat() ? null : I(Event2Appointment.getConfirm(attendee.getPartStat()));
+            public String get(Attendee attendee) {
+                ParticipationStatus value = attendee.getPartStat();
+                return null == value ? null : value.name();
             }
 
             @Override
@@ -167,7 +260,7 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
                 attendee.removePartStat();
             }
         });
-        mappings.put(AttendeeField.COMMENT, new VarCharMapping<Attendee>("reason", "Comment") {
+        mappings.put(AttendeeField.COMMENT, new VarCharMapping<Attendee>("comment", "Comment") {
 
             @Override
             public void set(Attendee attendee, String value) {
@@ -187,6 +280,28 @@ public class ExternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
             @Override
             public void remove(Attendee attendee) {
                 attendee.removeComment();
+            }
+        });
+        mappings.put(AttendeeField.MEMBER, new VarCharMapping<Attendee>("member", "Member") {
+
+            @Override
+            public void set(Attendee attendee, String value) {
+                attendee.setMember(value);
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsMember();
+            }
+
+            @Override
+            public String get(Attendee attendee) {
+                return attendee.getMember();
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeMember();
             }
         });
         return mappings;

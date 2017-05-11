@@ -58,7 +58,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -93,7 +93,7 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
         requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         Date lastModified = folder.getLastModifiedUTC();
         SearchTerm<?> searchTerm = getFolderIdTerm(folder);
-        SortOptions sortOptions = new SortOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
+        SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
         EventField[] fields = { EventField.LAST_MODIFIED };
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, sortOptions, fields);
         if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {

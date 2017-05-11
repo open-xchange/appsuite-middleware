@@ -85,8 +85,8 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
-import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -252,13 +252,17 @@ public class Utils {
         }
         if (PrivateType.getInstance().equals(folder.getType())) {
             return new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0)))
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.ISNULL))
+                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0))))
                 .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
                 .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
         }
         if (SharedType.getInstance().equals(folder.getType())) {
             CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0)))
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.ISNULL))
+                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0))))
                 .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
                 .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
             if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
@@ -268,38 +272,6 @@ public class Utils {
         }
         throw new UnsupportedOperationException("Unknown folder type: " + folder.getType());
 
-    }
-
-    /**
-     * Appends search terms for the commonly used restriction by time range, based on the session parameters
-     * {@link CalendarParameters#PARAMETER_RANGE_START} and {@link CalendarParameters#PARAMETER_RANGE_END}.
-     *
-     * @param session The calendar session
-     * @param searchTerm The search term to append the search terms for
-     * @return The passed search term reference
-     */
-    public static CompositeSearchTerm appendTimeRangeTerms(CalendarSession session, CompositeSearchTerm searchTerm) {
-        Date from = getFrom(session);
-        if (null != from) {
-            if (session.getConfig().isIgnoreSeriesPastCalculationLimit()) {
-                searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                    .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, from))
-                    .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
-                        .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-                        .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT)
-                            .addSearchTerm(getSearchTerm(EventField.RECURRENCE_RULE, SingleOperation.EQUALS, "*e|*"))
-                        )
-                    )
-                );
-            } else {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, from));
-            }
-        }
-        Date until = getUntil(session);
-        if (null != until) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, until));
-        }
-        return searchTerm;
     }
 
     /**
@@ -427,7 +399,6 @@ public class Utils {
         Date from = getFrom(session);
         Date until = getUntil(session);
         if (null != from || null != until) {
-            TimeZone timeZone = getTimeZone(session);
             if (isSeriesMaster(event)) {
                 /*
                  * excluded if there are no actual occurrences in range
@@ -438,6 +409,7 @@ public class Utils {
                 /*
                  * excluded if event period not in range
                  */
+                TimeZone timeZone = getTimeZone(session);
                 if (false == isInRange(event, from, until, timeZone)) {
                     return true;
                 }
@@ -548,8 +520,8 @@ public class Utils {
      * @param sortOptions The sort options to use
      * @return The sorted events
      */
-    public static List<Event> sortEvents(List<Event> events, SortOptions sortOptions) {
-        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) ||
+    public static List<Event> sortEvents(List<Event> events, SearchOptions sortOptions) {
+        if (null == events || 2 > events.size() || null == sortOptions || SearchOptions.EMPTY.equals(sortOptions) ||
             null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
             return events;
         }

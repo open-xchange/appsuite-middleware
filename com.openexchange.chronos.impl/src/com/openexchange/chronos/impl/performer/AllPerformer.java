@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.appendTimeRangeTerms;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
@@ -65,12 +64,11 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
@@ -98,15 +96,11 @@ public class AllPerformer extends AbstractQueryPerformer {
      */
     public List<Event> perform() throws OXException {
         /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId()))));
-        /*
          * perform search & userize the results for the current session's user
          */
+        SearchTerm<?> searchTerm = getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId()));
         EventField[] fields = getFields(session, EventField.ATTENDEES);
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         readAdditionalEventData(events, session.getUserId(), fields);
         return postProcess(events, session.getUserId(), true);
     }
@@ -118,15 +112,12 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @return The loaded events
      */
     public List<Event> perform(UserizedFolder folder) throws OXException {
+        /*
+         * perform search & userize the results based on the requested folder
+         */
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = appendTimeRangeTerms(session, new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder)));
-        /*
-         * perform search & userize the results
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
+        SearchTerm<?> searchTerm = getFolderIdTerm(folder);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), getFields(session));
         readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
         return postProcess(events, folder, isIncludeClassifiedEvents(session));
     }

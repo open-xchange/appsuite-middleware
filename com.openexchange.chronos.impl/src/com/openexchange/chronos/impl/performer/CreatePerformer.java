@@ -53,8 +53,11 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -65,6 +68,7 @@ import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
@@ -122,7 +126,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             newEvent.setFolderId(folder.getID());
-            storage.getAlarmStorage().insertAlarms(newEvent, calendarUser.getId(), event.getAlarms());
+            storage.getAlarmStorage().insertAlarms(newEvent, calendarUser.getId(), prepareAlarms(event.getAlarms()));
         }
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
@@ -135,12 +139,35 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         return AttendeeHelper.onNewEvent(session, folder, attendeeData).getAttendeesToInsert();
     }
 
+    private List<Alarm> prepareAlarms(List<Alarm> alarmData) throws OXException {
+        if (null == alarmData) {
+            return null;
+        }
+        List<Alarm> alarms = new ArrayList<Alarm>(alarmData.size());
+        for (Alarm alarm : alarmData) {
+            alarms.add(prepareAlarm(alarm));
+        }
+        return alarms;
+    }
+
+    private Alarm prepareAlarm(Alarm alarmData) throws OXException {
+        Alarm alarm = new Alarm();
+        alarm.setId(storage.getAlarmStorage().nextId());
+        if (false == alarmData.containsUid() || Strings.isEmpty(alarmData.getUid())) {
+            alarm.setUid(UUID.randomUUID().toString());
+        } else {
+            alarm.setUid(alarmData.getUid());
+        }
+        AlarmMapper.getInstance().copy(alarmData, alarm, AlarmField.ACKNOWLEDGED, AlarmField.ACTION, AlarmField.TRIGGER);
+        return alarm;
+    }
+
     private Event prepareEvent(Event eventData) throws OXException {
         Event event = new Event();
         /*
          * identifiers
          */
-        event.setId(storage.nextObjectID());
+        event.setId(storage.getEventStorage().nextId());
         event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
         event.setSequence(0);
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {

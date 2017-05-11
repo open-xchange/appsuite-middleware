@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.compat.Appointment2Event.asString;
 import static com.openexchange.chronos.compat.Event2Appointment.asInteger;

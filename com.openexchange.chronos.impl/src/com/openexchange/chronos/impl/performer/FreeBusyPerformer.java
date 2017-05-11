@@ -82,7 +82,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -144,8 +144,9 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         for (Attendee attendee : attendees) {
             eventsPerAttendee.put(attendee, new ArrayList<Event>());
         }
+        SearchOptions searchOptions = new SearchOptions(session).setRange(from, until);
         EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
-        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(from, until, attendees, true, new SortOptions(session), fields);
+        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendees, true, searchOptions, fields);
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
         }

@@ -58,12 +58,17 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -85,7 +90,6 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link CalendarUtils}
@@ -94,6 +98,8 @@ import com.openexchange.tools.TimeZoneUtils;
  * @since v7.10.0
  */
 public class CalendarUtils {
+
+    private static final ConcurrentMap<String, TimeZone> KNOWN_TIMEZONES = new ConcurrentHashMap<String, TimeZone>();
 
     /**
      * Gets a value indicating whether a recurrence id's value matches a specific timestamp value.
@@ -742,9 +748,16 @@ public class CalendarUtils {
         if (null == id) {
             return fallback;
         }
-        TimeZone timeZone = TimeZoneUtils.getTimeZone(id);
-        if ("GMT".equals(timeZone.getID()) && false == "GMT".equalsIgnoreCase(id)) {
-            return fallback;
+        TimeZone timeZone = KNOWN_TIMEZONES.get(id);
+        if (null == timeZone) {
+            TimeZone timeZoneForId = TimeZone.getTimeZone(id);
+            if ("GMT".equals(timeZoneForId.getID()) && false == "GMT".equalsIgnoreCase(id)) {
+                return fallback;
+            }
+            timeZone = KNOWN_TIMEZONES.putIfAbsent(id, timeZoneForId);
+            if (null == timeZone) {
+                timeZone = timeZoneForId;
+            }
         }
         return timeZone;
     }
@@ -826,6 +839,62 @@ public class CalendarUtils {
      */
     public static boolean isInPast(RecurrenceService recurrenceService, Event seriesMaster, Date now, TimeZone timeZone) throws OXException {
         return false == recurrenceService.iterateRecurrenceIds(seriesMaster, now, null).hasNext();
+    }
+
+    /**
+     * Maps a list of events based on their UID property, so that each event series including any change exceptions are grouped separately.
+     *
+     * @param events The events to map
+     * @param assignIfEmpty <code>true</code> to assign a new unique identifier in case it's missing from an event, <code>false</code>, otherwise
+     * @return The events, mapped by their unique identifier
+     */
+    public static Map<String, List<Event>> getEventsByUID(List<Event> events, boolean assignIfEmpty) {
+        if (null == events) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
+        for (Event event : events) {
+            String uid = event.getUid();
+            if (null == uid && assignIfEmpty) {
+                uid = UUID.randomUUID().toString();
+                event.setUid(uid);
+            }
+            List<Event> list = eventsByUID.get(uid);
+            if (null == list) {
+                list = new ArrayList<Event>();
+                eventsByUID.put(uid, list);
+            }
+            list.add(event);
+        }
+        return eventsByUID;
+    }
+
+    /**
+     * Sorts a list of events and change exceptions so that the <i>series master</i> event will be the first element in the list, and any
+     * change exceptions are sorted afterwards based on their recurrence identifier.
+     *
+     * @param events The events to sort
+     * @return The sorted events
+     */
+    public static List<Event> sortSeriesMasterFirst(List<Event> events) {
+        if (null != events && 1 < events.size()) {
+            Collections.sort(events, new Comparator<Event>() {
+
+                @Override
+                public int compare(Event event1, Event event2) {
+                    RecurrenceId recurrenceId1 = event1.getRecurrenceId();
+                    RecurrenceId recurrenceId2 = event2.getRecurrenceId();
+                    if (null == recurrenceId1) {
+                        return null == recurrenceId2 ? 0 : -1;
+                    }
+                    if (null == recurrenceId2) {
+                        return 1;
+                    }
+                    return Long.compare(recurrenceId1.getValue(), recurrenceId2.getValue());
+                }
+            });
+        }
+        return events;
     }
 
 }

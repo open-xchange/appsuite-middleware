@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.performer.AllPerformer;
@@ -107,7 +108,18 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public CalendarSession init(Session session) throws OXException {
-        return new DefaultCalendarSession(session, this);
+        return init(session, null);
+    }
+
+    @Override
+    public CalendarSession init(Session session, CalendarParameters parameters) throws OXException {
+        DefaultCalendarSession calendarSession = new DefaultCalendarSession(session, this);
+        if (null != parameters) {
+            for (Entry<String, Object> entry : parameters.entrySet()) {
+                calendarSession.set(entry.getKey(), entry.getValue());
+            }
+        }
+        return calendarSession;
     }
 
     @Override

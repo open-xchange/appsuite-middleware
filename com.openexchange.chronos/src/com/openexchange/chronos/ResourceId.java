@@ -59,6 +59,9 @@ import java.util.UUID;
  */
 public class ResourceId {
 
+    /** Static number encoded into resource identifiers */
+    private static final Long MAGIC = 4240498974L << 24;
+
     /**
      * Gets the resource ID value.
      *
@@ -176,27 +179,22 @@ public class ResourceId {
     }
 
     private static UUID encode(int contextID, int entity, CalendarUserType type) {
-        long lsb = entity;
-        long cid = contextID & 0xffffffffL;
-        long msb = cid << 16;
-        msb += type.getType();
+        long msb = (long) contextID << 32 | entity & 0xffffffffL;
+        long lsb = MAGIC | type.getType() & 0xffffffffL;
         return new UUID(msb, lsb);
     }
 
     private static int decodeContextID(UUID encoded) {
-        long msb = encoded.getMostSignificantBits();
-        return (int) msb >> 16;
+        return (int) (encoded.getMostSignificantBits() >> 32);
     }
 
     private static CalendarUserType decodeType(UUID encoded) {
-        long msb = encoded.getMostSignificantBits();
-        long cid = msb >> 16;
-        int type = (int) (msb - (cid << 16));
+        int type = (int) (encoded.getLeastSignificantBits() - MAGIC);
         return CalendarUserType.fromType(type);
     }
 
     private static int decodeEntity(UUID encoded) {
-        return (int) encoded.getLeastSignificantBits();
+        return (int) encoded.getMostSignificantBits();
     }
 
 }

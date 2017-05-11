@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.settings.tree.folder;
 
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -58,6 +62,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
@@ -97,6 +102,15 @@ public class Calendar implements PreferencesItemService {
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 if (false == user.isGuest()) {
+                    ConfigView configView = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                    if (configView.opt("com.openexchange.chronos.useIDBasedAccess", Boolean.class, Boolean.FALSE).booleanValue()) {
+                        IDBasedCalendarAccessFactory calendarAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedCalendarAccessFactory.class);
+                        if (null != calendarAccessFactory) {
+                            IDBasedCalendarAccess calendarAccess = calendarAccessFactory.createAccess(session);
+                            setting.setSingleValue(calendarAccess.getDefaultFolder().getId());
+                            return;
+                        }
+                    }
                     setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.CALENDAR)));
                 }
             }

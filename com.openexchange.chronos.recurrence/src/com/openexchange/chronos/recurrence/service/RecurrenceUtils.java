@@ -95,13 +95,23 @@ public class RecurrenceUtils {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
     public static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
-        RecurrenceRule rule;
-        try {
-            rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceData.getRecurrenceRule());
-        }
+        RecurrenceRule rule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
         return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), recurrenceData.getTimeZoneID(), recurrenceData.isAllDay(), forwardToOccurrence);
+    }
+
+    /**
+     * Initializes a new recurrence rule.
+     *
+     * @param recurrenceRule The recurrence rule string
+     * @return The recurrence rule
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    public static RecurrenceRule getRecurrenceRule(String recurrenceRule) throws OXException {
+        try {
+            return new RecurrenceRule(recurrenceRule);
+        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceRule);
+        }
     }
 
     /**

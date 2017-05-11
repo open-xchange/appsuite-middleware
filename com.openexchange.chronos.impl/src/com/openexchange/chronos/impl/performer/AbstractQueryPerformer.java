@@ -78,7 +78,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -131,15 +131,14 @@ public abstract class AbstractQueryPerformer {
         if (null != updatedSince) {
             searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
         }
-        Utils.appendTimeRangeTerms(session, searchTerm);
         /*
          * perform search & userize the results
          */
         List<Event> events;
         if (deleted) {
-            events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session));
+            events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SearchOptions(session), getFields(session));
         } else {
-            events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
+            events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), getFields(session));
         }
         return readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
     }
@@ -213,7 +212,7 @@ public abstract class AbstractQueryPerformer {
                 processedEvents.add(event);
             }
         }
-        return sortEvents(processedEvents, new SortOptions(session));
+        return sortEvents(processedEvents, new SearchOptions(session));
     }
 
     /**
@@ -249,7 +248,7 @@ public abstract class AbstractQueryPerformer {
                 processedEvents.add(event);
             }
         }
-        return sortEvents(processedEvents, new SortOptions(session));
+        return sortEvents(processedEvents, new SearchOptions(session));
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {

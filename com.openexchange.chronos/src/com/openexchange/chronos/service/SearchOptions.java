@@ -50,36 +50,39 @@
 package com.openexchange.chronos.service;
 
 import java.util.Arrays;
+import java.util.Date;
 import com.openexchange.chronos.EventField;
 
 /**
- * {@link SortOptions}
+ * {@link SearchOptions}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class SortOptions {
+public class SearchOptions {
 
     /** Empty sort options */
-    public static final SortOptions EMPTY = new SortOptions();
+    public static final SearchOptions EMPTY = new SearchOptions();
 
     private SortOrder[] sortOrders;
     private int limit;
     private int offset;
+    private Date from;
+    private Date until;
 
     /**
-     * Initializes a new {@link SortOptions}.
+     * Initializes a new {@link SearchOptions}.
      */
-    public SortOptions() {
+    public SearchOptions() {
         super();
     }
 
     /**
-     * Initializes a new {@link SortOptions} base on the supplied calendar parameters.
+     * Initializes a new {@link SearchOptions} base on the supplied calendar parameters.
      *
      * @param parameters The calendar parameters to extract the sort options from
      */
-    public SortOptions(CalendarParameters parameters) {
+    public SearchOptions(CalendarParameters parameters) {
         this();
         EventField by = parameters.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
         if (null != by) {
@@ -92,6 +95,9 @@ public class SortOptions {
         Integer leftHandLimit = parameters.get(CalendarParameters.PARAMETER_LEFT_HAND_LIMIT, Integer.class);
         Integer rightHandLimit = parameters.get(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, Integer.class);
         setLimits(null != leftHandLimit ? leftHandLimit.intValue() : 0, null != rightHandLimit ? rightHandLimit.intValue() : -1);
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        setRange(from, until);
     }
 
     /**
@@ -100,7 +106,7 @@ public class SortOptions {
      * @param order The sort order to add
      * @return A self reference
      */
-    public SortOptions addOrder(SortOrder order) {
+    public SearchOptions addOrder(SortOrder order) {
         if (null == sortOrders) {
             sortOrders = new SortOrder[] { order };
         } else {
@@ -116,7 +122,7 @@ public class SortOptions {
      * @param rightHandLimit The "right-hand" limit of the range to return
      * @return A self reference
      */
-    public SortOptions setLimits(int leftHandLimit, int rightHandLimit) {
+    public SearchOptions setLimits(int leftHandLimit, int rightHandLimit) {
         if (0 < leftHandLimit) {
             offset = leftHandLimit;
             if (0 > rightHandLimit || rightHandLimit < leftHandLimit) {
@@ -127,6 +133,19 @@ public class SortOptions {
             offset = 0;
             limit = 0 < rightHandLimit ? rightHandLimit : -1;
         }
+        return this;
+    }
+
+    /**
+     * Sets the from/to range based on the supplied <i>from</i> and <i>until</i> values..
+     *
+     * @param from The lower inclusive limit of the queried range, or <code>null</code> if not set
+     * @param until The upper exclusive limit of the queried range, or <code>null</code> if not set
+     * @return A self reference
+     */
+    public SearchOptions setRange(Date from, Date until) {
+        this.from = from;
+        this.until = until;
         return this;
     }
 
@@ -152,13 +171,33 @@ public class SortOptions {
         return offset;
     }
 
+    /**
+     * Gets the lower inclusive limit of the queried range.
+     *
+     * @return The lower inclusive limit of the queried range, or <code>null</code> if not set
+     */
+    public Date getFrom() {
+        return from;
+    }
+
+    /**
+     * Gets the upper exclusive limit of the queried range.
+     *
+     * @return The upper exclusive limit of the queried range, or <code>null</code> if not set
+     */
+    public Date getUntil() {
+        return until;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((from == null) ? 0 : from.hashCode());
         result = prime * result + limit;
         result = prime * result + offset;
         result = prime * result + Arrays.hashCode(sortOrders);
+        result = prime * result + ((until == null) ? 0 : until.hashCode());
         return result;
     }
 
@@ -170,12 +209,22 @@ public class SortOptions {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SortOptions other = (SortOptions) obj;
+        SearchOptions other = (SearchOptions) obj;
+        if (from == null) {
+            if (other.from != null)
+                return false;
+        } else if (!from.equals(other.from))
+            return false;
         if (limit != other.limit)
             return false;
         if (offset != other.offset)
             return false;
         if (!Arrays.equals(sortOrders, other.sortOrders))
+            return false;
+        if (until == null) {
+            if (other.until != null)
+                return false;
+        } else if (!until.equals(other.until))
             return false;
         return true;
     }

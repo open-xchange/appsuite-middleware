@@ -52,8 +52,9 @@ package com.openexchange.chronos.storage.rdb.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory;
+import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -90,7 +91,9 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              */
             //            registerService(CreateTableService.class, new CreateAlarmTable());
             //            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AlarmTableUpdateTask()));
-            registerService(CalendarStorageFactory.class, new RdbCalendarStorageFactory());
+            registerService(LegacyCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorageFactory());
+            registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(this));
+            registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(this));
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.calendar.storage.rdb\"", e);
             throw e;

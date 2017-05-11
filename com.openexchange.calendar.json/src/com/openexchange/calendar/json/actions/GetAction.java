@@ -58,8 +58,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.IDBasedCalendarAction;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.composition.CompositeEventID;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -76,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class GetAction extends ChronosAction {
+public final class GetAction extends IDBasedCalendarAction {
 
     /**
      * Initializes a new {@link GetAction}.
@@ -127,7 +129,26 @@ public final class GetAction extends ChronosAction {
         String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         session.set(RECURRENCE_MASTER, Boolean.TRUE);
         Event event = session.getCalendarService().getEvent(session, folderId, objectId);
-        Appointment appointment = getEventConverter().getAppointment(request.getSession(), event);
+        Appointment appointment = getEventConverter(session).getAppointment(event);
+        return new AJAXRequestResult(appointment, event.getLastModified(), "appointment");
+    }
+
+    @Override
+    protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
+        int recurrencePosition = request.optInt("recurrence_position");
+        //TODO: recurrecneId
+
+        if (0 < recurrencePosition) {
+            System.out.println();
+        }
+
+        CompositeEventID eventID = CompositeEventID.parse(objectId);
+        //        EventID eventID = getEventConverter().getEventID(access, folderId, objectId, recurrencePosition);
+
+        Event event = access.getEvent(eventID);
+        Appointment appointment = getEventConverter(access).getAppointment(event);
         return new AJAXRequestResult(appointment, event.getLastModified(), "appointment");
     }
 

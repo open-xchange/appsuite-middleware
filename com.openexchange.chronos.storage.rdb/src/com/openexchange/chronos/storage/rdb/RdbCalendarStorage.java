@@ -49,22 +49,15 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
 
 /**
  * {@link CalendarStorage}
@@ -75,41 +68,29 @@ import com.openexchange.groupware.impl.IDGenerator;
  */
 public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
 
+    private final int accountId;
     private final RdbEventStorage eventStorage;
     private final RdbAttendeeStorage attendeeStorage;
     private final RdbAlarmStorage alarmStorage;
     private final RdbAttachmentStorage attachmentStorage;
 
+
     /**
      * Initializes a new {@link RdbCalendarStorage}.
      *
      * @param context The context
-     * @param entityResolver The entity resolver to use
+     * @param accountId The account identifier
+     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, entityResolver, dbProvider, txPolicy);
-        eventStorage = new RdbEventStorage(context, entityResolver, dbProvider, txPolicy);
-        attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
-        attachmentStorage = new RdbAttachmentStorage(context, entityResolver, dbProvider, txPolicy);
-    }
-
-    @Override
-    public String nextObjectID() throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            if (connection.getAutoCommit()) {
-                throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
-            }
-            return Appointment2Event.asString(IDGenerator.getId(context, Types.APPOINTMENT, connection));
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            release(connection, 1);
-        }
+    public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super(context, dbProvider, txPolicy);
+        this.accountId = accountId;
+        eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+        attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+        alarmStorage = new RdbAlarmStorage(context, accountId, dbProvider, txPolicy);
+        attachmentStorage = 0 == accountId ? new RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
     }
 
     @Override
@@ -124,6 +105,9 @@ public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
 
     @Override
     public AttachmentStorage getAttachmentStorage() {
+        if (null == attachmentStorage) {
+            throw new UnsupportedOperationException("No attachment storage for account " + accountId);
+        }
         return attachmentStorage;
     }
 

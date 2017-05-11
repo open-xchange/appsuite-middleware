@@ -155,7 +155,7 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
                 object.setAction(null);
             }
         });
-        mappings.put(AlarmField.ACTION, new DefaultMapping<Date, Alarm>() {
+        mappings.put(AlarmField.ACKNOWLEDGED, new DefaultMapping<Date, Alarm>() {
 
             @Override
             public void copy(Alarm from, Alarm to) throws OXException {

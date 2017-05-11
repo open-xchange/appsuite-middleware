@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.exception;
 
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTENDEE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.CONCURRENT_MODIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.DATA_TRUNCATION_MSG;
@@ -64,12 +65,14 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSI
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
@@ -107,15 +110,10 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$d, event %2$s]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
     /**
-     * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
-     * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
+     * <li>The requested calendar account was not found.</li>
+     * <li>Account not found [account %1$d]</li>
      */
-    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4044),
-    /**
-     * <li>In order to accomplish the search, %1$d or more characters are required.</li>
-     * <li>Query too short [minimum %1$d, query %2$s]</li>
-     */
-    QUERY_TOO_SHORT("Query too short [minimum %1$d, query %2$s]", QUERY_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 4045),
+    ACCOUNT_NOT_FOUND("Account not found [account %1$d]", ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4044),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$s]</li>
@@ -161,6 +159,16 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Unsupported folder [id %1$s, content type %2$s]</li>
      */
     UNSUPPORTED_FOLDER("Unsupported folder [id %1$s, content type %2$s]", UNSUPPORTED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4060),
+    /**
+     * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
+     * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
+     */
+    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4061),
+    /**
+     * <li>In order to accomplish the search, %1$d or more characters are required.</li>
+     * <li>Query too short [minimum %1$d, query %2$s]</li>
+     */
+    QUERY_TOO_SHORT("Query too short [minimum %1$d, query %2$s]", QUERY_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 4062),
     /**
      * <li>The operation could not be completed due to a concurrent modification. Please reload the data and try again.</li>
      * <li>Concurrent modification [id %1$s, client timestamp %2$d, actual timestamp %3$d]</li>
@@ -222,6 +230,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$s, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4227),
     /**
+     * <li>The requested operation is not supported for calendar provider \"%1$s\".</li>
+     * <li>Unsupported operation for calendar provider [provider %1$s]</li>
+     */
+    UNSUPPORTED_OPERATION_FOR_PROVIDER("Unsupported operation for calendar provider [provider %1$s]", UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG, Category.CATEGORY_USER_INPUT, 4228),
+    /**
      * <li>The supplied timezone is invalid. Please select a valid timezone and try again.</li>
      * <li>Invalid timezone [timezone id %1$s]</li>
      */
@@ -241,6 +254,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Unexpected database error [%1$s]</li>
      */
     DB_ERROR("Unexpected database error [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5001),
+    /**
+     * <li>The calendar provider \"%1$s\" is not available.</li>
+     * <li>Missing calendar provider [provider: %1$s]</li>
+     */
+    PROVIDER_NOT_AVAILABLE("Unexpected database error [%1$s]", PROVIDER_NOT_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 5030),
     /**
      * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>

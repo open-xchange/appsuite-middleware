@@ -49,8 +49,11 @@
 
 package com.openexchange.chronos.impl.session;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.Check;
@@ -179,6 +182,11 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public boolean contains(String parameter) {
         return parameters.containsKey(parameter);
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        return Collections.unmodifiableSet(parameters.entrySet());
     }
 
     @Override

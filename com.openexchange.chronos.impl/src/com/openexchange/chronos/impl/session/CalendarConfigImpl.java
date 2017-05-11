@@ -126,6 +126,16 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
+    public boolean isUseIDBasedAccess() {
+        return false == isUseLegacyStack() && getConfigValue("com.openexchange.chronos.useIDBasedAccess", Boolean.class, Boolean.FALSE).booleanValue();
+    }
+
+    @Override
+    public boolean isUseLegacyStorage() {
+        return isUseLegacyStack() || getConfigValue("com.openexchange.chronos.useLegacyStorage", Boolean.class, Boolean.TRUE).booleanValue();
+    }
+
+    @Override
     public int getRecurrenceCalculationLimit() {
         return getConfigValue("com.openexchange.chronos.recurrenceCalculationLimit", Integer.class, I(1000)).intValue();
     }

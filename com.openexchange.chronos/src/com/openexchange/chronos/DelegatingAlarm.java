@@ -72,18 +72,13 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public boolean equals(Object arg0) {
-        return delegate.equals(arg0);
-    }
-
-    @Override
     public int getId() {
         return delegate.getId();
     }
 
     @Override
-    public void setId(int id) {
-        delegate.setId(id);
+    public boolean containsId() {
+        return delegate.containsId();
     }
 
     @Override
@@ -92,8 +87,8 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public void setUid(String uid) {
-        delegate.setUid(uid);
+    public boolean containsUid() {
+        return delegate.containsUid();
     }
 
     @Override
@@ -102,53 +97,8 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public void setRelatedTo(RelatedTo relatedTo) {
-        delegate.setRelatedTo(relatedTo);
-    }
-
-    @Override
-    public Trigger getTrigger() {
-        return delegate.getTrigger();
-    }
-
-    @Override
-    public void setTrigger(Trigger trigger) {
-        delegate.setTrigger(trigger);
-    }
-
-    @Override
-    public String getDescription() {
-        return delegate.getDescription();
-    }
-
-    @Override
-    public void setDescription(String description) {
-        delegate.setDescription(description);
-    }
-
-    @Override
-    public AlarmAction getAction() {
-        return delegate.getAction();
-    }
-
-    @Override
-    public void setAction(AlarmAction action) {
-        delegate.setAction(action);
-    }
-
-    @Override
-    public String getDuration() {
-        return delegate.getDuration();
-    }
-
-    @Override
-    public void setDuration(String duration) {
-        delegate.setDuration(duration);
-    }
-
-    @Override
-    public int getRepeat() {
-        return delegate.getRepeat();
+    public boolean containsRelatedTo() {
+        return delegate.containsRelatedTo();
     }
 
     @Override
@@ -157,23 +107,143 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
+    public boolean containsAcknowledged() {
+        return delegate.containsAcknowledged();
+    }
+
+    @Override
+    public String getDescription() {
+        return delegate.getDescription();
+    }
+
+    @Override
+    public boolean containsDescription() {
+        return delegate.containsDescription();
+    }
+
+    @Override
+    public AlarmAction getAction() {
+        return delegate.getAction();
+    }
+
+    @Override
+    public boolean containsAction() {
+        return delegate.containsAction();
+    }
+
+    @Override
+    public Repeat getRepeat() {
+        return delegate.getRepeat();
+    }
+
+    @Override
+    public boolean containsRepeat() {
+        return delegate.containsRepeat();
+    }
+
+    @Override
+    public Trigger getTrigger() {
+        return delegate.getTrigger();
+    }
+
+    @Override
+    public boolean containsTrigger() {
+        return delegate.containsTrigger();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return delegate.equals(obj);
+    }
+
+    @Override
     public int hashCode() {
         return delegate.hashCode();
     }
 
     @Override
-    public void setRepeat(int repeat) {
-        delegate.setRepeat(repeat);
+    public boolean isSet(AlarmField field) {
+        return delegate.isSet(field);
     }
 
     @Override
-    public void setAcknowledged(Date acknowledged) {
-        delegate.setAcknowledged(acknowledged);
+    public void setId(int value) {
+        delegate.setId(value);
     }
 
     @Override
-    public String toString() {
-        return delegate.toString();
+    public void removeId() {
+        delegate.removeId();
+    }
+
+    @Override
+    public void setUid(String value) {
+        delegate.setUid(value);
+    }
+
+    @Override
+    public void removeUid() {
+        delegate.removeUid();
+    }
+
+    @Override
+    public void setRelatedTo(RelatedTo value) {
+        delegate.setRelatedTo(value);
+    }
+
+    @Override
+    public void removeRelatedTo() {
+        delegate.removeRelatedTo();
+    }
+
+    @Override
+    public void setAcknowledged(Date value) {
+        delegate.setAcknowledged(value);
+    }
+
+    @Override
+    public void removeAcknowledged() {
+        delegate.removeAcknowledged();
+    }
+
+    @Override
+    public void setDescription(String value) {
+        delegate.setDescription(value);
+    }
+
+    @Override
+    public void removeDescription() {
+        delegate.removeDescription();
+    }
+
+    @Override
+    public void setAction(AlarmAction value) {
+        delegate.setAction(value);
+    }
+
+    @Override
+    public void removeAction() {
+        delegate.removeAction();
+    }
+
+    @Override
+    public void setRepeat(Repeat value) {
+        delegate.setRepeat(value);
+    }
+
+    @Override
+    public void removeRepeat() {
+        delegate.removeRepeat();
+    }
+
+    @Override
+    public void setTrigger(Trigger value) {
+        delegate.setTrigger(value);
+    }
+
+    @Override
+    public void removeTrigger() {
+        delegate.removeTrigger();
     }
 
 }

@@ -75,6 +75,15 @@ public interface CalendarService {
     CalendarSession init(Session session) throws OXException;
 
     /**
+     * Initializes a new calendar session.
+     *
+     * @param session The underlying server session
+     * @param parameters Arbitrary calendar paramters to take over
+     * @return A new calendar session
+     */
+    CalendarSession init(Session session, CalendarParameters parameters) throws OXException;
+
+    /**
      * Resolves an UID to the identifier of an existing event. The lookup is performed case-sensitive and context-wise, independently of
      * the current session user's access rights. If an event series with change exceptions is matched, the identifier of the recurring
      * <i>master</i> event is returned.

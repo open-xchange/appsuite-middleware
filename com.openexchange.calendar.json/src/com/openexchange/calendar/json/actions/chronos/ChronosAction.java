@@ -97,6 +97,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ChronosAction}
@@ -106,7 +107,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class ChronosAction extends AppointmentAction {
 
-    private final EventConverter eventConverter;
+    protected final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link ChronosAction}.
@@ -115,7 +116,7 @@ public abstract class ChronosAction extends AppointmentAction {
      */
     protected ChronosAction(ServiceLookup services) {
         super(services);
-        this.eventConverter = new EventConverter(services);
+        this.serviceLookup = services;
     }
 
     /**
@@ -123,8 +124,8 @@ public abstract class ChronosAction extends AppointmentAction {
      *
      * @return The event converter
      */
-    protected EventConverter getEventConverter() {
-        return eventConverter;
+    protected EventConverter getEventConverter(CalendarSession session) {
+        return new DefaultEventConverter(serviceLookup, session);
     }
 
     @Override
@@ -221,17 +222,17 @@ public abstract class ChronosAction extends AppointmentAction {
      */
     protected abstract AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException;
 
-    protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<Event> events) throws OXException {
+    protected static AJAXRequestResult getAppointmentResultWithTimestamp(EventConverter converter, List<Event> events) throws OXException {
         Date timestamp = new Date(0L);
         List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (Event event : events) {
-            appointments.add(getEventConverter().getAppointment(session.getSession(), event));
+            appointments.add(converter.getAppointment(event));
             timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
     }
 
-    protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<Event> events, List<EventID> requestedIDs) throws OXException {
+    protected static AJAXRequestResult getAppointmentResultWithTimestamp(EventConverter converter, List<Event> events, List<EventID> requestedIDs) throws OXException {
         Date timestamp = new Date(0L);
         if (requestedIDs.size() != events.size()) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(new IllegalStateException("requestedIDs.size() != events.size()"), Autoboxing.I(50933));
@@ -243,19 +244,19 @@ public abstract class ChronosAction extends AppointmentAction {
                 getLogger(ChronosAction.class).info("Requested object {} not found in results; skipping silently.", Autoboxing.I(i));
                 continue;
             }
-            appointments.add(getEventConverter().getAppointment(session.getSession(), event));
+            appointments.add(converter.getAppointment(event));
             timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
     }
 
-    protected AJAXRequestResult getAppointmentConflictResult(ServerSession serverSession, CalendarSession session, List<EventConflict> conflicts) throws OXException, JSONException {
-        TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, session.getEntityResolver().getTimeZone(session.getUserId()));
-        AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(serverSession);
+    protected static AJAXRequestResult getAppointmentConflictResult(EventConverter converter, List<EventConflict> conflicts) throws OXException, JSONException {
+        TimeZone timeZone = converter.getDefaultTimeZone();
+        AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(ServerSessionAdapter.valueOf(converter.getSession()));
         JSONArray jsonArray = new JSONArray(conflicts.size());
         for (EventConflict conflict : conflicts) {
             JSONObject jsonObject = new JSONObject();
-            CalendarDataObject appointment = getEventConverter().getAppointment(session.getSession(), conflict.getConflictingEvent());
+            CalendarDataObject appointment = converter.getAppointment(conflict.getConflictingEvent());
             if (conflict.isHardConflict()) {
                 appointment.setHardConflict();
             }
@@ -288,18 +289,18 @@ public abstract class ChronosAction extends AppointmentAction {
         return null != lastModified2 && lastModified2.after(lastModified1) ? lastModified2 : lastModified1;
     }
 
-    protected AJAXRequestResult getAppointmentDeltaResultWithTimestamp(CalendarSession session, List<Event> newAndModifiedEvents, List<Event> deletedEvents) throws OXException {
+    protected static AJAXRequestResult getAppointmentDeltaResultWithTimestamp(EventConverter converter, List<Event> newAndModifiedEvents, List<Event> deletedEvents) throws OXException {
         Date timestamp = new Date(0L);
         CollectionDelta<Appointment> delta = new CollectionDelta<Appointment>();
         if (null != newAndModifiedEvents) {
             for (Event event : newAndModifiedEvents) {
-                delta.addNewOrModified(getEventConverter().getAppointment(session.getSession(), event));
+                delta.addNewOrModified(converter.getAppointment(event));
                 timestamp = getLatestModified(timestamp, event);
             }
         }
         if (null != deletedEvents) {
             for (Event event : deletedEvents) {
-                Appointment appointment = getEventConverter().getAppointment(session.getSession(), event);
+                Appointment appointment = converter.getAppointment(event);
                 appointment.setMarker(Marker.ID_ONLY);
                 delta.addDeleted(appointment);
                 timestamp = getLatestModified(timestamp, event);
@@ -330,13 +331,13 @@ public abstract class ChronosAction extends AppointmentAction {
         String folderId = DataParser.checkString(jsonObject, AJAXServlet.PARAMETER_FOLDERID);
         String objectId = DataParser.checkString(jsonObject, AJAXServlet.PARAMETER_ID);
         if (jsonObject.hasAndNotNull(CalendarFields.RECURRENCE_POSITION)) {
-            return eventConverter.getEventID(session, folderId, objectId, DataParser.checkInt(jsonObject, CalendarFields.RECURRENCE_POSITION));
+            return getEventConverter(session).getEventID(folderId, objectId, DataParser.checkInt(jsonObject, CalendarFields.RECURRENCE_POSITION));
         }
         if (jsonObject.hasAndNotNull(CalendarFields.OLD_RECURRENCE_POSITION)) {
-            return eventConverter.getEventID(session, folderId, objectId, DataParser.checkInt(jsonObject, CalendarFields.OLD_RECURRENCE_POSITION));
+            return getEventConverter(session).getEventID(folderId, objectId, DataParser.checkInt(jsonObject, CalendarFields.OLD_RECURRENCE_POSITION));
         }
         if (jsonObject.hasAndNotNull(CalendarFields.RECURRENCE_DATE_POSITION)) {
-            return eventConverter.getEventID(session, folderId, objectId, DataParser.checkDate(jsonObject, CalendarFields.RECURRENCE_DATE_POSITION));
+            return getEventConverter(session).getEventID(folderId, objectId, DataParser.checkDate(jsonObject, CalendarFields.RECURRENCE_DATE_POSITION));
         }
         return new EventID(folderId, objectId);
     }
@@ -384,7 +385,7 @@ public abstract class ChronosAction extends AppointmentAction {
         return session;
     }
 
-    private static Entry<String, ?> parseParameter(AppointmentAJAXRequest request, String parameter, boolean required) throws OXException {
+    protected static Entry<String, ?> parseParameter(AppointmentAJAXRequest request, String parameter, boolean required) throws OXException {
         String value = request.getParameter(parameter);
         if (Strings.isEmpty(value)) {
             if (false == required) {

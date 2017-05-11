@@ -47,76 +47,72 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.storage;
 
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.storage.CalendarStorage;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.exception.OXException;
+import com.openexchange.search.SearchTerm;
 
 /**
- * {@link CalendarStorage}
+ * {@link CalendarEventStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class StoredRecurrenceId implements RecurrenceId {
-
-    private final int recurrencePosition;
+public interface CalendarEventStorage {
 
     /**
-     * Initializes a new {@link StoredRecurrenceId}.
+     * Generates the next object unique identifier for inserting new event data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
      *
-     * @param recurrencePosition The legacy, 1-based recurrence position
+     * @return The next object identifier
      */
-    public StoredRecurrenceId(int recurrencePosition) {
-        super();
-        this.recurrencePosition = recurrencePosition;
-    }
-
-    @Override
-    public long getValue() {
-        throw new UnsupportedOperationException();
-    }
+    String nextEventId() throws OXException;
 
     /**
-     * Gets the legacy, 1-based recurrence position
+     * Inserts a new event into the database.
      *
-     * @return The recurrence position
+     * @param event The event to insert
      */
-    public int getRecurrencePosition() {
-        return recurrencePosition;
-    }
+    void insertEvent(Event event) throws OXException;
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + recurrencePosition;
-        return result;
-    }
+    /**
+     * Updates an existing event.
+     *
+     * @param event The event data to update
+     */
+    void updateEvent(Event event) throws OXException;
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        StoredRecurrenceId other = (StoredRecurrenceId) obj;
-        if (recurrencePosition != other.recurrencePosition)
-            return false;
-        return true;
-    }
+    /**
+     * Deletes an existing event.
+     *
+     * @param objectID The identifier of the event to delete
+     */
+    void deleteEvent(String objectID) throws OXException;
 
-    @Override
-    public int compareTo(RecurrenceId other) {
-        if (null == other) {
-            return 1;
-        }
-        if (StoredRecurrenceId.class.isInstance(other)) {
-            return Integer.compare(getRecurrencePosition(), ((StoredRecurrenceId) other).getRecurrencePosition());
-        }
-        throw new UnsupportedOperationException();
-    }
+    /**
+     * Loads a specific event.
+     *
+     * @param objectID The object identifier of the event to load
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The event
+     */
+    Event loadEvent(String objectID, EventField[] fields) throws OXException;
+
+    /**
+     * Searches for events.
+     *
+     * @param searchTerm The search term to use
+     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events
+     */
+    List<Event> searchEvents(SearchTerm<?> searchTerm, SearchOptions sortOptions, EventField[] fields) throws OXException;
 
 }

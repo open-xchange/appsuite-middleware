@@ -63,6 +63,12 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String ATTENDEE_NOT_FOUND_MSG = "The requested attendee was not found.";
 
+    public static final String ACCOUNT_NOT_FOUND_MSG = "The requested calendar account was not found.";
+
+    public static final String PROVIDER_NOT_AVAILABLE_MSG = "The calendar provider \"%1$s\" is not available.";
+
+    public static final String UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG = "The requested operation is not supported for calendar provider \"%1$s\".";
+
     public static final String NO_PERMISSION_MSG = "The operation could not be completed due to insufficient permissions.";
 
     public static final String MISSING_CAPABILITY_MSG = "The operation could not be completed due to missing capabilities.";

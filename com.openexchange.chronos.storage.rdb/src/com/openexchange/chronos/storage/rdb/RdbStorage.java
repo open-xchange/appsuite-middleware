@@ -59,9 +59,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -87,20 +85,17 @@ public abstract class RdbStorage {
     protected final Context context;
     protected final DBProvider dbProvider;
     protected final DBTransactionPolicy txPolicy;
-    protected final EntityResolver entityResolver;
 
     /**
      * Initializes a new {@link RdbStorage}.
      *
      * @param context The context
-     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    protected RdbStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    protected RdbStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super();
         this.context = context;
-        this.entityResolver = entityResolver;
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
     }
@@ -119,7 +114,7 @@ public abstract class RdbStorage {
                 }
                 txPolicy.setAutoCommit(connection, true);
             } catch (SQLException e) {
-                throw EventExceptionCode.MYSQL.create(e);
+                throw asOXException(e);
             } finally {
                 if (0 < updated) {
                     dbProvider.releaseWriteConnection(context, connection);
@@ -128,6 +123,56 @@ public abstract class RdbStorage {
                 }
             }
         }
+    }
+
+    /**
+     * Generates the next sequential event identifier in the context for the supplied calendar account.
+     *
+     * @param connection A connection within an active transaction
+     * @param account The identifier of the account to generate the next identifier for
+     * @return The next event identifier
+     */
+    protected int nextEventId(Connection connection, int account) throws SQLException {
+        return nextId(connection, context.getContextId(), account, "calendar_event_sequence");
+    }
+
+    /**
+     * Generates the next sequential event identifier in the context for the supplied calendar account.
+     *
+     * @param connection A connection within an active transaction
+     * @param account The identifier of the account to generate the next identifier for
+     * @return The next event identifier
+     */
+    protected int nextAlarmId(Connection connection, int account) throws SQLException {
+        return nextId(connection, context.getContextId(), account, "calendar_alarm_sequence");
+    }
+
+    private static int nextId(Connection connection, int cid, int account, String sequenceTable) throws SQLException {
+        if (connection.getAutoCommit()) {
+            throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE " + sequenceTable + " SET id=LAST_INSERT_ID(id+1) WHERE cid=? AND account=?;")) {
+            stmt.setInt(1, cid);
+            stmt.setInt(2, account);
+            if (0 == logExecuteUpdate(stmt)) {
+                try (PreparedStatement stmt2 = connection.prepareStatement("INSERT INTO " + sequenceTable + " (cid,account,id) VALUES (?,?,0);")) {
+                    stmt2.setInt(1, cid);
+                    stmt2.setInt(2, account);
+                    logExecuteUpdate(stmt2);
+                }
+                if (0 == logExecuteUpdate(stmt)) {
+                    throw new SQLException("Unable to initialize sequence table \"" + sequenceTable + "\" for account " + account + " in context " + cid);
+                }
+            }
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT LAST_INSERT_ID();")) {
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+        }
+        throw new SQLException("Unable to generate next sequential identifier via table \"" + sequenceTable + "\" for account " + account + " in context " + cid);
     }
 
     /**
@@ -220,6 +265,48 @@ public abstract class RdbStorage {
             }
         }
         return CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+    }
+
+    /**
+     * Parses the supplied identifier to its numerical integer value.
+     *
+     * @param id The identifier to get the integer value for
+     * @return The integer value of the supplied identifier.
+     * @throws NumberFormatException
+     */
+    protected static int asInt(String id) {
+        return Integer.parseInt(id);
+    }
+
+    /**
+     * Parses the supplied identifier to its numerical integer value.
+     *
+     * @param id The identifier to get the integer value for
+     * @return The integer value of the supplied identifier.
+     * @throws NumberFormatException
+     */
+    protected static Integer asInteger(String id) {
+        return null != id ? Integer.valueOf(id) : null;
+    }
+
+    /**
+     * Gets the string representation of the supplied numerical identifier.
+     *
+     * @param id The identifier to get the string representation for
+     * @return The string representation of the supplied numerical identifier.
+     */
+    protected static String asString(int id) {
+        return String.valueOf(id);
+    }
+
+    /**
+     * Gets the string representation of the supplied numerical identifier.
+     *
+     * @param id The identifier to get the string representation for
+     * @return The string representation of the supplied numerical identifier.
+     */
+    protected static String asString(Integer id) {
+        return null == id ? null : id.toString();
     }
 
     private static <O, E extends Enum<E>> MappedIncorrectString<O> getMappedIncorrectString(IncorrectStringSQLException e, DbMapper<O, E> mapper) {

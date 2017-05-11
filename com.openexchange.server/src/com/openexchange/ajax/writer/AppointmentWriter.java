@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -69,6 +67,8 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link AppointmentWriter} - Writer for appointments
@@ -151,6 +151,18 @@ public class AppointmentWriter extends CalendarWriter {
         if (appointmentObject.containsTitle()) {
             writeParameter(CalendarFields.TITLE, appointmentObject.getTitle(), jsonObj);
         }
+        if (appointmentObject.containsObjectID()) {
+            String compositeId = appointmentObject.getProperty("com.openexchange.chronos.provider.composition.EventID");
+            if (null != compositeId) {
+                writeParameter(CalendarFields.ID, compositeId, jsonObj);
+            }
+        }
+        if (appointmentObject.containsParentFolderID()) {
+            String compositeId = appointmentObject.getProperty("com.openexchange.chronos.provider.composition.FolderID");
+            if (null != compositeId) {
+                writeParameter(CalendarFields.FOLDER_ID, compositeId, jsonObj);
+            }
+        }
         final boolean isFullTime = appointmentObject.getFullTime();
         if (isFullTime) {
             writeParameter(CalendarFields.START_DATE, appointmentObject.getStartDate(), jsonObj);
@@ -199,6 +211,10 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject.containsRecurrenceID()) {
             writeParameter(CalendarFields.RECURRENCE_ID, appointmentObject.getRecurrenceID(), jsonObj);
+            String compositeId = appointmentObject.getProperty("com.openexchange.chronos.provider.composition.SeriesID");
+            if (null != compositeId) {
+                writeParameter(CalendarFields.RECURRENCE_ID, compositeId, jsonObj);
+            }
         }
         if (appointmentObject.containsRecurrencePosition()) {
             writeParameter(CalendarFields.RECURRENCE_POSITION, appointmentObject.getRecurrencePosition(), jsonObj);
@@ -243,6 +259,25 @@ public class AppointmentWriter extends CalendarWriter {
     }
 
     protected void writeField(final Appointment appointment, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+        if (CalendarObject.OBJECT_ID == column) {
+            String compositeId = appointment.getProperty("com.openexchange.chronos.provider.composition.EventID");
+            if (null != compositeId) {
+                writeValue(compositeId, json);
+                return;
+            }
+        } else if (CalendarObject.FOLDER_ID == column) {
+            String compositeId = appointment.getProperty("com.openexchange.chronos.provider.composition.FolderID");
+            if (null != compositeId) {
+                writeValue(compositeId, json);
+                return;
+            }
+        } else if (CalendarObject.RECURRENCE_ID == column) {
+            String compositeId = appointment.getProperty("com.openexchange.chronos.provider.composition.SeriesID");
+            if (null != compositeId) {
+                writeValue(compositeId, json);
+                return;
+            }
+        }
         final AppointmentFieldWriter writer = WRITER_MAP.get(column);
         if (null != writer) {
             writer.write(appointment, json);

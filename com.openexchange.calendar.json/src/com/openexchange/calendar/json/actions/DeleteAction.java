@@ -65,7 +65,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.IDBasedCalendarAction;
+import com.openexchange.chronos.provider.composition.CompositeEventID;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -84,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class DeleteAction extends ChronosAction {
+public final class DeleteAction extends IDBasedCalendarAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -168,6 +170,17 @@ public final class DeleteAction extends ChronosAction {
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         List<EventID> requestedIDs = parseRequestedIDs(session, request);
         Map<EventID, CalendarResult> results = session.getCalendarService().deleteEvents(session, requestedIDs);
+        Date timestamp = new Date(0L);
+        for (CalendarResult result : results.values()) {
+            timestamp = getLatestModified(timestamp, result.getTimestamp());
+        }
+        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
+    }
+
+    @Override
+    protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
+        List<CompositeEventID> requestedIDs = parseRequestedIDs(access, request);
+        Map<CompositeEventID, CalendarResult> results = access.deleteEvents(requestedIDs);
         Date timestamp = new Date(0L);
         for (CalendarResult result : results.values()) {
             timestamp = getLatestModified(timestamp, result.getTimestamp());

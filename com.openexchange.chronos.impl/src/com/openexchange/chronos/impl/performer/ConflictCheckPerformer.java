@@ -85,6 +85,7 @@ import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -376,7 +377,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      */
     private List<Event> getOverlappingEvents(Date from, Date until, List<Attendee> attendeesToCheck) throws OXException {
         EventField[] fields = getFields(new EventField[] { EventField.TRANSP, EventField.SUMMARY, EventField.LOCATION });
-        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(from, until, attendeesToCheck, false, null, fields);
+        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendeesToCheck, false, new SearchOptions().setRange(from, until), fields);
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
         }

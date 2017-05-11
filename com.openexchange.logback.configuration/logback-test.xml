@@ -113,5 +113,6 @@
     <logger name="com.openexchange.chronos" level="ALL"/>
     <logger name="com.openexchange.webdav" level="ALL"/>
     <logger name="com.openexchange.drive" level="ALL"/>
+    <logger name="com.openexchange.events.remote.internal.EventBridge" level="ALL"/>
     
 </configuration>

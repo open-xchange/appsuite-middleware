@@ -49,15 +49,10 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import static com.openexchange.chronos.compat.Appointment2Event.asString;
-import static com.openexchange.chronos.compat.Event2Appointment.asInteger;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -66,25 +61,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
-import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.compat.Event2Appointment;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
-import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
-import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 
 /**
@@ -160,11 +153,12 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 	protected EnumMap<EventField, DbMapping<? extends Object, Event>> createMappings() {
 		EnumMap<EventField, DbMapping<? extends Object, Event>> mappings = new
 			EnumMap<EventField, DbMapping<? extends Object, Event>>(EventField.class);
-        mappings.put(EventField.ID, new IntegerMapping<Event>("intfield01", "Object ID") {
+
+        mappings.put(EventField.ID, new IntegerMapping<Event>("id", "Object ID") {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setId(asString(value, true));
+                event.setId(null == value ? null : value.toString());
             }
 
             @Override
@@ -174,7 +168,8 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return asInteger(event.getId(), true);
+                String value = event.getId();
+                return null == value ? null : Integer.valueOf(value);
             }
 
             @Override
@@ -182,11 +177,11 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeId();
             }
         });
-        mappings.put(EventField.PUBLIC_FOLDER_ID, new IntegerMapping<Event>("fid", "Public folder ID") {
+        mappings.put(EventField.PUBLIC_FOLDER_ID, new VarCharMapping<Event>("folder", "Folder ID") {
 
             @Override
-            public void set(Event event, Integer value) {
-                event.setPublicFolderId(asString(value, true));
+            public void set(Event event, String value) {
+                event.setPublicFolderId(value);
             }
 
             @Override
@@ -195,13 +190,36 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public Integer get(Event event) {
-                return asInteger(event.getPublicFolderId(), true);
+            public String get(Event event) {
+                return event.getPublicFolderId();
             }
 
             @Override
             public void remove(Event event) {
                 event.removePublicFolderId();
+            }
+        });
+        mappings.put(EventField.SERIES_ID, new IntegerMapping<Event>("series", "Series id") {
+
+            @Override
+            public void set(Event event, Integer value) {
+                event.setSeriesId(null == value ? null : value.toString());
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsSeriesId();
+            }
+
+            @Override
+            public Integer get(Event event) {
+                String value = event.getSeriesId();
+                return null == value ? null : Integer.valueOf(value);
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeSeriesId();
             }
         });
         mappings.put(EventField.UID, new VarCharMapping<Event>("uid", "UID") {
@@ -226,26 +244,183 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeUid();
             }
         });
-        mappings.put(EventField.FILENAME, new VarCharMapping<Event>("filename", "Filename") {
+        mappings.put(EventField.RECURRENCE_RULE, new VarCharMapping<Event>("rrule", "Recurrence Rule") {
 
             @Override
             public void set(Event event, String value) {
-                event.setFilename(value);
+                event.setRecurrenceRule(value);
             }
 
             @Override
             public boolean isSet(Event event) {
-                return event.containsFilename();
+                return event.containsRecurrenceRule();
             }
 
             @Override
             public String get(Event event) {
-                return event.getFilename();
+                return event.getRecurrenceRule();
             }
 
             @Override
             public void remove(Event event) {
-                event.removeFilename();
+                event.removeRecurrenceRule();
+            }
+        });
+        mappings.put(EventField.RECURRENCE_ID, new BigIntMapping<Event>("recurrence", "Recurrence ID") {
+
+            @Override
+            public void set(Event event, Long value) {
+                event.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value.longValue()));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsRecurrenceId();
+            }
+
+            @Override
+            public Long get(Event event) {
+                RecurrenceId value = event.getRecurrenceId();
+                return null == value ? null : L(value.getValue());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeRecurrenceId();
+            }
+        });
+        mappings.put(EventField.DELETE_EXCEPTION_DATES, new VarCharMapping<Event>("deleteExceptions", "Delete exceptions") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setDeleteExceptionDates(deserializeExceptionDates(value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsDeleteExceptionDates();
+            }
+
+            @Override
+            public String get(Event event) {
+                return serializeExceptionDates(event.getDeleteExceptionDates());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeDeleteExceptionDates();
+            }
+        });
+        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new VarCharMapping<Event>("changeExceptions", "Change exceptions") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setChangeExceptionDates(deserializeExceptionDates(value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsChangeExceptionDates();
+            }
+
+            @Override
+            public String get(Event event) {
+                return serializeExceptionDates(event.getChangeExceptionDates());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeChangeExceptionDates();
+            }
+        });
+        mappings.put(EventField.CREATED, new BigIntMapping<Event>("created", "Created") {
+
+            @Override
+            public void set(Event event, Long value) {
+                event.setCreated(null == value ? null : new Date(value.longValue()));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsCreated();
+            }
+
+            @Override
+            public Long get(Event event) {
+                Date value = event.getCreated();
+                return null == value ? null : L(value.getTime());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeCreated();
+            }
+        });
+        mappings.put(EventField.CREATED_BY, new IntegerMapping<Event>("createdBy", "Created by") {
+
+            @Override
+            public void set(Event event, Integer value) {
+                event.setCreatedBy(null == value ? 0 : i(value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsCreatedBy();
+            }
+
+            @Override
+            public Integer get(Event event) {
+                return I(event.getCreatedBy());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeCreatedBy();
+            }
+        });
+        mappings.put(EventField.LAST_MODIFIED, new BigIntMapping<Event>("modified", "Last modified") {
+
+            @Override
+            public void set(Event event, Long value) {
+                event.setLastModified(null == value ? null : new Date(value.longValue()));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsLastModified();
+            }
+
+            @Override
+            public Long get(Event event) {
+                Date value = event.getLastModified();
+                return null == value ? null : L(value.getTime());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeLastModified();
+            }
+        });
+        mappings.put(EventField.MODIFIED_BY, new IntegerMapping<Event>("modifiedBy", "Modified by") {
+
+            @Override
+            public void set(Event event, Integer value) {
+                event.setModifiedBy(null == value ? 0 : i(value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsModifiedBy();
+            }
+
+            @Override
+            public Integer get(Event event) {
+                return I(event.getModifiedBy());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeModifiedBy();
             }
         });
         mappings.put(EventField.SEQUENCE, new IntegerMapping<Event>("sequence", "Sequence") {
@@ -270,237 +445,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeSequence();
             }
         });
-        mappings.put(EventField.CREATED, new DateMapping<Event>("creating_date", "Created") {
-
-            @Override
-            public void set(Event event, Date value) {
-                event.setCreated(value);
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsCreated();
-            }
-
-            @Override
-            public Date get(Event event) {
-                return event.getCreated();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeCreated();
-            }
-        });
-        mappings.put(EventField.CREATED_BY, new IntegerMapping<Event>("created_from", "Created by") {
-
-            @Override
-            public void set(Event event, Integer value) {
-                event.setCreatedBy(null == value ? 0 : i(value));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsCreatedBy();
-            }
-
-            @Override
-            public Integer get(Event event) {
-                return I(event.getCreatedBy());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeCreatedBy();
-            }
-        });
-        mappings.put(EventField.LAST_MODIFIED, new BigIntMapping<Event>("changing_date", "Last modified") {
-
-            @Override
-            public void set(Event event, Long value) {
-                event.setLastModified(null == value ? null : new Date(value.longValue()));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsLastModified();
-            }
-
-            @Override
-            public Long get(Event event) {
-                Date value = event.getLastModified();
-                return null == value ? null : L(value.getTime());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeLastModified();
-            }
-        });
-        mappings.put(EventField.MODIFIED_BY, new IntegerMapping<Event>("changed_from", "Modified by") {
-
-            @Override
-            public void set(Event event, Integer value) {
-                event.setModifiedBy(null == value ? 0 : i(value));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsModifiedBy();
-            }
-
-            @Override
-            public Integer get(Event event) {
-                return I(event.getModifiedBy());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeModifiedBy();
-            }
-        });
-        mappings.put(EventField.SUMMARY, new VarCharMapping<Event>("field01", "Summary") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setSummary(value);
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsSummary();
-            }
-
-            @Override
-            public String get(Event event) {
-                return event.getSummary();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeSummary();
-            }
-        });
-        mappings.put(EventField.LOCATION, new VarCharMapping<Event>("field02", "Location") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setLocation(value);
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsLocation();
-            }
-
-            @Override
-            public String get(Event event) {
-                return event.getLocation();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeLocation();
-            }
-        });
-        mappings.put(EventField.DESCRIPTION, new VarCharMapping<Event>("field04", "Description") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setDescription(value);
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsDescription();
-            }
-
-            @Override
-            public String get(Event event) {
-                return event.getDescription();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeDescription();
-            }
-        });
-        mappings.put(EventField.CATEGORIES, new VarCharMapping<Event>("field09", "Categories") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setCategories(Appointment2Event.getCategories(value));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsCategories();
-            }
-
-            @Override
-            public String get(Event event) {
-                return Event2Appointment.getCategories(event.getCategories());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeCategories();
-            }
-        });
-        mappings.put(EventField.CLASSIFICATION, new IntegerMapping<Event>("pflag", "Classification") {
-
-            @Override
-            public void set(Event event, Integer value) {
-                event.setClassification(null == value ? null : Appointment2Event.getClassification(1 == i(value)));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsClassification();
-            }
-
-            @Override
-            public Integer get(Event event) {
-                Classification value = event.getClassification();
-                return null == value ? null : Event2Appointment.getPrivateFlag(value) ? I(1) : I(0);
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeClassification();
-            }
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
-                // special handling; Column 'pflag' cannot be null
-                Integer value = get(event);
-                statement.setInt(parameterIndex, null != value ? i(value) : 0);
-                return 1;
-            }
-        });
-        mappings.put(EventField.COLOR, new IntegerMapping<Event>("intfield03", "Color") {
-
-            @Override
-            public void set(Event event, Integer value) {
-                event.setColor(null == value ? null : Appointment2Event.getColor(i(value)));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsColor();
-            }
-
-            @Override
-            public Integer get(Event event) {
-                return I(Event2Appointment.getColorLabel(event.getColor()));
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeColor();
-            }
-        });
-        mappings.put(EventField.START_DATE, new DateMapping<Event>("timestampfield01", "Start date") {
+        mappings.put(EventField.START_DATE, new DateMapping<Event>("start", "Start date") {
 
             @Override
             public void set(Event event, Date value) {
@@ -522,29 +467,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeStartDate();
             }
         });
-        mappings.put(EventField.START_TIMEZONE, new VarCharMapping<Event>("timezone", "Start timezone") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setStartTimeZone(value);
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsStartTimeZone();
-            }
-
-            @Override
-            public String get(Event event) {
-                return event.getStartTimeZone();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeStartTimeZone();
-            }
-        });
-        mappings.put(EventField.END_DATE, new DateMapping<Event>("timestampfield02", "End date") {
+        mappings.put(EventField.END_DATE, new DateMapping<Event>("end", "End date") {
 
             @Override
             public void set(Event event, Date value) {
@@ -566,8 +489,51 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeEndDate();
             }
         });
-        // EventField.END_TIMEZONE
-        mappings.put(EventField.ALL_DAY, new IntegerMapping<Event>("intfield07", "All day") {
+        mappings.put(EventField.START_TIMEZONE, new VarCharMapping<Event>("startTimezone", "Start timezone") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setStartTimeZone(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsStartTimeZone();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getStartTimeZone();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeStartTimeZone();
+            }
+        });
+        mappings.put(EventField.END_TIMEZONE, new VarCharMapping<Event>("endTimezone", "End timezone") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setEndTimeZone(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsEndTimeZone();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getEndTimeZone();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeEndTimeZone();
+            }
+        });
+        mappings.put(EventField.ALL_DAY, new IntegerMapping<Event>("allDay", "All day") {
 
             @Override
             public void set(Event event, Integer value) {
@@ -589,11 +555,25 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeAllDay();
             }
         });
-        mappings.put(EventField.TRANSP, new IntegerMapping<Event>("intfield06", "Transparency") {
+        mappings.put(EventField.TRANSP, new IntegerMapping<Event>("transp", "Transparency") {
+            // 0 - TRANSPARENT, FREE
+            // 1 - OPAQUE, RESERVED
+            // 2 - OPAQUE, TEMPORARY
+            // 3 - OPAQUE, ABSENT
 
             @Override
             public void set(Event event, Integer value) {
-                event.setTransp(null == value ? null : Appointment2Event.getTransparency(i(value)));
+                if (null == value) {
+                    event.setTransp(null);
+                } else if (0 == value.intValue()) {
+                    event.setTransp(TimeTransparency.TRANSPARENT);
+                } else if (2 == value.intValue()) {
+                    event.setTransp(ShownAsTransparency.TEMPORARY);
+                } else if (3 == value.intValue()) {
+                    event.setTransp(ShownAsTransparency.ABSENT);
+                } else {
+                    event.setTransp(TimeTransparency.OPAQUE);
+                }
             }
 
             @Override
@@ -604,15 +584,63 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public Integer get(Event event) {
                 Transp value = event.getTransp();
-                return null == value ? null : I(Event2Appointment.getShownAs(value));
+                if (null == value) {
+                    return null;
+                } else if (Transp.TRANSPARENT.equals(value.getValue())) {
+                    return I(0);
+                } else if (ShownAsTransparency.TEMPORARY.equals(value)) {
+                    return I(2);
+                } else if (ShownAsTransparency.ABSENT.equals(value)) {
+                    return I(3);
+                } else {
+                    return I(1);
+                }
             }
 
             @Override
-            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
-                // column is NOT NULL, so avoid setting SQL NULL here
-                Integer value = get(event);
-                statement.setInt(parameterIndex, null == value ? 0 : value.intValue());
-                return 1;
+            public void remove(Event event) {
+                event.removeTransp();
+            }
+        });
+        mappings.put(EventField.CLASSIFICATION, new VarCharMapping<Event>("class", "Classification") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setClassification(Enums.parse(Classification.class, value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsClassification();
+            }
+
+            @Override
+            public String get(Event event) {
+                Classification value = event.getClassification();
+                return null == value ? null : value.name();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeClassification();
+            }
+        });
+        mappings.put(EventField.STATUS, new VarCharMapping<Event>("status", "Status") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setStatus(Enums.parse(EventStatus.class, value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsStatus();
+            }
+
+            @Override
+            public String get(Event event) {
+                EventStatus value = event.getStatus();
+                return null == value ? null : value.name();
             }
 
             @Override
@@ -620,242 +648,13 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeStatus();
             }
         });
-        mappings.put(EventField.SERIES_ID, new IntegerMapping<Event>("intfield02", "Series id") {
-
-            @Override
-            public void set(Event event, Integer value) {
-                event.setSeriesId(asString(value, true));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsSeriesId();
-            }
-
-            @Override
-            public Integer get(Event event) {
-                return asInteger(event.getSeriesId(), false);
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeSeriesId();
-            }
-        });
-        mappings.put(EventField.RECURRENCE_ID, new DefaultDbMapping<RecurrenceId, Event>("intfield05", "Recurrence id", Types.INTEGER) {
-
-            @Override
-            public RecurrenceId get(ResultSet resultSet, String columnLabel) throws SQLException {
-                int recurrencePosition = resultSet.getInt(columnLabel);
-                if (resultSet.wasNull() || 0 >= recurrencePosition) {
-                    return null;
-                }
-                return new StoredRecurrenceId(recurrencePosition);
-            }
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
-                RecurrenceId value = isSet(event) ? get(event) : null;
-                if (null == value) {
-                    statement.setNull(parameterIndex, Types.INTEGER);
-                } else if (StoredRecurrenceId.class.isInstance(value)) {
-                    statement.setInt(parameterIndex, ((StoredRecurrenceId) value).getRecurrencePosition());
-                } else {
-                    throw new IllegalArgumentException("Unable to set recurrence id \"" + value + "\" in prepared statement");
-                }
-                return 1;
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsRecurrenceId();
-            }
-
-            @Override
-            public void set(Event event, RecurrenceId value) throws OXException {
-                event.setRecurrenceId(value);
-            }
-
-            @Override
-            public RecurrenceId get(Event event) {
-                return event.getRecurrenceId();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeRecurrenceId();
-            }
-        });
-        mappings.put(EventField.RECURRENCE_RULE, new DefaultDbMultiMapping<String, Event>(new String[] { "field06", "intfield04" }, "Recurrence rule") {
-
-            @Override
-            public String get(ResultSet resultSet, String[] columnLabels) throws SQLException {
-                String value = resultSet.getString(columnLabels[0]);
-                if (null == value) {
-                    return null;
-                }
-                int absoluteDuration = resultSet.getInt(columnLabels[1]);
-                return absoluteDuration + "~" + value;
-            }
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
-                String value = isSet(event) ? get(event) : null;
-                if (null == value) {
-                    statement.setNull(parameterIndex, Types.VARCHAR);
-                    statement.setNull(1 + parameterIndex, Types.INTEGER);
-                } else {
-                    int idx = value.indexOf('~');
-                    int absoluteDuration = Integer.parseInt(value.substring(0, idx));
-                    String pattern = value.substring(idx + 1);
-                    statement.setString(parameterIndex, pattern);
-                    statement.setInt(1 + parameterIndex, absoluteDuration);
-                }
-                return 2;
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsRecurrenceRule();
-            }
-
-            @Override
-            public void set(Event event, String value) throws OXException {
-                event.setRecurrenceRule(value);
-            }
-
-            @Override
-            public String get(Event event) {
-                return event.getRecurrenceRule();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeRecurrenceRule();
-            }
-
-            @Override
-            public String getColumnLabel() {
-                return getColumnLabels()[0];
-            }
-
-            @Override
-            public String getColumnLabel(String prefix) {
-                return getColumnLabels(prefix)[0];
-            }
-
-            @Override
-            public int getSqlType() {
-                return Types.VARCHAR;
-            }
-        });
-        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new VarCharMapping<Event>("field08", "Change exception dates") {
+        mappings.put(EventField.ORGANIZER, new VarCharMapping<Event>("organizer", "Organizer") {
 
             @Override
             public void set(Event event, String value) {
-                event.setChangeExceptionDates(deserializeExceptionDates(value));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsChangeExceptionDates();
-            }
-
-            @Override
-            public String get(Event event) {
-                return serializeExceptionDates(event.getChangeExceptionDates());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeChangeExceptionDates();
-            }
-        });
-        mappings.put(EventField.DELETE_EXCEPTION_DATES, new VarCharMapping<Event>("field07", "Delete exception dates") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setDeleteExceptionDates(deserializeExceptionDates(value));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsDeleteExceptionDates();
-            }
-
-            @Override
-            public String get(Event event) {
-                return serializeExceptionDates(event.getDeleteExceptionDates());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeDeleteExceptionDates();
-            }
-        });
-        // EventField.STATUS
-        mappings.put(EventField.ORGANIZER, new DefaultDbMultiMapping<Organizer, Event>(
-            new String[] { "organizer", "organizerId", "principal", "principalId" }, "Organizer") {
-
-            @Override
-            public Organizer get(ResultSet resultSet, String[] columnLabels) throws SQLException {
                 Organizer organizer = new Organizer();
-                String storedOrganizer = resultSet.getString(columnLabels[0]);
-                int storedOrganizerId = resultSet.getInt(columnLabels[1]);
-                String storedPrincipal = resultSet.getString(columnLabels[2]);
-                int storedPrincipalId = resultSet.getInt(columnLabels[3]);
-                if (0 < storedOrganizerId && storedOrganizerId == storedPrincipalId ||
-                    0 == storedOrganizerId && null != storedOrganizer && storedOrganizer.equals(storedPrincipal) ||
-                    0 == storedPrincipalId && null == storedPrincipal) {
-                    /*
-                     * no different "sent-by" user, take over stored values
-                     */
-                    organizer.setEntity(storedOrganizerId);
-                    organizer.setUri(Appointment2Event.getURI(storedOrganizer));
-                } else {
-                    /*
-                     * organizer with sent-by, use stored principal as organizer and stored organizer as "sent-by":
-                     * database/legacy: organizer ~ acting user , principal ~ calendar owner
-                     * iCal/chronos:    organizer ~ calendar owner , sent-by ~ user acting on behalf of organizer
-                     */
-                    organizer.setEntity(storedPrincipalId);
-                    organizer.setUri(Appointment2Event.getURI(storedPrincipal));
-                    CalendarUser sentBy = new CalendarUser();
-                    sentBy.setEntity(storedOrganizerId);
-                    sentBy.setUri(Appointment2Event.getURI(storedOrganizer));
-                    organizer.setSentBy(sentBy);
-                }
-                return null == organizer.getUri() && 0 == organizer.getEntity() ? null : organizer;
-            }
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
-                Organizer value = isSet(event) ? get(event) : null;
-                if (null == value) {
-                    statement.setNull(parameterIndex, Types.VARCHAR);
-                    statement.setNull(1 + parameterIndex, Types.INTEGER);
-                    statement.setNull(2 + parameterIndex, Types.VARCHAR);
-                    statement.setNull(3 + parameterIndex, Types.INTEGER);
-                } else if (null != value.getSentBy()) {
-                    /*
-                     * organizer with sent-by, store organizer as principal and "sent-by" in organizer columns
-                     * database/legacy: organizer ~ acting user , principal ~ calendar owner
-                     * iCal/chronos:    organizer ~ calendar owner , sent-by ~ user acting on behalf of organizer
-                     */
-                    statement.setString(parameterIndex, Event2Appointment.getEMailAddress(value.getSentBy().getUri()));
-                    statement.setInt(1 + parameterIndex, value.getSentBy().getEntity());
-                    statement.setString(2 + parameterIndex, Event2Appointment.getEMailAddress(value.getUri()));
-                    statement.setInt(3 + parameterIndex, value.getEntity());
-                } else {
-                    /*
-                     * no different "sent-by" user, store in organizer columns
-                     */
-                    statement.setString(parameterIndex, Event2Appointment.getEMailAddress(value.getUri()));
-                    statement.setInt(1 + parameterIndex, value.getEntity());
-                    statement.setNull(2 + parameterIndex, Types.VARCHAR);
-                    statement.setNull(3 + parameterIndex, Types.INTEGER);
-                }
-                return 4;
+                organizer.setUri(value);
+                event.setOrganizer(organizer);
             }
 
             @Override
@@ -864,13 +663,9 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event event, Organizer value) throws OXException {
-                event.setOrganizer(value);
-            }
-
-            @Override
-            public Organizer get(Event event) {
-                return event.getOrganizer();
+            public String get(Event event) {
+                Organizer value = event.getOrganizer();
+                return null == value ? null : value.getUri();
             }
 
             @Override
@@ -878,8 +673,126 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeOrganizer();
             }
         });
-        //      EventField.ATTENDEES
-        //      EventField.ATTACHMENT
+        mappings.put(EventField.SUMMARY, new VarCharMapping<Event>("summary", "Summary") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setSummary(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsSummary();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getSummary();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeSummary();
+            }
+        });
+        mappings.put(EventField.LOCATION, new VarCharMapping<Event>("location", "Location") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setLocation(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsLocation();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getLocation();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeLocation();
+            }
+        });
+        mappings.put(EventField.DESCRIPTION, new VarCharMapping<Event>("description", "Description") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setDescription(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsDescription();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getDescription();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeDescription();
+            }
+        });
+        mappings.put(EventField.CATEGORIES, new VarCharMapping<Event>("categories", "Categories") {
+
+            @Override
+            public void set(Event event, String value) {
+                String[] splitted = Strings.splitByCommaNotInQuotes(value);
+                event.setCategories(null != splitted ? Arrays.asList(splitted) : null);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsCategories();
+            }
+
+            @Override
+            public String get(Event event) {
+                List<String> value = event.getCategories();
+                if (null == value || 0 == value.size()) {
+                    return null;
+                }
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(value.get(0));
+                for (int i = 1; i < value.size(); i++) {
+                    stringBuilder.append(',').append(value.get(i));
+                }
+                return stringBuilder.toString();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeCategories();
+            }
+        });
+        mappings.put(EventField.COLOR, new VarCharMapping<Event>("color", "Color") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setColor(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsColor();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getColor();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeColor();
+            }
+        });
         return mappings;
 	}
 

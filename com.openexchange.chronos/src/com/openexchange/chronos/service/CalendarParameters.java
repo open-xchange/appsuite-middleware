@@ -50,6 +50,8 @@
 package com.openexchange.chronos.service;
 
 import java.util.Date;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventField;
@@ -199,5 +201,12 @@ public interface CalendarParameters {
      * @return <code>true</code> if the parameter is set, <code>false</code>, otherwise
      */
     boolean contains(String parameter);
+
+    /**
+     * Gets a set of all configured parameters.
+     *
+     * @return All parameters as set
+     */
+    Set<Entry<String, Object>> entrySet();
 
 }

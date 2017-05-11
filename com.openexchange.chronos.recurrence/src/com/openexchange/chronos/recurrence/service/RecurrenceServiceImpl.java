@@ -56,10 +56,12 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
@@ -155,6 +157,29 @@ public class RecurrenceServiceImpl implements RecurrenceService {
          * initializing the iterator implicitly checks the rule within the constraints of the corresponding recurrence data
          */
         RecurrenceUtils.getRecurrenceIterator(recurrenceData);
+    }
+
+    @Override
+    public boolean isUnlimited(String recurrenceRule) throws OXException {
+        RecurrenceRule rule = RecurrenceUtils.getRecurrenceRule(recurrenceRule);
+        return null == rule.getCount() && null == rule.getUntil();
+    }
+
+    @Override
+    public RecurrenceId getLastOccurrence(RecurrenceData recurrenceData) throws OXException {
+        RecurrenceRule rule = RecurrenceUtils.getRecurrenceRule(recurrenceData.getRecurrenceRule());
+        if (null == rule.getCount() && null == rule.getUntil()) {
+            return null;
+        }
+        RecurrenceRuleIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData, true);
+        if (false == iterator.hasNext()) {
+            return null;
+        }
+        long millis;
+        do {
+            millis = iterator.nextMillis();
+        } while (iterator.hasNext());
+        return new DefaultRecurrenceId(millis);
     }
 
 }
