@@ -50,6 +50,7 @@
 package com.openexchange.filestore.event;
 
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.osgi.annotation.Service;
 
 /**
  * {@link FileStorageListener} - Receives call-backs for file operations.
@@ -57,6 +58,7 @@ import com.openexchange.filestore.FileStorage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
+@Service
 public interface FileStorageListener {
 
     /**
