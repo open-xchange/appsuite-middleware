@@ -312,7 +312,7 @@ public final class HtmlProcessing {
                         } else {
                             optionsBuilder.setDropExternalImages(true).setModified(modified);
                         }
-                        optionsBuilder.setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize).setSuppressLinks(suppressLinks);
+                        optionsBuilder.setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize).setSuppressLinks(suppressLinks).setReplaceBodyWithDiv(null != cssPrefix);
                         retval = htmlService.sanitize(retval.getContent(), optionsBuilder.build());
                     }
                     /*

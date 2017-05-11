@@ -604,7 +604,8 @@ public final class HtmlServiceImpl implements HtmlService {
                 boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
                 CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
-                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
+                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
+                handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
 
                 boolean[] modified = options.getModified();
 
@@ -617,14 +618,14 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
 
                 // Get HTML content
-                if (null == options.getCssPrefix()) {
-                    Document document = handler.getDocument();
-                    html = hasBody ? document.outerHtml() : document.body().html();
-                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
-                } else {
+                if (options.isReplaceBodyWithDiv()) {
                     html = handler.getHtml();
                     htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                } else {
+                    Document document = handler.getDocument();
+                    html = hasBody ? document.outerHtml() : document.body().html();
+                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                 }
             }
 
