@@ -502,7 +502,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         ReentrantLock lock = OSGiCleanMapper.getLock();
         lock.lock();
         try {
-            for (String alias : mapper.getLocalAliases()) {
+            for (String alias : new LinkedHashSet<>(mapper.getLocalAliases())) {
                 LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);
