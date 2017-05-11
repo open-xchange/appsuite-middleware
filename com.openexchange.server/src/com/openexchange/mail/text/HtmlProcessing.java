@@ -306,7 +306,7 @@ public final class HtmlProcessing {
                     String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     {
                         // No need to generate well-formed HTML
-                        HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder();
+                        HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder().setSession(session);
                         if (externalImagesAllowed) {
                             optionsBuilder.setDropExternalImages(false);
                         } else {

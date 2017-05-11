@@ -136,7 +136,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                         content = htmlService.checkBaseTag(content, externalImagesAllowed);
                         {
                             // No need to generate well-formed HTML
-                            HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder();
+                            HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder().setSession(session);
                             if (externalImagesAllowed) {
                                 optionsBuilder.setDropExternalImages(false);
                             } else {

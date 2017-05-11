@@ -49,6 +49,8 @@
 
 package com.openexchange.html;
 
+import com.openexchange.session.Session;
+
 /**
  * {@link HtmlSanitizeOptions} - The options when sanitizing HTML content.
  *
@@ -76,6 +78,7 @@ public class HtmlSanitizeOptions {
         private int maxContentSize;
         private boolean suppressLinks;
         private boolean replaceBodyWithDiv;
+        private Session session;
 
         Builder() {
             super();
@@ -86,6 +89,13 @@ public class HtmlSanitizeOptions {
             maxContentSize = 0;
             suppressLinks = false;
             replaceBodyWithDiv = false;
+            session = null;
+        }
+
+        /** Sets the session */
+        public Builder setSession(Session session) {
+            this.session = session;
+            return this;
         }
 
         public Builder setOptConfigName(String optConfigName) {
@@ -131,7 +141,7 @@ public class HtmlSanitizeOptions {
 
         /** Builds the instance from this builder's arguments */
         public HtmlSanitizeOptions build() {
-            return new HtmlSanitizeOptions(optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv);
+            return new HtmlSanitizeOptions(session, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv);
         }
     }
 
@@ -144,9 +154,11 @@ public class HtmlSanitizeOptions {
     private final int maxContentSize;
     private final boolean suppressLinks;
     private final boolean replaceBodyWithDiv;
+    private final Session session;
 
-    HtmlSanitizeOptions(String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv) {
+    HtmlSanitizeOptions(Session session, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv) {
         super();
+        this.session = session;
         this.optConfigName = optConfigName;
         this.dropExternalImages = dropExternalImages;
         this.modified = modified;
@@ -154,6 +166,15 @@ public class HtmlSanitizeOptions {
         this.maxContentSize = maxContentSize;
         this.suppressLinks = suppressLinks;
         this.replaceBodyWithDiv = replaceBodyWithDiv;
+    }
+
+    /**
+     * Gets the optional session
+     *
+     * @return The session or <code>null</code>
+     */
+    public Session optSession() {
+        return session;
     }
 
     /**
