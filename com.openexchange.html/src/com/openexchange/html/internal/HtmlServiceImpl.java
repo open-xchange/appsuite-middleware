@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import gnu.inet.encoding.IDNAException;
 import gnu.trove.map.TIntObjectMap;
@@ -106,6 +107,7 @@ import org.jsoup.nodes.Document;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlExceptionCodes;
 import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
@@ -142,7 +144,8 @@ import de.l3s.boilerpipe.extractors.CommonExtractors;
  */
 public final class HtmlServiceImpl implements HtmlService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlServiceImpl.class);
+    /** The logger */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlServiceImpl.class);
 
     private static final String CHARSET_UTF_8 = "UTF-8";
 
@@ -331,6 +334,7 @@ public final class HtmlServiceImpl implements HtmlService {
             }
             builder.append(checkedUrl).append("\" target=\"_blank\">").append(url).append("</a>");
         } catch (final MalformedURLException e) {
+            LOG.debug("Malformed URL", e);
             // Append as-is
             builder.append(url);
         }
@@ -527,6 +531,7 @@ public final class HtmlServiceImpl implements HtmlService {
         if (isEmpty(htmlContent)) {
             return htmlSanitizeResult;
         }
+
         try {
             String html = htmlContent;
 
@@ -588,16 +593,23 @@ public final class HtmlServiceImpl implements HtmlService {
                 html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } else {
+                // First, check size
+                int maxLength = HtmlServices.htmlThreshold();
+                if (maxLength > 0 && html.length() > maxLength) {
+                    LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
+                    throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
+                }
+
                 // Check if input is a full HTML document or a fragment of HTML to parse
                 boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
-                CleaningJsoupHandler handler = getJsoupHandlerFor(html.length(), options.getOptConfigName());
+                CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
                 handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
 
                 boolean[] modified = options.getModified();
 
                 // Parse the HTML content
-                JsoupParser.getInstance().parse(html, handler, true);
+                JsoupParser.getInstance().parse(html, handler, false);
 
                 // Check if modified by handler
                 if (options.isDropExternalImages() && null != modified) {
@@ -635,7 +647,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return null == definition ? new FilterJerichoHandler(initialCapacity, this) : new FilterJerichoHandler(initialCapacity, definition, this);
     }
 
-    private CleaningJsoupHandler getJsoupHandlerFor(int initialCapacity, String optionalConfigName) {
+    private CleaningJsoupHandler getJsoupHandlerFor(String optionalConfigName) {
         if (null == optionalConfigName) {
             return new CleaningJsoupHandler();
         }
@@ -857,6 +869,7 @@ public final class HtmlServiceImpl implements HtmlService {
                             return null;
                         }
                     } catch (URISyntaxException ex) {
+                        LOG.debug("Invalid URI", ex);
                         return null;
                     }
                     return href;
@@ -1041,12 +1054,13 @@ public final class HtmlServiceImpl implements HtmlService {
         String content = PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
         HtmlSanitizeResult htmlSanitizeResult = new HtmlSanitizeResult(content);
 
-        if (!(maxContentSize >= 10000) && !(maxContentSize <= 0)) {
-            maxContentSize = 10000;
+        int maxSize = maxContentSize;
+        if (!(maxSize >= 10000) && !(maxSize <= 0)) {
+            maxSize = 10000;
         }
 
-        if ((maxContentSize > 0) && (maxContentSize < content.length())) {
-            int endOfSentence = content.indexOf('.', maxContentSize) + 1;
+        if ((maxSize > 0) && (maxSize < content.length())) {
+            int endOfSentence = content.indexOf('.', maxSize) + 1;
             content = content.substring(0, endOfSentence);
             htmlSanitizeResult.setTruncated(true);
         }
@@ -1300,6 +1314,7 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             return Integer.parseInt(possibleNum, radix);
         } catch (final NumberFormatException e) {
+            LOG.trace("", e);
             return -1;
         }
     }
