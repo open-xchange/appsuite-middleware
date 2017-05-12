@@ -49,8 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -76,15 +75,6 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  */
 public class AddGuestPermissionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link AddGuestPermissionTest}.
-     *
-     * @param name The test name
-     */
-    public AddGuestPermissionTest() {
-        super();
-    }
-
     @Test
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();
@@ -95,6 +85,9 @@ public class AddGuestPermissionTest extends ShareTest {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
+                    if (isReadOnlySharing(module) && false == isReadOnly(guestPermission)) {
+                        continue;
+                    }
                     testUpdateSharedFolder(api, module, guestPermission);
                 }
             }
@@ -181,7 +174,6 @@ public class AddGuestPermissionTest extends ShareTest {
         rootFolder.addPermission(guestPermission);
         rootFolder.setLastModified(clientLastModified);
         rootFolder = updateFolder(api, rootFolder, new RequestCustomizer<UpdateRequest>() {
-
             @Override
             public void customize(UpdateRequest request) {
                 request.setCascadePermissions(true);
@@ -275,5 +267,4 @@ public class AddGuestPermissionTest extends ShareTest {
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
-
 }

@@ -51,10 +51,9 @@ package com.openexchange.webdav.xml.appointment;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
 import com.openexchange.webdav.xml.appointment.recurrence.RecurrenceTestSuite;
 
-@RunWith(ParallelSuite.class)
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
     ConfirmTest.class,
     DeleteTest.class,

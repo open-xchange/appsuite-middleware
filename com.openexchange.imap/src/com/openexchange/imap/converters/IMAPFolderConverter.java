@@ -449,11 +449,11 @@ public final class IMAPFolderConverter {
                     if (!exists || mailFolder.isNonExistent()) {
                         ownPermission.parseRights((ownRights = new Rights()), imapConfig);
                     } else if (!selectable) {
-                        ownRights = ownRightsFromProblematic(session, imapAccess, imapFullName, imapConfig, mailFolder, accountId, ownPermission);
+                        ownRights = ownRightsFromProblematic(session, imapAccess, imapFullName, imapConfig, mailFolder, accountId, ownPermission, listEntry);
                     } else {
                         ownRights = getOwnRights(imapFolder, session, imapConfig);
                         if (null == ownRights) {
-                            ownRights = ownRightsFromProblematic(session, imapAccess, imapFullName, imapConfig, mailFolder, accountId, ownPermission);
+                            ownRights = ownRightsFromProblematic(session, imapAccess, imapFullName, imapConfig, mailFolder, accountId, ownPermission, listEntry);
                         } else {
                             ownPermission.parseRights(ownRights, imapConfig);
                         }
@@ -554,7 +554,7 @@ public final class IMAPFolderConverter {
         return false;
     }
 
-    private static Rights ownRightsFromProblematic(Session session, IMAPAccess imapAccess, String imapFullName, IMAPConfig imapConfig, IMAPMailFolder mailFolder, int accountId, ACLPermission ownPermission) throws MessagingException, OXException, IMAPException {
+    private static Rights ownRightsFromProblematic(Session session, IMAPAccess imapAccess, String imapFullName, IMAPConfig imapConfig, IMAPMailFolder mailFolder, int accountId, ACLPermission ownPermission, ListLsubEntry listEntry) throws MessagingException, OXException, IMAPException {
         Rights ownRights;
         /*
          * Distinguish between holds folders and none
@@ -568,7 +568,13 @@ public final class IMAPFolderConverter {
                 ownPermission.parseRights(ownRights, imapConfig);
             } else {
                 ownPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-                ownPermission.setFolderAdmin(false);
+                // Allow folder administration if there are no subfolders...
+                if (listEntry.hasChildren()) {
+                    ownPermission.setFolderAdmin(false);
+                } else {
+                    // In case no children exist, the non-selectable should be manageable by user. Otherwise no chance to get rid off it...
+                    ownPermission.setFolderAdmin(true);
+                }
                 ownRights = ACLPermission.permission2Rights(ownPermission, imapConfig);
             }
         } else {

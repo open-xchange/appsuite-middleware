@@ -50,14 +50,27 @@
 package com.openexchange.rest.userfeedback;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.userfeedback.actions.StoreRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.restclient.invoker.ApiException;
 import com.openexchange.userfeedback.rest.services.ExportUserFeedbackService;
 
@@ -75,64 +88,34 @@ public class ExportTest extends AbstractUserFeedbackTest {
         return new ResourceConfig(ExportUserFeedbackService.class);
     }
 
-    @Test
-    public void testExportCSV_everythingFine_returnMessage() {
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        removeFeedbacks();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
         try {
-            File export = userfeedbackApi.exportCSV("default", type, new Long(0), new Long(0));
-            assertEquals(200, getRestClient().getStatusCode());
-            assertNotNull(export);
-        } catch (ApiException e) {
-            fail(e.getMessage());
+            removeFeedbacks();
+        } finally {
+            super.tearDown();
         }
     }
 
-    @Test
-    public void testExportCSV_unknownContextGroup_return404() {
-        try {
-            userfeedbackApi.exportCSV("unknown", type, new Long(0), new Long(0));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(404, getRestClient().getStatusCode());
+    private void storeFeedbacks(int numberOfFeedbacks) throws OXException, IOException, JSONException {
+        StoreRequest feedback = new StoreRequest(type, validFeedback);
+        for (int feedbacks = 0; feedbacks < numberOfFeedbacks; feedbacks++) {
+            getAjaxClient().execute(feedback);
         }
     }
 
-    @Test
-    public void testExportCSV_unknownFeefdbackType_return404() {
+    private void removeFeedbacks() {
         try {
-            userfeedbackApi.exportCSV("default", "schalke-rating", new Long(0), new Long(0));
-            fail();
+            userfeedbackApi.delete("default", type, new Long(0), new Long(0));
         } catch (ApiException e) {
-            assertEquals(404, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportCSV_negativeStart_return404() {
-        try {
-            userfeedbackApi.exportCSV("default", type, new Long(-11111), new Long(0));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(400, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportCSV_negativeEnd_return404() {
-        try {
-            userfeedbackApi.exportCSV("default", type, new Long(0), new Long(-11111));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(400, getRestClient().getStatusCode());
-        }
-    }
-
-    @Test
-    public void testExportCSV_endBeforeStart_return404() {
-        try {
-            userfeedbackApi.exportCSV("default", type, new Long(222222222), new Long(11111));
-            fail();
-        } catch (ApiException e) {
-            assertEquals(400, getRestClient().getStatusCode());
+            fail("Unable to cleanup: " + e.getMessage());
         }
     }
 
@@ -168,6 +151,85 @@ public class ExportTest extends AbstractUserFeedbackTest {
     }
 
     @Test
+    public void testRawExport() throws Exception {
+        storeFeedbacks(3);
+
+        String export = userfeedbackApi.exportRAW("default", type, new Long(0), new Long(0));
+        JSONArray jsonExport = new JSONArray(export);
+
+        assertEquals(3, jsonExport.length());
+
+        for (int i = 0; i < jsonExport.length(); ++i) {
+            JSONObject exportedFeedback = jsonExport.getJSONObject(i);
+            String resolution = exportedFeedback.getString("screen_resolution");
+            assertEquals(feedback.getString("Screen_Resolution"), resolution);
+
+            String date = exportedFeedback.getString("date");
+            assertTrue(Strings.isNotEmpty(date));
+
+            String score = exportedFeedback.getString("score");
+            assertEquals("3", score);
+
+            String browser = exportedFeedback.getString("browser");
+            assertEquals("Chrome", browser);
+
+            assertFalse(exportedFeedback.has("Browser"));
+            assertFalse(exportedFeedback.has("Language"));
+        }
+    }
+
+    @Test
+    public void testRawExport_onlyOlderFeedbacks_emptyExport() throws Exception {
+        storeFeedbacks(3);
+
+        Thread.sleep(2000);
+        try {
+            DateTime now = DateTime.now(DateTimeZone.UTC);
+
+            String export = userfeedbackApi.exportRAW("default", type, now.getMillis(), new Long(0));
+            JSONArray jsonExport = new JSONArray(export);
+
+            assertEquals(0, jsonExport.length());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRawExport_onlyNewerFeedbacks_emptyExport() throws Exception {
+        DateTime now = DateTime.now(DateTimeZone.UTC);
+        Thread.sleep(2000);
+
+        storeFeedbacks(3);
+
+        String export = userfeedbackApi.exportRAW("default", type, new Long(0), now.getMillis());
+        JSONArray jsonExport = new JSONArray(export);
+
+        assertEquals(0, jsonExport.length());
+    }
+
+    @Test
+    public void testRawExport_between_exportThree() throws Exception {
+        storeFeedbacks(3);
+        Thread.sleep(2000);
+        DateTime second = DateTime.now(DateTimeZone.UTC);
+        Thread.sleep(2000);
+        storeFeedbacks(3);
+        Thread.sleep(2000);
+        DateTime third = DateTime.now(DateTimeZone.UTC);
+        Thread.sleep(2000);
+        storeFeedbacks(3);
+
+        String export = userfeedbackApi.exportRAW("default", type, second.getMillis(), third.getMillis());
+        JSONArray jsonExport = new JSONArray(export);
+        assertEquals(3, jsonExport.length());
+
+        String export2 = userfeedbackApi.exportRAW("default", type, 0L, 0L);
+        JSONArray jsonExport2 = new JSONArray(export2);
+        assertEquals(9, jsonExport2.length());
+    }
+
+    @Test
     public void testExportRAW_negativeStart_return404() {
         try {
             userfeedbackApi.exportRAW("default", type, new Long(-11111), new Long(0));
@@ -196,4 +258,27 @@ public class ExportTest extends AbstractUserFeedbackTest {
             assertEquals(400, getRestClient().getStatusCode());
         }
     }
+
+    @Test
+    public void testExportCSV_everythingFine_returnFile() throws IOException, OXException, JSONException {
+        storeFeedbacks(3);
+
+        LineNumberReader lnr = null;
+        try {
+            File export = userfeedbackApi.exportCSV("default", type, new Long(0), new Long(0));
+            assertEquals(200, getRestClient().getStatusCode());
+            assertNotNull(export);
+
+            lnr = new LineNumberReader(new FileReader(export));
+            lnr.skip(Long.MAX_VALUE);
+            assertEquals(4, lnr.getLineNumber());
+        } catch (ApiException e) {
+            fail(e.getMessage());
+        } finally {
+            if (lnr != null) {
+                lnr.close();
+            }
+        }
+    }
+
 }

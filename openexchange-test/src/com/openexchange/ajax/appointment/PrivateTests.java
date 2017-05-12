@@ -55,8 +55,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.UUID;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -95,11 +93,7 @@ public class PrivateTests extends AbstractAJAXSession {
 
     private Appointment app;
 
-    public PrivateTests() {
-        super();
-    }
-
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -235,11 +229,20 @@ public class PrivateTests extends AbstractAJAXSession {
         assertEquals("Missing data.", app.getLocation(), loaded.getLocation());
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             client1.execute(new DeleteRequest(app));
             client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder));
+           
+            if(null != client3){
+                client3.logout();
+                client3 = null;
+            }
+            if(null != client4){
+                client4.logout();
+                client4 = null;
+            }
         } finally {
             super.tearDown();
         }

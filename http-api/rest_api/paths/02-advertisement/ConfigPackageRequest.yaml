@@ -19,11 +19,11 @@
         type: string
       -
         name: body
-        in: formData
+        in: body
         description: JSONObject describing the advertisement configuration
         required: true
-        type: string
-        format: JSON
+        schema:
+          type: string
 
     responses:
       200:

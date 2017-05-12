@@ -3,29 +3,34 @@ properties:
     - key: com.openexchange.mail.filter.loginType
       description: |
         Specifies which sieve server should be used. Two options are allowed here:
-        user : use the imap server setting stored for user in the database
-        global : use the sieve server given in com.openexchange.mail.filter.server for all users.
+        <ul>
+          <li><code>user</code> - use the imap server setting stored for user in the database</li>
+          <li><code>global</code> - use the sieve server given in [[com.openexchange.mail.filter.server]] for all users.</li>
+        </ul>
       defaultValue: user
       version:
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mail.filter.server
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.credentialSource
       description: |
         Specifies which sieve credentials should be use. Four options are allowed here:
-        "session" : login name and password are used from the current session.
-        "session-full-login" : full login (incl. context part) name and password are used from the current session.
-        "imapLogin" : the login name is taken from the field imapLogin of the current
-                      user the password is taken from the current session.
-        "mail" : use the primary mail address of the user and the password from the session.
+        <ul>
+          <li><code>session</code> - login name and password are used from the current session.</li>
+          <li><code>session-full-login</code> - full login (incl. context part) name and password are used from the current session.</li>
+          <li><code>imapLogin</code> - the login name is taken from the field imapLogin of the current user, the password is taken from the current session.</li>
+          <li><code>mail</code> - use the primary mail address of the user and the password from the session.</li>
+        </ul>
       defaultValue: session
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.server
       description: |
@@ -36,21 +41,23 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "Host", "SIEVE"]
     - key: com.openexchange.mail.filter.port
       description: |
-        Specifies the SIEVE port
-        -----------------------------------------------------------
-        NOTE: 2000 is the deprecated port number for SIEVE (now assigned to some Cisco SCCP protocol by the IANA)
-              4190 is the new one used with most recent Linux and IMAP implementations.
-        Please check your system's default port defined at /etc/services.
-        -----------------------------------------------------------
+        Specifies the SIEVE port.
+
+        Note:  
+        <code>2000</code> is the deprecated port number for SIEVE (now assigned to some Cisco SCCP protocol by the IANA).  
+        <code>4190</code> is the new one used with most recent Linux and IMAP implementations.  
+        Please check your system's default port defined at /etc/services.  
       defaultValue: 4190
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "Port", "SIEVE"]
     - key: com.openexchange.mail.filter.scriptName
       description: |
@@ -63,6 +70,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.authenticationEncoding
       description: |
@@ -73,6 +81,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.nonRFCCompliantTLSRegex
       description: |
@@ -83,6 +92,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.tls
       description: |
@@ -93,18 +103,21 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Security"]
     - key: com.openexchange.mail.filter.vacationDomains
       description: |
         Specifies if a vacation messages should only be sent to specific domains.
-        If multiple domains are given, they should be separated by ","
-        e.g. com.openexchange.mail.filter.vacationDomains=testdomain.com,example.com
+        If multiple domains are given, they should be separated by ",".  
+        E.g.: 
+        <pre>com.openexchange.mail.filter.vacationDomains=testdomain.com,example.com</pre>
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.connectionTimeout
       description: |
@@ -115,6 +128,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Timeout"]
     - key: com.openexchange.mail.filter.authTimeout
       description: |
@@ -125,38 +139,41 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Timeout"]
     - key: com.openexchange.mail.filter.passwordSource
       description: |
-        Set the password source; meaning which source is taken to determine a user's password to login into mail filter system. 
-        If 'session' is set, then user's individual system's password is taken. 
-        If 'global' is set, then the value specified through property 'com.openexchange.mail.filter.masterPassword' is taken.
-        Currently known values: session and global
+        Set the password source; meaning which source is taken to determine a user's password to login into mail filter system.  
+        If <code>session</code> is set, then user's individual system's password is taken.  
+        If <code>global</code> is set, then the value specified through property 'com.openexchange.mail.filter.masterPassword' is taken.  
+        Currently known values: <code>session</code> and <code>global</code>
       defaultValue: session
       version:
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mail.filter.masterPassword
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.masterPassword
       description: |
         The master password for mail/transport server. Only takes effect when property
-        "com.openexchange.mail.filter.passwordSource" is set to "global".
+        [[com.openexchange.mail.filter.passwordSource]] is set to <code>global</code>.
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mail.filter.passwordSource
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "Credential"]
     - key: com.openexchange.mail.filter.useUTF7FolderEncoding
       description: |
         This property defines if mailbox names shall be UTF-7 encoded as specified in RFC2060; section 5.1.3. "Mailbox International Naming Convention".
-        If set to "false" no UTF-7 encoding is performed.
+        If set to <code>false</code> no UTF-7 encoding is performed.
 
-        Set to "true" for those Cyrus IMAP server versions that do NOT support "sieve_utf8fileinto" property (e.g. lower than v2.3.11)
-        Set to "true" for those Cyrus IMAP server versions that support "sieve_utf8fileinto" property having that property set to "0".
+        Set to <code>true</code> for those Cyrus IMAP server versions that do NOT support "sieve_utf8fileinto" property (e.g. lower than v2.3.11).  
+        Set also to <code>true</code> for those Cyrus IMAP server versions that support "sieve_utf8fileinto" property and having that property set to "0".  
         Thus moving mails with the 'fileinto' command will properly work for mailbox names that contain non-ascii characters.
       defaultValue: false
       version:
@@ -164,6 +181,7 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.punycode
       description: |
@@ -174,17 +192,19 @@ properties:
       configcascadeAware: true
       related: 
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.useSIEVEResponseCodes
       description: |
-        Interpret SIEVE Response Codes, see https://tools.ietf.org/html/rfc5804#section-1.3
-        In most cases, this option must be kept to false.
+        Interpret SIEVE Response Codes, see [[https://tools.ietf.org/html/rfc5804#section-1.3]].
+        In most cases, this option must be kept to <code>false</code>.
       defaultValue: false
       version:
       reloadable: true
       configcascadeAware: true
       related:
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]
     - key: com.openexchange.mail.filter.redirectWhitelist
       description: |
@@ -195,17 +215,19 @@ properties:
       configcascadeAware: true
       related:
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE", "White List"]
     - key: com.openexchange.mail.filter.preferredSaslMech
       description: |
         Specifies the preferred SASL authentication mechanism.
-        An empty value falls-back to "PLAIN"
+        An empty value falls-back to "PLAIN".
         
-        Known values: GSSAPI, XOAUTH2, OAUTHBEARER
+        Known values: <code>GSSAPI</code>, <code>XOAUTH2</code>, <code>OAUTHBEARER</code>
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
       related:
       file: mailfilter.properties
+      packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "SIEVE"]

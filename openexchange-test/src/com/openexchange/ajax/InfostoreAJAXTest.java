@@ -73,6 +73,7 @@ public class InfostoreAJAXTest extends AbstractAJAXSession {
 
     protected String hostName = null;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -80,11 +81,11 @@ public class InfostoreAJAXTest extends AbstractAJAXSession {
 
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        File file1 = InfostoreTestManager.createFile(folderId, "test knowledge", "text/javascript");
+        File file1 = InfostoreTestManager.createFile(folderId, "test knowledge", "text/plain");
         file1.setDescription("test knowledge description");
         itm.newAction(file1, upload);
-        
-        File file2 = InfostoreTestManager.createFile(folderId, "test url", "text/javascript");
+
+        File file2 = InfostoreTestManager.createFile(folderId, "test url", "text/plain");
         file2.setURL("http://www.open-xchange.com");
         file2.setDescription("test url description");
         itm.newAction(file2, upload);

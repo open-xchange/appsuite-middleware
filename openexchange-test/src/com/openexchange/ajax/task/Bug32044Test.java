@@ -104,7 +104,7 @@ public final class Bug32044Test extends AbstractAJAXSession {
         super.setUp();
         client1 = getClient();
         timeZone1 = client1.getValues().getTimeZone();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
         timeZone2 = client2.getValues().getTimeZone();
         cal = TimeTools.createCalendar(TimeZones.UTC);
         // Create a shared folder

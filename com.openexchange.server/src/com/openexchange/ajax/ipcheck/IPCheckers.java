@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.ipcheck;
 
-import static com.openexchange.ajax.SessionUtility.isWhitelistedClient;
 import static com.openexchange.ajax.SessionUtility.isWhitelistedFromIPCheck;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.ipcheck.internal.NoneIPChecker;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -77,6 +77,36 @@ public class IPCheckers {
     }
 
     /**
+     * Checks if IP check is not supposed to be applied since session-associated client is white-listed as per configuration.
+     *
+     * @param session The associated session
+     * @param configuration The IP check configuration
+     * @return <code>true</code> if white-listed; otherwise <code>false</code>
+     */
+    public static boolean isWhitelistedClient(Session session, IPCheckConfiguration configuration) {
+        return SessionUtility.isWhitelistedClient(session, configuration.getClientWhitelist());
+    }
+
+    /**
+     * Checks if IP check is not supposed to be applied since IP addresses are white-listed as per configuration.
+     * <p>
+     * Either:
+     * <ul>
+     * <li>White-listed by IP range; see file <code>noipcheck.cnf</code></li>
+     * <li>White-listed as new and old IP address reside in the same configured sub-net</li>
+     * </ul>
+     *
+     * @param current The current/changed IP address
+     * @param previous The previous IP address
+     * @param session The associated session
+     * @param configuration The IP check configuration
+     * @return <code>true</code> if white-listed; otherwise <code>false</code>
+     */
+    public static boolean isWhiteListedAddress(String current, String previous, IPCheckConfiguration configuration) {
+        return isWhitelistedFromIPCheck(current, configuration.getRanges()) || configuration.getAllowedSubnet().areInSameSubnet(current, previous);
+    }
+
+    /**
      * Checks if IP check is not supposed to be applied since IP and/or session characteristics are white-listed.
      * <p>
      * Either:
@@ -93,7 +123,7 @@ public class IPCheckers {
      * @return <code>true</code> if white-listed; otherwise <code>false</code>
      */
     public static boolean isWhiteListed(String current, String previous, Session session, IPCheckConfiguration configuration) {
-        return isWhitelistedFromIPCheck(current, configuration.getRanges()) || isWhitelistedClient(session, configuration.getClientWhitelist()) || configuration.getAllowedSubnet().areInSameSubnet(current, previous);
+        return isWhiteListedAddress(current, previous, configuration) || isWhitelistedClient(session, configuration);
     }
 
     /**
@@ -123,13 +153,14 @@ public class IPCheckers {
      *
      * @param current The current IP address to set
      * @param session The session to apply to
-     * @param whiteListed <code>true</code> if session-associated client/request has been excluded from IP check; otherwise <code>false</code> if IP check happened
+     * @param effectivelyChecked Whether changed IP has been effectively checked (<code>false</code> for {@link NoneIPChecker})
+     * @param whiteListedClient <code>true</code> if session-associated client has been excluded from IP check; otherwise <code>false</code> if IP check happened
      */
-    public static void updateIPAddress(String current, Session session, boolean whiteListed) {
-        if (whiteListed) {
+    public static void updateIPAddress(String current, Session session, boolean effectivelyChecked, boolean whiteListedClient) {
+        if (whiteListedClient) {
             // Change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
             updateIPAddress(current, session);
-        } else {
+        } else if (!effectivelyChecked) {
             // Do not change session's IP address anymore in case of USM/EAS (Bug #29136)
             if (!isUsmEas(session.getClient())) {
                 updateIPAddress(current, session);
@@ -179,7 +210,7 @@ public class IPCheckers {
     public static void kick(String current, Session session) throws OXException {
         // kick client with changed IP address
         LOG.info("Request to server denied (IP check activated) for session: {}. Client login IP changed from {} to {} and is not covered by IP white-list or netmask.", session.getSessionID(), session.getLocalIp(), (null == current ? "<missing>" : current));
-        throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSecret());
+        throw SessionExceptionCodes.WRONG_CLIENT_IP.create(session.getLocalIp(), null == current ? "<unknown>" : current);
     }
 
 }

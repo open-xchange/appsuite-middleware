@@ -54,7 +54,6 @@ import java.util.Map;
 import org.jdom2.JDOMException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
 import com.openexchange.webdav.xml.user.actions.SearchRequest;
 import com.openexchange.webdav.xml.user.actions.SearchResponse;
@@ -93,7 +92,7 @@ public final class GroupUserTools {
                 }
             }
             if (0 == userId) {
-                throw new TestException("Unable to find identifier of user.");
+                throw OXException.general("Unable to find identifier of user.");
             }
         }
         return userId;

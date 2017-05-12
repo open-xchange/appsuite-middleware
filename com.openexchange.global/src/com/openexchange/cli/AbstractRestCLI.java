@@ -188,7 +188,12 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
                 String parsedResponse = new String(IOUtils.toCharArray(new AsciiReader(response)));
                 JSONObject errorJson = new JSONObject(parsedResponse);
                 String errorMessage = (String) errorJson.get("error_desc");
-                result = Strings.isEmpty(errorMessage) ? defaultMessage : errorMessage;
+                if (errorJson.hasAndNotNull("error_id")) {
+                    StringBuilder sb = new StringBuilder(errorMessage);
+                    result = sb.append(" Server log exception ID: ").append(errorJson.getString("error_id")).toString();
+                } else {
+                    result = Strings.isEmpty(errorMessage) ? defaultMessage : errorMessage;
+                }
             } catch (IOException | JSONException e) {
                 //do nothing
             }
@@ -199,7 +204,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
 
     private boolean showHelp(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-h")) {
+            if (args[i].equals("-h") || args[i].equals("--help")) {
                 return true;
             }
         }

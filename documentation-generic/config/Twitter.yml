@@ -2,13 +2,14 @@ feature_name: Twitter
 properties:
     - key: com.openexchange.twitter.clientVersion
       description: |
-        The client version string
+        The client version string.
       defaultValue: 2.2.3
       version:
       reloadable: false
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter"]
     - key: com.openexchange.twitter.http.proxyHost
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.twitter.http.proxyPort
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Host"]
     - key: com.openexchange.twitter.http.proxyPort
       description: |
@@ -29,44 +31,49 @@ properties:
       configcascadeAware: false
       related: com.openexchange.twitter.http.proxyHost
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Port"]
     - key: com.openexchange.twitter.http.connectionTimeout
       description: |
-        Connection time out
+        The connection time out.
       defaultValue: 20000
       version:
       reloadable: false
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.readTimeout
       description: |
-        Read time out
+        The read time out.
       defaultValue: 120000
       version:
       reloadable: false
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter", "Timeout"]
     - key: com.openexchange.twitter.http.retryCount
       description: |
-        Retry count
+        The retry count.
       defaultValue: 3
       version:
       reloadable: false
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter"]
     - key: com.openexchange.twitter.http.retryIntervalSecs
       description: |
-        Retry interval seconds
+        The retry interval in seconds.
       defaultValue: 10
       version:
       reloadable: false
       configcascadeAware: false
       related:
       file: twitter.properties
+      packageName: open-xchange-messaging
       tags: ["Twitter"]

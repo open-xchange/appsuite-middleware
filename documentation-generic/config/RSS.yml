@@ -9,16 +9,18 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS"]
     - key: com.openexchange.rss
       description: |
-        If set to false disables the rss capability.
+        If set to <code>false</code> disables the rss capability.
       defaultValue: true
       version: 7.2.1
       reloadable: true
       configcascadeAware: true
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS"]
     - key: com.openexchange.messaging.rss
       description: |
@@ -29,6 +31,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS"]
     - key: com.openexchange.messaging.rss.feed.size
       description: |
@@ -39,10 +42,14 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS", "Limit"]
     - key: com.openexchange.messaging.rss.feed.blacklist
       description: |
-        Specifies a black-list for those hosts that are covered by denoted IP range; e.g. "127.0.0.1-127.255.255.255, localhost, internal.domain.org"
+        Specifies a black-list for those hosts that are covered by denoted IP range; e.g. 
+        <pre>
+        com.openexchange.messaging.rss.feed.blacklist=127.0.0.1-127.255.255.255, localhost, internal.domain.org
+        </pre>
         An empty value means no black-listing is active.
       defaultValue: 127.0.0.1-127.255.255.255,localhost
       version:
@@ -50,6 +57,7 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS", "Black List"]
     - key: com.openexchange.messaging.rss.feed.whitelist.ports
       description: |
@@ -62,4 +70,5 @@ properties:
       configcascadeAware: false
       related: 
       file: rssmessaging.properties
+      packageName: open-xchange-messaging
       tags: ["RSS", "White List"]      

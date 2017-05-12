@@ -366,7 +366,11 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         ThreadPoolService threadPool = Services.optService(ThreadPoolService.class);
         if (null == threadPool) {
             // Perform with current thread
-            ThreadPools.execute(new ReschedulerTask(allMembers, allPushUsers, hzInstance, this, pushManagerRegistry, policy, remotePlan));
+            try {
+                ThreadPools.execute(new ReschedulerTask(allMembers, allPushUsers, hzInstance, this, pushManagerRegistry, policy, remotePlan));
+            } catch (Exception e) {
+                LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
+            }
         } else {
             // Submit task to thread pool
             threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, this, pushManagerRegistry, policy, remotePlan));

@@ -74,6 +74,7 @@ import com.openexchange.continuation.ExecutorContinuation.ContinuationResponseGe
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -502,6 +503,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 if (null != mail) {
                     mail.setFolder(fullName);
                     mail.setAccountId(unifiedAccountId);
+                    mail.setOriginalId(mail.getMailId()); // ID stays the same
+                    mail.setOriginalFolder(fa);
                 }
             }
             return mails;
@@ -512,7 +515,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     @Override
     public MailPart getImageAttachment(String fullName, String mailId, String contentId) throws OXException {
-        if (null == contentId) {
+        if (Strings.isEmpty(contentId)) {
             return null;
         }
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
@@ -676,6 +679,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // mail.loadContent();
             mail.setFolder(fullName);
             mail.setAccountId(unifiedAccountId);
+            mail.setOriginalId(mail.getMailId()); // ID stays the same
+            mail.setOriginalFolder(fa);
             return mail;
         } finally {
             // Nothing
@@ -956,7 +961,17 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             ISimplifiedThreadStructureEnhanced structureEnhanced = messageStorage.supports(ISimplifiedThreadStructureEnhanced.class);
             if (null != structureEnhanced) {
                 try {
-                    return structureEnhanced.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
+                    List<List<MailMessage>> conversations = structureEnhanced.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
+                    int unifiedAccountId = access.getAccountId();
+                    for (List<MailMessage> conversation : conversations) {
+                        for (MailMessage mail : conversation) {
+                            mail.setFolder(fullName);
+                            mail.setAccountId(unifiedAccountId);
+                            mail.setOriginalId(mail.getMailId()); // ID stays the same
+                            mail.setOriginalFolder(fa);
+                        }
+                    }
+                    return conversations;
                 } catch (OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;
@@ -968,13 +983,23 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             ISimplifiedThreadStructure structure = messageStorage.supports(ISimplifiedThreadStructure.class);
             if (null != structure) {
                 try {
-                    List<List<MailMessage>> mails = structure.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
+                    List<List<MailMessage>> conversations = structure.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
 
                     if (null != headerNames && headerNames.length > 0) {
-                        MessageUtility.enrichWithHeaders(mails, headerNames, messageStorage);
+                        MessageUtility.enrichWithHeaders(conversations, headerNames, messageStorage);
                     }
 
-                    return mails;
+                    int unifiedAccountId = access.getAccountId();
+                    for (List<MailMessage> conversation : conversations) {
+                        for (MailMessage mail : conversation) {
+                            mail.setFolder(fullName);
+                            mail.setAccountId(unifiedAccountId);
+                            mail.setOriginalId(mail.getMailId()); // ID stays the same
+                            mail.setOriginalFolder(fa);
+                        }
+                    }
+
+                    return conversations;
                 } catch (OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;
@@ -1034,12 +1059,17 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             // Check for index range
             list = sliceMessages(list, indexRange);
-            /*
-             * Apply account identifier
-             */
-            setAccountInfo2(list, getAccount(fa.getAccountId()));
             if (null != headerNames && headerNames.length > 0) {
                 MessageUtility.enrichWithHeaders(list, headerNames, messageStorage);
+            }
+            int unifiedAccountId = access.getAccountId();
+            for (List<MailMessage> conversation : list) {
+                for (MailMessage mail : conversation) {
+                    mail.setFolder(fullName);
+                    mail.setAccountId(unifiedAccountId);
+                    mail.setOriginalId(mail.getMailId()); // ID stays the same
+                    mail.setOriginalFolder(fa);
+                }
             }
             // Return list
             return list;
@@ -1279,7 +1309,17 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             ISimplifiedThreadStructure structure = messageStorage.supports(ISimplifiedThreadStructure.class);
             if (null != structure) {
                 try {
-                    return structure.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
+                    List<List<MailMessage>> conversations = structure.getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
+                    int unifiedAccountId = access.getAccountId();
+                    for (List<MailMessage> conversation : conversations) {
+                        for (MailMessage mail : conversation) {
+                            mail.setFolder(fullName);
+                            mail.setAccountId(unifiedAccountId);
+                            mail.setOriginalId(mail.getMailId()); // ID stays the same
+                            mail.setOriginalFolder(fa);
+                        }
+                    }
+                    return conversations;
                 } catch (OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;
@@ -1342,7 +1382,15 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             /*
              * Apply account identifier
              */
-            setAccountInfo2(list, getAccount(fa.getAccountId()));
+            int unifiedAccountId = access.getAccountId();
+            for (List<MailMessage> conversation : list) {
+                for (MailMessage mail : conversation) {
+                    mail.setFolder(fullName);
+                    mail.setAccountId(unifiedAccountId);
+                    mail.setOriginalId(mail.getMailId()); // ID stays the same
+                    mail.setOriginalFolder(fa);
+                }
+            }
             // Return list
             return list;
         } finally {
@@ -1564,6 +1612,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 if (null != mail) {
                     mail.setFolder(fullName);
                     mail.setAccountId(unifiedAccountId);
+                    mail.setOriginalId(mail.getMailId()); // ID stays the same
+                    mail.setOriginalFolder(fa);
                 }
             }
             return mails;
@@ -2070,6 +2120,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 if (null != mail) {
                     mail.setFolder(fullName);
                     mail.setAccountId(unifiedMailAccountId);
+                    mail.setOriginalId(mail.getMailId()); // ID stays the same
+                    mail.setOriginalFolder(fa);
                 }
             }
             return mails;
@@ -2182,6 +2234,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 if (null != mail) {
                     mail.setFolder(fullName);
                     mail.setAccountId(unifiedAccountId);
+                    mail.setOriginalId(mail.getMailId()); // ID stays the same
+                    mail.setOriginalFolder(fa);
                 }
             }
             return mails;

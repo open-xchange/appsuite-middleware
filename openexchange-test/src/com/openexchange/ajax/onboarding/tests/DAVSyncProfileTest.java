@@ -70,7 +70,7 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
  * @since v7.8.1
  */
 public class DAVSyncProfileTest extends AbstractSmtpAJAXSession {
-    
+
     @Test
     public void testDAVsyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();

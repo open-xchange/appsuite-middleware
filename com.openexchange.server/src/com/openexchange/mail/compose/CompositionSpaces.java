@@ -81,6 +81,18 @@ public final class CompositionSpaces {
     }
 
     /**
+     * Gets the denoted composition space.
+     *
+     * @param csid The composition space identifier
+     * @param session The session
+     * @return The composition space or <code>null</code>
+     */
+    public static CompositionSpace get(String csid, Session session) {
+        CompositionSpaceRegistry registry = CompositionSpace.getRegistry(session);
+        return registry.optCompositionSpace(csid);
+    }
+
+    /**
      * Destroys the denoted composition space.
      * <ul>
      * <li>Drops messages held in composition space's clean-ups</li>

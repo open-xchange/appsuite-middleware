@@ -70,13 +70,14 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link AuxiliaryAPITest}.
-     * 
+     *
      * @param name test case's name
      */
     public AuxiliaryAPITest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -92,6 +93,7 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
+            rememberRule(id);
             rule.setId(id);
             rule.setPosition(i);
             expectedRules.add(rule);

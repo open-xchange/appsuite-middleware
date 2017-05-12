@@ -67,6 +67,6 @@ public class UtilsTest {
     public void testConvertToStringInUTCTimeZone() {
         Date d = D("24/03/2009 10:00");
         String converted = Utils.convert(d);
-        assertEquals("2009-03-24T10:00:00Z", converted);
+        assertEquals("Tue, 24 Mar 2009 10:00:00 GMT", converted);
     }
 }

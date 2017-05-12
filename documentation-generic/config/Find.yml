@@ -13,6 +13,7 @@ properties:
       configcascadeAware: true
       related: 
       file: findbasic.properties
+      packageName: open-xchange-core
       tags: ["Find", "Mail"]
     - key: com.openexchange.find.basic.mail.searchmailbody
       description: |
@@ -20,11 +21,12 @@ properties:
         This improves the search experience within the mail module, if your mail
         backend supports fast full text search. Otherwise it can slow down the
         search requests significantly.
-        Change the value to 'true', if fast full text search is supported.
+        Change the value to <code>true</code>, if fast full text search is supported.
       defaultValue: false
       version:
       reloadable: false
       configcascadeAware: false
       related:
       file: findbasic.properties
+      packageName: open-xchange-core
       tags: ["Find", "Mail"]

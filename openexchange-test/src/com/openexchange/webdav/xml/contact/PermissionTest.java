@@ -26,20 +26,20 @@ public class PermissionTest extends ContactTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Contact contactObj = new Contact();
         contactObj.setSurName("testInsertContactInPrivateFolderWithoutPermission");
         contactObj.setParentFolderID(parentFolderId);
 
         try {
-            insertContact(getSecondWebConversation(), contactObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            insertContact(getSecondWebConversation(), contactObj, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -55,20 +55,20 @@ public class PermissionTest extends ContactTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Contact contactObj = new Contact();
         contactObj.setSurName("testInsertContactInPublicFolderWithoutPermission");
         contactObj.setParentFolderID(parentFolderId);
 
         try {
-            insertContact(getSecondWebConversation(), contactObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            insertContact(getSecondWebConversation(), contactObj, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -84,23 +84,23 @@ public class PermissionTest extends ContactTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Contact contactObj = new Contact();
         contactObj.setSurName("testUpdateContactInPrivateFolderWithoutPermission");
         contactObj.setParentFolderID(parentFolderId);
 
-        final int contactObjectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int contactObjectId = insertContact(getWebConversation(), contactObj, getHostURI(), getLogin(), getPassword());
         contactObj.setObjectID(contactObjectId);
 
         try {
-            updateContact(getSecondWebConversation(), contactObj, contactObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            updateContact(getSecondWebConversation(), contactObj, contactObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -116,23 +116,23 @@ public class PermissionTest extends ContactTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Contact contactObj = new Contact();
         contactObj.setSurName("testUpdateContactInPublicFolderWithoutPermission");
         contactObj.setParentFolderID(parentFolderId);
 
-        final int contactObjectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int contactObjectId = insertContact(getWebConversation(), contactObj, getHostURI(), getLogin(), getPassword());
         contactObj.setObjectID(contactObjectId);
 
         try {
-            updateContact(getSecondWebConversation(), contactObj, contactObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            updateContact(getSecondWebConversation(), contactObj, contactObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -148,23 +148,23 @@ public class PermissionTest extends ContactTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Contact contactObj = new Contact();
         contactObj.setSurName("testDeleteContactInPrivateFolderWithoutPermission");
         contactObj.setParentFolderID(parentFolderId);
 
-        final int contactObjectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int contactObjectId = insertContact(getWebConversation(), contactObj, getHostURI(), getLogin(), getPassword());
         contactObj.setObjectID(contactObjectId);
 
         try {
-            deleteContact(getSecondWebConversation(), contactObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            deleteContact(getSecondWebConversation(), contactObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -180,22 +180,22 @@ public class PermissionTest extends ContactTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Contact contactObj = new Contact();
         contactObj.setSurName("testDeleteContactInPublicFolderWithoutPermission");
         contactObj.setParentFolderID(parentFolderId);
 
-        final int contactObjectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int contactObjectId = insertContact(getWebConversation(), contactObj, getHostURI(), getLogin(), getPassword());
         contactObj.setObjectID(contactObjectId);
 
         try {
-            deleteContact(getSecondWebConversation(), contactObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            deleteContact(getSecondWebConversation(), contactObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 }

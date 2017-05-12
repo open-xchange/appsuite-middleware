@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     com.openexchange.test.MainInterfaceTests.class,
+    com.openexchange.test.SequentialInterfaceTests.class,
     com.openexchange.test.RESTTests.class,
     com.openexchange.test.InterfaceSmtpMockTests.class,
 })

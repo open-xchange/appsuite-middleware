@@ -72,7 +72,6 @@ import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * no autologin with httpauth
@@ -82,16 +81,10 @@ import com.openexchange.test.pool.TestUser;
 public class Bug34928Test extends AbstractAJAXSession {
 
     private AJAXClient client;
-    private String login;
-    private String password;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        TestUser testUser3 = testContext.acquireUser();
-        login = testUser3.getLogin();
-        password = testUser3.getPassword();
         client = new AJAXClient(new AJAXSession(), true);
         client.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }

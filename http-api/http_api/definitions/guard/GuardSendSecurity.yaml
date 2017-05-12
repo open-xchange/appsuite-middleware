@@ -1,0 +1,16 @@
+type: object
+properties:
+  encrypt:
+    type: boolean
+    description: If true, the mail will be encrypted before sending
+  pgpInline:
+    type: boolean
+    description: If true, mail will be encrypted using PGP Inline rather than PGP Mime
+  sign:
+    type: boolean
+    description: If true, the mail will be signed with the users private key.  Requires authentication token
+  authentication:
+    type: string
+    description:  The Guard authentication token required for signing.  
+
+

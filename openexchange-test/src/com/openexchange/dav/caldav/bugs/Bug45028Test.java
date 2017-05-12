@@ -54,8 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.dav.StatusCodes;
@@ -85,7 +83,7 @@ public class Bug45028Test extends CalDAVTest {
     private FolderObject publicFolder;
     private String publicFolderId;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         manager2 = new CalendarTestManager(getClient2());
@@ -102,7 +100,7 @@ public class Bug45028Test extends CalDAVTest {
         publicFolderId = String.valueOf(folder.getObjectID());
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (null != manager2) {

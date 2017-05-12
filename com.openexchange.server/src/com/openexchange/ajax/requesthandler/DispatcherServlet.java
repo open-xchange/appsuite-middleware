@@ -105,6 +105,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.StatusKnowingHttpServletResponse;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -395,6 +396,7 @@ public class DispatcherServlet extends SessionServlet {
             MailExceptionCode.REFERENCED_MAIL_NOT_FOUND,
             MailExceptionCode.FOLDER_NOT_FOUND,
             SessionExceptionCodes.SESSION_EXPIRED,
+            SessionExceptionCodes.WRONG_SESSION_SECRET,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED
         );
@@ -514,6 +516,8 @@ public class DispatcherServlet extends SessionServlet {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
             handleOXException(e, httpRequest, httpResp);
+        } catch (RateLimitedException e) {
+            e.send(httpResponse);
         } catch (RuntimeException e) {
             exc = e;
             logException(e);

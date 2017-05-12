@@ -231,7 +231,7 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
         if ((null != mimeType) && (previewService instanceof Delegating)) {
             // Determine candidate
             try {
-                candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, previewOutput);
+                candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, previewOutput, session);
             } catch (OXException e) {
                 LOG.info("Failed to find delegate for mime-type {} and preview output {}", mimeType, previewOutput);
             }

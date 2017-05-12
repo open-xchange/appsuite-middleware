@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.userfeedback;
 
+import org.json.JSONObject;
 import com.openexchange.rest.AbstractRestTest;
 import com.openexchange.testing.restclient.modules.UserfeedbackApi;
 
@@ -75,6 +76,8 @@ public class AbstractUserFeedbackTest extends AbstractRestTest {
         "\"Screen_Resolution\":\"1600x900\","+
         "\"Language\": \"de_de\""+
         "}");
+    
+    protected JSONObject feedback;
 
     protected UserfeedbackApi userfeedbackApi;
 
@@ -82,6 +85,8 @@ public class AbstractUserFeedbackTest extends AbstractRestTest {
     public void setUp() throws Exception {
         super.setUp();
         userfeedbackApi = new UserfeedbackApi(getRestClient());
+        
+        feedback = new JSONObject(validFeedback);
     }
 
 }

@@ -442,7 +442,7 @@ public class DefaultNotificationParticipantResolver implements
 		if (!foundOrganizer) {
 			final User organizerUser = discoverOrganizer(appointment, ctx);
 			final NotificationParticipant notificationOrganizer = new NotificationParticipant(
-					ITipRole.ORGANIZER, organizerUser == null, organizer);
+					ITipRole.ORGANIZER, organizerUser == null, organizer, organizerUser == null ? -1 : organizerUser.getId());
 			final NotificationConfiguration configuration = defaultConfiguration.clone();
 			if (organizerUser == null) {
 			    LOG.warn("Unable to resolve Organizer for appointment: " + appointment.getObjectID() + " in context " + ctx.getContextId());

@@ -11,6 +11,7 @@ properties:
       configcascadeAware: false
       related: 
       file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
       tags: ["OXNotifier"]
 
     - key: com.openexchange.oxnotifier.productName
@@ -23,16 +24,18 @@ properties:
       configcascadeAware: true
       related: 
       file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
       tags: ["OXNotifier"]
 
     - key: com.openexchange.oxnotifier.icon
       description: |
-        Bytecode of an icon that can be displayed in the updater for this product next to the update entry
+        Bytecode of an icon that can be displayed in the updater for this product next to the update entry.
       defaultValue: 
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
       tags: ["OXNotifier"]
       

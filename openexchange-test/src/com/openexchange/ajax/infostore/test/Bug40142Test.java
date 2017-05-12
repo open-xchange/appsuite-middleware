@@ -101,7 +101,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
             expected.setFolderId(String.valueOf(folder.getObjectID()));
             expected.setFileName("name.name.txt.pgp");
             expected.setLastModified(new Date());
-            final java.io.File file = new java.io.File(TestInit.getTestProperty("webdavPropertiesFile"));
+            final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
             itm.newAction(expected, file);
             assertFalse("Creating an entry should work", itm.getLastResponse().hasError());

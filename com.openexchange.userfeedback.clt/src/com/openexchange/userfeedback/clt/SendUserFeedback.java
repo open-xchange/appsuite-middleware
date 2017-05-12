@@ -62,7 +62,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -106,11 +105,14 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
     private static final String BODY_LONG = "body";
     private static final String BODY_SHORT = "b";
 
+    private static final String COMPRESS_LONG = "compress";
+    private static final String COMPRESS_SHORT = "c";
+
     private static final String RECIPIENTS_SHORT = "r";
     private static final String RECIPIENT_LONG = "recipients";
 
     private static final String ENDPOINT_LONG = "api-root";
-    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/mail";
+    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/send";
 
     public static void main(String[] args) {
         new SendUserFeedback().execute(args);
@@ -129,6 +131,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
         options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
         options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
+        options.addOption(COMPRESS_SHORT, COMPRESS_LONG, false, "Use to gzip-compress exported feedback.");
         Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Single Recipient's mail address like \"Displayname <email@example.com>\" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.");
         recipients.setRequired(true);
         options.addOption(recipients);
@@ -150,16 +153,10 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             WebTarget target = baseTarget.path(contextGroup).path(type);
 
             if (cmd.hasOption(START_SHORT)) {
-                target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
+                target = target.queryParam("start", cmd.getOptionValue(START_SHORT).concat("000")); // convert seconds to ms
             }
             if (cmd.hasOption(END_SHORT)) {
-                target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
-            }
-            if (cmd.hasOption(SUBJECT_SHORT)) {
-                target = target.queryParam("subject", cmd.getOptionValue(SUBJECT_SHORT));
-            }
-            if (cmd.hasOption(BODY_SHORT)) {
-                target = target.queryParam("body", cmd.getOptionValue(BODY_SHORT));
+                target = target.queryParam("end", cmd.getOptionValue(END_SHORT).concat("000")); // convert seconds to ms
             }
             return target;
         } catch (URISyntaxException e) {
@@ -176,7 +173,14 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
-        context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        JSONObject requestBody = new JSONObject();
+        if (cmd.hasOption(SUBJECT_SHORT)) {
+            requestBody.put("subject", cmd.getOptionValue(SUBJECT_SHORT));
+        }
+        if (cmd.hasOption(BODY_SHORT)) {
+            requestBody.put("body", cmd.getOptionValue(BODY_SHORT));
+        }
+        requestBody.put("compress", cmd.hasOption(COMPRESS_SHORT));
         String recipients = cmd.getOptionValue(RECIPIENTS_SHORT);
         JSONArray array = new JSONArray();
         if (recipients.startsWith("@")) {
@@ -185,9 +189,58 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
         } else {
             array.add(0, extractSingleRecipient(recipients));
         }
+        requestBody.put("recipients", array);
         InputStream response = null;
-        response = context.post(Entity.json(array.toString()), InputStream.class);
-        System.out.println(IOUtils.toCharArray(new AsciiReader(response)));
+        response = context.post(Entity.json(requestBody.toString()), InputStream.class);
+        StringBuilder sb = new StringBuilder();
+        try {
+            JSONObject json = new JSONObject(new String(IOUtils.toCharArray(new AsciiReader(response))));
+            if (json.hasAndNotNull("pgp")) {
+                sb.append("A PGP-signed/encrypted email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("pgp");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("sign")) {
+                sb.append("A PGP-signed email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("sign");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("encrypt")) {
+                sb.append("A PGP-encrypted email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("encrypt");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("normal")) {
+                sb.append("An email with user feedback was send to\n");
+                JSONArray a = json.getJSONArray("normal");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("fail")) {
+                sb.append("The following addresses are invalid and therefore ignored\n");
+                JSONArray a = json.getJSONArray("fail");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+            if (json.hasAndNotNull("pgpFail")) {
+                sb.append("The following addresses are linked with an invalid PGP key and therefore ignored\n");
+                JSONArray a = json.getJSONArray("pgpFail");
+                for (int i = 0; i < a.length(); i++) {
+                    sb.append(a.get(i)).append("\n");
+                }
+            }
+        } catch (JSONException e) {
+            // will not happen
+        }
+        System.out.println(sb.toString());
         System.exit(0);
         return null;
     }
@@ -215,7 +268,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
                 if (null != pgp && Strings.isNotEmpty(pgp)) {
                     try {
                         pgp = new String(Files.readAllBytes(Paths.get(pgp)));
-                        json.put("pgpKey", pgp);
+                        json.put("pgp_key", pgp);
                     } catch (IOException e) {
                         exitWithError("Could not load PGP key " + pgp);
                     }
@@ -236,16 +289,34 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
     }
 
     private JSONObject extractSingleRecipient(String recipients) throws JSONException {
-        int startOfAddress = recipients.lastIndexOf("<");
-        String address = "";
-        String displayName = "";
-        if (startOfAddress >= 0) {
-            address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
-            displayName = startOfAddress != 0 ? recipients.substring(0,  startOfAddress - 1) : "" ;
-        } else {
-            address = recipients;
+        String publicKeyFile = null;
+        JSONObject json = null;
+        try {
+            boolean hasPublicKeyFile = recipients.contains(":");
+            int startOfAddress = recipients.lastIndexOf("<");
+            String address = "";
+            String displayName = "";
+            if (startOfAddress >= 0) {
+                address = recipients.substring(startOfAddress + 1, recipients.lastIndexOf(">"));
+                displayName = startOfAddress != 0 ? recipients.substring(0, startOfAddress - 1) : "";
+            } else {
+                address = recipients;
+            }
+            json = getAddressJSON(address, displayName);
+            if (hasPublicKeyFile) {
+                int startOfPublicKeyFile = recipients.lastIndexOf(":");
+                if (displayName.contains(":")) {
+                    if (startOfAddress > startOfPublicKeyFile) {
+                        return json;
+                    }
+                }
+                publicKeyFile = recipients.substring(startOfPublicKeyFile + 1);
+                String pgp = new String(Files.readAllBytes(Paths.get(publicKeyFile)));
+                json.put("pgp_key", pgp);
+            }
+        } catch (IOException e) {
+            exitWithError("Could not load PGP public key file " + publicKeyFile);
         }
-        JSONObject json = getAddressJSON(address, displayName);
         return json;
     }
 

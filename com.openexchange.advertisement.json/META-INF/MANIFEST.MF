@@ -26,4 +26,5 @@ Import-Package: com.google.common.annotations,
  javax.ws.rs.core,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j

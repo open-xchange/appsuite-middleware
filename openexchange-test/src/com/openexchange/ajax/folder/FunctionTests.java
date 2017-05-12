@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
@@ -89,17 +88,9 @@ public class FunctionTests extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client2.logout();
-        } finally {
-            super.tearDown();
-        }
-    }
 
     @Test
     public void testUnknownAction() throws IOException, JSONException, OXException {

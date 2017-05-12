@@ -59,7 +59,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @RunWith(ParallelSuite.class)
-@SuiteClasses({
+@SuiteClasses({ // @formatter:off
     NewTest.class,
     FreeBusyTest.class,
     MkCalendarTest.class,
@@ -72,7 +72,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ExDateTest.class,
     SplitSeriesTest.class,
     MailtoEncodingTest.class
-})
+}) // @formatter:on
 public final class CalDAVTestSuite {
 
 }

@@ -81,7 +81,9 @@ import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceLookup;
@@ -92,6 +94,7 @@ import com.openexchange.subscribe.google.internal.ContactEntryParser;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GoogleContactSubscribeService}
@@ -264,11 +267,28 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
+            // Load associated Google OAuth account
+            ServerSession session = subscription.getSession();
+            OAuthAccount oauthAccount = null;
+            {
+                Object accountId = subscription.getConfiguration().get("account");
+                if (null != accountId) {
+                    int iAccountId;
+                    if (accountId instanceof Integer) {
+                        iAccountId = ((Integer) accountId).intValue();
+                    } else {
+                        iAccountId = Integer.parseInt(accountId.toString());
+                    }
+                    OAuthService service = services.getService(OAuthService.class);
+                    oauthAccount = service.getAccount(iAccountId, session, session.getUserId(), session.getContextId());
+                }
+            }
+
             // Establish GData contact service using OAuth v2 credentials
             final ContactsService contactsService;
             {
-                GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-                String productName = GoogleApiClients.getGoogleProductName(subscription.getSession());
+                GoogleCredential googleCreds = null == oauthAccount ? GoogleApiClients.getCredentials(session) : GoogleApiClients.getCredentials(oauthAccount, session);
+                String productName = GoogleApiClients.getGoogleProductName(session);
                 contactsService = new ContactsService(productName);
                 contactsService.setOAuth2Credentials(googleCreds);
             }

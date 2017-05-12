@@ -88,7 +88,11 @@ public class JavaImageMetadataService implements ImageMetadataService {
             return new Dimension(width, height);
         } finally {
             if (null != reader) {
-                reader.dispose();
+                try {
+                    reader.dispose();
+                } catch (final Exception e) {
+                    // Ignore
+                }
             }
             Streams.close(imageInputStream, imageStream);
         }

@@ -59,8 +59,25 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @RunWith(ParallelSuite.class)
-@SuiteClasses({ CurrentUserPrincipalTest.class, OptionsTest.class, CollectionsTest.class, PrincipalPropertiesTest.class, AddressbookPropertiesTest.class, NewTest.class, UpdateTest.class, DeleteTest.class, MoveTest.class, UpgradeTest.class, ImageTest.class, CookieTest.class, BasicTest.class, BulkImportTest.class, AddressbookQueryTest.class, AddressbookQueryPartialRetrievalTest.class, AddressbookMultigetPartialRetrievalTest.class, ImageURITest.class
-})
+@SuiteClasses({ // @formatter:off
+    CurrentUserPrincipalTest.class,
+    OptionsTest.class,
+    CollectionsTest.class,
+    PrincipalPropertiesTest.class,
+    AddressbookPropertiesTest.class,
+    NewTest.class,
+    UpdateTest.class,
+    DeleteTest.class,
+    MoveTest.class,
+    UpgradeTest.class,
+    ImageTest.class,
+    CookieTest.class,
+    BasicTest.class,
+    BulkImportTest.class,
+    AddressbookQueryTest.class,
+    AddressbookQueryPartialRetrievalTest.class,
+    AddressbookMultigetPartialRetrievalTest.class, ImageURITest.class
+}) // @formatter:on
 public final class CardDAVTestSuite {
 
 }

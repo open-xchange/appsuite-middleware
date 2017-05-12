@@ -1,0 +1,8 @@
+type: object
+properties:
+  encrypted:
+    type: boolean
+    description: True if the mail is currently encrypted
+  signed:
+    type: boolean
+    description: True if the email has signatures

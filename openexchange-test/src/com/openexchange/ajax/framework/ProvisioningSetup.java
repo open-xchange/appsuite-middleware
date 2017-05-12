@@ -157,7 +157,7 @@ public class ProvisioningSetup {
 
             String contextName = filter.get(prefix + CONTEXT_IDENTIFIER).toString();
             try {
-                TestContext context = new TestContext(contextName, i);
+                TestContext context = new TestContext(contextName);
                 context.setAdmin(new TestUser(oxadmin, contextName, password));
 
                 String userId1 = filter.get(prefix + USER1_IDENTIFIER).toString();

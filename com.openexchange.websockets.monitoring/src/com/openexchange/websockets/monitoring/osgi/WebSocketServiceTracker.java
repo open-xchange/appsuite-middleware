@@ -90,7 +90,7 @@ public class WebSocketServiceTracker implements ServiceTrackerCustomizer<WebSock
             ObjectName objectName = Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN);
             managementService.registerMBean(objectName, new WebSocketMBeanImpl(webSocketService));
             error = false;
-            logger.warn("Registered MBean {}", WebSocketMBean.class.getName());
+            logger.info("Registered MBean {}", WebSocketMBean.class.getName());
             return webSocketService;
         } catch (Exception e) {
             logger.warn("Could not register MBean {}", WebSocketMBean.class.getName(), e);
@@ -114,7 +114,7 @@ public class WebSocketServiceTracker implements ServiceTrackerCustomizer<WebSock
 
         try {
             managementService.unregisterMBean(Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN));
-            logger.warn("Unregistered MBean {}", WebSocketMBean.class.getName());
+            logger.info("Unregistered MBean {}", WebSocketMBean.class.getName());
         } catch (Exception e) {
             logger.warn("Could not un-register MBean {}", WebSocketMBean.class.getName(), e);
         }

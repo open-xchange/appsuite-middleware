@@ -9,15 +9,17 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mailaccount.failedAuth.span
       file: mailaccount.properties
+      packageName: open-xchange-core
       tags: ["Mail Account","Limit"]
     - key: com.openexchange.mailaccount.failedAuth.span
       description: |
         Specifies the time span in which the failed authentication attempts are tracked.
-        The value accepts known time span syntax like "1W" or "5m"
+        The value accepts known time span syntax like <code>1W</code> or <code>5m</code>.
       defaultValue: 30m
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mailaccount.failedAuth.limit
       file: mailaccount.properties
+      packageName: open-xchange-core
       tags: ["Mail Account"]

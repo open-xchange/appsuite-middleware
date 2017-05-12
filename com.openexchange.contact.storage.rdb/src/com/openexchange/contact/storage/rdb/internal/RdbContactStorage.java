@@ -81,7 +81,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.imagetransformation.ImageTransformationService;
-import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -1076,25 +1075,28 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                     type = ScaleType.AUTO;
                     break;
             }
-            final byte[] imageBytes = contact.getImage1();
 
+            byte[] imageBytes = contact.getImage1();
             if (imageBytes == null || imageBytes.length == 0) {
                 return;
             }
 
-            final ImageTransformationService resizeService = RdbServiceLookup.getService(ImageTransformationService.class, true);
-            final ImageTransformations transform = resizeService.transfom(contact.getImage1());
-            if (transform == null) {
-                return;
+            byte[] transformedImage;
+            {
+                ImageTransformationService transformationService = RdbServiceLookup.getService(ImageTransformationService.class, true);
+                BufferedImage originalImage = transformationService.transfom(imageBytes).getImage();
+                if (null == originalImage || originalImage.getWidth() <= image_width && originalImage.getHeight() <= image_height) {
+                    return;
+                }
+                String formatName = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
+                transformedImage = transformationService.transfom(originalImage)
+                    .rotate()
+                    .scale(image_width, image_height, type, true)
+                    .getBytes(formatName)
+                ;
             }
-            final BufferedImage oldImage = transform.getImage();
-            if (oldImage == null || oldImage.getWidth() < image_width || oldImage.getHeight() < image_height) {
-                return;
-            }
-            transform.scale(image_width, image_height, type, true);
-            final byte[] image = transform.getBytes("jpg");
-            if (image != null && image.length != 0) {
-                contact.setImage1(image);
+            if (null != transformedImage && 0 < transformedImage.length) {
+                contact.setImage1(transformedImage);
             }
         } catch (OXException | IOException | NumberFormatException ex) {
             LOG.error("Unable to resize contact image due to " + ex.getMessage());

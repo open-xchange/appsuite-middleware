@@ -365,6 +365,7 @@ public abstract class MailConfig {
 
         mailConfig.parseServerURL(urlInfo);
         mailConfig.doCustomParsing(mailAccount, session);
+
         return mailConfig;
     }
 

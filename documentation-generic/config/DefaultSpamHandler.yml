@@ -12,6 +12,7 @@ properties:
       configcascadeAware: true
       related: 
       file: defaultspamhandler.properties
+      packageName: open-xchange-spamhandler-default
       tags: ["Spam Handler", "Folder"]
     - key: com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam
       description: |
@@ -23,6 +24,7 @@ properties:
       configcascadeAware: true
       related: 
       file: defaultspamhandler.properties
+      packageName: open-xchange-spamhandler-default
       tags: ["Spam Handler", "Folder"]
     - key: com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders
       description: |
@@ -33,4 +35,5 @@ properties:
       configcascadeAware: true
       related: 
       file: defaultspamhandler.properties
+      packageName: open-xchange-spamhandler-default
       tags: ["Spam Handler", "Folder"]

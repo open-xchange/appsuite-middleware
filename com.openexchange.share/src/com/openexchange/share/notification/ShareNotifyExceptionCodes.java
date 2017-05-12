@@ -49,8 +49,7 @@
 
 package com.openexchange.share.notification;
 
-import static com.openexchange.share.notification.ShareNotifyExceptionMessages.INVALID_MAIL_ADDRESS_MSG;
-import static com.openexchange.share.notification.ShareNotifyExceptionMessages.MISSING_MAIL_ADDRESS_MSG;
+import static com.openexchange.share.notification.ShareNotifyExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -104,7 +103,13 @@ public enum ShareNotifyExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unknown notification transport: %1$s.
      */
-    UNKNOWN_NOTIFICATION_TRANSPORT("Unknown notification transport: %1$s.", null, Category.CATEGORY_ERROR, 5)
+    UNKNOWN_NOTIFICATION_TRANSPORT("Unknown notification transport: %1$s.", null, Category.CATEGORY_ERROR, 5),
+
+    /**
+     * <li>You don't have sufficient permissions to send notifications for this share.</li>
+     * <li>Insufficient notification permissions for %1$s</li>
+     */
+    INSUFFICIENT_PERMISSIONS("Insufficient notification permissions for %1$s", INSUFFICIENT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 6),
 
     ;
 

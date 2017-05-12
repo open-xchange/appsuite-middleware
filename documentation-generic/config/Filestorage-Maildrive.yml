@@ -1,4 +1,6 @@
 feature_name: Mail Drive
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/virtual_mail_attachments.html]] for more informations.
 properties:
     - key: com.openexchange.file.storage.mail.enabled
       description: |
@@ -9,6 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
       tags: ["Mail Drive", "Filestorage"]
     - key: com.openexchange.file.storage.mail.fullNameAll
       description: |
@@ -20,6 +23,7 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
       tags: ["Mail Drive", "Filestorage"]
     - key: com.openexchange.file.storage.mail.fullNameReceived
       description: |
@@ -31,6 +35,7 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
       tags: ["Mail Drive", "Filestorage"]
     - key: com.openexchange.file.storage.mail.fullNameSent
       description: |
@@ -42,6 +47,7 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
       tags: ["Mail Drive", "Filestorage"]
     - key: com.openexchange.file.storage.mail.maxAccessesPerUser
       description: |
@@ -53,4 +59,5 @@ properties:
       configcascadeAware: true
       related: 
       file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
       tags: ["Mail Drive", "Filestorage", "Limit", "IMAP"]

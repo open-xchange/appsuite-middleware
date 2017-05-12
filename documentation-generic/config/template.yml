@@ -11,8 +11,9 @@ properties:
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
-      related: 
+      related: c.o.some.property
       file:
+      packageName: open-xchange-core
       tags: []
     - key: c.o.some.property2
       description: |
@@ -22,6 +23,7 @@ properties:
       version: 7.8.0
       reloadable: true
       configcascadeAware: true
-      related: c.o.some.property
+      related: ["c.o.some.property.1","c.o.some.property.2"]
       file: somefile.properties
+      packageName: open-xchange-packageB
       tags: ["tagA","tagB"]

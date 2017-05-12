@@ -66,6 +66,8 @@
         type: boolean
         description: If set to "true" the "size" field for mail attachments is adjusted by applying an estimation based on attachment's Content-Transfer-Encoding header
         required: false
+      - $ref: "#/parameters/gblQueryParamsDecrypt"
+      - $ref: "#/parameters/glbQueryParamsCryptoAuth"
     responses:
       200:
         description: |
@@ -73,3 +75,5 @@
           response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailResponse"
+
+

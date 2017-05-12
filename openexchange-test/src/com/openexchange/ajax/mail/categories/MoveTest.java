@@ -69,8 +69,8 @@ public class MoveTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testShouldMoveToAnotherCategory() throws OXException, IOException, SAXException, JSONException {
-        MailTestManager manager = new MailTestManager(getClient(), false);
-        getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
+        MailTestManager manager = new MailTestManager(getAjaxClient(), false);
+        getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         TestMail myMail = new TestMail(getFirstMailInFolder(origin));
         String oldID = myMail.getId();
@@ -83,8 +83,8 @@ public class MoveTest extends AbstractMailCategoriesTest {
 
     @Test
     public void testShouldNotMoveToNonExistentCategory() throws OXException, IOException, SAXException, JSONException {
-        MailTestManager manager = new MailTestManager(getClient(), false);
-        getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
+        MailTestManager manager = new MailTestManager(getAjaxClient(), false);
+        getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         TestMail myMail = new TestMail(getFirstMailInFolder(origin));
         String oldID = myMail.getId();

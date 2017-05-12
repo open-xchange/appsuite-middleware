@@ -3,13 +3,14 @@ properties:
     - key: java.naming.provider.url
       description: |
         URL of the LDAP server to connect to for authenticating users.
-        ldaps is supported.
+        "ldaps" is supported.
       defaultValue: ldap://localhost:389/dc=example,dc=com
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: java.naming.security.authentication
       description: |
@@ -20,6 +21,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: com.sun.jndi.ldap.connect.timeout
       description: |
@@ -31,6 +33,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication", "Timeout"]
     - key: com.sun.jndi.ldap.read.timeout
       description: |
@@ -41,10 +44,11 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication", "Timeout"]
     - key: useFullLoginInfo
       description: |
-        Set to true to authenticate with the string entered in the login name field, e.g.
+        Set to <code>true</code> to authenticate with the string entered in the login name field, e.g.
         "user@domain" instead of just "user" against ldap server.
       defaultValue: false
       version:
@@ -52,18 +56,21 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: uidAttribute
       description: |
         This attribute is used for login. E.g. uid=<login>,baseDN
-        NOTE: 
-        If the attribute is not part of the user dn, you need to set bindOnly=false.
+
+        Note:  
+        If the attribute is not part of the user dn, you need to set [[bindOnly]] to <code>false</code>.
       defaultValue: uid
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: baseDN
       description: |
@@ -74,6 +81,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: ldapReturnField
       description: |
@@ -86,12 +94,15 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: adsBind
       description: |
         This option activates a special ADS bind. It allows the user to
-        authenticate at the ADS with only the displayName or by using the syntax
-        DOMAIN\Samaccountname.
+        authenticate at the ADS with only the displayName or by using the syntax:
+        <pre>
+        DOMAIN\Samaccountname
+        </pre>
         Note that "\" cannot be used in user names when this option is activated.
       defaultValue: false
       version:
@@ -99,13 +110,16 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: bindOnly
       description: |
-        Set bindonly to false if the user entries are not directly contained in the
+        Set this to <code>false</code> if the user entries are not directly contained in the
         entry of the dn, and you have to search within ldap, change ldapScope
         in order to define the search depth.
-        NOTE: When two users exist with the same uidAttribute, authentication
+
+        Note:  
+        When two users exist with the same uidAttribute, authentication
         will be refused, though.
       defaultValue: true
       version:
@@ -113,30 +127,39 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: ldapScope
       description: |
-        Set the ldap search scope in case bindOnly is set to false
-        must be one of subtree, onelevel or base.
+        Set the ldap search scope in case [[bindOnly]] is set to <code>false</code>.
+        Possible values:
+        <ul>
+          <li><code>subtree</code></li>
+          <li><code>onelevel</code></li>
+          <li><code>base</code></li>
+        </ul>
       defaultValue: subtree
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: searchFilter
       description: |
         Specify the filter to limit the search of user entries (used in combination with subtreeSearch=true).
         The filter will be ANDed with the attributed specified in uidAttribute.
+
         Example:
-        (&(objectclass=posixAccount)(uid=foo))
+        <code>(&(objectclass=posixAccount)(uid=foo))</code>
       defaultValue: (objectclass=posixAccount)
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: bindDN
       description: |
@@ -148,6 +171,7 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: bindDNPassword
       description: |
@@ -158,18 +182,25 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication", "Credential"]
     - key: referral
       description: |
         This option configures how to handle the chasing of referrals in LDAP 
-        (see http://java.sun.com/products/jndi/tutorial/ldap/referral/overview.html).
-        possible values: ignore, follow, throw
+        (see [[http://java.sun.com/products/jndi/tutorial/ldap/referral/overview.html]]).  
+        Possible values:
+        <ul>
+          <li><code>ignore</code></li>
+          <li><code>follow</code></li>
+          <li><code>throw</code></li>
+        </ul>
       defaultValue: follow
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]
     - key: proxyUser
       description: |
@@ -180,21 +211,27 @@ properties:
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication", "Credential"]
     - key: proxyDelimiter
       description: |
-        Define a delimiter to be used to seperate Proxy from Userlogin
-        If defined, a proxy user can login on behalf of a user using the form
-        <PROXYACCOUNT><DELIMITER><USERACCOUNT>
-        NOTES:
-            1. The underlying Mailserver must support SASL AUTHPROXYING.
-               The open-xchange mailfilterbundle does not support it, so it will
-               raise errors.
-            2. The same option has to be set in mail.properties
+        Define a delimiter to be used to seperate Proxy from Userlogin.
+        If defined, a proxy user can login on behalf of a user using the form:  
+        <pre>
+        &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;
+        </pre>
+        Note:
+          <ol>
+            <li>The underlying Mailserver must support SASL AUTHPROXYING.  
+                The open-xchange mailfilterbundle does not support it, so it will
+                raise errors.</li>
+            <li>The same option has to be set in mail.properties</li>
+          </ol>
       defaultValue:
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: ldapauth.properties
+      packageName: open-xchange-authentication-ldap
       tags: ["LDAP", "Authentication"]

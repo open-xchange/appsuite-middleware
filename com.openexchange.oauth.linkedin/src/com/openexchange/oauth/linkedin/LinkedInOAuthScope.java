@@ -59,7 +59,7 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum LinkedInOAuthScope implements OAuthScope {
-    contacts_ro("r_basicprofile r_emailaddress", OXScope.contacts_ro);
+    contacts_ro("r_basicprofile r_emailaddress r_network", OXScope.contacts_ro);
 
     private final String mapping;
     private final OXScope module;

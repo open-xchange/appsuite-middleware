@@ -49,9 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -89,11 +87,13 @@ public class Bug43297Test extends CalDAVTest {
     private FolderObject subfolder;
     private String sharedFolderID;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
+        manager2.resetDefaultFolderPermissions();
         FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
@@ -115,6 +115,7 @@ public class Bug43297Test extends CalDAVTest {
         sharedFolderID = String.valueOf(folder.getObjectID());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

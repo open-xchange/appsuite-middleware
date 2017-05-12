@@ -4,11 +4,12 @@ properties:
       description: |
         Specifies a list jump end-points.
         [system-name] must be replaced with the name of the system. 
-        E.g. com.openexchange.jump.endpoint.mysystem=http://my.host.invalid/identities?action=receiveIdentity
+        E.g. <pre>com.openexchange.jump.endpoint.mysystem=http://my.host.invalid/identities?action=receiveIdentity</pre>
       defaultValue:
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: tokens.properties
+      packageName: open-xchange-core
       tags: ["Jump", "Host"]

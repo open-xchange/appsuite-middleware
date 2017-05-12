@@ -197,7 +197,15 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Echo header; see property "com.openexchange.servlet.echoHeaderName" in file 'server.properties'
          */
-        ECHO_HEADER("echo_header");
+        ECHO_HEADER("echo_header"),
+
+        /**
+         * Directory which contains test mails (rfc 822 files)
+         */
+        TEST_MAIL_DIR("testMailDir"),
+
+        MAIL_PORT("mailPort"),
+
         ;
 
         /**

@@ -52,6 +52,7 @@ package com.openexchange.file.storage.mail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -422,8 +423,6 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                         return Collections.<File> emptyList();
                     }
 
-                    List<File> files = new LinkedList<File>();
-
                     boolean hasEsort;
                     {
                         IMAPMessageStorage messageStorage = AbstractMailDriveResourceAccess.getImapMessageStorageFrom(mailAccess);
@@ -433,21 +432,59 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
                     if (hasEsort) {
                         SortTerm[] sortTerms = MailDriveSortUtility.getSortTerms(sort, order);
-                        Message[] messages = null == sortTerms ? null : MailDriveSortUtility.performEsort(sortTerms, null, range.from, range.to, folder);
-                        if (null != messages) {
-                            folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
-
-                            // Iterate messages
+                        int[] seqNums = null == sortTerms ? null : MailDriveSortUtility.performEsortAndGetSeqNums(sortTerms, null, range.from, range.to, folder);
+                        if (null != seqNums) {
+                            List<File> files = new ArrayList<File>(seqNums.length);
+                            boolean closeMailAccess = false;
                             int i = 0;
-                            for (int k = messages.length; k-- > 0;) {
-                                IMAPMessage message = (IMAPMessage) messages[i++];
-                                long uid = message.getUID();
-                                if (uid < 0) {
-                                    uid = folder.getUID(message);
+                            try {
+                                Message[] messages = folder.getMessages(seqNums);
+                                folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
+
+                                while (i < messages.length) {
+                                    IMAPMessage message = (IMAPMessage) messages[i];
+                                    long uid = message.getUID();
+                                    if (uid < 0) {
+                                        uid = folder.getUID(message);
+                                    }
+                                    MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, Long.toString(uid), userId, getRootFolderId(), fields);
+                                    if (null != mailDriveFile) {
+                                        files.add(mailDriveFile);
+                                    }
+                                    i++;
                                 }
-                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, Long.toString(uid), userId, getRootFolderId(), fields);
-                                if (null != mailDriveFile) {
-                                    files.add(mailDriveFile);
+                            } catch (javax.mail.FolderClosedException e) {
+                                // Need to reconnect. Close existing...
+                                closeFolder(folder);
+                                MailAccess.closeInstance(mailAccess, false);
+                                closeMailAccess = true;
+
+                                // ... and re-connect them
+                                mailAccess = MailAccess.getInstance(session);
+                                mailAccess.connect();
+                                imapStore = getIMAPStore(mailAccess);
+                                folder = getIMAPFolderFor(fullName, imapStore);
+                                folder.open(Folder.READ_ONLY);
+
+                                seqNums = Arrays.copyOfRange(seqNums, i, seqNums.length);
+                                Message[] messages = folder.getMessages(seqNums);
+                                folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
+
+                                while (i < messages.length) {
+                                    IMAPMessage message = (IMAPMessage) messages[i];
+                                    long uid = message.getUID();
+                                    if (uid < 0) {
+                                        uid = folder.getUID(message);
+                                    }
+                                    MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, Long.toString(uid), userId, getRootFolderId(), fields);
+                                    if (null != mailDriveFile) {
+                                        files.add(mailDriveFile);
+                                    }
+                                    i++;
+                                }
+                            } finally {
+                                if (closeMailAccess) {
+                                    MailAccess.closeInstance(mailAccess);
                                 }
                             }
 
@@ -461,6 +498,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                     }
 
                     // Manual chunk-wise fetch & sort in-app
+                    List<File> files = new LinkedList<File>();
                     int limit = 100;
                     int offset = 1;
 
@@ -920,6 +958,14 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             }
         }
         return list;
+    }
+
+    static void closeFolder(IMAPFolder folder) {
+        try {
+            folder.close(false);
+        } catch (Exception x) {
+            // Ignore
+        }
     }
 
 }

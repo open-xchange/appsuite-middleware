@@ -102,6 +102,7 @@ import org.htmlcleaner.Serializer;
 import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -116,6 +117,9 @@ import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
+import com.openexchange.html.internal.jsoup.JsoupParser;
+import com.openexchange.html.internal.jsoup.handler.CleaningJsoupHandler;
+import com.openexchange.html.internal.jsoup.handler.UrlReplacerJsoupHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
@@ -526,39 +530,39 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String html = htmlContent;
 
-            // Normalize the string
-            {
-                Matcher matcher = PATTERN_URL.matcher(html);
-                if (matcher.find()) {
-                    StringBuffer sb = new StringBuffer(html.length());
-                    do {
-                        matcher.appendReplacement(sb, Matcher.quoteReplacement(normalize(matcher.group())));
-                    } while (matcher.find());
-                    matcher.appendTail(sb);
-                    html = sb.toString();
+            boolean useJericho = HtmlServices.useJericho();
+            if (useJericho) {
+                // Normalize the string
+                {
+                    Matcher matcher = PATTERN_URL.matcher(html);
+                    if (matcher.find()) {
+                        StringBuffer sb = new StringBuffer(html.length());
+                        do {
+                            matcher.appendReplacement(sb, Matcher.quoteReplacement(normalize(matcher.group())));
+                        } while (matcher.find());
+                        matcher.appendTail(sb);
+                        html = sb.toString();
+                    }
                 }
-            }
 
-            // Perform one-shot sanitizing
-            html = replacePercentTags(html);
-            html = replaceHexEntities(html);
-            html = processDownlevelRevealedConditionalComments(html);
-            html = dropWeirdXmlNamespaceDeclarations(html);
-            html = dropDoubleAccents(html);
-            html = dropSlashedTags(html);
-            html = dropExtraChar(html);
+                // Perform one-shot sanitizing
+                html = replacePercentTags(html);
+                html = replaceHexEntities(html);
+                html = processDownlevelRevealedConditionalComments(html);
+                html = dropWeirdXmlNamespaceDeclarations(html);
+                html = dropDoubleAccents(html);
+                html = dropSlashedTags(html);
+                html = dropExtraChar(html);
 
-            // Repetitive sanitizing until no further replacement/changes performed
-            final boolean[] sanitized = new boolean[] { true };
-            while (sanitized[0]) {
-                sanitized[0] = false;
-                // Start sanitizing round
-                html = SaneScriptTags.saneScriptTags(html, sanitized);
-            }
+                // Repetitive sanitizing until no further replacement/changes performed
+                final boolean[] sanitized = new boolean[] { true };
+                while (sanitized[0]) {
+                    sanitized[0] = false;
+                    // Start sanitizing round
+                    html = SaneScriptTags.saneScriptTags(html, sanitized);
+                }
 
-            // CSS- and tag-wise sanitizing
-            {
-                // Initialize the handler
+                // // CSS- and tag-wise sanitizing -- Initialize the handler
                 FilterJerichoHandler handler = getHandlerFor(html.length(), options.getOptConfigName());
                 handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
 
@@ -573,7 +577,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
 
                 // Parse the HTML content
-                JerichoParser.getInstance().parse(html, handler, options.getMaxContentSize() <= 0);
+                JerichoParser.getInstance().parse(html, handler, true);
 
                 // Check if modified by handler
                 if (options.isDropExternalImages() && null != modified) {
@@ -583,6 +587,33 @@ public final class HtmlServiceImpl implements HtmlService {
                 // Get HTML content
                 html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+            } else {
+                // Check if input is a full HTML document or a fragment of HTML to parse
+                boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
+
+                CleaningJsoupHandler handler = getJsoupHandlerFor(html.length(), options.getOptConfigName());
+                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize()).setSuppressLinks(options.isSuppressLinks());
+
+                boolean[] modified = options.getModified();
+
+                // Parse the HTML content
+                JsoupParser.getInstance().parse(html, handler, true);
+
+                // Check if modified by handler
+                if (options.isDropExternalImages() && null != modified) {
+                    modified[0] |= handler.isImageURLFound();
+                }
+
+                // Get HTML content
+                if (null == options.getCssPrefix()) {
+                    Document document = handler.getDocument();
+                    html = hasBody ? document.outerHtml() : document.body().html();
+                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                } else {
+                    html = handler.getHtml();
+                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                }
             }
 
             // Replace HTML entities
@@ -602,6 +633,14 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         String definition = getConfiguration().getText(optionalConfigName.endsWith(".properties") ? optionalConfigName : optionalConfigName + ".properties");
         return null == definition ? new FilterJerichoHandler(initialCapacity, this) : new FilterJerichoHandler(initialCapacity, definition, this);
+    }
+
+    private CleaningJsoupHandler getJsoupHandlerFor(int initialCapacity, String optionalConfigName) {
+        if (null == optionalConfigName) {
+            return new CleaningJsoupHandler();
+        }
+        String definition = getConfiguration().getText(optionalConfigName.endsWith(".properties") ? optionalConfigName : optionalConfigName + ".properties");
+        return null == definition ? new CleaningJsoupHandler() : new CleaningJsoupHandler(definition);
     }
 
     private static final Pattern PATTERN_FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/+([a-zA-Z_0-9-][^>]+)");
@@ -1658,9 +1697,16 @@ public final class HtmlServiceImpl implements HtmlService {
 
         // Check URLs
         if (replaceUrls) {
-            UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
-            JerichoParser.getInstance().parse(html, handler, false);
-            html = handler.getHTML();
+            boolean useJericho = HtmlServices.useJericho();
+            if (useJericho) {
+                UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
+                JerichoParser.getInstance().parse(html, handler, false);
+                html = handler.getHTML();
+            } else {
+                UrlReplacerJsoupHandler handler = new UrlReplacerJsoupHandler();
+                JsoupParser.getInstance().parse(html, handler, false);
+                html = handler.getDocument().toString();
+            }
         }
 
         return html;

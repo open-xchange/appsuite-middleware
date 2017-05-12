@@ -1,32 +1,34 @@
 feature_name: Permission
 feature_description: |
-  The properties for permissions
+  The properties for permissions.
 properties:
     - key: permissions
       description: |
-        Default permissions for all users
+        Default permissions for all users.
       defaultValue: 
       version: 
       reloadable: false
       configcascadeAware: false
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Capability"]
 
     - key: com.openexchange.capability.boring
       description: |
-        Mark this installation as boring, i.e. disable an easter egg
+        Mark this installation as boring, i.e. disable an easter egg.
       defaultValue: true
       version: 
       reloadable: false
       configcascadeAware: false
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Capability"]
 
     - key: com.openexchange.capability.alone
       description: |
-        The property "alone" signals that the user is the only user in associated context/tenant.
+        This property signals that the user is the only user in associated context/tenant.
         It disables certain collaborative features and that would therefore be useless in such a context/tenant.
       defaultValue: false
       version: 
@@ -34,17 +36,19 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Capability"]
 
     - key: com.openexchange.capability.mobile_mail_app
       description: |
-        Mobile App general permission
+        Mobile App general permission.
       defaultValue: false
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission"]
 
     - key: com.openexchange.capability.share_links
@@ -56,6 +60,7 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Share", "Capability"]
 
     - key: com.openexchange.capability.invite_guests
@@ -67,6 +72,7 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Share", "Capability"]
 
     - key: com.openexchange.capability.archive_emails
@@ -79,4 +85,5 @@ properties:
       configcascadeAware: true
       related: 
       file: permissions.properties
+      packageName: open-xchange-core
       tags: ["Permission", "Mail", "Capability"]

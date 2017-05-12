@@ -65,8 +65,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.openexchange.ajax.appointment.AppointmentRangeGenerator.AppointmentRange;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -99,8 +97,6 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AbstractAppointmentTest extends AbstractAJAXSession {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractAppointmentTest.class);
 
     /**
      * Initializes a new {@link AbstractAppointmentTest}.

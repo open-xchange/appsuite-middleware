@@ -49,15 +49,16 @@
 
 package com.openexchange.ajax.framework;
 
-import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONObject;
-import org.junit.After;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.rest.AbstractRestTest;
 
 /**
  * {@link AbstractConfigAwareAjaxSession} extends the AbstractAjaxSession with methods to preconfigure reloadable configurations before executing the tests.
@@ -65,7 +66,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public abstract class AbstractConfigAwareAjaxSession extends AbstractSmtpAJAXSession {
+public abstract class AbstractConfigAwareAjaxSession extends AbstractRestTest {
 
     /**
      * Initializes a new {@link AbstractConfigAwareAjaxSession}.
@@ -76,29 +77,27 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractSmtpAJAXSes
 
     JSONObject oldData;
 
+    @Override
+    protected Application configure() {
+        return new ResourceConfig();
+    }
+
     /**
      * Changes the configurations given by {@link #getNeededConfigurations()}.
      *
-     * @param client The client to use.
-     * @param logout Indicating whether the used client should be logged out afterwards.
      * @throws Exception if changing the configuration fails
      */
-    protected void setUpConfiguration(AJAXClient client, boolean logout) throws Exception {
-
-        assertNotNull("The client must not be null!", client);
+    protected void setUpConfiguration() throws Exception {
         Map<String, String> map = getNeededConfigurations();
         if (!map.isEmpty()) {
             // change configuration to new values
             ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
-            ChangePropertiesResponse response = client.execute(req);
+            ChangePropertiesResponse response = getAjaxClient().execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
-        }
-        if (logout) {
-            client.logout();
         }
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (oldData != null) {
@@ -115,7 +114,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractSmtpAJAXSes
                 }
                 if (!map.isEmpty()) {
                     ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, "server", getReloadables());
-                    ChangePropertiesResponse response = getClient().execute(req);
+                    ChangePropertiesResponse response = getAjaxClient().execute(req);
                     oldData = ResponseWriter.getJSON(response.getResponse());
                 }
             }

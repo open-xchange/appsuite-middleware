@@ -78,7 +78,8 @@ public final class DBUtils {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBUtils.class);
 
-    public static final int IN_LIMIT = 1000;
+    /** The default limit for SQL-IN expressions: <code>1000</code> */
+    public static final int IN_LIMIT = com.openexchange.database.Databases.IN_LIMIT;
 
     private DBUtils() {
         super();

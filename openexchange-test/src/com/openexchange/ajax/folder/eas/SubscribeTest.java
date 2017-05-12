@@ -53,7 +53,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -75,25 +74,10 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class SubscribeTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    /**
-     * Initializes a new {@link SubscribeTest}.
-     *
-     * @param name The name of the test.
-     */
-    public SubscribeTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
 
     @Test
     public void testSubscribePrivate() throws Throwable {
+        AJAXClient client = getClient();
         final String parent = FolderStorage.ROOT_ID;
         String newId = null;
         boolean unsubscribe = false;

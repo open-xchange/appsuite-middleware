@@ -50,9 +50,7 @@
 package com.openexchange.ajax.voipnow;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.voipnow.actions.NewCallRequest;
@@ -69,13 +67,6 @@ public class NewCallTest extends AbstractAJAXSession {
         super();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
-        final AJAXClient client2 = new AJAXClient(testContext.acquireUser());
-        client2.logout();
-    }
 
     @Test
     public void testNewCall() throws Exception {

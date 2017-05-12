@@ -59,7 +59,6 @@ import com.openexchange.ajax.onboarding.tests.MailSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSRateLimitTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSUserLimitTest;
-import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link OnboardingAJAXSuite}
@@ -67,7 +66,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-@RunWith(ParallelSuite.class)
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
     ConfigTest.class,
     DAVSyncProfileTest.class,

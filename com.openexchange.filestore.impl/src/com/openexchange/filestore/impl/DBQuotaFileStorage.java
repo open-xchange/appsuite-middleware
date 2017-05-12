@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils.isUnifiedQuotaEnabledFor;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
@@ -79,8 +80,10 @@ import com.openexchange.filestore.Purpose;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageListener;
-import com.openexchange.filestore.QuotaBackendService;
 import com.openexchange.filestore.impl.osgi.Services;
+import com.openexchange.filestore.unified.KnownContributor;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
+import com.openexchange.filestore.unified.UsageResult;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.ServiceListings;
 
@@ -95,6 +98,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     private static final long serialVersionUID = -4048657112670657310L;
 
+    private static final String SERVICE_ID_APPSUITE_DRIVE = KnownContributor.APPSUITE_DRIVE.getId();
+
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     // -------------------------------------------------------------------------------------------------------------
@@ -105,7 +110,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private final OwnerInfo ownerInfo;
     private final URI uri;
     private final ServiceListing<QuotaFileStorageListener> listeners;
-    private final ServiceListing<QuotaBackendService> backendServices;
+    private final ServiceListing<UnifiedQuotaService> unifiedQuotaServices;
     private final Purpose purpose;
     private final int effectiveUserId;
 
@@ -120,16 +125,16 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
      * @param uri The URI that fully qualifies this file storage
      * @param nature The storage's nature
      * @param listeners The quota listeners
-     * @param backendServices The tracked backend services
+     * @param unifiedQuotaServices The tracked Unified Quota services
      * @throws OXException If initialization fails
      */
-    public DBQuotaFileStorage(int contextId, Info info, OwnerInfo ownerInfo, long quota, FileStorage fs, URI uri, ServiceListing<QuotaFileStorageListener> listeners, ServiceListing<QuotaBackendService> backendServices) throws OXException {
+    public DBQuotaFileStorage(int contextId, Info info, OwnerInfo ownerInfo, long quota, FileStorage fs, URI uri, ServiceListing<QuotaFileStorageListener> listeners, ServiceListing<UnifiedQuotaService> unifiedQuotaServices) throws OXException {
         super();
         if (fs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
 
-        this.backendServices = null == backendServices ? ServiceListings.<QuotaBackendService> emptyList() : backendServices;
+        this.unifiedQuotaServices = null == unifiedQuotaServices ? ServiceListings.<UnifiedQuotaService> emptyList() : unifiedQuotaServices;
         this.listeners = null == listeners ? ServiceListings.<QuotaFileStorageListener> emptyList() : listeners;
 
         this.purpose = null == info ? Purpose.ADMINISTRATIVE : info.getPurpose();
@@ -175,35 +180,40 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         return Services.requireService(DatabaseService.class);
     }
 
-    private QuotaBackendService getHighestRankedBackendService(int userId, int contextId) throws OXException  {
+    private UnifiedQuotaService getHighestRankedBackendService(int userId, int contextId) throws OXException  {
         if (userId <= 0) {
             return null;
         }
 
-        Iterator<QuotaBackendService> iter = backendServices.iterator();
+        if (false == isUnifiedQuotaEnabledFor(userId, contextId)) {
+            LOGGER.debug("Unified Quota is not enabled for user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
+            return null;
+        }
+
+        Iterator<UnifiedQuotaService> iter = unifiedQuotaServices.iterator();
         if (false == iter.hasNext()) {
             // No one available...
-            LOGGER.debug("No quota backend service available for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+            LOGGER.warn("No Unified Quota service available for file storage '{}' of user {} in context {}, although it has been enabled.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
             return null;
         }
 
         do {
-            QuotaBackendService backendService = iter.next();
-            if (backendService.isApplicableFor(userId, contextId)) {
-                LOGGER.debug("Using quota backend service '{}' for file storage '{}' of user {} in context {}.", backendService.getMode(), uri, Integer.valueOf(userId), Integer.valueOf(contextId));
-                return backendService;
+            UnifiedQuotaService unifiedQuotaService = iter.next();
+            if (unifiedQuotaService.isApplicableFor(userId, contextId)) {
+                LOGGER.debug("Using Unified Quota service '{}' for file storage '{}' of user {} in context {}.", unifiedQuotaService.getMode(), uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+                return unifiedQuotaService;
             }
-            LOGGER.debug("Quota backend service '{}' is not applicable for file storage '{}' of user {} in context {}.", backendService.getMode(), uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+            LOGGER.debug("Unified Quota service '{}' is not applicable for file storage '{}' of user {} in context {}.", unifiedQuotaService.getMode(), uri, Integer.valueOf(userId), Integer.valueOf(contextId));
         } while (iter.hasNext());
 
-        LOGGER.debug("No quota backend service applicable for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+        LOGGER.debug("No Unified Quota service applicable for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
         return null;
     }
 
     @Override
     public String getMode() throws OXException {
-        QuotaBackendService backendService = getHighestRankedBackendService(effectiveUserId, contextId);
-        return null == backendService ? DEFAULT_MODE : backendService.getMode();
+        UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+        return null == unifiedQuotaService ? DEFAULT_MODE : unifiedQuotaService.getMode();
     }
 
     @Override
@@ -213,8 +223,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public long getQuota() throws OXException {
-        QuotaBackendService backendService = getHighestRankedBackendService(effectiveUserId, contextId);
-        return null == backendService ? quota : backendService.getLimit(effectiveUserId, contextId);
+        UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+        return null == unifiedQuotaService ? quota : unifiedQuotaService.getLimit(effectiveUserId, contextId);
     }
 
     @Override
@@ -251,8 +261,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
 
-        Long toDecrement = null;
-        QuotaBackendService backendService = null;
+        Long toRestore = null;
+        UnifiedQuotaService unifiedQuotaService = null;
 
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
@@ -281,23 +291,27 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             if (quota < 0) {
                 // Unlimited quota...
             } else {
-                backendService = getHighestRankedBackendService(effectiveUserId, contextId);
-                if (backendService != null) {
-                    long effectiveOldUsage = backendService.getUsage(effectiveUserId, contextId);
-                    long effectiveNewUsage = effectiveOldUsage + required;
-                    long effectiveLimit = getQuota();
-                    if (checkExceededQuota(id, effectiveLimit, required, effectiveNewUsage, effectiveOldUsage)) {
-                        return true;
-                    }
+                unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+                if (unifiedQuotaService != null) {
+                    boolean keepOn = true;
+                    while (keepOn) {
+                        long otherUsages = unifiedQuotaService.getUsageExceptFor(effectiveUserId, contextId, SERVICE_ID_APPSUITE_DRIVE).getTotal();
+                        long oldTotalUsage = otherUsages + oldUsageFromDb;
+                        long newTotalUsage = otherUsages + newUsageForDb;
+                        long effectiveLimit = getQuota();
+                        if (checkExceededQuota(id, effectiveLimit, required, newTotalUsage, oldTotalUsage)) {
+                            return true;
+                        }
 
-                    // Advertise usage increment to listeners
-                    for (QuotaFileStorageListener listener : listeners) {
-                        listener.onUsageIncrement(id, required, effectiveOldUsage, effectiveLimit, ownerId, contextId);
-                    }
+                        // Advertise usage increment to listeners
+                        for (QuotaFileStorageListener listener : listeners) {
+                            listener.onUsageIncrement(id, required, oldTotalUsage, effectiveLimit, ownerId, contextId);
+                        }
 
-                    // Increment usage
-                    backendService.incrementUsage(required, effectiveUserId, contextId);
-                    toDecrement = Long.valueOf(required);
+                        // Increment usage
+                        keepOn = !unifiedQuotaService.setUsage(newUsageForDb, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                    }
+                    toRestore = Long.valueOf(oldUsageFromDb);
                 } else {
                     long quota = getQuota();
                     if (checkExceededQuota(id, quota, required, newUsageForDb, oldUsageFromDb)) {
@@ -330,8 +344,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             if (rollback) {
                 Databases.rollback(con);
 
-                if (null != backendService && null != toDecrement) {
-                    backendService.decrementUsage(toDecrement.longValue(), effectiveUserId, contextId);
+                if (null != unifiedQuotaService && null != toRestore) {
+                    unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 }
             }
             Databases.autocommit(con);
@@ -409,8 +423,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
 
-        Long toIncrement = null;
-        QuotaBackendService backendService = null;
+        Long toRestore = null;
+        UnifiedQuotaService unifiedQuotaService = null;
 
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
@@ -443,38 +457,22 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 LOGGER.error("", e);
             }
 
-            backendService = getHighestRankedBackendService(effectiveUserId, contextId);
-            if (backendService != null) {
-                long effectiveOldUsage = backendService.getUsage(effectiveUserId, contextId);
-                long effectiveToReleasedBy = toReleaseBy;
-                long effectiveNewUsage = effectiveOldUsage - effectiveToReleasedBy;
-                if (effectiveNewUsage < 0) {
-                    effectiveNewUsage = 0;
-                    effectiveToReleasedBy = effectiveOldUsage;
-                    final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(ownerId), I(contextId));
-                    LOGGER.error("", e);
+            // Check whether to mirror new usage to possible QuotaBackendService
+            unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+            if (unifiedQuotaService != null) {
+                boolean keepOn = true;
+                while (keepOn) {
+                    keepOn = !unifiedQuotaService.setUsage(newUsageForDb, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 }
+                toRestore = Long.valueOf(oldUsageFromDb);
+            }
 
-                // Advertise usage decrement to listeners
-                for (QuotaFileStorageListener listener : listeners) {
-                    try {
-                        listener.onUsageDecrement(ids, toReleaseBy, effectiveOldUsage, getQuota(), ownerId, contextId);
-                    } catch (Exception e) {
-                        LOGGER.warn("", e);
-                    }
-                }
-
-                // Decrement usage
-                backendService.decrementUsage(effectiveToReleasedBy, effectiveUserId, contextId);
-                toIncrement = Long.valueOf(effectiveToReleasedBy);
-            } else {
-                // Advertise usage increment to listeners
-                for (QuotaFileStorageListener listener : listeners) {
-                    try {
-                        listener.onUsageDecrement(ids, toReleaseBy, oldUsageFromDb, getQuota(), ownerId, contextId);
-                    } catch (Exception e) {
-                        LOGGER.warn("", e);
-                    }
+            // Advertise usage increment to listeners
+            for (QuotaFileStorageListener listener : listeners) {
+                try {
+                    listener.onUsageDecrement(ids, toReleaseBy, oldUsageFromDb, getQuota(), ownerId, contextId);
+                } catch (Exception e) {
+                    LOGGER.warn("", e);
                 }
             }
 
@@ -499,8 +497,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             if (rollback) {
                 Databases.rollback(con);
 
-                if (null != backendService && null != toIncrement) {
-                    backendService.incrementUsage(toIncrement.longValue(), effectiveUserId, contextId);
+                if (null != unifiedQuotaService && null != toRestore) {
+                    unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
                 }
             }
             Databases.autocommit(con);
@@ -557,18 +555,29 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public long getUsage() throws OXException {
-        QuotaBackendService backendService = getHighestRankedBackendService(effectiveUserId, contextId);
-        if (backendService != null) {
-            return backendService.getUsage(effectiveUserId, contextId);
+        UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+        if (unifiedQuotaService != null) {
+            UsageResult usage = unifiedQuotaService.getUsage(effectiveUserId, contextId);
+            if (usage.hasUsageFor(SERVICE_ID_APPSUITE_DRIVE)) {
+                return usage.getTotal();
+            }
+
+            // Set & return
+            long fsUsage = getUsage0();
+            unifiedQuotaService.setUsage(fsUsage, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+            return usage.getTotal() + fsUsage;
         }
 
         // Otherwise grab the usage from database
+        return getUsage0();
+    }
+
+    private long getUsage0() throws OXException {
         DatabaseService db = getDatabaseService();
         Connection con = db.getReadOnly(contextId);
 
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final long usage;
         try {
             int ownerId = ownerInfo.getOwnerId();
             stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
@@ -582,14 +591,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
 
-            usage = result.getLong(1);
+            return result.getLong(1);
         } catch (final SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
         } finally {
             Databases.closeSQLStuff(result, stmt);
             db.backReadOnly(contextId, con);
         }
-        return usage;
     }
 
     @Override
@@ -660,6 +668,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
         }
 
+        UnifiedQuotaService unifiedQuotaService = null;
+        Long toRestore = null;
+
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
         PreparedStatement stmt = null;
@@ -667,6 +678,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         try {
             con.setAutoCommit(false);
             rollback = true;
+
+            unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
+            if (unifiedQuotaService != null) {
+                long effectiveOldUsage = unifiedQuotaService.getUsage(effectiveUserId, contextId).getTotal();
+                unifiedQuotaService.setUsage(entireFileSize, SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                toRestore = Long.valueOf(effectiveOldUsage);
+            }
 
             stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             stmt.setLong(1, entireFileSize);
@@ -689,6 +707,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         } finally {
             if (rollback) {
                 Databases.rollback(con);
+
+                if (null != unifiedQuotaService && null != toRestore) {
+                    unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                }
             }
             Databases.autocommit(con);
             Databases.closeSQLStuff(stmt);

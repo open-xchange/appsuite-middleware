@@ -76,6 +76,8 @@ public abstract class AbstractFeedbackType implements FeedbackType {
      * @throws OXException
      */
     public final Object prepareAndValidateFeedback(Object feedback) throws OXException {
+        checkFeedback(feedback);
+
         Object normalizedFeedback = normalize(feedback);
         Object cleanUpFeedback = cleanUp(normalizedFeedback);
 
@@ -85,14 +87,36 @@ public abstract class AbstractFeedbackType implements FeedbackType {
     }
 
     /**
-     * Delegates feedback validation to implementation to ensure requirements are met by the given feedback.
+     * Syntactic check of the feedback content. Checks if the provided feedback has the minimum requirements for further processing.
      * 
-     * @param feedback
+     * @param feedback The feedback object to check
+     * @throws OXException
+     */
+    protected abstract void checkFeedback(Object feedback) throws OXException;
+
+    /**
+     * Semantic check of the feedback content. Validates the normalized ({@link #normalize(Object)}) and cleaned ({@link #cleanUp(Object)}) feedback content.
+     * 
+     * @param feedback The feedback object to validate
      * @throws OXException
      */
     protected abstract void validate(Object feedback) throws OXException;
 
+    /**
+     * Ensures the feedback is well prepared for persisting. No additional and the minimum required information are available.
+     * 
+     * @param feedback The feedback object to clean up
+     * @return The cleaned and syntactic ready feedback
+     * @throws OXException
+     */
     protected abstract Object cleanUp(Object feedback) throws OXException;
 
+    /**
+     * Ensures a normalized representation of the feedback object for upcoming cleanups (e. g. lower case keys in JSON)
+     * 
+     * @param feedback The feedback object to normalize
+     * @return The normalized feedback
+     * @throws OXException
+     */
     protected abstract Object normalize(Object feedback) throws OXException;
 }

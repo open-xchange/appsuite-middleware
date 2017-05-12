@@ -51,7 +51,6 @@ package com.openexchange.ajax.user;
 
 import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -60,24 +59,15 @@ import com.openexchange.ajax.user.actions.GetResponse;
 
 public class GetTest extends AbstractAJAXSession {
 
-    private int userId;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
-        userId = getClient2().getValues().getUserId();
-    }
-
     @Test
     public void testGet() throws Exception {
-        final GetRequest getRequest = new GetRequest(userId, getClient().getValues().getTimeZone());
+        final GetRequest getRequest = new GetRequest(getClient2().getValues().getUserId(), getClient().getValues().getTimeZone());
         final GetResponse getResponse = Executor.execute(getClient(), getRequest);
 
         final JSONObject user = (JSONObject) getResponse.getData();
 
         assertTrue("No ID", user.hasAndNotNull("id"));
-        assertTrue("Wrong ID", user.getInt("id") == userId);
+        assertTrue("Wrong ID", user.getInt("id") == getClient2().getValues().getUserId());
 
         assertTrue("No aliases. JSON: " + user, user.hasAndNotNull("aliases"));
     }

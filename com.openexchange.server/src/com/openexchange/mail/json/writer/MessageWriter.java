@@ -305,7 +305,11 @@ public final class MessageWriter {
             }
             if (null != params.getWarnings()) {
                 List<OXException> list = parser.getWarnings();
-                if (!list.isEmpty()) {
+                if (null != list && !list.isEmpty()) {
+                    params.getWarnings().addAll(list);
+                }
+                list = handler.getWarnings();
+                if (null != list && !list.isEmpty()) {
                     params.getWarnings().addAll(list);
                 }
             }

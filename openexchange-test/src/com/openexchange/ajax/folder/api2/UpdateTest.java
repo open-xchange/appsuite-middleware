@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -62,7 +61,6 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -74,22 +72,6 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class UpdateTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    /**
-     * Initializes a new {@link UpdateTest}.
-     *
-     * @param name The name of the test.
-     */
-    public UpdateTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
 
     @Test
     public void testUpdatePrivate() throws Throwable {
@@ -101,7 +83,7 @@ public class UpdateTest extends AbstractAJAXSession {
             fo.setModule(FolderObject.CALENDAR);
             {
                 final OCLPermission oclP = new OCLPermission();
-                oclP.setEntity(client.getValues().getUserId());
+                oclP.setEntity(getClient().getValues().getUserId());
                 oclP.setGroupPermission(false);
                 oclP.setFolderAdmin(true);
                 oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -110,18 +92,18 @@ public class UpdateTest extends AbstractAJAXSession {
             final String newId;
             {
                 final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
-                final InsertResponse response = client.execute(request);
+                final InsertResponse response = getClient().execute(request);
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
             }
             {
-                fo.setLastModified(client.execute(new GetRequest(EnumAPI.OUTLOOK, newId)).getTimestamp());
+                fo.setLastModified(getClient().execute(new GetRequest(EnumAPI.OUTLOOK, newId)).getTimestamp());
             }
             fo.setFolderName("testCalendarFolderRename" + System.currentTimeMillis());
             fo.setObjectID(Integer.parseInt(newId));
             {
                 final OCLPermission oclP = new OCLPermission();
-                oclP.setEntity(client.getValues().getUserId());
+                oclP.setEntity(getClient().getValues().getUserId());
                 oclP.setGroupPermission(false);
                 oclP.setFolderAdmin(true);
                 oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -134,11 +116,11 @@ public class UpdateTest extends AbstractAJAXSession {
             }
             {
                 final UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OUTLOOK, fo);
-                client.execute(updateRequest).getResponse();
+                getClient().execute(updateRequest).getResponse();
             }
             {
                 final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, newId);
-                final GetResponse response = client.execute(request);
+                final GetResponse response = getClient().execute(request);
                 fo.setLastModified(response.getTimestamp());
                 final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
 
@@ -155,7 +137,7 @@ public class UpdateTest extends AbstractAJAXSession {
                 // Delete folder
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, fo);
-                    client.execute(deleteRequest);
+                    getClient().execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

@@ -51,8 +51,6 @@ package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
@@ -73,7 +71,6 @@ import com.openexchange.share.recipient.RecipientType;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class NotifyFileSharesTest extends ShareTest {
 
     @Test
@@ -102,14 +99,14 @@ public class NotifyFileSharesTest extends ShareTest {
 
     private void testNotifyGroup(int parent) throws Exception {
         DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ);
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         testNotify(parent, permission, emailAddress);
     }
 
     private void testNotifyUser(int parent) throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = getClient2();
         int userId = client2.getValues().getUserId();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
@@ -138,13 +135,12 @@ public class NotifyFileSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        getNoReplyClient().execute(new ClearMailsRequest());
+        getClient().execute(new ClearMailsRequest());
         getClient().execute(new NotifyFileRequest(file.getId(), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(getNoReplyClient(), emailAddress);
+        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
         assertNotNull(notificationMessage);
     }
-
 }

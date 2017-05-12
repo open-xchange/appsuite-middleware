@@ -69,7 +69,7 @@ public class VacationTest extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link VacationTest}.
-     * 
+     *
      * @param name The test case's name
      */
     public VacationTest() {
@@ -95,6 +95,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -119,6 +120,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -143,6 +145,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -167,6 +170,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -193,6 +197,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setTest(new AllOfTest(tests));
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -219,6 +224,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setTest(new AllOfTest(tests));
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }

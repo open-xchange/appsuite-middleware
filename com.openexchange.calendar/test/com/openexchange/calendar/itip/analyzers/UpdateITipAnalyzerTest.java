@@ -311,7 +311,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-         @Test
+     @Test
      public void testUpdateButNotReschedule() throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
@@ -344,7 +344,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
 
-        assertActions(analysis, ITipAction.UPDATE);
+        assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER, ITipAction.UPDATE);
 
 
         integrationBuilder.assertAllWereCalled();

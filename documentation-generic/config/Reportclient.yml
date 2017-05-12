@@ -3,16 +3,19 @@ feature_description: |
   The first part defines if a proxy server should be used to establish the http connection
   to the Open-Xchange report server, and if which server and proxy details to use.
   The second part configures report serialization.
+
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/report_client.html]] for more informations.
 properties:
     - key: com.openexchange.report.client.proxy.useproxy
       description: |
-        Determine wether a proxy should be used or not. If set to true, the related properties have to be set also.
+        Determine wether a proxy should be used or not. If set to <code>true</code>, the related properties also have to be set.
       defaultValue: false
       version:
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.report.client.proxy.address, com.openexchange.report.client.proxy.port, com.openexchange.report.client.proxy.authrequired
+      related: ["com.openexchange.report.client.proxy.address", "com.openexchange.report.client.proxy.port", "com.openexchange.report.client.proxy.authrequired"]
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Proxy"]
     - key: com.openexchange.report.client.proxy.address
       description: |
@@ -23,6 +26,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.report.client.proxy.port
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Proxy"]
     - key: com.openexchange.report.client.proxy.port
       description: |
@@ -33,16 +37,18 @@ properties:
       configcascadeAware: false
       related: com.openexchange.report.client.proxy.address
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Proxy", "Port"]
     - key: com.openexchange.report.client.proxy.authrequired
       description: |
-        Is authorisation required to use the proxy. If set to true, the related properties have to be set also.
+        Is authorisation required to use the proxy. If set to <code>true</code>, the related properties have alsos to be set.
       defaultValue: false
       version:
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.report.client.proxy.username, com.openexchange.report.client.proxy.password
+      related: ["com.openexchange.report.client.proxy.username", "com.openexchange.report.client.proxy.password"]
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Proxy"]
     - key: com.openexchange.report.client.proxy.username
       description: |
@@ -53,6 +59,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.report.client.proxy.password
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Proxy", "Credential"]
     - key: com.openexchange.report.client.proxy.password
       description: |
@@ -63,6 +70,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.report.client.proxy.username
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Proxy", "Credential"]
     - key: com.openexchange.report.appsuite.fileStorage
       description: |
@@ -73,6 +81,7 @@ properties:
       configcascadeAware: false
       related:
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Serialization"]
     - key: com.openexchange.report.appsuite.maxChunkSize
       description: |
@@ -83,6 +92,7 @@ properties:
       configcascadeAware: false
       related:
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Serialization"]
     - key: com.openexchange.report.appsuite.maxThreadPoolSize
       description: |
@@ -93,6 +103,7 @@ properties:
       configcascadeAware: false
       related:
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Serialization", "Thread"]
     - key: com.openexchange.report.appsuite.threadPriority
       description: |
@@ -103,4 +114,5 @@ properties:
       configcascadeAware: false
       related:
       file: reportclient.properties
+      packageName: open-xchange-report-client
       tags: ["Report", "Serialization", "Thread"]

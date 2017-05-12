@@ -50,10 +50,9 @@
 package com.openexchange.userfeedback.mail.internal;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -64,6 +63,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.zip.GZIPOutputStream;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -74,7 +76,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.io.IOUtils;
+import javax.mail.util.ByteArrayDataSource;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -103,6 +105,7 @@ public class FeedbackMimeMessageUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackMimeMessageUtility.class);
     private static final String FILE_TYPE = ".csv";
+    private static final String COMPRESSED_TYPE = ".csv.gz";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("YYYY-MM-dd");
 
     /**
@@ -121,11 +124,11 @@ public class FeedbackMimeMessageUtility {
      * @return a MimeMessage with the gathered user feedback, which can be send
      * @throws OXException
      */
-    public static MimeMessage createMailMessage(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
-        return getNotEncryptedUnsignedMail(feedbackFile, filter, session);
+    public static MimeMessage createMailMessage(InputStream data, FeedbackMailFilter filter, Session session) throws OXException {
+        return getNotEncryptedUnsignedMail(data, filter, session);
     }
 
-    private static MimeMessage getNotEncryptedUnsignedMail(File feedbackFile, FeedbackMailFilter filter, Session session) throws OXException {
+    private static MimeMessage getNotEncryptedUnsignedMail(InputStream data, FeedbackMailFilter filter, Session session) throws OXException {
         MimeMessage email = new MimeMessage(session);
         LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
         String exportPrefix = configService.getProperty(UserFeedbackMailProperty.exportPrefix);
@@ -136,7 +139,11 @@ public class FeedbackMimeMessageUtility {
             synchronized (DATE_FORMAT) {
                 fileBuilder.append(DATE_FORMAT.format(new Date()));
             }
-            file = fileBuilder.append(FILE_TYPE).toString();
+            if (filter.isCompress()) {
+                file = fileBuilder.append(COMPRESSED_TYPE).toString();
+            } else {
+                file = fileBuilder.append(FILE_TYPE).toString();
+            }
         }
 
         try {
@@ -148,7 +155,13 @@ public class FeedbackMimeMessageUtility {
             messageBody.setText(filter.getBody());
             Multipart completeMailContent = new MimeMultipart(messageBody);
             MimeBodyPart attachment = new MimeBodyPart();
-            attachment.attachFile(feedbackFile);
+            DataSource source = null;
+            if (filter.isCompress()) {
+                source = new ByteArrayDataSource(compress(data), "application/gzip");
+            } else {
+                source = new ByteArrayDataSource(data, "text/plain");
+            }
+            attachment.setDataHandler(new DataHandler(source));
             attachment.setFileName(file);
             completeMailContent.addBodyPart(attachment);
             email.setContent(completeMailContent);
@@ -171,30 +184,41 @@ public class FeedbackMimeMessageUtility {
      * @return a file with all user feedback for the given filter
      * @throws OXException, when something during the export goes wrong
      */
-    public static File getFeedbackfile(FeedbackMailFilter filter) throws OXException {
+    public static InputStream getFeedbackFile(FeedbackMailFilter filter) throws OXException {
         FeedbackService feedbackService = Services.getService(FeedbackService.class);
         ExportResultConverter feedbackProvider = feedbackService.export(filter.getCtxGroup(), filter);
         ExportResult feedbackResult = feedbackProvider.get(ExportType.CSV);
         // get the csv file
-        File result = null;
-        try (InputStream stream = (InputStream) feedbackResult.getResult()) {
-            result = getFileFromStream(stream);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+        if (null != feedbackResult.getResult()) {
+            return (InputStream) feedbackResult.getResult();
         }
-        return result;
+        throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create();
     }
 
-    private static File getFileFromStream(InputStream stream) throws OXException, IOException {
-        File tempFile = File.createTempFile("export", FILE_TYPE);
-        try (FileOutputStream out = new FileOutputStream(tempFile)) {
-            IOUtils.copy(stream, out);
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+    /**
+     * Compress the given {@link InputStream} into a GZIPed {@link ByteArrayOutputStream}.
+     * 
+     * @param toCompress the stream that is supposed to be compressed
+     * @return 
+     * @throws OXException
+     */
+    public static byte[] compress(InputStream toCompress) throws OXException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            GZIPOutputStream compressedStream = new GZIPOutputStream(out);
+            try {
+                byte[] buffer = new byte[10240];
+                for (int i = 0; (i = toCompress.read(buffer)) != -1;) {
+                    compressedStream.write(buffer, 0, i);
+                }
+            } finally {
+                Streams.close(toCompress, compressedStream);
+            }
+            return out.toByteArray();
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            Streams.close(toCompress, out);
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return tempFile;
     }
 
     /**
@@ -224,6 +248,16 @@ public class FeedbackMimeMessageUtility {
         return validRecipients.toArray(new InternetAddress[validRecipients.size()]);
     }
 
+    /**
+     * Extract all valid addresses with corresponding PGPPublicKeys from a given filter. Also
+     * store all invalid addresses and all PGP-keys, that were not parsed, because of reasons.
+     * 
+     * @param filter the filter with all needed data
+     * @param invalidAddresses the list where all invalid addresses should be stored
+     * @param pgpFailedAddresses the list where all addresses are stored for which the PGP parsing failed
+     * @return a map with all addresses and corresponding {@link PGPPublicKey}
+     * @throws OXException
+     */
     public static Map<Address, PGPPublicKey> extractRecipientsForPgp(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses, List<InternetAddress> pgpFailedAddresses) throws OXException {
         Map<String, String> pgpKeys = filter.getPgpKeys();
         Map<Address, PGPPublicKey> result = new HashMap<>();
@@ -267,6 +301,13 @@ public class FeedbackMimeMessageUtility {
         }
     }
 
+    /**
+     * Parse the private key for PGP encryption/decryption from a file.
+     * 
+     * @param file path to the file
+     * @return a valid {@link PGPSecretKey}
+     * @throws OXException
+     */
     public static PGPSecretKey parsePrivateKey(String file) throws OXException {
         PGPKeyRingParser parser = Services.getService(PGPKeyRingParser.class);
         FileInputStream in = null;

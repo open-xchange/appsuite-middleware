@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -64,10 +62,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.json.JSONException;
 import org.jsoup.nodes.Document;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -101,7 +96,6 @@ import com.openexchange.test.TestInit;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class MailNotificationTest extends ShareTest {
 
     private FolderObject testFolder1;
@@ -117,7 +111,7 @@ public class MailNotificationTest extends ShareTest {
     DateFormat dateFormat = null;
     UserValues userValues;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         userValues = getClient().getValues();
@@ -312,6 +306,8 @@ public class MailNotificationTest extends ShareTest {
                 public void customize(UpdateInfostoreRequest request) {
                     if (notify) {
                         request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    } else {
+                        request.setNotifyPermissionEntities(null);
                     }
                 }
             });
@@ -328,6 +324,8 @@ public class MailNotificationTest extends ShareTest {
                 public void customize(UpdateRequest request) {
                     if (notify) {
                         request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    } else {
+                        request.setNotifyPermissionEntities(null);
                     }
                 }
             });
@@ -342,7 +340,7 @@ public class MailNotificationTest extends ShareTest {
         permission.setEntity(internalUserId);
         permission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         share(testFolder, file, permission, null, false);
-        List<Message> messages = getNoReplyClient().execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(0, messages.size());
     }
 
@@ -359,7 +357,7 @@ public class MailNotificationTest extends ShareTest {
     }
 
     private Message assertAndGetMessage() throws JSONException, MessagingException, OXException, IOException {
-        List<Message> messages = getNoReplyClient().execute(new GetMailsRequest()).getMessages();
+        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         return messages.get(0);
     }

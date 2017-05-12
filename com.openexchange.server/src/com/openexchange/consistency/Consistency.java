@@ -81,6 +81,7 @@ import com.openexchange.consistency.solver.ProblemSolver;
 import com.openexchange.consistency.solver.RecordSolver;
 import com.openexchange.consistency.solver.RemoveFileSolver;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
@@ -91,7 +92,6 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Provides the Business Logic for the consistency tool. Concrete subclasses must provide integration to the environment by implementing the
@@ -271,7 +271,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            LOG.debug("Deleting context_server2dbpool mapping for context {}", contextId);
+            LOG.debug("Deleting context_server2db_pool mapping for context {}", contextId);
             // delete context from context_server2db_pool
             stmt = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
             stmt.setInt(1, contextId);
@@ -292,6 +292,29 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.debug("Deleting context entry for context {}", contextId);
             stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
+            stmt.executeUpdate();
+            stmt.close();
+        } finally {
+            if (null != stmt) {
+                stmt.close();
+            }
+        }
+    }
+
+    /**
+     * Deletes the specified schema mapping from the 'context_server2db_pool'
+     * 
+     * @param configCon The configdb writeable {@link Connection}
+     * @param schema The schema name
+     * @throws SQLException if an SQL error is occurred
+     */
+    private void deleteSchemaFromConfigDB(final Connection configCon, final String schema) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            LOG.debug("Deleting context_server2db_pool mapping for schema {}", schema);
+            // delete schema from context_server2db_pool
+            stmt = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE db_schema=?");
+            stmt.setString(1, schema);
             stmt.executeUpdate();
             stmt.close();
         } finally {
@@ -337,13 +360,27 @@ public abstract class Consistency implements ConsistencyMBean {
                     schemaMap.put(schema, ctxs);
                 }
             }
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             stmt = null;
             for (final Entry<String, List<Integer>> schemaEntry : schemaMap.entrySet()) {
                 String schema = schemaEntry.getKey();
                 List<Integer> ctxs = schemaEntry.getValue();
                 Integer poolid = schemaPoolMap.get(schema);
-                poolCon = databaseService.get(poolid.intValue(), schema);
+                try {
+                    poolCon = databaseService.get(poolid.intValue(), schema);
+                } catch (OXException e) {
+                    Throwable cause = e.getCause();
+                    if (cause.getMessage() != null && cause.getMessage().contains("Unknown database")) {
+                        if (repair) {
+                            deleteSchemaFromConfigDB(confCon, schema);
+                            ret.add("Deleted inconsistent entry(ies) for schema " + schema + " from configdb.");
+                        } else {
+                            ret.add("The schema '" + schema + "' does not exist.'");
+                        }
+                        continue;
+                    }
+                    throw e;
+                }
                 String contextids = "";
                 for (final Integer c : ctxs) {
                     contextids += c + ",";
@@ -368,7 +405,7 @@ public abstract class Consistency implements ConsistencyMBean {
                         }
                     }
                 }
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
                 databaseService.back(poolid.intValue(), poolCon);
                 poolCon = null;
@@ -376,7 +413,7 @@ public abstract class Consistency implements ConsistencyMBean {
             if (ret.size() == 0 && repair) {
                 ret.add("there was nothing to repair");
             }
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             stmt = null;
             return ret;
         } catch (final SQLException e) {
@@ -388,7 +425,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (databaseService != null) {
                 if (null != confCon) {
                     databaseService.backReadOnly(confCon);

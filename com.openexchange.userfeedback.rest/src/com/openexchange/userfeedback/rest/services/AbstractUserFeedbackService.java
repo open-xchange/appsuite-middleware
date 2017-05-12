@@ -83,7 +83,7 @@ public abstract class AbstractUserFeedbackService extends JAXRSService {
         if (end < 0L) {
             badParams.add("end");
         }
-        if (end < start) {
+        if ((end != 0L) && (start != 0L) && (end < start)) {
             badParams.add("start");
             badParams.add("end");
         }

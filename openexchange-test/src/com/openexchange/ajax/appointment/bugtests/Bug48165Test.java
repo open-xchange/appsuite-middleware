@@ -71,12 +71,10 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class Bug48165Test extends AbstractAJAXSession {
 
-    private AJAXClient client2;
-    private CalendarTestManager ctm1;
     private CalendarTestManager ctm2;
-    private Appointment conflict;
-    private Appointment series;
-    private int nextYear;
+    private Appointment         conflict;
+    private Appointment         series;
+    private int                 nextYear;
 
     public Bug48165Test() {
         super();
@@ -88,16 +86,14 @@ public class Bug48165Test extends AbstractAJAXSession {
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
-        client2 = new AJAXClient(testContext.acquireUser());
-        ctm1 = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(client2);
+        ctm2 = new CalendarTestManager(getClient2());
 
         conflict = new Appointment();
         conflict.setTitle("Bug 48165 Test - conflict");
         conflict.setStartDate(TimeTools.D("03.08." + nextYear + " 11:00"));
         conflict.setEndDate(TimeTools.D("03.08." + nextYear + " 12:00"));
         conflict.setIgnoreConflicts(true);
-        conflict.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        conflict.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
 
         series = new Appointment();
         series.setTitle("Bug 48165 Test - series");
@@ -107,13 +103,13 @@ public class Bug48165Test extends AbstractAJAXSession {
         series.setInterval(1);
         series.setIgnoreConflicts(true);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        series.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(client2.getValues().getUserId()) });
+        series.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(getClient2().getValues().getUserId()) });
     }
 
     @Test
     public void testBug48165() throws Exception {
         ctm2.insert(conflict);
-        ctm1.insert(series);
+        catm.insert(series);
 
         Appointment exception = new Appointment();
         exception.setObjectID(series.getObjectID());
@@ -126,10 +122,10 @@ public class Bug48165Test extends AbstractAJAXSession {
         exception.setEndDate(TimeTools.D("03.08." + nextYear + " 12:00"));
         exception.setIgnoreConflicts(false);
 
-        ctm1.update(exception);
-        assertTrue("Expect conflicts.", ctm1.getLastResponse().hasConflicts());
+        catm.update(exception);
+        assertTrue("Expect conflicts.", catm.getLastResponse().hasConflicts());
         boolean found = false;
-        for (ConflictObject conflictObject : ctm1.getLastResponse().getConflicts()) {
+        for (ConflictObject conflictObject : catm.getLastResponse().getConflicts()) {
             if (conflictObject.getId() == conflict.getObjectID()) {
                 found = true;
                 break;
@@ -141,7 +137,6 @@ public class Bug48165Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm1.cleanUp();
             ctm2.cleanUp();
         } finally {
             super.tearDown();

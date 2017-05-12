@@ -11,66 +11,73 @@ properties:
       configcascadeAware: false
       related: 
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.web.de
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: true
       version: 
       reloadable: true
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.gmx.de
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: true
       version: 
       reloadable: true
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.msn.de
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncontacts
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncalendar
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suntasks
       description: |
-        Enable / Disable individual crawlers (true / false).
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
       defaultValue: false
       version: 
       reloadable: true
       configcascadeAware: false
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.web.de.autorunInterval
       description: |
@@ -82,6 +89,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.gmx.de.autorunInterval
       description: |
@@ -93,6 +101,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.msn.de.autorunInterval
       description: |
@@ -104,6 +113,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncontacts.autorunInterval
       description: |
@@ -115,6 +125,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suncalendar.autorunInterval
       description: |
@@ -126,6 +137,7 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]
     - key: com.openexchange.subscribe.crawler.suntasks.autorunInterval
       description: |
@@ -137,4 +149,5 @@ properties:
       configcascadeAware: true
       related:
       file: crawler.properties
+      packageName: open-xchange-subscribe
       tags: ["Crawler"]      

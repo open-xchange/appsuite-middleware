@@ -68,8 +68,6 @@ public class Bug13173Test extends AbstractAJAXSession {
 
     TimeZone timezone;
 
-    TaskTestManager ttm;
-
     ArrayList<Task> duplicates;
 
     public Bug13173Test() {
@@ -81,7 +79,6 @@ public class Bug13173Test extends AbstractAJAXSession {
         super.setUp();
         folderId = getClient().getValues().getPrivateTaskFolder();
         timezone = getClient().getValues().getTimeZone();
-        ttm = new TaskTestManager(getClient());
 
         testTask = new Task();
 

@@ -26,7 +26,7 @@ public class PermissionTest extends TaskTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Task taskObj = new Task();
         taskObj.setTitle("testInsertTaskInPrivateFolderWithoutPermission");
@@ -35,13 +35,13 @@ public class PermissionTest extends TaskTest {
         taskObj.setParentFolderID(parentFolderId);
 
         try {
-            insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            insertTask(getSecondWebConversation(), taskObj, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class PermissionTest extends TaskTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Task taskObj = new Task();
         taskObj.setTitle("testInsertTaskInPublicFolderWithoutPermission");
@@ -66,13 +66,13 @@ public class PermissionTest extends TaskTest {
         taskObj.setParentFolderID(parentFolderId);
 
         try {
-            insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            insertTask(getSecondWebConversation(), taskObj, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class PermissionTest extends TaskTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Task taskObj = new Task();
         taskObj.setTitle("testInsertTaskInPrivateFolderWithoutPermission");
@@ -96,17 +96,17 @@ public class PermissionTest extends TaskTest {
         taskObj.setEndDate(endTime);
         taskObj.setParentFolderID(parentFolderId);
 
-        final int taskObjectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int taskObjectId = insertTask(getWebConversation(), taskObj, getHostURI(), getLogin(), getPassword());
         taskObj.setObjectID(taskObjectId);
 
         try {
-            updateTask(getSecondWebConversation(), taskObj, taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            updateTask(getSecondWebConversation(), taskObj, taskObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class PermissionTest extends TaskTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Task taskObj = new Task();
         taskObj.setTitle("testUpdateTaskInPublicFolderWithoutPermission");
@@ -130,17 +130,17 @@ public class PermissionTest extends TaskTest {
         taskObj.setEndDate(endTime);
         taskObj.setParentFolderID(parentFolderId);
 
-        final int taskObjectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int taskObjectId = insertTask(getWebConversation(), taskObj, getHostURI(), getLogin(), getPassword());
         taskObj.setObjectID(taskObjectId);
 
         try {
-            updateTask(getSecondWebConversation(), taskObj, taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            updateTask(getSecondWebConversation(), taskObj, taskObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class PermissionTest extends TaskTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Task taskObj = new Task();
         taskObj.setTitle("testDeleteTaskInPrivateFolderWithoutPermission");
@@ -164,17 +164,17 @@ public class PermissionTest extends TaskTest {
         taskObj.setEndDate(endTime);
         taskObj.setParentFolderID(parentFolderId);
 
-        final int taskObjectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int taskObjectId = insertTask(getWebConversation(), taskObj, getHostURI(), getLogin(), getPassword());
         taskObj.setObjectID(taskObjectId);
 
         try {
-            deleteTask(getSecondWebConversation(), taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            deleteTask(getSecondWebConversation(), taskObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 
     @Test
@@ -190,7 +190,7 @@ public class PermissionTest extends TaskTest {
 
         folderObj.setPermissionsAsArray(permission);
 
-        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
         final Task taskObj = new Task();
         taskObj.setTitle("testDeleteTaskInPublicFolderWithoutPermission");
@@ -198,16 +198,16 @@ public class PermissionTest extends TaskTest {
         taskObj.setEndDate(endTime);
         taskObj.setParentFolderID(parentFolderId);
 
-        final int taskObjectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int taskObjectId = insertTask(getWebConversation(), taskObj, getHostURI(), getLogin(), getPassword());
         taskObj.setObjectID(taskObjectId);
 
         try {
-            deleteTask(getSecondWebConversation(), taskObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword(), context);
+            deleteTask(getSecondWebConversation(), taskObjectId, parentFolderId, getHostURI(), getSecondLogin(), getPassword());
             fail("permission exception expected!");
         } catch (final OXException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
         }
 
-        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostURI(), getLogin(), getPassword());
     }
 }

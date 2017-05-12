@@ -820,7 +820,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     private AuthenticationFailureHandlerResult handleConnectFailure(OXException e, MailConfig mailConfig) {
-        if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+        if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) && !OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
             return AuthenticationFailureHandlerResult.createErrorResult(e);
         }
 
@@ -833,6 +833,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     return AuthenticationFailureHandlerResult.createErrorResult(x);
                 }
             }
+        }
+
+        if (OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
+            return AuthenticationFailureHandlerResult.createErrorResult(e);
         }
 
         // Authentication failed... Check for OAuth-based authentication

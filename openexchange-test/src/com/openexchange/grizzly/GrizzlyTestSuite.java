@@ -60,7 +60,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
-    ProcessingTest.class,
     GetWithBodyTest.class,
     MaxHttpHeaderSizeTest.class,
     OmitUserInputTest.class,

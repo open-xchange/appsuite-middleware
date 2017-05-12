@@ -393,7 +393,7 @@ public final class MailMessageParser {
         if (null != mimeFilter && mimeFilter.ignorable(lcct, mailPart)) {
             return;
         }
-        final String fileName = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
+        final String fileName = getFileName(mailPart.getFileName(), contentType, getSequenceId(prefix, partCount), lcct);
         /*
          * Parse part dependent on its MIME type
          */
@@ -1010,8 +1010,6 @@ public final class MailMessageParser {
         handler.handleHeaders(headersSize, headersSize > 0 ? mail.getHeadersIterator() : EMPTY_ITER);
     }
 
-    private static final String PREFIX = "Part_";
-
     /**
      * Generates an appropriate filename from either specified <code>rawFileName</code> if not <code>null</code> or generates a filename
      * composed with <code>"Part_" + sequenceId</code>
@@ -1022,10 +1020,26 @@ public final class MailMessageParser {
      * @return An appropriate filename
      */
     public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
+        return getFileName(rawFileName, null, sequenceId, baseMimeType);
+    }
+
+    private static final String PREFIX = "Part_";
+
+    /**
+     * Generates an appropriate filename from either specified <code>rawFileName</code> if not <code>null</code> or generates a filename
+     * composed with <code>"Part_" + sequenceId</code>
+     *
+     * @param rawFileName The raw filename obtained from mail part
+     * @param contentType The Content-Type obtained from mail part
+     * @param sequenceId The part's sequence ID
+     * @param baseMimeType The base MIME type to look up an appropriate file extension, if <code>rawFileName</code> is <code>null</code>
+     * @return An appropriate filename
+     */
+    private static String getFileName(String rawFileName, ContentType contentType, String sequenceId, String baseMimeType) {
         String filename = rawFileName;
-        if ((filename == null) || com.openexchange.java.Strings.isEmpty(filename)) {
-            final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
+        if (Strings.isEmpty(filename)) {
+            List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
+            StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -1034,6 +1048,13 @@ public final class MailMessageParser {
             filename = sb.toString();
         } else {
             filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
+            if (filename.indexOf('.') < 0) {
+                // No file extension given. Check if "name" parameter from Content-Type provides a better "alternative" value
+                String name = null == contentType ? null : contentType.getNameParameter();
+                if (Strings.isNotEmpty(name) && name.indexOf('.') > 0) {
+                    filename = MimeMessageUtility.decodeMultiEncodedHeader(name);
+                }
+            }
         }
         return filename;
     }

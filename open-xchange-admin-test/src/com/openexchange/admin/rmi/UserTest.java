@@ -69,7 +69,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import org.junit.AfterClass;
+import java.util.Random;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -83,6 +84,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -92,22 +94,22 @@ import com.openexchange.java.util.TimeZones;
  */
 public class UserTest extends AbstractTest {
 
-    public final static String NAMED_ACCESS_COMBINATION_BASIC = "all";
+    public final String NAMED_ACCESS_COMBINATION_BASIC = "all";
     // list of chars that must be valid
     //    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
-    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    protected final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     // global setting for stored password
-    protected static final String pass = "foo-user-pass";
-
-    protected static OXUserInterface getUserClient() throws Exception {
+    protected final String pass = "foo-user-pass";
+  
+    protected OXUserInterface getUserClient() throws Exception {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
-    
-    private static List<User> toDeleteUsers = new ArrayList<User>();
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    private List<User> toDeleteUsers = new ArrayList<User>();
+
+    @After
+    public void tearDown() throws Exception {
         final OXUserInterface oxu = getUserClient();
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
@@ -117,7 +119,7 @@ public class UserTest extends AbstractTest {
             oxu.delete(ctx, userArray, null, cred);
         }
     }
-    
+
     private void rememberToDeleteUser(User createduser) {
         if (toDeleteUsers != null) {
             toDeleteUsers.add(createduser);
@@ -169,8 +171,6 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data for added user");
         }
     }
-
-    
 
     private User id(User createduser) {
         User user = new User();
@@ -245,7 +245,7 @@ public class UserTest extends AbstractTest {
         }
 
     }
-    
+
     private void compareUserMandatory(User a, User b) {
 
         System.out.println("USERA" + a.toString());
@@ -258,12 +258,12 @@ public class UserTest extends AbstractTest {
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
 
     }
-    
+
     @Test
     public void testCreateUserWithWrongDriveFoldersMode() throws Exception {
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
-        
+
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
         final User user = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
@@ -419,7 +419,7 @@ public class UserTest extends AbstractTest {
             // Everything is fine. Setting publicFolderEditable should be denied. See bugs 18866, 20369, 20635.
             access.setPublicFolderEditable(false);
             createduser = oxu.create(ctx, usr, access, cred);
-            
+
         }
         rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
@@ -740,6 +740,113 @@ public class UserTest extends AbstractTest {
     }
 
     @Test
+    public void testChangeAlias() throws Exception {
+        // change alias
+
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
+            //verify data
+            compareUser(createduser, srv_loaded);
+        } else {
+            fail("Expected to get user data");
+        }
+
+        // now change data
+        String alias = generateRandomAlias(44);
+        srv_loaded = changeUserAlias(srv_loaded, alias);
+
+        // submit changes
+        oxu.change(ctx, srv_loaded, cred);
+
+        // load again
+        final User user_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
+
+        // remove deleted dynamic attribute for verification
+        srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
+        if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
+            //verify data
+            compareUser(srv_loaded, user_changed_loaded);
+        } else {
+            fail("Expected to get correct changed user data");
+        }
+    }
+
+    @Test
+    public void testChangeAliasTooLong() throws Exception {
+        // Try to change alias with too long name (Bug 52763) 
+
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
+        rememberToDeleteUser(createduser);
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
+            //verify data
+            compareUser(createduser, srv_loaded);
+        } else {
+            fail("Expected to get user data");
+        }
+
+        // now change data
+        String alias = generateRandomAlias(4096);
+        srv_loaded = changeUserAlias(srv_loaded, alias);
+
+        // submit changes, should throw StorageException
+        boolean canary = true;
+        try {
+            oxu.change(ctx, srv_loaded, cred);
+        } catch (StorageException e) {
+            canary = false;
+        }
+
+        // Check if exception was thrown
+        if (canary) {
+            fail("Expected an Storage Exception");
+        }
+
+        // remove flawed alias
+        srv_loaded.removeAlias(alias);
+
+        // no assertion needed since no data changed on server
+        // check if you can still change alias (Bug 52763)
+        alias = generateRandomAlias(44);
+        srv_loaded = changeUserAlias(srv_loaded, alias);
+
+        // submit changes
+        oxu.change(ctx, srv_loaded, cred);
+
+        // load again
+        final User user_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
+
+        // remove deleted dynamic attribute for verification
+        srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
+        if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
+            //verify data
+            compareUser(srv_loaded, user_changed_loaded);
+        } else {
+            fail("Expected to get correct changed user data");
+        }
+    }
+
+    @Test
     public void testChangeSingleAttributeNull() throws Exception {
         // set single values to null in the user object and then call change, what happens?
 
@@ -956,6 +1063,7 @@ public class UserTest extends AbstractTest {
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestore_name");
         notallowed.add("setFilestoreOwner");
+        notallowed.add("setPrimaryAccountName");
         return notallowed;
     }
 
@@ -1008,6 +1116,11 @@ public class UserTest extends AbstractTest {
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestoreOwner");
         notallowed.add("setFilestore_name");
+        
+        notallowed.add("setPrimaryAccountName");
+        notallowed.add("setDriveFolderMode");
+        
+        
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
 
@@ -1021,7 +1134,7 @@ public class UserTest extends AbstractTest {
                     } else if (map_obj.getMethodName().toLowerCase().contains("mail")) {
                         map_obj.getSetter().invoke(tmp_usr, getChangedEmailAddress(oldvalue, "_singlechange"));
                     } else {
-                        map_obj.getSetter().invoke(tmp_usr, oldvalue + "-singlechange");
+                        map_obj.getSetter().invoke(tmp_usr, oldvalue == null ? "singlechanged" : oldvalue + "-singlechange");
                     }
                     //System.out.println("Setting String via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                 }
@@ -1438,8 +1551,10 @@ public class UserTest extends AbstractTest {
         usr.setEmail2("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail3("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
 
-        usr.setFilestoreId(null);
-        usr.setFilestore_name(null);
+        if (context != null) {
+            usr.setFilestoreId(context.getFilestoreId());
+            usr.setFilestore_name(context.getFilestore_name());
+        }
 
         final HashSet<String> aliase = new HashSet<String>();
         aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
@@ -1559,16 +1674,9 @@ public class UserTest extends AbstractTest {
         return usr;
     }
 
-    public static User getTestUserObject() {
+    public User getTestUserObject() {
         return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange", null);
     }
-
-    //    private static int getContextID() throws Exception {
-    //        final Credentials cred = DummyCredentials();
-    //        final Context ctx = ContextTest.getTestContextObject(ContextTest.createNewContextID(cred), 10);
-    //        final int id = ContextTest.addContext(ctx, getRMIHostUrl(), cred);
-    //        return id;
-    //    }
 
     public static void compareUser(final User a, final User b) {
         System.out.println("USERA" + a.toString());
@@ -1715,11 +1823,11 @@ public class UserTest extends AbstractTest {
         final Hashtable<String, OXCommonExtension> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
-            //          for (int i = 0; i < aexts.size(); i++) {
-            //          final OXCommonExtensionInterface aext = aexts.get(i);
-            //          final OXCommonExtensionInterface bext = bexts.get(i);
-            //          assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-            //          }
+            for (int i = 0; i < aexts.size(); i++) {
+                final OXCommonExtensionInterface aext = aexts.get(i);
+                final OXCommonExtensionInterface bext = bexts.get(i);
+                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+            }
         }
 
         assertEquals("User Attributes not equal", a.getUserAttributes(), b.getUserAttributes());
@@ -1741,16 +1849,36 @@ public class UserTest extends AbstractTest {
         assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
     }
 
-    public static User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
+    public User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
         // create new user
         final OXUserInterface oxu = getUserClient();
         return oxu.create(ctx, usr, access, DummyCredentials());
     }
 
-    //Uncomment this to use another context that 1
-    //    public static Context getTestContextObject(final Credentials cred) {
-    //        return getTestContextObject(1, 50);
-    //    }
+    private String generateRandomAlias(long length) {
+        String mail = "@test.org";
+        StringBuffer buf = new StringBuffer();
+        Random r = new Random();
+        for (long l = 0; l <= (length - mail.length()); l++) {
+            buf.append((char) (r.nextInt(26) + 'a'));
+        }
+        buf.append(mail);
+        return buf.toString();
+    }
+
+    private User changeUserAlias(final User usr, String alias) throws CloneNotSupportedException {
+        final User retval = (User) usr.clone();
+
+        // Change alias and remove attributes to meet later compare action
+        retval.addAlias(alias);
+        retval.setFilestoreId(null);
+        retval.setPasswordMech(null);
+        retval.setUserAttribute("com.openexchange.test", "simpleValue", usr.getUserAttribute("com.openexchange.test", "simpleValue") + change_suffix);
+        retval.setUserAttribute("com.openexchange.test", "newValue", change_suffix);
+        retval.setUserAttribute("com.openexchange.test", "deleteMe", null);
+
+        return retval;
+    }
 
     private User createChangeUserData(final User usr) throws CloneNotSupportedException, URISyntaxException {
 

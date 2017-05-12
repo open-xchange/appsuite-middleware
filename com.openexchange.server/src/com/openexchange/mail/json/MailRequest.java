@@ -231,8 +231,9 @@ public final class MailRequest {
         } else if (parameter.equals("list")) {
             l = new ArrayList<Column>(Arrays.asList(AbstractMailAction.COLUMNS_LIST_ALIAS));
         } else {
-            int userId = requestData.getSession().getUserId();
-            int contextId = requestData.getSession().getContextId();
+            ServerSession session = requestData.getSession();
+            int userId = session.getUserId();
+            int contextId = session.getContextId();
 
             String[] sa = SPLIT.split(parameter, 0);
             l = new ArrayList<Column>(sa.length);

@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.tests;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -132,15 +133,18 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
     protected MailFilterAPI mailFilterAPI;
 
+    private final List<Integer> rulesToDelete = new ArrayList<>();
+
     /**
      * Initialises a new {@link AbstractMailFilterTest}.
-     * 
+     *
      * @param name The name of the test case
      */
     public AbstractMailFilterTest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -206,23 +210,31 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonWriterRegistry.addWriter(MatchType.user, new UserComparisonWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.under, new UnderJSONWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.over, new OverJSONWriterImpl());
-
-        // Start fresh
-        mailFilterAPI.purge();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            mailFilterAPI.purge();
+            for(Integer id: rulesToDelete){
+                try {
+                    mailFilterAPI.deleteRule(id);
+                } catch (Exception e){
+                    // ignore
+                }
+            }
         } finally {
             super.tearDown();
         }
     }
 
+    protected void rememberRule(Integer ruleId){
+        rulesToDelete.add(ruleId);
+    }
+
     /**
      * Gets all rules and asserts with the expectedRules list
-     * 
+     *
      * @param expectedRules The expected rules list
      * @throws Exception if getting all rules fails
      */
@@ -241,7 +253,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
     /**
      * Asserts that the expected {@link Rule} is equal the actual {@link Rule}
-     * 
+     *
      * @param expected The expected {@link Rule}
      * @param actual The actual {@link Rule}
      */
@@ -258,7 +270,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
     /**
      * Asserts that the expected {@link Action} is equal to actual {@link Action}
-     * 
+     *
      * @param expected the expected {@link Action}
      * @param actual the actual {@link Action}
      */
@@ -272,7 +284,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
     /**
      * Asserts that the expected {@link AbstractTest} is equal the actual {@link AbstractTest}
-     * 
+     *
      * @param expected The expected {@link AbstractTest}
      * @param actual The actual {@link AbstractTest}
      */

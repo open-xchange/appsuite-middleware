@@ -237,10 +237,26 @@ public class GuestClient extends AJAXClient {
     public GuestClient(ClientConfig config) throws Exception {
         super(getOrCreateSession(config), config.mustLogout);
         prepareClient(getHttpClient(), config.username, config.password);
+        Assert.assertNotNull("Share-URL not set", config.url);
         setHostname(new URI(config.url).getHost());
         setProtocol(new URI(config.url).getScheme());
-        shareResponse = Executor.execute(this, new ResolveShareRequest(config.url, config.failOnNonRedirect), getProtocol(), getHostname());
-        if (null != shareResponse.getLoginType()) {
+        /*
+         * resolve share
+         */
+        ResolveShareResponse resolveShareResponse = Executor.execute(this, new ResolveShareRequest(config.url, config.failOnNonRedirect), getProtocol(), getHostname());
+        if (null != resolveShareResponse.getToken()) {
+            /*
+             * redeem message details via token & continue
+             */
+            RedeemResponse redeemResponse = execute(new RedeemRequest(resolveShareResponse.getToken(), true));
+            shareResponse = new ResolveShareResponse(resolveShareResponse, redeemResponse);
+        } else {
+            shareResponse = resolveShareResponse;
+        }
+        /*
+         * continue share login as indicated by response
+         */
+        if (null != shareResponse.getLoginType() && false == "message".equals(shareResponse.getLoginType())) {
             loginResponse = login(shareResponse, config);
             getSession().setId(loginResponse.getSessionId());
             if (false == loginResponse.hasError()) {
@@ -259,7 +275,6 @@ public class GuestClient extends AJAXClient {
             module = shareResponse.getModule();
             folder = shareResponse.getFolder();
             item = shareResponse.getItem();
-            shareResponse.getSessionID();
         }
     }
 
@@ -343,17 +358,6 @@ public class GuestClient extends AJAXClient {
             loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
         } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
-        } else if ("message".equals(shareResponse.getLoginType()) && null != shareResponse.getToken()) {
-            RedeemRequest req = new RedeemRequest(shareResponse.getToken(), true);
-            RedeemResponse resp = execute(req);
-            if ("guest".equals(resp.getLoginType()) || "guest_password".equals(resp.getLoginType())) {
-                GuestCredentials credentials = new GuestCredentials(config.username, config.password);
-                loginRequest = LoginRequest.createGuestLoginRequest(resp.getShare(), resp.getTarget(), credentials, config.client, false);
-            } else if ("anonymous_password".equals(resp.getLoginType())) {
-                loginRequest = LoginRequest.createAnonymousLoginRequest(resp.getShare(), resp.getTarget(), config.password, false);
-            } else {
-                Assert.fail("unknown login type: " + resp.getLoginType());
-            }
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());
         }

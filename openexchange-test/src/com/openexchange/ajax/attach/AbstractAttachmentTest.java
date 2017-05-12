@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.attach;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -85,6 +82,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
     protected int moduleId = -1;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -249,12 +247,8 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
     }
 
     protected void doMultiple() throws Exception {
-        AttachmentImpl attachment = new AttachmentImpl();
-        int id = atm.attach(attachment, testFile.getName(), new FileInputStream(testFile), null);
-        AbstractAJAXResponse resp = atm.getLastResponse();
-        assertFalse(resp.hasError());
-
-        AttachmentMetadata reloaded = atm.get(folderId, attachedId, attachment.getModuleId(), id);
+        int id = upload();
+        AttachmentMetadata reloaded = atm.get(folderId, attachedId, moduleId, id);
         assertEquals(reloaded.getFilename(), testFile.getName());
     }
 

@@ -109,9 +109,13 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
      */
     protected void parseZone(List<Object> argList, JSONObject jsonObject, ServerSession session, String commandName) throws OXException {
         if (jsonObject.hasAndNotNull(DateTestField.zone.name())) {
-            argList.add(ArgumentUtil.createTagArgument("zone"));
             String zone = CommandParserJSONUtil.getString(jsonObject, DateTestField.zone.name(), commandName);
-            argList.add(CommandParserJSONUtil.stringToList(zone));
+            if ("original".equals(zone)) {
+                argList.add(ORIGINAL_ZONE_TAG);
+            } else {
+                argList.add(ZONE_TAG);
+                argList.add(CommandParserJSONUtil.stringToList(zone));
+            }
         } else {
             // add the zone tag
             if (session != null && session.getUser().getTimeZone() != null) {
@@ -137,43 +141,31 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         final String comparisonTag = CommandParserJSONUtil.getString(jsonObject, DateTestField.comparison.name(), commandName);
         String normalizedMatcher = MatchType.getNormalName(comparisonTag);
         if (normalizedMatcher != null) {
-            Comparison comparison = Comparison.valueOf(normalizedMatcher);
+            addComparatorToArgumentList(argList, commandName, normalizedMatcher);
+            return true;
+        }
 
-            switch (comparison) {
-                case ge:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("ge"));
-                    break;
-                case is:
-                    argList.add(ArgumentUtil.createTagArgument(comparison.name()));
-                    break;
-                case le:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("le"));
-                    break;
-                default:
-                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
-            }
-           return true;
-        } else {
-            Comparison comparison = Comparison.valueOf(comparisonTag);
+        addComparatorToArgumentList(argList, commandName, comparisonTag);
+        return false;
+    }
 
-            switch (comparison) {
-                case ge:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("ge"));
-                    break;
-                case is:
-                    argList.add(ArgumentUtil.createTagArgument(comparison.name()));
-                    break;
-                case le:
-                    argList.add(ArgumentUtil.createTagArgument("value"));
-                    argList.add(CommandParserJSONUtil.stringToList("le"));
-                    break;
-                default:
-                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
-            }
-            return false;
+    private void addComparatorToArgumentList(List<Object> argList, String commandName, final String comparisonTag) throws OXException {
+        Comparison comparison = Comparison.valueOf(comparisonTag);
+
+        switch (comparison) {
+            case ge:
+                argList.add(ArgumentUtil.createTagArgument("value"));
+                argList.add(CommandParserJSONUtil.stringToList("ge"));
+                break;
+            case is:
+                argList.add(ArgumentUtil.createTagArgument(comparison.name()));
+                break;
+            case le:
+                argList.add(ArgumentUtil.createTagArgument("value"));
+                argList.add(CommandParserJSONUtil.stringToList("le"));
+                break;
+            default:
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(commandName + " rule: The comparison \"" + comparison + "\" is not a valid comparison");
         }
     }
 
@@ -203,7 +195,12 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
     protected void parseDatePart(List<Object> argList, JSONObject jsonObject, String commandName) throws OXException, JSONException {
         // Parse the date part
         final String datepart = CommandParserJSONUtil.getString(jsonObject, DateTestField.datepart.name(), commandName);
-        DatePart datePart = DatePart.valueOf(datepart);
+        DatePart datePart;
+        try {
+            datePart = DatePart.valueOf(datepart);
+        } catch (IllegalArgumentException ex) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Date rule: The datepart \"" + datepart + "\" is not a valid datepart");
+        }
         switch (datePart) {
             case date:
                 argList.add(CommandParserJSONUtil.stringToList(datepart));
@@ -233,13 +230,12 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
     protected void parseComparisonTag(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
 
-
         String matchType = command.getMatchType();
         final String comparison; // = command.getMatchType().substring(1);
         if (matchType == null) {
             comparison = MatchType.is.name();
         } else {
-            if(transformToNotMatcher){
+            if (transformToNotMatcher) {
                 String notMatchType = MatchType.getNotNameForArgumentName(matchType);
                 comparison = notMatchType;
             } else {
@@ -248,9 +244,9 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         }
 
         if (MatchType.value.name().equals(comparison) || MatchType.value.getNotName().equals(comparison)) {
-            int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
+            int compPos = command.getArgumentPosition(ArgumentUtil.createTagArgument("value")) + 1;
             String resultMatchTtype = ((List<String>) command.getArguments().get(compPos)).get(0);
-            if(transformToNotMatcher){
+            if (transformToNotMatcher) {
                 resultMatchTtype = MatchType.valueOf(resultMatchTtype).getNotName();
             }
             jsonObject.put(DateTestField.comparison.name(), resultMatchTtype);
@@ -260,6 +256,7 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
     }
 
     private static final TagArgument ZONE_TAG = ArgumentUtil.createTagArgument("zone");
+    private static final TagArgument ORIGINAL_ZONE_TAG = ArgumentUtil.createTagArgument("originalzone");
 
     /**
      * Parses the zone tag
@@ -273,12 +270,14 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
             Object arg = command.getArguments().get(x);
             if (ZONE_TAG.equals(arg)) {
                 Object zoneArgument = command.getArguments().get(x + 1);
-                if(zoneArgument instanceof List<?>){
+                if (zoneArgument instanceof List<?>) {
                     jsonObject.put(DateTestField.zone.name(), ((List<?>) zoneArgument).get(0));
                 } else {
                     jsonObject.put(DateTestField.zone.name(), zoneArgument);
                 }
                 return;
+            } else if (ORIGINAL_ZONE_TAG.equals(arg)) {
+                jsonObject.put(DateTestField.zone.name(), "original");
             }
         }
     }
@@ -310,8 +309,12 @@ abstract class AbstractDateTestCommandParser extends AbstractTestCommandParser {
         final List<String> value = (List<String>) command.getArguments().get(command.getArguments().size() - 2);
         String datepart = value.get(0);
         jsonObject.put(DateTestField.datepart.name(), datepart);
-
-        DatePart datePart = DatePart.valueOf(datepart);
+        DatePart datePart;
+        try {
+             datePart = DatePart.valueOf(datepart);
+        } catch(IllegalArgumentException ex) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Date rule: The datepart \"" + datepart + "\" is not a valid datepart");
+        }
         int index = command.getArguments().size() - 1;
         switch (datePart) {
             case date:

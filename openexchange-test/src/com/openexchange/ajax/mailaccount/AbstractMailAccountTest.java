@@ -51,14 +51,14 @@ package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link AbstractMailAccountTest}
@@ -95,32 +95,32 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         return mailAccountDescription;
     }
 
-    protected void createMailAccount() throws OXException, IOException, SAXException, JSONException, OXException {
+    protected void createMailAccount() throws OXException, IOException, JSONException, OXException {
         mailAccountDescription = createMailAccountObject();
 
-        updateMailAccountDescription(mailAccountDescription, MailConfig.getProperty(MailConfig.Property.LOGIN2));
+        updateMailAccountDescription(mailAccountDescription, testUser2);
         final MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         response.fillObject(mailAccountDescription);
 
     }
 
-    protected void updateMailAccountDescription(final MailAccountDescription mailAccountDescription, String user) {
-        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
-        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
+    protected void updateMailAccountDescription(final MailAccountDescription mailAccountDescription, TestUser user) {
+        mailAccountDescription.setMailServer(AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
+        mailAccountDescription.setMailPort(Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.MAIL_PORT)));
 
         mailAccountDescription.setMailProtocol("imap");
         mailAccountDescription.setMailSecure(false);
-        mailAccountDescription.setLogin(user);
-        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
-        mailAccountDescription.setTransportServer(MailConfig.getProperty(MailConfig.Property.SERVER));
+        mailAccountDescription.setLogin(user.getLogin());
+        mailAccountDescription.setPassword(user.getPassword());
+        mailAccountDescription.setTransportServer(AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
         mailAccountDescription.setTransportPort(25);
         mailAccountDescription.setTransportProtocol("smtp");
-        mailAccountDescription.setTransportLogin(user);
-        mailAccountDescription.setTransportPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
+        mailAccountDescription.setTransportLogin(user.getLogin());
+        mailAccountDescription.setTransportPassword(user.getPassword());
         mailAccountDescription.setTransportSecure(false);
     }
 
-    protected void deleteMailAccount() throws OXException, IOException, SAXException, JSONException {
+    protected void deleteMailAccount() throws OXException, IOException, JSONException {
         getClient().execute(new MailAccountDeleteRequest(mailAccountDescription.getId()));
     }
 }

@@ -55,6 +55,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 import com.openexchange.xing.User;
 import com.openexchange.xing.XingAPI;
@@ -90,7 +91,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      */
     public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
         super(session);
-        verifyAccount(oauthAccount);
+        verifyAccount(oauthAccount, OXScope.contacts_ro);
         setOAuthAccount(oauthAccount);
     }
 

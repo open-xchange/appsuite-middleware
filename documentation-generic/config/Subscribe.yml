@@ -11,6 +11,7 @@ properties:
       configcascadeAware: true
       related: 
       file: subscribe.properties
+      packageName: open-xchange-core
       tags: ["Subscribe"]
     - key: com.openexchange.subscribe.google.calendar.pageSize
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: false
       related: 
       file: googlesubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Google", "Calendar", "Subscribe"]
     - key: com.openexchange.subscribe.google.contact.pageSize
       description: |
@@ -31,6 +33,7 @@ properties:
       configcascadeAware: false
       related: 
       file: googlesubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Google", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.google.calendar.autorunInterval
       description: |
@@ -41,6 +44,7 @@ properties:
       configcascadeAware: true
       related: 
       file: googlesubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Google", "Calendar", "Subscribe"]
     - key: com.openexchange.subscribe.google.contact.autorunInterval
       description: |
@@ -51,6 +55,7 @@ properties:
       configcascadeAware: true
       related: 
       file: googlesubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Google", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.linkedin
       description: |
@@ -61,6 +66,7 @@ properties:
       configcascadeAware: true
       related: 
       file: linkedinsubscribe.properties
+      packageName: open-xchange-linkedin
       tags: ["LinkedIn", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.linkedin.autorunInterval
       description: |
@@ -71,6 +77,7 @@ properties:
       configcascadeAware: true
       related: 
       file: linkedinsubscribe.properties
+      packageName: open-xchange-linkedin
       tags: ["LinkedIn", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.mslive.contact.autorunInterval
       description: |
@@ -81,24 +88,29 @@ properties:
       configcascadeAware: true
       related: 
       file: mslivesubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["MS Live Connect", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.contacts.http
-      description:
+      description: |
+        Enables / disables the microformats contacts subscription.
       defaultValue: true
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: microformatSubscription.properties
+      packageName: open-xchange-subscribe
       tags: ["Microformats", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.infostore.http
-      description:
+      description: |
+        Enables / disables the microformats infostore subscription.
       defaultValue: true
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: microformatSubscription.properties
+      packageName: open-xchange-subscribe
       tags: ["Microformats", "Infostore", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.contacts.http.autorunInterval
       description: |
@@ -109,6 +121,7 @@ properties:
       configcascadeAware: true
       related: 
       file: microformatSubscription.properties
+      packageName: open-xchange-subscribe
       tags: ["Microformats", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.infostore.http.autorunInterval
       description: |
@@ -119,11 +132,12 @@ properties:
       configcascadeAware: true
       related: 
       file: microformatSubscription.properties
+      packageName: open-xchange-subscribe
       tags: ["Microformats", "Infostore", "Subscribe"]
     - key: com.openexchange.subscribe.microformats.allowedHosts
       description: |
         Optionally specifies the list of accepted host names allowed being subscribed.
-        If property is empty, there is no restriction for such subscriptions.
+        If left empty, there is no restriction for such subscriptions.
         Otherwise non-matching host names are rejected. 
       defaultValue:
       version:
@@ -131,17 +145,19 @@ properties:
       configcascadeAware: false
       related: 
       file: microformatSubscription.properties
+      packageName: open-xchange-subscribe
       tags: ["Microformats", "Subscribe", "White List"]
     - key: com.openexchange.subscribe.microformats.createModifyEnabled
       description: |
         Enabled/disables the possibility to create/modify subscriptions.
-        Default is false, because the new sharing module is supposed to be used and this module is considered as deprecated.
+        Should be set to false, because the new sharing module is supposed to be used and this module is considered as deprecated.
       defaultValue: false
       version:
       reloadable: true
       configcascadeAware: false
       related: 
       file: microformatSubscription.properties
+      packageName: open-xchange-subscribe
       tags: ["Microformats", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.yahoo
       description: |
@@ -152,6 +168,7 @@ properties:
       configcascadeAware: true
       related: 
       file: yahoosubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Yahoo", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.yahoo.autorunInterval
       description: |
@@ -162,6 +179,7 @@ properties:
       configcascadeAware: true
       related: 
       file: yahoosubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Yahoo", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.xing
       description: |
@@ -172,6 +190,7 @@ properties:
       configcascadeAware: true
       related: 
       file: xingsubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Xing", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.xing.autorunInterval
       description: |
@@ -182,4 +201,5 @@ properties:
       configcascadeAware: true
       related: 
       file: xingsubscribe.properties
+      packageName: open-xchange-subscribe
       tags: ["Xing", "Contact", "Subscribe"]

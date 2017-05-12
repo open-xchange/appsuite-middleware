@@ -101,11 +101,27 @@ public class MimeMessageUtilityTest {
     }
 
     @Test
+    public void testForBug53100() {
+       String s = "=?CP-850?B?U3BhbV9JTVNWQTpOb24gcmVjYXBpdGFiaWxlOiBTcGE=?==?CP-850?B?bV9JTVNWQTo4NTI2?=";
+       s = MimeMessageUtility.decodeEnvelopeSubject(s);
+
+       assertEquals("Subject nor properly unfolded/decoded.", "Spam_IMSVA:Non recapitabile: Spam_IMSVA:8526", s);
+    }
+
+    @Test
+    public void testForBug53023() {
+       String s = "=?utf-8?B?TGEgdHVhIExpYmVybyBNYWlsIFBsdXMgc3RhIHBlciBlc3M=?==?utf-8?B?ZXJlIHJpbm5vdmF0YQ==?=";
+       s = MimeMessageUtility.decodeEnvelopeSubject(s);
+
+       assertEquals("Subject nor properly unfolded/decoded.", "La tua Libero Mail Plus sta per essere rinnovata", s);
+    }
+
+    @Test
     public void testForBug52314() {
        String s = "=?utf-8?B?44CQ6YeN6KaB44CR5oqA6KGT5bGANOaciDHml6XjgYvjgonj?= =?utf-8?B?ga7pgYvnlKjlpInmm7TvvIjmp4vpgKDmlLnpnanvvIk=?=";
        s = MimeMessageUtility.decodeEnvelopeSubject(s);
 
-       assertTrue("Subject nor properly unfolded/decoded.", s.indexOf(MessageUtility.UNKNOWN) < 0);
+       assertTrue("Subject nor properly unfolded/decoded", s.indexOf(MessageUtility.UNKNOWN) < 0);
     }
 
          @Test

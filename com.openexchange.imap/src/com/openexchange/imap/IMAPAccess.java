@@ -1294,6 +1294,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         imapProps.put("mail.imap.issueNoopToKeepConnectionAlive", "false");
         /*
+         * Whether to extend (default) or to overwrite pre-login capabilities
+         */
+        if (config.getIMAPProperties().isOverwritePreLoginCapabilities()) {            
+            imapProps.put("mail.imap.overwriteprelogincapabilities", "true");
+        }
+        /*
          * Enable/disable audit log
          */
         if (config.getIMAPProperties().isAuditLogEnabled()) {

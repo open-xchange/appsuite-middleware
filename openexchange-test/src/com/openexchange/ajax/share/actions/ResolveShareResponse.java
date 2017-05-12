@@ -77,6 +77,8 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     private final Map<String, String> parameters;
     private final int statusCode;
 
+    private RedeemResponse redeemResponse;
+
     /**
      * Initializes a new {@link ResolveShareResponse}.
      *
@@ -91,15 +93,44 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
         this.path = path;
     }
 
+    /**
+     * Initializes a new {@link ResolveShareResponse} based on a previous token redemption.
+     *
+     * @param delegate The initial share response
+     * @param redeemResponse The following redeem response
+     */
+    public ResolveShareResponse(ResolveShareResponse delegate, RedeemResponse redeemResponse) {
+        this(delegate.statusCode, delegate.path, delegate.parameters);
+        this.redeemResponse = redeemResponse;
+    }
+
+    /**
+     * Gets the response from the redeem token request used to transport an additional message to the client once it was executed.
+     *
+     * @return The redeem response, or <code>null</code> if not available
+     */
+    public RedeemResponse getRedeemResponse() {
+        return redeemResponse;
+    }
+
     public String getShare() {
+        if (null != redeemResponse) {
+            return redeemResponse.getShare();
+        }
         return parameters.get("share");
     }
 
     public String getTarget() {
+        if (null != redeemResponse) {
+            return redeemResponse.getTarget();
+        }
         return parameters.get("target");
     }
 
     public String getLoginType() {
+        if (null != redeemResponse) {
+            return redeemResponse.getLoginType();
+        }
         return parameters.get("login_type");
     }
 
@@ -163,6 +194,9 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     }
 
     public String getStatus() {
+        if (null != redeemResponse) {
+            return redeemResponse.getStatus();
+        }
         return parameters.get("status");
     }
 
@@ -176,10 +210,16 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     }
 
     public String getMessage() {
+        if (null != redeemResponse) {
+            return redeemResponse.getMessage();
+        }
         return parameters.get("message");
     }
 
     public String getMessageType() {
+        if (null != redeemResponse) {
+            return redeemResponse.getMessageType();
+        }
         return parameters.get("message_type");
     }
 

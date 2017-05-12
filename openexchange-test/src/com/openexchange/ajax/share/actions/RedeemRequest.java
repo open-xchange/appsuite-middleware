@@ -123,21 +123,9 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
         protected RedeemResponse createResponse(Response response) throws JSONException {
             if (!response.hasError()) {
                 Map<String, String> properties = new HashMap<String, String>();
-                JSONObject data = (JSONObject) response.getJSON();
-                if (data.hasAndNotNull("share")) {
-                    properties.put("share", data.getString("share"));
-                }
-                if (data.hasAndNotNull("login_type")) {
-                    properties.put("login_type", data.getString("login_type"));
-                }
-                if (data.hasAndNotNull("message_type")) {
-                    properties.put("message_type", data.getString("message_type"));
-                }
-                if (data.hasAndNotNull("message")) {
-                    properties.put("message", data.getString("message"));
-                }
-                if (data.hasAndNotNull("target")) {
-                    properties.put("target", data.getString("target"));
+                JSONObject data = response.getJSON();
+                for (String key : data.keySet()) {
+                    properties.put(key, data.getString(key));
                 }
                 return new RedeemResponse(response, properties);
             }

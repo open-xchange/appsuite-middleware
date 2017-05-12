@@ -234,17 +234,8 @@ public final class HtmlServices {
         }
 
         // Check for global event handlers
-        {
-            int pos = lc.indexOf("on");
-            if (pos == 0) {
-                if (nextAreAsciiLetter(pos + 1, 3, lc)) {
-                    return false;
-                }
-            } else if (pos > 0) {
-                if (false == isWordCharacter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
-                    return false;
-                }
-            }
+        if (doContainsEventHandler(lc)) {
+            return false;
         }
 
         // Check additionally specified unsafe tokens
@@ -257,6 +248,31 @@ public final class HtmlServices {
         }
 
         return true;
+    }
+
+    /**
+     * Checks if specified value contains an event handler like <code>"onerror"</code>.
+     *
+     * @param val The value to check
+     * @return <code>true</code> if an event handler is contained; otherwise <code>false</code>
+     */
+    public static boolean containsEventHandler(String val) {
+        String lc = asciiLowerCase(fullUrlDecode(val.trim()));
+        return doContainsEventHandler(lc);
+    }
+
+    private static boolean doContainsEventHandler(String lc) {
+        int pos = lc.indexOf("on");
+        if (pos == 0) {
+            if (nextAreAsciiLetter(pos + 1, 3, lc)) {
+                return true;
+            }
+        } else if (pos > 0) {
+            if (false == isWordCharacter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -385,7 +401,7 @@ public final class HtmlServices {
         if (null == maxLength) {
             synchronized (HtmlServices.class) {
                 i = maxLength;
-                if (null == maxLength) {
+                if (null == i) {
                     // Default is 1MB
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     int defaultMaxLength = 1048576;
@@ -398,6 +414,60 @@ public final class HtmlServices {
             }
         }
         return i.intValue();
+    }
+
+    /** Volatile cache variable for CSS size threshold */
+    private static volatile Integer maxCssLength;
+
+    /**
+     * Gets the CSS size threshold (<code>"<i>com.openexchange.html.css.maxLength</i>"</code> property).
+     *
+     * @return The CSS size threshold
+     */
+    public static int cssThreshold() {
+        Integer i = maxCssLength;
+        if (null == maxCssLength) {
+            synchronized (HtmlServices.class) {
+                i = maxCssLength;
+                if (null == i) {
+                    // Default is 96KB
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    int defaultMaxLength = 98304;
+                    if (null == service) {
+                        return defaultMaxLength;
+                    }
+                    i = Integer.valueOf(service.getIntProperty("com.openexchange.html.css.maxLength", defaultMaxLength));
+                    maxCssLength = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
+    private static volatile Boolean useJericho;
+
+    /**
+     * Checks whether to use Jericho HTML parser or Jsoup (<code>"<i>com.openexchange.html.jericho</i>"</code> property).
+     *
+     * @return <code>true</code> for Jericho; otherwise <code>false</code>
+     */
+    public static boolean useJericho() {
+        Boolean i = useJericho;
+        if (null == useJericho) {
+            synchronized (HtmlServices.class) {
+                i = useJericho;
+                if (null == i) {
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    boolean def = true;
+                    if (null == service) {
+                        return def;
+                    }
+                    i = Boolean.valueOf(service.getBoolProperty("com.openexchange.html.jericho", def));
+                    useJericho = i;
+                }
+            }
+        }
+        return i.booleanValue();
     }
 
     // ------------------------------------------------------------------------------------------------------------------------ //

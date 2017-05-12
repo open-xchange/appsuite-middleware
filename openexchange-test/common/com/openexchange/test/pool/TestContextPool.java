@@ -49,14 +49,20 @@
 
 package com.openexchange.test.pool;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -80,14 +86,14 @@ public class TestContextPool {
         remember(context);
         contexts.add(context);
         startWatcher();
-        LOG.info("Added context '{}' with id {} to pool.", context.getName(), context.getId());
+        LOG.info("Added context '{}' with users {} to pool.", context.getName(), Strings.concat(",", context.getCopyOfAll()));
     }
 
     private static void remember(TestContext context) {
         if (allTimeContexts.contains(context)) {
             return;
         }
-        allTimeContexts.add(context);
+        allTimeContexts.add((TestContext) SerializationUtils.clone(context));
         LOG.info("Added context {} to all time available context list.", context.getName());
     }
 
@@ -105,7 +111,7 @@ public class TestContextPool {
             Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
             context.setAcquiredBy(acquiredBy);
             contextWatcher.get().contextInUse(context);
-            LOG.debug("Context '{}' with id {} has been acquired by {}.", context.getName(), context.getId(), acquiredBy, new Throwable());
+            LOG.debug("Context '{}' has been acquired by {}.", context.getName(), acquiredBy);
             return context;
         } catch (InterruptedException e) {
             // should not happen
@@ -167,6 +173,24 @@ public class TestContextPool {
     }
 
     public static synchronized List<TestContext> getAllTimeAvailableContexts() {
-        return new ArrayList<>(allTimeContexts);
+        List<TestContext> cloned = new ArrayList<>(allTimeContexts.size());
+        for (TestContext current : allTimeContexts) {
+            cloned.add((TestContext) deepClone(current));
+        }
+        return cloned;
+    }
+
+    private static Object deepClone(Object object) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(object);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return ois.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

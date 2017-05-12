@@ -9,6 +9,7 @@ properties:
       configcascadeAware: false
       related: 
       file: sipgate.properties
+      packageName: open-xchange-sms-sipgate
       tags: ["Sipgate", "SMS", "Credential"]
     - key: com.openexchange.sms.sipgate.password
       description: |
@@ -19,6 +20,7 @@ properties:
       configcascadeAware: false
       related: 
       file: sipgate.properties
+      packageName: open-xchange-sms-sipgate
       tags: ["Sipgate", "SMS", "Credential"]
     - key: com.openexchange.sms.sipgate.maxlength
       description: |
@@ -29,4 +31,5 @@ properties:
       configcascadeAware: false
       related: 
       file: sipgate.properties
+      packageName: open-xchange-sms-sipgate
       tags: ["Sipgate", "SMS", "Limit"]

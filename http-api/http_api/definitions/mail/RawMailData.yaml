@@ -131,3 +131,4 @@ original_folder_id:
 content_type:
   type: string
   description: The MIME type of the mail.
+

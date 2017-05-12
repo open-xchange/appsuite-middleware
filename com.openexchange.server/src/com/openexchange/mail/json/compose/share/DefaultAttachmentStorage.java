@@ -361,10 +361,9 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         if (Strings.isEmpty(toSanitize)) {
             toSanitize = defaultName;
         } else {
-            toSanitize = toSanitize.trim();
-
             boolean sanitize = true;
             while (sanitize) {
+                toSanitize = toSanitize.trim();
                 sanitize = false;
 
                 String illegalCharacters = FilenameValidationUtils.getIllegalCharacters(toSanitize);
@@ -376,9 +375,21 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
                     }
                 } else {
                     ValidityResult validity = FilenameValidationUtils.getValidityFor(toSanitize);
-                    if (!validity.isValid()) {
-                        sanitize = true;
-                        toSanitize = defaultName;
+                    switch (validity.getViolation()) {
+                        case ONLY_DOTS:
+                            sanitize = true;
+                            toSanitize = defaultName;
+                            break;
+                        case OTHER_ILLEGAL:
+                            sanitize = true;
+                            toSanitize = toSanitize.length() > 1 ? toSanitize.substring(0, toSanitize.length() - 1) : defaultName;
+                            break;
+                        case RESERVED_NAME:
+                            sanitize = true;
+                            toSanitize = defaultName;
+                            break;
+                        default:
+                            break;
                     }
                 }
             }

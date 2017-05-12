@@ -3,13 +3,14 @@ properties:
     - key: com.openexchange.quartz.startLocalScheduler
       description: |
         Wether the local quartz scheduler instance should be started.
-        If false, this node is unable to perform local jobs.
+        If <code>false</code>, this node is unable to perform local jobs.
       defaultValue: true
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: quartz.properties
+      packageName: open-xchange-core
       tags: ["Quartz"]
     - key: com.openexchange.quartz.localThreads
       description: |
@@ -20,4 +21,5 @@ properties:
       configcascadeAware: false
       related: 
       file: quartz.properties
+      packageName: open-xchange-core
       tags: ["Quartz", "Thread"]

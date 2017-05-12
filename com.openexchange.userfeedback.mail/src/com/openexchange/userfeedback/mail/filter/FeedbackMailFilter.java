@@ -72,6 +72,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
     private final long start;
     private final long end;
     private final String type;
+    private final boolean compress;
 
     private static final String DEFAULT_BODY = "";
     private static final String DEFAULT_CONTEXT_GROUP = "default";
@@ -79,11 +80,11 @@ public class FeedbackMailFilter implements FeedbackFilter {
     private static final String DEFAULT_SUBJECT = "User feedback report: %s";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, String subject, String body, long start, long end, String type) {
-        this(ctxGroup, recipients, null, subject, body, start, end, type);
+    public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, String subject, String body, long start, long end, String type, boolean compress) {
+        this(ctxGroup, recipients, null, subject, body, start, end, type, compress);
     }
 
-    public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, Map<String, String> pgpKeys, String subject, String body, long start, long end, String type) {
+    public FeedbackMailFilter(String ctxGroup, Map<String, String> recipients, Map<String, String> pgpKeys, String subject, String body, long start, long end, String type, boolean compress) {
         super();
         this.ctxGroup = ctxGroup == null ? DEFAULT_CONTEXT_GROUP : ctxGroup;
         this.recipients = recipients == null ? new HashMap<String, String>(0) : recipients;
@@ -93,6 +94,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
         this.start = start == 0 ? Long.MIN_VALUE : start;
         this.end = end == 0 ? Long.MAX_VALUE : end;
         this.type = type == null ? DEFAULT_TYPE : type;
+        this.compress = compress;
     }
 
     @Override
@@ -161,6 +163,10 @@ public class FeedbackMailFilter implements FeedbackFilter {
         return body;
     }
 
+    public boolean isCompress() {
+        return compress;
+    }
+
     // --------------------------------------------------------------------------------------
 
     public static class FeedBackMailFilterBuilder {
@@ -173,6 +179,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
         private long builderStart;
         private long builderEnd;
         private final String builerType;
+        private boolean compress;
 
         public FeedBackMailFilterBuilder(String ctxGroup, String type) {
             this.builderCtxGroup = ctxGroup;
@@ -205,8 +212,13 @@ public class FeedbackMailFilter implements FeedbackFilter {
             return this;
         }
 
+        public FeedBackMailFilterBuilder compress(boolean compress) {
+            this.compress = compress;
+            return this;
+        }
+
         public FeedbackMailFilter build() {
-            return new FeedbackMailFilter(builderCtxGroup, builderRecipients, builderPgpKeys, builderSubject, builderBody, builderStart, builderEnd, builerType);
+            return new FeedbackMailFilter(builderCtxGroup, builderRecipients, builderPgpKeys, builderSubject, builderBody, builderStart, builderEnd, builerType, compress);
         }
     }
 }

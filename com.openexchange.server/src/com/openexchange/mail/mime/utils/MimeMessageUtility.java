@@ -1022,6 +1022,10 @@ public final class MimeMessageUtility {
             return false;
         }
 
+        boolean isPadded() {
+            return value.charAt(value.length() - 1) == '=';
+        }
+
         String asEncodedWord() {
             return new StringBuilder(value.length() + 8).append("=?").append(charset).append("?B?").append(value).append("?=").toString();
         }
@@ -1044,22 +1048,30 @@ public final class MimeMessageUtility {
             int lastMatch = 0;
             Base64EncodedValue prev = null;
             do {
+                String encoding = m.group(2);
+                String encodedValue = m.group(3);
                 try {
-                    String encoding = m.group(2);
                     String charset = m.group(1);
 
                     boolean doEncode = true;
                     int start = m.start();
                     if (lastMatch == start) {
                         if ("b".equalsIgnoreCase(encoding)) {
-                            Base64EncodedValue ev = new Base64EncodedValue(charset, m.group(3));
+                            Base64EncodedValue ev = new Base64EncodedValue(charset, encodedValue);
                             if (null == prev) {
-                                prev = ev;
-                                doEncode = false;
+                                // Only combineable if not padded
+                                if (!encodedValue.endsWith("=")) {
+                                    // Is padded...
+                                    prev = ev;
+                                    doEncode = false;
+                                }
                             } else {
                                 if (false == prev.combine(ev)) {
                                     sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
                                     prev = ev;
+                                } else if (prev.isPadded()) {
+                                    sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
+                                    prev = null;
                                 }
                                 doEncode = false;
                             }
@@ -1074,14 +1086,14 @@ public final class MimeMessageUtility {
 
                     // Decode encoded-word
                     if (doEncode) {
-                        sb.append(decodeEncodedWord(charset, encoding, m.group(3)));
+                        sb.append(decodeEncodedWord(charset, encoding, encodedValue));
                     }
 
                     // Remember last match position
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
                     LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    sb.append(handleUnsupportedEncoding(m.group(2), m.group(3)));
+                    sb.append(handleUnsupportedEncoding(encoding, encodedValue));
                     lastMatch = m.end();
                 } catch (final ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
@@ -1172,18 +1184,32 @@ public final class MimeMessageUtility {
             throw new UnsupportedEncodingException("unknown encoding: " + encoding);
         }
 
+        // Read decoded bytes
+        byte[] bytes;
         try {
-            byte[] bytes = new byte[count];
+            bytes = new byte[count];
             // count is set to the actual number of decoded bytes
             count = is.read(bytes, 0, count);
 
-            // Finally, convert the decoded bytes into a String using the specified charset
-            return count <= 0 ? "" : new String(bytes, 0, count, charset);
+            if (count <= 0) {
+                return "";
+            }
         } catch (IOException ioex) {
             // Shouldn't happen.
-            throw new ParseException(ioex.toString());
+            throw new ParseException(ioex.toString(), ioex);
+        } finally {
+            Streams.close(is);
+        }
+
+        // Return decoded value
+        try {
+            return new String(bytes, 0, count, charset);
+        } catch (java.io.UnsupportedEncodingException uec) {
+            LOG.debug("Unsupported character-encoding in encoded-word: {}", encodedValue, uec);
+            String decoded = detectCharsetAndDecodeElseNull(bytes, count);
+            return null == decoded ? encodedValue : decoded;
         } catch (IllegalArgumentException iex) {
-            /*
+            /*-
              * An unknown charset of the form ISO-XXX-XXX, will cause
              * the JDK to throw an IllegalArgumentException ... Since the
              * JDK will attempt to create a classname using this string,
@@ -1191,9 +1217,22 @@ public final class MimeMessageUtility {
              * and this results in an IllegalArgumentException, rather than
              * the expected UnsupportedEncodingException. Yikes
              */
-            throw new UnsupportedEncodingException(charset);
-        } finally {
-            Streams.close(is);
+            LOG.debug("Unsupported character-encoding in encoded-word: {}", encodedValue, iex);
+            String decoded = detectCharsetAndDecodeElseNull(bytes, count);
+            return null == decoded ? encodedValue : decoded;
+        }
+    }
+
+    private static String detectCharsetAndDecodeElseNull(byte[] bytes, int count) {
+        String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes, 0, count));
+        try {
+            return new String(bytes, 0, count, Charsets.forName(detectedCharset));
+        } catch (java.nio.charset.UnsupportedCharsetException uce) {
+            /*
+             * Even detected charset is unknown... giving up
+             */
+            LOG.warn("Unknown character-encoding: {}", detectedCharset, uce);
+            return null;
         }
     }
 
@@ -1433,8 +1472,17 @@ public final class MimeMessageUtility {
         if (isEmpty(fileName)) {
             // Then look-up content-type
             fileName = mailPart.getContentType().getNameParameter();
+            return decodeMultiEncodedHeader(fileName);
         }
-        return decodeMultiEncodedHeader(fileName);
+        fileName = decodeMultiEncodedHeader(fileName);
+        if (fileName.indexOf('.') < 0) {
+            // No file extension given. Check if "name" parameter from Content-Type provides a better "alternative" value
+            String name = mailPart.getContentType().getNameParameter();
+            if (Strings.isNotEmpty(name) && name.indexOf('.') > 0) {
+                fileName = MimeMessageUtility.decodeMultiEncodedHeader(name);
+            }
+        }
+        return fileName;
     }
 
     /**

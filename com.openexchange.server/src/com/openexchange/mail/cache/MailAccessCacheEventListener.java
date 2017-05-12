@@ -51,7 +51,6 @@ package com.openexchange.mail.cache;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -60,7 +59,6 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -84,33 +82,20 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
     @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-            final @SuppressWarnings("unchecked") Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-            IMailAccessCache mac = MailAccess.optMailAccessCache();
-            if (null != mac) {
-                for (final Session session : sessions.values()) {
-                    if (!session.isTransient()) {
+        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+            if (null != contextId) {
+                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                if (null != userId) {
+                    IMailAccessCache mac = MailAccess.optMailAccessCache();
+                    if (null != mac) {
                         try {
-                            mac.clearUserEntries(session);
+                            mac.clearUserEntries(userId.intValue(), contextId.intValue());
                             // AttachmentTokenRegistry.getInstance().dropFor(session);
                         } catch (final OXException e) {
-                            LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
+                            LOG.error("Unable to clear cached mail access for user {} in context {}", userId, contextId, e);
                         }
                     }
-                }
-            }
-        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            if (session.isTransient()) {
-                return;
-            }
-            IMailAccessCache mac = MailAccess.optMailAccessCache();
-            if (null != mac) {
-                try {
-                    mac.clearUserEntries(session);
-                    // AttachmentTokenRegistry.getInstance().dropFor(session);
-                } catch (final OXException e) {
-                    LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
                 }
             }
         }
@@ -119,9 +104,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
     @Override
     public void registerService(final BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] {
-            SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER,
-            SessiondEventConstants.TOPIC_REMOVE_SESSION });
+        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_LAST_SESSION });
         serviceRegistration = context.registerService(EventHandler.class, this, serviceProperties);
     }
 

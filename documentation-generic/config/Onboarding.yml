@@ -4,13 +4,14 @@ feature_description: |
 properties:
     - key: com.openexchange.client.onboarding.enabled
       description: |
-        The main switch to enabled/disable client on-boarding
+        The main switch to enabled/disable client on-boarding.
       defaultValue: true
       version:
       reloadable: false
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding"]
     - key: com.openexchange.client.onboarding.apple.displayName
       description: |
@@ -21,6 +22,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.apple.description
       description: |
@@ -31,6 +33,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.android.displayName
       description: |
@@ -41,6 +44,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.android.description
       description: |
@@ -51,6 +55,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.windows.displayName
       description: |
@@ -61,6 +66,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Windows"]
     - key: com.openexchange.client.onboarding.windows.description
       description: |
@@ -71,6 +77,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Windows"]
     - key: com.openexchange.client.onboarding.apple.mac.scenarios
       description: |
@@ -81,6 +88,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.apple.ipad.scenarios
       description: |
@@ -91,6 +99,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.apple.iphone.scenarios
       description: |
@@ -101,6 +110,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple"]
     - key: com.openexchange.client.onboarding.android.tablet.scenarios
       description: |
@@ -111,6 +121,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.android.phone.scenarios
       description: |
@@ -121,6 +132,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Android"]
     - key: com.openexchange.client.onboarding.windows.desktop.scenarios
       description: |
@@ -131,6 +143,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Windows"]
     - key: com.openexchange.client.onboarding.plist.signature.enabled
       description: |
@@ -141,6 +154,7 @@ properties:
       configcascadeAware: false
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList"]
     - key: com.openexchange.client.onboarding.plist.pkcs12store.filename
       description: |
@@ -151,6 +165,7 @@ properties:
       configcascadeAware: false
       related: 
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList"]
     - key: com.openexchange.client.onboarding.plist.pkcs12store.password
       description: |
@@ -161,6 +176,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList", "Credential"]
     - key: com.openexchange.client.onboarding.plist.signkey.alias
       description: |
@@ -171,28 +187,31 @@ properties:
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Apple", "PList"]
     - key: com.openexchange.client.onboarding.sms.ratelimit
       description: |
-        Define the time (in milliseconds) which must pass by before a new sms can be sent
-        A value of 0 disables the limit.
+        Define the time (in milliseconds) which must pass by before a new sms can be sent.
+        A value of <code>0</code> disables the limit.
       defaultValue: 0
       version:
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Limit", "SMS"]
     - key: com.openexchange.client.onboarding.sms.defaultCountry
       description: |
         Defines the default country as a two letter code.
-        For all codes see ISO 3166-1
+        For all codes see ISO 3166-1.
       defaultValue: DE
       version:
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "SMS"]
     - key: com.openexchange.client.onboarding.enabledScenarios
       description: |
@@ -203,62 +222,79 @@ properties:
       configcascadeAware: true
       related: com.openexchange.client.onboarding.plist.pkcs12store.filename
       file: client-onboarding.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding"]
     - key: com.openexchange.client.onboarding.caldav.url
       description: |
-        Specifies the URL to the CalDAV end-point; e.g. "dav.open-xchange.invalid" or "http://dav.open-xchange.invalid".
+        Specifies the URL to the CalDAV end-point; e.g.: 
+        <pre>
+        com.openexchange.client.onboarding.caldav.url=dav.open-xchange.invalid
+        </pre>
+        <pre>
+        com.openexchange.client.onboarding.caldav.url=http://dav.open-xchange.invalid
+        </pre>
         
-        Note:
+        Note:  
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
-        The administrator has ensure that end-point is reachable by a well-known path;
-        E.g. "PROPFIND /dav.example.com%3A8800/.well-known/caldav HTTP/1.1"
+        The administrator has ensure that end-point is reachable by a well-known path;  
+        E.g.: 
+        <pre>
+        PROPFIND /dav.example.com%3A8800/.well-known/caldav HTTP/1.1
+        </pre>
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: client-onboarding-caldav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CalDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.caldav.login.customsource
       description: |
-        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
-        If available, then the login string is taken from such a custom login source
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered.
+        If available, then the login string is taken from such a custom login source.
       defaultValue: false
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: client-onboarding-caldav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CalDAV"]
     - key: com.openexchange.client.onboarding.carddav.url
       description: |
         Specifies the URL to the CardDAV end-point; e.g. "dav.open-xchange.invalid" or "http://dav.open-xchange.invalid".
         
-        Note:
+        Note:  
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
-        The administrator has ensure that end-point is reachable by a well-known path;
-        E.g. "PROPFIND /dav.example.com%3A8843/.well-known/carddav HTTP/1.1"
+        The administrator has ensure that end-point is reachable by a well-known path;  
+        E.g.:
+        <pre>
+        PROPFIND /dav.example.com%3A8843/.well-known/carddav HTTP/1.1
+        </pre>
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: client-onboarding-carddav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CardDAV", "Host", "Port"]
     - key: com.openexchange.client.onboarding.carddav.login.customsource
       description: |
-        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
-        If available, then the login string is taken from such a custom login source
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered.
+        If available, then the login string is taken from such a custom login source.
       defaultValue: false
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: client-onboarding-carddav.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "CardDAV"]
     - key: com.openexchange.client.onboarding.driveapp.store.google.playstore
       description: |
@@ -269,6 +305,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-driveapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Drive", "Android"]
     - key: com.openexchange.client.onboarding.driveapp.store.apple.appstore
       description: |
@@ -279,6 +316,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-driveapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Drive", "Apple"]
     - key: com.openexchange.client.onboarding.driveapp.store.apple.macappstore
       description: |
@@ -289,12 +327,19 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-driveapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Drive", "Apple"]
     - key: com.openexchange.client.onboarding.eas.url
       description: |
-        Specifies the URL to the EAS end-point; e.g. "eas.open-xchange.invalid" or "http://eas.open-xchange.invalid".
+        Specifies the URL to the EAS end-point; e.g.:
+        <pre>
+        com.openexchange.client.onboarding.eas.url=eas.open-xchange.invalid
+        </pre>
+        <pre>
+        com.openexchange.client.onboarding.eas.url=http://eas.open-xchange.invalid
+        </pre>
         
-        Note:
+        Note:  
         Specifying a protocol/scheme is optional and may be used to control whether the end-point is
         supposed to be accessed via SSL or not.
         Moreover, any path information is stripped off as only host name, port and SSL/No-SSL are relevant.
@@ -305,17 +350,19 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-eas.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "EAS", "Host", "Port"]
     - key: com.openexchange.client.onboarding.eas.login.customsource
       description: |
-        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered
-        If available, then the login string is taken from such a custom login source
+        Specifies whether a look-up is supposed to be performed to check for custom login sources that might be registered.
+        If available, then the login string is taken from such a custom login source.
       defaultValue: false
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: client-onboarding-eas.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "EAS"]
     - key: com.openexchange.client.onboarding.emclient.url
       description: |
@@ -326,6 +373,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-emclient.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "eM-Client"]
     - key: com.openexchange.client.onboarding.mail.imap.host
       description: |
@@ -337,6 +385,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Host"]
     - key: com.openexchange.client.onboarding.mail.imap.port
       description: |
@@ -348,19 +397,21 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Port"]
     - key: com.openexchange.client.onboarding.mail.imap.secure
       description: |
         Specifies whether a secure connection is supposed to established to access the IMAP server.
         If not set, falls-back to internal settings for accessing the primary account.
         
-        Possible values: true|false
+        Possible values: <code>true</code> or <code>false</code>
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Security"]
     - key: com.openexchange.client.onboarding.mail.smtp.host
       description: |
@@ -372,6 +423,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Host"]
     - key: com.openexchange.client.onboarding.mail.smtp.port
       description: |
@@ -383,19 +435,21 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Port"]
     - key: com.openexchange.client.onboarding.mail.smtp.secure
       description: |
         Specifies whether a secure connection is supposed to established to access the SMTP server.
         If not set, falls-back to internal settings for accessing the primary account.
         
-        Possible values: true|false
+        Possible values: <code>true</code> or <code>false</code>
       defaultValue:
       version:
       reloadable: true
       configcascadeAware: true
       related: 
       file: client-onboarding-mail.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Security"]
     - key: com.openexchange.client.onboarding.mailapp.store.google.playstore
       description: |
@@ -406,6 +460,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mailapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Android"]
     - key: com.openexchange.client.onboarding.mailapp.store.apple.appstore
       description: |
@@ -416,6 +471,7 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-mailapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Mail", "Apple"]
     - key: com.openexchange.client.onboarding.syncapp.store.google.playstore
       description: |
@@ -426,4 +482,5 @@ properties:
       configcascadeAware: true
       related: 
       file: client-onboarding-syncapp.properties
+      packageName: open-xchange-client-onboarding
       tags: ["Onboarding", "Sync App", "Android"]

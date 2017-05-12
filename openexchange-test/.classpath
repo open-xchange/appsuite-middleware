@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="unittests"/>
 	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/source/httpunit-1.7-sources.zip"/>
 	<classpathentry kind="lib" path="lib/jchronic-0.2.6.jar"/>
-	<classpathentry kind="lib" path="lib/junit-4.11.jar" sourcepath="lib/source/junit-4.11-sources.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.12.jar" sourcepath="lib/source/junit-4.12-sources.jar"/>
 	<classpathentry kind="lib" path="lib/junit-addons-1.4.jar" sourcepath="lib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry kind="lib" path="lib/junitperf-1.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/jvyaml.jar"/>
@@ -154,8 +154,8 @@
 	<classpathentry kind="lib" path="lib/tempus-fugit-1.2-20140129.191141-5.jar" sourcepath="lib/source/tempus-fugit-1.2-20140129.191141-5-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.25-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.25-sources.jar"/>
-	<classpathentry kind="lib" path="lib/httpClient-java-develop-SNAPSHOT.jar" sourcepath="lib/source/httpClient-java-develop-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="lib" path="lib/restClient-java-develop-SNAPSHOT.jar" sourcepath="lib/source/restClient-java-develop-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="lib/httpClient-java.jar" sourcepath="lib/source/httpClient-java-sources.jar"/>
+	<classpathentry kind="lib" path="lib/restClient-java.jar" sourcepath="lib/source/restClient-java-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.7.5.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.7.5-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-base-2.7.5.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-base-2.7.5-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.media.multipart_2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.media.multipart.source_2.17.jar"/>
@@ -175,7 +175,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.advertisement.json"/>
 	<classpathentry kind="lib" path="lib/jackson-datatype-joda-2.8.7.jar" sourcepath="lib/source/jackson-datatype-joda-2.8.7-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.7.jar" sourcepath="/com.openexchange.bundles/source/joda-time-2.7-source.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.17.jar" sourcepath="lib/source/jersey-media-json-jackson-2.17-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-entity-filtering-2.17.jar" sourcepath="lib/jersey-entity-filtering-2.17-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-media-json-jackson-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-media-json-jackson-2.17-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-entity-filtering-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-entity-filtering-2.17-sources.jar"/>
+	<classpathentry kind="lib" path="lib/mimepull-1.6.jar" sourcepath="lib/source/mimepull-1.6-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

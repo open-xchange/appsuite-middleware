@@ -59,7 +59,6 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 
@@ -74,20 +73,16 @@ public class CreatedByTest extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    private AJAXClient client2;
-
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        client2 = new AJAXClient(testContext.acquireUser());
+        super.setUp();        
 
         appointment = new Appointment();
         appointment.setTitle("Created by Test");
         appointment.setStartDate(D("07.12.2010 09:00"));
         appointment.setEndDate(D("07.12.2010 10:00"));
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        appointment.setCreatedBy(client2.getValues().getUserId());
+        appointment.setCreatedBy(getClient2().getValues().getUserId());
         appointment.setIgnoreConflicts(true);
     }
 

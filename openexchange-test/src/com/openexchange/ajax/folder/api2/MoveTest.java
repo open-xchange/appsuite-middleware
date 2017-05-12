@@ -53,12 +53,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GenJSONRequest;
 import com.openexchange.ajax.folder.actions.GenJSONResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
@@ -67,8 +65,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MoveTest extends AbstractAJAXSession {
-
-    private AJAXClient client;
 
     /**
      * Initializes a new {@link MoveTest}.
@@ -79,26 +75,20 @@ public class MoveTest extends AbstractAJAXSession {
         super();
     }
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
     @Test
     public void testMoveCalBelowMail() throws Throwable {
         // Get root folder
         String newCalId = null;
         String newMailId = null;
         try {
-            final int userId = client.getValues().getUserId();
+            final int userId = getClient().getValues().getUserId();
             {
                 JSONObject newFolder = new JSONObject("{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
                 GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
-                GenJSONResponse response = client.execute(request);
+                GenJSONResponse response = getClient().execute(request);
                 newCalId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newCalId);
 
@@ -107,7 +97,7 @@ public class MoveTest extends AbstractAJAXSession {
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
-                response = client.execute(request);
+                response = getClient().execute(request);
                 newMailId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newMailId);
             }
@@ -120,7 +110,7 @@ public class MoveTest extends AbstractAJAXSession {
                 request.setJSONValue(new JSONObject("{\"folder_id\":\"" + newMailId + "\"}"));
                 request.setParameter("action", "update");
                 request.setParameter("id", newCalId);
-                final GenJSONResponse response = client.execute(request);
+                final GenJSONResponse response = getClient().execute(request);
                 final String newCalIDMoved = (String) response.getData();
                 assertEquals("ID not equal.", newCalId, newCalIDMoved);
             }
@@ -131,7 +121,7 @@ public class MoveTest extends AbstractAJAXSession {
                     final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete");
-                    client.execute(request);
+                    getClient().execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
@@ -142,7 +132,7 @@ public class MoveTest extends AbstractAJAXSession {
                     final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete");
-                    client.execute(request);
+                    getClient().execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
@@ -156,14 +146,14 @@ public class MoveTest extends AbstractAJAXSession {
         String newCalId = null;
         String newMailId = null;
         try {
-            final int userId = client.getValues().getUserId();
+            final int userId = getClient().getValues().getUserId();
             {
                 JSONObject newFolder = new JSONObject("{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
                 GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
-                GenJSONResponse response = client.execute(request);
+                GenJSONResponse response = getClient().execute(request);
                 newCalId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newCalId);
 
@@ -172,7 +162,7 @@ public class MoveTest extends AbstractAJAXSession {
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
-                response = client.execute(request);
+                response = getClient().execute(request);
                 newMailId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newMailId);
             }
@@ -185,7 +175,7 @@ public class MoveTest extends AbstractAJAXSession {
                 request.setJSONValue(new JSONObject("{\"folder_id\":\"" + newCalId + "\"}"));
                 request.setParameter("action", "update");
                 request.setParameter("id", newMailId);
-                final GenJSONResponse response = client.execute(request);
+                final GenJSONResponse response = getClient().execute(request);
                 final String newMailIDMoved = (String) response.getData();
                 assertEquals("ID must not be equal.", newMailId, newMailIDMoved);
                 newMailId = newMailIDMoved;
@@ -197,7 +187,7 @@ public class MoveTest extends AbstractAJAXSession {
                     final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete");
-                    client.execute(request);
+                    getClient().execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
@@ -208,7 +198,7 @@ public class MoveTest extends AbstractAJAXSession {
                     final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete");
-                    client.execute(request);
+                    getClient().execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

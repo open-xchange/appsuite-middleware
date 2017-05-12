@@ -6,7 +6,7 @@
     summary: Sets an advertisement configuration for a given user by id
     parameters:
       - 
-        name: ctxId
+        name: contextId
         in: query
         description: The context id
         required: true
@@ -21,11 +21,11 @@
         format: int64
       -
         name: body
-        in: formData
+        in: body
         description: JSONObject describing the advertisement configuration
         required: true
-        type: string
-        format: JSON 
+        schema:
+          type: string
 
     responses:
       200:
@@ -42,7 +42,7 @@
     summary: Remove the current configuration for the user identified by userId
     parameters:
       - 
-        name: ctxId
+        name: contextId
         in: query
         description: The context id
         required: true

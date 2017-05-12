@@ -53,6 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -71,7 +72,7 @@ public class GoogleSubscribeActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             SessiondService.class, UserService.class, DatabaseService.class, ThreadPoolService.class, ConfigurationService.class,
-            FolderUpdaterRegistry.class, ContextService.class };
+            FolderUpdaterRegistry.class, ContextService.class, OAuthService.class };
     }
 
     @Override

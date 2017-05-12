@@ -63,11 +63,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -75,6 +77,7 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.ConversionService;
@@ -99,6 +102,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
+import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -291,10 +296,20 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
             if (attachmentArray.length() > 1) {
                 // Check for inline images (in case content is HTML)
                 Set<String> contentIds = extractContentIds(sContent);
-                parseAttachments(sourceMessage,
-                    attachmentArray,
-                    contentIds,
-                    context,
+
+                // Check composition space
+                CompositionSpace compositionSpace = null;
+                {
+                    String csid = request.getRequest().getParameter(AJAXServlet.PARAMETER_CSID);
+                    if (null == csid) {
+                        csid = request.getJsonMail().optString("csid", null);
+                    }
+                    if (null != csid) {
+                        compositionSpace = CompositionSpaces.get(csid, request.getSession());
+                    }
+                }
+
+                parseAttachments(sourceMessage, attachmentArray, contentIds, context, compositionSpace,
                     // If forwarding a previously encrypted message, needs attachments decrypted with authentication
                     (sourceMessage.getSecuritySettings() == null ? null : sourceMessage.getSecuritySettings().getAuthentication()));
             }
@@ -455,15 +470,31 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
      * @param jAttachments The attachments to parse
      * @param contentIds The extracted content identifiers of inline images
      * @param context The compose context
+     * @param compositionSpace The optional composition space
      * @throws OXException If parsing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context, String cryptoAuth) throws OXException, JSONException {
+    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context, CompositionSpace compositionSpace, String cryptoAuth) throws OXException, JSONException {
         // Get the identifier of the referenced message
         MailPath parentMsgRef = composeMessage.getMsgref();
+        MailPath originalMsgRef = null;
+        if (null != parentMsgRef && null != compositionSpace) {
+            originalMsgRef = compositionSpace.getReplyFor();
+            if (null == originalMsgRef) {
+                Queue<MailPath> queue = compositionSpace.getForwardsFor();
+                originalMsgRef = queue.size() == 1 ? queue.peek() : null;
+            }
+            if (null == originalMsgRef) {
+                Queue<MailPath> queue = compositionSpace.getDraftEditsFor();
+                originalMsgRef = queue.size() == 1 ? queue.peek() : null;
+            }
+            if (null != originalMsgRef && (originalMsgRef.equals(parentMsgRef) || parentMsgRef.getAccountId() != originalMsgRef.getAccountId())) {
+                originalMsgRef = null;
+            }
+        }
 
         // Load & set referenced parts
-        Map<String, ReferencedMailPart> referencedParts = loadReferencedParts(jAttachments, contentIds, parentMsgRef, context, cryptoAuth);
+        Map<String, ReferencedMailPart> referencedParts = loadReferencedParts(jAttachments, contentIds, parentMsgRef, originalMsgRef, context, cryptoAuth);
 
         // Iterate attachments (once again)
         int len = jAttachments.length();
@@ -574,12 +605,13 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
      * @param jAttachments The attachments of the JSON representation of the message
      * @param contentIds The extracted content identifiers of inline images
      * @param parentMsgRef The message reference identifier
+     * @param originalMsgRef The optional original message reference identifier
      * @param context The compose context
      * @return The loaded parts
      * @throws OXException If loading the parts fails
      * @throws JSONException If a JSON error occurred
      */
-    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, ComposeContext context, String cryptoAuth) throws OXException, JSONException {
+    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, MailPath originalMsgRef, ComposeContext context, String cryptoAuth) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -588,7 +620,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         Map<String, String> groupedSeqIDs = new HashMap<String, String>(len);
         for (int i = 1; i < len; i++) {
             JSONObject jAttachment = jAttachments.getJSONObject(i);
-            String seqId = jAttachment.hasAndNotNull(MailListField.ID.getKey()) ? jAttachment.getString(MailListField.ID.getKey()) : null;
+            String seqId = jAttachment.optString(MailListField.ID.getKey(), null);
             if (seqId != null) {
                 // If "msgref" is defined in attachment itself, the referenced mail itself is meant to be attached and not an attachment
                 if (!jAttachment.hasAndNotNull(MSGREF)) {
@@ -613,18 +645,18 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                     context.getSession(),
                     cryptoAuth);
             }
-            return loadMultipleRefs(groupedSeqIDs, parentMsgRef, contentIds, mailAccess, context);
+            return loadMultipleRefs(groupedSeqIDs, parentMsgRef, originalMsgRef, contentIds, mailAccess, context);
         } catch (OXException oe) {
             if (null == mailAccess || !shouldRetry(oe)) {
                 throw oe;
             }
 
             mailAccess = context.reconnectMailAccess(mailAccess.getAccountId());
-            return loadMultipleRefs(groupedSeqIDs, parentMsgRef, contentIds, mailAccess, context);
+            return loadMultipleRefs(groupedSeqIDs, parentMsgRef, originalMsgRef, contentIds, mailAccess, context);
         }
     }
 
-    protected Map<String, ReferencedMailPart> loadMultipleRefs(Map<String, String> groupedSeqIDs, MailPath parentMsgRef, Set<String> contentIds, MailAccess<?, ?> access, ComposeContext context) throws OXException {
+    protected Map<String, ReferencedMailPart> loadMultipleRefs(Map<String, String> groupedSeqIDs, MailPath parentMsgRef, MailPath originalMsgRef, Set<String> contentIds, MailAccess<?, ?> access, ComposeContext context) throws OXException {
         MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
         if (null == referencedMail) {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
@@ -642,9 +674,43 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         }
 
         if (!groupedSeqIDs.isEmpty()) {
-            for (String seqId : groupedSeqIDs.keySet()) {
-                if (!contentIds.contains(seqId)) {
-                    throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
+            if (null == originalMsgRef) {
+                // Throw an exception for parts that were not loaded
+                for (String seqId : groupedSeqIDs.keySet()) {
+                    if (!contentIds.contains(seqId)) {
+                        throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
+                    }
+                }
+            } else {
+                // Retry loading referenced parts using original msgref
+                Set<String> retries = new LinkedHashSet<>(groupedSeqIDs.size());
+                for (String seqId : groupedSeqIDs.keySet()) {
+                    if (!contentIds.contains(seqId)) {
+                        retries.add(seqId);
+                    }
+                }
+
+                if (!retries.isEmpty()) {
+                    MailMessage originalMessage = access.getMessageStorage().getMessage(originalMsgRef.getFolder(), originalMsgRef.getMailID(), false);
+                    if (null != originalMessage) {
+                        originalMessage.setAccountId(access.getAccountId());
+                        MultipleMailPartHandler handler2 = new MultipleMailPartHandler(retries, false);
+                        new MailMessageParser().parseMailMessage(originalMessage, handler2);
+                        for (Map.Entry<String, MailPart> e : handler2.getMailParts().entrySet()) {
+                            String seqId = e.getKey();
+                            loadedParts.put(seqId, context.getProvider().getNewReferencedPart(e.getValue(), context.getSession()));
+                            retries.remove(seqId);
+                        }
+                    }
+
+                    if (!retries.isEmpty()) {
+                        // Throw an exception for parts that were not loaded
+                        for (String seqId : retries) {
+                            if (!contentIds.contains(seqId)) {
+                                throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
+                            }
+                        }
+                    }
                 }
             }
         }

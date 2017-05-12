@@ -2,9 +2,8 @@ feature_name: Calendar
 properties:
     - key: CACHED_ITERATOR_FAST_FETCH
       description: |
-        By enabling the option CACHED_ITERATOR_FAST_FETCH you
-        can define the numbers of pre fetched results with
-        the parameter MAX_PRE_FETCH.
+        By enabling this option you can define the numbers of 
+        pre fetched results with the parameter [[MAX_PRE_FETCH]].
 
         This means that MAX_PRE_FETCH results are gathered in one
         SQL query instead of MAX_PRE_FETCH single SQL queries.
@@ -16,13 +15,14 @@ properties:
       configcascadeAware: false
       related: MAX_PRE_FETCH
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar", "Cache"]
     - key: MAX_PRE_FETCH
       description: |
-        By enabling the option CACHED_ITERATOR_FAST_FETCH you
+        By enabling the option [[CACHED_ITERATOR_FAST_FETCH]] you
         can define the numbers of pre fetched results with
-        the parameter MAX_PRE_FETCH.
-
+        this parameter.
+          
         This means that MAX_PRE_FETCH results are gathered in one
         SQL query instead of MAX_PRE_FETCH single SQL queries.
         Normally higher values result in more performance if this
@@ -33,6 +33,7 @@ properties:
       configcascadeAware: false
       related: CACHED_ITERATOR_FAST_FETCH
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Limit", "Cache"]
     - key: CHECK_AND_REMOVE_PAST_REMINDERS
       description: |
@@ -45,6 +46,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Mail", "Event"]
     - key: CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS
       description: |
@@ -58,6 +60,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Mail", "Event"]
     - key: MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS
       description: |
@@ -73,6 +76,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.seriesconflictlimit
       description: |
@@ -87,6 +91,7 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar","Limit", "Appointment"]
     - key: com.openexchange.calendar.undefinedstatusconflict
       description: |
@@ -99,4 +104,5 @@ properties:
       configcascadeAware: false
       related:
       file: calendar.properties
+      packageName: open-xchange-core
       tags: ["Calendar"]

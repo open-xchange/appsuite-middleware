@@ -59,6 +59,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -391,6 +392,57 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    @Override
+    public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
+        // Get all available database clusters (writeDB to readDB associations)
+        Map<Integer, Integer> clusters;
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT write_db_pool_id, read_db_pool_id FROM db_cluster");
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return Collections.emptyMap();
+                }
+
+                clusters = new LinkedHashMap<>();
+                do {
+                    int writeDbId = rs.getInt(1);
+                    int readDbId = rs.getInt(2);
+                    clusters.put(Integer.valueOf(writeDbId), Integer.valueOf(readDbId <= 0 ? writeDbId : readDbId));
+                } while (rs.next());
+            } catch (SQLException e) {
+                throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                closeSQLStuff(rs, stmt);
+            }
+        }
+
+        // Iterate database clusters
+        int serverId = Server.getServerId();
+        Map<String, Integer> allSchemas = new LinkedHashMap<>();
+        for (Map.Entry<Integer, Integer> clusterEntry : clusters.entrySet()) {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT db_schema, server_id FROM context_server2db_pool WHERE write_db_pool_id=? GROUP by db_schema");
+                stmt.setInt(1, clusterEntry.getValue().intValue());
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    if (serverId == rs.getInt(2)) {
+                        allSchemas.put(rs.getString(1), clusterEntry.getValue());
+                    }
+                }
+            } catch (SQLException e) {
+                throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                closeSQLStuff(rs, stmt);
+            }
+        }
+        return allSchemas;
     }
 
     void setCacheService(final CacheService service) {

@@ -50,10 +50,6 @@
 package com.openexchange.groupware.tools.iterator;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -85,6 +81,10 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link FolderObjectIterator} - A {@link SearchIterator} especially for instances of {@link FolderObject}.
@@ -352,7 +352,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
         FolderCacheManager manager;
         try {
-            manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
+            manager = FolderCacheManager.isInitialized() && FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null;
         } catch (final OXException e) {
             manager = null;
         }

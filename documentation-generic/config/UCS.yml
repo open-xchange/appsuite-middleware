@@ -2,13 +2,14 @@ feature_name: Univention Server Authentication
 properties:
     - key: com.openexchange.authentication.ucs.useLdapPool
       description: |
-        Specifies whether to se ldap pooling or not.
+        Specifies whether to use ldap pooling or not.
       defaultValue: false
       version: 
       reloadable: true
       configcascadeAware: false
       related: 
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.baseDn
       description: |
@@ -19,16 +20,18 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.ldapUrl
       description: |
-        The ldap url; use ldaps:// for ssl.
+        The ldap url; use <code>ldaps://</code> for ssl.
       defaultValue: ldap://localhost
       version: 
       reloadable: true
       configcascadeAware: false
       related: 
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "LDAP", "Host"]
     - key: com.openexchange.authentication.ucs.mailAttribute
       description: |
@@ -39,6 +42,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "Mail"]
     - key: com.openexchange.authentication.ucs.loginAttribute
       description: |
@@ -49,29 +53,32 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.contextIdAttribute
       description: |
         Specifies the name of the attribute containing the contextId in order to lookup the context.
         This is optional; if not specified, context lookup will be done using domain name as found 
-        in com.openexchange.authentication.ucs.mailAttribute.
+        in [[com.openexchange.authentication.ucs.mailAttribute]].
       defaultValue:
       version: 
       reloadable: true
       configcascadeAware: false
       related: com.openexchange.authentication.ucs.mailAttribute
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication"]
     - key: com.openexchange.authentication.ucs.searchFilter
       description: |
         Search query to find the user within ldap.
-        %s will be replaced by the login as entered in the ox login mask.
+        '%s' will be replaced by the login as entered in the ox login mask.
       defaultValue: "(&(objectClass=oxUserObject)(|(uid=%s)(mailPrimaryAddress=%s)))"
       version: 
       reloadable: true
       configcascadeAware: false
       related: 
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.passwordChangeURL
       description: |
@@ -82,6 +89,7 @@ properties:
       configcascadeAware: false
       related: 
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication"]
     - key: com.openexchange.authentication.ucs.bindDn
       description: |
@@ -92,6 +100,7 @@ properties:
       configcascadeAware: false
       related: com.openexchange.authentication.ucs.bindPassword
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "LDAP"]
     - key: com.openexchange.authentication.ucs.bindPassword
       description: |
@@ -102,4 +111,5 @@ properties:
       configcascadeAware: false
       related: com.openexchange.authentication.ucs.bindDn
       file: authplugin.properties
+      packageName: open-xchange-authentication-ucs
       tags: ["Univention", "Authentication", "LDAP", "Credential"]

@@ -58,7 +58,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.openexchange.http.grizzly.service.http.HttpContextImpl;
 import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
 
 /**
@@ -176,11 +175,10 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
 
             String[] paths = getPathsFrom(reference);
             if (null == paths) {
-                mainHttpHandler.registerFilter(filter, "/*", null, new HttpContextImpl(context.getBundle()), null);
+                mainHttpHandler.addServletFilter(filter, "/*");
             } else {
-                HttpContextImpl httpContext = new HttpContextImpl(context.getBundle());
                 for (String path : paths) {
-                    mainHttpHandler.registerFilter(filter, path, null, httpContext, null);
+                    mainHttpHandler.addServletFilter(filter, path);
                 }
             }
 

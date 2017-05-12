@@ -95,6 +95,10 @@ public interface JerichoHandler {
 
     void handleUnknownTag(Tag tag);
 
+    void markCssStart(StartTag startTag);
+
+    void markCssEnd(EndTag endTag);
+
     void markBodyAbsent();
 
 }

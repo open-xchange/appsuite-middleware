@@ -83,8 +83,6 @@ public class ContactTest extends AbstractAJAXSession {
 
     protected int userId = 0;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactTest.class);
-
 
     @Before
     public void setUp() throws Exception {
@@ -942,12 +940,12 @@ public class ContactTest extends AbstractAJAXSession {
         return distributionlist;
     }
 
-    private HashSet distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
+    private HashSet<String> distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
         if (distributionListEntry == null) {
             return null;
         }
 
-        final HashSet hs = new HashSet();
+        final HashSet<String> hs = new HashSet<String>();
 
         for (int a = 0; a < distributionListEntry.length; a++) {
             hs.add(entry2String(distributionListEntry[a]));

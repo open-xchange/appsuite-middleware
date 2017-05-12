@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
@@ -84,16 +83,16 @@ public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
         return confs;
     }
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
-        setUpConfiguration(getClient(), false);
+        setUpConfiguration();
     }
 
     @Test
     public void testEMClientURL() throws Exception {
         ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
-        OnboardingTestResponse response = getClient().execute(req);
+        OnboardingTestResponse response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         if (response.hasError()) {
             fail("The response has an unexpected error: " + response.getException().getMessage());

@@ -96,15 +96,22 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
         metrics.incrementTotalIPChanges();
 
+        boolean whiteListedClient = IPCheckers.isWhitelistedClient(session, configuration);
+        // ACCEPT: If session-associated client is white-listed
+        if (whiteListedClient) {
+            accept(current, previous, session, true, AcceptReason.WHITE_LISTED);
+            return;
+        }
+
         // ACCEPT: If one of the given IP address lies with in the private range
         if (isPrivateV4Address(current) || isPrivateV4Address(previous)) {
-            accept(current, previous, session, AcceptReason.PRIVATE_IPV4);
+            accept(current, previous, session, whiteListedClient, AcceptReason.PRIVATE_IPV4);
             return;
         }
 
         // ACCEPT: if the IP address are white-listed
-        if (IPCheckers.isWhiteListed(current, previous, session, configuration)) {
-            accept(current, previous, session, AcceptReason.WHITE_LISTED);
+        if (IPCheckers.isWhiteListedAddress(current, previous, configuration)) {
+            accept(current, previous, session, whiteListedClient, AcceptReason.WHITE_LISTED);
             return;
         }
 
@@ -130,7 +137,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         }
 
         // ACCEPT
-        accept(current, previous, session, AcceptReason.ELIGIBLE);
+        accept(current, previous, session, whiteListedClient, AcceptReason.ELIGIBLE);
     }
 
     @Override
@@ -155,11 +162,12 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      *
      * @param current The current IP address
      * @param session The {@link Session}
+     * @param whiteListedClient Whether client is white-listed
      * @param acceptReason The accept reason
      */
-    private void accept(String current, String previous, Session session, AcceptReason acceptReason) {
+    private void accept(String current, String previous, Session session, boolean whiteListedClient, AcceptReason acceptReason) {
         LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
-        IPCheckers.updateIPAddress(current, session, true);
+        IPCheckers.updateIPAddress(current, session, true, whiteListedClient);
         switch (acceptReason) {
             case PRIVATE_IPV4:
                 metrics.incrementAcceptedPrivateIP();

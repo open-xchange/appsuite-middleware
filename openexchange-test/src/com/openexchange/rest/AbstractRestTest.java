@@ -52,9 +52,7 @@ package com.openexchange.rest;
 import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.test.JerseyTest;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -98,26 +96,16 @@ public abstract class AbstractRestTest extends JerseyTest {
         return ajaxClient2;
     }
 
-    /**
-     * Gets the client identifier to use when performing a login
-     *
-     * @return The client identifier or <code>null</code> to use default one (<code>"com.openexchange.ajax.framework.AJAXClient"</code>)
-     */
-    protected String getClientId() {
-        return null;
-    }
-
-    @Before
+    @Override
     public void setUp() throws Exception {
         ProvisioningSetup.init();
 
-        String clientId = getClientId();
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
         testUser2 = testContext.acquireUser();
-        ajaxClient1 = null == clientId ? new AJAXClient(testUser) : new AJAXClient(testUser, clientId);
-        ajaxClient2 = null == clientId ? new AJAXClient(testUser2) : new AJAXClient(testUser2, clientId);
+        ajaxClient1 = new AJAXClient(testUser);
+        ajaxClient2 = new AJAXClient(testUser2);
         admin = testContext.getAdmin();
 
         restClient = new ApiClient();
@@ -143,7 +131,7 @@ public abstract class AbstractRestTest extends JerseyTest {
         return this.protocol + "://" + this.hostname + ":8009";
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (ajaxClient1 != null) {

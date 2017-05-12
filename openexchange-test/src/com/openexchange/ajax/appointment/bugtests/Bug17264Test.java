@@ -102,7 +102,7 @@ public class Bug17264Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 17264", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
@@ -178,8 +178,8 @@ public class Bug17264Test extends AbstractAJAXSession {
 
     private void checkAlarm(AJAXClient client, int folderId, int alarm) throws Exception {
         GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
-        GetResponse getResponse = getClient().execute(getRequest);
-        Appointment app = getResponse.getAppointment(getClient().getValues().getTimeZone());
+        GetResponse getResponse = clientA.execute(getRequest);
+        Appointment app = getResponse.getAppointment(clientA.getValues().getTimeZone());
         assertEquals("Wrong alarm value", alarm, app.getAlarm());
     }
 

@@ -58,12 +58,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.google.common.hash.Hashing;
@@ -73,6 +76,7 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.validate.ParameterValidator;
 import com.openexchange.userfeedback.AbstractFeedbackType;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.Feedback;
@@ -96,6 +100,13 @@ public class StarRatingV1 extends AbstractFeedbackType {
     private static final String DELETE_SQL = "DELETE FROM feedback_star_rating_v1 WHERE id = ?";
 
     @Override
+    protected void checkFeedback(Object feedback) throws OXException {
+        JSONObject jsonFeedback = getFeedback(feedback);
+
+        ParameterValidator.checkJSON(jsonFeedback);
+    }
+
+    @Override
     protected void validate(Object feedback) throws OXException {
         JSONObject jsonFeedback = getFeedback(feedback);
 
@@ -108,7 +119,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
             if (Strings.isEmpty(score)) {
                 throw StarRatingExceptionCodes.INVALID_SCORE_TYPE.create(score);
             }
-            int scoreInt = Integer.valueOf(score).intValue();
+            long scoreInt = Long.valueOf(score).longValue();
             if (scoreInt < 1) {
                 throw StarRatingExceptionCodes.INVALID_SCORE_VALUE.create(scoreInt);
             }
@@ -118,6 +129,46 @@ public class StarRatingV1 extends AbstractFeedbackType {
         } catch (NumberFormatException e) {
             LOG.error("Unable to parse 'score' value from feedback.", e);
             throw StarRatingExceptionCodes.BAD_PARAMETER.create("score");
+        }
+    }
+
+    /**
+     * Limits the data column to have at most 21000 UTF-8 characters as the blob column is able to take 65535 bytes and an UTF-8 character can be up to 3 bytes. Therefor values will be cut off after defined lengths.
+     * 
+     * @param jsonFeedback
+     */
+    protected JSONObject ensureSizeLimits(JSONObject jsonFeedback) {
+        JSONObject limitedFeedback = new JSONObject(jsonFeedback);
+
+        limit(limitedFeedback, StarRatingV1Fields.app.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.browser.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.browser_version.name(), 10);
+        limit(limitedFeedback, StarRatingV1Fields.client_version.name(), 20);
+        limit(limitedFeedback, StarRatingV1Fields.comment.name(), 20000);
+        limit(limitedFeedback, StarRatingV1Fields.entry_point.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.language.name(), 20);
+        limit(limitedFeedback, StarRatingV1Fields.operating_system.name(), 50);
+        limit(limitedFeedback, StarRatingV1Fields.screen_resolution.name(), 20);
+        limit(limitedFeedback, StarRatingV1Fields.user_agent.name(), 200);
+        limit(limitedFeedback, StarRatingV1Fields.score.name(), 5);
+        return limitedFeedback;
+    }
+
+    protected void limit(JSONObject feedback, String key, int allowed) {
+        if ((feedback == null) || (Strings.isEmpty(key)) || (allowed <= 10)) {
+            return;
+        }
+        if (!feedback.has(key)) {
+            return;
+        }
+        try {
+            String value = feedback.getString(key);
+            if (value.length() > allowed) {
+                String limitedValue = org.apache.commons.lang.StringUtils.substring(value, 0, allowed - 4).concat(" ...");
+                feedback.put(key, limitedValue);
+            }
+        } catch (JSONException e) {
+            LOG.warn("Unable to limit json value.", e);
         }
     }
 
@@ -200,12 +251,30 @@ public class StarRatingV1 extends AbstractFeedbackType {
                     LOG.error("Unable to read feedback with id {}. Won't return it.", id, e);
                 }
             }
+            SortedSet<Feedback> sorted = sort(feedbacks.values());
+            return createExportObject(sorted);
         } catch (final SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
-        return createExportObject(feedbacks.values());
+    }
+
+    private SortedSet<Feedback> sort(Collection<Feedback> collection) {
+        Comparator<Feedback> comparator = new Comparator<Feedback>() {
+
+            @Override
+            public int compare(Feedback o1, Feedback o2) {
+                if (o1.getDate() < o2.getDate()) {
+                    return -1;
+                }
+                return 1;
+
+            }
+        };
+        SortedSet<Feedback> sorted = new TreeSet<Feedback>(comparator);
+        sorted.addAll(collection);
+        return sorted;
     }
 
     /**
@@ -269,7 +338,10 @@ public class StarRatingV1 extends AbstractFeedbackType {
 
         JSONObject removeAdditional = remove(returnFeedback, keys);
         JSONObject cleanedFeedback = addRequired(removeAdditional, keys);
-        return cleanedFeedback;
+
+        JSONObject ensureSizeLimits = ensureSizeLimits(cleanedFeedback);
+
+        return ensureSizeLimits;
     }
 
     /**
@@ -318,7 +390,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
         while (jsonKeys.hasNext()) {
             String key = (String) jsonKeys.next();
             if (!expectedKeys.contains(key)) {
-                LOG.warn("An unknown key '{}' has been provided. It will be removed before persisting.", key);
+                LOG.info("An unknown key '{}' has been provided. It will be removed before persisting.", key);
                 processed.remove(key);
                 continue;
             }
@@ -351,5 +423,4 @@ public class StarRatingV1 extends AbstractFeedbackType {
         }
         return processed;
     }
-
 }

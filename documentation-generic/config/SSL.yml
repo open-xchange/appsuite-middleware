@@ -1,18 +1,21 @@
 feature_name: SSL
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/trusted_connections.html]] for more informations.
 properties:
     - key: com.openexchange.net.ssl.default.truststore.enabled
       description: |
         Defines if the default truststore provided by the JVM should be used. These truststore contains the Application Server’s trusted certificates, including public keys for other entities. 
         For a trusted certificate, the server has confirmed that the public key in the certificate belongs to the certificate’s owner. 
         Trusted certificates generally include those of certification authorities (CAs).
-        The administrator is able to ignore the provided by setting the property to 'false'. If so a custom truststore should be provided. 
-        Have a look at 'com.openexchange.net.ssl.custom.truststore.enabled' for more details.
+        The administrator is able to ignore the provided by setting the property to <code>false</code>. If so a custom truststore should be provided. 
+        Have a look at [[com.openexchange.net.ssl.custom.truststore.enabled]] for more details.
       defaultValue: true
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
       related: com.openexchange.net.ssl.custom.truststore.enabled
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.custom.truststore.enabled
       description: |
@@ -23,8 +26,9 @@ properties:
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.net.ssl.custom.truststore.path, com.openexchange.net.ssl.custom.truststore.password
+      related: ["com.openexchange.net.ssl.custom.truststore.path", "com.openexchange.net.ssl.custom.truststore.password"]
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.custom.truststore.path
       description: |
@@ -33,8 +37,9 @@ properties:
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.password
+      related: ["com.openexchange.net.ssl.custom.truststore.enabled", "com.openexchange.net.ssl.custom.truststore.password"]
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.custom.truststore.password
       description: |
@@ -43,32 +48,36 @@ properties:
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
-      related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
+      related: ["com.openexchange.net.ssl.custom.truststore.enabled", "com.openexchange.net.ssl.custom.truststore.path"]
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL", "Credential"]
     - key: com.openexchange.net.ssl.hostname.verification.enabled
       description: |
         Defines if the name of the host should be checked while SSL handshaking. If the host name verification fails,
         a connection to the desired host cannot be established even if there is a valid certificate. 
-        A host name verifier ensures the host name in the URL to which the client connects matches the host name in the digital certificate that the server sends back as part of the SSL connection.  
+        A host name verifier ensures the host name in the URL to which the client connects matches the host name in
+        the digital certificate that the server sends back as part of the SSL connection.  
       defaultValue: true
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.trustlevel
       description: |
         Defines which level of trust should be considered for potentially secure connections (e. g. https). 
-        The value 'all' means that all certificates will be trusted and a SSLSocketFactory that does not check certificates (and host names) will be used. 
-        You can switch this setting to 'restricted' so that every certificate provided by the defined endpoint will be validated trusted.
+        The value <code>all</code> means that all certificates will be trusted and a SSLSocketFactory that does not check certificates (and host names) will be used. 
+        You can switch this setting to <code>restricted</code> so that every certificate provided by the defined endpoint will be validated trusted.
       defaultValue: all
       version: 7.8.3
       reloadable: false
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.protocols
       description: |
@@ -79,10 +88,13 @@ properties:
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.ciphersuites
       description: |
         Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.
+        
+        <b>Note</b>:
         The named cipher suites refer to the identifiers of OpenJDK. Although an attempt is in place to find the matching ones on other vendors' JREs, it might be a good
         idea to name the desired cipher suites to use according to vendor-specific identifiers.
       defaultValue: TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV
@@ -91,30 +103,35 @@ properties:
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
     - key: com.openexchange.net.ssl.whitelist
       description: |
         Defines a comma separated list of hosts certificates shouldn't be checked for validity. The list can contain wildcards and ip ranges. 
         In addition it is possible to define a list by host name, IPv4 or IPv6 address. An incoming host name will not be checked against its IP address, 
-        for instance connecting against 'imap.gmail.com' will be possible if '*.gmail.com' is whitelisted but adding only the corresponding IP address entry '64.233.167.108' as whitelisted won't work.   
+        for instance connecting against 'imap.gmail.com' will be possible if '*.gmail.com' is whitelisted but adding only the corresponding 
+        IP address entry '64.233.167.108' as whitelisted won't work.   
       defaultValue: 127.0.0.1-127.255.255.255,localhost
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
       related:
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL", "White List"]
     - key: com.openexchange.net.ssl.user.configuration.enabled
       description: |
         Defines if the user is able to define a more unsecure trust level than it is defined globally the administrator. 
-        For instance if 'com.openexchange.net.ssl.trustlevel' is 'restricted' the user won't be able to use untrusted connections (invalid certificates provided by the endpoint). 
-        If 'com.openexchange.net.ssl.user.configuration.enabled' is 'true' the user will be able to define that he will use untrusted connections.
+        For instance if [[com.openexchange.net.ssl.trustlevel]] is <code>restricted</code> the user won't be able to use untrusted connections (invalid certificates provided by the endpoint). 
+        If [[com.openexchange.net.ssl.user.configuration.enabled]] is <code>true</code> the user will be able to define that he will use untrusted connections.
+
+        JSLob: io.ox/core//trustAllConnections
       defaultValue: false
       version: 7.8.3
       reloadable: true
       configcascadeAware: true
-      related: |
-        com.openexchange.net.ssl.trustlevel, JSLob: io.ox/core//trustAllConnections
+      related: com.openexchange.net.ssl.trustlevel
       file: ssl.properties
+      packageName: open-xchange-core
       tags: ["SSL"]
       

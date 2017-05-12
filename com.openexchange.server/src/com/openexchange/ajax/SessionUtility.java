@@ -748,7 +748,7 @@ public final class SessionUtility {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             if (cookies.isEmpty()) {
-                LOG.info("Empty Cookies in HTTP request. No session secret can be looked up.");
+                LOG.debug("Empty Cookies in HTTP request. No session secret can be looked up.");
             } else {
                 final String secretPrefix = SECRET_PREFIX;
                 final StringBuilder tmp = new StringBuilder(256);
@@ -890,8 +890,16 @@ public final class SessionUtility {
             return;
         }
 
+        // Check for configured domain and/or host sharding
+        String serverName = req.getServerName();
+        String domain = Cookies.getDomainValue(serverName);
+
+        if (null == domain) {
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            domain = serverName;
+        }
+
         // Drop "open-xchange-session" cookie
-        String domain = Cookies.getDomainValue(req.getServerName());
         {
             Cookie cookie = cookies.get(SESSION_PREFIX + hash);
             if (null != cookie) {
@@ -941,7 +949,16 @@ public final class SessionUtility {
     public static void removeOXCookies(Session session, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         String sessionHash = session.getHash();
-        String domain = Cookies.getDomainValue(request.getServerName());
+
+        // Check for configured domain and/or host sharding
+        String serverName = request.getServerName();
+        String domain = Cookies.getDomainValue(serverName);
+
+        if (null == domain) {
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            domain = serverName;
+        }
+
         removeCookie(cookies, response, SESSION_PREFIX + sessionHash, domain);
         removeCookie(cookies, response, SECRET_PREFIX + sessionHash, domain);
         removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID), domain);
@@ -963,7 +980,14 @@ public final class SessionUtility {
             return;
         }
 
-        String domain = Cookies.getDomainValue(req.getServerName());
+        // Check for configured domain and/or host sharding
+        String serverName = req.getServerName();
+        String domain = Cookies.getDomainValue(serverName);
+        if (null == domain) {
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            domain = serverName;
+        }
+
         for (final String cookieName : cookieNames) {
             Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
@@ -990,8 +1014,12 @@ public final class SessionUtility {
         final String name = Tools.JSESSIONID_COOKIE;
         final Cookie cookie = cookies.get(name);
         if (null != cookie) {
-            String domain = Cookies.getDomainValue(req.getServerName());
-            removeCookie(cookie, null, domain, resp);
+            // Check for configured domain and/or host sharding
+            String serverName = req.getServerName();
+            String domain = Cookies.getDomainValue(serverName);
+
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            removeCookie(cookie, null, null == domain ? serverName : domain, resp);
         }
     }
 

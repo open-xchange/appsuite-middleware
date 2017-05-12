@@ -4,13 +4,14 @@ properties:
       description: |
         This option enables or disable the complete event handling for OX
         The event handling is a essential Open-Xchange component which needs
-        to always run. This should only be set to false for debugging purposes.
+        to always run. This should only be set to <code>false</code> for debugging purposes.
       defaultValue: true
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: event.properties
+      packageName: open-xchange-core
       tags: ["Event"]
     - key: com.openexchange.event.eventQueueDelay
       description: |
@@ -27,4 +28,5 @@ properties:
       configcascadeAware: false
       related: com.openexchange.event.isEventQueueEnabled
       file: event.properties
+      packageName: open-xchange-core
       tags: ["Event"]

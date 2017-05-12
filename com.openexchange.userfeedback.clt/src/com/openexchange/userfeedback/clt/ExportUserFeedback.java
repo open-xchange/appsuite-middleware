@@ -49,10 +49,12 @@
 
 package com.openexchange.userfeedback.clt;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
@@ -60,8 +62,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import com.openexchange.cli.AbstractRestCLI;
 
@@ -90,7 +91,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     private static final String ENDPOINT_LONG = "api-root";
     private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/export";
-    private String pathStr;
+    private Path path;
 
     /**
      * Invokes this command-line tool
@@ -122,11 +123,10 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     protected String getName() {
         return "exportuserfeedback [OPTIONS] output_file";
     }
-    
+
     @Override
     protected String getHeader() {
-        return "exportuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time] output_file\n" +
-            "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
+        return "exportuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
     }
 
     @Override
@@ -136,13 +136,20 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             System.exit(1);
             return;
         }
-        pathStr = cmd.getArgs()[0];
-        File file = new File(pathStr);
-        if (file.exists()) {
-            System.err.println("File " + file.getAbsolutePath() + " does already exist! Please choose another location.");
+        setFilePath(cmd);
+
+        if (Files.exists(path)) {
+            System.err.println("File " + path.toString() + " does already exist! Please choose another location.");
             System.exit(1);
             return;
         }
+    }
+
+    private void setFilePath(CommandLine cmd) {
+        String pathStr = cmd.getArgs()[0];
+        String normalizedPath = FilenameUtils.normalize(pathStr).replaceFirst("^~", System.getProperty("user.home"));
+        Path tmpPath = Paths.get(normalizedPath).normalize();
+        path = Paths.get(tmpPath.toUri());
     }
 
     @Override
@@ -151,12 +158,9 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
         builder.acceptEncoding("UTF-8");
 
         InputStream response = builder.get(InputStream.class);
+        Files.copy(response, path);
 
-        File file = new File(pathStr);
-        byte[] byteArray = IOUtils.toByteArray(response);
-        FileUtils.writeByteArrayToFile(file, byteArray);
-
-        System.out.println("File successfully written to: " + pathStr);
+        System.out.println("File successfully written to: " + path.toString());
         return null;
     }
 
@@ -176,10 +180,10 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             target.request(MediaType.APPLICATION_OCTET_STREAM_TYPE).accept(MediaType.APPLICATION_OCTET_STREAM_TYPE);
 
             if (cmd.hasOption(START_SHORT)) {
-                target = target.queryParam("start", cmd.getOptionValue(START_SHORT));
+                target = target.queryParam("start", cmd.getOptionValue(START_SHORT).concat("000")); // convert seconds to ms
             }
             if (cmd.hasOption(END_SHORT)) {
-                target = target.queryParam("end", cmd.getOptionValue(END_SHORT));
+                target = target.queryParam("end", cmd.getOptionValue(END_SHORT).concat("000")); // convert seconds to ms
             }
             return target;
         } catch (URISyntaxException e) {

@@ -157,6 +157,10 @@ public enum FolderField {
      */
     ACCOUNT_ID(318, "account_id"),
     /**
+     * The folders raw name
+     */
+    FOLDER_NAME_RAW(319, "folder_name"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),

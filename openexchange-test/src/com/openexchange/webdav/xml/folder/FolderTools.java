@@ -49,12 +49,12 @@
 
 package com.openexchange.webdav.xml.folder;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Date;
 import org.jdom2.JDOMException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.folder.actions.ListRequest;
 import com.openexchange.webdav.xml.folder.actions.ListResponse;
 import com.openexchange.webdav.xml.framework.WebDAVClient;
@@ -93,9 +93,7 @@ public final class FolderTools {
                     break;
                 }
             }
-            if (null == defaultAppointmentFolder) {
-                throw new TestException("Unable to find default appointment folder.");
-            }
+            assertNotNull("Unable to find default appointment folder.", defaultAppointmentFolder);
         }
         return defaultAppointmentFolder;
     }
@@ -115,9 +113,7 @@ public final class FolderTools {
                     break;
                 }
             }
-            if (null == defaultContactFolder) {
-                throw new TestException("Unable to find default contact folder.");
-            }
+            assertNotNull("Unable to find default contact folder.", defaultContactFolder);
         }
         return defaultContactFolder;
     }

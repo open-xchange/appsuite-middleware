@@ -678,7 +678,8 @@ public final class LoginPerformer {
             String login = null == session ? request.getLogin() : session.getLoginName();
             if (null != login) {
                 String client = request.getClient();
-                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client));
+                String sessionId = null == session ? null : session.getSessionID();
+                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client), DefaultAttribute.valueFor(Name.SESSION_ID, null == sessionId ? "<none>" : sessionId));
             }
         }
     }

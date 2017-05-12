@@ -747,7 +747,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     /**
      * Sets the archive full name
      *
-     * @param trashFullname The archive full name to set
+     * @param archiveFullname The archive full name to set
      */
     public void setArchiveFullname(String archiveFullname) {
         this.archiveFullname = archiveFullname;

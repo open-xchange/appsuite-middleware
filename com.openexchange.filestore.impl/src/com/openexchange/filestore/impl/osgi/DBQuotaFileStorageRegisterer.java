@@ -59,9 +59,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.QuotaBackendService;
 import com.openexchange.filestore.impl.DBQuotaFileStorageService;
 import com.openexchange.filestore.impl.groupware.QuotaModePreferenceItem;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -78,7 +78,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
     private final Lock lock = new ReentrantLock();
 
     private final QuotaFileStorageListenerTracker listenerTracker;
-    private final RankingAwareNearRegistryServiceTracker<QuotaBackendService> backendServices;
+    private final RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> backendServices;
 
     private List<ServiceRegistration<?>> registrations;
     boolean isRegistered = false;
@@ -88,7 +88,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
      *
      * @param context The bundle context
      */
-    public DBQuotaFileStorageRegisterer(RankingAwareNearRegistryServiceTracker<QuotaBackendService> backendServices, QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
+    public DBQuotaFileStorageRegisterer(RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> backendServices, QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
         super();
         this.backendServices = backendServices;
         this.listenerTracker = listenerTracker;

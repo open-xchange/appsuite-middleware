@@ -72,9 +72,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String UPDATE_WITHOUT_PARTICIPANTS_DISPLAY = "Appointments must have at least one participant.";
 
     /**
-     * You do not have the appropriate permissions to read appointments that folder.
+     * You do not have the appropriate permissions to read appointments in that folder.
      */
-    public static final String NO_PERMISSION_MSG = "You do not have the appropriate permissions to read appointments that folder.";
+    public static final String NO_PERMISSION_MSG = "You do not have the appropriate permissions to read appointments in that folder.";
 
     /**
      * End date must not be before start date.

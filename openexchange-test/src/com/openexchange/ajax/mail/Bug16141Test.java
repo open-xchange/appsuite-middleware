@@ -69,7 +69,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 
 /**
  *
@@ -101,7 +101,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         values = getClient().getValues();
         folder = values.getInboxFolder();
         address = getClient().getValues().getSendAddress();
-        testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
     }
 
     @Test

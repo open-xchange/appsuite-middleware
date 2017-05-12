@@ -696,7 +696,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
             try {
-                ImageTransformations transformed = transformationService.transfom(image).scale(200, 150, ScaleType.COVER_AND_CROP, true);
+                ImageTransformations transformed = transformationService.transfom(image).rotate().scale(200, 150, ScaleType.COVER_AND_CROP, true);
                 ThresholdFileHolder transformedImage = new ThresholdFileHolder();
                 transformedImage.write(transformed.getFullTransformedImage(mimeType).getImageStream());
                 return transformedImage;

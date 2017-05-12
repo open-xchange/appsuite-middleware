@@ -9,17 +9,19 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report"]
   - key: com.openexchange.report.appsuite.maxChunkSize
     description: |
-      Determines how many chunks of data can be kept in the report before saving them in the folder described in the 
-      com.openexchange.report.client.fileStorage property
+      Determines how many chunks of data can be kept in the report before saving them in the folder described in 
+      [[com.openexchange.report.client.fileStorage]].
     defaultValue: 200
     version: 7.8.3
     reloadable: true
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report","Limit"]
   - key: com.openexchange.report.appsuite.maxThreadPoolSize
     description: |
@@ -30,14 +32,16 @@ properties:
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report","Limit", "Thread"]
   - key: com.openexchange.report.appsuite.threadPriority
     description: |
-      The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
+      The priority that threads, working on the report have. Allowed value range is <code>1</code> - <code>10</code>. <code>1</code> is the lowest, <code>10</code> the highest priority.
     defaultValue: 1
     version: 7.8.3
     reloadable: true
     configcascadeAware: false
     related: 
     file: reportserialization.properties
+    packageName: open-xchange-core
     tags: ["Report", "Thread"]           

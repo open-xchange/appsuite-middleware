@@ -79,7 +79,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Disposition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
@@ -391,8 +391,8 @@ public class FileResponseRendererTest {
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
-        final String expectedCD = "attachment"; // force download
-        assertTrue("Wrong Content-Disposition: " + resp.getHeader("Content-Disposition") + "; expected: " + expectedCD, resp.getHeader("Content-Disposition").startsWith(expectedCD));
+        assertTrue("Wrong status code", resp.getStatus() == 403);
+        assertTrue("Wrong status message", resp.getStatusMessage().equals("Denied to output possibly harmful content"));
     }
 
     @Test
@@ -523,14 +523,9 @@ public class FileResponseRendererTest {
         fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
 
-        // Faked SVG image should be processed as XML, which is output as HTML in case inline/view requested
-
         assertNotNull("Header content-type not found", resp.getContentType());
-        assertTrue("Wrong Content-Type", resp.getContentType().startsWith("application/html"));
-
-        String content = new String(servletOutputStream.toByteArray());
-        assertTrue("Processed XML/SVG content contains JavaScript content, but shouldn't:\n" + content, content.indexOf("<script") < 0);
-        assertTrue("Processed XML/SVG content contains unsanitized JavaScript content, but shouldn't:\n" + content, content.indexOf("&lt;/script&gt;") > 0);
+        assertTrue("Wrong Content-Type", resp.getContentType().startsWith("application/xml"));
+        assertTrue("Wrong content-disposition", resp.getHeader("content-disposition").startsWith("attachment"));
     }
 
     @Test
@@ -619,7 +614,7 @@ public class FileResponseRendererTest {
 
     @Test
     public void testContentLengthMailAttachments_Bug26926() {
-        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         try {
             InputStream is = null;
             is = new FileInputStream(new File(testDataDir + "26926_27394.pdf"));

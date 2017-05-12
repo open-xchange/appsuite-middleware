@@ -11,7 +11,8 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: manifests.properties.in
+      file: manifests.properties
+      packageName: open-xchange-appsuite-backend
       tags: ["Manifests"]
     - key: com.openexchange.apps.tzdata
       description: |
@@ -21,7 +22,8 @@ properties:
       reloadable: false
       configcascadeAware: false
       related: 
-      file: manifests.properties.in
+      file: manifests.properties
+      packageName: open-xchange-appsuite-backend
       tags: ["Manifests", "Database"]
     - key: com.openexchange.apps.manifestPath
       description: |
@@ -31,5 +33,6 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: manifests.properties.in
+      file: manifests.properties
+      packageName: open-xchange-appsuite-backend
       tags: ["Manifests"]

@@ -69,25 +69,19 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class CreateWithGuestPermissionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link CreateWithGuestPermissionTest}.
-     *
-     * @param name The test name
-     */
-    public CreateWithGuestPermissionTest() {
-        super();
-    }
-
     @Test
     public void testCreateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testCreateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
-    public void notTestCreateSharedFolderExtensively() throws Exception {
+    public void noTestCreateSharedFolderExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
+                    if (isReadOnlySharing(module) && false == isReadOnly(guestPermission)) {
+                        continue;
+                    }
                     testCreateSharedFolder(api, module, guestPermission);
                 }
             }

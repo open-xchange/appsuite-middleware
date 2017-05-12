@@ -63,6 +63,7 @@ import com.openexchange.session.UserAndContext;
 
 public class MobileApiFacadePushConfiguration {
 
+    public static final String CONFIG_CLIENT_IDS_YAML = "pns-mobile-api-facade-clients.yml";
     public static final String CONFIG_APN_BADGE_ENABLED = "com.openexchange.pns.mobile.api.facade.apn.badge.enabled";
     public static final String CONFIG_APN_SOUND_ENABLED = "com.openexchange.pns.mobile.api.facade.apn.sound.enabled";
     public static final String CONFIG_APN_SOUND_FILENAME = "com.openexchange.pns.mobile.api.facade.apn.sound.filename";
@@ -76,6 +77,15 @@ public class MobileApiFacadePushConfiguration {
         CACHE_CONFIGS.invalidateAll();
     }
 
+    /**
+     * Gets the Mobile API Facade configuration for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param viewFactory The view factory to use
+     * @return The Mobile API Facade configuration for specified user
+     * @throws OXException If the Mobile API Facade configuration cannot be returned for specified user
+     */
     public static MobileApiFacadePushConfiguration getConfigFor(final int userId, final int contextId, final ConfigViewFactory viewFactory) throws OXException {
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
         MobileApiFacadePushConfiguration config = CACHE_CONFIGS.getIfPresent(key);

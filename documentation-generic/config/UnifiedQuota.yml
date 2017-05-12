@@ -1,0 +1,13 @@
+feature_name: Unified Quota
+properties:
+    - key: com.openexchange.unifiedquota.enabled
+      description: |
+        Enables or disables Unified Quota
+      defaultValue: false
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: unifiedquota.properties
+      packageName: open-xchange-core
+      tags: ["Filestore"]

@@ -51,7 +51,6 @@ package com.openexchange.rest.userfeedback;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * 
@@ -60,13 +59,11 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-@RunWith(ParallelSuite.class)
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
-    FeedbackRoundtripTest.class,
     SendTest.class,
     ExportTest.class,
     DeleteTest.class,
-    
 
 })
 public class UserFeedbackSuite {

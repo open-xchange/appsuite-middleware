@@ -284,4 +284,9 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     public void lock(Connection con, int writePoolId) throws OXException {
         contextAssignment.lock(con, writePoolId);
     }
+
+    @Override
+    public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
+        return contextAssignment.getAllSchemata(con);
+    }
 }

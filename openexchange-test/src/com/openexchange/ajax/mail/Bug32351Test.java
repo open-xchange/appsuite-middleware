@@ -69,7 +69,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 
@@ -111,7 +111,7 @@ public class Bug32351Test extends AbstractMailTest {
         {
             InputStreamReader streamReader = null;
             try {
-                streamReader = new InputStreamReader(new FileInputStream(new File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR), "mail010.eml")), "UTF-8");
+                streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "mail010.eml")), "UTF-8");
                 char[] buf = new char[2048];
                 for (int read; (read = streamReader.read(buf, 0, 2048)) > 0;) {
                     sb.append(buf, 0, read);
