@@ -85,6 +85,7 @@ public class Bug25160Test extends CalDAVTest {
         manager2.setFailOnError(true);
         manager2.resetDefaultFolderPermissions();
 
+        ftm.setClient(getClient2());
         FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder());
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
