@@ -162,7 +162,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private final OSGiCleanMapper mapper;
     private final HttpStatus shutDownStatus;
     private final ErrorPageGenerator errorPageGenerator;
-    private final Map<HttpContext, HttpContext> registeredHttpContexts;
 
     /**
      * Constructor.
@@ -172,8 +171,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      */
     public OSGiMainHandler(List<FilterAndPath> initialFilters, Bundle bundle) {
         super();
-        this.initialFilters = new ArrayList<FilterAndPath>(initialFilters);
-        registeredHttpContexts = new HashMap<>(16, 0.9F);
+        this.initialFilters = initialFilters;
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
         this.shutDownStatus = HttpStatus.newHttpStatus(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "Server shutting down...");
@@ -315,7 +313,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 LOG.debug("No HttpContext provided, creating default");
                 context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
-            registeredHttpContexts.put(context, context);
 
             OSGiServletHandler servletHandler =
                     findOrCreateOSGiServletHandler(servlet, context, initparams);
@@ -337,7 +334,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     /**
-     * Add our default set of Filters to the ServletHandler.
+     * Add our set of initial Filters to the ServletHandler.
      *
      * @param context The associated HTTP context
      * @throws ServletException
@@ -349,7 +346,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     /**
-     * Adds specified filter to all known HTTP contexts.
+     * Adds specified filter to all local HTTP contexts.
      *
      * @param filter The filter to add
      * @param path The filter path
@@ -359,12 +356,25 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         ReentrantLock lock = OSGiCleanMapper.getLock();
         lock.lock();
         try {
-            initialFilters.add(new FilterAndPath(filter, path));
-
-            for (HttpContext context : registeredHttpContexts.keySet()) {
+            for (HttpContext context : mapper.httpContextToServletContextMap.keySet()) {
                 registerFilter(filter, path, null, context, null);
             }
 
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Removes specified filter from all local HTTP contexts.
+     *
+     * @param filter The filter to remove
+     */
+    public void removeServletFilter(Filter filter) {
+        ReentrantLock lock = OSGiCleanMapper.getLock();
+        lock.lock();
+        try {
+            unregisterFilter(filter);
         } finally {
             lock.unlock();
         }
@@ -439,7 +449,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 LOG.debug("No HttpContext provided, creating default");
                 context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
-            registeredHttpContexts.put(context, context);
 
             if (internalPrefix == null) {
                 internalPrefix = "";
