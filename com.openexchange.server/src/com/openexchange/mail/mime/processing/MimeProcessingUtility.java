@@ -515,8 +515,8 @@ public final class MimeProcessingUtility {
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
         } else if (contentType.startsWith(MimeTypes.MIME_TEXT_PLAIN)) {
             final String content = readContent(textPart, charset);
-            final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-            if (uuencodedMP.isUUEncoded()) {
+            UUEncodedMultiPart uuencodedMP = UUEncodedMultiPart.valueFor(content);
+            if (null != uuencodedMP && uuencodedMP.isUUEncoded()) {
                 /*
                  * UUEncoded content detected. Extract normal text.
                  */

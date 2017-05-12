@@ -591,8 +591,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final String subtype = com.openexchange.java.Strings.toLowerCase(bodystructure.subtype);
                 if ("plain".equals(subtype)) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
-                        final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                        if (uuencodedMP.isUUEncoded()) {
+                        UUEncodedMultiPart uuencodedMP = UUEncodedMultiPart.valueFor(content);
+                        if (null != uuencodedMP && uuencodedMP.isUUEncoded()) {
                             content = uuencodedMP.getCleanText();
                         }
                     }
@@ -1080,7 +1080,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (!contentType.startsWith("text/plain")) {
             return false;
         }
-        return new UUEncodedMultiPart(MimeMessageUtility.readContent(part, contentType)).isUUEncoded();
+        return UUEncodedMultiPart.isUUEncoded(MimeMessageUtility.readContent(part, contentType));
     }
 
     @Override
