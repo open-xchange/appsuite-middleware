@@ -75,6 +75,8 @@ import com.openexchange.tools.arrays.Collections;
  */
 public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
+    private static final AttendeeMapper MAPPER = AttendeeMapper.getInstance();
+
     private final int accountId;
     private final EntityProcessor entityProcessor;
 
@@ -194,29 +196,41 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void insertTombstoneAttendees(String eventId, List<Attendee> attendees) throws OXException {
-        // TODO Auto-generated method stub
-
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (Attendee attendee : attendees) {
+                updated += replaceTombstoneAttendee(connection, eventId, attendee);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
 
     private int updateAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException, OXException {
         int updated = 0;
         for (Attendee attendee : attendees) {
             attendee = entityProcessor.adjustPriorSave(attendee);
-            AttendeeField[] fields = AttendeeMapper.getInstance().getMappedFields(AttendeeMapper.getInstance().getAssignedFields(attendee));
+            AttendeeField[] fields = MAPPER.getMappedFields(MAPPER.getAssignedFields(attendee));
             String sql = new StringBuilder()
-                .append("UPDATE calendar_attendee SET ").append(AttendeeMapper.getInstance().getAssignments(fields))
+                .append("UPDATE calendar_attendee SET ").append(MAPPER.getAssignments(fields))
                 .append(" WHERE cid=? AND account=? AND event=? AND uri=?;")
             .toString();
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 int parameterIndex = 1;
-                parameterIndex = AttendeeMapper.getInstance().setParameters(stmt, parameterIndex, attendee, fields);
+                parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, fields);
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
                 stmt.setInt(parameterIndex++, asInt(eventId));
                 stmt.setString(parameterIndex++, attendee.getUri());
                 updated += logExecuteUpdate(stmt);
             } catch (SQLException e) {
-                throw asOXException(e, AttendeeMapper.getInstance(), attendee, connection, "calendar_attendee");
+                throw asOXException(e, MAPPER, attendee, connection, "calendar_attendee");
             }
         }
         return updated;
@@ -248,25 +262,40 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private int insertAttendee(Connection connection, String eventId, Attendee attendee) throws SQLException, OXException {
         attendee = entityProcessor.adjustPriorSave(attendee);
-        AttendeeField[] mappedFields = AttendeeMapper.getInstance().getMappedFields();
+        AttendeeField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
-            .append("INSERT INTO calendar_attendee (cid,account,event,").append(AttendeeMapper.getInstance().getColumns(mappedFields)).append(") ")
-            .append("VALUES (?,?,?,").append(AttendeeMapper.getInstance().getParameters(mappedFields)).append(");")
+            .append("INSERT INTO calendar_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ").append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
             stmt.setInt(parameterIndex++, asInt(eventId));
-            parameterIndex = AttendeeMapper.getInstance().setParameters(stmt, parameterIndex, attendee, mappedFields);
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private int replaceTombstoneAttendee(Connection connection, String eventId, Attendee attendee) throws SQLException, OXException {
+        attendee = entityProcessor.adjustPriorSave(attendee);
+        AttendeeField[] mappedFields = MAPPER.getMappedTombstoneFields();
+        String sql = new StringBuilder()
+            .append("REPLACE INTO calendar_del_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ").append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, asInt(eventId));
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
             return logExecuteUpdate(stmt);
         }
     }
 
     private Map<String, List<Attendee>> selectAttendees(Connection connection, String[] eventIds, Boolean internal, AttendeeField[] fields) throws SQLException, OXException {
-        AttendeeField[] mappedFields = AttendeeMapper.getInstance().getMappedFields(fields);
+        AttendeeField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT event,").append(AttendeeMapper.getInstance().getColumns(mappedFields))
+            .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM calendar_attendee WHERE cid=? AND account=?")
         ;
         if (1 == eventIds.length) {
@@ -295,7 +324,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private Attendee readAttendee(ResultSet resultSet, AttendeeField[] fields) throws SQLException, OXException {
-        Attendee attendee = AttendeeMapper.getInstance().fromResultSet(resultSet, fields);
+        Attendee attendee = MAPPER.fromResultSet(resultSet, fields);
         return entityProcessor.adjustAfterLoad(attendee);
     }
 
