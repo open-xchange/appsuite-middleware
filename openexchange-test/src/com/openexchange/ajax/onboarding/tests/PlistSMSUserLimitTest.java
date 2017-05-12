@@ -125,7 +125,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         }
 
         //Wait until sms tokens are refreshed
-        Thread.sleep(61000);
+        Thread.sleep(122000);
 
         //Execute another sms request which shouldn't run into the user sms limit
         ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
@@ -141,7 +141,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
     protected Map<String, String> getNeededConfigurations() {
         Map<String, String> map = new HashMap<String, String>();
         map.put("com.openexchange.sms.userlimit", String.valueOf(2));
-        map.put("com.openexchange.sms.userlimit.refreshInterval", String.valueOf(1));
+        map.put("com.openexchange.sms.userlimit.refreshInterval", String.valueOf(2));
         return map;
     }
 

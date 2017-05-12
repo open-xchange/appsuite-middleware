@@ -185,7 +185,8 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
+    /** The logger */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
     private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
 
@@ -1834,7 +1835,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                             CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(fo.getObjectID()));
                             globalCache.putInGroup(cacheKey, Integer.toString(storageParameters.getContextId()), f, true);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
+                        LOG.warn("", e);
+                    } catch (RuntimeException e) {
                         LOG.warn("", e);
                     }
                 }

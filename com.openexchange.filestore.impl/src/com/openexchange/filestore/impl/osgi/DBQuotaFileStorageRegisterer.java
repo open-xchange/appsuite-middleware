@@ -77,8 +77,9 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
 
-    private final QuotaFileStorageListenerTracker listenerTracker;
-    private final RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> backendServices;
+    private final FileStorageListenerRegistry storageListenerRegistry;
+    private final QuotaFileStorageListenerTracker quotaListenerTracker;
+    private final RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> unifiedQuotaServices;
 
     private List<ServiceRegistration<?>> registrations;
     boolean isRegistered = false;
@@ -88,10 +89,11 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
      *
      * @param context The bundle context
      */
-    public DBQuotaFileStorageRegisterer(RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> backendServices, QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
+    public DBQuotaFileStorageRegisterer(FileStorageListenerRegistry storageListenerRegistry, RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> unifiedQuotaServices, QuotaFileStorageListenerTracker quotaListenerTracker, BundleContext context) {
         super();
-        this.backendServices = backendServices;
-        this.listenerTracker = listenerTracker;
+        this.storageListenerRegistry = storageListenerRegistry;
+        this.unifiedQuotaServices = unifiedQuotaServices;
+        this.quotaListenerTracker = quotaListenerTracker;
         this.context = context;
     }
 
@@ -110,7 +112,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
                 List<ServiceRegistration<?>> registrations = new ArrayList<>(4);
                 this.registrations = registrations;
 
-                QuotaFileStorageService qfss = new DBQuotaFileStorageService(backendServices, listenerTracker, service);
+                QuotaFileStorageService qfss = new DBQuotaFileStorageService(storageListenerRegistry, unifiedQuotaServices, quotaListenerTracker, service);
                 registrations.add(context.registerService(QuotaFileStorageService.class, qfss, null));
 
                 QuotaModePreferenceItem item = new QuotaModePreferenceItem(qfss);

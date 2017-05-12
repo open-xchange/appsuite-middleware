@@ -69,7 +69,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * {@link Bug21620Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug21620Test extends AbstractAJAXSession {
@@ -86,12 +86,13 @@ public class Bug21620Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        clientA = new AJAXClient(testContext.acquireUser());
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientA = getClient();
+        clientB = getClient2();
         clientC = new AJAXClient(testContext.acquireUser());
 
         List<UserParticipant> users = new ArrayList<UserParticipant>();
@@ -141,6 +142,7 @@ public class Bug21620Test extends AbstractAJAXSession {
         assertEquals("Wrong organizer ID", clientA.getValues().getUserId(), loadedAppointment.getOrganizerId());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

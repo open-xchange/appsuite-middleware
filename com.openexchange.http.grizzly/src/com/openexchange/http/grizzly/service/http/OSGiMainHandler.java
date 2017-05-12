@@ -313,7 +313,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
              */
             if (context == null) {
                 LOG.debug("No HttpContext provided, creating default");
-                context = httpService.createDefaultHttpContext();
+                context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
             registeredHttpContexts.put(context, context);
 
@@ -394,7 +394,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
             if (context == null) {
                 LOG.debug("No HttpContext provided, creating default");
-                context = httpService.createDefaultHttpContext();
+                context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
 
             OSGiServletContext servletContext =
@@ -437,7 +437,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
             if (context == null) {
                 LOG.debug("No HttpContext provided, creating default");
-                context = httpService.createDefaultHttpContext();
+                context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
             registeredHttpContexts.put(context, context);
 
@@ -502,7 +502,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         ReentrantLock lock = OSGiCleanMapper.getLock();
         lock.lock();
         try {
-            for (String alias : mapper.getLocalAliases()) {
+            for (String alias : new LinkedHashSet<>(mapper.getLocalAliases())) {
                 LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);

@@ -93,7 +93,7 @@ public class Bug24682Test extends CalDAVTest {
          * setup managers for other users
          */
         managers = new CalendarTestManager[3];
-        managers[0] = new CalendarTestManager(new AJAXClient(testUser));
+        managers[0] = new CalendarTestManager(getClient2());
         managers[1] = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
         managers[2] = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
         for (CalendarTestManager manager : managers) {

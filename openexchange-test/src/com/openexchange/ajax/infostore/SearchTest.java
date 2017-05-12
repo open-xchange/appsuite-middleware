@@ -34,6 +34,7 @@ public class SearchTest extends AbstractAJAXSession {
 
     protected int folderId;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -50,7 +51,7 @@ public class SearchTest extends AbstractAJAXSession {
             all[i] = "Test " + i;
         }
     }
-    
+
     private int createFolderForTest() throws JSONException, OXException, IOException {
         final int parent = getClient().getValues().getPrivateInfostoreFolder();
         FolderObject folder = FolderTestManager.createNewFolderObject("NewInfostoreFolder" + UUID.randomUUID().toString(), Module.INFOSTORE.getFolderConstant(), FolderObject.PUBLIC, getClient().getValues().getUserId(), parent);
@@ -165,7 +166,12 @@ public class SearchTest extends AbstractAJAXSession {
     public void testVersions() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
+        String id = null;
+        for(com.openexchange.file.storage.File file: itm.getCreatedEntities()){
+            if(file.getTitle().equals(all[1])){
+                id=file.getId();
+            }
+        }
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setTitle("File");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));

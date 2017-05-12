@@ -86,8 +86,8 @@ import org.junit.runners.Parameterized.Parameter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -118,8 +118,6 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     private static final boolean AUTODISCOVER_AUTH = false;
 
     protected static final int TIMEOUT = 10000;
-
-    private List<FolderObject> foldersToCleanUp;
 
     private Map<Long, WebDAVClient> webDAVClients;
 
@@ -213,7 +211,6 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         this.webDAVClients = new HashMap<Long, WebDAVClient>();
         getAJAXClient().setHostname(getHostname());
         getAJAXClient().setProtocol(getProtocol());
-        this.foldersToCleanUp = new ArrayList<FolderObject>();
     }
 
     protected abstract String getDefaultUserAgent();
@@ -227,28 +224,6 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         } else {
             return this.webDAVClients.get(threadID);
         }
-    }
-
-    private void cleanupFolders() {
-        if (null != this.foldersToCleanUp) {
-            for (FolderObject folder : foldersToCleanUp) {
-                try {
-                    getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder.getObjectID(), new Date()));
-                } catch (Exception e) {
-                    System.out.println(e);
-                }
-            }
-        }
-    }
-
-    /**
-     * Remembers the supplied folder for deletion after the test is finished
-     * in the <code>tearDown()</code> method.
-     *
-     * @param folder
-     */
-    protected void rememberForCleanUp(FolderObject folder) {
-        this.foldersToCleanUp.add(folder);
     }
 
     /**
@@ -270,7 +245,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             }
         }
         if (null != folder) {
-            folder = getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
+            folder = ftm.getFolderFromServer(folder.getObjectID());
         }
         return folder;
     }
@@ -294,7 +269,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             }
         }
         if (null != folder) {
-            folder = getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
+            folder = ftm.getFolderFromServer(folder.getObjectID());
         }
         return folder;
     }
@@ -338,26 +313,16 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         return hrefs;
     }
 
-    protected FolderObject createFolder(FolderObject folder) throws OXException, IOException, JSONException {
-        InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
-        folder.setObjectID(response.getId());
-        folder.setLastModified(response.getTimestamp());
-        this.rememberForCleanUp(folder);
-        return folder;
-    }
-
     protected FolderObject updateFolder(FolderObject folder) throws OXException, IOException, JSONException {
-        InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_NEW, folder));
-        folder.setLastModified(response.getTimestamp());
-        return folder;
+        return ftm.updateFolderOnServer(folder);
     }
 
     protected FolderObject getFolder(int folderID) throws OXException, IOException, JSONException {
-        return getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folderID)).getFolder();
+        return ftm.getFolderFromServer(folderID);
     }
 
-    protected void deleteFolder(FolderObject folder) throws OXException, IOException, JSONException {
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, true, folder));
+    protected void deleteFolder(FolderObject folder) throws OXException, IOException, JSONException, SAXException {
+        ftm.deleteFolderOnServer(folder);
     }
 
     protected FolderObject createFolder(FolderObject parent, String folderName) throws OXException, IOException, JSONException {
@@ -367,7 +332,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         folder.setModule(parent.getModule());
         folder.setType(parent.getType());
         folder.setPermissions(parent.getPermissions());
-        return this.createFolder(folder);
+        return ftm.insertFolderOnServer(folder);
     }
 
     protected static String getBaseUri() throws OXException {

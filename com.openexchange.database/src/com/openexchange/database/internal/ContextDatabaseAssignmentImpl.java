@@ -429,7 +429,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             ResultSet rs = null;
             try {
                 stmt = con.prepareStatement("SELECT db_schema, server_id FROM context_server2db_pool WHERE write_db_pool_id=? GROUP by db_schema");
-                stmt.setInt(1, clusterEntry.getValue().intValue());
+                stmt.setInt(1, clusterEntry.getKey().intValue());
                 rs = stmt.executeQuery();
                 while (rs.next()) {
                     if (serverId == rs.getInt(2)) {

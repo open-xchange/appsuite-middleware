@@ -1577,35 +1577,6 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 folderMapManagement.dropHierarchyFor(ids, realTreeId, userId, contextId);
             }
 
-            List<Serializable> keys = new LinkedList<Serializable>();
-            if (Tools.isGlobalId(oldFolderId)) {
-                keys.add(newCacheKey(oldFolderId, treeId));
-            }
-            if (isMove) {
-                if (Tools.isGlobalId(oldParentId)) {
-                    keys.add(newCacheKey(oldParentId, treeId));
-                }
-                if (Tools.isGlobalId(updatedFolder.getParentID())) {
-                    keys.add(newCacheKey(updatedFolder.getParentID(), treeId));
-                }
-            }
-            if (!treeId.equals(realTreeId)) {
-                if (Tools.isGlobalId(oldFolderId)) {
-                    keys.add(newCacheKey(oldFolderId, realTreeId));
-                }
-                if (isMove) {
-                    if (Tools.isGlobalId(oldParentId)) {
-                        keys.add(newCacheKey(oldParentId, realTreeId));
-                    }
-                    if (Tools.isGlobalId(updatedFolder.getParentID())) {
-                        keys.add(newCacheKey(updatedFolder.getParentID(), realTreeId));
-                    }
-                }
-            }
-            if (!keys.isEmpty()) {
-                globalCache.removeFromGroup(keys, Integer.toString(contextId));
-            }
-
             registry.clearCaches(storageParameters.getUserId(), storageParameters.getContextId());
         }
 

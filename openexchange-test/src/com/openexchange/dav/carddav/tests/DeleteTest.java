@@ -125,7 +125,6 @@ public class DeleteTest extends CardDAVTest {
          */
         String folderName = "testfolder_" + randomUID();
         FolderObject folder = super.createFolder(folderName);
-        super.rememberForCleanUp(folder);
         String uid = randomUID();
         String firstName = "test";
         String lastName = "otto";

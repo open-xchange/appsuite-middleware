@@ -466,13 +466,18 @@ public final class MailMessageParser {
                 }
             } else {
                 if (isInline) {
-                    if (null != mailPart.getFileName()) {
-                        contentType.setParameter("realfilename", mailPart.getFileName());
+                    boolean dropTmpParameter = false;
+                    {
+                        String fn = mailPart.getFileName();
+                        if (null != fn) {
+                            contentType.setParameter("realfilename", fn);
+                            dropTmpParameter = true;
+                        }
                     }
                     try {
                         String content = readContent(mailPart, contentType, mailId, folder);
-                        UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                        if (uuencodedMP.isUUEncoded()) {
+                        UUEncodedMultiPart uuencodedMP = UUEncodedMultiPart.valueFor(content);
+                        if (null != uuencodedMP && uuencodedMP.isUUEncoded()) {
                             /*
                              * UUEncoded content detected. Handle normal text.
                              */
@@ -518,7 +523,9 @@ public final class MailMessageParser {
                             }
                         }
                     } finally {
-                        contentType.removeParameter("realfilename");
+                        if (dropTmpParameter) {
+                            contentType.removeParameter("realfilename");
+                        }
                     }
                 } else {
                     /*

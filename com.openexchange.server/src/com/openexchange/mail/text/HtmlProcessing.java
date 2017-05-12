@@ -306,13 +306,13 @@ public final class HtmlProcessing {
                     String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     {
                         // No need to generate well-formed HTML
-                        HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder();
+                        HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder().setSession(session);
                         if (externalImagesAllowed) {
                             optionsBuilder.setDropExternalImages(false);
                         } else {
                             optionsBuilder.setDropExternalImages(true).setModified(modified);
                         }
-                        optionsBuilder.setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize).setSuppressLinks(suppressLinks);
+                        optionsBuilder.setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize).setSuppressLinks(suppressLinks).setReplaceBodyWithDiv(null != cssPrefix);
                         retval = htmlService.sanitize(retval.getContent(), optionsBuilder.build());
                     }
                     /*

@@ -93,9 +93,6 @@ public class Bug48828Test extends CalDAVTest {
         try {
             if (null != this.manager2) {
                 this.manager2.cleanUp();
-                if (null != manager2.getClient()) {
-                    manager2.getClient().logout();
-                }
             }
         } finally {
             super.tearDown();

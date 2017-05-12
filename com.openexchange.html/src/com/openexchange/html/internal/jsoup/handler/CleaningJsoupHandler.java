@@ -161,6 +161,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
     private boolean replaceUrls = true;
     private String cssPrefix;
     private boolean suppressLinks;
+    private boolean replaceBodyWithDiv;
     private final LinkedList<CellPadding> tablePaddings;
     private final boolean changed = false;
 
@@ -242,6 +243,17 @@ public final class CleaningJsoupHandler implements JsoupHandler {
      */
     public CleaningJsoupHandler setSuppressLinks(boolean suppressLinks) {
         this.suppressLinks = suppressLinks;
+        return this;
+    }
+
+    /**
+     * Sets whether <code>&lt;body&gt;</code> is supposed to be replaced with a <code>&lt;div&gt;</code> tag for embedded display
+     *
+     * @param replaceBodyWithDiv <code>true</code> to replace; otherwise <code>false</code>
+     * @return This handler with new behavior applied
+     */
+    public CleaningJsoupHandler setReplaceBodyWithDiv(boolean replaceBodyWithDiv) {
+        this.replaceBodyWithDiv = replaceBodyWithDiv;
         return this;
     }
 
@@ -367,7 +379,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             node.remove();
         }
 
-        if (null != cssPrefix) {
+        if (replaceBodyWithDiv) {
             Attributes attributes = new Attributes();
             attributes.put("id", cssPrefix);
             Element div = new Element(org.jsoup.parser.Tag.valueOf("div"), "", attributes);
@@ -930,7 +942,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 builder.append('.').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
             } else if ('#' == first) {
                 if (word.indexOf('.') < 0) { // contains no dots
-                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                    builder.append('#').append(cssPrefix).append('-').append(word.substring(1)).append(' ');
                 } else {
                     builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
                 }
