@@ -198,7 +198,7 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         System.out.println("------------------------------------PGP-PRIVATE-KEY-----------------------------------------");
         System.out.println("Password: " + new String(testIdentity.getPassword()));
         System.out.println(getKeyData(testIdentity.getSecretKey()));
-        System.out.println("------------------------------------X-----------------------------------------");
+        System.out.println("------------------------------------Encoded Session Packet-----------------------------------------");
         System.out.println(Base64.encode(encryptedPgpSession.getEncoded()));
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
