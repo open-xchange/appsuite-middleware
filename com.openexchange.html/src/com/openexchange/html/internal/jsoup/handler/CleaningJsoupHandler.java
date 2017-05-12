@@ -942,7 +942,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 builder.append('.').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
             } else if ('#' == first) {
                 if (word.indexOf('.') < 0) { // contains no dots
-                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                    builder.append('#').append(cssPrefix).append('-').append(word.substring(1)).append(' ');
                 } else {
                     builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
                 }
