@@ -77,7 +77,6 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -117,7 +116,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             return Appointment2Event.asString(IDGenerator.getId(context, Types.APPOINTMENT, connection));
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             release(connection, 1);
         }

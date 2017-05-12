@@ -61,7 +61,6 @@ import java.util.List;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -119,7 +118,7 @@ public abstract class RdbStorage {
                 }
                 txPolicy.setAutoCommit(connection, true);
             } catch (SQLException e) {
-                throw EventExceptionCode.MYSQL.create(e);
+                throw asOXException(e);
             } finally {
                 if (0 < updated) {
                     dbProvider.releaseWriteConnection(context, connection);

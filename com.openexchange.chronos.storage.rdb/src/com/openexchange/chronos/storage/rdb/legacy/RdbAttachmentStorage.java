@@ -68,7 +68,6 @@ import java.util.Map;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -126,7 +125,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             connection = dbProvider.getReadConnection(context);
             return selectAttachments(connection, context.getContextId(), objectIDs);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -234,7 +233,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             connection = dbProvider.getReadConnection(context);
             fileID = selectFileID(connection, context.getContextId(), attachmentID);
         } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
+            throw asOXException(e);
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
