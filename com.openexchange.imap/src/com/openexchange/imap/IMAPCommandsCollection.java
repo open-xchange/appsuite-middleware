@@ -3346,12 +3346,16 @@ public final class IMAPCommandsCollection {
              */
             final BODYSTRUCTURE[] bodies = bodystructure.bodies;
             if (null != bodies) {
-                final int count = bodies.length;
+                int count = bodies.length;
                 if (count > 0) {
-                    final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
-                    final String mpPrefix;
+                    String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                    String mpPrefix;
                     if (mpDetected[0]) {
                         mpPrefix = mpId;
+                        if (false == sectionId.startsWith(mpPrefix)) {
+                            // Different branch in MIME tree
+                            return candidate ? new BodyAndId(bodystructure, sequenceId) : null;
+                        }
                     } else {
                         mpPrefix = prefix;
                         mpDetected[0] = true;
