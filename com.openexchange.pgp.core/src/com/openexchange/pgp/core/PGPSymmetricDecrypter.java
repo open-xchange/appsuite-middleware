@@ -47,63 +47,77 @@
  *
  */
 
-package com.openexchange.pgp.core.packethandling;
+package com.openexchange.pgp.core;
 
-import java.io.IOException;
-import org.bouncycastle.bcpg.Packet;
-import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
 
 /**
- * {@link RemoveRecipientPacketProcessorHandler} removes recipients from a PGP Message without the need for re-encrypting the whole message
+ * {@link PGPSymmetricDecrypter} decrypts PGP data with a known symmetric key (PGP session key).
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHandler {
+public class PGPSymmetricDecrypter extends PGPDecrypter {
 
-    private final long[] keyIdsToRemove;
-
-    /**
-     * Initializes a new {@link RemoveRecipientPacketProcessorHandler}.
-     *
-     * @param keyIds The IDs of the key's which should be removed from being able to decrypt the PGP Message
-     */
-    public RemoveRecipientPacketProcessorHandler(long[] keyIds) {
-        this.keyIdsToRemove = keyIds;
-    }
+    private final byte[] key;
 
     /**
-     * Internal method to check if a session packet matches one of the IDs which get removed
+     * Initializes a new {@link PGPSymmetricDecrypter}.
      *
-     * @param session The session packet
-     * @return True, if the session packet should be removed, false otherwise
+     * @param keyRetrievalStrategy
      */
-    private boolean shouldRemoveSession(PublicKeyEncSessionPacket session) {
-        if (keyIdsToRemove != null) {
-            for (long id : keyIdsToRemove) {
-                if (session.getKeyID() == id) {
-                    return true;
-                }
+    public PGPSymmetricDecrypter(final byte[] key) {
+        //Not dealing with asymmetric keys, because this class knows the symmetric key for decrypting the PGP data.
+        super(new PGPKeyRetrievalStrategy() {
+
+            @Override
+            public PGPPrivateKey getSecretKey(long keyId, String userIdentity, char[] password) throws Exception {
+                return null;
             }
-            return false;
-        }
-        return false;
+
+            @Override
+            public PGPPublicKey getPublicKey(long keyId) throws Exception {
+                return null;
+            }
+        });
+        this.key = key;
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.guard.pgpcore.commons.PGPPacketProcessorHandler#handlePacket(com.openexchange.guard.pgpcore.commons.GuardBCPacket)
+     * @see com.openexchange.pgp.core.PGPDecrypter#keyFound(org.bouncycastle.openpgp.PGPPrivateKey)
      */
     @Override
-    public PGPPacket[] handlePacket(PGPPacket packet) throws IOException {
-        Packet rawPacket = packet.getBcPacket();
-        if (rawPacket instanceof PublicKeyEncSessionPacket) {
-            if (shouldRemoveSession((PublicKeyEncSessionPacket) rawPacket)) {
-                //packet will not be written back
-                return null;
-            }
-        }
-        return new PGPPacket[] { packet };
+    protected boolean keyFound(PGPPrivateKey key) {
+        //Not dealing with asymmetric keys, because this class knows the symmetric key for decrypting the PGP data.
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.pgp.core.PGPDecrypter#getDecryptionFactory(com.openexchange.pgp.core.PGPDecrypter.PGPDataContainer)
+     */
+    @Override
+    protected PublicKeyDataDecryptorFactory getDecryptionFactory(PGPDataContainer publicKeyEncryptedData) {
+        return new SymmetricKeyDataDecryptorFactory(key);
+    }
+
+    /**
+     * Decrypts the given PGP data.
+     *
+     * @param input The input stream to read the PGP data from
+     * @param output The output stream to write the decoded data to
+     * @return A list of Signature verification results, or an empty list, if the encrypted data was not signed
+     * @throws Exception
+     */
+    public List<PGPSignatureVerificationResult> decrypt(InputStream input, OutputStream output) throws Exception {
+        return super.decrypt(input, output, null, null);
     }
 }

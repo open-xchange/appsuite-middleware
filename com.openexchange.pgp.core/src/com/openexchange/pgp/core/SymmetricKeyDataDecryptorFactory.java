@@ -47,63 +47,67 @@
  *
  */
 
-package com.openexchange.pgp.core.packethandling;
+package com.openexchange.pgp.core;
 
-import java.io.IOException;
-import org.bouncycastle.bcpg.Packet;
-import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
+import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
 
 /**
- * {@link RemoveRecipientPacketProcessorHandler} removes recipients from a PGP Message without the need for re-encrypting the whole message
+ * {@link SymmetricKeyDataDecryptorFactory} is a factory which decrypts PGP data with a known symmetric session key.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHandler {
+public class SymmetricKeyDataDecryptorFactory implements PublicKeyDataDecryptorFactory {
 
-    private final long[] keyIdsToRemove;
+    private static final PGPPrivateKey          NULL_KEY = null;
+    private final byte[]                        sessionKey;
+    private final PublicKeyDataDecryptorFactory delegate;
 
     /**
-     * Initializes a new {@link RemoveRecipientPacketProcessorHandler}.
+     * Initializes a new {@link SymmetricKeyDataDecryptorFactory} using the Bouncy Castle ("BC") JCE provider.
      *
-     * @param keyIds The IDs of the key's which should be removed from being able to decrypt the PGP Message
+     * @param sessionKey The symmetric session key for decrypting the PGP data.
      */
-    public RemoveRecipientPacketProcessorHandler(long[] keyIds) {
-        this.keyIdsToRemove = keyIds;
+    public SymmetricKeyDataDecryptorFactory(byte[] sessionKey) {
+        this(BouncyCastleProvider.PROVIDER_NAME, sessionKey);
     }
 
     /**
-     * Internal method to check if a session packet matches one of the IDs which get removed
+     * Initializes a new {@link SymmetricKeyDataDecryptorFactory}.
      *
-     * @param session The session packet
-     * @return True, if the session packet should be removed, false otherwise
+     * @param providerName The name of the JCE provider to use
+     * @param sessionKey The symmetric session key for decrypting the PGP data
+     *
      */
-    private boolean shouldRemoveSession(PublicKeyEncSessionPacket session) {
-        if (keyIdsToRemove != null) {
-            for (long id : keyIdsToRemove) {
-                if (session.getKeyID() == id) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return false;
+    public SymmetricKeyDataDecryptorFactory(String providerName, byte[] sessionKey) {
+        super();
+        this.sessionKey = sessionKey;
+        this.delegate = new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(providerName).build(NULL_KEY);
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.guard.pgpcore.commons.PGPPacketProcessorHandler#handlePacket(com.openexchange.guard.pgpcore.commons.GuardBCPacket)
+     * @see org.bouncycastle.openpgp.operator.PGPDataDecryptorFactory#createDataDecryptor(boolean, int, byte[])
      */
     @Override
-    public PGPPacket[] handlePacket(PGPPacket packet) throws IOException {
-        Packet rawPacket = packet.getBcPacket();
-        if (rawPacket instanceof PublicKeyEncSessionPacket) {
-            if (shouldRemoveSession((PublicKeyEncSessionPacket) rawPacket)) {
-                //packet will not be written back
-                return null;
-            }
-        }
-        return new PGPPacket[] { packet };
+    public PGPDataDecryptor createDataDecryptor(boolean withIntegrityPacket, int encAlgorithm, byte[] key) throws PGPException {
+        return delegate.createDataDecryptor(withIntegrityPacket, encAlgorithm, key);
     }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory#recoverSessionData(int, byte[][])
+     */
+    @Override
+    public byte[] recoverSessionData(int keyAlgorithm, byte[][] secKeyData) throws PGPException {
+        return this.sessionKey;
+    }
+
 }
