@@ -560,14 +560,6 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     @Override
-    protected FolderObject createFolder(FolderObject folder) throws OXException, IOException, JSONException {
-        InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
-        folder.setObjectID(response.getId());
-        folder.setLastModified(response.getTimestamp());
-        return folder;
-    }
-
-    @Override
     protected FolderObject updateFolder(FolderObject folder) throws OXException, IOException, JSONException {
         InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_NEW, folder));
         folder.setLastModified(response.getTimestamp());

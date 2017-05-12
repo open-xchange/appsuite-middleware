@@ -112,7 +112,6 @@ public class MkCalendarTest extends CalDAVTest {
          */
         FolderObject folder = super.getCalendarFolder(name);
         assertNotNull("folder not found on server", folder);
-        rememberForCleanUp(folder);
         assertEquals("folder name wrong", name, folder.getFolderName());
         /*
          * verify calendar on client

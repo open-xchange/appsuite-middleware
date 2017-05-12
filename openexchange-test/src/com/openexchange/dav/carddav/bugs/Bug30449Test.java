@@ -84,7 +84,6 @@ public class Bug30449Test extends CardDAVTest {
          */
         String folderName = "testfolder_" + randomUID();
         FolderObject subFolder = super.createFolder(folderName);
-        super.rememberForCleanUp(subFolder);
         String uid = randomUID();
         String firstName = "gerd";
         String lastName = "gurke";

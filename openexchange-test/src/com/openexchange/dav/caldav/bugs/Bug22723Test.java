@@ -76,7 +76,6 @@ public class Bug22723Test extends CalDAVTest {
          */
         String subFolderName = "testfolder_" + randomUID();
         FolderObject subFolder = super.createFolder(subFolderName);
-        super.rememberForCleanUp(subFolder);
         String subFolderID = Integer.toString(subFolder.getObjectID());
         /*
          * fetch initial sync token for later synchronization
