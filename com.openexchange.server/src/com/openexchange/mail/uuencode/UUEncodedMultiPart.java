@@ -77,7 +77,7 @@ public class UUEncodedMultiPart {
      * @return <code>true</code> if UUEncoded; otherwise <code>false</code>
      */
     public static boolean isUUEncoded(final String content) {
-        return content.indexOf("begin ") < 0 ? false : PAT_UUENCODED.matcher(content).find();
+        return possiblyUUEncoded(content) && PAT_UUENCODED.matcher(content).find();
     }
 
     /**
@@ -87,7 +87,7 @@ public class UUEncodedMultiPart {
      * @return The uuencoded instance or <code>null</code>
      */
     public static UUEncodedMultiPart valueFor(String content) {
-        if (null == content || content.indexOf("begin ") < 0) {
+        if (false == possiblyUUEncoded(content)) {
             return null;
         }
 
@@ -97,6 +97,22 @@ public class UUEncodedMultiPart {
         }
 
         return uuencodedMP;
+    }
+
+    private static boolean possiblyUUEncoded(String content) {
+        if (null == content) {
+            return false;
+        }
+
+        int i = content.indexOf("begin ", 0);
+        if (i < 0) {
+            return false;
+        }
+
+        // Example: "begin 665 myfile.exe..."
+        // So there are at least 10 characters between "begin" and "end" if uuencoded
+        i += 10;
+        return i < content.length() && content.indexOf("end", i) > 0;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------
