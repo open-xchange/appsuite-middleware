@@ -52,8 +52,6 @@ package com.openexchange.ajax.mail;
 import static org.junit.Assert.assertNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.SendRequest;
@@ -68,8 +66,6 @@ import com.openexchange.mail.MailJSONField;
  */
 public final class Send2Test extends AbstractMailTest {
 
-    private MailTestManager manager;
-
     /**
      * Default constructor.
      *
@@ -78,22 +74,6 @@ public final class Send2Test extends AbstractMailTest {
     public Send2Test() {
         super();
     }
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        manager = new MailTestManager(getClient(), false);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
     /**
      * Tests the <code>action=new</code> request on INBOX folder
      *
