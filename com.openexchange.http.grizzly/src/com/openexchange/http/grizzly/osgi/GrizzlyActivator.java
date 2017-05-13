@@ -259,7 +259,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             // Initialize the filter tracker
             {
-                ServiceTracker<Filter, Filter> tracker = new ServiceTracker<Filter, Filter>(context, Filter.class, new ServletFilterTracker(httpServiceFactory.getMainHttpHandler(), context));
+                ServiceTracker<Filter, Filter> tracker = new ServiceTracker<Filter, Filter>(context, Filter.class, new ServletFilterTracker(httpServiceFactory, context));
                 rememberTracker(tracker);
             }
 

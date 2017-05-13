@@ -122,19 +122,20 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
         folderA = ftm.getFolderFromServer(getClient().getValues().getPrivateAppointmentFolder());
         folderA1 = createPrivateFolder("SubfolderA1" + UUID.randomUUID().toString(), ftm, getClient());
-        ftm.insertFolderOnServer(folderA1);
+        folderA1 = ftm.insertFolderOnServer(folderA1);
 
+        // 
         folderB = ftmB.getFolderFromServer(getClient2().getValues().getPrivateAppointmentFolder());
         addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
         folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, getClient2(), getClient());
-        ftmB.insertFolderOnServer(folderB1);
+        folderB1 = ftmB.insertFolderOnServer(folderB1);
         folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, getClient2(), getClient());
-        ftmB.insertFolderOnServer(folderB2);
+        folderB2 = ftmB.insertFolderOnServer(folderB2);
 
         folderC = ftmC.getFolderFromServer(valuesC.getPrivateAppointmentFolder());
         addAuthorPermissions(folderC, getClient().getValues().getUserId(), ftmC);
         folderC1 = createPrivateFolder("SubfolderC1" + UUID.randomUUID().toString(), ftmC, clientC, getClient());
-        ftmC.insertFolderOnServer(folderC1);
+        folderC1 = ftmC.insertFolderOnServer(folderC1);
     }
 
     private void addAuthorPermissions(FolderObject folder, int userId, FolderTestManager actor) {
@@ -163,7 +164,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
             if(null != clientC) {
                 clientC.logout();
                 clientC = null;
-            }            
+            }
         } finally {
             super.tearDown();
         }

@@ -61,6 +61,7 @@ public class FilterAndPath {
 
     private final Filter filter;
     private final String path;
+    private final int hash;
 
     /**
      * Initializes a new {@link FilterAndPath}.
@@ -69,6 +70,10 @@ public class FilterAndPath {
         super();
         this.filter = filter;
         this.path = path;
+        int prime = 31;
+        int result = 1;
+        result = prime * result + ((filter == null) ? 0 : filter.hashCode());
+        hash = result;
     }
 
     /**
@@ -87,6 +92,30 @@ public class FilterAndPath {
      */
     public String getPath() {
         return path;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof FilterAndPath)) {
+            return false;
+        }
+        FilterAndPath other = (FilterAndPath) obj;
+        if (filter == null) {
+            if (other.filter != null) {
+                return false;
+            }
+        } else if (!filter.equals(other.filter)) {
+            return false;
+        }
+        return true;
     }
 
 }

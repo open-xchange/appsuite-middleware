@@ -115,8 +115,8 @@ public final class Bug12614Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        boss = new AJAXClient(testContext.acquireUser());
-        secretary = new AJAXClient(testContext.acquireUser());
+        boss = getClient();
+        secretary = getClient2();
         thirdUser = new AJAXClient(testContext.acquireUser());
         
         assertFalse("Could not acquire enough users", boss == null);
@@ -134,8 +134,9 @@ public final class Bug12614Test extends AbstractAJAXSession {
         try {
             secretaryDeletesSeries();
             bossUnsharesPrivateFolder();
-            thirdUser.logout();
-            secretary.logout();
+            if (null != thirdUser) {
+                thirdUser.logout();
+            }
         } finally {
             super.tearDown();
         }

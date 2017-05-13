@@ -115,14 +115,13 @@ public class HttpServiceImpl implements HttpServiceExtension {
     private final Bundle bundle;
     private final OSGiMainHandler mainHttpHandler;
 
-
     // ------------------------------------------------------------ Constructors
 
 
     /**
      * {@link HttpService} constructor.
      *
-     * @param mainHttpHandler The main HTTP handler
+     * @param mainHttpHandler The bundle-associated HTTP handler
      * @param bundle {@link org.osgi.framework.Bundle} that got this instance of {@link org.osgi.service.http.HttpService}.
      */
     public HttpServiceImpl(OSGiMainHandler mainHttpHandler, Bundle bundle) {
@@ -130,7 +129,6 @@ public class HttpServiceImpl implements HttpServiceExtension {
         this.bundle = bundle;
         this.mainHttpHandler = mainHttpHandler;
     }
-
 
     // ------------------------------------------------ Methods from HttpService
 
@@ -188,7 +186,6 @@ public class HttpServiceImpl implements HttpServiceExtension {
     @Override
     public void registerFilter(Filter filter, String urlPattern, Dictionary initParams, HttpContext context)
     throws ServletException {
-
         LOG.info("Registering servlet: {}, under url-pattern: {}, with: {} and context: {}", filter, urlPattern, initParams, context);
         mainHttpHandler.registerFilter(filter, urlPattern, initParams, context, this);
     }
