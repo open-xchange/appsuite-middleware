@@ -549,7 +549,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         PrimaryMailProps primaryMailProps = new PrimaryMailProps(params);
-        LOG.info(logMessageBuilder.toString(), args.toArray(new Object[args.size()]));
+        LOG.debug(logMessageBuilder.toString(), args.toArray(new Object[args.size()]));
         return primaryMailProps;
     }
 

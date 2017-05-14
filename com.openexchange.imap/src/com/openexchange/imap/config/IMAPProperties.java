@@ -327,7 +327,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         PrimaryIMAPProperties primaryIMAPProps = new PrimaryIMAPProperties(params);
-        LOG.info(logMessageBuilder.toString(), args.toArray(new Object[args.size()]));
+        LOG.debug(logMessageBuilder.toString(), args.toArray(new Object[args.size()]));
         return primaryIMAPProps;
     }
 
