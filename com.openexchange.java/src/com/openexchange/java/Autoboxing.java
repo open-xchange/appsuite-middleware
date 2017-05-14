@@ -361,7 +361,7 @@ public final class Autoboxing {
      * <p>
      * See details {@link Float#valueOf(float) here}.
      *
-     * @param  l A float value.
+     * @param  f A float value.
      * @return A {@code Float} instance representing {@code f}.
      */
     public static Float valueOf(float f) {
@@ -373,7 +373,7 @@ public final class Autoboxing {
      * <p>
      * See details {@link Double#valueOf(double) here}.
      *
-     * @param  l A double value.
+     * @param  d A double value.
      * @return A {@code Double} instance representing {@code d}.
      */
     public static Double valueOf(double d) {
