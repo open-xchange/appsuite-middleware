@@ -251,6 +251,71 @@ public class Strings {
     }
 
     /**
+     * High speed test for punctuation character!
+     *
+     * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
+     */
+    public static boolean isPunctuation(char ch) {
+        // !"#$%&'()*+,-./:;<=>?@[\]^_`\u00b4{|}~
+        switch (ch) {
+            case '!':
+            case '"':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case '\'':
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '-':
+            case '.':
+            case '/':
+            case ':':
+            case ';':
+            case '<':
+            case '=':
+            case '>':
+            case '?':
+            case '@':
+            case '[':
+            case ']':
+            case '\\':
+            case '^':
+            case '_':
+            case 96:
+            case 180:
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * High speed test for ASCII letter!
+     *
+     * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
+     */
+    public static boolean isAsciiLetter(final char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    /**
+     * High speed test for ASCII letter or digit!
+     *
+     * @return <code>true</code> if the indicated character is an ASCII letter or digit; otherwise <code>false</code>
+     */
+    public static boolean isAsciiLetterOrDigit(final char c) {
+        return isDigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    /**
      * Gets specified string's ASCII bytes
      *
      * @param str The string
@@ -291,7 +356,7 @@ public class Strings {
         if (null == str) {
             return null;
         }
-        List<String> splitted = new LinkedList<String>();
+        List<String> splitted = new LinkedList<>();
         int inQuotes = 0;
         boolean escaped = false;
         StringBuilder s = new StringBuilder(16);
@@ -340,7 +405,7 @@ public class Strings {
         if (null == str) {
             return null;
         }
-        List<String> splitted = new LinkedList<String>();
+        List<String> splitted = new LinkedList<>();
         boolean inQuotes = false;
         boolean escaped = false;
         StringBuilder s = new StringBuilder(16);
@@ -708,7 +773,7 @@ public class Strings {
      * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final int[] arr, final String connector, final StringBuilder builder) {
-        final List<Integer> list = new LinkedList<Integer>();
+        final List<Integer> list = new LinkedList<>();
         for (final int i : arr) {
             list.add(Autoboxing.I(i));
         }
@@ -720,7 +785,7 @@ public class Strings {
     }
 
     public static String join(final int[] arr, final String connector) {
-        final List<Integer> list = new LinkedList<Integer>();
+        final List<Integer> list = new LinkedList<>();
         for (final int i : arr) {
             list.add(Autoboxing.I(i));
         }
@@ -728,7 +793,7 @@ public class Strings {
     }
 
     public static String join(final byte[] arr, final String connector) {
-        final List<Byte> list = new LinkedList<Byte>();
+        final List<Byte> list = new LinkedList<>();
         for (final Byte i : arr) {
             list.add(i);
         }
@@ -1069,7 +1134,7 @@ public class Strings {
         if (Strings.isEmpty(separator)) {
             throw new IllegalArgumentException("Missing separator");
         }
-        ArrayList<String> trimmedSplits = new ArrayList<String>();
+        ArrayList<String> trimmedSplits = new ArrayList<>();
         try {
             String[] splits = input.split(separator);
             for (String string : splits) {

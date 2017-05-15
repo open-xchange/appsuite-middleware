@@ -51,6 +51,7 @@ package com.openexchange.filemanagement.json.actions;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -68,6 +69,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -129,6 +131,10 @@ public final class NewAction implements AJAXActionService {
             AJAXRequestResult result = new AJAXRequestResult(jArray, "json");
             error = false;
             return result;
+        } catch (ImageTransformationDeniedIOException e) {
+            throw UploadException.UploadCode.INVALID_FILE.create(e);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (error) {
                 for (Object id : jArray) {
