@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 23
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1431,6 +1431,12 @@ ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 # SoftwareChange_Request-3934
 ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-4094
+VALUE=$(ox_read_property com.openexchange.mail.autoconfig.ispdb /opt/open-xchange/etc/autoconfig.properties)
+if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
+    ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1472,6 +1478,10 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Mon May 08 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-05-15 (4132)
+* Fri Apr 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-05-02 (4113)
 * Wed Apr 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-04-18 (4084)
 * Fri Mar 31 2017 Marcus Klein <marcus.klein@open-xchange.com>

@@ -51,6 +51,7 @@ package com.openexchange.imagetransformation.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationReloadable;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -80,6 +81,7 @@ public class ImageTransformationActivator extends HousekeepingActivator {
 
         ImageTransformationServiceImpl serviceImpl = new ImageTransformationServiceImpl(context);
         rememberTracker(serviceImpl);
+        trackService(ImageMetadataService.class);
         openTrackers();
 
         registerService(Reloadable.class, ImageTransformationReloadable.getInstance());

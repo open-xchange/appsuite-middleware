@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceLookup;
@@ -86,7 +87,7 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
 
     /**
      * Initializes a new {@link ContactsMSLiveSubscribeService}.
-     * 
+     *
      * @param oAuthServiceMetaData
      * @param services
      */
@@ -107,17 +108,34 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
      */
     @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
-        final Session session = subscription.getSession();
-        final OAuthAccount oauthAccount = MSLiveApiClient.getDefaultOAuthAccount(session);
-        final String accessToken = MSLiveApiClient.getAccessToken(oauthAccount, session);
-        final JSONObject contacts = fetchData(accessToken);
-        final ContactParser parser = new ContactParser();
-        return parser.parse(contacts);
+        Session session = subscription.getSession();
+
+        // Load associated OAuth account
+        OAuthAccount oauthAccount;
+        {
+            Object accountId = subscription.getConfiguration().get("account");
+            if (null == accountId) {
+                oauthAccount = MSLiveApiClient.getDefaultOAuthAccount(session);
+            } else {
+                int iAccountId;
+                if (accountId instanceof Integer) {
+                    iAccountId = ((Integer) accountId).intValue();
+                } else {
+                    iAccountId = Integer.parseInt(accountId.toString());
+                }
+                OAuthService service = services.getService(OAuthService.class);
+                oauthAccount = service.getAccount(iAccountId, session, session.getUserId(), session.getContextId());
+            }
+        }
+
+        String accessToken = MSLiveApiClient.getAccessToken(oauthAccount, session);
+        JSONObject contacts = fetchData(accessToken);
+        return ContactParser.getInstance().parse(contacts);
     }
 
     /**

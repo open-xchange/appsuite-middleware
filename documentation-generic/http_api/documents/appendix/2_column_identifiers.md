@@ -330,12 +330,12 @@ specific field data of single or multiple objects.
 |605 |Default address |	default_address | Number ||
 |606 ||	image1_url | String ||
 |608 ||	useCount | Number |	In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.||
-|610 ||	yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|611 ||	yomiLastName | String |	Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|612 ||	yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|613 ||	addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)||
-|614 ||	addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)||
-|615 ||	addressOther | String |	Support for Outlook 'other' address field. (since 6.20.1)||
+|616 ||	yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
+|617 ||	yomiLastName | String |	Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
+|618 ||	yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
+|619 ||	addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)||
+|620 ||	addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)||
+|621 ||	addressOther | String |	Support for Outlook 'other' address field. (since 6.20.1)||
 
 
 
@@ -471,13 +471,14 @@ specific field data of single or multiple objects.
 |704 | file_size | Number | Size of the document in bytes. |
 |705 | version | Number | Version number of the document. New documents start at 1. Every update increments the version by 1. |
 |706 | description | String | Description |
-|707 | locked_until | Time | The time until which this item will presumably be locked. Only set if the docment is currently locked, 0 otherwise. |
+|707 | locked_until | Time | The time until which this item will presumably be locked. Only set if the document is currently locked, 0 otherwise. |
 |708 | file_md5sum | String | MD5Sum of the document. Not yet implemented, so this is currently always empty. |
 |709 | version_comment | String | A version comment is used to file a changelog for the file. |
 |710 | current_version | Boolean | “true” if this version is the current version “false” otherwise. Note: This is not writeable |
 |711 | number_of_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |
 |7010 | com.openexchange.share.extendedObjectPermissions | Array | Each element is an object described in [Extended object permission object](#extended-object-permission-object). Read Only, Since 7.8.0.|
 |7020 | com.openexchange.realtime.resourceID | String | The resource identifier for the infoitem for usage within the realtime component. Read Only, Since 7.8.0. |
+|7040 | com.openexchange.file.sanitizedFilename | String | A sanitized version of the filename. Which prevents end users from being confused by special characters, e.g. RTLO (0x202E). Read Only. |
 
 
 ### Object Permission object

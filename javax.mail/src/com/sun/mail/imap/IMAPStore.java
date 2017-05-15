@@ -279,6 +279,7 @@ public class IMAPStore extends Store
     private boolean closeFoldersOnStoreFailure = true;
     private boolean enableCompress = false;	// enable COMPRESS=DEFLATE
     private boolean finalizeCleanClose = false;
+    private boolean overwritePreLoginCapabilitiesAfterLogin = false;
 
     private long myValidity;
 
@@ -719,6 +720,11 @@ public class IMAPStore extends Store
 	if (finalizeCleanClose)
 	    logger.config("close connection cleanly in finalize");
 
+	overwritePreLoginCapabilitiesAfterLogin = PropUtil.getBooleanSessionProperty(session,
+        "mail." + name + ".overwriteprelogincapabilities", false);
+	if (overwritePreLoginCapabilitiesAfterLogin)
+	    logger.config("overwrite pre-login capabilities after login");
+
 	s = session.getProperty("mail." + name + ".folder.class");
 	if (s != null) {
 	    logger.log(Level.CONFIG, "IMAP: folder class: {0}", s);
@@ -1070,7 +1076,7 @@ public class IMAPStore extends Store
 	 */
 	if (p.hasCapability("__PRELOGIN__")) {
 	    try {
-		p.capability(false);
+		p.capability(overwritePreLoginCapabilitiesAfterLogin);
 	    } catch (ConnectionException cex) {
 		throw cex;	// rethrow connection failures
 		// XXX - assume connection has been closed

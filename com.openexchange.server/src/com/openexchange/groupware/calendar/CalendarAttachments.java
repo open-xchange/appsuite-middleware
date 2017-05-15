@@ -114,7 +114,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     public void checkMayReadAttachments(ServerSession session, int folderId, int objectId) throws OXException {
         try {
             final CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            if (!collection.getReadPermission(objectId, folderId, session, session.getContext())) {
+            if (!collection.getReadPermission(objectId, folderId, session, session.getContext(), true)) {
                 throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();
             }
         } catch (final OXException e) {

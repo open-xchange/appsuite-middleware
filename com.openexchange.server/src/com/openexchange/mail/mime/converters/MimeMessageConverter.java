@@ -1067,7 +1067,7 @@ public final class MimeMessageConverter {
                 /*
                  * Subject
                  */
-                mailMessage.setSubject(getSubject(msg));
+                mailMessage.setSubject(getSubject(msg), true);
                 /*
                  * Date
                  */
@@ -1194,7 +1194,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                mailMessage.setSubject(getSubject(msg));
+                mailMessage.setSubject(getSubject(msg), true);
             }
         });
         FILLER_MAP_EXT.put(MailField.SIZE, new MailMessageFieldFiller() {
@@ -1355,7 +1355,7 @@ public final class MimeMessageConverter {
                 /*
                  * Subject
                  */
-                mailMessage.setSubject(getSubject(msg));
+                mailMessage.setSubject(getSubject(msg), true);
                 /*
                  * Date
                  */
@@ -1530,7 +1530,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                mailMessage.setSubject(getSubject(msg));
+                mailMessage.setSubject(getSubject(msg), true);
             }
         });
         FILLER_MAP.put(MailField.SIZE, new MailMessageFieldFiller() {
@@ -2019,7 +2019,7 @@ public final class MimeMessageConverter {
              * Date: Thu, 18 Sep 1997 10:49:08 +0200
              * </pre>
              */
-            mail.setSubject(getSubject(mail));
+            mail.setSubject(getSubject(mail), true);
             mail.setThreadLevel(0);
             return mail;
         } catch (final MessageRemovedException e) {

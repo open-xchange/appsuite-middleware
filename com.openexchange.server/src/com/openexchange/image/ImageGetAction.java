@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -82,6 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
+@OAuthAction(OAuthAction.GRANT_ALL)
 public class ImageGetAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageGetAction.class);

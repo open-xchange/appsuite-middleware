@@ -73,6 +73,7 @@ import com.openexchange.java.Strings;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.EndTagType;
+import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
@@ -88,7 +89,8 @@ import net.htmlparser.jericho.TagType;
  */
 public final class JerichoParser {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
 
     private static final JerichoParser INSTANCE = new JerichoParser();
 
@@ -106,6 +108,67 @@ public final class JerichoParser {
      */
     public static void shutDown() {
         INSTANCE.stop();
+    }
+
+    private static final class CSS {
+
+        private final int cssThreshold;
+        private boolean exceeded;
+
+        private boolean css;
+        private StringBuilder content;
+
+        CSS(int cssThreshold) {
+            super();
+            this.cssThreshold = cssThreshold;
+        }
+
+        Segment getContent() {
+            return null == content ? null : new Segment(new Source(content), 0, content.length());
+        }
+
+        boolean isCss() {
+            return css;
+        }
+
+        void addSegment(Segment segment) {
+            if (exceeded) {
+                return;
+            }
+
+            if (null == content) {
+                content = new StringBuilder(segment.length() << 1);
+            }
+            content.append(segment);
+            if (cssThreshold > 0 && content.length() > cssThreshold) {
+                LOG.debug("Discarding content of <style> tag as its size exceeds max. allowed size ({})", Integer.valueOf(cssThreshold));
+                content = null;
+                exceeded = true;
+            }
+        }
+
+        boolean handleStartTag(StartTag startTag) {
+            if (HTMLElementName.STYLE != startTag.getName()) {
+                return false;
+            }
+
+            // Start of <style>
+            css = true;
+            return true;
+        }
+
+        boolean handleEndTag(EndTag endTag) {
+            if (HTMLElementName.STYLE != endTag.getName()) {
+                return false;
+            }
+
+            if (!css) {
+                return false;
+            }
+
+            css = false;
+            return true;
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------------- //
@@ -155,7 +218,8 @@ public final class JerichoParser {
         }
         if (checkSize) {
             int maxLength = HtmlServices.htmlThreshold();
-            if (html.length() > maxLength) {
+            if (maxLength > 0 && html.length() > maxLength) {
+                LOG.info("HTML content is too big: max. '{}', but is '{}'.", maxLength, html.length());
                 throw HtmlExceptionCodes.TOO_BIG.create(maxLength, html.length());
             }
         }
@@ -217,6 +281,7 @@ public final class JerichoParser {
             // Start regular parsing
             streamedSource = new StreamedSource(InterruptibleCharSequence.valueOf(html));
             streamedSource.setLogger(null);
+            CSS css = new CSS(HtmlServices.cssThreshold());
             int lastSegmentEnd = 0;
             Segment prev = null;
             for (Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
@@ -232,12 +297,12 @@ public final class JerichoParser {
                     if (combineable(segment)) {
                         segment = combineSegments(prev, segment);
                     } else {
-                        handleSegment(handler, prev, true, true);
+                        handleSegment(handler, prev, css, true, true);
                     }
                 }
 
                 // Handle current segment
-                prev = handleSegment(handler, segment, true, false);
+                prev = handleSegment(handler, segment, css, true, false);
             }
         } catch (InterruptedRuntimeException e) {
             throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
@@ -248,7 +313,7 @@ public final class JerichoParser {
         }
     }
 
-    private Segment combineSegments(Segment prev, Segment segment) {
+    static Segment combineSegments(Segment prev, Segment segment) {
         CharSequence cs = new CombinedCharSequence(prev, segment);
         return new Segment(new Source(cs), 0, cs.length());
     }
@@ -276,7 +341,7 @@ public final class JerichoParser {
         }
     }
 
-    private static Segment handleSegment(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) throws OXException {
+    private static Segment handleSegment(JerichoHandler handler, Segment segment, CSS css, boolean fixStartTags, boolean force) throws OXException {
         if (segment instanceof Tag) {
             Tag tag = (Tag) segment;
             TagType tagType = tag.getTagType();
@@ -284,32 +349,82 @@ public final class JerichoParser {
             EnumTagType enumType = EnumTagType.enumFor(tagType);
             if (null == enumType) {
                 if (!segment.isWhiteSpace()) {
-                    if ((tag instanceof StartTag) && (indexOf('<', 1, tag) >= 0)) {
-                        throw HtmlExceptionCodes.CORRUPT.create();
+                    if (css.isCss()) {
+                        css.addSegment(segment);
+                    } else {
+                        if ((tag instanceof StartTag) && (indexOf('<', 1, tag) >= 0)) {
+                            throw HtmlExceptionCodes.CORRUPT.create();
+                        }
+                        handler.handleUnknownTag(tag);
                     }
-                    handler.handleUnknownTag(tag);
                 }
             } else {
                 switch (enumType) {
-                    case START_TAG:
-                        handler.handleStartTag((StartTag) tag);
+                        case START_TAG:
+                        {
+                            StartTag startTag = (StartTag) tag;
+                            if (css.handleStartTag(startTag)) {
+                                // Start of <style> section
+                                handler.markCssStart(startTag);
+                            } else {
+                                if (css.isCss()) {
+                                    css.addSegment(segment);
+                                } else {
+                                    handler.handleStartTag(startTag);
+                                }
+
+                            }
+                        }
                         break;
                     case END_TAG:
-                        handler.handleEndTag((EndTag) tag);
+                        {
+                            EndTag endTag = (EndTag) tag;
+                            if (css.handleEndTag(endTag)) {
+                                // Leaving <style> section
+                                Segment cssContent = css.getContent();
+                                if (Strings.isNotEmptyCharSequence(cssContent)) {
+                                    handler.handleSegment(cssContent);
+                                }
+                                handler.markCssEnd(endTag);
+                            } else {
+                                if (css.isCss()) {
+                                    css.addSegment(segment);
+                                } else {
+                                    handler.handleEndTag(endTag);
+                                }
+                            }
+                        }
                         break;
                     case DOCTYPE_DECLARATION:
-                        handler.handleDocDeclaration(segment.toString());
+                        if (css.isCss()) {
+                            css.addSegment(segment);
+                        } else {
+                            handler.handleDocDeclaration(segment.toString());
+                        }
                         break;
                     case CDATA_SECTION:
-                        handler.handleCData(segment.toString());
+                        if (css.isCss()) {
+                            css.addSegment(segment);
+                        } else {
+                            handler.handleCData(segment.toString());
+                        }
                         break;
                     case COMMENT:
-                        handler.handleComment(segment.toString());
+                        if (css.isCss()) {
+                            css.addSegment(segment);
+                        } else {
+                            handler.handleComment(segment.toString());
+                        }
                         break;
                     default:
                         break;
                 }
             }
+            return null;
+        }
+
+        if (css.isCss()) {
+            css.addSegment(segment);
             return null;
         }
 
@@ -320,10 +435,10 @@ public final class JerichoParser {
         }
 
         // Safety re-parse
-        return safeParse(handler, segment, fixStartTags, force);
+        return safeParse(handler, segment, css, fixStartTags, force);
     }
 
-    private static Segment safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) throws OXException {
+    private static Segment safeParse(JerichoHandler handler, Segment segment, CSS css, boolean fixStartTags, boolean force) throws OXException {
         if (!fixStartTags || !containsStartTag(segment)) {
             handler.handleSegment(saneCharSequence(segment));
             return null;
@@ -373,19 +488,25 @@ public final class JerichoParser {
         Iterator<Segment> iter = nestedSource.iterator();
         if (!thread.isInterrupted() && iter.hasNext()) {
             Segment firstSegment = iter.next();
-            if (!(firstSegment instanceof Tag)) {
+            if (firstSegment instanceof Tag) {
+                // All fine
+                handleSegment(handler, firstSegment, css, false, true);
+            } else if (firstSegment.length() <= 0 || firstSegment.charAt(0) != '<' || firstSegment.charAt(firstSegment.length() - 1) != '>' || (indexOf('<', 1, firstSegment) >= 0)) {
                 // Start tag detection did not help
                 throw HtmlExceptionCodes.CORRUPT.create();
+            } else {
+                // Seems to be a valid start tag that cannot be parsed. Most likely due to invalid attributes
+                // Ignore...
             }
-            handleSegment(handler, firstSegment, false, true);
+
             while (!thread.isInterrupted() && iter.hasNext()) {
                 Segment nestedSegment = iter.next();
-                handleSegment(handler, nestedSegment, false, true);
+                handleSegment(handler, nestedSegment, css, false, true);
             }
         }
 
         if (null != remainder) {
-            return safeParse(handler, new Segment(new Source(segment), remainder[0], remainder[1]), fixStartTags, force);
+            return safeParse(handler, new Segment(new Source(segment), remainder[0], remainder[1]), css, fixStartTags, force);
             // handler.handleSegment(remainder);
         }
         return null;

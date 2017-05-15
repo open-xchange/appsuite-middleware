@@ -66,16 +66,29 @@ public class ContactParser {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactParser.class);
 
+    private static final ContactParser INSTANCE = new ContactParser();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static ContactParser getInstance() {
+        return INSTANCE;
+    }
+
+    // --------------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link ContactParser}.
      */
-    public ContactParser() {
+    private ContactParser() {
         super();
     }
 
     /**
      * Parse to contact object
-     * 
+     *
      * @param response
      * @return
      */

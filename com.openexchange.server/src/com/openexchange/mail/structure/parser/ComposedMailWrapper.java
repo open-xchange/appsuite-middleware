@@ -706,6 +706,11 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
+    public void setSubject(String subject, boolean decoded) {
+        mail.setSubject(subject, decoded);
+    }
+
+    @Override
     public void prepareForCaching() {
         mail.prepareForCaching();
     }

@@ -449,7 +449,7 @@ public enum Utilities {
             composedMail.setMsgref(source.getMsgref());
         }
         if (source.containsSubject()) {
-            composedMail.setSubject(source.getSubject());
+            composedMail.setSubject(source.getSubject(), source.isSubjectDecoded());
         }
         if (source.containsSize()) {
             composedMail.setSize(source.getSize());

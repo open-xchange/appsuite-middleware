@@ -51,8 +51,8 @@ package com.openexchange.ajax.helper;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
+import java.awt.Dimension;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -70,8 +70,11 @@ import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
+import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
+import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
@@ -561,6 +564,8 @@ public final class DownloadUtility {
         appendFilenameParameter(fileName, null, userAgent, appendTo);
     }
 
+    private static final PercentEscaper encoder = new PercentEscaper("", false);
+
     /**
      * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
      *
@@ -609,7 +614,6 @@ public final class DownloadUtility {
                 foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
-            PercentEscaper encoder = new PercentEscaper("", false);
             String encoded = encoder.escape(fn);
             appendTo.append("; filename*=UTF-8''").append(encoded);
         }
@@ -785,43 +789,40 @@ public final class DownloadUtility {
      * @param file The file to check
      * @return <code>true</code> if specified uploaded file is illegal/harmful; otherwise <code>false</code>
      * @throws OXException If uploaded file cannot be checked
+     * @throws IOException If an I/O error occurs or upload is denied
      */
-    public static boolean isIllegalUpload(UploadFile file) throws OXException {
-        try {
-            ContentType contentType = new ContentType(file.getContentType());
-            String fileName = file.getPreparedFileName();
-            if ((null != fileName) && contentType.startsWith(MIME_APPL_OCTET)) {
-                /*
-                 * Try to determine MIME type
-                 */
-                final String ct = MimeType2ExtMap.getContentType(fileName);
-                final int pos = ct.indexOf('/');
-                contentType.setPrimaryType(ct.substring(0, pos));
-                contentType.setSubType(ct.substring(pos + 1));
-            }
+    public static boolean isIllegalUpload(UploadFile file) throws OXException, IOException {
+        ContentType contentType = new ContentType(file.getContentType());
+        String fileName = file.getPreparedFileName();
+        if ((null != fileName) && contentType.startsWith(MIME_APPL_OCTET)) {
+            /*
+             * Try to determine MIME type
+             */
+            final String ct = MimeType2ExtMap.getContentType(fileName);
+            final int pos = ct.indexOf('/');
+            contentType.setPrimaryType(ct.substring(0, pos));
+            contentType.setSubType(ct.substring(pos + 1));
+        }
 
-            if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
-                if (HTMLDetector.containsHTMLTags(file.openStream(), false)) {
-                    // Illegal
-                    return true;
-                }
-                return false;
-            }
-
-            if (isIllegalImage(file)) {
-                return true;
-            }
-
-            if (contentType.containsAny("shockwave", "flash") || fileNameImpliesFlash(fileName)) {
-                return true;
-            }
-            if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm", "xml") || fileNameImpliesHtml(fileName)) {
+        if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
+            if (HTMLDetector.containsHTMLTags(file.openStream(), false)) {
+                // Illegal
                 return true;
             }
             return false;
-        } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+
+        if (isIllegalImage(file)) {
+            return true;
+        }
+
+        if (contentType.containsAny("shockwave", "flash") || fileNameImpliesFlash(fileName)) {
+            return true;
+        }
+        if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm", "xml") || fileNameImpliesHtml(fileName)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -854,7 +855,7 @@ public final class DownloadUtility {
     }
 
     private static boolean isIllegalImageData(UploadFile imageFile) throws IOException {
-        if (!isValidImage(imageFile.openStream())) {
+        if (!isValidImage(imageFile)) {
             // Invalid
             return true;
         }
@@ -866,15 +867,34 @@ public final class DownloadUtility {
         return false;
     }
 
-    private static boolean isValidImage(final InputStream data) {
-        try {
-            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(data);
-            return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
-        } catch (final Exception e) {
+    private static boolean isValidImage(UploadFile imageFile) throws IOException {
+        Dimension dimension = Utility.getImageDimensionFor(imageFile.openStream(), imageFile.getContentType(), imageFile.getPreparedFileName());
+        if (dimension == null || dimension.getHeight() <= 0 || dimension.getWidth() <= 0) {
             return false;
-        } finally {
-            Streams.close(data);
         }
+
+        // Check size
+        {
+            long maxSize = Utility.maxSize();
+            if (0 < maxSize && maxSize < imageFile.getSize()) {
+                // Too big
+                throw new ImageTransformationDeniedIOException(new StringBuilder("Image upload denied. Size is too big. (current=").append(imageFile.getSize()).append(", max=").append(maxSize).append(')').toString());
+            }
+        }
+
+        // Check resolution
+        {
+            long maxResolution = Utility.maxResolution();
+            if (0 < maxResolution) {
+                int resolution = dimension.height * dimension.width;
+                if (resolution > maxResolution) {
+                    // Resolution too high
+                    throw new ImageTransformationDeniedIOException(new StringBuilder("Image upload denied. Resolution is too high. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
+                }
+            }
+        }
+
+        return true;
     }
 
 }

@@ -820,6 +820,11 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     }
 
     @Override
+    public void setSubject(String subject, boolean decoded) {
+        delegate.setSubject(subject, decoded);
+    }
+
+    @Override
     public Date getSentDate() {
         return delegate.getSentDate();
     }

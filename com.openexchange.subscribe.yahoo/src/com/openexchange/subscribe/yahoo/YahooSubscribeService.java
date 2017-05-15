@@ -95,7 +95,8 @@ private final Activator activator;
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
-        return activator.getYahooService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+        int oauthAccountId = ((Integer) subscription.getConfiguration().get("account")).intValue();
+        return activator.getYahooService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), oauthAccountId);
     }
 
     @Override

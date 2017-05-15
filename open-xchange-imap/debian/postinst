@@ -94,6 +94,9 @@ postFix() {
             ox_set_property com.openexchange.imap.ssl.protocols "" $PFILE
         fi
     fi
+
+    # SoftwareChange_Request-4092
+    ox_add_property com.openexchange.imap.overwritePreLoginCapabilities false $PFILE
 }
 
 case "$1" in

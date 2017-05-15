@@ -109,7 +109,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     private interface PhotoHandler {
 
-        void handlePhoto(User xingUser, Contact contact, ServerSession session) throws OXException;
+        void handlePhoto(User xingUser, Contact contact, Subscription subscription, ServerSession session) throws OXException;
     }
 
     private final class CollectingPhotoHandler implements PhotoHandler {
@@ -125,7 +125,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         }
 
         @Override
-        public void handlePhoto(User xingUser, Contact contact, ServerSession session) throws OXException {
+        public void handlePhoto(User xingUser, Contact contact, Subscription subscription, ServerSession session) throws OXException {
             final PhotoUrls photoUrls = xingUser.getPhotoUrls();
             String url = photoUrls.getMaxiThumbUrl();
             if (url == null) {
@@ -142,7 +142,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
     private final PhotoHandler loadingPhotoHandler = new PhotoHandler() {
 
         @Override
-        public void handlePhoto(final User xingUser, final Contact contact, ServerSession session) throws OXException {
+        public void handlePhoto(final User xingUser, final Contact contact, Subscription subscription, ServerSession session) throws OXException {
             if (null == xingUser || null == contact) {
                 return;
             }
@@ -154,7 +154,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             }
 
             if (url != null) {
-                XingOAuthAccess xingAccess = getXingOAuthAccess(session);
+                XingOAuthAccess xingAccess = getXingOAuthAccess(subscription, session);
                 XingAPI<WebAuthSession> api = xingAccess.getXingAPI();
                 try {
                     IFileHolder photo = api.getPhoto(url);
@@ -205,17 +205,31 @@ public class XingSubscribeService extends AbstractSubscribeService {
     /**
      * Gets the XING OAuth access.
      *
+     * @param subscription The subscription information
      * @param session The associated session
      * @return The XING OAuth access
      * @throws OXException If XING OAuth access cannot be returned
      */
-    protected XingOAuthAccess getXingOAuthAccess(final ServerSession session) throws OXException {
+    protected XingOAuthAccess getXingOAuthAccess(Subscription subscription, ServerSession session) throws OXException {
         final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
         if (null == provider) {
             throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
         }
 
-        final int xingOAuthAccount = provider.getXingOAuthAccount(session);
+        int xingOAuthAccount;
+        {
+            Object accountId = subscription.getConfiguration().get("account");
+            if (null == accountId) {
+                xingOAuthAccount = provider.getXingOAuthAccount(session);
+            } else {
+                if (accountId instanceof Integer) {
+                    xingOAuthAccount = ((Integer) accountId).intValue();
+                } else {
+                    xingOAuthAccount = Integer.parseInt(accountId.toString());
+                }
+            }
+        }
+
         return provider.accessFor(xingOAuthAccount, session);
     }
 
@@ -223,7 +237,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
             final ServerSession session = subscription.getSession();
-            final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(session);
+            final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(subscription, session);
             final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
             final String userId = xingOAuthAccess.getXingUserId();
             final List<UserField> userFields = Arrays.asList(UserField.values());
@@ -234,7 +248,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             List<User> chunk = contacts.getUsers();
             if (chunk.size() < firstChunkLimit) {
                 // Obtained less than requested; no more contacts available then
-                return convert(chunk, loadingPhotoHandler, session);
+                return convert(chunk, loadingPhotoHandler, subscription, session);
             }
             final int maxLimit = 25;
             final int total = contacts.getTotal();
@@ -258,7 +272,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 LOG.info("Going to converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
                 final Map<String, String> photoUrlsMap = new HashMap<String, String>(total);
                 final PhotoHandler photoHandler = new CollectingPhotoHandler(photoUrlsMap);
-                final List<Contact> retval = convert(chunk, photoHandler, session);
+                final List<Contact> retval = convert(chunk, photoHandler, subscription, session);
                 LOG.info("Converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
 
                 // TODO: Schedule a separate task to fill photos
@@ -276,7 +290,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                         final int remain = total - off;
                         final List<User> chunk = xingAPI.getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, off, null, userFields).getUsers();
                         // Store them
-                        final List<Contact> convertees = convert(chunk, loadingPhotoHandler, session);
+                        final List<Contact> convertees = convert(chunk, loadingPhotoHandler, subscription, session);
                         LOG.info("Converted {} XING contacts for user {} in context {}", chunk.size(), session.getUserId(), session.getContextId());
                         folderUpdater.save(new SearchIteratorDelegator<Contact>(convertees), subscription);
                         // Next chunk...
@@ -286,7 +300,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 }
             });
             // Return first chunk with this thread
-            return convert(chunk, loadingPhotoHandler, session);
+            return convert(chunk, loadingPhotoHandler, subscription, session);
         } catch (final XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
         } catch (final XingException e) {
@@ -303,10 +317,10 @@ public class XingSubscribeService extends AbstractSubscribeService {
      * @param optPhotoHandler The photo handler
      * @return The resulting contacts
      */
-    protected List<Contact> convert(final List<User> xingContacts, final PhotoHandler optPhotoHandler, final ServerSession session) {
+    protected List<Contact> convert(final List<User> xingContacts, final PhotoHandler optPhotoHandler, Subscription subscription, final ServerSession session) {
         final List<Contact> ret = new ArrayList<Contact>(xingContacts.size());
         for (final User xingContact : xingContacts) {
-            ret.add(convert(xingContact, optPhotoHandler, session));
+            ret.add(convert(xingContact, optPhotoHandler, subscription, session));
         }
         return ret;
     }
@@ -387,7 +401,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         removeWhereConfigMatches(context, query);
     }
 
-    private Contact convert(final User xingUser, final PhotoHandler optPhotoHandler, final ServerSession session) {
+    private Contact convert(final User xingUser, final PhotoHandler optPhotoHandler, Subscription subscription, final ServerSession session) {
         if (null == xingUser) {
             return null;
         }
@@ -596,7 +610,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         }
         if (null != optPhotoHandler) {
             try {
-                optPhotoHandler.handlePhoto(xingUser, oxContact, session);
+                optPhotoHandler.handlePhoto(xingUser, oxContact, subscription, session);
             } catch (final Exception e) {
                 LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), xingUser.getId());
             }

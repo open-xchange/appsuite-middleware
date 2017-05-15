@@ -98,7 +98,11 @@ final class TestCommandParserUtil {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     static final void fillWithAddressEnvelopeOrHeaderTest(JSONObject jsonObject, TestCommand command) throws JSONException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(AddressEnvelopeAndHeaderTestField.comparison.name(), command.getMatchType().substring(1));
+        if (command.getMatchType() == null) {
+            jsonObject.put(AddressEnvelopeAndHeaderTestField.comparison.name(), "is");
+        } else {
+            jsonObject.put(AddressEnvelopeAndHeaderTestField.comparison.name(), command.getMatchType().substring(1));
+        }
         jsonObject.put(AddressEnvelopeAndHeaderTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
         jsonObject.put(AddressEnvelopeAndHeaderTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
     }
