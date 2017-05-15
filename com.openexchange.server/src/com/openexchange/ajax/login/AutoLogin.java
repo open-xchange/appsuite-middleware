@@ -144,8 +144,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                      * auto-login failed
                      */
                     SessionUtility.removeOXCookies(hash, req, resp);
-                    SessionUtility.removeJSESSIONID(req, resp);
                     if (doAutoLogin(req, resp)) {
+                        SessionUtility.removeJSESSIONID(req, resp);
                         if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
                             return;
                         }
