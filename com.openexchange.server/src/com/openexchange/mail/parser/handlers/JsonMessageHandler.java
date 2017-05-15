@@ -112,6 +112,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -503,7 +504,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
                 jsonObject.put(ATTACHMENT_FILE_NAME, val);
             } else {
-                jsonObject.put(ATTACHMENT_FILE_NAME, fileName);
+            	jsonObject.put(ATTACHMENT_FILE_NAME, FileNameTools.sanitizeFilename(fileName));
             }
             /*
              * Size

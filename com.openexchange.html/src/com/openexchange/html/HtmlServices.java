@@ -54,14 +54,18 @@ import static com.openexchange.java.Strings.isWhitespace;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import net.htmlparser.jericho.HTMLElementName;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.net.URLCodec;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
+import com.openexchange.java.Strings;
+
 
 /**
  * {@link HtmlServices} - A utility class for {@link HtmlService}.
@@ -230,9 +234,14 @@ public final class HtmlServices {
         }
 
         // Check for global event handlers
-        if (lc.indexOf("on") >= 0) {
-            for (String eventHandler : GLOBAL_EVENT_HANDLERS) {
-                if (lc.indexOf(eventHandler) >= 0) {
+        {
+            int pos = lc.indexOf("on");
+            if (pos == 0) {
+                if (nextAreAsciiLetter(pos + 1, 3, lc)) {
+                    return false;
+                }
+            } else if (pos > 0) {
+                if (false == isWordCharacter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
                     return false;
                 }
             }
@@ -248,6 +257,31 @@ public final class HtmlServices {
         }
 
         return true;
+    }
+
+    /**
+     * Checks if specified character is a word character: <code>[a-zA-Z_0-9-]</code>
+     *
+     * @return <code>true</code> if the indicated character is a word character; otherwise <code>false</code>
+     */
+    private static boolean isWordCharacter(char c) {
+        return '-' == c || '_' == c || Strings.isAsciiLetterOrDigit(c);
+    }
+
+    private static boolean nextAreAsciiLetter(int pos, int count, String s) {
+        int c = count;
+        int npos = pos + c--;
+        if (npos >= s.length()) {
+            return false;
+        }
+
+        boolean letter = true;
+        while (letter && c >= 0) {
+            letter = Strings.isAsciiLetter(s.charAt(npos));
+            npos = pos + c--;
+        }
+
+        return letter;
     }
 
     private static String dropWhitespacesFrom(String str) {
@@ -415,87 +449,17 @@ public final class HtmlServices {
 
     // ------------------------------------------------------------------------------------------------------------------------ //
 
-    private static final String[] GLOBAL_EVENT_HANDLERS = {
-        "onabort",
-        "onanimationcancel",
-        "onanimationend",
-        "onanimationiteration",
-        "onanimationstart",
-        "onblur",
-        "onerror",
-        "onfocus",
-        "oncancel",
-        "oncanplay",
-        "oncanplaythrough",
-        "onchange",
-        "onclick",
-        "onclose",
-        "oncontextmenu",
-        "oncuechange",
-        "ondblclick",
-        "ondrag",
-        "ondragend",
-        "ondragenter",
-        "ondragexit",
-        "ondragleave",
-        "ondragover",
-        "ondragstart",
-        "ondrop",
-        "ondurationchange",
-        "onemptied",
-        "onended",
-        "ongotpointercapture",
-        "oninput",
-        "oninvalid",
-        "onkeydown",
-        "onkeypress",
-        "onkeyup",
-        "onload",
-        "onloadeddata",
-        "onloadedmetadata",
-        "onloadstart",
-        "onlostpointercapture",
-        "onmousedown",
-        "onmouseenter",
-        "onmouseleave",
-        "onmousemove",
-        "onmouseout",
-        "onmouseover",
-        "onmouseup",
-        "onmousewheel",
-        "onpause",
-        "onplay",
-        "onplaying",
-        "onpointerdown",
-        "onpointermove",
-        "onpointerup",
-        "onpointercancel",
-        "onpointerover",
-        "onpointerout",
-        "onpointerenter",
-        "onpointerleave",
-        "onpointerlockchange",
-        "onpointerlockerror",
-        "onprogress",
-        "onratechange",
-        "onreset",
-        "onscroll",
-        "onseeked",
-        "onseeking",
-        "onselect",
-        "onselectionchange",
-        "onshow",
-        "onsort",
-        "onstalled",
-        "onsubmit",
-        "onsuspend",
-        "ontimeupdate",
-        "onvolumechange",
-        "ontouchcancel",
-        "ontouchend",
-        "ontouchmove",
-        "ontouchstart",
-        "ontransitionend",
-        "onwaiting"};
+    private static Set<String> ALLOWED_IN_HEAD = ImmutableSet.<String> builder().add("head", "title", "style", "base", "link", "meta", "script", "noscript").build();
+
+    /**
+     * Gets a (read-only) set containing those HTML elements that are allowed to occur inside &lt;head&gt; tag.
+     * <p>
+     * Currently: "head", "title", "style", "base", "link", "meta", "script", and "noscript"
+     *
+     * @return HTML elements that are allowed to occur inside &lt;head&gt; tag
+     */
+    public static Set<String> getElementsAllowedInHead() {
+        return ALLOWED_IN_HEAD;
+    }
 
 }
