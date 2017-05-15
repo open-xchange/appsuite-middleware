@@ -75,6 +75,7 @@ import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
@@ -204,8 +205,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         List<Object> args = new ArrayList<>(16);
 
         logMessageBuilder.append("Primary IMAP properties successfully loaded for user {} in context {}{}");
-        args.add(userId);
-        args.add(contextId);
+        args.add(Integer.valueOf(userId));
+        args.add(Integer.valueOf(contextId));
         args.add(Strings.getLineSeparator());
 
         {
@@ -245,7 +246,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.namespacePerUser = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.namespacePerUser", false, view);
 
             logMessageBuilder.append("  Namespace per User: {}{}");
-            args.add(params.namespacePerUser);
+            args.add(Autoboxing.valueOf(params.namespacePerUser));
             args.add(Strings.getLineSeparator());
         }
 
@@ -253,7 +254,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.umlautFilterThreshold = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.umlautFilterThreshold", 50, view);
 
             logMessageBuilder.append("  Umlaut filter threshold: {}{}");
-            args.add(params.umlautFilterThreshold);
+            args.add(Autoboxing.valueOf(params.umlautFilterThreshold));
             args.add(Strings.getLineSeparator());
         }
 
@@ -261,7 +262,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.maxMailboxNameLength = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.maxMailboxNameLength", 60, view);
 
             logMessageBuilder.append("  Max. Mailbox Name Length: {}{}");
-            args.add(params.maxMailboxNameLength);
+            args.add(Autoboxing.valueOf(params.maxMailboxNameLength));
             args.add(Strings.getLineSeparator());
         }
 
@@ -290,7 +291,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.allowESORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowESORT", true, view);
 
             logMessageBuilder.append("  Allow ESORT: {}{}");
-            args.add(params.allowESORT);
+            args.add(Autoboxing.valueOf(params.allowESORT));
             args.add(Strings.getLineSeparator());
         }
 
@@ -298,7 +299,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.allowSORTDISPLAY = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowSORTDISPLAY", false, view);
 
             logMessageBuilder.append("  Allow SORT-DSIPLAY: {}{}");
-            args.add(params.allowSORTDISPLAY);
+            args.add(Autoboxing.valueOf(params.allowSORTDISPLAY));
             args.add(Strings.getLineSeparator());
         }
 
@@ -306,7 +307,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.fallbackOnFailedSORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.fallbackOnFailedSORT", false, view);
 
             logMessageBuilder.append("  Fallback On Failed SORT: {}{}");
-            args.add(params.fallbackOnFailedSORT);
+            args.add(Autoboxing.valueOf(params.fallbackOnFailedSORT));
             args.add(Strings.getLineSeparator());
         }
 
@@ -314,7 +315,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.useMultipleAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddresses", false, view);
 
             logMessageBuilder.append("  Use Multiple IP addresses: {}{}");
-            args.add(params.useMultipleAddresses);
+            args.add(Autoboxing.valueOf(params.useMultipleAddresses));
             args.add(Strings.getLineSeparator());
         }
 
@@ -322,7 +323,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             params.useMultipleAddressesUserHash = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddressesUserHash", false, view);
 
             logMessageBuilder.append("  Use User Hash for Multiple IP addresses: {}{}");
-            args.add(params.useMultipleAddressesUserHash);
+            args.add(Autoboxing.valueOf(params.useMultipleAddressesUserHash));
             args.add(Strings.getLineSeparator());
         }
 
@@ -665,7 +666,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
                     logBuilder.append("\tHost name regular expression: ").append(tmp).append("\n");
                 } catch (PatternSyntaxException e) {
-                    logBuilder.append("\tHost name regular expression: Invalid value \"").append(null == tmp ? "<none>" : tmp).append("\". Using no host name extraction\n");
+                    logBuilder.append("\tHost name regular expression: Invalid value \"").append(tmp).append("\". Using no host name extraction\n");
                 }
             }
         }
