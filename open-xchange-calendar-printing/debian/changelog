@@ -1,3 +1,9 @@
+open-xchange-calendar-printing (7.6.3-28) stable; urgency=medium
+
+  * Build for patch 2017-05-15 (4133)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 08 May 2017 16:29:23 +0200
+
 open-xchange-calendar-printing (7.6.3-27) stable; urgency=medium
 
   * Build for patch 2017-04-21 (4079)
