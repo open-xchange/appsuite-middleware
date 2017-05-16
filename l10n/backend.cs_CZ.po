@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-21 17:46+0100\n"
+"PO-Revision-Date: 2017-05-06 12:30+0100\n"
 "Last-Translator: Robert Kratky <kratky@rob.cz>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -3248,6 +3248,11 @@ msgstr "HTML obsah není platný a nelze jej zobrazit"
 msgid "The HTML content cannot be safely displayed"
 msgstr "HTML obsah nelze bezpečně zobrazit"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Tuto zprávu lze zobrazit pouze jako prostý text"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5074,16 +5079,16 @@ msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for appointments."
 msgstr ""
-"Převodem vznikly objekty, které nebylo možné uložit, protože neexistuje"
-" složka pro schůzky."
+"Převodem vznikly objekty, které nebylo možné uložit, protože neexistuje "
+"složka pro schůzky."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
 msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for tasks."
 msgstr ""
-"Převodem vznikly objekty, které nebylo možné uložit, protože neexistuje"
-" složka pro úkoly."
+"Převodem vznikly objekty, které nebylo možné uložit, protože neexistuje "
+"složka pro úkoly."
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5304,11 +5309,12 @@ msgid "Appointments must have at least one participant."
 msgstr "Schůzky musí mít alespoň jednoho účastníka."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr "Nemáte příslušná oprávnění ke čtení schůzek v dané složce."
 
 #. *
@@ -5534,8 +5540,8 @@ msgid ""
 "Cannot create that appointment. An appointment having the same unique "
 "identifier already exists."
 msgstr ""
-"Nelze vytvořit schůzku. Schůzka se stejným unikátním identifikátorem již"
-" existuje."
+"Nelze vytvořit schůzku. Schůzka se stejným unikátním identifikátorem již "
+"existuje."
 
 #. *
 #. * Cannot create that task. A task having the same unique identifier already exists.
@@ -8589,8 +8595,8 @@ msgid ""
 "Your mail transport for %2$s was disabled because of authorization issues. "
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
-"Váš poštovní přenosový účet pro %2$s byl vypnut kvůli problému s autorizací."
-" Autorizujte, prosím, znovu účet %5$s, aby bylo možné jej opět zapnout."
+"Váš poštovní přenosový účet pro %2$s byl vypnut kvůli problému s autorizací. "
+"Autorizujte, prosím, znovu účet %5$s, aby bylo možné jej opět zapnout."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8682,8 +8688,8 @@ msgid ""
 "The provided login data to access mail server %1$s seem to be wrong. Please "
 "correct them."
 msgstr ""
-"Zadané přihlašovací údaje pro přístup k serveru %1$s jsou patrně chybné."
-" Opravte je, prosím."
+"Zadané přihlašovací údaje pro přístup k serveru %1$s jsou patrně chybné. "
+"Opravte je, prosím."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -10266,8 +10272,8 @@ msgstr "Došlo k chybě, nebylo možné poslat oznámení."
 msgid ""
 "You don't have sufficient permissions to send notifications for this share."
 msgstr ""
-"Nemáte příslušná oprávnění k posílání oznámení ohledně tohoto sdíleného"
-" obsahu."
+"Nemáte příslušná oprávnění k posílání oznámení ohledně tohoto sdíleného "
+"obsahu."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -10605,8 +10611,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
 msgid "The provided feedback score is invalid. Please choose a number > 0."
 msgstr ""
-"Zadaná hodnota zpětné vazby je neplatná. Vyberte, prosím, číslo větší než"
-" nula."
+"Zadaná hodnota zpětné vazby je neplatná. Vyberte, prosím, číslo větší než "
+"nula."
 
 #. The provided feedback for key 'score' has an invalid type.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
@@ -10615,13 +10621,13 @@ msgstr "Zadaná zpětná vazba pro položku ‚skóre‘ je neplatného typu."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "Zadaná zpětná vazba neobsahuje povinný klíč „%s“."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Zadaná zpětná vazba neobsahuje povinný klíč ‚%s‘."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "Zadanou zpětnou vazbu pro klíč „%s“ nelze zpracovat."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "Zadanou zpětnou vazbu pro klíč ‚%s‘ nelze zpracovat."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -12877,6 +12883,17 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr "Nemáte příslušná oprávnění ke čtení schůzek v dané složce."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Zadaná zpětná vazba neobsahuje povinný klíč „%s“."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Zadanou zpětnou vazbu pro klíč „%s“ nelze zpracovat."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

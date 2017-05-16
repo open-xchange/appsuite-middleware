@@ -6,9 +6,9 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-18 23:29-0300\n"
-"Last-Translator: Bianca Oliveira <bianca@bureau-cornavin.com>\n"
-"Language-Team: Portuguese <bianca@bureau-cornavin.com>\n"
+"PO-Revision-Date: 2017-05-10 10:02-0300\n"
+"Last-Translator: Bianca Oliveira <biatopeira@gmail.com>\n"
+"Language-Team: Portuguese <bianca@workshop-chapina.com>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3271,6 +3271,11 @@ msgstr "O conteúdo HTML é inválido e não pode ser exibido"
 msgid "The HTML content cannot be safely displayed"
 msgstr "O conteúdo HTML não pode ser exibido com segurança"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Esta mensagem só pode ser visualizada como texto simples"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5128,16 +5133,16 @@ msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for appointments."
 msgstr ""
-"A conversão resultou em alguns objetos que não puderam ser armazenados devido"
-" a ausência de pasta para os compromissos."
+"A conversão resultou em alguns objetos que não puderam ser armazenados "
+"devido a ausência de pasta para os compromissos."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
 msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for tasks."
 msgstr ""
-"A conversão resultou em alguns objetos que não puderam ser armazenados devido"
-" a ausência de pasta para as tarefas."
+"A conversão resultou em alguns objetos que não puderam ser armazenados "
+"devido a ausência de pasta para as tarefas."
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5361,13 +5366,14 @@ msgid "Appointments must have at least one participant."
 msgstr "O compromisso deve ter ao menos um participante."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
-"Você não possui permissão apropriada para ler os compromissos desta pasta."
+"Você não tem permissões apropriadas para ler os compromissos nesta pasta."
 
 #. *
 #. * End date must not be before start date.
@@ -5598,8 +5604,8 @@ msgid ""
 "Cannot create that appointment. An appointment having the same unique "
 "identifier already exists."
 msgstr ""
-"Não é possível criar este compromisso. Já existe um compromisso com o mesmo"
-" identificador."
+"Não é possível criar este compromisso. Já existe um compromisso com o mesmo "
+"identificador."
 
 #. *
 #. * Cannot create that task. A task having the same unique identifier already exists.
@@ -5609,8 +5615,8 @@ msgid ""
 "Cannot create that task. A task having the same unique identifier already "
 "exists."
 msgstr ""
-"Não é possível criar esta tarefa. Já existe uma tarefa com o mesmo"
-" identificador."
+"Não é possível criar esta tarefa. Já existe uma tarefa com o mesmo "
+"identificador."
 
 #. Sequence number is outdated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -8692,8 +8698,8 @@ msgid ""
 "Your mail transport for %2$s was disabled because of authorization issues. "
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
-"Seu transporte de e-mail para %2$s foi desabilitado devido a problemas de"
-" autorização. Por favor, reautorize a conta %5$s para habilitá-la novamente."
+"Seu transporte de e-mail para %2$s foi desabilitado devido a problemas de "
+"autorização. Por favor, reautorize a conta %5$s para habilitá-la novamente."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8786,8 +8792,8 @@ msgid ""
 "The provided login data to access mail server %1$s seem to be wrong. Please "
 "correct them."
 msgstr ""
-"Os dados de login fornecidos para acessar o servidor de e-mail %1$s parecem"
-" estar incorretos. Por favor, corrija-os."
+"Os dados de login fornecidos para acessar o servidor de e-mail %1$s parecem "
+"estar incorretos. Por favor, corrija-os."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -10416,8 +10422,8 @@ msgstr ""
 msgid ""
 "You don't have sufficient permissions to send notifications for this share."
 msgstr ""
-"Você não possui permissão suficiente para enviar notificações para este"
-" compartilhamento."
+"Você não possui permissão suficiente para enviar notificações para este "
+"compartilhamento."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -10756,8 +10762,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
 msgid "The provided feedback score is invalid. Please choose a number > 0."
 msgstr ""
-"A pontuação fornecida no comentário é inválida. Por favor escolha um número >"
-" 0."
+"A pontuação fornecida no comentário é inválida. Por favor escolha um número "
+"> 0."
 
 #. The provided feedback for key 'score' has an invalid type.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
@@ -10767,13 +10773,13 @@ msgstr ""
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "O comentário fornecido não contém a chave requerida \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "O comentário fornecido não contém a chave requerida '%s'."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "O comentário fornecido para a chave \"%s\" não pode ser analisado."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "O comentário fornecido para a chave '%s' não pode ser analisado."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -13036,6 +13042,18 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "Você não possui permissão apropriada para ler os compromissos desta pasta."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "O comentário fornecido não contém a chave requerida \"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "O comentário fornecido para a chave \"%s\" não pode ser analisado."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

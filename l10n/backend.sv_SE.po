@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-20 17:29+0100\n"
+"PO-Revision-Date: 2017-05-03 17:47+0100\n"
 "Last-Translator: Arve Eriksson <031299870@telia.com>\n"
 "Language-Team: Swedish <ox@workshop-chapina.com>\n"
 "Language: sv\n"
@@ -3246,6 +3246,11 @@ msgstr "HTML-innehållet är ogiltigt och kan inte visas"
 msgid "The HTML content cannot be safely displayed"
 msgstr "HTML-innehållet kan inte visas säkert"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Det här meddelandet kan bara visas som vanlig text"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5071,8 +5076,8 @@ msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for appointments."
 msgstr ""
-"Konverteringen skapade en del objekt som inte kunde lagras på grund av saknad "
-"mapp för möten."
+"Konverteringen skapade en del objekt som inte kunde lagras på grund av "
+"saknad mapp för möten."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
 msgid ""
@@ -5301,13 +5306,13 @@ msgid "Appointments must have at least one participant."
 msgstr "Möten måste ha minst en deltagare."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
-msgstr ""
-"Du har inte tillräckliga rättigheter för att läsa möten från den mappen."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
+msgstr "Du har inte tillräckliga rättigheter för att läsa möten i den mappen."
 
 #. *
 #. * End date must not be before start date.
@@ -5543,8 +5548,8 @@ msgid ""
 "Cannot create that task. A task having the same unique identifier already "
 "exists."
 msgstr ""
-"Kan inte skapa uppgiften. En uppgift med samma unika identifierare finns"
-" redan."
+"Kan inte skapa uppgiften. En uppgift med samma unika identifierare finns "
+"redan."
 
 #. Sequence number is outdated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -8704,9 +8709,8 @@ msgid ""
 "The provided login data to access mail server %1$s seem to be wrong. Please "
 "correct them."
 msgstr ""
-"Inloggningsuppgifterna för att komma åt e-postservern %1$s verkar vara"
-" felaktiga. "
-"Justera dem."
+"Inloggningsuppgifterna för att komma åt e-postservern %1$s verkar vara "
+"felaktiga. Justera dem."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -10653,12 +10657,12 @@ msgstr "Återkopplingen för nyckeln \"score\" har en ogiltig typ."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
 msgstr "Återkopplingen innehåller inte den nödvändiga nyckeln \"%s\"."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr "Återkopplingen för nyckeln \"%s\" kan inte tolkas."
 
 #. The value given in the property %1$s is no integer value
@@ -12921,6 +12925,18 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för att läsa möten från den mappen."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Återkopplingen innehåller inte den nödvändiga nyckeln \"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Återkopplingen för nyckeln \"%s\" kan inte tolkas."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

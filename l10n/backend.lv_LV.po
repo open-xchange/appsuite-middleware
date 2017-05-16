@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-21 10:21+0300\n"
+"PO-Revision-Date: 2017-05-15 19:04+0300\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
-"X-Generator: Poedit 2.0.1\n"
+"X-Generator: Poedit 2.0.2\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -3266,6 +3266,11 @@ msgstr "HTML saturs ir nederīgs un to nevar parādīt"
 msgid "The HTML content cannot be safely displayed"
 msgstr "HTML saturs nevar tikt droši parādīts"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Šo ziņojumu var parādīt tikai kā vienkāršu tekstu"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5322,11 +5327,12 @@ msgid "Appointments must have at least one participant."
 msgstr "Mītiņu ierakstiem ir jāsatur vismaz viens dalībnieks."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr "Jums nav nepieciešamo tiesību mītiņu informācijas lasīšanai šajā mapē."
 
 #. *
@@ -10652,13 +10658,13 @@ msgstr "Norādītā atbilde atslēgai 'vērtējums' ir ar nepareizu tipu."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "Norādītā atbilde nesatur prasīto atslēgu \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Norādītā atbilde nesatur prasīto atslēgu  '%s'."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "Atslēgai \"%s\" norādītā atbilde nevar tikt apstrādāta."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "Atslēgai '%s' norādītā atbilde nevar tikt apstrādāta."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -12914,6 +12920,18 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "Jums nav nepieciešamo tiesību mītiņu informācijas lasīšanai šajā mapē."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Norādītā atbilde nesatur prasīto atslēgu \"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Atslēgai \"%s\" norādītā atbilde nevar tikt apstrādāta."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
