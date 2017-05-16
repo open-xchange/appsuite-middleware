@@ -49,7 +49,6 @@
 
 package com.openexchange.pgp.core.packethandling;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,6 +60,7 @@ import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.openpgp.PGPUtil;
+import com.openexchange.java.Streams;
 
 /**
  * {@link PacketProcessor} allows to process and modify packets within a PGP message
@@ -122,10 +122,15 @@ public class PacketProcessor {
                             ((ContainedPacket) rawModifiedPacket).encode(out);
                         }
                         else if (rawModifiedPacket instanceof InputStreamPacket) {
-                            //InputStreamPackets cannot be re-encoded;
-                            //We need to re-write the already parsed header to the output stream before writing the stream content
-                            IOUtils.copy(new ByteArrayInputStream(newPacket.getBcPacketHeader()), out);
-                            IOUtils.copy(((InputStreamPacket) rawModifiedPacket).getInputStream(), out);
+                            BCPGInputStream inputStream = ((InputStreamPacket) rawModifiedPacket).getInputStream();
+                            try {
+                                //InputStreamPackets cannot be re-encoded;
+                                //We need to re-write the already parsed header to the output stream before writing the stream content
+                                out.write(newPacket.getBcPacketHeader());
+                                IOUtils.copy(inputStream, out);
+                            } finally {
+                                Streams.close(inputStream);
+                            }
                         }
                         else {
                             throw new IllegalArgumentException("Cannot handle unknown PGP BC Packet instance: " + rawModifiedPacket.getClass().getCanonicalName());
@@ -140,7 +145,11 @@ public class PacketProcessor {
                 Packet rawPacket = packet.getBcPacket();
                 if(rawPacket instanceof InputStreamPacket) {
                     InputStream streamToSkip = ((InputStreamPacket)rawPacket).getInputStream();
-                    streamToSkip.skip(Integer.MAX_VALUE);
+                    try {
+                        Streams.consume(streamToSkip);
+                    } finally {
+                        Streams.close(streamToSkip);
+                    }
                 }
             }
         }
