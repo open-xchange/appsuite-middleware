@@ -10,8 +10,7 @@
         name: type
         description: The feedback type
         required: true
-        schema:
-          type: string
+        type: string
       - in: body
         name: body
         description: A JSON object describing the feedback
