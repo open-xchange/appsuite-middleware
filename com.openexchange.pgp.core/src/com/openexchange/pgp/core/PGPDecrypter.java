@@ -89,7 +89,8 @@ public class PGPDecrypter {
     private final PGPKeyRetrievalStrategy keyRetrievalStrategy;
     private static final int BUFFERSIZE = 1024;
 
-    protected class PGPDataContainer{
+    public static class PGPDataContainer {
+
         private final PGPPrivateKey privateKey;
         private final PGPPublicKeyEncryptedData data;
 

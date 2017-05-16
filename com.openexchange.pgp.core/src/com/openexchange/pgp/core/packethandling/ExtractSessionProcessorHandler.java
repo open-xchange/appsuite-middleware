@@ -73,7 +73,7 @@ public class ExtractSessionProcessorHandler implements PacketProcessorHandler {
      * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
      * @since v7.10.0
      */
-    public class EncryptedSession {
+    public static class EncryptedSession {
 
         private final int version;
         private final int algorithm;
