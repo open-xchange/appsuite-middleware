@@ -693,7 +693,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
                 startTag.attr(attribute.getKey(), value);
             } else {
-                if (HtmlServices.containsEventHandler(attr)) {
+                if (isAttributeNameForbidden(attr) || HtmlServices.containsEventHandler(attr)) {
                     startTag.removeAttr(attr);
                 } else {
                     final String val = attribute.getValue();
@@ -727,6 +727,10 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 }
             }
         }
+    }
+
+    private static boolean isAttributeNameForbidden(String attr) {
+        return attr.indexOf('"') >= 0;
     }
 
     private List<Attribute> listFor(Attributes attributes) {
