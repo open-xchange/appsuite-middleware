@@ -122,21 +122,22 @@ public class DAVPushEventHandler implements EventHandler {
             return;
         }
         List<PushNotification> pushNotifications = new ArrayList<PushNotification>();
-        String rootTopic = DAVPushUtility.getRootTopic(clientId);
         Long timestamp = Long.valueOf(getTimestamp(event).getTime());
         Integer priority = determinePriority(event);
         String clientToken = determineClientToken(event);
         int contextId = event.getContextId();
         for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
             int userId = entry.getKey().intValue();
-            pushNotifications.add(getPushNotification(contextId, userId, rootTopic, timestamp, priority, clientToken));
             for (Integer folderId : entry.getValue()) {
                 String folderTopic = DAVPushUtility.getFolderTopic(clientId, folderId.toString());
                 pushNotifications.add(getPushNotification(contextId, userId, folderTopic, timestamp, priority, clientToken));
             }
         }
-
         notificationService.handle(pushNotifications);
+    }
+
+    private boolean useIndividualTopics() {
+        return false;
     }
 
     private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long timestamp, Integer priority, String clientToken) {

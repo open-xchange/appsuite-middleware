@@ -242,7 +242,7 @@ public class DAVPushUtility {
      * @param clientId The client identifier to get the root topic for
      * @return The root topic, or <code>null</code> if passed client identifier was <code>null</code>
      */
-    public static String getRootTopic(String clientId) {
+    private static String getRootTopic(String clientId) {
         return null != clientId ? "ox:" + clientId : null;
     }
 

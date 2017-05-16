@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.push.subscribe;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import static com.openexchange.dav.push.DAVPushUtility.PUSH_NS;
 import java.io.IOException;
 import java.text.ParseException;
@@ -133,12 +134,12 @@ public class PushSubscribeResource extends DAVResource {
                 return true;
             }
         } catch (JDOMException | IOException e) {
-            throw DAVProtocol.protocolException(request.getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+            throw protocolException(request.getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
         }
         /*
          * bad request, otherwise
          */
-        throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        throw protocolException(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
     }
 
     private boolean handleDavPushSubscribe(Element subscribeElement) throws WebdavProtocolException {
@@ -149,7 +150,7 @@ public class PushSubscribeResource extends DAVResource {
         String transportUri = selectedTransportElement.getChildText("transport-uri", PUSH_NS);
         DavPushGateway pushGateway = getPushGateway(transportUri);
         if (null == pushGateway) {
-            throw DAVProtocol.protocolException(getUrl(), PushExceptionCodes.NO_SUCH_TRANSPORT.create(transportUri), HttpServletResponse.SC_BAD_REQUEST);
+            throw protocolException(getUrl(), PushExceptionCodes.NO_SUCH_TRANSPORT.create(transportUri), HttpServletResponse.SC_BAD_REQUEST);
         }
         String clientData = selectedTransportElement.getChildText("client-data", PUSH_NS);
         List<String> pushKeys = extractPushKeys(subscribeElement.getChildren("topic", PUSH_NS));
@@ -163,7 +164,7 @@ public class PushSubscribeResource extends DAVResource {
                 String token = pushGateway.subscribe(pushKeys, clientData, expires);
                 registerSubscription(pushGateway.getOptions().getTransportID(), token, topics, expires);
             } catch (OXException e) {
-                throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+                throw protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
             }
         } else {
             /*
@@ -173,7 +174,7 @@ public class PushSubscribeResource extends DAVResource {
                 String token = pushGateway.unsubscribe(clientData);
                 unregisterSubscription(pushGateway.getOptions().getTransportID(), token);
             } catch (OXException e) {
-                throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+                throw protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
             }
         }
         return true;
@@ -184,14 +185,14 @@ public class PushSubscribeResource extends DAVResource {
         try {
             topic = DAVPushUtility.extractTopic(key, factory.getContext().getContextId(), factory.getUser().getId());
         } catch (OXException e) {
-            throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
         }
         /*
          * subscribe
          */
         DAVApnOptions apnOptions = getApnOptions();
         if (null == apnOptions) {
-            throw DAVProtocol.protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
         registerSubscription(KnownTransport.APNS.getTransportId(), token, Collections.singletonList(topic), getExpires(apnOptions.getRefreshInterval()));
         return true;
@@ -271,7 +272,7 @@ public class PushSubscribeResource extends DAVResource {
             try {
                 return DAVPushUtility.UTC_DATE_FORMAT.get().parse(expiresElement.getText());
             } catch (ParseException e) {
-                throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+                throw protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
             }
         }
         return null;

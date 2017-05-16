@@ -396,6 +396,9 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             }
             stmt.setString(pos++, topic);
             stmt.setString(pos, topic);
+
+            System.err.println(" ### " + stmt);
+
             rs = stmt.executeQuery();
 
             if (false == rs.next()) {
