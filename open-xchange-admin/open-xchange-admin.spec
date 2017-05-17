@@ -267,7 +267,7 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property DEFAULT_TIMEZONE Europe/Berlin /opt/open-xchange/etc/AdminUser.properties
 
     # SoftwareChange_Request-4170
-    ox_add_property LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB false /opt/open-xchange/etc/hosting.properties
+    ox_add_property LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB false /opt/open-xchange/etc/plugin/hosting.properties
 fi
 
 %clean
