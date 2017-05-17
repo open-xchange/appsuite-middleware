@@ -59,12 +59,13 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pns.Hits;
+import com.openexchange.pns.IteratorBackedHits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscription.Nature;
+import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
+import com.openexchange.pns.PushSubscriptionRegistry;
 
 
 /**
@@ -126,16 +127,16 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     }
 
     @Override
-    public Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
-        return getInterestedSubscriptions(null, userId, contextId, topic);
+    public Hits getInterestedSubscriptions(int[] userIds, int contextId, String topic) throws OXException {
+        return getInterestedSubscriptions(null, userIds, contextId, topic);
     }
 
     @Override
-    public Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         for (PushSubscriptionRegistry registry : registries) {
-            Hits currentHits = null == client ? registry.getInterestedSubscriptions(userId, contextId, topic) : registry.getInterestedSubscriptions(client, userId, contextId, topic);
+            Hits currentHits = registry.getInterestedSubscriptions(client, userIds, contextId, topic);
             if (false == currentHits.isEmpty()) {
                 Map<ClientAndTransport, List<PushMatch>> currentMap = ((MapBackedHits) currentHits).getMap();
 
@@ -166,7 +167,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         // Check for more hits from providers
         LinkedList<Hits> moreHits = null;
         for (PushSubscriptionProvider provider : providers) {
-            Hits currentHits = null == client ? provider.getInterestedSubscriptions(userId, contextId, topic) : provider.getInterestedSubscriptions(client, userId, contextId, topic);
+            Hits currentHits = provider.getInterestedSubscriptions(client, userIds, contextId, topic);
             if (false == currentHits.isEmpty()) {
                 if (null == moreHits) {
                     moreHits = new LinkedList<>();

@@ -54,33 +54,30 @@ import com.openexchange.pns.PushNotification;
 /**
  * Simple key that combines user and topic.
  */
-class UserAndTopicKey {
+class ContextAndTopicKey {
 
-    final int userId;
     final int contextId;
     final String topic;
     private final int hash;
 
     /**
-     * Initializes a new {@link UserAndTopicKey}.
+     * Initializes a new {@link ContextAndTopicKey}.
      */
-    UserAndTopicKey(PushNotification notification) {
-        this(notification.getTopic(), notification.getUserId(), notification.getContextId());
+    ContextAndTopicKey(PushNotification notification) {
+        this(notification.getTopic(), notification.getContextId());
     }
 
     /**
-     * Initializes a new {@link UserAndTopicKey}.
+     * Initializes a new {@link ContextAndTopicKey}.
      */
-    UserAndTopicKey(String topic, int userId, int contextId) {
+    ContextAndTopicKey(String topic, int contextId) {
         super();
         this.contextId = contextId;
-        this.userId = userId;
         this.topic = topic;
 
         int prime = 31;
         int result = 1;
         result = prime * result + contextId;
-        result = prime * result + userId;
         result = prime * result + ((topic == null) ? 0 : topic.hashCode());
         this.hash = result;
     }
@@ -95,14 +92,11 @@ class UserAndTopicKey {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof UserAndTopicKey)) {
+        if (!(obj instanceof ContextAndTopicKey)) {
             return false;
         }
-        UserAndTopicKey other = (UserAndTopicKey) obj;
+        ContextAndTopicKey other = (ContextAndTopicKey) obj;
         if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
             return false;
         }
         if (topic == null) {

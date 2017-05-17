@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -344,53 +345,80 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
-        return getInterestedSubscriptions(null, userId, contextId, topic);
+    public MapBackedHits getInterestedSubscriptions(int[] userIds, int contextId, String topic) throws OXException {
+        return getInterestedSubscriptions(null, userIds, contextId, topic);
     }
 
     @Override
-    public MapBackedHits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    public MapBackedHits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         // Check cache
         RdbPushSubscriptionRegistryCache cache = this.cache;
         if (null != cache) {
-            return cache.getCollectionFor(userId, contextId).getInterestedSubscriptions(client, topic);
+            HashMap<ClientAndTransport, List<PushMatch>> map = new HashMap<>();
+            for (int userId : userIds) {
+                MapBackedHits hits = cache.getCollectionFor(userId, contextId).getInterestedSubscriptions(client, topic);
+                if (null != hits && false == hits.isEmpty()) {
+                    map.putAll(hits.getMap());
+                }
+            }
+            return new MapBackedHits(map);
         }
 
         Connection con = databaseService.getReadOnly(contextId);
         try {
-            return getSubscriptions(client, userId, contextId, topic, con);
+            return getSubscriptions(client, userIds, contextId, topic, con);
         } finally {
             databaseService.backReadOnly(contextId, con);
         }
     }
 
     /**
-     * Gets all subscriptions interested in specified topic belonging to given user.
+     * Gets all subscriptions interested in specified topic belonging to certain users.
      *
      * @param optClient The optional client to filter by
-     * @param userId The user identifier
+     * @param userIds The user identifiers
      * @param contextId The context identifier
      * @param topic The topic
      * @param con The connection to use
      * @return All subscriptions for specified affiliation
      * @throws OXException If subscriptions cannot be returned
      */
-    public MapBackedHits getSubscriptions(String optClient, int userId, int contextId, String topic, Connection con) throws OXException {
+    public MapBackedHits getSubscriptions(String optClient, int[] userIds, int contextId, String topic, Connection con) throws OXException {
         if (null == con) {
-            return getInterestedSubscriptions(optClient, userId, contextId, topic);
+            return getInterestedSubscriptions(optClient, userIds, contextId, topic);
         }
+        if (null == userIds || 0 == userIds.length) {
+            return MapBackedHits.EMPTY;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT s.user, s.token, s.client, s.transport, s.last_modified, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s")
+            .append(" LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id")
+            .append(" LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id")
+            .append(" WHERE s.cid=?")
+        ;
+        if (1 == userIds.length) {
+            stringBuilder.append(" AND s.user=?");
+        } else {
+            stringBuilder.append(" AND s.user IN (?");
+            for (int i = 1; i < userIds.length; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        if (null != optClient) {
+            stringBuilder.append(" AND s.client=?");
+        }
+        stringBuilder.append(" AND ((s.all_flag=1) OR (te.topic=?) OR (? LIKE CONCAT(twc.topic, '%')));");
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(
-                "SELECT s.token, s.client, s.transport, s.last_modified, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s" +
-                " LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id" +
-                " LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id" +
-                " WHERE s.cid=? AND s.user=?" + (null == optClient ? "" : " AND s.client=?") + " AND ((s.all_flag=1) OR (te.topic=?) OR (? LIKE CONCAT(twc.topic, '%')));");
+            stmt = con.prepareStatement(stringBuilder.toString());
             int pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            for (int userId : userIds) {
+                stmt.setInt(pos++, userId);
+            }
             if (null != optClient) {
                 stmt.setString(pos++, optClient);
             }
@@ -404,22 +432,23 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
             Map<ClientAndTransport, List<PushMatch>> map = new LinkedHashMap<>(6);
             do {
-                String token = rs.getString(1);
-                String client = rs.getString(2);
-                String transportId = rs.getString(3);
-                Date lastModified = new Date(rs.getLong(4));
+                int userId = rs.getInt(1);
+                String token = rs.getString(2);
+                String client = rs.getString(3);
+                String transportId = rs.getString(4);
+                Date lastModified = new Date(rs.getLong(5));
 
                 // Determine matching topic
                 String matchingTopic;
                 {
-                    boolean all = rs.getInt(5) > 0;
+                    boolean all = rs.getInt(6) > 0;
                     if (all) {
                         matchingTopic = KnownTopic.ALL.getName();
                     } else {
-                        matchingTopic = rs.getString(6);
+                        matchingTopic = rs.getString(7);
                         if (rs.wasNull()) {
                             // E.g. "ox:mail:new"
-                            matchingTopic = rs.getString(7);
+                            matchingTopic = rs.getString(8);
                         } else {
                             // E.g. "ox:mail:*"
                             matchingTopic = new StringBuilder(matchingTopic).append('*').toString();

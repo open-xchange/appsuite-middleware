@@ -50,6 +50,7 @@
 package com.openexchange.pns.transport.websocket.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,6 +71,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.Hits;
+import com.openexchange.pns.IteratorBackedHits;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
@@ -79,10 +81,10 @@ import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionProvider;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.UserAndContext;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.websockets.WebSocketService;
 
 /**
@@ -196,7 +198,18 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     @Override
-    public Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) throws OXException {
+    public Hits getInterestedSubscriptions(final int[] userIds, final int contextId, String topic) throws OXException {
+        List<Hits> hitsList = new ArrayList<Hits>();
+        for (int userId : userIds) {
+            Hits hits = getInterestedSubscriptions(userId, contextId, topic);
+            if (null != hits && false == hits.isEmpty()) {
+                hitsList.add(hits);
+            }
+        }
+        return new IteratorBackedHits(hitsList);
+    }
+
+    private Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) throws OXException {
         // Remember checked clients
         Map<WebSocketClient, Boolean> checkedOnes = new LinkedHashMap<>();
         Set<WebSocketClient> hasOpenWebSocket = new LinkedHashSet<>();
@@ -233,7 +246,18 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     @Override
-    public Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
+        List<Hits> hitsList = new ArrayList<Hits>();
+        for (int userId : userIds) {
+            Hits hits = getInterestedSubscriptions(client, userId, contextId, topic);
+            if (null != hits && false == hits.isEmpty()) {
+                hitsList.add(hits);
+            }
+        }
+        return new IteratorBackedHits(hitsList);
+    }
+
+    private Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
             Map<String, WebSocketClient> clients = resolver.getSupportedClients();

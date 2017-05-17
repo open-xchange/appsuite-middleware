@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage;
+package com.openexchange.pns;
 
 import java.util.ArrayList;
 import java.util.Collections;
