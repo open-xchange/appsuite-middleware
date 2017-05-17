@@ -993,7 +993,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     }
                 } else if (e.getNextException() instanceof IOException) {
                     if (e.getNextException().getMessage().equals("Maximum message size is exceeded.")) {
-                        throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 2, false, true));
+                        throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 0, false, true));
                     }
                 }
                 throw handleMessagingException(e, smtpConfig);
