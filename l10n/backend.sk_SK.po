@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-12 00:33+0200\n"
+"PO-Revision-Date: 2017-05-03 13:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -3258,6 +3258,11 @@ msgstr "Obsah HTML je neplatný a nemožno ho zobraziť"
 msgid "The HTML content cannot be safely displayed"
 msgstr "Obsah HTML nemožno bezpečne zobraziť"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Túto správu je možné zobraziť iba ako obyčajný text"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5337,11 +5342,12 @@ msgid "Appointments must have at least one participant."
 msgstr "Schôdzky musia mať aspoň jedného účastníka."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr "Nemáte príslušné oprávnenie na čítanie schôdzok v tomto priečinku."
 
 #. *
@@ -5413,8 +5419,7 @@ msgstr "Požadovaná hodnota „Názov“ nebola zadaná."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:123
 msgid "Move not supported. You cannot move an appointment into that folder."
 msgstr ""
-"Presunutie nie je podporované. Nemôžete presunúť schôdzku do tohto "
-"priečinka."
+"Presunutie nie je podporované. Nemôžete presunúť schôdzku do tohto priečinka."
 
 #. *
 #. * Move not allowed from shared folders.
@@ -8720,8 +8725,8 @@ msgid ""
 "The provided login data to access mail server %1$s seem to be wrong. Please "
 "correct them."
 msgstr ""
-"Zdá sa, že poskytnuté prihlasovacie údaje na prístup k poštovému serveru %"
-"1$s sú nesprávne. Prosím, opravte ich."
+"Zdá sa, že poskytnuté prihlasovacie údaje na prístup k poštovému serveru "
+"%1$s sú nesprávne. Prosím, opravte ich."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -10666,12 +10671,12 @@ msgstr "Poskytnutá spätná väzba kľúča „score“ je neplatného typu."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
 msgstr "Poskytnutá spätná väzba neobsahuje povinný kľúč „%s“."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr "Poskytnutú spätnú väzbu ku kľúču „%s“ nie je možné spracovať."
 
 #. The value given in the property %1$s is no integer value
@@ -12930,6 +12935,17 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr "Nemáte príslušné oprávnenie na čítanie schôdzok v tomto priečinku."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Poskytnutá spätná väzba neobsahuje povinný kľúč „%s“."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Poskytnutú spätnú väzbu ku kľúču „%s“ nie je možné spracovať."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

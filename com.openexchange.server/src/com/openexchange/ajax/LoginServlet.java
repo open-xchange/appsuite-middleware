@@ -750,13 +750,6 @@ public class LoginServlet extends AJAXServlet {
             final String action = req.getParameter(PARAMETER_ACTION);
             final String subPath = getServletSpecificURI(req);
 
-            if ("autologin".equals(action)) {
-                String serverName = req.getServerName();
-                if (null != serverName && !isAutologinActivated(serverName)) {
-                    throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
-                }
-            }
-
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 handlerMap.get("/httpAuth").handleRequest(req, resp);
             } else {
@@ -765,8 +758,6 @@ public class LoginServlet extends AJAXServlet {
             }
         } catch (RateLimitedException e) {
             e.send(resp);
-        } catch (OXException oxException) {
-            logAndSendException(resp, oxException);
         } finally {
             LogProperties.removeProperties(LOG_PROPERTIES);
         }

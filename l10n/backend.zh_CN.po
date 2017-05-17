@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-19 22:03+1000\n"
+"PO-Revision-Date: 2017-05-08 19:54+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -3139,6 +3139,11 @@ msgstr "HTML 内容是无效，不能显示"
 msgid "The HTML content cannot be safely displayed"
 msgstr "不能安全地显示 HTML 内容"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "此消息只能以纯文本形式显示"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5074,12 +5079,13 @@ msgid "Appointments must have at least one participant."
 msgstr "约会必须有最少一个参与者。"
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
-msgstr "您没有适当的权限去阅读该文件夹里的任务。"
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
+msgstr "您没有适当的权限去读取该文件夹里的约会。"
 
 #. *
 #. * End date must not be before start date.
@@ -10101,12 +10107,12 @@ msgstr "提供键 '分' 的反馈具有无效的类型。"
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
 msgstr "提供的反馈不包含所需的键 \"%s\"。"
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr "不能分析提供键 \"%s\" 的反馈。"
 
 #. The value given in the property %1$s is no integer value
@@ -12360,6 +12366,17 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "祖鲁"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr "您没有适当的权限去阅读该文件夹里的任务。"
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "提供的反馈不包含所需的键 \"%s\"。"
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "不能分析提供键 \"%s\" 的反馈。"
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

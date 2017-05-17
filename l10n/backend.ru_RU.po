@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-10 11:30+0200\n"
+"PO-Revision-Date: 2017-05-02 15:21+0200\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
 "Language: ru_RU\n"
@@ -3188,6 +3188,11 @@ msgstr "Невозможно отобразить недействительно
 msgid "The HTML content cannot be safely displayed"
 msgstr "Не удается безопасно отобразить HTML-содержимое."
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Сообщение может быть показано только в текстовом формате"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -3360,6 +3365,7 @@ msgstr "Не удалось удалить некоторые сообщения
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
 msgid "Not allowed to open folder %1$s due to missing read access"
 msgstr "Папка %1$s не может быть открыта, так как к ней нет доступа чтения."
+
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
 msgid "The raw content's input stream cannot be read"
@@ -3667,6 +3673,7 @@ msgstr "Недопустимое правило SIEVE. Проверьте пра
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:66
 msgid ""
 "Please review your mail filter rules as they seem to be invalid. Response "
+""
 "from server: \"%1$s\""
 msgstr "Ответ сервера: «%1$s». Проверьте правила фильтрации почты."
 
@@ -3689,9 +3696,7 @@ msgstr "Нет идентификатора клиента для сеанса %
 msgid ""
 "Invalid Twitter messaging account. Please delete and re-create your Twitter "
 "messaging account."
-msgstr ""
-"Недействительная учетная запись Твиттере. Удалите ее и "
-"создайте новую."
+msgstr "Недействительная учетная запись Твиттере. Удалите ее и создайте новую."
 
 #. A messaging error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:64
@@ -4147,6 +4152,7 @@ msgstr "Недостаточно административных разреше
 #. *
 #. * No write access to POP3 folder %1$s
 #.
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:99
 msgid "You do not have the appropriate permissions to write to POP3 folder %1$s"
 msgstr "Недостаточно разрешений для записи в папку POP3 %1$s"
@@ -4936,13 +4942,17 @@ msgstr "Недействительный почтовый адрес внешн�
 msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for appointments."
-msgstr "Преобразование возвращает объекты, которые не могут быть сохранены в силу отсутствия папки для встреч."
+msgstr ""
+"Преобразование возвращает объекты, которые не могут быть сохранены в силу "
+"отсутствия папки для встреч."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
 msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for tasks."
-msgstr "Преобразование возвращает объекты, которые не могут быть сохранены в силу отсутствия папки для задач."
+msgstr ""
+"Преобразование возвращает объекты, которые не могут быть сохранены в силу "
+"отсутствия папки для задач."
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5162,11 +5172,13 @@ msgid "Appointments must have at least one participant."
 msgstr "Для встречи должен быть задан как минимум один участник."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
-msgid "You do not have the appropriate permissions to read appointments that folder."
-msgstr "Недостаточно разрешений для чтения встреч в этой папке."
+msgid ""
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
+msgstr "У вас недостаточно разрешений для чтения встреч в этой папке."
 
 #. *
 #. * End date must not be before start date.
@@ -5360,6 +5372,7 @@ msgstr "Дата окончания должна следовать за дат�
 #. *
 #. * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
 #.
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:208
 msgid ""
 "An external participant with the E-Mail address %1$s is already included. "
@@ -5602,7 +5615,6 @@ msgid "Could not connect to the context storage."
 msgstr "Не удалось подключиться к контекстному хранилищу."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
-
 msgid "The account \"%1$s\" was not found."
 msgstr "Учетная запись «%1$s» не найдена."
 
@@ -7332,6 +7344,7 @@ msgstr "Не разрешается изменять ресурсы в конт�
 msgid "Missing or unknown password mechanism \"%1$s\""
 msgstr "Неизвестный механизм паролей или он отсутствует: «%1$s»."
 
+
 #. *
 #. * New password contains invalid characters
 #.
@@ -8776,6 +8789,7 @@ msgid "A mail account with the given E-Mail address already exists."
 msgstr "Учетная запись с заданным электронным адресом уже существует."
 
 #. The mail account name "%1$s" is not valid.
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
 msgid "The mail account name \"%1$s\" is not valid."
 msgstr "Недопустимое имя учетной записи «%1$s»."
@@ -9203,7 +9217,6 @@ msgstr ""
 "Слишком большой размер HTML-контента для отображения. Загрузите контент для "
 "его просмотра."
 
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Invalid JSON data received from client"
 msgstr "Полученные от клиента данные JSON недействительны."
@@ -9443,6 +9456,7 @@ msgstr ""
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -10018,7 +10032,9 @@ msgstr "Ошибка: не удалось отправить уведомлен�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:70
 msgid "You don't have sufficient permissions to send notifications for this share."
-msgstr "У вас недостаточно разрешений для того, чтобы отправлять уведомления для этого общего ресурса."
+msgstr ""
+"У вас недостаточно разрешений для того, чтобы отправлять уведомления для "
+"этого общего ресурса."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -10349,13 +10365,13 @@ msgstr "Ключ «оценка» содержит значение недопу
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "Отзыв не содержит обязательного ключа «%s»."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Отзыв не содержит обязательный ключ «%s»."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "Не удалось обработать отзыв для ключа «%s»."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "Не удалось обработать значение ключа «%s»."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -12608,6 +12624,17 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Зулу"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr "Недостаточно разрешений для чтения встреч в этой папке."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Отзыв не содержит обязательного ключа «%s»."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Не удалось обработать отзыв для ключа «%s»."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
