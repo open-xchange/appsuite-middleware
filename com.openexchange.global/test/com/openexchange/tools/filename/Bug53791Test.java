@@ -47,37 +47,41 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.tools.filename;
 
-import com.openexchange.exception.interception.Bug50893Test;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
-import com.openexchange.sessiond.SessionFilterTest;
-import com.openexchange.tools.filename.Bug53791Test;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import com.openexchange.java.Strings;
 
 /**
- * {@link UnitTests}
+ * {@link BugFileNameToolsTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Lost support for umlauts in file names with certain browsers on macOS
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class UnitTests {
+public class Bug53791Test {
 
-    public UnitTests() {
-        super();
+    @Test
+    public void testDecomposedString() {
+        String[] strings = new String[] {
+            "Du\u0308ru\u0308m.txt",
+            "D\u00fcr\u00fcm.txt",
+            "Jos\u00E9.txt",
+            "Jos\u0065\u0301.txt",
+            "\u00C5ngstrom.txt",
+            "\u0041\u030Angstrom.txt"
+        };
+        for (String string : strings) {
+            checkSanitizing(string);
+        }
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
-        tests.addTest(new JUnit4TestAdapter(SessionFilterTest.class));
-        tests.addTestSuite(Bug50893Test.class);
-        tests.addTest(new JUnit4TestAdapter(Bug53791Test.class));
-        return tests;
+    private static void checkSanitizing(String string) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
+        assertTrue("Unexpected string after sanitizing", Strings.equalsNormalized(string, sanitizedString));
     }
+
 }
