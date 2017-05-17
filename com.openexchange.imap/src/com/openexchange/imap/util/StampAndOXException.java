@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,29 +47,46 @@
  *
  */
 
-package com.openexchange.threadpool;
+package com.openexchange.imap.util;
 
-import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
-import com.openexchange.timer.TimerService;
-import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
-
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SimFactory}
+ * {@link StampAndOXException} - Helper class.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class SimFactory {
+public class StampAndOXException {
 
-    private static final ThreadPoolServiceImpl POOL = ThreadPoolServiceImpl.newInstance(-1, 100, 1000l, "synchronous", 10, true, "abort", 60000, 20000);
+    private final OXException e;
+    private final long stamp;
 
-    public static ThreadPoolService newThreadPoolService() {
-        return POOL;
+    /**
+     * Initializes a new {@link StampAndOXException}.
+     */
+    public StampAndOXException(OXException e, long stamp) {
+        super();
+        this.e = e;
+        this.stamp = stamp;
     }
 
-    public static TimerService newTimerService() {
-        return new CustomThreadPoolExecutorTimerService(POOL.getThreadPoolExecutor());
+    /**
+     * Gets the <code>OXException</code> instance
+     *
+     * @return The <code>OXException</code> instance
+     */
+    public OXException getOXException() {
+        return e;
+    }
+
+    /**
+     * Gets the stamp
+     *
+     * @return The stamp
+     */
+    public long getStamp() {
+        return stamp;
     }
 
 }

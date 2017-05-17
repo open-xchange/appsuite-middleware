@@ -93,7 +93,6 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.MDC;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.log.LogProperties;
 import com.openexchange.startup.CloseableControlService;
@@ -103,7 +102,6 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.TaskWrapper;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
-import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
 
 /**
  * {@link CustomThreadPoolExecutor} - Copied from Java6's <tt>ThreadPoolExecutor</tt> written by Doug Lea.
@@ -1239,13 +1237,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         private final long maxRunningTime;
         private final String lineSeparator;
 
-        ActiveTaskWatcher() {
+        ActiveTaskWatcher(long maxRunningTime, long minWaitTime) {
             super();
             lineSeparator = System.getProperty("line.separator");
             tasks = new NonBlockingHashMap<Long, TaskInfo>(8192);
-            final ConfigurationService service = ThreadPoolServiceRegistry.getService(ConfigurationService.class);
-            minWaitTime = null == service ? 20000L : service.getIntProperty("com.openexchange.requestwatcher.frequency", 20000);
-            maxRunningTime = null == service ? 60000L : service.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
+            this.minWaitTime = minWaitTime;
+            this.maxRunningTime = maxRunningTime;
         }
 
         void stopWhenFinished() {
@@ -1485,7 +1482,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @throws NullPointerException if <tt>workQueue</tt> is <code>null</code>
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), DEFAULT_HANDLER);
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), DEFAULT_HANDLER, 60000, 20000);
     }
 
     /**
@@ -1499,31 +1496,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @param workQueue the queue to use for holding tasks before they are executed. This queue will hold only the <tt>Runnable</tt> tasks
      *            submitted by the <tt>execute</tt> method.
      * @param threadFactory the factory to use when the executor creates a new thread.
+     * @param watcherMaxRunningTime The watcher's max. running time
+     * @param watcherMinWaitTime The watcher's min. wait time
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final ThreadFactory threadFactory) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, threadFactory, DEFAULT_HANDLER);
-    }
-
-    /**
-     * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters.
-     *
-     * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
-     * @param maximumPoolSize the maximum number of threads to allow in the pool.
-     * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
-     *            for new tasks before terminating.
-     * @param unit the time unit for the keepAliveTime argument.
-     * @param workQueue the queue to use for holding tasks before they are executed. This queue will hold only the <tt>Runnable</tt> tasks
-     *            submitted by the <tt>execute</tt> method.
-     * @param handler the handler to use when execution is blocked because the thread bounds and queue capacities are reached.
-     * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
-     *             or if corePoolSize greater than maximumPoolSize.
-     * @throws NullPointerException if <tt>workQueue</tt> or <tt>handler</tt> are <code>null</code>.
-     */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final RejectedExecutionHandler handler) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), handler);
+    public CustomThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, long watcherMaxRunningTime, long watcherMinWaitTime) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, threadFactory, DEFAULT_HANDLER, watcherMaxRunningTime, watcherMinWaitTime);
     }
 
     /**
@@ -1541,11 +1521,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *            requires the passed work queue to have a boundary restriction.
      * @param threadFactory the factory to use when the executor creates a new thread.
      * @param handler the handler to use when execution is blocked because the thread bounds and queue capacities are reached.
+     * @param watcherMaxRunningTime The watcher's max. running time
+     * @param watcherMinWaitTime The watcher's min. wait time
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> or <tt>handler</tt> are <code>null</code>.
      */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final boolean blocking, final ThreadFactory threadFactory, final RejectedExecutionHandler handler) {
+    public CustomThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, boolean blocking, ThreadFactory threadFactory, RejectedExecutionHandler handler, long watcherMaxRunningTime, long watcherMinWaitTime) {
         super(0, 1, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
         if ((corePoolSize < 0) || (maximumPoolSize <= 0) || (maximumPoolSize < corePoolSize) || (keepAliveTime < 0)) {
             throw new IllegalArgumentException();
@@ -1571,7 +1553,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         /*
          * Start watcher thread
          */
-        activeTaskWatcher = new ActiveTaskWatcher();
+        activeTaskWatcher = new ActiveTaskWatcher(watcherMaxRunningTime, watcherMinWaitTime);
         watcherThread = new Thread(activeTaskWatcher, "ActiveTaskWatcher");
         watcherThread.start();
         /*
