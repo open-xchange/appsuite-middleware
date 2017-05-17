@@ -53,11 +53,13 @@ import static com.openexchange.ajax.AJAXServlet.localeFrom;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -76,7 +78,7 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -174,7 +176,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
         final Dispatcher ox = services.getService(Dispatcher.class);
 
-        rampUps.put(RampUpKey.FOLDER_LIST.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.FOLDER_LIST.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
@@ -201,7 +203,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.FOLDER.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.FOLDER.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
@@ -251,7 +253,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.JSLOBS.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.JSLOBS.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
@@ -282,7 +284,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.SERVER_CONFIG.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.SERVER_CONFIG.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
@@ -307,7 +309,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.OAUTH.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.OAUTH.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
@@ -374,7 +376,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.USER.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.USER.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
@@ -399,7 +401,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.ACCOUNTS.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.ACCOUNTS.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
@@ -426,12 +428,42 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         }));
 
         try {
-            JSONObject jo = new JSONObject(numberOfKeys);
+            // Grab tasks to complete in preserved order
+            List<RampUpFuture> taskCompletions = new ArrayList<>(numberOfKeys);
             for (RampUpKey rampUpKey : KEYS) {
-                Object value = rampUps.get(rampUpKey.key).get();
-                jo.put(rampUpKey.key, JSONCoercion.coerceToJSON(value));
+                Future<Object> taskCompletion = rampUps.get(rampUpKey.key);
+                if (null != taskCompletion) {
+                    taskCompletions.add(new RampUpFuture(rampUpKey, taskCompletion));
+                }
             }
 
+            // Let tasks contribute to JSON object
+            JSONObject jo = new JSONObject(numberOfKeys);
+            Iterator<RampUpFuture> tasksoWaitFor = taskCompletions.iterator();
+            RampUpFuture last = null;
+            try {
+                while (tasksoWaitFor.hasNext()) {
+                    RampUpFuture rampUpTask = tasksoWaitFor.next();
+                    last = rampUpTask;
+                    Object value = rampUpTask.get();
+                    jo.put(rampUpTask.getKey(), JSONCoercion.coerceToJSON(value));
+                }
+            } catch (InterruptedException e) {
+                // Ramp-up interrupted... Cancel remaining tasks
+                if (null != last) {
+                    last.cancel(true);
+                }
+                while (tasksoWaitFor.hasNext()) {
+                    RampUpFuture rampUpTask = tasksoWaitFor.next();
+                    rampUpTask.cancel(true);
+                }
+
+                // Keep interrupted status
+                Thread.currentThread().interrupt();
+                LOG.debug("Ramp-up has been intentionally interrupted", e);
+            }
+
+            // Add errors (if any)
             int numErrors = errors.size();
             if (numErrors > 0) {
                 Locale locale = localeFrom(session);
@@ -446,11 +478,33 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             return jo;
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            Logger logger = org.slf4j.LoggerFactory.getLogger(DefaultAppSuiteLoginRampUp.class);
-            logger.warn("Failed ramp-up", t);
+            LOG.warn("Failed ramp-up", t);
             return new JSONObject();
         }
     }
 
+    private static final class RampUpFuture {
+
+        private final RampUpKey rampUpKey;
+        private final Future<Object> rampUpTask;
+
+        RampUpFuture(RampUpKey rampUpKey, Future<Object> rampUpTask) {
+            super();
+            this.rampUpKey = rampUpKey;
+            this.rampUpTask = rampUpTask;
+        }
+
+        String getKey() {
+            return rampUpKey.key;
+        }
+
+        boolean cancel(boolean mayInterruptIfRunning) {
+            return rampUpTask.cancel(mayInterruptIfRunning);
+        }
+
+        Object get() throws InterruptedException, ExecutionException {
+            return rampUpTask.get();
+        }
+    }
 
 }

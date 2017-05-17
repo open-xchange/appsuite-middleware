@@ -79,6 +79,10 @@ public final class ThreadPoolProperties {
 
     private boolean blocking;
 
+    private long watcherMinWaitTime;
+
+    private long watcherMaxRunningTime;
+
     /**
      * Initializes a new {@link ThreadPoolProperties}.
      */
@@ -185,6 +189,30 @@ public final class ThreadPoolProperties {
                     refusedExecutionBehavior = tmp.trim();
                 }
             }
+
+            watcherMaxRunningTime = 60000L;
+            {
+                String tmp = configurationService.getProperty("com.openexchange.requestwatcher.maxRequestAge");
+                if (null != tmp) {
+                    try {
+                        watcherMaxRunningTime = Integer.parseInt(tmp.trim());
+                    } catch (final NumberFormatException e) {
+                        watcherMaxRunningTime = 60000L;
+                    }
+                }
+            }
+
+            watcherMinWaitTime = 20000L;
+            {
+                String tmp = configurationService.getProperty("com.openexchange.requestwatcher.frequency");
+                if (null != tmp) {
+                    try {
+                        watcherMinWaitTime = Integer.parseInt(tmp.trim());
+                    } catch (final NumberFormatException e) {
+                        watcherMinWaitTime = 20000L;
+                    }
+                }
+            }
         } else {
             corePoolSize = 3;
             prestartAllCoreThreads = true;
@@ -192,6 +220,8 @@ public final class ThreadPoolProperties {
             keepAliveTime = 60000L;
             workQueue = "synchronous";
             refusedExecutionBehavior = "abort";
+            watcherMaxRunningTime = 60000L;
+            watcherMinWaitTime = 20000L;
         }
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolProperties.class);
         final String ls = System.getProperty("line.separator");
@@ -272,6 +302,24 @@ public final class ThreadPoolProperties {
      */
     public String getRefusedExecutionBehavior() {
         return refusedExecutionBehavior;
+    }
+
+    /**
+     * Gets the watcher's max. running time
+     *
+     * @return The max. running time
+     */
+    public long getWatcherMaxRunningTime() {
+        return watcherMaxRunningTime;
+    }
+
+    /**
+     * Gets the watcher's min. wait time
+     *
+     * @return The min. wait time
+     */
+    public long getWatcherMinWaitTime() {
+        return watcherMinWaitTime;
     }
 
 }

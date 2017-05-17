@@ -56,6 +56,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
@@ -298,15 +300,24 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Await client-specific ramp-up and add to JSON object
             if (null != optRampUp) {
+                int timeoutSecs = 30;
                 try {
-                    JSONObject jsonObject = optRampUp.get();
+                    JSONObject jsonObject = optRampUp.get(timeoutSecs, TimeUnit.SECONDS);
                     for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
                         json.put(entry.getKey(), entry.getValue());
                     }
                 } catch (InterruptedException e) {
                     // Keep interrupted state
+                    optRampUp.cancel(true);
                     Thread.currentThread().interrupt();
                     throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (TimeoutException e) {
+                    optRampUp.cancel(true);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.warn("Ramp-up information could not be added to login JSON response within {} seconds. Skipping...", Integer.valueOf(timeoutSecs));
+                    } else {
+                        LOG.warn("Ramp-up information could not be added to login JSON response within {} seconds. Skipping...", Integer.valueOf(timeoutSecs), e);
+                    }
                 } catch (ExecutionException e) {
                     // Cannot occur
                     final Throwable cause = e.getCause();
@@ -511,7 +522,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             @Override
             public JSONObject call() throws OXException, IOException {
-                JSONObject json = new JSONObject(8);
+                JSONObject json = new JSONObject(2);
                 performRampUp(req, json, serverSession);
                 return json;
             }
