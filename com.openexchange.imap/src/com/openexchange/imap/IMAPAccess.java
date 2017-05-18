@@ -821,7 +821,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     ThreadPools.getThreadPool().submit(task);
                 }
                 OXException oxe = MimeMailException.handleMessagingException(e, config, session);
-                if (imapConfProps.getImapTemporaryDown() > 0) {
+                if (imapConfProps.getImapFailedAuthTimeout() > 0) {
                     Map<HostAndPortAndCredentials, StampAndOXException> map = authFailedServers;
                     if (null != map) {
                         map.put(new HostAndPortAndCredentials(this.login, this.password, this.server, this.port), new StampAndOXException(oxe, System.currentTimeMillis()));
@@ -1117,7 +1117,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         HostAndPortAndCredentials key = new HostAndPortAndCredentials(user, password, mailConfig.getServer(), mailConfig.getPort());
         StampAndOXException range = map.get(key);
         if (range != null) {
-            if (System.currentTimeMillis() - range.getStamp() <= imapConfProps.getImapTemporaryDown()) {
+            if (System.currentTimeMillis() - range.getStamp() <= imapConfProps.getImapFailedAuthTimeout()) {
                 /*
                  * Still considered as being temporary broken
                  */

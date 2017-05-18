@@ -356,6 +356,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private int imapTemporaryDown;
 
+    private int imapFailedAuthTimeout;
+
     private String imapAuthEnc;
 
     private String entity2AclImpl;
@@ -373,7 +375,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     private boolean enableTls;
 
     private boolean auditLogEnabled;
-    
+
     private boolean overwritePreLoginCapabilities;
 
     private Set<String> propagateHostNames;
@@ -535,6 +537,18 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
+            final String imapFailedAuthTimeoutStr = configuration.getProperty("com.openexchange.imap.failedAuthTimeout", "10000").trim();
+            try {
+                imapFailedAuthTimeout = Integer.parseInt(imapFailedAuthTimeoutStr);
+                logBuilder.append("\tIMAP Failed Auth Timeout: ").append(imapFailedAuthTimeout).append('\n');
+            } catch (final NumberFormatException e) {
+                imapFailedAuthTimeout = 10000;
+                logBuilder.append("\tIMAP Failed Auth Timeout: Invalid value \"").append(imapFailedAuthTimeoutStr).append("\". Setting to fallback: ").append(
+                    imapFailedAuthTimeout).append('\n');
+            }
+        }
+
+        {
             final String imapAuthEncStr = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8").trim();
             if (Charset.isSupported(imapAuthEncStr)) {
                 imapAuthEnc = imapAuthEncStr;
@@ -691,6 +705,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         imapTimeout = 0;
         imapConnectionTimeout = 0;
         imapTemporaryDown = 0;
+        imapFailedAuthTimeout = 10000;
         imapAuthEnc = null;
         entity2AclImpl = null;
         blockSize = 0;
@@ -965,6 +980,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public int getImapTemporaryDown() {
         return imapTemporaryDown;
+    }
+
+    @Override
+    public int getImapFailedAuthTimeout() {
+        return imapFailedAuthTimeout;
     }
 
     @Override

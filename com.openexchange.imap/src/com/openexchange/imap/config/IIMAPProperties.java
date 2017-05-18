@@ -126,6 +126,13 @@ public interface IIMAPProperties extends IMailProperties {
     public int getImapTemporaryDown();
 
     /**
+     * Gets the timeout for failed authentication attempts.
+     *
+     * @return The timeout for failed authentication attempts
+     */
+    public int getImapFailedAuthTimeout();
+
+    /**
      * Checks if IMAP search is enabled.
      *
      * @return <code>true</code> if IMAP search is enabled; otherwise <code>false</code>
