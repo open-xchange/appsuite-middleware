@@ -49,7 +49,7 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,12 +71,8 @@ import com.openexchange.session.Session;
  */
 public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashContainer {
 
-    private static final String TABLE_NAME = "pop3_storage_deleted";
-
     private final int cid;
-
     private final int user;
-
     private final int accountId;
 
     /**
@@ -90,8 +86,6 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         accountId = pop3Access.getAccountId();
     }
 
-    private static final String SQL_DROP_PROPERTIES = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
-
     /**
      * Drops all trash entries related to specified POP3 account.
      *
@@ -104,7 +98,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
     public static void dropTrash(final int accountId, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_DROP_PROPERTIES);
+            stmt = con.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -117,29 +111,13 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         }
     }
 
-    private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND uidl = ?";
-
-    private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME + " (cid, user, id, uidl) VALUES (?, ?, ?, ?)";
-
     @Override
     public void addUIDL(final String uidl) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_DELETE);
+            stmt = con.prepareStatement("INSERT IGNORE INTO pop3_storage_deleted (cid, user, id, uidl) VALUES (?, ?, ?, ?)");
             int pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, user);
-            stmt.setInt(pos++, accountId);
-            stmt.setString(pos++, uidl);
-            stmt.executeUpdate();
-            closeSQLStuff(null, stmt);
-            stmt = con.prepareStatement(SQL_INSERT);
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
@@ -152,20 +130,13 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             Database.back(cid, true, con);
         }
     }
-
-    private static final String SQL_DELETE_ALL = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
     @Override
     public void clear() throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_DELETE_ALL);
+            stmt = con.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -179,20 +150,13 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
         }
     }
 
-    private static final String SQL_SELECT_ALL = "SELECT uidl FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
-
     @Override
     public Set<String> getUIDLs() throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, false);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection con = Database.get(cid, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_ALL);
+            stmt = con.prepareStatement("SELECT uidl FROM pop3_storage_deleted WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -213,15 +177,10 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     @Override
     public void removeUIDL(final String uidl) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_DELETE);
+            stmt = con.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid = ? AND user = ? AND id = ? AND uidl = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -238,26 +197,10 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     @Override
     public void addAllUIDL(final Collection<? extends String> uidls) throws OXException {
-        final Connection con;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_DELETE);
-            for (final String uidl : uidls) {
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, user);
-                stmt.setInt(pos++, accountId);
-                stmt.setString(pos++, uidl);
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-            closeSQLStuff(null, stmt);
-            stmt = con.prepareStatement(SQL_INSERT);
+            stmt = con.prepareStatement("INSERT IGNORE INTO pop3_storage_deleted (cid, user, id, uidl) VALUES (?, ?, ?, ?)");
             for (final String uidl : uidls) {
                 int pos = 1;
                 stmt.setInt(pos++, cid);

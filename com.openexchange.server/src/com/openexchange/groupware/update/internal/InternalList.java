@@ -634,6 +634,11 @@ public final class InternalList {
         // Drops rather needless foreign keys from tables.
         list.add(new com.openexchange.groupware.update.tasks.DropFKTaskv3());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.10.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Extends uidl column of the pop3_storage_ids and pop3_storage_deleted tables
+        list.add(new com.openexchange.groupware.update.tasks.POP3ExtendUidlTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
