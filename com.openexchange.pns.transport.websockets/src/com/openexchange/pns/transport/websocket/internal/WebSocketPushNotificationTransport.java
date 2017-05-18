@@ -250,7 +250,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         List<Hits> hitsList = new ArrayList<Hits>();
         for (int userId : userIds) {
-            Hits hits = getInterestedSubscriptions(client, userId, contextId, topic);
+            Hits hits = null != client ? getInterestedSubscriptions(client, userId, contextId, topic) : getInterestedSubscriptions(userId, contextId, topic);
             if (null != hits && false == hits.isEmpty()) {
                 hitsList.add(hits);
             }
