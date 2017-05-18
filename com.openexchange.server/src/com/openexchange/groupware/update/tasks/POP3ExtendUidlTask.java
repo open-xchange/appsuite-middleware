@@ -94,12 +94,12 @@ public final class POP3ExtendUidlTask extends UpdateTaskAdapter {
             Databases.startTransaction(con);
             rollback = true;
 
-            if (128 == Tools.getVarcharColumnSize("uidl", "pop3_storage_ids", con)) {
+            if (128 != Tools.getVarcharColumnSize("uidl", "pop3_storage_ids", con)) {
                 Column column = new Column("uidl", "VARCHAR(128) CHARACTER SET latin1 NOT NULL");
                 Tools.modifyColumns(con, "pop3_storage_ids", column);
             }
 
-            if (128 == Tools.getVarcharColumnSize("uidl", "pop3_storage_deleted", con)) {
+            if (128 != Tools.getVarcharColumnSize("uidl", "pop3_storage_deleted", con)) {
                 Column column = new Column("uidl", "VARCHAR(128) CHARACTER SET latin1 NOT NULL");
                 Tools.modifyColumns(con, "pop3_storage_deleted", column);
             }
