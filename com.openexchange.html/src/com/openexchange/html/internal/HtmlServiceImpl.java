@@ -2251,6 +2251,10 @@ public final class HtmlServiceImpl implements HtmlService {
             String preprocessed = preprocessWithJSoup ? preprocessWithJSoup(htmlContent) : htmlContent;
             preprocessed = replaceSpecialEntities(preprocessed);
             final TagNode htmlNode = newHtmlCleaner().clean(preprocessed);
+            if (null == htmlNode) {
+                LOG.warn("HtmlCleaner library failed to pretty-print HTML content");
+                return htmlContent;
+            }
 
             // Serialize
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
