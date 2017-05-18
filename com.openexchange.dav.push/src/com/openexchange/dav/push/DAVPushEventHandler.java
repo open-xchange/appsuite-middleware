@@ -53,6 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,22 +123,23 @@ public class DAVPushEventHandler implements EventHandler {
             return;
         }
         List<PushNotification> pushNotifications = new ArrayList<PushNotification>();
+        String rootTopic = DAVPushUtility.getRootTopic(clientId);
         Long timestamp = Long.valueOf(getTimestamp(event).getTime());
         Integer priority = determinePriority(event);
         String clientToken = determineClientToken(event);
         int contextId = event.getContextId();
         for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
             int userId = entry.getKey().intValue();
+            Set<String> topics = new HashSet<String>();
+            topics.add(rootTopic);
             for (Integer folderId : entry.getValue()) {
-                String folderTopic = DAVPushUtility.getFolderTopic(clientId, folderId.toString());
-                pushNotifications.add(getPushNotification(contextId, userId, folderTopic, timestamp, priority, clientToken));
+                topics.add(DAVPushUtility.getFolderTopic(clientId, folderId.toString()));
+            }
+            for (String topic : topics) {
+                pushNotifications.add(getPushNotification(contextId, userId, topic, timestamp, priority, clientToken));
             }
         }
         notificationService.handle(pushNotifications);
-    }
-
-    private boolean useIndividualTopics() {
-        return false;
     }
 
     private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long timestamp, Integer priority, String clientToken) {
