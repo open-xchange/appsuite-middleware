@@ -51,6 +51,7 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -169,6 +170,8 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setString(pos++, pair.getFullname());
             stmt.setString(pos, pair.getMailId());
             stmt.executeUpdate();
+        } catch (final DataTruncation e) {
+            throw POP3ExceptionCode.UIDL_TOO_BIG.create(e, uidl);
         } catch (final SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
