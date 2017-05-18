@@ -54,8 +54,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import com.google.common.collect.Iterators;
-import com.openexchange.pns.Hit;
-import com.openexchange.pns.Hits;
 
 
 /**
@@ -97,7 +95,7 @@ public class IteratorBackedHits implements Hits {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return null == hits || hits.isEmpty();
     }
 
 }

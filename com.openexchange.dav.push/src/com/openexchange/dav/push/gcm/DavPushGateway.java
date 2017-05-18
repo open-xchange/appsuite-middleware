@@ -57,6 +57,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -122,6 +123,15 @@ public class DavPushGateway implements PushNotificationTransport {
     @Override
     public boolean servesClient(String client) throws OXException {
         return transportOptions.getClientID().equals(client);
+    }
+
+    @Override
+    public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
+        if (null != notifications && 0 < notifications.size()) {
+            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+                transport(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     @Override

@@ -450,13 +450,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             m = new HashMap<Integer, List<PushNotification>>();
             polledNotificationsPerUser.put(key, m);
         }
-        Integer userId = I(notification.getUserId());
-        List<PushNotification> l = m.get(userId);
-        if (null == l) {
-            l = new LinkedList<>();
-            m.put(userId, l);
-        }
-        l.add(notification);
+        com.openexchange.tools.arrays.Collections.put(m,  I(notification.getUserId()), notification);
     }
 
     /**
@@ -478,36 +472,53 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             return;
         }
 
-        // Transport each hit using associated transport
+        for (Entry<PushNotificationTransport, List<Hit>> entry : getHitsPerTransport(hits).entrySet()) {
+            /*
+             * get push matches for each notification
+             */
+            PushNotificationTransport transport = entry.getKey();
+            Map<PushNotification, List<PushMatch>> notifications = new HashMap<>();
+            for (Hit hit : entry.getValue()) {
+                List<PushMatch> matches = hit.getMatches();
+                for (PushMatch match : matches) {
+                    int userId = match.getUserId();
+                    if (false == isTransportAllowed(transport, topic, hit.getClient(), userId, contextId)) {
+                        LOGGER.info("Transport '{}' not enabled for client '{}' to publish notification \"{}\" from user {} in context {}",
+                            transport.getId(), hit.getClient(), topic, I(userId), I(contextId));
+                        continue;
+                    }
+                    List<PushNotification> notificationsForUser = notificationsPerUser.get(I(match.getUserId()));
+                    for (PushNotification notification : notificationsForUser) {
+                        if (matchesSourceToken(match, notification.getSourceToken())) {
+                            LOGGER.debug("Skipping push match for source token {}", notification.getSourceToken());
+                            continue;
+                        }
+                        com.openexchange.tools.arrays.Collections.put(notifications, notification, match);
+                    }
+                }
+            }
+            /*
+             * hand over to associated transport
+             */
+            transport.transport(notifications);
+        }
+
+        addNumOfProcessedNotifications(numOfNotifications);
+    }
+
+    private Map<PushNotificationTransport, List<Hit>> getHitsPerTransport(Hits hits) throws OXException {
+        Map<PushNotificationTransport, List<Hit>> hitsPerTransport = new HashMap<PushNotificationTransport, List<Hit>>();
         for (Hit hit : hits) {
             String client = hit.getClient();
             String transportId = hit.getTransportId();
             PushNotificationTransport transport = transportRegistry.getTransportFor(client, transportId);
             if (null == transport) {
-                LOGGER.info("No such transport '{}' for client '{}' to publish notification \"{}\" in context {}", transportId, client, topic, I(contextId));
+                LOGGER.info("No transport '{}' for client '{}' available, skipping notificaton.", transportId, client);
             } else {
-                for (Entry<Integer, List<PushNotification>> entry : notificationsPerUser.entrySet()) {
-                    Integer userId = entry.getKey();
-                    if (isTransportAllowed(transport, topic, client, i(userId), contextId)) {
-                        for (PushNotification notification : entry.getValue()) {
-                            List<PushMatch> matches = filterSourceToken(hit.getMatches(), notification.getSourceToken());
-                            if (null != matches && 0 < matches.size()) {
-                                LOGGER.debug("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, userId, I(contextId));
-                                try {
-                                    transport.transport(notification, hit.getMatches());
-                                } catch (Exception e) {
-                                    LOGGER.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, userId, I(contextId), e);
-                                }
-                            }
-                        }
-                    } else {
-                        LOGGER.info("Transport '{}' not enabled for client '{}' to publish notification \"{}\" from user {} in context {}", transportId, client, topic, userId, I(contextId));
-                    }
-                }
+                com.openexchange.tools.arrays.Collections.put(hitsPerTransport, transport, hit);
             }
         }
-
-        addNumOfProcessedNotifications(numOfNotifications);
+        return hitsPerTransport;
     }
 
     private boolean isTransportAllowed(PushNotificationTransport transport, String topic, String client, int userId, int contextId) {
@@ -531,6 +542,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         return matches;
     }
 
+    private boolean matchesSourceToken(PushMatch match, String sourceToken) {
+        return null != sourceToken && null != match && sourceToken.equals(match.getToken());
+    }
+
     private void addNumOfProcessedNotifications(int numOfNotifications) {
         if (numOfProcessedNotifications.addAndGet(numOfNotifications) < 0L) {
             numOfProcessedNotifications.set(0L);
@@ -545,7 +560,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         private final int numOfNotifications;
 
         /**
-         * Initializes a new {@link PushNotificationServiceImpl.MultiNotificationsHandler}.
+         * Initializes a new {@link PushNotificationServiceImpl.NotificationsHandler}.
          */
         NotificationsHandler(int contextId, String topic, Map<Integer, List<PushNotification>> notificationsPerUser, int numOfNotifications) {
             super();
@@ -556,7 +571,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         }
 
         /**
-         * Initializes a new {@link PushNotificationServiceImpl.MultiNotificationsHandler}.
+         * Initializes a new {@link PushNotificationServiceImpl.NotificationsHandler}.
          */
         NotificationsHandler(PushNotification notification) {
             this(notification.getContextId(), notification.getTopic(), Collections.singletonMap(I(notification.getUserId()), Collections.singletonList(notification)), 1);
