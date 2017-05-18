@@ -136,7 +136,12 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         for (PushSubscriptionRegistry registry : registries) {
-            Hits currentHits = registry.getInterestedSubscriptions(client, userIds, contextId, topic);
+            Hits currentHits;
+            if (null == client) {
+                currentHits = registry.getInterestedSubscriptions(userIds, contextId, topic);
+            } else {
+                currentHits = registry.getInterestedSubscriptions(client, userIds, contextId, topic);
+            }
             if (false == currentHits.isEmpty()) {
                 Map<ClientAndTransport, List<PushMatch>> currentMap = ((MapBackedHits) currentHits).getMap();
 
@@ -167,7 +172,12 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         // Check for more hits from providers
         LinkedList<Hits> moreHits = null;
         for (PushSubscriptionProvider provider : providers) {
-            Hits currentHits = provider.getInterestedSubscriptions(client, userIds, contextId, topic);
+            Hits currentHits;
+            if (null == client) {
+                currentHits = provider.getInterestedSubscriptions(userIds, contextId, topic);
+            } else {
+                currentHits = provider.getInterestedSubscriptions(client, userIds, contextId, topic);
+            }
             if (false == currentHits.isEmpty()) {
                 if (null == moreHits) {
                     moreHits = new LinkedList<>();
