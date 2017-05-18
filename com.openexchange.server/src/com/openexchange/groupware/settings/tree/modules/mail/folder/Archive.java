@@ -55,9 +55,11 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -89,26 +91,38 @@ public class Archive implements PreferencesItemService {
      */
     @Override
     public IValueHandler getSharedValue() {
-        return new AbstractStandardFolderItemValue() {
+        return new ArchiveStandardFolderItemValue();
+    }
 
-            @Override
-            protected void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException {
-                MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                if (null == mass) {
-                    setting.setSingleValue(null);
-                    return;
-                }
+    private static final class ArchiveStandardFolderItemValue extends AbstractStandardFolderItemValue {
 
-                Session session = primaryMailAccess.getSession();
-                MailAccount mailAccount = mass.getMailAccount(MailAccount.DEFAULT_ID, session.getUserId(), session.getContextId());
-                String archiveFullname = mailAccount.getArchiveFullname();
+        ArchiveStandardFolderItemValue() {
+            super();
+        }
 
-                if (Strings.isEmpty(archiveFullname)) {
-                    setting.setSingleValue(null);
-                } else {
+        @Override
+        protected void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException {
+            MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null == mass) {
+                setting.setSingleValue(null);
+                return;
+            }
+
+            Session session = primaryMailAccess.getSession();
+            MailAccount mailAccount = mass.getMailAccount(MailAccount.DEFAULT_ID, session.getUserId(), session.getContextId());
+            String archiveFullname = mailAccount.getArchiveFullname();
+
+            if (Strings.isEmpty(archiveFullname)) {
+                setting.setSingleValue(null);
+            } else {
+                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(archiveFullname);
+                if (primaryMailAccess.getFolderStorage().exists(fa.getFullName())) {
                     setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, archiveFullname));
+                } else {
+                    setting.setSingleValue(null);
                 }
             }
-        };
+        }
     }
+
 }
