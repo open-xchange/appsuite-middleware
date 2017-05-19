@@ -84,6 +84,7 @@ public class FolderID {
      * Initializes a new {@link FolderID}.
      *
      * @param uniqueID The composite identifier; e.g. <code>"com.openexchange.file.storage.custom://1234/MyFolder"</code>
+     * @throws IllegalArgumentException If given composite identifier is <code>null</code>
      */
     public FolderID(String uniqueID) {
         super();
