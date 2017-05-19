@@ -594,7 +594,7 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
             final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior());
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior(), 60000, 20000);
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
