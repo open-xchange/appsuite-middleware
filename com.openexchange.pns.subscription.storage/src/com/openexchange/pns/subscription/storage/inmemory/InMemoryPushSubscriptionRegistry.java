@@ -385,7 +385,8 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                                                             .token(newToken)
                                                             .topics(source.getTopics())
                                                             .transportId(source.getTransportId())
-                                                            .userId(source.getUserId());
+                                                            .userId(source.getUserId())
+                                                            .expires(source.getExpires());
 
                 if (null == toAdd) {
                     toAdd = new LinkedList<PushSubscriptionWrapper>();
