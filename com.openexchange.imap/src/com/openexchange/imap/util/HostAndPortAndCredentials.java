@@ -119,10 +119,10 @@ public final class HostAndPortAndCredentials {
 
         int prime = 31;
         int result = 1;
-        result = prime * result + ((host == null) ? 0 : host.hashCode());
+        result = prime * result + host.hashCode();
         result = prime * result + port;
-        result = prime * result + ((user == null) ? 0 : user.hashCode());
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + user.hashCode();
+        result = prime * result + password.hashCode();
         hashCode = result;
     }
 
