@@ -105,7 +105,9 @@ public abstract class AbstractFileAction implements AJAXActionService {
         /** The <code>"module"</code> parameter */
         MODULE("module"),
         /** The <code>"attachment"</code> parameter */
-        ATTACHMENT("attachment");
+        ATTACHMENT("attachment"),
+        /** The <code>"attachment_module"</code> parameter */
+        ATTACHMENT_MODULE("attachment_module");
 
         private final String name;
 

@@ -377,7 +377,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public int getModule() {
-        return getInt(Param.MODULE);
+        String value = data.getParameter(Param.ATTACHMENT_MODULE.getName());
+        if (null == value) {
+            return getInt(Param.MODULE);
+        }
+
+        return Integer.parseInt(value.trim());
     }
 
     /**
