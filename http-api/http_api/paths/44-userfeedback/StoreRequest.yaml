@@ -4,6 +4,8 @@
     tags:
       - userfeedback
     summary: Store user feedback
+    consumes:
+      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

@@ -11,6 +11,9 @@
         type: array
         description: An array containing all RSS Feeds to load. Array can consist of one element.
         required: true
+        items: {
+          type: string
+        }
       - in: query
         name: limit
         type: integer
