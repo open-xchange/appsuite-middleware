@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.pns.DefaultPushNotification;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.PushPriority;
 import com.openexchange.session.Session;
 
 /**
@@ -139,7 +140,7 @@ public class DAVPushEventHandler implements EventHandler {
                 pushNotifications.add(getPushNotification(contextId, userId, topic, timestamp, priority, clientToken));
             }
         }
-        notificationService.handle(pushNotifications);
+        notificationService.handle(pushNotifications, PushPriority.LOW);
     }
 
     private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long timestamp, Integer priority, String clientToken) {

@@ -73,14 +73,25 @@ public interface PushNotificationService {
     void handle(PushNotification notification) throws OXException;
 
     /**
+     * Handles the specified notification.
+     * <p>
+     * Looks up associated subscriptions and delivers the notification using the appropriate {@link PushNotificationTransport transport}.
+     *
+     * @param notification The push notification to handle
+     * @throws OXException If handling push notification fails
+     */
+    void handle(PushNotification notification, PushPriority priority) throws OXException;
+
+    /**
      * Handles the specified notifications.
      * <p>
      * Looks up associated subscriptions and delivers the notifications using the appropriate {@link PushNotificationTransport transport}.
      *
      * @param notifications The push notifications to handle
+     * @param priority The priority with which the notifications should be handled
      * @throws OXException If handling push notifications fails
      */
-    void handle(Collection<PushNotification> notifications) throws OXException;
+    void handle(Collection<PushNotification> notifications, PushPriority priority) throws OXException;
 
     // ----------------------------------------------------------------------------------------
 

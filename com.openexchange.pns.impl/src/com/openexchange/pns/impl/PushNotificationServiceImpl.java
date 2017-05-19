@@ -72,6 +72,7 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
+import com.openexchange.pns.PushPriority;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.processing.Processor;
 import com.openexchange.processing.ProcessorService;
@@ -108,6 +109,36 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             }
         }
         return tmp.longValue();
+    }
+
+    private static long delayDuration(ConfigurationService configService, PushPriority priority) {
+        long baseDelayDuration = delayDuration(configService);
+        return null != priority ? priority.getDelay(baseDelayDuration) : baseDelayDuration;
+    }
+
+    private static volatile Long maxDelayDuration;
+
+    private static long maxDelayDuration(ConfigurationService configService) {
+        Long tmp = maxDelayDuration;
+        if (null == tmp) {
+            synchronized (PushNotificationServiceImpl.class) {
+                tmp = maxDelayDuration;
+                if (null == tmp) {
+                    int defaultValue = 10000; // 10 seconds
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.pns.maxDelayDuration", defaultValue));
+                    maxDelayDuration = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    private static long maxDelayDuration(ConfigurationService configService, PushPriority priority) {
+        long baseMaxDelayDuration = maxDelayDuration(configService);
+        return null != priority ? priority.getDelay(baseMaxDelayDuration) : baseMaxDelayDuration;
     }
 
     private static volatile Long timerFrequency;
@@ -213,7 +244,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         this.configService = configService;
         this.timerService = timerService;
         this.transportRegistry = transportRegistry;
-        scheduledNotifcations = new UnsynchronizedBufferingQueue<>(delayDuration(configService));
+        scheduledNotifcations = new UnsynchronizedBufferingQueue<>(delayDuration(configService), maxDelayDuration(configService));
         numOfProcessedNotifications = new AtomicLong(0);
         numOfSubmittedNotifications = new AtomicLong(0);
     }
@@ -298,39 +329,22 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
     @Override
     public void handle(PushNotification notification) throws OXException {
-        lock.lock();
-        try {
-            if (stopped) {
-                return;
-            }
-
-            // Add to queue
-            addToQueue(notification);
-
-            // Fire off worker if paused
-            if (null == scheduledTimerTask) {
-                Runnable task = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        checkNotifications();
-                    }
-                };
-                long initialDelay = delayDuration(configService);
-                long delay = timerFrequency(configService);
-                scheduledTimerTask = timerService.scheduleWithFixedDelay(task, initialDelay, delay);
-            }
-        } finally {
-            lock.unlock();
-        }
+        handle(notification, PushPriority.HIGH);
     }
 
     @Override
-    public void handle(Collection<PushNotification> notifications) throws OXException {
+    public void handle(PushNotification notification, PushPriority priority) throws OXException {
+        handle(Collections.singletonList(notification), priority);
+    }
+
+    @Override
+    public void handle(Collection<PushNotification> notifications, PushPriority priority) throws OXException {
         if (null == notifications || notifications.isEmpty()) {
             return;
         }
 
+        long delayDuration = delayDuration(configService, priority);
+        long maxDelayDuration = maxDelayDuration(configService, priority);
         lock.lock();
         try {
             if (stopped) {
@@ -342,7 +356,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
             // Grab first one for bootstrapping
             PushNotification firstNotification = iterator.next();
-            addToQueue(firstNotification);
+            addToQueue(firstNotification, delayDuration, maxDelayDuration);
 
             // Fire off worker if paused
             if (null == scheduledTimerTask) {
@@ -360,15 +374,15 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
             // Add rest to queue
             while (iterator.hasNext()) {
-                addToQueue(iterator.next());
+                addToQueue(iterator.next(), delayDuration, maxDelayDuration);
             }
         } finally {
             lock.unlock();
         }
     }
 
-    private void addToQueue(PushNotification notification) {
-        boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
+    private void addToQueue(PushNotification notification, long delayDuration, long maxDelayDuration) {
+        boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification, delayDuration, maxDelayDuration);
         if (added) {
             if (numOfSubmittedNotifications.incrementAndGet() < 0L) {
                 numOfSubmittedNotifications.set(0L);
@@ -528,18 +542,6 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             LOGGER.error("Failed to check whether notification \"{}\" is allowed to be sent via transport '{}' to client '{}' for user {} in context {}. Transport will be denied...", topic, transport.getId(), client, I(userId), I(contextId), e);
             return false;
         }
-    }
-
-    private List<PushMatch> filterSourceToken(List<PushMatch> matches, String sourceToken) {
-        if (null != sourceToken && null != matches) {
-            for (Iterator<PushMatch> iterator = matches.iterator(); iterator.hasNext();) {
-                if (sourceToken.equals(iterator.next().getToken())) {
-                    LOGGER.debug("Skipping push match for source token {}", sourceToken);
-                    iterator.remove();
-                }
-            }
-        }
-        return matches;
     }
 
     private boolean matchesSourceToken(PushMatch match, String sourceToken) {

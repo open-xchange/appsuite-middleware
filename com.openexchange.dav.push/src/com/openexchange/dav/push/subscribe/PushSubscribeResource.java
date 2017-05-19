@@ -218,7 +218,7 @@ public class PushSubscribeResource extends DAVResource {
             .token(token)
             .transportId(transportId)
             .userId(factory.getUser().getId())
-//TODO            .expires(expires)
+            .expires(expires)
         .build();
         try {
             subscriptionRegistry.registerSubscription(subscription);
