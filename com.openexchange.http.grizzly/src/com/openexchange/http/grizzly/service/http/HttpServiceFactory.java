@@ -166,9 +166,9 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     public synchronized HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
         LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
 
-        OSGiMainHandler mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
-        httpHandlers.put(bundle, mainHttpHandler);
-        return new HttpServiceImpl(mainHttpHandler, bundle);
+        OSGiMainHandler bundleHttpHandler = new OSGiMainHandler(initialFilters, bundle);
+        httpHandlers.put(bundle, bundleHttpHandler);
+        return new HttpServiceImpl(bundleHttpHandler, bundle);
     }
 
     @Override
