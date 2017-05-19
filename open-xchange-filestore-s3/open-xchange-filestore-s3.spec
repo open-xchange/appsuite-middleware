@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -80,6 +80,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri May 19 2017 Markus Wagner <markus.wagner@open-xchange.com>
+First candidate for 7.8.4 release
 * Thu May 04 2017 Markus Wagner <markus.wagner@open-xchange.com>
 Second preview of 7.8.4 release
 * Mon Apr 03 2017 Markus Wagner <markus.wagner@open-xchange.com>
