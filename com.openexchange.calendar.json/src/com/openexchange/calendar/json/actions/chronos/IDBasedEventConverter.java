@@ -58,6 +58,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
+import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -213,17 +214,20 @@ public class IDBasedEventConverter extends EventConverter {
 
         @Override
         public String getId() {
-            return "0";
+            String uniqueId = super.getId();
+            return null == uniqueId ? null : CompositeEventID.parse(uniqueId).getEventId();
         }
 
         @Override
         public String getFolderId() {
-            return "0";
+            String uniqueId = super.getFolderId();
+            return null == uniqueId ? null : CompositeFolderID.parse(uniqueId).getFolderId();
         }
 
         @Override
         public String getSeriesId() {
-            return "0";
+            String uniqueId = super.getSeriesId();
+            return null == uniqueId ? null : CompositeEventID.parse(uniqueId).getEventId();
         }
 
     }

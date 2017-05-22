@@ -142,7 +142,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectEvents(connection, searchTerm, filters, searchOptions, fields);
+            return selectEvents(connection, false, searchTerm, filters, searchOptions, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -230,8 +230,15 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return Collections.emptyList();
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectEvents(connection, true, searchTerm, null, searchOptions, fields);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
     }
 
     @Override
@@ -266,7 +273,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = replaceTombstoneEvent(connection, event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, event, connection, "calendar_del_event");
+            throw asOXException(e, MAPPER, event, connection, "calendar_event_tombstone");
         } finally {
             release(connection, updated);
         }
@@ -300,17 +307,19 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private int replaceTombstoneEvent(Connection connection, Event event) throws SQLException, OXException {
-        EventField[] mappedFields = MAPPER.getMappedTombstoneFields();
+        EventField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
-            .append("REPLACE INTO calendar_del_event ")
-            .append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(") ")
-            .append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
+            .append("REPLACE INTO calendar_event_tombstone ")
+            .append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(",rangeFrom,rangeUntil) ")
+            .append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?);")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
+            stmt.setLong(parameterIndex++, getRangeFrom(event));
+            stmt.setLong(parameterIndex++, getRangeUntil(event));
             return logExecuteUpdate(stmt);
         }
     }
@@ -386,15 +395,16 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         return null;
     }
 
-    private List<Event> selectEvents(Connection connection, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
+    private List<Event> selectEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = MAPPER.getMappedFields(fields);
         SearchAdapter adapter = new SearchAdapter(context.getContextId(), null, "e.", "a.").append(searchTerm).append(filters);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT DISTINCT ").append(MAPPER.getColumns(mappedFields, "e."))
-            .append(" FROM calendar_event AS e")
+            .append(" FROM ").append(deleted ? "calendar_event_tombstone" : "calendar_event").append(" AS e ")
         ;
         if (adapter.usesAttendees()) {
-            stringBuilder.append(" LEFT JOIN ").append("calendar_attendee AS a ON e.cid=a.cid AND e.account=a.account AND e.id=a.event");
+            stringBuilder.append(" LEFT JOIN ").append(deleted ? "calendar_attendee_tombstone" : "calendar_attendee").append(" AS a ")
+            .append("ON e.cid=a.cid AND e.account=a.account AND e.id=a.event");
         }
         stringBuilder.append(" WHERE e.cid=? AND e.account=?");
         if (null != searchOptions && null != searchOptions.getFrom()) {

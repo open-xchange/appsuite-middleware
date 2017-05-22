@@ -70,7 +70,6 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
@@ -94,19 +93,15 @@ import com.openexchange.search.SearchTerm;
  */
 public class RdbEventStorage extends RdbStorage implements EventStorage {
 
-    private final EntityResolver entityResolver;
-
     /**
      * Initializes a new {@link RdbEventStorage}.
      *
      * @param context The context
-     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbEventStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbEventStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
-        this.entityResolver = entityResolver;
     }
 
     @Override

@@ -264,7 +264,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         attendee = entityProcessor.adjustPriorSave(attendee);
         AttendeeField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
-            .append("INSERT INTO calendar_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ").append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
+            .append("INSERT INTO calendar_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ")
+            .append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -278,9 +279,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private int replaceTombstoneAttendee(Connection connection, String eventId, Attendee attendee) throws SQLException, OXException {
         attendee = entityProcessor.adjustPriorSave(attendee);
-        AttendeeField[] mappedFields = MAPPER.getMappedTombstoneFields();
+        AttendeeField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
-            .append("REPLACE INTO calendar_del_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ").append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
+            .append("REPLACE INTO calendar_attendee_tombstone (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ")
+            .append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;

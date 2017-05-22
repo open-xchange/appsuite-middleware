@@ -80,6 +80,7 @@ import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -522,11 +523,40 @@ public abstract class EventConverter {
         if (event.containsSummary()) {
             appointment.setTitle(event.getSummary());
         }
-        if (event.containsStartDate()) {
-            appointment.setStartDate(event.getStartDate());
-        }
-        if (event.containsEndDate()) {
-            appointment.setEndDate(event.getEndDate());
+        if (isSeriesMaster(event)) {
+            if (event.containsStartDate() || event.containsEndDate()) {
+                // prefer start/end date of first occurrence for the series master event
+                if (null == recurrenceData) {
+                    recurrenceData = new DefaultRecurrenceData(event);
+                }
+                RecurrenceId firstRecurrenceId = null;
+                RecurrenceIterator<RecurrenceId> iterator = getRecurrenceService().iterateRecurrenceIds(recurrenceData, null, null);
+                if (iterator.hasNext()) {
+                    firstRecurrenceId = iterator.next();
+                }
+                if (event.containsStartDate()) {
+                    if (null != firstRecurrenceId) {
+                        appointment.setStartDate(new Date(firstRecurrenceId.getValue()));
+                    } else {
+                        appointment.setStartDate(event.getStartDate());
+                    }
+                }
+                if (event.containsEndDate()) {
+                    if (null != firstRecurrenceId) {
+                        long duration = event.getEndDate().getTime() - event.getStartDate().getTime();
+                        appointment.setEndDate(new Date(firstRecurrenceId.getValue() + duration));
+                    } else {
+                        appointment.setEndDate(event.getEndDate());
+                    }
+                }
+            }
+        } else {
+            if (event.containsStartDate()) {
+                appointment.setStartDate(event.getStartDate());
+            }
+            if (event.containsEndDate()) {
+                appointment.setEndDate(event.getEndDate());
+            }
         }
         if (event.containsDescription()) {
             appointment.setNote(event.getDescription());

@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -91,11 +90,6 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
     private static final EventMapper INSTANCE = new EventMapper();
 
-    private static final EventField[] TOMBSTONE_FIELDS = {
-        EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.UID, 
-        EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.CREATED, EventField.CREATED_BY
-    };
-
     /**
      * Gets the mapper instance.
      *
@@ -112,14 +106,6 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         super();
     }
 
-    /**
-     * Gets the mapped fields available in the tombstone table.
-     *
-     * @return The mapped tombstone fields
-     */
-    public EventField[] getMappedTombstoneFields() {
-        return TOMBSTONE_FIELDS;
-    }
     /**
      * Gets all mapped fields.
      *

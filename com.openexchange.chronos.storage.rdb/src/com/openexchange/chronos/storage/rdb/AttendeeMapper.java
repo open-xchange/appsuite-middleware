@@ -73,10 +73,6 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
     private static final AttendeeMapper INSTANCE = new AttendeeMapper();
 
-    private static final AttendeeField[] TOMBSTONE_FIELDS = { 
-        AttendeeField.URI, AttendeeField.ENTITY, AttendeeField.FOLDER_ID
-    };
-
     /**
      * Gets the mapper instance.
      *
@@ -91,15 +87,6 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
      */
     private AttendeeMapper() {
         super();
-    }
-
-    /**
-     * Gets the mapped fields available in the tombstone table.
-     *
-     * @return The mapped tombstone fields
-     */
-    public AttendeeField[] getMappedTombstoneFields() {
-        return TOMBSTONE_FIELDS;
     }
 
 	@Override
