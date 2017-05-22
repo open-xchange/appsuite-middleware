@@ -4,12 +4,15 @@
     tags:
       - userfeedback
     summary: Store user feedback
+    consumes:
+      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
         name: type
         description: The feedback type
         required: true
+        type: string
       - in: body
         name: body
         description: A JSON object describing the feedback

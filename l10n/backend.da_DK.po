@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-30 19:46+0200\n"
+"PO-Revision-Date: 2017-05-05 14:37+0200\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@bureau-cornavin.com>\n"
 "Language-Team: Danish <da@bureau-cornavin.com>\n"
 "Language: da\n"
@@ -3247,6 +3247,11 @@ msgstr "HTML-indholdet er ugyldigt og kan derfor ikke vises"
 msgid "The HTML content cannot be safely displayed"
 msgstr "HTML-indholdet kan ikke vises på sikker vis"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Denne besked kan kun vises som almindelig tekst"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5064,16 +5069,16 @@ msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for appointments."
 msgstr ""
-"Samtalen giver nogle objekter, der ikke kunne gemmes, da der ikke er oprettet"
-" en mappe til aftaler."
+"Samtalen giver nogle objekter, der ikke kunne gemmes, da der ikke er "
+"oprettet en mappe til aftaler."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
 msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for tasks."
 msgstr ""
-"Samtalen giver nogle objekter, der ikke kunne gemmes, da der ikke er oprettet"
-" en mappe til opgaver."
+"Samtalen giver nogle objekter, der ikke kunne gemmes, da der ikke er "
+"oprettet en mappe til opgaver."
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5294,12 +5299,13 @@ msgid "Appointments must have at least one participant."
 msgstr "Aftaler skal have mindst en deltager."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
-msgstr "Du har ikke de rette rettigheder til at læse aftaler fra den mappe."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
+msgstr "Du har ikke de rette rettigheder til at læse aftaler i den mappe."
 
 #. *
 #. * End date must not be before start date.
@@ -5528,8 +5534,8 @@ msgid ""
 "Cannot create that appointment. An appointment having the same unique "
 "identifier already exists."
 msgstr ""
-"Kan ikke oprette den aftale.  Der findes allerede en aftale med samme unikke"
-" ID."
+"Kan ikke oprette den aftale.  Der findes allerede en aftale med samme unikke "
+"ID."
 
 #. *
 #. * Cannot create that task. A task having the same unique identifier already exists.
@@ -5539,8 +5545,8 @@ msgid ""
 "Cannot create that task. A task having the same unique identifier already "
 "exists."
 msgstr ""
-"Kan ikke oprette den opgave.  Der findes allerede en opgave med samme unikke"
-" ID."
+"Kan ikke oprette den opgave.  Der findes allerede en opgave med samme unikke "
+"ID."
 
 #. Sequence number is outdated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -8590,9 +8596,9 @@ msgid ""
 "Your mail transport for %2$s was disabled because of authorization issues. "
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
-"Din e-mail-transport for %2$s blev slået fra på grund af"
-" godkendelsesproblemer. "
-"Gengodkend venligst kontoen %5$s for at slå den til igen."
+"Din e-mail-transport for %2$s blev slået fra på grund af "
+"godkendelsesproblemer. Gengodkend venligst kontoen %5$s for at slå den til "
+"igen."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8684,8 +8690,8 @@ msgid ""
 "The provided login data to access mail server %1$s seem to be wrong. Please "
 "correct them."
 msgstr ""
-"De givne log-in-data til at tilgå e-mail-serveren %1$s ser ud til at være"
-" forkerte.  Ret dem venligst."
+"De givne log-in-data til at tilgå e-mail-serveren %1$s ser ud til at være "
+"forkerte.  Ret dem venligst."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -9473,8 +9479,8 @@ msgid ""
 "The value \"%1$s\" you set for attribute %2$s must not contain non digit "
 "characters."
 msgstr ""
-"Værdien \"%1$s\", som du satte for attribut %2$s, må ikke indeholde andet end "
-"taltegn."
+"Værdien \"%1$s\", som du satte for attribut %2$s, må ikke indeholde andet "
+"end taltegn."
 
 #. *
 #. * You inserted too many digits into field %1$s.
@@ -10281,8 +10287,8 @@ msgstr "Der opstod en fejl.  Vi kunne ikke udsende påmindelses-e-mails."
 msgid ""
 "You don't have sufficient permissions to send notifications for this share."
 msgstr ""
-"Du har ikke tilstrækkelige rettigheder til at sende underretninger for denne"
-" deling."
+"Du har ikke tilstrækkelige rettigheder til at sende underretninger for denne "
+"deling."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -10623,12 +10629,12 @@ msgstr "Den givne vurdering for nøglen 'score' har en ugyldig type."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "Den givne vurdering indeholder ikke den påkrævede nøgle »%s«.s"
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Den givne vurdering indeholder ikke den påkrævede nøgle »%s«."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr "Den givne vurdering for nøglen »%s« kan ikke fortolkes."
 
 #. The value given in the property %1$s is no integer value
@@ -12886,6 +12892,17 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr "Du har ikke de rette rettigheder til at læse aftaler fra den mappe."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Den givne vurdering indeholder ikke den påkrævede nøgle »%s«.s"
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Den givne vurdering for nøglen »%s« kan ikke fortolkes."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

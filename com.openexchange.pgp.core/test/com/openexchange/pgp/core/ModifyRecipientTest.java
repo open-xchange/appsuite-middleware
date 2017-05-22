@@ -49,6 +49,8 @@
 
 package com.openexchange.pgp.core;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -57,11 +59,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static org.mockito.Mockito.*;
-import org.mockito.Matchers;
 import org.bouncycastle.openpgp.PGPKeyRingGenerator;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPSecretKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,6 +68,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.Matchers;
 import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.packethandling.AddRecipientPacketProcessorHandler;
 import com.openexchange.pgp.core.packethandling.PacketProcessor;
@@ -79,7 +78,7 @@ import com.openexchange.pgp.core.packethandling.RemoveRecipientPacketProcessorHa
  * {@link ModifyRecipientTest}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 @RunWith(value = Parameterized.class)
 public class ModifyRecipientTest extends AbstractPGPTest {
@@ -89,73 +88,6 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     private PGPKeyRetrievalStrategy keyRetrievalStrategy;
     private Identity identity;
     private Identity identity2;
-
-    /**
-     *
-     * {@link Identity} Represents a Identity containing one PGP Key useful for testing purpose.
-     *
-     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
-     * @since v2.4.2
-     */
-    private class Identity {
-
-        private final String identity;
-        private final PGPPublicKey publicKey;
-        private final PGPSecretKey secretKey;
-        private final char[] password;
-
-        /**
-         * Initializes a new {@link Identity}.
-         *
-         * @param identity The name of the identity
-         * @param publicKey The public key of the identity
-         * @param secretKey The secret key of the identity
-         * @param password The password for accessing the private key
-         */
-        public Identity(String identity, PGPPublicKey publicKey, PGPSecretKey secretKey, char[] password) {
-            super();
-            this.identity = identity;
-            this.publicKey = publicKey;
-            this.secretKey = secretKey;
-            this.password = password;
-        }
-
-        /**
-         * Gets the identity
-         *
-         * @return The identity
-         */
-        public String getIdentity() {
-            return identity;
-        }
-
-        /**
-         * Gets the publicKey
-         *
-         * @return The publicKey
-         */
-        public PGPPublicKey getPublicKey() {
-            return publicKey;
-        }
-
-        /**
-         * Gets the secretKey
-         *
-         * @return The secretKey
-         */
-        public PGPSecretKey getSecretKey() {
-            return secretKey;
-        }
-
-        /**
-         * Gets the password
-         *
-         * @return The password
-         */
-        public char[] getPassword() {
-            return password;
-        }
-    }
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -187,7 +119,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     public void setup() throws Exception {
         //Setting up a keypair for the first identity
         PGPKeyRingGenerator keyGenerator = createPGPKeyPairGenerator();
-        identity = new Identity(TEST_IDENTITY, getPublicKeyFromGenerator(keyGenerator), getSecretKeyFromGenerator(keyGenerator), TEST_PASSWORD);
+        identity = new Identity(TEST_IDENTITY_NAME, getPublicKeyFromGenerator(keyGenerator), getSecretKeyFromGenerator(keyGenerator), TEST_IDENTITY_PASSWORD);
 
         //Setup an additional key pair for the 2nd identity
         final String TEST_IDENTITY_2 = "user2";
@@ -201,19 +133,6 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         when(keyRetrievalStrategy.getSecretKey(Matchers.eq(identity2.getSecretKey().getKeyID()), Matchers.eq(identity2.getIdentity()), Matchers.eq(identity2.getPassword()))).thenReturn(decodePrivateKey(identity2.getSecretKey(), identity2.getPassword()));
     }
 
-    /**
-     * A helper method for getting all Public Keys from a group of identities
-     *
-     * @param identities The identities to get the keys for
-     * @return A set of Public Keys for the given identities
-     */
-    private PGPPublicKey[] getPublicKeysFor(List<Identity> identities) {
-        PGPPublicKey[] ret = new PGPPublicKey[(identities.size())];
-        for (int i = 0; i < identities.size(); i++) {
-            ret[i] = identities.get(i).getPublicKey();
-        }
-        return ret;
-    }
 
     /**
      * final String TEST_IDENTITY_2 = "user2";
@@ -232,15 +151,6 @@ public class ModifyRecipientTest extends AbstractPGPTest {
             return ret;
         }
         return null;
-    }
-
-    /**
-     * A helper method for creating clear text test data which can be used for encryption
-     *
-     * @return A bunch of test data
-     */
-    private byte[] generateTestData() {
-        return "test".getBytes();
     }
 
     /**

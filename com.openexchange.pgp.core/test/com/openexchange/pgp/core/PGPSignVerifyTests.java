@@ -51,12 +51,15 @@
 
 package com.openexchange.pgp.core;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.List;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 import org.bouncycastle.openpgp.PGPKeyRingGenerator;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
@@ -68,7 +71,7 @@ import org.junit.Test;
  * {@link PGPSignVerifyTests}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class PGPSignVerifyTests extends AbstractPGPTest {
 
@@ -85,7 +88,7 @@ public class PGPSignVerifyTests extends AbstractPGPTest {
         //Setting up a strategy for key retrieving, this is used when decrypting data
         keyRetrievalStrategy = mock(PGPKeyRetrievalStrategy.class);
         when(keyRetrievalStrategy.getPublicKey(anyLong())).thenReturn(publicKey);
-        when(keyRetrievalStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_PASSWORD));
+        when(keyRetrievalStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_IDENTITY_PASSWORD));
     }
 
     @Test
@@ -95,7 +98,7 @@ public class PGPSignVerifyTests extends AbstractPGPTest {
 
         //Create the signature
         ByteArrayOutputStream signatureData = new ByteArrayOutputStream();
-        new PGPSignatureCreator().createSignature(plainTextData, signatureData, true, secretKey, TEST_PASSWORD);
+        new PGPSignatureCreator().createSignature(plainTextData, signatureData, true, secretKey, TEST_IDENTITY_PASSWORD);
         String signature = new String(signatureData.toByteArray());
         ByteArrayInputStream signatureStream = new ByteArrayInputStream(signature.getBytes());
         Assert.assertTrue(signature.startsWith("-----BEGIN PGP SIGNATURE-----"));
@@ -118,7 +121,7 @@ public class PGPSignVerifyTests extends AbstractPGPTest {
         secretKey = getSecretKeyFromGenerator(keyGenerator);
         publicKey = getPublicKeyFromGenerator(keyGenerator);
         PGPKeyRetrievalStrategy onlyFindSecretKeyStrategy = mock(PGPKeyRetrievalStrategy.class);
-        when(onlyFindSecretKeyStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_PASSWORD));
+        when(onlyFindSecretKeyStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_IDENTITY_PASSWORD));
         when(onlyFindSecretKeyStrategy.getPublicKey(anyLong())).thenReturn(null);
 
         byte[] testData = "test".getBytes();
@@ -126,7 +129,7 @@ public class PGPSignVerifyTests extends AbstractPGPTest {
 
         //Create the signature
         ByteArrayOutputStream signatureData = new ByteArrayOutputStream();
-        new PGPSignatureCreator().createSignature(plainTextData, signatureData, true, secretKey, TEST_PASSWORD);
+        new PGPSignatureCreator().createSignature(plainTextData, signatureData, true, secretKey, TEST_IDENTITY_PASSWORD);
         String signature = new String(signatureData.toByteArray());
         ByteArrayInputStream signatureStream = new ByteArrayInputStream(signature.getBytes());
         Assert.assertTrue(signature.startsWith("-----BEGIN PGP SIGNATURE-----"));

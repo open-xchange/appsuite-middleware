@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-19 16:17-0700\n"
+"PO-Revision-Date: 2017-05-05 15:29-0700\n"
 "Last-Translator: Timothy Friesen <timothy.friesen@gmail.com>\n"
 "Language-Team: English <kde-i18n-doc@kde.org>\n"
 "Language: en_GB\n"
@@ -3257,6 +3257,11 @@ msgstr "The HTML content is invalid and cannot be displayed"
 msgid "The HTML content cannot be safely displayed"
 msgstr "The HTML content cannot be safely displayed"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "This message can only be displayed as plain text"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5085,16 +5090,16 @@ msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for appointments."
 msgstr ""
-"The conversion yields some objects which could not be stored due to a missing "
-"folder for appointments."
+"The conversion yields some objects which could not be stored due to a "
+"missing folder for appointments."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
 msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for tasks."
 msgstr ""
-"The conversion yields some objects which could not be stored due to a missing "
-"folder for tasks."
+"The conversion yields some objects which could not be stored due to a "
+"missing folder for tasks."
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5317,13 +5322,15 @@ msgid "Appointments must have at least one participant."
 msgstr "Appointments must have at least one participant."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 
 #. *
 #. * End date must not be before start date.
@@ -8717,9 +8724,8 @@ msgid ""
 "The provided login data to access mail server %1$s seem to be wrong. Please "
 "correct them."
 msgstr ""
-"The provided login data to access e-mail server %1$s seems to be wrong."
-" Please "
-"correct them."
+"The provided login data to access e-mail server %1$s seems to be wrong. "
+"Please correct them."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -10673,13 +10679,13 @@ msgstr "The provided feedback for key 'score' has an invalid type."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "The provided feedback does not contain required key '%s'."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "The provided feedback for key '%s' cannot be parsed."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -12936,6 +12942,19 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "The provided feedback does not contain required key \"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "The provided feedback for key \"%s\" cannot be parsed."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

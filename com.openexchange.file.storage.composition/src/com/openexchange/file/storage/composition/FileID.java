@@ -115,12 +115,14 @@ public class FileID {
                 folderId = unmangled.get(0);
                 fileId = unmangled.get(1);
                 break;
-            default:
+            case 4:
                 serviceId = unmangled.get(0);
                 accountId = unmangled.get(1);
                 folderId = unmangled.get(2);
                 fileId = unmangled.get(3);
                 break;
+            default:
+                throw new IllegalArgumentException("Unique ID is not valid.");
         }
     }
 

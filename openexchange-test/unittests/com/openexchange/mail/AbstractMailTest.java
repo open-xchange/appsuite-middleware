@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.MailAccess;
@@ -78,6 +79,8 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -98,7 +101,7 @@ public abstract class AbstractMailTest {
 
     private String password;
 
-    private int user;
+    private int userId;
 
     private int cid;
 
@@ -106,24 +109,31 @@ public abstract class AbstractMailTest {
 
     private SessionObject session;
 
+    private String user;
+
+    private Context context;
+
     @Before
     public void setUp() throws Exception {
         /*
          * Init
          */
         Init.startServer();
-        /*
-         * Init test environment
-         */
-        AJAXConfig.init();
+        final TestConfig config = new TestConfig();
+
+        user = config.getUser();
+        final TestContextToolkit tools = new TestContextToolkit();
+        context = tools.getDefaultContext();
+
+        userId = tools.resolveUser(user, context);
         server = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         port = Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.MAIL_PORT));
-        login = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
-        secondUser = Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER));
         password = AJAXConfig.getProperty(AJAXConfig.Property.PASSWORD);
-        user = 3; //FIXME get user/context dynamically
-        cid = 1; //FIXME get user/context dynamically
+        cid = context.getContextId();
         testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+
+        String secondUser2 = config.getSecondUser();
+        secondUser = tools.resolveUser(secondUser2, context);
     }
 
     @After
@@ -248,7 +258,7 @@ public abstract class AbstractMailTest {
      * @return the user
      */
     protected final int getUser() {
-        return user;
+        return userId;
     }
 
     /**

@@ -50,7 +50,6 @@
 package com.openexchange.imap.storecache;
 
 import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
-import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPClientParameters;
 import com.openexchange.log.LogProperties;
@@ -106,16 +105,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         /*
          * ... and connect it
          */
-        try {
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
-        } catch (final AuthenticationFailedException e) {
-            /*
-             * Retry connect with AUTH=PLAIN disabled
-             */
-            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-            imapStore = (IMAPStore) imapSession.getStore(name);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
-        }
+        doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
 
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
         if (null != sessionInformation) {

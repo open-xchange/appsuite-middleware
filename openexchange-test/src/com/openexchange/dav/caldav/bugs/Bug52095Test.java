@@ -75,7 +75,6 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.SyncToken;
@@ -123,9 +122,8 @@ public class Bug52095Test extends CalDAVTest {
             PermissionTools.ADMIN, Integer.valueOf(getClient().getValues().getUserId()), "vr")
         );
         sharedFolder.setFolderName(randomUID());
-        com.openexchange.ajax.folder.actions.InsertRequest request = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, sharedFolder);
-        com.openexchange.ajax.folder.actions.InsertResponse response = manager2.getClient().execute(request);
-        response.fillObject(sharedFolder);
+        ftm.setClient(getClient2());
+        sharedFolder = ftm.insertFolderOnServer(sharedFolder);
     }
 
     @Override
@@ -133,11 +131,7 @@ public class Bug52095Test extends CalDAVTest {
     public void tearDown() throws Exception {
         try {
             if (null != manager2) {
-                if (null != sharedFolder) {
-                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, sharedFolder));
-                }
                 manager2.cleanUp();
-                manager2.getClient().logout();
             }
         } finally {
             super.tearDown();

@@ -347,21 +347,25 @@ public abstract class Consistency implements ConsistencyMBean {
 
             final Map<String, Integer> schemaPoolMap = Tools.getAllSchemata(LOG);
             confCon = databaseService.getReadOnly();
-            stmt = confCon.prepareStatement("SELECT db_schema,cid FROM context_server2db_pool");
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                final String schema = rs.getString(1);
-                final Integer ctx = Integer.valueOf(rs.getInt(2));
-                if (schemaMap.containsKey(schema)) {
-                    schemaMap.get(schema).add(ctx);
-                } else {
-                    List<Integer> ctxs = new ArrayList<Integer>();
-                    ctxs.add(ctx);
-                    schemaMap.put(schema, ctxs);
+
+            // Fetch all contexts for each db_schema
+            for (String schema : schemaPoolMap.keySet()) {
+                stmt = confCon.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
+                stmt.setString(1, schema);
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    final Integer ctx = Integer.valueOf(rs.getInt(1));
+                    if (schemaMap.containsKey(schema)) {
+                        schemaMap.get(schema).add(ctx);
+                    } else {
+                        List<Integer> ctxs = new ArrayList<Integer>();
+                        ctxs.add(ctx);
+                        schemaMap.put(schema, ctxs);
+                    }
                 }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
             }
-            Databases.closeSQLStuff(rs, stmt);
-            stmt = null;
             for (final Entry<String, List<Integer>> schemaEntry : schemaMap.entrySet()) {
                 String schema = schemaEntry.getKey();
                 List<Integer> ctxs = schemaEntry.getValue();

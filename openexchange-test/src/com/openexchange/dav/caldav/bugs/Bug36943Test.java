@@ -159,7 +159,6 @@ public class Bug36943Test extends CalDAVTest {
         String expectedName = name.replaceAll("\uD83D\uDCA9", "");
         FolderObject folder = super.getCalendarFolder(expectedName);
         assertNotNull("folder not found on server", folder);
-        rememberForCleanUp(folder);
         assertEquals("folder name wrong", expectedName, folder.getFolderName());
         /*
          * verify calendar on client
@@ -236,7 +235,6 @@ public class Bug36943Test extends CalDAVTest {
         String expectedName = newName.replaceAll("\uD83D\uDCA9", "");
         folder = getCalendarFolder(expectedName);
         assertNotNull("folder not found on server", folder);
-        rememberForCleanUp(folder);
         assertEquals("folder name wrong", expectedName, folder.getFolderName());
         /*
          * verify calendar on client

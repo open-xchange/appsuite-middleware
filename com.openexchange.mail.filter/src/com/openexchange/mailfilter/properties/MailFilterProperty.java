@@ -121,7 +121,7 @@ public enum MailFilterProperty implements Property {
      * If multiple domains are given, they should be separated by ","
      * e.g. VACATION_DOMAINS=testdomain.com,example.com
      */
-    vacationDomains(MailFilterProperty.EMPTY),
+    vacationDomains(MailFilterProperty.EMPTY, true),
 
     /**
      * Specifies when the connection should time out (value in milliseconds)

@@ -56,7 +56,6 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -95,9 +94,8 @@ public class Bug52255Test extends CalDAVTest {
             PermissionTools.ADMIN, Integer.valueOf(getClient().getValues().getUserId()), "vr")
         );
         sharedFolder.setFolderName(randomUID());
-        com.openexchange.ajax.folder.actions.InsertRequest request = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, sharedFolder);
-        com.openexchange.ajax.folder.actions.InsertResponse response = manager2.getClient().execute(request);
-        response.fillObject(sharedFolder);
+        ftm.setClient(getClient2());
+        sharedFolder = ftm.insertFolderOnServer(sharedFolder);
     }
 
     @Override
@@ -105,11 +103,7 @@ public class Bug52255Test extends CalDAVTest {
     public void tearDown() throws Exception {
         try {
             if (null != manager2) {
-                if (null != sharedFolder) {
-                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, sharedFolder));
-                }
                 manager2.cleanUp();
-                manager2.getClient().logout();
             }
         } finally {
             super.tearDown();

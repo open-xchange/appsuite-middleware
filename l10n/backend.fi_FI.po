@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-16 17:44+0200\n"
+"PO-Revision-Date: 2017-05-14 17:15+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -3267,6 +3267,11 @@ msgstr "HTML-sisältö ei kelpaa eikä sitä voida näyttää"
 msgid "The HTML content cannot be safely displayed"
 msgstr "HTML-sisältöä ei voida turvallisesti näyttää"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Tämä viesti voidaan näyttää vain tekstimuotoisena"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5329,13 +5334,14 @@ msgid "Appointments must have at least one participant."
 msgstr "Tapaamisella on oltava vähintään yksi osallistuja."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
-"Sinulla ei ole tarvittavia lupia lukeaksesi tapaamisia tässä kansiossa."
+"Sinulta puuttuu tarvittavat luvat tapaamisten lukemiseen tässä kansiossa."
 
 #. *
 #. * End date must not be before start date.
@@ -10673,13 +10679,13 @@ msgstr "Annettu palaute 'tulokselle' on kelpaamatonta tyyppiä."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "Annetusta palautteesta puuttuu vaadittu \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Annettu palaute ei sisällä vaadittua  '%s'-avainta."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "Palautetta koskien avainta \"%s\" ei voida jäsentää."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "Annettua palautetta avaimelle '%s' ei voida jäsentää."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -12934,6 +12940,18 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "Sinulla ei ole tarvittavia lupia lukeaksesi tapaamisia tässä kansiossa."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Annetusta palautteesta puuttuu vaadittu \"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Palautetta koskien avainta \"%s\" ei voida jäsentää."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

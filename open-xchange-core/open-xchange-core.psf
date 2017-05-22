@@ -231,5 +231,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.magicwerk.brownies.collections"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,oxscripts"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pluginsloaded"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pluginsloaded.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pluginsloaded.mbean"/>
 </provider>
 </psf>

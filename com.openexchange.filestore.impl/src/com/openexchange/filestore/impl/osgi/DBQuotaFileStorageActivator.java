@@ -116,7 +116,10 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
             QuotaFileStorageListenerTracker listenerTracker = new QuotaFileStorageListenerTracker(context);
             rememberTracker(listenerTracker);
 
-            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(unifiedQuotaServices, listenerTracker, context));
+            FileStorageListenerRegistry listenerRegistry = new FileStorageListenerRegistry(context);
+            rememberTracker(listenerRegistry);
+
+            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(listenerRegistry, unifiedQuotaServices, listenerTracker, context));
             rememberTracker(tracker);
 
             trackService(ContextService.class);

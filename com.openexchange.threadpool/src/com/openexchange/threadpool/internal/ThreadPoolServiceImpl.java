@@ -97,7 +97,9 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             properties.getWorkQueue(),
             properties.getWorkQueueSize(),
             properties.isBlocking(),
-            properties.getRefusedExecutionBehavior());
+            properties.getRefusedExecutionBehavior(),
+            properties.getWatcherMaxRunningTime(),
+            properties.getWatcherMinWaitTime());
     }
 
     /**
@@ -112,14 +114,16 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * @param blocking <code>true</code> for a blocking behavior; otherwise <code>false</code>
      * @param refusedExecutionBehavior The default behavior to obey when execution is blocked because the thread bounds and queue capacities
      *            are reached.
+     * @param watcherMaxRunningTime The watcher's max. running time
+     * @param watcherMinWaitTime The watcher's min. wait time
      * @return A new {@link ThreadPoolServiceImpl} instance
      * @throws IllegalArgumentException If corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize or either <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> cannot
      *             be resolved.
      * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
      */
-    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
-        return new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize, blocking, refusedExecutionBehavior);
+    public static ThreadPoolServiceImpl newInstance(int corePoolSize, int maximumPoolSize, long keepAliveTime, String workQueue, int workQueueSize, boolean blocking, String refusedExecutionBehavior, long watcherMaxRunningTime, long watcherMinWaitTime) {
+        return new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize, blocking, refusedExecutionBehavior, watcherMaxRunningTime, watcherMinWaitTime);
     }
 
     private final CustomThreadPoolExecutor threadPoolExecutor;
@@ -135,11 +139,13 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *            threads will wait for new tasks before terminating.
      * @param workQueue The queue to use for holding tasks before they are executed.
      * @param workQueueSize The size of the work queue
+     * @param watcherMaxRunningTime The watcher's max. running time
+     * @param watcherMinWaitTime The watcher's min. wait time
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
-    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
+    private ThreadPoolServiceImpl(int corePoolSize, int maximumPoolSize, long keepAliveTime, String workQueue, int workQueueSize, boolean blocking, String refusedExecutionBehavior, long watcherMaxRunningTime, long watcherMinWaitTime) {
         final QueueType queueType = QueueType.getQueueType(workQueue);
         if (null == queueType) {
             throw new IllegalArgumentException("Unknown queue type: " + workQueue);
@@ -158,7 +164,9 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                     keepAliveTime,
                     TimeUnit.MILLISECONDS,
                     scalingQueue,
-                    new CustomThreadFactory("OXWorker-"));
+                    new CustomThreadFactory("OXWorker-"),
+                    watcherMaxRunningTime,
+                    watcherMinWaitTime);
             scalingQueue.setThreadPoolExecutor(threadPoolExecutor);
             scalingQueue.setThreadPool(this);
             final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), this);
@@ -172,7 +180,9 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                     keepAliveTime,
                     TimeUnit.MILLISECONDS,
                     queueType.newWorkQueue(workQueueSize),
-                    new CustomThreadFactory("OXWorker-"));
+                    new CustomThreadFactory("OXWorker-"),
+                    watcherMaxRunningTime,
+                    watcherMinWaitTime);
             final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), this);
             threadPoolExecutor.setRejectedExecutionHandler(reh);
             threadPoolExecutor.setBlocking(blocking);

@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-13 18:15+0200\n"
+"PO-Revision-Date: 2017-05-14 21:26+0200\n"
 "Last-Translator: \n"
 "Language-Team: Romanian <ro@bureau-cornavin.com>\n"
 "Language: ro\n"
@@ -3281,6 +3281,11 @@ msgstr "Conținutul HTML este incorect și nu poate fi afișat"
 msgid "The HTML content cannot be safely displayed"
 msgstr "Conținutul HTML nu poate fi afișat în siguranță"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Acest mesaj poate fi afișat doar ca text simplu."
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5364,11 +5369,12 @@ msgid "Appointments must have at least one participant."
 msgstr "Întâlnirile trebuie să aibă cel puțin un participant."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
 "Nu aveți permisiunile necesare pentru a citi întâlnirile din acest dosar."
 
@@ -10768,13 +10774,13 @@ msgstr "Tipul feedbackului pentru cheia 'scor' este incorect."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "Feedbackul nu conține cheia obligatorie \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Feedbackul furnizat nu conține cheia obligatorie \"%s\"."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr "Feedbackul pentru cheia \"%s\" nu poate fi analizat."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "Feedbackul furnizat pentru cheia \"%s\" nu poate fi analizat."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -13031,6 +13037,18 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "Nu aveți permisiunile necesare pentru a citi întâlnirile din acest dosar."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Feedbackul nu conține cheia obligatorie \"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Feedbackul pentru cheia \"%s\" nu poate fi analizat."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

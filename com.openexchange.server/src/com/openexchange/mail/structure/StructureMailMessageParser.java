@@ -346,7 +346,7 @@ public final class StructureMailMessageParser {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
                 final UUEncodedMultiPart uuencodedMP;
-                if (parseUUEncodedParts && (uuencodedMP = new UUEncodedMultiPart(content)).isUUEncoded()) {
+                if (parseUUEncodedParts && (uuencodedMP = UUEncodedMultiPart.valueFor(content)) != null && uuencodedMP.isUUEncoded()) {
                     /*
                      * UUEncoded content detected. Handle normal text.
                      */

@@ -57,7 +57,7 @@ import java.util.Arrays;
  * {@link RememberingInputStream} represents an InputStream which remembers the data which has been read
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 class RememberingInputStream extends InputStream {
 

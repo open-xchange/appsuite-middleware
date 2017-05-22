@@ -84,7 +84,7 @@ public class AggregatedCollection extends CardDAVCollection {
 
     @Override
     public String getPushTopic() {
-        return "ox:" + Interface.CARDDAV.toString().toLowerCase();
+        return "ox:" + Interface.CARDDAV.toString().toLowerCase() + ":contacts" ;
     }
 
     @Override

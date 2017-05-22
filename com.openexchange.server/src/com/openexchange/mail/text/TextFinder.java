@@ -137,8 +137,8 @@ public final class TextFinder {
                 String content = readContent(part, ct);
                 if (ct.startsWith("text/plain")) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
-                        final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                        if (uuencodedMP.isUUEncoded()) {
+                        UUEncodedMultiPart uuencodedMP = UUEncodedMultiPart.valueFor(content);
+                        if (null != uuencodedMP && uuencodedMP.isUUEncoded()) {
                             content = uuencodedMP.getCleanText();
                         }
                     }

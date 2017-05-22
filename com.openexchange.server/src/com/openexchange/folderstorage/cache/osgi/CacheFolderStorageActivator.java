@@ -73,6 +73,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -312,8 +313,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                  * @param event The event
                  */
                 protected void doHandleEvent(final CacheFolderStorage tmp, final Event event) {
+                    String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
+                    if (Tools.isGlobalId(folderID)) {
+                        // Assume caches were already updated
+                        return;
+                    }
+
                     try {
-                        final String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
                         final ServerSession session = ServerSessionAdapter.valueOf((Session)event.getProperty(FileStorageEventConstants.SESSION));
                         final String[] folderPath = (String[]) event.getProperty(FileStorageEventConstants.FOLDER_PATH);
                         tmp.removeFromGlobalCache(folderID, FolderStorage.REAL_TREE_ID, session.getContextId());

@@ -49,7 +49,6 @@
 
 package com.openexchange.pgp.core.packethandling;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,12 +60,13 @@ import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.openpgp.PGPUtil;
+import com.openexchange.java.Streams;
 
 /**
  * {@link PacketProcessor} allows to process and modify packets within a PGP message
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  * @see "5. Packet Types" in RFC 4880, "OpenPGP Message Format" (https://www.ietf.org/rfc/rfc4880.txt)
  */
 public class PacketProcessor {
@@ -75,7 +75,7 @@ public class PacketProcessor {
 
     /**
      * Parses the next packet from a given stream
-     * 
+     *
      * @param bcIn The stream to parse a packet from
      * @param t
      * @return
@@ -101,7 +101,7 @@ public class PacketProcessor {
 
     /**
      * Internal method to handle a parsed packet
-     * 
+     *
      * @param packet The parsed packet to handle
      * @param out The output to write the modified packet to
      * @param handler The handler which want't to modify the parsed package
@@ -114,7 +114,7 @@ public class PacketProcessor {
             PGPPacket[] newPackets = handler.handlePacket(packet);
             if (newPackets != null) {
                 for (PGPPacket newPacket : newPackets) {
-                    //Writing the modifiedPacket back 
+                    //Writing the modifiedPacket back
                     Packet rawModifiedPacket = newPacket.getBcPacket();
                     if (rawModifiedPacket != null) {
                         if (rawModifiedPacket instanceof ContainedPacket) {
@@ -122,10 +122,15 @@ public class PacketProcessor {
                             ((ContainedPacket) rawModifiedPacket).encode(out);
                         }
                         else if (rawModifiedPacket instanceof InputStreamPacket) {
-                            //InputStreamPackets cannot be re-encoded; 
-                            //We need to re-write the already parsed header to the output stream before writing the stream content
-                            IOUtils.copy(new ByteArrayInputStream(newPacket.getBcPacketHeader()), out);
-                            IOUtils.copy(((InputStreamPacket) rawModifiedPacket).getInputStream(), out);
+                            BCPGInputStream inputStream = ((InputStreamPacket) rawModifiedPacket).getInputStream();
+                            try {
+                                //InputStreamPackets cannot be re-encoded;
+                                //We need to re-write the already parsed header to the output stream before writing the stream content
+                                out.write(newPacket.getBcPacketHeader());
+                                IOUtils.copy(inputStream, out);
+                            } finally {
+                                Streams.close(inputStream);
+                            }
                         }
                         else {
                             throw new IllegalArgumentException("Cannot handle unknown PGP BC Packet instance: " + rawModifiedPacket.getClass().getCanonicalName());
@@ -134,12 +139,25 @@ public class PacketProcessor {
                     }
                 }
             }
+            else {
+                //The handler don't want the package to be written into the output stream;
+                //we skip in case the handler did not consumed the data.
+                Packet rawPacket = packet.getBcPacket();
+                if(rawPacket instanceof InputStreamPacket) {
+                    InputStream streamToSkip = ((InputStreamPacket)rawPacket).getInputStream();
+                    try {
+                        Streams.consume(streamToSkip);
+                    } finally {
+                        Streams.close(streamToSkip);
+                    }
+                }
+            }
         }
     }
 
     /**
      * Process all packets within a given InputStream and writes modified packets back to the OutputStream
-     * 
+     *
      * @param in The stream to parse the PGP packets from
      * @param out The stream to write modified packages to
      * @param handler A handler defining how to modify the packages within the InputStream while writing them to the OutputStream

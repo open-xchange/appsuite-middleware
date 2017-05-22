@@ -59,7 +59,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link PGPCoreExceptionCodes}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public enum PGPCoreExceptionCodes implements DisplayableOXExceptionCode {
 

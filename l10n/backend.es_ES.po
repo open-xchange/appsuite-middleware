@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-22 23:17+0200\n"
+"PO-Revision-Date: 2017-05-11 23:02+0200\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "Language: es\n"
@@ -3302,6 +3302,11 @@ msgstr "El contenido HTML no es válido y no se puede mostrar"
 msgid "The HTML content cannot be safely displayed"
 msgstr "El contenido HTML no se puede mostrar con seguridad"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Este mensaje solo se puede mostrar en texto sencillo"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5417,12 +5422,13 @@ msgid "Appointments must have at least one participant."
 msgstr "Las citas deben tener al menos un participante."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
-msgstr "No dispone de los permisos adecuados para leer citas de esa carpeta."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
+msgstr "No dispone de los permisos adecuados para leer citas en esa carpeta."
 
 #. *
 #. * End date must not be before start date.
@@ -10900,15 +10906,15 @@ msgstr "El valor devuelto para la 'puntuación' tiene un tipo no válido."
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "La información proporcionada no contiene la clave \"%s\" solicitada."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr ""
+"La retroalimentación proporcionada no contiene la clave requerida '%s'."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr ""
-"La información proporcionada de la clave \"%s\" solicitada no se puede "
-"procesar."
+"La retroalimentación proporcionada para la clave '%s' no pudo ser analizada."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -13176,6 +13182,21 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulú"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "No dispone de los permisos adecuados para leer citas de esa carpeta."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr ""
+#~ "La información proporcionada no contiene la clave \"%s\" solicitada."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr ""
+#~ "La información proporcionada de la clave \"%s\" solicitada no se puede "
+#~ "procesar."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

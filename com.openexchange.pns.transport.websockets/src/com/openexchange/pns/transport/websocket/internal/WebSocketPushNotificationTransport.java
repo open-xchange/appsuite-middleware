@@ -50,6 +50,7 @@
 package com.openexchange.pns.transport.websocket.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -70,6 +72,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.Hits;
+import com.openexchange.pns.IteratorBackedHits;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
@@ -79,10 +82,10 @@ import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionProvider;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.UserAndContext;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.websockets.WebSocketService;
 
 /**
@@ -196,7 +199,18 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     @Override
-    public Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) throws OXException {
+    public Hits getInterestedSubscriptions(final int[] userIds, final int contextId, String topic) throws OXException {
+        List<Hits> hitsList = new ArrayList<Hits>();
+        for (int userId : userIds) {
+            Hits hits = getInterestedSubscriptions(userId, contextId, topic);
+            if (null != hits && false == hits.isEmpty()) {
+                hitsList.add(hits);
+            }
+        }
+        return new IteratorBackedHits(hitsList);
+    }
+
+    private Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) throws OXException {
         // Remember checked clients
         Map<WebSocketClient, Boolean> checkedOnes = new LinkedHashMap<>();
         Set<WebSocketClient> hasOpenWebSocket = new LinkedHashSet<>();
@@ -233,7 +247,18 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     @Override
-    public Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
+        List<Hits> hitsList = new ArrayList<Hits>();
+        for (int userId : userIds) {
+            Hits hits = null != client ? getInterestedSubscriptions(client, userId, contextId, topic) : getInterestedSubscriptions(userId, contextId, topic);
+            if (null != hits && false == hits.isEmpty()) {
+                hitsList.add(hits);
+            }
+        }
+        return new IteratorBackedHits(hitsList);
+    }
+
+    private Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
             Map<String, WebSocketClient> clients = resolver.getSupportedClients();
@@ -311,6 +336,15 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
         // Default is "true"
         return true;
+    }
+
+    @Override
+    public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
+        if (null != notifications && 0 < notifications.size()) {
+            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+                transport(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     @Override

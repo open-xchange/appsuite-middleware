@@ -68,6 +68,7 @@ public class RdbPushMatch implements PushMatch {
     private final String token;
     private final String topic;
     private final Date lastModified;
+    private final Date expires;
     private int hash; // Default to 0
 
     /**
@@ -81,7 +82,7 @@ public class RdbPushMatch implements PushMatch {
      * @param topic The matching topic
      * @param lastModified The last-modified date
      */
-    public RdbPushMatch(int userId, int contextId, String client, String transportId, String token, String topic, Date lastModified) {
+    public RdbPushMatch(int userId, int contextId, String client, String transportId, String token, String topic, Date lastModified, Date expires) {
         super();
         this.userId = userId;
         this.contextId = contextId;
@@ -90,6 +91,7 @@ public class RdbPushMatch implements PushMatch {
         this.token = token;
         this.topic = topic;
         this.lastModified = lastModified;
+        this.expires = expires;
     }
 
     /**
@@ -99,6 +101,15 @@ public class RdbPushMatch implements PushMatch {
      */
     public Date getLastModified() {
         return lastModified;
+    }
+
+    /**
+     * Gets the expiration date
+     *
+     * @return The expiration date, or <code>null</code> if not set
+     */
+    public Date getExpires() {
+        return expires;
     }
 
     @Override

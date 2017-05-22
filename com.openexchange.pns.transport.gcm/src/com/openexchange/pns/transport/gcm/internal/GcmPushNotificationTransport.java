@@ -58,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,12 +69,12 @@ import com.google.android.gcm.Constants;
 import com.google.android.gcm.Endpoint;
 import com.google.android.gcm.Message;
 import com.google.android.gcm.Message.Priority;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Notification;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -235,6 +236,15 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         }
 
         return false;
+    }
+
+    @Override
+    public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
+        if (null != notifications && 0 < notifications.size()) {
+            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+                transport(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     @Override

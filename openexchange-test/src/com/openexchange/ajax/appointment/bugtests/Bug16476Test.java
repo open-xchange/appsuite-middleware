@@ -96,13 +96,12 @@ public class Bug16476Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 16476", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
-
-        CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
-        response.fillObject(folder);
-
+        
+        folder = ftm.insertFolderOnServer(folder);
+        
         appointment = new Appointment();
         appointment.setStartDate(D("01.06.2010 08:00"));
         appointment.setEndDate(D("01.06.2010 09:00"));
@@ -123,15 +122,4 @@ public class Bug16476Test extends AbstractAJAXSession {
         JSONArray jsonArray = (JSONArray) searchResponse.getResponse().getData();
         assertTrue("No results expected", jsonArray.length() == 0);
     }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clientA.execute(new DeleteRequest(appointment));
-            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

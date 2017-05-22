@@ -1,7 +1,7 @@
 feature_name: SMTP
 feature_description: |
   To differentiate between settings that apply all SMTP accounts or settings that only apply to the primary account
-  each property containing the "[.primary]" suffix allows to specify a value only applicable to the primary account
+  each property containing the ".primary" suffix allows to specify a value only applicable to the primary account
   by appending the "primary." suffix to properties' common "com.openexchange.smtp." prefix.  
   E.g.
   <pre>
@@ -12,7 +12,7 @@ feature_description: |
   # specifies 20sec read timeout for primary-only SMTP account  
   </pre>
 properties:
-    - key: com.openexchange.smtp[.primary].smtpLocalhost
+    - key: com.openexchange.smtp.smtpLocalhost
       description: |
         The localhost name that is going to be used on SMTP's HELO or EHLO command.
         The default is set to InetAddress.getLocalHost().getHostName() but if either JDK or name service are not
@@ -24,10 +24,21 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP", "Host"]
-    - key: com.openexchange.smtp[.primary].smtpAuthEnc
+    - key: com.openexchange.smtp.smtpAuthentication
+      description: |
+        Enable/disable SMTP Authentication.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.smtpAuthEnc
       description: |
         Define the encoding for SMTP authentication.
       defaultValue: UTF-8
@@ -35,7 +46,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.setSMTPEnvelopeFrom
@@ -48,10 +59,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
-    - key: com.openexchange.smtp[.primary].smtpTimeout
+    - key: com.openexchange.smtp.smtpTimeout
       description: |
         Define the socket read timeout value in milliseconds. A value less than
         or equal to zero is infinite timeout.
@@ -60,10 +71,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: mail.smtp.timeout
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP", "Timeout"]
-    - key: com.openexchange.smtp[.primary].smtpConnectionTimeout
+    - key: com.openexchange.smtp.smtpConnectionTimeout
       description: |
         Define the socket connect timeout value in milliseconds. A value less
         or equal to zero is infinite timeout.
@@ -72,7 +83,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: mail.smtp.connectiontimeout
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp.logTransport
@@ -84,10 +95,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
-    - key: com.openexchange.smtp[.primary].ssl.protocols
+    - key: com.openexchange.smtp.ssl.protocols
       description: |
         Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
       defaultValue: 
@@ -95,10 +106,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
-    - key: com.openexchange.smtp[.primary].ssl.ciphersuites
+    - key: com.openexchange.smtp.ssl.ciphersuites
       description: |
         Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
         
@@ -110,7 +121,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: imap.properties
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.sendPartial
@@ -121,6 +132,105 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: imap.properties
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP"]
+
+    - key: com.openexchange.smtp.primary.smtpLocalhost
+      description: |
+        The localhost name that is going to be used by the primary account on SMTP's HELO or EHLO command.
+        The default is set to InetAddress.getLocalHost().getHostName() but if either JDK or name service are not
+        configured properly, this routine fails and the HELO or EHLO command is send without a name which
+        leads to an error: "501 HELO requires domain address".
+        The value <code>null</code> falls back to InetAddress.getLocalHost().getHostName() which works in most cases.
+      defaultValue: null
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP", "Host"]
+    - key: com.openexchange.smtp.primary.smtpAuthentication
+      description: |
+        Enable/disable SMTP Authentication for the primary account.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.primary.smtpAuthEnc
+      description: |
+        Defines the encoding used by the primary account for SMTP authentication.
+      defaultValue: UTF-8
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.primary.smtpTimeout
+      description: |
+        Define the socket read timeout value in milliseconds for the primary account. A value less than
+        or equal to zero is infinite timeout.
+      defaultValue: 50000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: mail.smtp.timeout
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP", "Timeout"]
+    - key: com.openexchange.smtp.primary.smtpConnectionTimeout
+      description: |
+        Define the socket connect timeout value in milliseconds for the primary account. A value less
+        or equal to zero is infinite timeout.
+      defaultValue: 10000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: mail.smtp.connectiontimeout
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP", "Timeout"]
+    - key: com.openexchange.smtp.primary.ssl.protocols
+      description: |
+        Specifies the SSL protocols that will be enabled for SSL connections for the primary account. The property value is a whitespace separated list of tokens.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.primary.ssl.ciphersuites
+      description: |
+        Specifies the SSL cipher suites that will be enabled for SSL connections for the primary account. The property value is a whitespace separated list of tokens.
+        
+        Check "http://&lt;ox-grizzly-hostname&gt;:&lt;ox-grizzly-port&gt;/stats/diagnostic?param=ciphersuites" to check available cipher suites.
+        
+        If left empty the current JVM's default SSL cipher suite is used.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: smtp.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","SMTP"]
+    - key: com.openexchange.smtp.primary.sendPartial
+      description: |
+        Whether partial send is allowed or message transport is supposed to be aborted for the primary account.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: smtp.properties
       packageName: open-xchange-imap
       tags: ["Mail","SMTP"]

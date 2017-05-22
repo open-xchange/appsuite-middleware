@@ -223,6 +223,33 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public int getImapFailedAuthTimeout() {
+        String tmp = getAccountProperty("com.openexchange.imap.failedAuthTimeout");
+        if (null != tmp) {
+            try {
+                return Integer.parseInt(tmp.trim());
+            } catch (final NumberFormatException e) {
+                LOG.error("IMAP Failed Auth Timeout: Invalid value.", e);
+                return IMAPProperties.getInstance().getImapFailedAuthTimeout();
+            }
+        }
+
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.imap.primary.failedAuthTimeout");
+            if (null != tmp) {
+                try {
+                    return Integer.parseInt(tmp.trim());
+                } catch (final NumberFormatException e) {
+                    LOG.error("IMAP Failed Auth Timeout: Invalid value.", e);
+                    return IMAPProperties.getInstance().getImapFailedAuthTimeout();
+                }
+            }
+        }
+
+        return lookUpIntProperty("com.openexchange.imap.failedAuthTimeout", IMAPProperties.getInstance().getImapFailedAuthTimeout());
+    }
+
+    @Override
     public int getImapTimeout() {
         String tmp = getAccountProperty("com.openexchange.imap.imapTimeout");
         if (null != tmp) {

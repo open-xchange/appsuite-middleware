@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.dav.push.DAVPushUtility;
@@ -61,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
+import com.openexchange.session.Session;
 
 /**
  * {@link DAVApnOptionsProvider}
@@ -106,6 +108,32 @@ public class DAVApnOptionsProvider implements ApnOptionsProvider {
         if (null != carddavOptions) {
             options.put(DAVPushUtility.CLIENT_CARDDAV, carddavOptions);
         }
+    }
+
+    /**
+     * Gets additional checkers for APN-transport specific capabilities.
+     *
+     * @return The capability checkers, mapped to their associated capability name
+     */
+    public Map<String, CapabilityChecker> getCapabilityCheckers() {
+        Map<String, CapabilityChecker> checkers = new HashMap<String, CapabilityChecker>(2);
+        for (final String client : new String[] { DAVPushUtility.CLIENT_CALDAV, DAVPushUtility.CLIENT_CARDDAV }) {
+            final String capabilityName = "com.openexchange.pns.transport.apn.ios.enabled." + client;
+            checkers.put(capabilityName, new CapabilityChecker() {
+
+                @Override
+                public boolean isEnabled(String capability, Session session) throws OXException {
+                    if (null == session || session.getUserId() < 0 || session.getContextId() < 0) {
+                        return false;
+                    }
+                    if (capabilityName.equals(capability)) {
+                        return null != getOptions(client);
+                    }
+                    return true;
+                }
+            });
+        }
+        return checkers;
     }
 
     @Override

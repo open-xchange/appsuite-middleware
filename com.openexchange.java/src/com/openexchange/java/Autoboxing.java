@@ -320,4 +320,64 @@ public final class Autoboxing {
         throw new ClassCastException("I don't know how to turn "+anything+" of class "+anything.getClass().getName()+" into a boolean.");
     }
 
+    /**
+     * Returns a {@code Boolean} instance representing the specified {@code boolean} value.
+     * <p>
+     * See details {@link Boolean#valueOf(boolean) here}.
+     *
+     * @param  b A boolean value.
+     * @return A {@code Boolean} instance representing {@code b}
+     */
+    public static Boolean valueOf(boolean b) {
+        return Boolean.valueOf(b);
+    }
+
+    /**
+     * Returns an {@code Integer} instance representing the specified {@code int} value.
+     * <p>
+     * See details {@link Integer#valueOf(int) here}.
+     *
+     * @param  i An {@code int} value.
+     * @return An {@code Integer} instance representing {@code i}
+     */
+    public static Integer valueOf(int i) {
+        return Integer.valueOf(i);
+    }
+
+    /**
+     * Returns a {@code Long} instance representing the specified {@code long} value.
+     * <p>
+     * See details {@link Long#valueOf(long) here}.
+     *
+     * @param  l A long value.
+     * @return A {@code Long} instance representing {@code l}.
+     */
+    public static Long valueOf(long l) {
+        return Long.valueOf(l);
+    }
+
+    /**
+     * Returns a {@code Float} instance representing the specified {@code float} value.
+     * <p>
+     * See details {@link Float#valueOf(float) here}.
+     *
+     * @param  f A float value.
+     * @return A {@code Float} instance representing {@code f}.
+     */
+    public static Float valueOf(float f) {
+        return Float.valueOf(f);
+    }
+
+    /**
+     * Returns a {@code Double} instance representing the specified {@code double} value.
+     * <p>
+     * See details {@link Double#valueOf(double) here}.
+     *
+     * @param  d A double value.
+     * @return A {@code Double} instance representing {@code d}.
+     */
+    public static Double valueOf(double d) {
+        return Double.valueOf(d);
+    }
+
 }

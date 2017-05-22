@@ -332,6 +332,7 @@ public class OSGiCleanMapper {
     /*package*/ static Set<String> getAllAliases() {
         return aliasTree;
     }
+
     /**
      * Checks if {@link HttpContext} has been registered..
      *

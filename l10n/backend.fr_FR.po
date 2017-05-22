@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-04-23 16:49+0900\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2017-05-14 11:09+0900\n"
+"Last-Translator: Sandrine <sandrine@workshop-chapina.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -3354,6 +3354,11 @@ msgstr "Le contenu HTML est invalide et ne peut pas être affiché"
 msgid "The HTML content cannot be safely displayed"
 msgstr "Le contenu HTML ne peut pas être affiché de manière sûre"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Ce message ne peut être affiché que sous forme de texte simple"
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -5499,13 +5504,15 @@ msgid "Appointments must have at least one participant."
 msgstr "Les rendez-vous doivent comporter au moins un participant."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
-"Vous n'avez pas les droits requis pour lire les rendez-vous de ce dossier."
+"Vous ne possédez pas les droits requis pour lire les rendez-vous de ce "
+"dossier."
 
 #. *
 #. * End date must not be before start date.
@@ -8912,7 +8919,8 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
 "Votre transport de courriel pour %2$s a été désactivé à cause de problèmes "
-"d'autorisation. Veuillez autoriser à nouveau le compte %5$s pour le réactiver."
+"d'autorisation. Veuillez autoriser à nouveau le compte %5$s pour le "
+"réactiver."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -9006,8 +9014,8 @@ msgid ""
 "The provided login data to access mail server %1$s seem to be wrong. Please "
 "correct them."
 msgstr ""
-"Les données d'identification fournies pour accéder au serveur de courrier %"
-"1$s semblent erronées. Veuillez les corriger."
+"Les données d'identification fournies pour accéder au serveur de courrier "
+"%1$s semblent erronées. Veuillez les corriger."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -11045,14 +11053,13 @@ msgstr ""
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
-msgstr "Les impressions saisies ne contiennent pas la clé requise \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Les impressions saisies ne contiennent pas la clé requise '%s'."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
-msgstr ""
-"Les impressions saisies pour la clé \"%s\" ne peuvent pas être traitées."
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "Les impressions saisies pour la clé '%s' ne peuvent pas être traitées."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -13317,6 +13324,19 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits requis pour lire les rendez-vous de ce dossier."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Les impressions saisies ne contiennent pas la clé requise \"%s\"."
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr ""
+#~ "Les impressions saisies pour la clé \"%s\" ne peuvent pas être traitées."
 
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""

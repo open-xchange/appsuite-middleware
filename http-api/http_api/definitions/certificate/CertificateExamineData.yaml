@@ -4,10 +4,12 @@ properties:
     type: string
     description: The fingerprint of the SSL certificate
   issuedOn:
-    type: long
+    type: integer
+    format: int64
     description: The timestamp of the date when the SSL certificate was issued
   expiresOn:
-    type: long
+    type: integer
+    format: int64
     description: The timestamp of the date when the SSL certificate expires
   hostname:
     type: string

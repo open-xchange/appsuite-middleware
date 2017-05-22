@@ -1334,38 +1334,39 @@ public class SieveHandler {
      */
     private boolean selectAuth(PreferredSASLMech auth_mech, StringBuilder commandBuilder, int timeout) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         // Adjust timeout if necessary
-        int toRestore = s_sieve.getSoTimeout();
-        if (toRestore > timeout) {
-            s_sieve.setSoTimeout(timeout);
-        } else {
-            toRestore = -1;
-        }
-
-        // Perform authentication
-        try {
-            switch (auth_mech) {
-                case GSSAPI:
-                    return authGSSAPI(commandBuilder);
-                case LOGIN:
-                    return authLOGIN(commandBuilder);
-                case OAUTHBEARER:
-                    return authOAUTHBEARER(commandBuilder);
-                case PLAIN:
-                    return authPLAIN(commandBuilder);
-                case XOAUTH2:
-                    return authXOAUTH2(commandBuilder);
-                default:
-                    return false;
-
+        synchronized (s_sieve) {
+            int toRestore = s_sieve.getSoTimeout();
+            if (toRestore > timeout) {
+                s_sieve.setSoTimeout(timeout);
+            } else {
+                toRestore = -1;
             }
-        } catch (SocketTimeoutException e) {
-            // Read timeout while doing auth
-            String message = "Exceeded timeout of " + s_sieve.getSoTimeout() + "milliseconds while performing \"" + auth_mech.name() + "\" SASL authentication for " + sieve_auth;
-            throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null, e).setAuthTimeoutError(true);
-        } finally {
-            // Restore read timeout
-            if (toRestore > 0) {
-                s_sieve.setSoTimeout(toRestore);
+            // Perform authentication
+            try {
+                switch (auth_mech) {
+                    case GSSAPI:
+                        return authGSSAPI(commandBuilder);
+                    case LOGIN:
+                        return authLOGIN(commandBuilder);
+                    case OAUTHBEARER:
+                        return authOAUTHBEARER(commandBuilder);
+                    case PLAIN:
+                        return authPLAIN(commandBuilder);
+                    case XOAUTH2:
+                        return authXOAUTH2(commandBuilder);
+                    default:
+                        return false;
+                        
+                }
+            } catch (SocketTimeoutException e) {
+                // Read timeout while doing auth
+                String message = "Exceeded timeout of " + s_sieve.getSoTimeout() + "milliseconds while performing \"" + auth_mech.name() + "\" SASL authentication for " + sieve_auth;
+                throw new OXSieveHandlerException(message, sieve_host, sieve_host_port, null, e).setAuthTimeoutError(true);
+            } finally {
+                // Restore read timeout
+                if (toRestore > 0) {
+                    s_sieve.setSoTimeout(toRestore);
+                }
             }
         }
     }

@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -265,6 +265,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3676
     ox_add_property DEFAULT_TIMEZONE Europe/Berlin /opt/open-xchange/etc/AdminUser.properties
+
+    # SoftwareChange_Request-4170
+    ox_add_property LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB false /opt/open-xchange/etc/plugin/hosting.properties
 fi
 
 %clean
@@ -289,6 +292,8 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Tue May 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Second preview of 7.8.4 release
 * Mon Apr 03 2017 Marcus Klein <marcus.klein@open-xchange.com>

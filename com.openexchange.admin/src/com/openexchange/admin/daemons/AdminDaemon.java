@@ -78,6 +78,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.Tools;
 
 /**
  * {@link AdminDaemon} - The admin daemon.
@@ -226,7 +227,7 @@ public class AdminDaemon implements AdminDaemonService {
      * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle; else <code>false</code>
      */
     public static boolean isNoFragment(final Bundle bundle) {
-        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+        return Tools.isNoFragment(bundle);
     }
 
     /**
@@ -236,7 +237,7 @@ public class AdminDaemon implements AdminDaemonService {
      * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
      */
     public static boolean isNoFragmentAndActive(final Bundle bundle) {
-        return (isNoFragment(bundle) && (Bundle.ACTIVE == bundle.getState()));
+        return Tools.isNoFragmentAndActive(bundle);
     }
 
     /**
@@ -331,7 +332,7 @@ public class AdminDaemon implements AdminDaemonService {
             final com.openexchange.admin.rmi.impl.OXResource oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource();
             final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
             final com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
-            final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl(context);
+            final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl();
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
             final OXPublication oxpublication = new OXPublication();
 

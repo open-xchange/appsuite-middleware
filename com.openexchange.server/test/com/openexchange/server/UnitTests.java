@@ -108,7 +108,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.sessiond.impl.IPRangeTest.class,
     com.openexchange.ajax.requesthandler.AJAXRequestDataTest.class,
     com.openexchange.mail.usersetting.CachingUserSettingMailStorageTest.class,
-    com.openexchange.folderstorage.internal.ConfiguredDefaultPermissionsTest.class
+    com.openexchange.folderstorage.internal.ConfiguredDefaultPermissionsTest.class,
+    com.openexchange.groupware.contact.Bug53690Test.class
 })
 public class UnitTests {
 

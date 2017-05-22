@@ -49,6 +49,7 @@
 
 package com.openexchange.pns;
 
+import java.util.Date;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
@@ -96,6 +97,7 @@ public class DefaultPushSubscription implements PushSubscription {
         String token;
         String client;
         Nature nature;
+        Date expires;
 
         /** Creates a new builder */
         Builder() {
@@ -187,6 +189,16 @@ public class DefaultPushSubscription implements PushSubscription {
         }
 
         /**
+         * Sets the expires
+         * @param expires The expires
+         * @return This builder
+         */
+        public Builder expires(Date expires) {
+            this.expires =expires;
+            return this;
+        }
+
+        /**
          * Builds the <code>DefaultPushSubscription</code> instance.
          * @return The resulting <code>DefaultPushSubscription</code> instance
          */
@@ -204,6 +216,7 @@ public class DefaultPushSubscription implements PushSubscription {
     private final String transportId;
     private final String token;
     private final Nature nature;
+    private final Date expires;
 
     /**
      * Initializes a new {@link DefaultPushSubscription}.
@@ -217,6 +230,7 @@ public class DefaultPushSubscription implements PushSubscription {
         this.userId = builder.userId;
         this.client = builder.client;
         this.nature = builder.nature;
+        this.expires = builder.expires;
     }
 
     @Override
@@ -252,6 +266,11 @@ public class DefaultPushSubscription implements PushSubscription {
     @Override
     public Nature getNature() {
         return nature;
+    }
+
+    @Override
+    public Date getExpires() {
+        return expires;
     }
 
     @Override

@@ -674,7 +674,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
                     cacheManager.removeFolderObject(fo.getObjectID(), ctx);
                     {
-                        FolderObject tmp = cacheManager.getFolderObject(fo.getObjectID(), false, ctx, wc);
+                        FolderObject tmp = cacheManager.loadFolderObject(fo.getObjectID(), ctx, wc);
                         fo.fill(tmp);
                         if (null != handlers) {
                             for (UpdatedFolderHandler handler : handlers) {
