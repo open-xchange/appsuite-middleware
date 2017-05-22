@@ -49,60 +49,78 @@
 
 package com.openexchange.admin.console.admincore;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.rmi.OXAdminCoreInterface;
+import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
 
-public class AllPluginsLoaded extends BasicCommandlineOptions {
+public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
 
-    private AllPluginsLoaded() {
+    /**
+     * The main method invoked on CLT execution.
+     *
+     * @param args The command-line arguments
+     */
+    public static void main(String[] args) {
+        new AllPluginsLoaded().execute(args);
+    }
+
+    // ---------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link AllPluginsLoaded}.
+     */
+    public AllPluginsLoaded() {
         super();
     }
 
     @Override
-    protected void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {
-        // Do nothing
+    protected void checkOptions(CommandLine cmd) {
+        checkOptions(cmd, null);
     }
 
-    public static void main(final String[] args) {
-        new AllPluginsLoaded().internalMain(args);
+    @Override
+    protected void checkOptions(CommandLine cmd, Options options) {
+        // Nothing to check
     }
 
-    private void internalMain(String[] args) {
-        AdminParser parser = new AdminParser("allpluginsloaded");
-        setDefaultCommandLineOptionsWithoutContextID(parser);
+    @Override
+    protected boolean requiresAdministrativePermission() {
+        return false;
+    }
 
-        try {
-            parser.ownparse(args);
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
+        authenticator.doAuthentication(login, password);
+    }
 
-            final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(RMI_HOSTNAME+OXAdminCoreInterface.RMI_NAME);
-            if (oxadmincore.allPluginsLoaded()) {
-                sysexit(0);
-            } else {
-                sysexit(1);
-            }
-        } catch (final java.rmi.ConnectException neti) {
-            printError(neti.getMessage(), null);
-            sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg("Ids must be numbers!");
-            sysexit(1);
-        } catch (final MalformedURLException e) {
-            printServerException(e,null);
-            sysexit(1);
-        } catch (final RemoteException e) {
-            printServerException(e,null);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
-            printServerException(e,null);
-            sysexit(1);
-        } catch (final Exception e) {
-            printServerException(e,null);
-            sysexit(1);
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    @Override
+    protected String getName() {
+        return "allpluginsloaded";
+    }
+
+    @Override
+    protected void addOptions(Options options) {
+        // Nothing
+    }
+
+    @Override
+    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        PluginsLoadedMBean pluginsLoadedMBean = getMBean(mbsc, PluginsLoadedMBean.class, PluginsLoadedMBean.DOMAIN);
+        if (pluginsLoadedMBean.allPluginsLoaded()) {
+            System.exit(0);
+        } else {
+            System.exit(1);
         }
+        return null;
     }
+
 }
