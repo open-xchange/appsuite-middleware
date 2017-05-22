@@ -68,6 +68,7 @@ import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
+import com.openexchange.mail.api.IMailFolderStorageTrashAware;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -96,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, IMailFolderStorageInfoSupport {
+public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, IMailFolderStorageInfoSupport, IMailFolderStorageTrashAware {
 
     static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(MailAccountPOP3FolderStorage.class);
@@ -497,6 +498,39 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
         // Soft-delete
         moveFolder0(realMailFolder, realTrashFullname, newName);
         return fullname;
+    }
+
+    @Override
+    public String trashFolder(final String fullname) throws OXException {
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
+            throw POP3ExceptionCode.NO_DEFAULT_FOLDER_DELETE.create(fullname);
+        }
+        final String realFullname = getRealFullname(fullname);
+        if (performHardDelete(fullname)) {
+            // Hard-delete
+            hardDeleteFolder(delegatee.getFolder(realFullname));
+            return null;
+        }
+        // Load trash's subfolders to compose unique name
+        final String realTrashFullname = getRealFullname(getTrashFolder());
+        final MailFolder realMailFolder = delegatee.getFolder(realFullname);
+        String newName = realMailFolder.getName();
+        {
+            final StringBuilder tmp = new StringBuilder(32);
+            boolean exists = false;
+            int count = 1;
+            do {
+                tmp.setLength(0);
+                exists = delegatee.exists(tmp.append(realTrashFullname).append(storage.getSeparator()).append(newName).toString());
+                if (exists) {
+                    tmp.setLength(0);
+                    newName = tmp.append(newName).append('_').append(++count).toString();
+                }
+            } while (exists);
+        }
+        // Soft-delete
+        moveFolder0(realMailFolder, realTrashFullname, newName);
+        return newName;
     }
 
     private boolean performHardDelete(final String fullname) throws OXException {

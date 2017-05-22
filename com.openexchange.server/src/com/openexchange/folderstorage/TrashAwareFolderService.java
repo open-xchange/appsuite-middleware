@@ -47,80 +47,34 @@
  *
  */
 
-package com.openexchange.admin.console.admincore;
+package com.openexchange.folderstorage;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
+import java.util.Date;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
-public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
+/**
+ * {@link TrashAwareFolderService}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
+ */
+public interface TrashAwareFolderService {
 
     /**
-     * The main method invoked on CLT execution.
+     * Deletes the specified folder in given tree.
+     * This method tries to move the folder to trash first, before deleting it permanently.
+     * <p>
+     * The folder is deleted from all trees and its subfolders as well
      *
-     * @param args The command-line arguments
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param timeStamp The requestor's last-modified time stamp
+     * @param session The session
+     * @param decorator The folder service decorator or <code>null</code>
+     * @return a {@link FolderResponse} which holds a {@link TrashResult}
+     * @throws OXException If folder cannot be deleted
      */
-    public static void main(String[] args) {
-        new AllPluginsLoaded().execute(args);
-    }
-
-    // ---------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link AllPluginsLoaded}.
-     */
-    public AllPluginsLoaded() {
-        super();
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        checkOptions(cmd, null);
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
-        // Nothing to check
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "allpluginsloaded";
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        // Nothing
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PluginsLoadedMBean pluginsLoadedMBean = getMBean(mbsc, PluginsLoadedMBean.class, PluginsLoadedMBean.DOMAIN);
-        if (pluginsLoadedMBean.allPluginsLoaded()) {
-            System.exit(0);
-        } else {
-            System.exit(1);
-        }
-        return null;
-    }
+    FolderResponse<TrashResult> trashFolder(String treeId, String folderId, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException;
 
 }

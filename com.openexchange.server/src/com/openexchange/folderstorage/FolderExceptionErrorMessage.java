@@ -231,7 +231,12 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     /**
      * Folder name contains illegal characters: \"%1$s\"
      */
-    ILLEGAL_CHARACTERS("Folder name contains illegal characters: \"%1$s\"", Category.CATEGORY_USER_INPUT, 1040, FolderExceptionMessages.ILLEGAL_CHARACTERS_MSG)
+    ILLEGAL_CHARACTERS("Folder name contains illegal characters: \"%1$s\"", Category.CATEGORY_USER_INPUT, 1040, FolderExceptionMessages.ILLEGAL_CHARACTERS_MSG),
+
+    /**
+     * Invoked method is not supported.
+     */
+    UNSUPPORTED_OPERATION("Invoked method is not supported.", CATEGORY_ERROR, 1041),
     ;
 
     private static final String PREFIX = "FLD";

@@ -120,6 +120,7 @@ import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.api.IMailFolderStorageStatusSupport;
+import com.openexchange.mail.api.IMailFolderStorageTrashAware;
 import com.openexchange.mail.api.IMailSharedFolderPathResolver;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
@@ -153,7 +154,7 @@ import com.sun.mail.imap.protocol.ListInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageStatusSupport {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageStatusSupport, IMailFolderStorageTrashAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -2205,6 +2206,87 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                 }
                 return fullName;
+            }
+        } catch (final MessagingException e) {
+            throw handleMessagingException(fullName, e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        } finally {
+            if (clearListLsubCache) {
+                ListLsubCache.clearCache(accountId, session);
+            }
+        }
+    }
+
+    @Override
+    public String trashFolder(final String fullName) throws OXException {
+        boolean clearListLsubCache = false;
+        try {
+            if (DEFAULT_FOLDER_ID.equals(fullName)) {
+                throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
+            }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
+            IMAPFolder deleteMe = getIMAPFolder(fullName);
+            char separator;
+            {
+                ListLsubEntry deleteMeEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+                if (null != deleteMeEntry) {
+                    if (!deleteMeEntry.exists()) {
+                        deleteMe = checkForNamespaceFolder(fullName);
+                        if (null == deleteMe) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
+                    }
+                    separator = deleteMeEntry.getSeparator();
+                } else {
+                    ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, deleteMe);
+                    if (null == listInfo) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                    separator = listInfo.separator;
+                }
+            }
+            clearListLsubCache = true;
+            synchronized (deleteMe) {
+                imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
+                String trashFullName = getTrashFolder();
+                if (isSubfolderOf(getParentFullName(fullName, separator), trashFullName, separator) || !inferiors(trashFullName, deleteMe)) {
+                    /*
+                     * Delete permanently
+                     */
+                    deleteFolder(deleteMe, separator);
+                    return null;
+                } else {
+                    /*
+                     * Just move this folder to trash
+                     */
+                    imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullName);
+                    final String name = getNameOf(deleteMe);
+                    int appendix = 1;
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(trashFullName).append(separator).append(name);
+                    while (ListLsubCache.getCachedLISTEntry(sb.toString(), accountId, deleteMe, session, ignoreSubscriptions).exists()) {
+                        /*
+                         * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
+                         */
+                        sb.setLength(0);
+                        sb.append(trashFullName).append(separator).append(name).append('_').append(++appendix);
+                    }
+                    IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(trashFullName);
+                    IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
+                    synchronized (newFolder) {
+                        try {
+                            moveFolder(deleteMe, trashFolder, newFolder, false);
+                        } catch (final OXException e) {
+                            deleteTemporaryCreatedFolder(newFolder);
+                            throw e;
+                        } catch (final MessagingException e) {
+                            deleteTemporaryCreatedFolder(newFolder);
+                            throw e;
+                        }
+                    }
+                    return newFolder.getFullName();
+                }
             }
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);

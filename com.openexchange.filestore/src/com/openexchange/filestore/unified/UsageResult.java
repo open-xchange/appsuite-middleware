@@ -89,8 +89,15 @@ public class UsageResult {
          * @param usage The usage to add
          * @param serviceId The identifier of the service contributor
          * @return This builder
+         * @throws IllegalArgumentException If given usage is less than <code>0</code> (zero) or given service identifier is <code>null</code>
          */
         public Builder addUsageForService(long usage, String serviceId) {
+            if (usage < 0) {
+                throw new IllegalArgumentException("usage must not be less than zero");
+            }
+            if (null == serviceId) {
+                throw new IllegalArgumentException("serviceId must not be null");
+            }
             usagePerService.put(serviceId, Long.valueOf(usage));
             total += usage;
             return this;

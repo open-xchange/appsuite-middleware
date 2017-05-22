@@ -47,80 +47,26 @@
  *
  */
 
-package com.openexchange.admin.console.admincore;
+package com.openexchange.mail.api;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
+import com.openexchange.exception.OXException;
 
-public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
+/**
+ * {@link IMailFolderStorageTrashAware}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
+ */
+public interface IMailFolderStorageTrashAware {
 
     /**
-     * The main method invoked on CLT execution.
+     * Deletes an existing mail folder identified through given full name. 
+     * This method tries to move the folder to trash first, before deleting it permanently.
      *
-     * @param args The command-line arguments
+     * @param fullName The full name of the mail folder to delete
+     * @return The fullName of the new folder or null
+     * @throws OXException If either folder does not exist or cannot be deleted
      */
-    public static void main(String[] args) {
-        new AllPluginsLoaded().execute(args);
-    }
-
-    // ---------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link AllPluginsLoaded}.
-     */
-    public AllPluginsLoaded() {
-        super();
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        checkOptions(cmd, null);
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
-        // Nothing to check
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "allpluginsloaded";
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        // Nothing
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PluginsLoadedMBean pluginsLoadedMBean = getMBean(mbsc, PluginsLoadedMBean.class, PluginsLoadedMBean.DOMAIN);
-        if (pluginsLoadedMBean.allPluginsLoaded()) {
-            System.exit(0);
-        } else {
-            System.exit(1);
-        }
-        return null;
-    }
+    public String trashFolder(final String fullName) throws OXException;
 
 }

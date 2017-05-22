@@ -50,7 +50,6 @@
 package com.openexchange.imageserver.api;
 
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link ImageServerConfig}
@@ -95,14 +94,8 @@ public class ImageServerConfig extends Properties {
     /**
      * @return The FileServerConfig singleton
      */
-    public static synchronized ImageServerConfig get() {
-        ImageServerConfig config = m_instance.get();
-
-        if (null == config) {
-            m_instance.set(config = new ImageServerConfig());
-        }
-
-        return config;
+    public static ImageServerConfig get() {
+        return INSTANCE;
     }
 
     // - Implementation --------------------------------------------------------
@@ -134,5 +127,5 @@ public class ImageServerConfig extends Properties {
 
     //- Members ----------------------------------------------------------------
 
-    private static AtomicReference<ImageServerConfig> m_instance = new AtomicReference<>(null);
+    private static final ImageServerConfig INSTANCE = new ImageServerConfig();
 }

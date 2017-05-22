@@ -62,6 +62,8 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.TrashAwareFolderService;
+import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.performers.AllVisibleFoldersPerformer;
@@ -92,7 +94,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderServiceImpl implements FolderService {
+public final class FolderServiceImpl implements FolderService, TrashAwareFolderService {
 
     /**
      * Initializes a new {@link FolderServiceImpl}.
@@ -364,6 +366,13 @@ public final class FolderServiceImpl implements FolderService {
         } else {
             return ContentTypeRegistry.getInstance().getByString(value);
         }
+    }
+
+    @Override
+    public FolderResponse<TrashResult> trashFolder(String treeId, String folderId, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException {
+        final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session), decorator);
+        TrashResult result = performer.doTrash(treeId, folderId, timeStamp);
+        return FolderResponseImpl.newFolderResponse(result, performer.getWarnings());
     }
 
 }

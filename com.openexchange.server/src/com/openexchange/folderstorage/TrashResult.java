@@ -47,80 +47,105 @@
  *
  */
 
-package com.openexchange.admin.console.admincore;
+package com.openexchange.folderstorage;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
 
-public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
+/**
+ * {@link TrashResult} is the result of a delete folder operation
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.4
+ */
+public class TrashResult {
+
+    private final boolean trashed;
+    private final String path;
+    private final String oldPath;
+    private final boolean failed;
+    private boolean isSupported=true;
+
+
+    public static TrashResult createUnsupportedTrashResult(){
+       return new TrashResult();
+    }
 
     /**
-     * The main method invoked on CLT execution.
+     * Initializes a new {@link TrashResult}.
      *
-     * @param args The command-line arguments
+     * @param path The new path (maybe null)
+     * @param oldPath The old path
      */
-    public static void main(String[] args) {
-        new AllPluginsLoaded().execute(args);
+    public TrashResult() {
+        super();
+        this.trashed = false;
+        this.path = null;
+        this.oldPath = null;
+        this.failed = false;
+        this.isSupported = false;
     }
 
-    // ---------------------------------------------------------------------
 
     /**
-     * Initializes a new {@link AllPluginsLoaded}.
+     * Initializes a new {@link TrashResult}.
+     *
+     * @param path The new path (maybe null)
+     * @param oldPath The old path
      */
-    public AllPluginsLoaded() {
+    public TrashResult(String path, String oldPath) {
         super();
+        this.trashed = path != null && !path.equals(oldPath);
+        this.path = path;
+        this.oldPath = oldPath;
+        this.failed = false;
     }
 
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        checkOptions(cmd, null);
+    /**
+     * Initializes a new {@link TrashResult}.
+     *
+     * @param path The new path (maybe null)
+     * @param oldPath The old path
+     * @param isTrashed Flag indicating whether the folder is trashed or not.
+     */
+    public TrashResult(String path, String oldPath, boolean isTrashed) {
+        super();
+        this.trashed = isTrashed;
+        this.path = path;
+        this.oldPath = oldPath;
+        this.failed = false;
     }
 
-    @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
-        // Nothing to check
+    /**
+     * Initializes a new {@link TrashResult}.
+     *
+     * @param oldPath The old path
+     * @param failed Indicating whether the delete operations has failed or not
+     */
+    public TrashResult(String oldPath, boolean failed) {
+        super();
+        this.trashed = false;
+        this.path = null;
+        this.oldPath = oldPath;
+        this.failed = failed;
     }
 
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
+    public boolean isTrashed() {
+        return trashed;
     }
 
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
+    public boolean hasFailed() {
+        return failed;
     }
 
-    @Override
-    protected String getFooter() {
-        return null;
+    public String getNewPath() {
+        return path;
     }
 
-    @Override
-    protected String getName() {
-        return "allpluginsloaded";
+    public String getOldPath() {
+        return oldPath;
     }
 
-    @Override
-    protected void addOptions(Options options) {
-        // Nothing
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PluginsLoadedMBean pluginsLoadedMBean = getMBean(mbsc, PluginsLoadedMBean.class, PluginsLoadedMBean.DOMAIN);
-        if (pluginsLoadedMBean.allPluginsLoaded()) {
-            System.exit(0);
-        } else {
-            System.exit(1);
-        }
-        return null;
+    public boolean isSupported(){
+        return isSupported;
     }
 
 }

@@ -61,6 +61,8 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.TrashAwareFolderStorage;
+import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
@@ -199,6 +201,101 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
         }
     }
 
+    /**
+     * Performs the <code>TRASH</code> request.
+     *
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param timeStamp The requestor's last-modified time stamp
+     * @return
+     * @throws OXException If an error occurs during deletion
+     */
+    public TrashResult doTrash(final String treeId, final String folderId, final Date timeStamp) throws OXException {
+        TrashResult result = null;
+        if (KNOWN_TREES.contains(treeId)) {
+            FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+            }
+            checkTrashAware(folderStorage);
+            if (null != timeStamp) {
+                storageParameters.setTimeStamp(timeStamp);
+            }
+
+            TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+            boolean rollbackTransaction = true;
+            /*
+             * Throws an exception if someone tries to add an element. If this happens, you found a bug.
+             * As long as a TransactionManager is present, every storage has to add itself to the
+             * TransactionManager in FolderStorage.startTransaction() and must return false.
+             */
+            final List<FolderStorage> openedStorages = Collections.emptyList();
+            checkOpenedStorage(folderStorage, openedStorages);
+            try {
+                if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                    /*
+                     * Real delete
+                     */
+                    result = trashRealFolder(folderId, folderStorage, transactionManager);
+                } else {
+                    /*-
+                     * Virtual delete:
+                     *
+                     * 1. Delete from virtual storage
+                     * 2. Delete from real storage
+                     */
+                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+                    if (null == realStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+                    }
+                    if (folderStorage.equals(realStorage)) {
+                        result = trashRealFolder(folderId, folderStorage, transactionManager);
+                    } else {
+                        /*
+                         * Delete from virtual storage
+                         */
+                        trashVirtualFolder(folderId, treeId, folderStorage, openedStorages, transactionManager);
+                    }
+                }
+                /*
+                 * Commit
+                 */
+                transactionManager.commit();
+                rollbackTransaction = false;
+                return result;
+            } catch (final OXException e) {
+                throw e;
+            } catch (final Exception e) {
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (rollbackTransaction) {
+                    transactionManager.rollback();
+                }
+            }
+        } else if (VirtualFolderStorage.FOLDER_TREE_EAS.equals(treeId)) {
+            FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+            }
+            checkTrashAware(folderStorage);
+
+            if (!(folderStorage instanceof TrashAwareFolderStorage)) {
+                throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
+            }
+
+            ((TrashAwareFolderStorage) folderStorage).trashFolder(treeId, folderId, storageParameters);
+            return result;
+        } else {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Delete not supported by tree " + treeId);
+        }
+    }
+
+    private void checkTrashAware(FolderStorage storage) throws OXException {
+        if(!(storage instanceof TrashAwareFolderStorage)){
+            throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
+        }
+    }
+
     private void deleteVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages, TransactionManager transactionManager) throws OXException {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
         storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
@@ -250,8 +347,67 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
         folderStorage.deleteFolder(treeId, folderId, storageParameters);
     }
 
+    private TrashResult trashVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages, TransactionManager transactionManager) throws OXException {
+        if (!(folderStorage instanceof TrashAwareFolderStorage)) {
+            throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
+        }
+        final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
+        storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
+        {
+            Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
+            if (!permission.isVisible()) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
+            }
+            if (!permission.isAdmin()) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
+            }
+            /*
+             * Delete permissions
+             */
+            if (!canDeleteAllObjects(permission, folderId, treeId, folderStorage)) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
+            }
+        }
+        final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folderId, storageParameters);
+        for (final SortableId subfolder : subfolders) {
+            final String id = subfolder.getId();
+            final FolderStorage subfolderStorage;
+            if (folderStorage.getFolderType().servesFolderId(id)) {
+                subfolderStorage = folderStorage;
+            } else {
+                subfolderStorage = folderStorageDiscoverer.getFolderStorage(treeId, id);
+                if (null == subfolderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
+                }
+                checkOpenedStorage(subfolderStorage, openedStorages);
+            }
+            /*
+             * Delete subfolder
+             */
+            trashVirtualFolder(id, treeId, subfolderStorage, openedStorages, transactionManager);
+        }
+        /*
+         * Delete from real storage
+         */
+        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+        if (null == realStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+        }
+        checkOpenedStorage(realStorage, openedStorages);
+        trashRealFolder(folder, realStorage, transactionManager);
+        /*
+         * And now from virtual storage
+         */
+        TrashResult result = ((TrashAwareFolderStorage) folderStorage).trashFolder(treeId, folderId, storageParameters);
+        return result;
+    }
+
     private void deleteRealFolder(String id, FolderStorage storage, TransactionManager transactionManager) throws OXException {
         deleteRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage, transactionManager);
+    }
+
+    private TrashResult trashRealFolder(String id, FolderStorage storage, TransactionManager transactionManager) throws OXException {
+        return trashRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage, transactionManager);
     }
 
     private void deleteRealFolder(Folder folder, FolderStorage storage, TransactionManager transactionManager) throws OXException {
@@ -259,6 +415,16 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
          * delete folder
          */
         storage.deleteFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
+    }
+
+    private TrashResult trashRealFolder(Folder folder, FolderStorage storage, TransactionManager transactionManager) throws OXException {
+        /*
+         * trash folder
+         */
+        if (storage instanceof TrashAwareFolderStorage) {
+            return ((TrashAwareFolderStorage) storage).trashFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
+        }
+        throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
     }
 
     private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws OXException {
