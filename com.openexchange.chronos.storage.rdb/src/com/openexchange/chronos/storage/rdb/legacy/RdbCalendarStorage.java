@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
+public class RdbCalendarStorage implements CalendarStorage {
 
     private final RdbEventStorage eventStorage;
     private final RdbAttendeeStorage attendeeStorage;
@@ -82,11 +82,11 @@ public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
      * @param txPolicy The transaction policy
      */
     public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, entityResolver, dbProvider, txPolicy);
+        super();
         eventStorage = new RdbEventStorage(context, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
-        attachmentStorage = new RdbAttachmentStorage(context, entityResolver, dbProvider, txPolicy);
+        attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
     }
 
     @Override

@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb.legacy;
 
-import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
@@ -77,6 +76,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.EventStorage;
+import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -94,6 +94,8 @@ import com.openexchange.search.SearchTerm;
  */
 public class RdbEventStorage extends RdbStorage implements EventStorage {
 
+    private final EntityResolver entityResolver;
+
     /**
      * Initializes a new {@link RdbEventStorage}.
      *
@@ -103,7 +105,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @param txPolicy The transaction policy
      */
     public RdbEventStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, entityResolver, dbProvider, txPolicy);
+        super(context, dbProvider, txPolicy);
+        this.entityResolver = entityResolver;
     }
 
     @Override

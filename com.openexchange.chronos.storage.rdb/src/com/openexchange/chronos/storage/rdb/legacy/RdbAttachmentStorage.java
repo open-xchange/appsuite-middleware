@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb.legacy;
 
-import static com.openexchange.chronos.compat.Appointment2Event.asString;
-import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -66,8 +64,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attachment;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttachmentStorage;
+import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -105,12 +103,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
      * Initializes a new {@link RdbAttachmentStorage}.
      *
      * @param context The context
-     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbAttachmentStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, entityResolver, dbProvider, txPolicy);
+    public RdbAttachmentStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super(context, dbProvider, txPolicy);
     }
 
     @Override

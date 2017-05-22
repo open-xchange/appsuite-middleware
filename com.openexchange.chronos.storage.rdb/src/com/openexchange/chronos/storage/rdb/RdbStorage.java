@@ -126,42 +126,28 @@ public abstract class RdbStorage {
     }
 
     /**
-     * Generates the next sequential event identifier in the context for the supplied calendar account.
+     * Generates the next sequential identifier in the context for the supplied calendar account, based on the given sequence table.
      *
      * @param connection A connection within an active transaction
      * @param account The identifier of the account to generate the next identifier for
-     * @return The next event identifier
+     * @param sequenceTable The sequence number to use for identifier generation
+     * @return The next sequential identifier
      */
-    protected int nextEventId(Connection connection, int account) throws SQLException {
-        return nextId(connection, context.getContextId(), account, "calendar_event_sequence");
-    }
-
-    /**
-     * Generates the next sequential event identifier in the context for the supplied calendar account.
-     *
-     * @param connection A connection within an active transaction
-     * @param account The identifier of the account to generate the next identifier for
-     * @return The next event identifier
-     */
-    protected int nextAlarmId(Connection connection, int account) throws SQLException {
-        return nextId(connection, context.getContextId(), account, "calendar_alarm_sequence");
-    }
-
-    private static int nextId(Connection connection, int cid, int account, String sequenceTable) throws SQLException {
+    protected int nextId(Connection connection, int account, String sequenceTable) throws SQLException {
         if (connection.getAutoCommit()) {
             throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
         }
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE " + sequenceTable + " SET id=LAST_INSERT_ID(id+1) WHERE cid=? AND account=?;")) {
-            stmt.setInt(1, cid);
+            stmt.setInt(1, context.getContextId());
             stmt.setInt(2, account);
             if (0 == logExecuteUpdate(stmt)) {
                 try (PreparedStatement stmt2 = connection.prepareStatement("INSERT INTO " + sequenceTable + " (cid,account,id) VALUES (?,?,0);")) {
-                    stmt2.setInt(1, cid);
+                    stmt2.setInt(1, context.getContextId());
                     stmt2.setInt(2, account);
                     logExecuteUpdate(stmt2);
                 }
                 if (0 == logExecuteUpdate(stmt)) {
-                    throw new SQLException("Unable to initialize sequence table \"" + sequenceTable + "\" for account " + account + " in context " + cid);
+                    throw new SQLException("Unable to initialize sequence table \"" + sequenceTable + "\" for account " + account + " in context " + context.getContextId());
                 }
             }
         }
@@ -172,7 +158,7 @@ public abstract class RdbStorage {
                 }
             }
         }
-        throw new SQLException("Unable to generate next sequential identifier via table \"" + sequenceTable + "\" for account " + account + " in context " + cid);
+        throw new SQLException("Unable to generate next sequential identifier via table \"" + sequenceTable + "\" for account " + account + " in context " + context.getContextId());
     }
 
     /**

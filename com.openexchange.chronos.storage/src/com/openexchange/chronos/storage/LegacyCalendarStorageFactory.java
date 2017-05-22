@@ -64,7 +64,7 @@ import com.openexchange.groupware.contexts.Context;
 public interface LegacyCalendarStorageFactory {
 
     /**
-     * Initializes a new {@link CalendarStorage}.
+     * Initializes a new {@link CalendarStorage} using the <i>legacy</i> database tables.
      *
      * @param context The context
      * @param entityResolver The entity resolver to use
@@ -72,7 +72,7 @@ public interface LegacyCalendarStorageFactory {
     CalendarStorage create(Context context, EntityResolver entityResolver) throws OXException;
 
     /**
-     * Initializes a new {@link CalendarStorage}.
+     * Initializes a new {@link CalendarStorage} using the <i>legacy</i> database tables.
      *
      * @param context The context
      * @param entityResolver The entity resolver to use

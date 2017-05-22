@@ -52,11 +52,8 @@ package com.openexchange.chronos.storage.rdb.legacy;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -68,9 +65,21 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbCalendarStorageFactory implements LegacyCalendarStorageFactory {
 
+    private final DBProvider defaultDbProvider;
+
+    /**
+     * Initializes a new {@link RdbCalendarStorageFactory}.
+     *
+     * @param defaultDbProvider The default database provider to use
+     */
+    public RdbCalendarStorageFactory(DBProvider defaultDbProvider) {
+        super();
+        this.defaultDbProvider = defaultDbProvider;
+    }
+
     @Override
     public CalendarStorage create(Context context, EntityResolver entityResolver) throws OXException {
-        return create(context, entityResolver, new DatabaseServiceDBProvider(Services.getService(DatabaseService.class)), DBTransactionPolicy.NORMAL_TRANSACTIONS);
+        return create(context, entityResolver, defaultDbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS);
     }
 
     @Override

@@ -121,7 +121,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            value = asString(nextEventId(connection, accountId));
+            value = asString(nextId(connection, accountId, "calendar_event_sequence"));
             updated = 1;
             txPolicy.commit(connection);
         } catch (SQLException e) {

@@ -56,6 +56,7 @@ import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -82,27 +83,34 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         try {
-            LOG.info("starting bundle: \"com.openexchange.calendar.storage.rdb\"");
+            LOG.info("starting bundle {}", context.getBundle());
             Services.set(this);
             /*
              * register services
              */
             //            registerService(CreateTableService.class, new CreateAlarmTable());
             //            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AlarmTableUpdateTask()));
-            registerService(LegacyCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorageFactory());
-            registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(this));
-            registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(this));
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.calendar.storage.rdb\"", e);
+            DatabaseServiceDBProvider defaultDbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
+            registerService(LegacyCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorageFactory(defaultDbProvider));
+            registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(defaultDbProvider));
+            registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(defaultDbProvider));
+        } catch (Exception e) {
+            LOG.error("error starting {}", context.getBundle(), e);
             throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.calendar.storage.rdb\"");
+        LOG.info("stopping bundle {}", context.getBundle());
+        Services.set(null);
         super.stopBundle();
     }
 

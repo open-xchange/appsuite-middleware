@@ -52,8 +52,6 @@ package com.openexchange.chronos.storage.rdb.legacy;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
-import static com.openexchange.chronos.compat.Appointment2Event.asString;
-import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.put;
@@ -79,6 +77,7 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -92,6 +91,8 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
+    private final EntityResolver entityResolver;
+
     /**
      * Initializes a new {@link RdbAttendeeStorage}.
      *
@@ -101,7 +102,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
      * @param txPolicy The transaction policy
      */
     public RdbAttendeeStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, entityResolver, dbProvider, txPolicy);
+        super(context, dbProvider, txPolicy);
+        this.entityResolver = entityResolver;
     }
 
     @Override

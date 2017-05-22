@@ -52,14 +52,10 @@ package com.openexchange.chronos.storage.rdb;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CalendarStorage}
@@ -69,34 +65,26 @@ import com.openexchange.server.ServiceLookup;
  */
 public class RdbCalendarAccountStorageFactory implements CalendarAccountStorageFactory {
 
-    private final ServiceLookup services;
+    private final DBProvider defaultDbProvider;
 
     /**
      * Initializes a new {@link RdbCalendarAccountStorageFactory}.
      *
-     * @param services A service lookup reference
+     * @param defaultDbProvider The default database provider to use
      */
-    public RdbCalendarAccountStorageFactory(ServiceLookup services) {
+    public RdbCalendarAccountStorageFactory(DBProvider defaultDbProvider) {
         super();
-        this.services = services;
+        this.defaultDbProvider = defaultDbProvider;
     }
 
     @Override
     public CalendarAccountStorage create(Context context) throws OXException {
-        return create(context, getDefaultDBProvider(), DBTransactionPolicy.NORMAL_TRANSACTIONS);
+        return create(context, defaultDbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS);
     }
 
     @Override
     public CalendarAccountStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         return new RdbCalendarAccountStorage(context, dbProvider, txPolicy);
-    }
-
-    private DatabaseServiceDBProvider getDefaultDBProvider() throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        if (null == dbService) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-        return new DatabaseServiceDBProvider(dbService);
     }
 
 }

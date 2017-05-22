@@ -63,10 +63,9 @@ import com.openexchange.groupware.contexts.Context;
  * {@link CalendarStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
+public class RdbCalendarStorage implements CalendarStorage {
 
     private final int accountId;
     private final RdbEventStorage eventStorage;
@@ -85,7 +84,7 @@ public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
      * @param txPolicy The transaction policy
      */
     public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, dbProvider, txPolicy);
+        super();
         this.accountId = accountId;
         eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);

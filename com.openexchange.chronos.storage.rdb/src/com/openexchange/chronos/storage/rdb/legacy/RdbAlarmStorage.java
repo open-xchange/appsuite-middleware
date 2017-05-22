@@ -52,8 +52,6 @@ package com.openexchange.chronos.storage.rdb.legacy;
 import static com.openexchange.chronos.common.AlarmUtils.filter;
 import static com.openexchange.chronos.common.AlarmUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.compat.Appointment2Event.asString;
-import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
@@ -84,6 +82,7 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -104,6 +103,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     /** The module identifier used in the <code>reminder</code> table */
     private static final int REMINDER_MODULE = Types.APPOINTMENT;
 
+    private final EntityResolver entityResolver;
+
     /**
      * Initializes a new {@link RdbAlarmStorage}.
      *
@@ -113,7 +114,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param txPolicy The transaction policy
      */
     public RdbAlarmStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, entityResolver, dbProvider, txPolicy);
+        super(context, dbProvider, txPolicy);
+        this.entityResolver = entityResolver;
     }
 
     @Override

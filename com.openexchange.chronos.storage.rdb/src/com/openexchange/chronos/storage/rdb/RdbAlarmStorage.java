@@ -102,7 +102,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            value = nextAlarmId(connection, accountId);
+            value = nextId(connection, accountId, "calendar_alarm_sequence");
             updated = 1;
             txPolicy.commit(connection);
         } catch (SQLException e) {
