@@ -14,5 +14,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.provider.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.tika"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-extensions-1.3.8.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.pluginsloaded"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.pluginsloaded.mbean"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
