@@ -50,11 +50,11 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import static com.openexchange.calendar.storage.ParticipantStorage.extractExternal;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -99,6 +99,7 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
     private Appointment appointment;
     private ExternalUserParticipant participant;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -124,6 +125,7 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
         client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -148,7 +150,9 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
         appointment.setLastModified(response2.getTimestamp());
         GetResponse response3 = client.execute(new GetRequest(appointment));
         checkConfirmations(extractExternal(appointment.getParticipants()), response3.getAppointment(tz).getConfirmations());
-        CommonAllResponse response4 = client.execute(new AllRequest(folderId, COLUMNS, occurrence3.getStartDate(), occurrence3.getEndDate(), tz));
+        Date rangeStart = TimeTools.getAPIDate(tz, occurrence3.getStartDate(), 0);
+        Date rangeEnd = TimeTools.getAPIDate(tz, occurrence3.getEndDate(), 1);
+        CommonAllResponse response4 = client.execute(new AllRequest(folderId, COLUMNS, rangeStart, rangeEnd, tz));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response4, response2.getId()));
         CommonListResponse response5 = client.execute(new ListRequest(ListIDs.l(new int[] { folderId, response2.getId() }), COLUMNS));
         checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response5, response2.getId()));

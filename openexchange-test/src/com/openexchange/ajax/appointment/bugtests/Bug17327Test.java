@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
@@ -93,6 +94,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -120,7 +122,9 @@ public class Bug17327Test extends AbstractAJAXSession {
         insertResponse.fillAppointment(appointment);
 
         // Get appointment via AllRequest
-        CommonAllResponse allResponseBeforeUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] { Appointment.ALARM }, appointment.getStartDate(), appointment.getEndDate(), tz2));
+        Date rangeStart = TimeTools.getAPIDate(tz, appointment.getStartDate(), 0);
+        Date rangeEnd = TimeTools.getAPIDate(tz, appointment.getEndDate(), 1);
+        CommonAllResponse allResponseBeforeUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] { Appointment.ALARM }, rangeStart, rangeEnd, tz2));
         //        CommonListResponse listResponseBeforeUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
         GetResponse getResponseBeforeUpdate = client2.execute(new GetRequest(appointment));
         Object alarmValue = allResponseBeforeUpdate.getValue(0, Appointment.ALARM);
@@ -139,7 +143,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         appointment.setLastModified(updateResponse.getTimestamp());
 
         // Get appointment via AllRequest
-        CommonAllResponse allResponseAfterUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] { Appointment.ALARM }, appointment.getStartDate(), appointment.getEndDate(), tz2));
+        CommonAllResponse allResponseAfterUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] { Appointment.ALARM }, rangeStart, rangeEnd, tz2));
         //        CommonListResponse listResponseAfterUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
         GetResponse getResponseAfterUpdate = client2.execute(new GetRequest(appointment));
         alarmValue = allResponseAfterUpdate.getValue(0, Appointment.ALARM);
@@ -152,6 +156,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         assertEquals("Alarm is not equal in All- and GetRequest after update.", getResponseAfterUpdate.getAppointment(tz).getAlarm(), alarmValueInt);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
