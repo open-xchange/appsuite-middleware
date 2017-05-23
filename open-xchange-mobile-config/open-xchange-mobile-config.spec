@@ -80,7 +80,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Tue May 16 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+* Fri May 19 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second preview of 7.8.4 release

@@ -61,7 +61,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/mail-categories.properties
 
 %changelog
-* Tue May 16 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+* Fri May 19 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Second preview of 7.8.4 release

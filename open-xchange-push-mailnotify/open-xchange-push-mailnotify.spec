@@ -71,7 +71,7 @@ fi
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
-* Tue May 16 2017 Carsten Hoeger <choeger@open-xchange.com>
+* Fri May 19 2017 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Carsten Hoeger <choeger@open-xchange.com>
 Second preview of 7.8.4 release

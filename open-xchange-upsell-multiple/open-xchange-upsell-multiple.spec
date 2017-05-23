@@ -71,7 +71,7 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
-* Tue May 16 2017 Carsten Hoeger <choeger@open-xchange.com>
+* Fri May 19 2017 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Carsten Hoeger <choeger@open-xchange.com>
 Second preview of 7.8.4 release
