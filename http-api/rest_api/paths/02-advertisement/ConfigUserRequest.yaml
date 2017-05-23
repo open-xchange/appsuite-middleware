@@ -1,6 +1,6 @@
 /advertisement/v1/config/user:
   put:
-    operationId: put
+    operationId: putAdvertisementByUserId
     tags:
       - Advertisement
     summary: Sets an advertisement configuration for a given user by id
@@ -36,7 +36,7 @@
         description: Not authorized
 
   delete:
-    operationId: delete
+    operationId: deleteAdvertisementByUserId
     tags:
       - Advertisement
     summary: Remove the current configuration for the user identified by userId
