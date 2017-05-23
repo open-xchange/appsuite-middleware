@@ -100,8 +100,8 @@ public class NewListTest extends AbstractAJAXSession {
         // Create some appointments.
         final Date appStart = new Date(TimeTools.getHour(0, tzA));
         final Date appEnd = new Date(TimeTools.getHour(1, tzA));
-        final Date listStart = new Date(TimeTools.getHour(-1, tzA));
-        final Date listEnd = new Date(TimeTools.getHour(2, tzA));
+        final Date listStart = TimeTools.getAPIDate(tzA, appStart, 0);
+        final Date listEnd = TimeTools.getAPIDate(tzA, appEnd, 1);
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
             final Appointment app = new Appointment();
