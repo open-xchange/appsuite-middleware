@@ -61,12 +61,14 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Consistency;
@@ -80,6 +82,8 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link AbstractUpdatePerformer}
@@ -307,7 +311,7 @@ public abstract class AbstractUpdatePerformer {
         for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalMasterEvent).entrySet()) {
             int userID = entry.getKey().intValue();
             if (userID != originalAttendee.getEntity()) {
-                storage.getAlarmStorage().insertAlarms(exceptionEvent, userID, entry.getValue());
+                insertAlarms(exceptionEvent, userID, entry.getValue(), true);
             }
         }
         /*
@@ -319,6 +323,31 @@ public abstract class AbstractUpdatePerformer {
          * track new change exception date in master
          */
         addChangeExceptionDate(originalMasterEvent, recurrenceID);
+    }
+
+    /**
+     * Inserts alarm data for an event of a specific user, optionally assigning new alarm UIDs in case the alarms are copied over from
+     * another event. A new unique alarm identifier is always assigned.
+     *
+     * @param event The event the alarms are associated with
+     * @param userId The identifier of the user the alarms should be inserted for
+     * @param alarms The alarms to insert
+     * @param forceNewUids <code>true</code> if new UIDs should be assigned even if already set in the supplied alarms, <code>false</code>, otherwise
+     */
+    protected void insertAlarms(Event event, int userId, List<Alarm> alarms, boolean forceNewUids) throws OXException {
+        if (null == alarms || 0 == alarms.size()) {
+            return;
+        }
+        List<Alarm> newAlarms = new ArrayList<Alarm>(alarms.size());
+        for (Alarm alarm : alarms) {
+            Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
+            newAlarm.setId(storage.getAlarmStorage().nextId());
+            if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
+                newAlarm.setUid(UUIDs.getUnformattedStringFromRandom());
+            }
+            newAlarms.add(newAlarm);
+        }
+        storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);
     }
 
     /**

@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
@@ -96,6 +97,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
@@ -192,7 +194,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalEvent.getAttendees());
                 storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newExceptionEvent.getId(), originalEvent.getAttachments());
                 for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
-                    storage.getAlarmStorage().insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue());
+                    insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
                 }
                 /*
                  * reload the newly created exception as 'original' & perform the update
@@ -619,14 +621,43 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     private boolean updateAlarms(Event event, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = Utils.getAlarmUpdates(originalAlarms, updatedAlarms);
-        if (false == alarmUpdates.isEmpty()) {
-            if (session.getUserId() != calendarUser.getId()) {
-                requireWritePermissions(event);
-            }
+        if (alarmUpdates.isEmpty()) {
+            return false;
+        }
+        requireWritePermissions(event);
+        /*
+         * pass updated alarms directly if using legacy storage
+         */
+        if (session.getConfig().isUseLegacyStorage()) {
             storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), updatedAlarms);
             return true;
         }
-        return false;
+        /*
+         * delete removed alarms
+         */
+        List<Alarm> removedItems = alarmUpdates.getRemovedItems();
+        if (0 < removedItems.size()) {
+            storage.getAlarmStorage().deleteAlarms(getAlarmIDs(removedItems));
+        }
+        /*
+         * save updated alarms
+         */
+        List<ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
+        if (0 < updatedItems.size()) {
+            List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
+            for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
+                Alarm alarm = AlarmMapper.getInstance().copy(itemUpdate.getOriginal(), null, AlarmField.ID, AlarmField.UID);
+                AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm,
+                    AlarmField.ACKNOWLEDGED, AlarmField.ACTION, AlarmField.DESCRIPTION, AlarmField.RELATED_TO, AlarmField.REPEAT, AlarmField.TRIGGER);
+                alarms.add(alarm);
+            }
+            storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), alarms);
+        }
+        /*
+         * insert new alarms
+         */
+        insertAlarms(event, calendarUser.getId(), alarmUpdates.getAddedItems(), false);
+        return true;
     }
 
     /**

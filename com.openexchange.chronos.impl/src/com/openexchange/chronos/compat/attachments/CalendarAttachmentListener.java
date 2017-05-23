@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,78 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.compat.attachments;
 
-import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.storage.AlarmStorage;
+import java.util.Date;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.StorageOperation;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentEvent;
+import com.openexchange.groupware.attach.AttachmentListener;
+import com.openexchange.session.Session;
 
 /**
- * {@link CalendarStorage}
+ * {@link CalendarAttachmentListener}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage implements CalendarStorage {
+public class CalendarAttachmentListener implements AttachmentListener {
 
-    private final int accountId;
-    private final RdbEventStorage eventStorage;
-    private final RdbAttendeeStorage attendeeStorage;
-    private final RdbAlarmStorage alarmStorage;
-    private final AttachmentStorage attachmentStorage;
-
+    private final CalendarService calendarService;
 
     /**
-     * Initializes a new {@link RdbCalendarStorage}.
+     * Initializes a new {@link CalendarAttachmentListener}.
      *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
-     * @param dbProvider The database provider to use
-     * @param txPolicy The transaction policy
+     * @param calendarService A reference to the calendar service
      */
-    public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public CalendarAttachmentListener(CalendarService calendarService) {
         super();
-        this.accountId = accountId;
-        eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, accountId, dbProvider, txPolicy);
-        attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
+        this.calendarService = calendarService;
     }
 
     @Override
-    public EventStorage getEventStorage() {
-        return eventStorage;
+    public long attached(AttachmentEvent e) throws Exception {
+        return touch(e);
     }
 
     @Override
-    public AlarmStorage getAlarmStorage() {
-        return alarmStorage;
+    public long detached(AttachmentEvent e) throws Exception {
+        return touch(e);
     }
 
-    @Override
-    public AttachmentStorage getAttachmentStorage() {
-        if (null == attachmentStorage) {
-            throw new UnsupportedOperationException("No attachment storage for account " + accountId);
+    private long touch(AttachmentEvent event) throws OXException {
+        if (isManagedInternally(event)) {
+            return -1;
         }
-        return attachmentStorage;
+        final String objectId = String.valueOf(event.getAttachedId());
+        CalendarSession session = calendarService.init(event.getSession());
+        return new StorageOperation<Long>(session) {
+
+            @Override
+            protected Long execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return touch(session, storage, objectId);
+            }
+        }.executeUpdate().longValue();
     }
 
-    @Override
-    public AttendeeStorage getAttendeeStorage() {
-        return attendeeStorage;
+    private static long touch(CalendarSession session, CalendarStorage storage, String objectId) throws OXException {
+        Date now = new Date();
+        Event eventUpdate = new Event();
+        eventUpdate.setId(objectId);
+        Consistency.setModified(now, eventUpdate, session.getUserId());
+        storage.getEventStorage().updateEvent(eventUpdate);
+        return now.getTime();
+    }
+
+    private static boolean isManagedInternally(AttachmentEvent event) {
+        Session session = event.getSession();
+        return null != session && Boolean.TRUE.equals(session.getParameter(AttachmentStorage.class.getName()));
     }
 
 }

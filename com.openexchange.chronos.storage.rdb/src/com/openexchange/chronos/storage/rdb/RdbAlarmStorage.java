@@ -79,6 +79,8 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
+    private static final AlarmMapper MAPPER = AlarmMapper.getInstance();
+
     private final int accountId;
 
     /**
@@ -169,7 +171,9 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            //TODO
+            for (Alarm alarm : alarms) {
+                updated += updateAlarm(connection, context.getContextId(), accountId, alarm.getId(), alarm);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -218,6 +222,25 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
+    @Override
+    public void deleteAlarms(int[] alarmIds) throws OXException {
+        if (null == alarmIds || 0 == alarmIds.length) {
+            return;
+        }
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAlarms(connection, context.getContextId(), accountId, alarmIds);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
     private static int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws SQLException, OXException {
         AlarmField[] mappedFields = AlarmMapper.getInstance().getMappedFields();
         String sql = new StringBuilder()
@@ -232,6 +255,22 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, asInt(eventId));
             stmt.setInt(parameterIndex++, userId);
             parameterIndex = AlarmMapper.getInstance().setParameters(stmt, parameterIndex, alarm, mappedFields);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int updateAlarm(Connection connection, int cid, int account, int id, Alarm alarm) throws SQLException, OXException {
+        AlarmField[] assignedfields = MAPPER.getAssignedFields(alarm);
+        String sql = new StringBuilder()
+            .append("UPDATE calendar_alarm SET ").append(MAPPER.getAssignments(assignedfields))
+            .append(" WHERE cid=? AND account=? AND id=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, alarm, assignedfields);
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, account);
+            stmt.setInt(parameterIndex++, id);
             return logExecuteUpdate(stmt);
         }
     }
@@ -307,6 +346,25 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, asInt(eventId));
             for (Integer userId : userIds) {
                 stmt.setInt(parameterIndex++, i(userId));
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int deleteAlarms(Connection connection, int cid, int account, int[] alarmIds) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm WHERE cid=? AND account=?");
+        if (1 == alarmIds.length) {
+            stringBuilder.append(" AND id=?");
+        } else {
+            stringBuilder.append(" AND id IN (").append(getParameters(alarmIds.length)).append(')');
+        }
+        stringBuilder.append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, account);
+            for (int alarmId : alarmIds) {
+                stmt.setInt(parameterIndex++, alarmId);
             }
             return logExecuteUpdate(stmt);
         }

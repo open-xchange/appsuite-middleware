@@ -51,6 +51,8 @@ package com.openexchange.chronos.impl.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.compat.attachments.CalendarAttachmentAuthorization;
+import com.openexchange.chronos.compat.attachments.CalendarAttachmentListener;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -65,6 +67,10 @@ import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentAuthorization;
+import com.openexchange.groupware.attach.AttachmentListener;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
@@ -81,6 +87,9 @@ import com.openexchange.user.UserService;
 public class ChronosActivator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChronosActivator.class);
+
+    private volatile AttachmentAuthorization attachmentAuthorization;
+    private volatile AttachmentListener attachmentListener;
 
     /**
      * Initializes a new {@link ChronosActivator}.
@@ -114,8 +123,18 @@ public class ChronosActivator extends HousekeepingActivator {
             /*
              * register services
              */
-            registerService(CalendarService.class, new CalendarServiceImpl(calendarHandlers));
+            CalendarService calendarService = new CalendarServiceImpl(calendarHandlers);
+            registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
+            /*
+             * inject legacy calendar attachment authorization & listener
+             */
+            CalendarAttachmentAuthorization calendarAttachmentAuthorization = new CalendarAttachmentAuthorization(calendarService);
+            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).registerForEverything(calendarAttachmentAuthorization, 17);
+            this.attachmentAuthorization = calendarAttachmentAuthorization;
+            CalendarAttachmentListener calendarAttachmentListener = new CalendarAttachmentListener(calendarService);
+            Attachments.getListenerChooserForModule(Types.APPOINTMENT).registerForEverything(calendarAttachmentListener, 17);
+            this.attachmentListener = calendarAttachmentListener;
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
@@ -125,6 +144,16 @@ public class ChronosActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle {}", context.getBundle());
+        AttachmentAuthorization attachmentAuthorization = this.attachmentAuthorization;
+        if (null != attachmentAuthorization) {
+            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).removeForEverything(attachmentAuthorization);
+            this.attachmentAuthorization = null;
+        }
+        AttachmentListener attachmentListener = this.attachmentListener;
+        if (null != attachmentListener) {
+            Attachments.getListenerChooserForModule(Types.APPOINTMENT).removeForEverything(attachmentListener);
+            this.attachmentListener = null;
+        }
         Services.setServiceLookup(null);
         super.stopBundle();
     }

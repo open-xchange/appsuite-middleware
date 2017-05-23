@@ -70,6 +70,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -664,6 +665,23 @@ public class CalendarUtils {
             }
         }
         return I2i(userIDs);
+    }
+
+    /**
+     * Gets the identifiers of all alarms in the supplied alarm collection.
+     *
+     * @param alarms The alarms to extract the user identifiers for
+     * @return The alarm identifiers, or an empty array if there are none
+     */
+    public static int[] getAlarmIDs(List<Alarm> alarms) {
+        if (null == alarms || 0 == alarms.size()) {
+            return new int[0];
+        }
+        int[] alarmIds = new int[alarms.size()];
+        for (int i = 0; i < alarmIds.length; i++) {
+            alarmIds[i] = alarms.get(i).getId();
+        }
+        return alarmIds;
     }
 
     /**

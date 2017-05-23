@@ -132,6 +132,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     public void deleteAttachments(Session session, String folderID, String eventID) throws OXException {
         ServerSession serverSession = checkSession(session);
         AttachmentBase attachmentBase = initAttachmentBase();
+        serverSession.setParameter(AttachmentStorage.class.getName(), Boolean.TRUE);
         try {
             attachmentBase.startTransaction();
             List<Integer> attachmentIDs = new ArrayList<Integer>();
@@ -156,6 +157,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             }
             attachmentBase.commit();
         } finally {
+            serverSession.setParameter(AttachmentStorage.class.getName(), null);
             attachmentBase.finish();
         }
     }
@@ -171,12 +173,14 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             attachmentIDs.add(I(attachment.getManagedId()));
         }
         AttachmentBase attachmentBase = initAttachmentBase();
+        serverSession.setParameter(AttachmentStorage.class.getName(), Boolean.TRUE);
         try {
             attachmentBase.startTransaction();
             attachmentBase.detachFromObject(asInt(folderID), asInt(eventID), MODULE_ID, I2i(attachmentIDs),
                 session, context, serverSession.getUser(), serverSession.getUserConfiguration());
             attachmentBase.commit();
         } finally {
+            serverSession.setParameter(AttachmentStorage.class.getName(), null);
             attachmentBase.finish();
         }
     }
@@ -188,6 +192,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         }
         ServerSession serverSession = checkSession(session);
         AttachmentBase attachmentBase = initAttachmentBase();
+        serverSession.setParameter(AttachmentStorage.class.getName(), Boolean.TRUE);
         try {
             attachmentBase.startTransaction();
             /*
@@ -219,6 +224,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             }
             attachmentBase.commit();
         } finally {
+            serverSession.setParameter(AttachmentStorage.class.getName(), null);
             attachmentBase.finish();
         }
     }

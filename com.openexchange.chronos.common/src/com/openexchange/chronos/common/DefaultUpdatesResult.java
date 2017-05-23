@@ -47,72 +47,48 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.common;
 
-import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.storage.AlarmStorage;
-import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.AttendeeStorage;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.groupware.contexts.Context;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.UpdatesResult;
 
 /**
- * {@link CalendarStorage}
+ * {@link DefaultUpdatesResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage implements CalendarStorage {
+public class DefaultUpdatesResult implements UpdatesResult {
 
-    private final int accountId;
-    private final RdbEventStorage eventStorage;
-    private final RdbAttendeeStorage attendeeStorage;
-    private final RdbAlarmStorage alarmStorage;
-    private final AttachmentStorage attachmentStorage;
-
+    private final List<Event> newAndModifiedEvents;
+    private final List<Event> deletedEvents;
 
     /**
-     * Initializes a new {@link RdbCalendarStorage}.
+     * Initializes a new {@link DefaultUpdatesResult}.
      *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
-     * @param dbProvider The database provider to use
-     * @param txPolicy The transaction policy
+     * @param newAndModifiedEvents The list of new/modified events
+     * @param deletedEvents The list of deleted events
      */
-    public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public DefaultUpdatesResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents) {
         super();
-        this.accountId = accountId;
-        eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, accountId, dbProvider, txPolicy);
-        attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
+        this.newAndModifiedEvents = newAndModifiedEvents;
+        this.deletedEvents = deletedEvents;
     }
 
     @Override
-    public EventStorage getEventStorage() {
-        return eventStorage;
+    public List<Event> getNewAndModifiedEvents() {
+        return newAndModifiedEvents;
     }
 
     @Override
-    public AlarmStorage getAlarmStorage() {
-        return alarmStorage;
+    public List<Event> getDeletedEvents() {
+        return deletedEvents;
     }
 
     @Override
-    public AttachmentStorage getAttachmentStorage() {
-        if (null == attachmentStorage) {
-            throw new UnsupportedOperationException("No attachment storage for account " + accountId);
-        }
-        return attachmentStorage;
-    }
-
-    @Override
-    public AttendeeStorage getAttendeeStorage() {
-        return attendeeStorage;
+    public String toString() {
+        return "DefaultUpdatesResult [newAndModifiedEvents=" + newAndModifiedEvents + ", deletedEvents=" + deletedEvents + "]";
     }
 
 }

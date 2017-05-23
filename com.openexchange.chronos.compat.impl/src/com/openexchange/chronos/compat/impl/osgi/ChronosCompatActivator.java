@@ -47,72 +47,72 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.compat.impl.osgi;
 
-import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.storage.AlarmStorage;
-import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.AttendeeStorage;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.groupware.contexts.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.caching.CacheService;
+import com.openexchange.chronos.compat.impl.attachments.CalendarAttachmentAuthorization;
+import com.openexchange.chronos.compat.impl.cache.CacheServiceListener;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentAuthorization;
+import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link CalendarStorage}
+ * {@link ChronosCompatActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage implements CalendarStorage {
+public class ChronosCompatActivator extends HousekeepingActivator {
 
-    private final int accountId;
-    private final RdbEventStorage eventStorage;
-    private final RdbAttendeeStorage attendeeStorage;
-    private final RdbAlarmStorage alarmStorage;
-    private final AttachmentStorage attachmentStorage;
+    private static final Logger LOG = LoggerFactory.getLogger(ChronosCompatActivator.class);
 
+    private volatile AttachmentAuthorization attachmentAuthorization;
 
     /**
-     * Initializes a new {@link RdbCalendarStorage}.
-     *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
-     * @param dbProvider The database provider to use
-     * @param txPolicy The transaction policy
+     * Initializes a new {@link ChronosCompatActivator}.
      */
-    public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public ChronosCompatActivator() {
         super();
-        this.accountId = accountId;
-        eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, accountId, dbProvider, txPolicy);
-        attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
     }
 
     @Override
-    public EventStorage getEventStorage() {
-        return eventStorage;
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public AlarmStorage getAlarmStorage() {
-        return alarmStorage;
-    }
-
-    @Override
-    public AttachmentStorage getAttachmentStorage() {
-        if (null == attachmentStorage) {
-            throw new UnsupportedOperationException("No attachment storage for account " + accountId);
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle {}", context.getBundle());
+            /*
+             * inject custom attachment authorization
+             */
+            CalendarAttachmentAuthorization calendarAttachmentAuthorization = new CalendarAttachmentAuthorization();
+            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).registerForEverything(calendarAttachmentAuthorization, 17);
+            this.attachmentAuthorization = attachmentAuthorization;
+            /*
+             * register calendar handler to invalidate legacy caches when upon changes
+             */
+            track(CacheService.class, new CacheServiceListener(context));
+            openTrackers();
+        } catch (Exception e) {
+            LOG.error("error starting {}", context.getBundle(), e);
+            throw e;
         }
-        return attachmentStorage;
     }
 
     @Override
-    public AttendeeStorage getAttendeeStorage() {
-        return attendeeStorage;
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle {}", context.getBundle());
+        AttachmentAuthorization attachmentAuthorization = this.attachmentAuthorization;
+        if (null != attachmentAuthorization) {
+            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).removeForEverything(attachmentAuthorization);
+            this.attachmentAuthorization = null;
+        }
+        super.stopBundle();
     }
 
 }

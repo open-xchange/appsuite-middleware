@@ -257,6 +257,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
+    @Override
+    public void deleteAlarms(int[] alarmIds) throws OXException {
+        throw new UnsupportedOperationException(); // not supported in legacy storage
+    }
+
     /**
      * Gets the alarms representing the stored reminder data.
      *
