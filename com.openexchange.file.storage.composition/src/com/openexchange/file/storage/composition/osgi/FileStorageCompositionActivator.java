@@ -93,6 +93,9 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         final ServiceLookup services = this;
         Services.setServiceLookup(services);
 
+        IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.initInstance(context);
+        rememberTracker(listenerRegistry);
+
         // The tracking factory
         TrackingIDBasedFileAccessFactory fileAccessFactory = new TrackingIDBasedFileAccessFactory(services, context);
         rememberTracker(fileAccessFactory);
@@ -126,6 +129,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         AbstractCompositingIDBasedFileAccess.setHandlerRegistry(null);
+        IDBasedFileAccessListenerRegistry.dropInstance();
         Services.setServiceLookup(null);
     }
 

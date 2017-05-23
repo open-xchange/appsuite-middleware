@@ -118,6 +118,8 @@ import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessListener;
+import com.openexchange.file.storage.composition.osgi.IDBasedFileAccessListenerRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
@@ -616,7 +618,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 return null;
             }
         };
-        removeDocumentDelegation.call(getFileAccess(id.getService(), id.getAccountId()));
+        FileStorageFileAccess fileAccess = getFileAccess(id.getService(), id.getAccountId());
+        /*
+         * check for available listeners
+         */
+        IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
+        if (null != listenerRegistry) {
+            for (IDBasedFileAccessListener listener : listenerRegistry) {
+                listener.onBeforeDeleteAllFilesInFolder(folderId, sequenceNumber, fileAccess, session);
+            }
+        }
+        removeDocumentDelegation.call(fileAccess);
         // TODO: Does this method really make sense? Skipping possible delete event.
     }
 
@@ -635,6 +647,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         for (Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
             FileStorageFileAccess access = deleteOp.getKey();
             final List<IDTuple> toDelete = ensureFolderIDs(access, deleteOp.getValue());
+            /*
+             * check for available listeners
+             */
+            IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
+            if (null != listenerRegistry) {
+                for (IDBasedFileAccessListener listener : listenerRegistry) {
+                    listener.onBeforeDeleteFiles(toDelete, sequenceNumber, hardDelete, access, session);
+                }
+            }
             /*
              * perform delete, collect any conflicting files
              */
@@ -820,6 +841,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             FilenameValidationUtils.checkName(document.getFileName());
         }
 
+        IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
+
         if (isNewFile(document)) {
             /*
              * create new file, determine target file storage
@@ -840,6 +863,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 addWarnings(warnings);
                 if (false == ignoreWarnings) {
                     return null;
+                }
+            }
+
+            /*
+             * check for available listeners
+             */
+            if (null != listenerRegistry) {
+                for (IDBasedFileAccessListener listener : listenerRegistry) {
+                    listener.onBeforeNewFile(document, data, sequenceNumber, modifiedColumns, fileAccess, session);
                 }
             }
 
@@ -889,9 +921,21 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 return null;
             }
         }
+
         final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
         ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
-        if (null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
+        boolean isMove = null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId());
+
+        /*
+         * check for available listeners
+         */
+        if (null != listenerRegistry) {
+            for (IDBasedFileAccessListener listener : listenerRegistry) {
+                listener.onBeforeUpdateFile(document, data, sequenceNumber, modifiedColumns, isMove, fileAccess, session);
+            }
+        }
+
+        if (isMove) {
             /*
              * Special handling for move to different folder
              */
@@ -1221,6 +1265,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
 
             if (useMultiMove) {
+                /*
+                 * check for available listeners
+                 */
+                IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
+                if (null != listenerRegistry) {
+                    for (IDBasedFileAccessListener listener : listenerRegistry) {
+                        listener.onBeforeMoveFiles(sourceIds, sequenceNumber, destFolderId, fileAccess, session);
+                    }
+                }
+
                 TransactionAwareFileAccessDelegation<List<String>> callable = new TransactionAwareFileAccessDelegation<List<String>>() {
 
                     @Override
@@ -1291,8 +1345,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             } else {
                 metadata = null;
             }
-            IDTuple result = getFileAccess(sourceID.getService(), sourceID.getAccountId()).copy(
-                new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields);
+            FileStorageFileAccess fileAccess = getFileAccess(sourceID.getService(), sourceID.getAccountId());
+            /*
+             * check for available listeners
+             */
+            IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
+            if (null != listenerRegistry) {
+                for (IDBasedFileAccessListener listener : listenerRegistry) {
+                    listener.onBeforeCopyFile(sourceId, version, destFolderId, update, newData, fields, fileAccess, session);
+                }
+            }
+            IDTuple result = fileAccess.copy(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields);
             FileID newID = new FileID(sourceID.getService(), sourceID.getAccountId(), result.getFolder(), result.getId());
             FolderID newFolderID = new FolderID(sourceID.getService(), sourceID.getAccountId(), result.getFolder());
             postEvent(FileStorageEventHelper.buildCreateEvent(
