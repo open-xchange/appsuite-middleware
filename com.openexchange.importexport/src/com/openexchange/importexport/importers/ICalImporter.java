@@ -208,16 +208,14 @@ public class ICalImporter extends AbstractImporter {
 			try {
 				fo = folderAccess.getFolderObject(folderId);
 			} catch (final OXException e) {
-				throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(
-						e, I(folderId));
+				throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, I(folderId));
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
 				result[APP] = folderId;
 			} else if (fo.getModule() == FolderObject.TASK) {
 				result[TASK] = folderId;
 			} else {
-				throw ImportExportExceptionCodes.CANNOT_IMPORT.create(
-						fo.getFolderName(), format);
+				throw ImportExportExceptionCodes.CANNOT_IMPORT.create(I(folderId), format);
 			}
 		}
 		return result;

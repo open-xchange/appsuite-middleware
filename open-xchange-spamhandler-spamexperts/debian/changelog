@@ -1,3 +1,33 @@
+open-xchange-spamhandler-spamexperts (7.6.3-28) stable; urgency=medium
+
+  * Build for patch 2017-05-15 (4133)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 08 May 2017 16:30:18 +0200
+
+open-xchange-spamhandler-spamexperts (7.6.3-27) stable; urgency=medium
+
+  * Build for patch 2017-04-21 (4079)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 18 Apr 2017 12:06:31 +0200
+
+open-xchange-spamhandler-spamexperts (7.6.3-26) stable; urgency=medium
+
+  * Build for patch 2017-04-03 (4047)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 31 Mar 2017 14:47:12 +0200
+
+open-xchange-spamhandler-spamexperts (7.6.3-25) stable; urgency=medium
+
+  * Build for patch 2017-02-24 (3991)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 24 Feb 2017 16:47:14 +0100
+
+open-xchange-spamhandler-spamexperts (7.6.3-24) stable; urgency=medium
+
+  * Build for patch 2017-02-20 (3949)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 08 Feb 2017 15:02:04 +0100
+
 open-xchange-spamhandler-spamexperts (7.6.3-23) stable; urgency=medium
 
   * Build for patch 2017-01-26 (3922)

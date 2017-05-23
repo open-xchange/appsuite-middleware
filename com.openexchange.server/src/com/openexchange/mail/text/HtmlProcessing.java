@@ -69,14 +69,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import net.htmlparser.jericho.Attribute;
-import net.htmlparser.jericho.CharacterReference;
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.OutputDocument;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
-import net.htmlparser.jericho.StartTag;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -99,6 +91,14 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.regex.MatcherReplacer;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.CharacterReference;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 
 /**
  * {@link HtmlProcessing} - Various methods for HTML processing for mail module.
@@ -121,7 +121,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) {
+    public static HtmlSanitizeResult formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) throws OXException {
         return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false, maxContentSize);
     }
 
@@ -134,7 +134,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
+    public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) throws OXException {
         return formatTextForDisplay(content, usm, mode, -1).getContent();
     }
 
@@ -152,7 +152,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
+    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) throws OXException {
         return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, -1).getContent();
     }
 
@@ -172,7 +172,7 @@ public final class HtmlProcessing {
      * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
+    public static HtmlSanitizeResult formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) throws OXException {
         return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode, embedded, maxContentSize);
     }
 
@@ -207,7 +207,7 @@ public final class HtmlProcessing {
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static HtmlSanitizeResult formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
+    public static HtmlSanitizeResult formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) throws OXException {
         HtmlSanitizeResult retval = new HtmlSanitizeResult(content);
         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
@@ -658,7 +658,7 @@ public final class HtmlProcessing {
      * @param contentType The corresponding content type (including charset parameter)
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final ContentType contentType) {
+    public static String getConformHTML(final String htmlContent, final ContentType contentType) throws OXException {
         return getConformHTML(htmlContent, contentType.getCharsetParameter());
     }
 
@@ -669,7 +669,7 @@ public final class HtmlProcessing {
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final String charset) {
+    public static String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).getConformHTML(htmlContent, charset);
     }
 

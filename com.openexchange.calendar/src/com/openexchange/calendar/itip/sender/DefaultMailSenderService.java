@@ -459,7 +459,7 @@ public class DefaultMailSenderService implements MailSenderService {
 
     }
 
-    private Multipart generateTextAndHtmlMultipart(NotificationMail mail, String charset) throws MessagingException {
+    private Multipart generateTextAndHtmlMultipart(NotificationMail mail, String charset) throws MessagingException, OXException {
         BodyPart textPart = generateTextPart(mail, charset);
         BodyPart htmlPart = generateHtmlPart(mail, charset);
 
@@ -470,7 +470,7 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private BodyPart generateHtmlPart(NotificationMail mail, String charset) throws MessagingException {
+    private BodyPart generateHtmlPart(NotificationMail mail, String charset) throws MessagingException, OXException {
         try {
             MimeBodyPart htmlPart = new MimeBodyPart();
             final ContentType ct = new ContentType();

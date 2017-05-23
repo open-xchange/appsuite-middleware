@@ -500,6 +500,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrincipal(setString(i++, load_resultset));
                 cdao.setPrincipalId(setInt(i++, load_resultset));
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
+                checkFolderId(cdao, inFolder, check_permissions);
 
                 //Context of check is critical. TODO: Make independent!
                 checkShared(oid, inFolder, so, action, action_folder, check_permissions, cdao, check_special_action);
@@ -536,6 +537,24 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             load_resultset.close();
         }
         return cdao;
+    }
+
+    private void checkFolderId(CalendarDataObject cdao, int inFolder, boolean check_permissions) throws OXException {
+        if (!check_permissions) {
+            return;
+        }
+
+        if (cdao.getParentFolderID() == inFolder) {
+            return;
+        }
+
+        for (UserParticipant user : cdao.getUsers()) {
+            if (user.getPersonalFolderId() == inFolder) {
+                return;
+            }
+        }
+
+        throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
     }
 
     private void checkGeneralPermissions(final int oid, final int inFolder, final Connection readcon, final Session so, final Context ctx, final int action_folder, boolean check_permissions, final CalendarDataObject cdao, int check_special_action, String organizer, String uniqueId) throws OXException {

@@ -54,6 +54,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -90,7 +91,7 @@ public class ConformHtmlTest {
     }
 
     @Test
-    public void testConformHtml() {
+    public void testConformHtml() throws OXException {
         String content = "<table><tr>\n" +
             "<td style=\"background-color:#FFFFFF; height:52px; width:100px;\">\n" +
             "<span style = \"font-size:48px; font-family: Veranda; font-weight: bold; color: #6666FF;\">OX</span>\n" +
@@ -107,7 +108,7 @@ public class ConformHtmlTest {
     }
 
     @Test
-    public void testConformHtml2() {
+    public void testConformHtml2() throws OXException {
         String content = "<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>";
 
         String test = service.getConformHTML(content, "us-ascii");

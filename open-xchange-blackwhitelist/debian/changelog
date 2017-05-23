@@ -1,3 +1,33 @@
+open-xchange-blackwhitelist (7.6.3-28) stable; urgency=medium
+
+  * Build for patch 2017-05-15 (4133)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 08 May 2017 16:29:22 +0200
+
+open-xchange-blackwhitelist (7.6.3-27) stable; urgency=medium
+
+  * Build for patch 2017-04-21 (4079)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 18 Apr 2017 12:05:34 +0200
+
+open-xchange-blackwhitelist (7.6.3-26) stable; urgency=medium
+
+  * Build for patch 2017-04-03 (4047)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 31 Mar 2017 14:46:09 +0200
+
+open-xchange-blackwhitelist (7.6.3-25) stable; urgency=medium
+
+  * Build for patch 2017-02-24 (3991)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 24 Feb 2017 16:46:11 +0100
+
+open-xchange-blackwhitelist (7.6.3-24) stable; urgency=medium
+
+  * Build for patch 2017-02-20 (3949)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 08 Feb 2017 15:01:14 +0100
+
 open-xchange-blackwhitelist (7.6.3-23) stable; urgency=medium
 
   * Build for patch 2017-01-26 (3922)
