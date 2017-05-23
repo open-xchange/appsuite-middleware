@@ -1,0 +1,804 @@
+feature_name: Basic Server Configuration
+properties:
+  - key: com.openexchange.servlet.useRobotsMetaTag
+    description: |
+       Specifies whether the special "X-Robots-Tag" HTTP response header is set.
+    defaultValue: true
+    version: 7.8.4
+    reloadable: false
+    configcascadeAware: false
+    file: server.properties
+    packageName: open-xchange-core
+    tags: ["Server"]
+  - key: com.openexchange.servlet.robotsMetaTag
+    description: |
+      Specifies the value for the "X-Robots-Tag" HTTP response.  
+      See [[https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag]]
+    defaultValue: none
+    version: 7.8.4
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.servlet.useRobotsMetaTag
+    file: server.properties
+    packageName: open-xchange-core
+    tags: ["Server"]
+  - key: PrefetchEnabled
+    description: |
+      Enable or disable SearchIterator prefetch. If prefetch is enabled the underlying
+      ResultSet data is completely stored and all related resources are released
+      immediately when creating a SearchIterator.
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: UPLOAD_DIRECTORY
+    description: |
+      Upload Parameter. All uploads that are done by a client are temporarily saved
+      in that directory.
+    defaultValue: /var/spool/open-xchange/uploads
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: MAX_UPLOAD_SIZE
+    description: |
+      If the sum of all uploaded files in one request is greater than this value, the upload will be rejected.
+      This value can be overridden on a per-module basis by setting the [[MAX_UPLOAD_SIZE]] parameter in the modules
+      config file (attachment.properties or infostore.properties). Or it can be overriden on a per-user
+      basis by setting the upload_quota in the mail configuration of this user.
+      If this value is set to <code>0</code> and not overridden by the module config or user config uploads will be unrestricted.
+      The size is in bytes.
+    defaultValue: 104857600
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: MAX_UPLOAD_IDLE_TIME_MILLIS
+    description: |
+      The max. idle time in milliseconds for an uploaded file temporary stored in
+      upload directory.
+    defaultValue: 300000
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server","Limit"]
+  - key: MAX_BODY_SIZE
+    description: |
+      The max. HTTP body size.
+      Zero or less means infinite.
+
+      <b>Deprecated</b>:  
+      Use [[com.openexchange.servlet.maxBodySize]] instead.
+    defaultValue: 0
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.defaultMaxConcurrentAJAXRequests
+    description: |
+      The default max. number of allowed concurrent requests per user.
+      This property only has effect if no individual value has been specified for the active user.
+      A value less than or equal to zero means infinite.
+    defaultValue: 100
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"]
+  - key: DefaultEncoding
+    description: |
+      Default encoding for incoming HTTP requests.
+      This value MUST be equal to web server's default encoding.
+    defaultValue: UTF-8
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Encoding"] 
+  - key: com.openexchange.MinimumSearchCharacters
+    description: |
+      Minimum number of characters a search pattern must contain. A value of <code>0</code> means no minimum.
+      This should prevent slow searches for contacts or big responses in large contexts.
+    defaultValue: 0
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: PUBLISH_REVOKE
+    description: |
+      eMail address of a person that can be called if data has been published
+      and the actual owner of the data objects to the publication. If left empty or not defined, 
+      the eMail address of the context admin is used.
+    defaultValue: empty
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.IPCheck
+    description: |
+      On session validation of every request the client IP address is compared with the client IP address used for the login request. If this
+      configuration parameter is set to <code>true</code> and the client IP addresses do not match the request, then it will be denied and the denied request is
+      logged with level info. Setting this parameter to <code>false</code> will only log the different client IP addresses with debug level.
+      
+      <b>Warning!</b>  
+      This should be only set to <code>false</code> if you know what you are doing and if all requests are secure - requests are always encrypted
+      by using HTTPS.
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Security"] 
+  - key: com.openexchange.IPMaskV4
+    description: |
+      Subnet mask for accepting IP-ranges.
+      Using CIDR-Notation for v4 and v6 or dotted decimal only for v4.  
+      Examples:
+      <pre>
+      com.openexchange.IPMaskV4=255.255.255.0
+      com.openexchange.IPMaskV4=/24
+      com.openexchange.IPMaskV6=/60
+      </pre>
+    defaultValue: empty
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.IPMaskV6
+    description: |
+      Subnet mask for accepting IP-ranges.
+      Using CIDR-Notation for v4 and v6 or dotted decimal only for v4.  
+      Examples:
+      <pre>
+      com.openexchange.IPMaskV4=255.255.255.0
+      com.openexchange.IPMaskV4=/24
+      com.openexchange.IPMaskV6=/60
+      </pre>
+    defaultValue: empty
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.IPCheckWhitelist
+    description: |
+      Specify a comma-separated list of client patterns that do bypass IP check. E.g.: 
+      <pre>
+      com.openexchange.IPCheckWhitelist="Mobile App*", "Foo*"
+      </pre>
+    defaultValue: open-xchange-mailapp, open-xchange-mobile-api-facade
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "White List"] 
+  - key: com.openexchange.UIWebPath
+    description: |
+      Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The default
+      conforms to the path where the UI is installed by the standard packages on the web server. This path is used for the [uiwebpath].  
+      For the Open-Xchange 6 frontend the path needs to be configured to <code>/ox6/index.html</code>.  
+      For the App Suite frontend the path needs to be configured to <code>/appsuite/</code>.
+    defaultValue: /appsuite/
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.dispatcher.prefix
+    description: |
+      Specify the prefix for Central Dispatcher framework (the Open-Xchange AJAX interface).
+    defaultValue: /ajax/
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.cookie.ttl
+    description: |
+       Special identifier "web-browser" to let the Cookie(s) be deleted when the Web browser exits.
+    defaultValue: 1W
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.cookie.httpOnly
+    description: |
+       Whether the "; HttpOnly" should be appended to server cookies.
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.cookie.hash
+    description: |
+      Whether the hash value for the cookie name should be calculated or remembered from the session for each request.  
+      Possible values are:
+      <ul>
+        <li><code>calculate</code> - Calculate hash from client login parameter and HTTP header User-Agent (may be modified through [[com.openexchange.cookie.hash.fields]]).</li>
+        <li><code>remember</code> - Remember once calculated hash in session and use it for the whole session life time (less secure).</li>
+      </ul>
+    defaultValue: calculate
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Security"] 
+  - key: com.openexchange.cookie.hash.salt
+    description: |
+       Cookie hash salt to avoid a potential brute force attack to cookie hashes.
+       This value should be replaced by any random String with at least 16 Characters.
+    defaultValue: replaceMe1234567890
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Security"] 
+  - key: com.openexchange.forceHTTPS
+    description: |
+       If an HTTPS connection is detected the cookie is automatically marked as secure. This tells the browser only to send the cookie over
+       encrypted connections. If HTTPS is terminated in front by some load balancer only HTTP is detected. Then this parameter can force to set
+       the secure flag for cookies. Additionally all links generated inside the groupware to point at itself will use the 'https://'' protocol prefix
+       when this is set. Use this flag to indicate that HTTPS termination happens elsewhere.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Security"] 
+  - key: com.openexchange.servlet.maxActiveSessions
+    description: |
+       The maximum number of active sessions that will be created by this Manager, or <code>-1</code> for no limit.
+    defaultValue: 250000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.servlet.maxInactiveInterval
+    description: |
+       The initial maximum time interval, in seconds, between client requests before a HTTP session is invalidated.
+       This only applies to the HTTP session controlled by special JSESSIONID cookie, and does therefore not influence life-time of Groupware session.
+       A negative value will result in sessions never timing out.
+       If the attribute is not provided, a default of 1800 seconds is used.
+    defaultValue: 1800
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.servlet.maxBodySize
+    description: |
+       Specify the maximum body size allowed being transferred via PUT or POST method.
+       A request exceeding that limit will be responded with a 500 error and that request is discarded.
+       Equal or less than zero means no restriction concerning body size.
+    defaultValue: 104857600
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.servlet.echoHeaderName
+    description: |
+       Specify the name of the echo header whose value is echoed for each request providing that header.
+    defaultValue: X-Echo-Header
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.servlet.contentSecurityPolicy
+    description: |
+       The value of Content-Security-Policy header.
+       Please refer to an Introduction to Content Security Policy ([[http://www.html5rocks.com/en/tutorials/security/content-security-policy/]]).
+       A empty value means no Content-Security-Policy header.
+    defaultValue: empty
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Security"] 
+  - key: com.openexchange.servlet.maxRateTimeWindow
+    description: |
+      Specify the rate limit' time window in milliseconds in which to track incoming HTTP requests.
+    defaultValue: 300000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.servlet.maxRate
+    description: |
+      Specify the rate limit that applies to incoming HTTP requests.
+      A client that exceeds that limit will receive a "429 Too Many Requests" HTTP error code.
+      That rate limit acts like a sliding window time frame; meaning that it considers only
+      requests that fit into time windows specified through [[com.openexchange.servlet.maxRateTimeWindow]] from current time stamp:
+      <pre>
+      window-end := $now
+      window-start := $window-end - $maxRateTimeWindow
+      </pre>
+    defaultValue: 1500
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.servlet.maxRateTimeWindow
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.servlet.maxRateLenientModules
+    description: |
+      Specify those AJAX-accessible modules which are excluded from the rate limit checks.
+    defaultValue: rt, system
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.servlet.maxRateLenientClients
+    description: |
+      Specify (wildcard notation supported) those User-Agents which are excluded from the rate limit checks.
+    defaultValue: Open-Xchange .NET HTTP Client*, Open-Xchange USM HTTP Client*, Jakarta Commons-HttpClient*
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.servlet.maxRateLenientRemoteAddresses
+    description: |
+      Specify (wildcard notation supported) those remote addresses/IPs which are excluded from the rate limit checks.
+    defaultValue: empty
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.servlet.maxRateKeyPartProviders
+    description: |
+      Specify how to associate a rate limit with a HTTP request.
+      By default a rate limit is associated with that tuple of { remote-address, user-agent }.
+      This does not apply to all scenarios. Therefore it is possible to specify more parts in a comma-separated list that build up the key.  
+      Possible values are:
+      <ul>
+        <li><code>http-session</code> - The identifier of the request-associated HTTP session aka JSESSIONID cookie.</li>
+        <li><code>cookie-</code> + &lt;cookie-name&gt; - Specifies the (ignore-case) name of the arbitrary cookie whose value is considered. If missing it is ignored.</li>
+        <li><code>header-</code> + &lt;header-name&gt; - Specifies the (ignore-case) name of the arbitrary header whose value is considered. If missing it is ignored.</li>
+        <li><code>parameter-</code> + &lt;parameter-name&gt; - Specifies the (ignore-case) name of the arbitrary parameter whose value is considered. If missing it is ignored.</li>
+      </ul>
+      E.g.: 
+      <pre>
+      com.openexchange.servlet.maxRateKeyPartProviders=cookie-My-Secret-Cookie, parameter-request_num
+      </pre>
+    defaultValue:
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.log.maxMessageLength
+    description: |
+      Specifies max. message length to log. Messages that exceed that limit are split.
+      A value of less than <code>1</code> means unlimited.
+    defaultValue: -1
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.json.maxSize
+    description: |
+      Specify the max. number of allowed attributes for a JSON object.
+    defaultValue: 2500
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.webdav.disabled
+    description: |
+      Setting this to <code>true</code> means that the WebDav XML servlets for attachments, calendar, contacts and tasks will be disabled.
+      On requests to these servlets a service-not-available (503) response will be sent. See "webdav-disabled-message.txt"
+      to customize the detailed error message that will be sent.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.ajax.response.includeStackTraceOnError
+    description: |
+      Whether the JSON response object should provide the stack trace of the associated exception.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core  
+    tags: ["Server"] 
+  - key: com.openexchange.ajax.response.includeArguments
+    description: |
+      Whether the JSON response object in case of an error should include the exception arguments or not.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"]  
+  - key: com.openexchange.connector.networkListenerHost
+    description: |
+      The host for the connector's http network listener. Set to <code>*</code> if you
+      want to listen on all available interfaces.
+    defaultValue: 127.0.0.1
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server", "Host"] 
+  - key: com.openexchange.connector.networkListenerPort
+    description: |
+      The default port for the connector's http network listener.
+    defaultValue: 8009
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server", "Port"]   
+  - key: com.openexchange.connector.networkSslListenerPort
+    description: |
+      The default port for the connector's https network listener.
+    defaultValue: 8010
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Port"] 
+  - key: com.openexchange.connector.maxRequestParameters
+    description: |
+      Specify the max. number of allowed request parameters for the connector http.
+    defaultValue: 1000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core  
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.connector.shutdownFast
+    description: |
+      Controls the shut-down behavior of the HTTP connector.
+      
+      If fast shut-down is enabled, the HTTP connector is attempted to be stopped as fast as possible.
+      This could lead to currently in-progress requests to quit with errors (due to absent services); e.g. NullPointerExceptions.
+      
+      If disabled an orderly shut-down is initiated; waiting for currently running requests to terminate. This may slow down
+      the shut-down sequence.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server"] 
+  - key: com.openexchange.connector.awaitShutDownSeconds
+    description: |
+      Specify the number of seconds to await an orderly shut-down
+      (only effective if [[com.openexchange.connector.shutdownFast]] is set to <code>false</code>)
+      
+      A value of less than or equal to <code>0</code> (zero) will cause to wait forever; otherwise a hard shut-down is initiated if the wait time elapsed
+      the shut-down sequence.
+    defaultValue: 90
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server"] 
+  - key: com.openexchange.server.backendRoute
+    description: |
+      To enable proper load balancing and request routing like: 
+      <pre>
+      {client1, client2 ...} --> balancer --> {backend1, backend2 ...} 
+      </pre>
+      we have to append a backend route to the JSESSIONID cookies separated by a '.'. It's important that this backend
+      route is unique for every single backend behind the load balancer.
+      The string has to be a sequence of characters excluding semi-colon, comma and
+      white space so the JSESSIONID cookie stays in accordance with the cookie
+      specification after we append the backendroute to it.
+    defaultValue: OX0
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core  
+    tags: ["Server"] 
+  - key: com.openexchange.server.considerXForwards
+    description: |
+      Decides if we should consider X-Forward-Headers that reach the backend.
+      Those can be spoofed by clients so we have to make sure to consider the headers only if the proxy/proxies reliably override those
+      headers for incoming requests.
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core   
+    tags: ["Server"] 
+  - key: com.openexchange.server.forHeader
+    description: |
+      The name of the protocolHeader used to identify the originating IP address of
+      a client connecting to a web server through an HTTP proxy or load balancer.
+      This is needed for grizzly based setups that make use of http proxying.
+      If the header isn't found the first proxy in front of grizzly will be used
+      as originating IP/remote address.
+    defaultValue: X-Forwarded-For
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"]  
+  - key: com.openexchange.server.knownProxies
+    description: |
+      A list of know proxies in front of our httpserver/balancer as comma separated IPs. E.g.: 192.168.1.50, 192.168.1.51
+    defaultValue: empty
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server"] 
+  - key: com.openexchange.html.css.parse.timeout
+    description: |
+      Specify the amount of seconds to wait for a CSS content being parsed.
+      This property influences parsing of HTML messages. If CSS could not be parsed in time, CSS is stripped from message's content.
+    defaultValue: 4
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core 
+    tags: ["Server", "Timeout"] 
+  - key: com.openexchange.log.suppressedCategories
+    description: |
+      Specify the OXException categories (comma separated) that shall not be logged.
+      The Exception itself will still be logged as configured, but the StackTraces are omitted.
+      Valid categories are:
+      <ul>
+        <li><code>ERROR</code></li>
+        <li><code>TRY_AGAIN</code></li>
+        <li><code>USER_INPUT</code></li>
+        <li><code>PERMISSION_DENIED</code></li>
+        <li><code>CONFIGURATION</code></li>
+        <li><code>CONNECTIVITY</code></li>
+        <li><code>SERVICE_DOWN</code></li>
+        <li><code>TRUNCATED</code></li>
+        <li><code>CONFLICT</code></li>
+        <li><code>CAPACITY</code></li>
+        <li><code>WARNING</code></li>
+      </ul>
+    defaultValue: USER_INPUT
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.rest.services.basic-auth.login
+    description: |
+      Specify the user name used for HTTP basic auth by internal REST servlet.
+      Both settings need to be set in order to have basic auth enabled - [[com.openexchange.rest.services.basic-auth.login]] and [[com.openexchange.rest.services.basic-auth.password]].
+      This value needs to be changed.
+    defaultValue:
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.rest.services.basic-auth.password
+    file: Server.properties
+    packageName: open-xchange-core  
+    tags: ["Server", "Credential"] 
+  - key: com.openexchange.rest.services.basic-auth.password
+    description: |
+      Specify the password used for HTTP basic auth by internal REST servlet.
+      Both settings need to be set in order to have basic auth enabled - [[com.openexchange.rest.services.basic-auth.login]] and [[com.openexchange.rest.services.basic-auth.password]]
+      This value needs to be changed.
+    defaultValue:
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.rest.services.basic-auth.login
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Credential"] 
+  - key: com.openexchange.preview.thumbnail.blockingWorker
+    description: |
+      The backend either delivers a thumbnail when it's available from cache or fails fast while initiating the thumbnail creation/caching in
+      the background. The advantage is that clients aren't blocked and can simply retry later when the thumbnail can be delivered from cache.
+
+      If there is no cache configured for the user/context:  
+        - we either have to generate the thumbnail on the fly which has the potential to block the whole client by occupying the max number of
+          allowed connections to the domain.  
+        - or simply fail fast which leaves the client responsive but without thumbnails.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.webdav.recursiveMarshallingLimit
+    description: |
+      Defines a hard limit when marshalling elements in WebDAV responses
+      recursively. This applies to all WebDAV responses with a depth >= 1,
+      including CardDAV and CalDAV. This setting is not meant as a quota
+      restriction, instead it is meant to protect against possibly very large
+      responses. A value of <code>0</code> or smaller disables the
+      limitation.
+    defaultValue: 250000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.tools.images.transformations.maxSize
+    description: |
+      Specifies the max. size (in bytes) for an image that is allowed to be transformed.
+      If exceeded image transformation is rejected.
+    defaultValue: 10485760
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.tools.images.transformations.maxResolution
+    description: |
+      Specifies the max. resolution (in pixels) for an image that is allowed to be transformed.
+      If exceeded image transformation is rejected.
+    defaultValue: 26824090
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Limit"] 
+  - key: com.openexchange.tools.images.transformations.waitTimeoutSeconds
+    description: |
+      Specifies the max. time (in seconds) to await an image transformation computation to complete.
+      If exceeded image transformation is cancelled.
+    defaultValue: 10
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Timeout"] 
+  - key: com.openexchange.tools.images.transformations.preferThumbnailThreshold
+    description: |
+      Configures up to which factor of the requested image's size an embedded 
+      thumbnail may be used, even if this thumbnail's size does not strictly 
+      fulfill the requested resolution. 
+      For example, if a 200x150 preview is requested, and an embedded thumbnail
+      is available with 160x120, and the factor is configured to 0.8, this
+      thumbnail image will be used - while smaller ones won't. 
+      A value of <code>1</code> only allows thumbnails if the requested preview size can be 
+      fulfilled entirely; a negative value disables usage of embedded thumbnails.
+    defaultValue: 0.8
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.ical.updateTimezones
+    description: |
+      Configures whether timezone definitions for interpreting iCalendar files 
+      should be updated automatically from the internet or not. If disabled, a 
+      static list of timezone defintions is used, otherwise, possibly updated 
+      timezones are retrieved through tzurl.org upon first usage. 
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server", "Timezone"] 

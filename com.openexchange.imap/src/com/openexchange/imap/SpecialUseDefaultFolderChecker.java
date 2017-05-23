@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -65,7 +66,7 @@ import com.sun.mail.imap.IMAPStore;
 import gnu.trove.map.TIntObjectMap;
 
 /**
- * {@link SpecialUseDefaultFolderChecker} - The IMAP default folder checker.
+ * {@link SpecialUseDefaultFolderChecker} - The IMAP default folder checker with respect to .
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -95,32 +96,43 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
         this.hasCreateSpecialUse = hasCreateSpecialUse;
     }
 
+    private boolean isAllowedToSetSpecialUse() {
+        boolean setSpecialUseFlags = false;
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        if (null != configViewFactory) {
+            try {
+                ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+                ComposedConfigProperty<Boolean> property = view.property(SET_SPECIAL_USE_PROPERTY, Boolean.class);
+                if (property.isDefined()) {
+                    Boolean b = property.get();
+                    if (null != b) {
+                        setSpecialUseFlags = b.booleanValue();
+                    }
+                }
+            } catch (OXException e) {
+                LOG.error("", e);
+                // continue with default value
+            }
+        }
+        return setSpecialUseFlags;
+    }
+
     @Override
     protected boolean setSpecialUseForExisting() {
-        return hasCreateSpecialUse;
+        return hasCreateSpecialUse && isAllowedToSetSpecialUse();
     }
 
     @Override
     protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index, TIntObjectMap<String> specialUseInfo) throws MessagingException {
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
-        boolean setSpecialUseFlags = false;
-        try {
-            ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
-            setSpecialUseFlags = view.opt(SET_SPECIAL_USE_PROPERTY, Boolean.class, false);
-        } catch (OXException e1) {
-            LOG.error(e1.getMessage());
-            // continue with default value
-        }
-
         if (!f.exists()) {
             try {
-                if (hasCreateSpecialUse && setSpecialUseFlags && specialUseInfo.get(index) == null) {
+                if (hasCreateSpecialUse && isAllowedToSetSpecialUse() && specialUseInfo.get(index) == null) {
                     // E.g. CREATE MyDrafts (USE (\Drafts))
                     List<String> specialUses = index <= StorageUtility.INDEX_TRASH ? Collections.singletonList(SPECIAL_USES[index]) : null;
                     IMAPCommandsCollection.createFolder(f, sep, type, false, specialUses);
                 } else {
                     IMAPCommandsCollection.createFolder(f, sep, type, false);
-                    if (hasMetadata && setSpecialUseFlags && index <= StorageUtility.INDEX_TRASH && specialUseInfo.get(index) == null) {
+                    if (hasMetadata && isAllowedToSetSpecialUse() && index <= StorageUtility.INDEX_TRASH && specialUseInfo.get(index) == null) {
                         // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
                         String flag = SPECIAL_USES[index];
                         try {
@@ -136,7 +148,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 throw e;
             }
         } else {
-            if (hasMetadata && setSpecialUseFlags && index <= StorageUtility.INDEX_TRASH && specialUseInfo.get(index) == null) {
+            if (hasMetadata && isAllowedToSetSpecialUse() && index <= StorageUtility.INDEX_TRASH && specialUseInfo.get(index) == null) {
                 // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
                 String flag = SPECIAL_USES[index];
                 try {

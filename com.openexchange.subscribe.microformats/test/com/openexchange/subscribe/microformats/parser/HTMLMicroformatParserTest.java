@@ -49,8 +49,11 @@
 
 package com.openexchange.subscribe.microformats.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 
 
@@ -61,7 +64,8 @@ import com.openexchange.exception.OXException;
  *
  */
 public class HTMLMicroformatParserTest extends ParserTest {
-    public void testIncorrectXML() throws OXException {
+         @Test
+     public void testIncorrectXML() throws OXException {
         String text = "<html><head><meta attr=\"value\"></head><body><div class=\"ox_contact\"><span class=\"ox_givenName\">Bla</span>&</div>";
         List<Map<String, String>> result = parse(text);
 

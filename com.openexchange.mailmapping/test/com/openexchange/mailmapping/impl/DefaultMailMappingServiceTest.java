@@ -49,6 +49,10 @@
 
 package com.openexchange.mailmapping.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.context.ContextService;
@@ -58,8 +62,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.server.MockingServiceLookup;
 import com.openexchange.user.UserService;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
 
 /**
  * {@link DefaultMailMappingServiceTest}
@@ -81,8 +83,8 @@ public class DefaultMailMappingServiceTest {
         assertNull(service.resolve(null));
     }
 
-    @Test
-    public void testResolve() throws OXException {
+     @Test
+     public void testResolve() throws OXException {
 
         ContextService contexts = services.mock(ContextService.class);
         UserService users = services.mock(UserService.class);
@@ -104,8 +106,8 @@ public class DefaultMailMappingServiceTest {
         assertEquals(12, resolved.getUserID());
     }
 
-    @Test
-    public void testResolveUnknownUser() throws OXException {
+     @Test
+     public void testResolveUnknownUser() throws OXException {
         ContextService contexts = services.mock(ContextService.class);
         UserService users = services.mock(UserService.class);
 
@@ -123,8 +125,8 @@ public class DefaultMailMappingServiceTest {
         assertNull(resolved);
     }
 
-    @Test
-    public void testResolveUnknownContext() throws OXException {
+     @Test
+     public void testResolveUnknownContext() throws OXException {
         ContextService contexts = services.mock(ContextService.class);
 
         when(contexts.getContextId("test.invalid")).thenReturn(0);

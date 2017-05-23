@@ -53,7 +53,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceGroup;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.types.Response;
@@ -82,7 +81,7 @@ public class ResponseParser {
             if (responseElements.size() == 1) {
                 response = parseGroupUserResponse((Element) responseElements.get(0));
             } else {
-                throw new TestException("invalid number of response elements in response!");
+                throw OXException.general("invalid number of response elements in response!");
             }
         } else {
             response = new Response[responseElements.size()];
@@ -105,20 +104,20 @@ public class ResponseParser {
             response.setDataObject(parseList(eProp));
         } else {
             switch (module) {
-            case Types.APPOINTMENT:
-                response.setDataObject(parseAppointmentResponse(eProp));
-                break;
-            case Types.CONTACT:
-                response.setDataObject(parseContactResponse(eProp));
-                break;
-            case Types.FOLDER:
-                response.setDataObject(parseFolderResponse(eProp));
-                break;
-            case Types.TASK:
-                response.setDataObject(parseTaskResponse(eProp));
-                break;
-            default:
-                throw new TestException("invalid module!");
+                case Types.APPOINTMENT:
+                    response.setDataObject(parseAppointmentResponse(eProp));
+                    break;
+                case Types.CONTACT:
+                    response.setDataObject(parseContactResponse(eProp));
+                    break;
+                case Types.FOLDER:
+                    response.setDataObject(parseFolderResponse(eProp));
+                    break;
+                case Types.TASK:
+                    response.setDataObject(parseTaskResponse(eProp));
+                    break;
+                default:
+                    throw OXException.general("invalid module!");
             }
         }
 

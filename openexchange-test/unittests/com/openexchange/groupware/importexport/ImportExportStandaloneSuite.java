@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.groupware.importexport.importers.CsvDoesDifferentLanguages;
 import com.openexchange.groupware.importexport.mappers.PropertyDrivenMapperTest;
 
@@ -60,37 +60,32 @@ import com.openexchange.groupware.importexport.mappers.PropertyDrivenMapperTest;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class ImportExportStandaloneSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    ContactFieldTester.class,
+    ContactSwitcherTester.class,
+    CSVParserTest.class,
+    SizedInputStreamTest.class,
 
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		//basics
-		tests.addTestSuite( ContactFieldTester.class );
-		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTest( CSVParserTest.suite() );
-		//tests.addTestSuite( com.openexchange.groupware.importexport.OXContainerConverterTest.class );
-		//tests.addTestSuite( com.openexchange.tools.versit.OXContainerConverterTest.class );
-		tests.addTest( SizedInputStreamTest.suite() );
+    //CSV
+    CSVContactImportTest.class,
+    CSVContactExportTest.class,
+    OutlookCSVContactImportTest.class,
+    CsvDoesDifferentLanguages.class,
+    PropertyDrivenMapperTest.class,
 
-		//CSV
-		tests.addTest( CSVContactImportTest.suite() );
-		tests.addTest( CSVContactExportTest.suite() );
-		tests.addTest( OutlookCSVContactImportTest.suite() );
-        tests.addTest(CsvDoesDifferentLanguages.suite());
-        tests.addTestSuite(PropertyDrivenMapperTest.class);
+    //ICAL
+    ICalImportTest.class,
 
-		//ICAL
-		tests.addTest( ICalImportTest.suite() );
+    //separate tests for reported bugs
+    Bug7732Test.class,
+    //       Bug7470Test.class , //FIXME
+    Bug8475.class,
+    Bug8653.class,
+    Bug8654.class,
+    Bug8681Suite.class,
 
-		//separate tests for reported bugs
-		tests.addTest( Bug7732Test.suite() );
-//		tests.addTest( Bug7470Test.suite() ); //FIXME
-		tests.addTest( Bug8475.suite() );
-		tests.addTest( Bug8527.suite() );
-		tests.addTest( Bug8653.suite() );
-		tests.addTest( Bug8654.suite() );
-		tests.addTest( Bug8681Suite.suite() );
+})
+public class ImportExportStandaloneSuite {
 
-		return tests;
-	}
 }

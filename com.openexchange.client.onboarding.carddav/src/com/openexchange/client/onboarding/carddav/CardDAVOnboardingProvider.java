@@ -52,8 +52,10 @@ package com.openexchange.client.onboarding.carddav;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
 import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
@@ -65,6 +67,7 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.carddav.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.net.HostAndPort;
 import com.openexchange.client.onboarding.net.NetUtility;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
@@ -76,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -89,20 +93,29 @@ import com.openexchange.session.Session;
  */
 public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAVOnboardingProvider.class);
+
     private final ServiceLookup services;
     private final String identifier;
     private final Set<Device> supportedDevices;
     private final Set<OnboardingType> supportedTypes;
+    private final ServiceListing<CustomLoginSource> loginSources;
 
     /**
      * Initializes a new {@link CardDAVOnboardingProvider}.
      */
-    public CardDAVOnboardingProvider(ServiceLookup services) {
+    public CardDAVOnboardingProvider(ServiceListing<CustomLoginSource> loginSources, ServiceLookup services) {
         super();
+        this.loginSources = loginSources;
         this.services = services;
         identifier = BuiltInProvider.CARDDAV.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC);
         supportedTypes = EnumSet.of(OnboardingType.PLIST, OnboardingType.MANUAL);
+    }
+
+    private CustomLoginSource getHighestRankedCustomLoginSource() {
+        List<CustomLoginSource> sources = loginSources.getServiceList();
+        return sources.isEmpty() ? null : sources.get(0);
     }
 
     @Override
@@ -150,7 +163,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         }
 
         Scenario scenario = request.getScenario();
-        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+        if (!Device.getActionsFor(request.getClientDevice(), device, scenario.getType(), session).contains(request.getAction())) {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
@@ -182,7 +195,22 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
-        configuration.put(CARDDAV_LOGIN_FIELD, session.getLogin());
+        String login;
+        {
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.carddav.login.customsource", Boolean.FALSE, session);
+            if (customSource.booleanValue()) {
+                CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
+                if (null == customLoginSource) {
+                    LOG.warn("Unable to find any CustomLoginSource services! Falling back to login name.");
+                    login = session.getLogin();
+                } else {
+                    login = customLoginSource.getCardDAVLogin(session.getUserId(), session.getContextId());
+                }
+            } else {
+                login = session.getLogin();
+            }
+        }
+        configuration.put(CARDDAV_LOGIN_FIELD, login);
         configuration.put(CARDDAV_URL_FIELD, getCardDAVUrl(false, request.getHostData(), session.getUserId(), session.getContextId()));
         return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
@@ -217,7 +245,22 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadIdentifier("com.open-xchange.carddav");
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
-        payloadContent.addStringValue("CardDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
+        String login;
+        {
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.carddav.login.customsource", Boolean.FALSE, userId, contextId);
+            if (customSource.booleanValue()) {
+                CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
+                if (null == customLoginSource) {
+                    LOG.warn("Unable to find any CustomLoginSource services! Falling back to login name.");
+                    login = OnboardingUtility.getUserLogin(userId, contextId);
+                } else {
+                    login = customLoginSource.getCardDAVLogin(userId, contextId);
+                }
+            } else {
+                login = OnboardingUtility.getUserLogin(userId, contextId);
+            }
+        }
+        payloadContent.addStringValue("CardDAVUsername", login);
 
         {
             String cardDAVUrl = getCardDAVUrl(false, null, userId, contextId);

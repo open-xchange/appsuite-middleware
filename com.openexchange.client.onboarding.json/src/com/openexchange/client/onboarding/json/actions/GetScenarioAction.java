@@ -52,8 +52,11 @@ package com.openexchange.client.onboarding.json.actions;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.client.onboarding.ClientDevice;
+import com.openexchange.client.onboarding.ClientDevices;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DeviceAwareScenario;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
@@ -84,7 +87,17 @@ public class GetScenarioAction extends AbstractOnboardingAction {
         String sCompositeId = requestData.checkParameter("id");
         CompositeId compositeId = OnboardingUtility.parseCompositeId(sCompositeId);
 
-        DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), compositeId.getDevice(), session);
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
+
+        if (false == clientDevice.implies(compositeId.getDevice())) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(compositeId.getScenarioId());
+        }
+
+        DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), clientDevice, compositeId.getDevice(), session);
         return new AJAXRequestResult(scenario, "onboardingScenario");
     }
 

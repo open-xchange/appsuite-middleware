@@ -50,17 +50,26 @@
 package com.openexchange.http.grizzly.osgi;
 
 import static com.openexchange.servlet.Constants.FILTER_PATHS;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.openexchange.http.grizzly.service.http.FilterProxy;
+import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
 import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
-import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 
 /**
  * {@link ServletFilterTracker} - Tracks services with the type {@link Filter} and updates the central {@link OSGiMainHandler}
@@ -138,7 +147,7 @@ import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.6.1
  */
-public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, FilterProxy> {
+public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Filter> {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletFilterTracker.class);
 
@@ -159,41 +168,99 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
     private final BundleContext context;
+    private final HttpServiceFactory httpServiceFactory;
+    private final Map<Filter, List<Filter>> wrappersFor;
 
     /**
      * Initializes a new {@link ServletFilterTracker}.
      */
-    public ServletFilterTracker(BundleContext context) {
+    public ServletFilterTracker(HttpServiceFactory httpServiceFactory, BundleContext context) {
         super();
+        this.httpServiceFactory = httpServiceFactory;
         this.context = context;
+        wrappersFor = new HashMap<>(8, 0.9F);
     }
 
     @Override
-    public FilterProxy addingService(ServiceReference<Filter> reference) {
+    public synchronized Filter addingService(ServiceReference<Filter> reference) {
         try {
             Filter filter = context.getService(reference);
+
             String[] paths = getPathsFrom(reference);
+            if (null == paths) {
+                httpServiceFactory.addServletFilter(filter, "/*");
+            } else {
+                int len = paths.length;
+                if (len == 0) {
+                    httpServiceFactory.addServletFilter(filter, "/*");
+                } else if (len == 1) {
+                    httpServiceFactory.addServletFilter(filter, paths[0]);
+                } else {
+                    List<Filter> wrappers = new LinkedList<>();
+                    boolean error = true;
+                    try {
+                        httpServiceFactory.addServletFilter(filter, paths[0]);
+                        wrappers.add(filter);
 
-            FilterProxy proxy = new FilterProxy(filter, paths, getRanking(reference));
-            ServletFilterRegistration.getInstance().put(proxy);
+                        // Create new wrapper instances for additional paths to not mess up Grizzly
+                        for (int i = 1; i < len; i++) {
+                            Filter wrapper = new WrappingFilter(filter);
+                            httpServiceFactory.addServletFilter(wrapper, paths[i]);
+                            wrappers.add(wrapper);
+                        }
 
-            return proxy;
+                        // Everything went well... Only keep real wrapper instances in list
+                        wrappers.remove(0);
+                        wrappersFor.put(filter, wrappers);
+
+                        error = false;
+                    } finally {
+                        if (error) {
+                            for (Filter toRemove : wrappers) {
+                                removeFilterSafe(toRemove);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return filter;
         } catch (InvalidFilterPathsException e) {
             LOG.error("Not adding servlet filter because of malformed path.info", e);
+            context.ungetService(reference);
+            return null;
+        } catch (Exception e) {
+            LOG.error("Failed to register filter", e);
             context.ungetService(reference);
             return null;
         }
     }
 
     @Override
-    public void modifiedService(ServiceReference<Filter> reference, FilterProxy proxy) {
+    public void modifiedService(ServiceReference<Filter> reference, Filter filter) {
         // Nothing
     }
 
     @Override
-    public void removedService(ServiceReference<Filter> reference, FilterProxy proxy) {
-        ServletFilterRegistration.getInstance().remove(proxy);
+    public synchronized void removedService(ServiceReference<Filter> reference, Filter filter) {
+        removeFilterSafe(filter);
+
+        List<Filter> wrappers = wrappersFor.remove(filter);
+        if (null != wrappers) {
+            for (Filter wrapper : wrappers) {
+                removeFilterSafe(wrapper);
+            }
+        }
+
         context.ungetService(reference);
+    }
+
+    private void removeFilterSafe(Filter toRemove) {
+        try {
+            httpServiceFactory.removeServletFilter(toRemove);
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
     private String[] getPathsFrom(ServiceReference<Filter> reference) throws InvalidFilterPathsException {
@@ -272,6 +339,33 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
             }
         }
         return ranking;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
+
+    private static class WrappingFilter implements Filter {
+
+        private final Filter delegate;
+
+        WrappingFilter(Filter delegate) {
+            super();
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void init(FilterConfig filterConfig) throws ServletException {
+            delegate.init(filterConfig);
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+            delegate.doFilter(request, response, chain);
+        }
+
+        @Override
+        public void destroy() {
+            delegate.destroy();
+        }
     }
 
 }

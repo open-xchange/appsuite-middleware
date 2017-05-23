@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.find.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,15 +65,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.RequestOptions;
@@ -89,7 +97,6 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 
-
 /**
  * {@link BasicMailTest}
  *
@@ -100,39 +107,31 @@ public class BasicMailTest extends AbstractMailFindTest {
 
     private FolderObject testFolder;
 
-    public BasicMailTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        String inboxFolder = client.getValues().getInboxFolder();
+        String inboxFolder = getClient().getValues().getInboxFolder();
         String folderName = "findApiMailTestFolder_" + System.currentTimeMillis();
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.MAIL);
         testFolder.setFullName(inboxFolder + "/" + folderName);
         testFolder.setFolderName(folderName);
-        testFolder = folderManager.insertFolderOnServer(testFolder);
+        testFolder = ftm.insertFolderOnServer(testFolder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testAutocomplete() throws Exception {
         /*
          * Set an image for autocomplete tests
          */
-        GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
-        GetResponse getResponse = client.execute(getRequest);
+        GetRequest getRequest = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
         Contact ownContact = getResponse.getContact();
         Contact modified = new Contact();
         modified.setObjectID(ownContact.getObjectID());
 
-        MailConfig.init();
-        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        AJAXConfig.init();
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         byte[] image = FileUtils.readFileToByteArray(new File(testDataDir, "contact_image.png"));
         modified.setImage1(image);
         modified.setImageContentType("image/png");
@@ -143,13 +142,11 @@ public class BasicMailTest extends AbstractMailFindTest {
          * Create a distribution list
          */
         Contact distributionList = new Contact();
-        distributionList.setParentFolderID(client.getValues().getPrivateContactFolder());
+        distributionList.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         distributionList.setSurName(randomUID());
         distributionList.setGivenName(randomUID());
         distributionList.setDisplayName(distributionList.getGivenName() + " " + distributionList.getSurName());
-        distributionList.setDistributionList(new DistributionListEntryObject[] {
-	        new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT),
-	        new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT)
+        distributionList.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT), new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT)
         });
         distributionList = contactManager.newAction(distributionList);
 
@@ -158,7 +155,7 @@ public class BasicMailTest extends AbstractMailFindTest {
          */
         String prefix = defaultAddress.substring(0, 3);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), prepareFacets());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         List<Facet> facets = autocompleteResponse.getFacets();
         FacetValue found = detectContact(facets);
         assertNotNull("own contact was missing in response", found);
@@ -191,14 +188,15 @@ public class BasicMailTest extends AbstractMailFindTest {
         DefaultFacet contactFacet = (DefaultFacet) findByType(MailFacetType.CONTACTS, facets);
         boolean dlFound = false;
         for (FacetValue v : contactFacet.getValues()) {
-        	if (v.getDisplayItem().getDisplayName().contains(distributionList.getSurName())) {
-        		dlFound = true;
-        		break;
-        	}
+            if (v.getDisplayItem().getDisplayName().contains(distributionList.getSurName())) {
+                dlFound = true;
+                break;
+            }
         }
         assertFalse("Distribution list was found but should not", dlFound);
     }
 
+    @Test
     public void testSearch() throws Exception {
         /*
          * Import test mail
@@ -232,6 +230,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertEquals("Mail found but should not", 0, documents.size());
     }
 
+    @Test
     public void testMultipleGlobalFacets() throws Exception {
         /*
          * Import test mail
@@ -259,6 +258,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertEquals("Mail found but should not", 0, documents.size());
     }
 
+    @Test
     public void testPagination() throws Exception {
         /*
          * Import test mails
@@ -282,6 +282,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertEquals("Should only find 0 mails", 0, documents.size());
     }
 
+    @Test
     public void testDateFilter() throws Exception {
         Calendar calWithinLastWeek = new GregorianCalendar(TimeZones.UTC);
         calWithinLastWeek.add(Calendar.WEEK_OF_YEAR, -1);
@@ -371,6 +372,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertNotNull("Mail not found", findByProperty(documents, "id", idBeforeLastYear));
     }
 
+    @Test
     public void testFilterChaining() throws Exception {
         /*
          * We're chaining some filters in subsequent query requests
@@ -378,10 +380,10 @@ public class BasicMailTest extends AbstractMailFindTest {
          * +-------------------------+
          * | Sender | Subject | Body |
          * +-------------------------+
-         * |   A    |    B    |   D  |
-         * |   A    |    B    |   E  |
-         * |   A    |    C    |   F  |
-         * |   G    |    H    |   I  |
+         * | A | B | D |
+         * | A | B | E |
+         * | A | C | F |
+         * | G | H | I |
          * +-------------------------+
          */
 
@@ -417,14 +419,11 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertEquals("Wrong number of mails", 1, documents.size());
     }
 
+    @Test
     public void testPrefixItemIsLastInContactsFacet() throws Exception {
-        FolderObject contactFolder = folderManager.generatePrivateFolder(
-            "findApiMailTestFolder_" + System.currentTimeMillis(),
-            FolderObject.CONTACT,
-            client.getValues().getPrivateContactFolder(),
-            client.getValues().getUserId());
+        FolderObject contactFolder = ftm.generatePrivateFolder("findApiMailTestFolder_" + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
 
-        contactFolder = folderManager.insertFolderOnServer(contactFolder);
+        contactFolder = ftm.insertFolderOnServer(contactFolder);
         List<Contact> contacts = new LinkedList<Contact>();
         contacts.add(contactManager.newAction(randomContact("Marc", contactFolder.getObjectID())));
         contacts.add(contactManager.newAction(randomContact("Marcus", contactFolder.getObjectID())));
@@ -453,6 +452,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());
     }
 
+    @Test
     public void testQueryActionWithColumns() throws Exception {
         /*
          * Import test mail
@@ -464,7 +464,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         facets.add(createQuery("Find me"));
 
         // list request columns from /ui/apps/io.ox/mail/api.js + account id
-        int[] columns = new int[] {102,600,601,602,603,604,605,607,608,610,611,614,652,653};
+        int[] columns = new int[] { 102, 600, 601, 602, 603, 604, 605, 607, 608, 610, 611, 614, 652, 653 };
         MailListField[] fields = MailListField.getFields(columns);
         List<PropDocument> documents = query(facets, columns);
         assertTrue("Did not find mail", documents.size() > 0);
@@ -476,7 +476,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         }
 
         Map<String, Object> props = document.getProps();
-        for (String jsonField :jsonFields) {
+        for (String jsonField : jsonFields) {
             Object value = props.remove(jsonField);
             assertNotNull("Missing field " + jsonField, value);
         }
@@ -484,6 +484,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertTrue("Document contained more fields than requested: " + props.keySet(), props.size() == 0);
     }
 
+    @Test
     public void testQueryActionWithoutColumns() throws Exception {
         /*
          * Import test mail
@@ -493,7 +494,6 @@ public class BasicMailTest extends AbstractMailFindTest {
 
         List<ActiveFacet> facets = prepareFacets();
         facets.add(createQuery("Find me"));
-
 
         MailListField[] fields = MailField.toListFields(MailField.FIELDS_LOW_COST);
         List<PropDocument> documents = query(facets);
@@ -506,7 +506,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         }
 
         Map<String, Object> props = document.getProps();
-        for (String jsonField :jsonFields) {
+        for (String jsonField : jsonFields) {
             Object value = props.remove(jsonField);
             assertNotNull("Missing field " + jsonField, value);
         }
@@ -514,13 +514,12 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertTrue("Document contained more fields than requested: " + props.keySet(), props.size() == 0);
     }
 
-
+    @Test
     public void testTokenizedQuery() throws Exception {
         String t1 = randomUID();
         String t2 = randomUID();
         String t3 = randomUID();
         String[][] mailIds = importMail(testFolder.getFullName(), defaultAddress, t1 + " " + t2 + " " + t3, "");
-
 
         List<ActiveFacet> facets = prepareFacets();
         SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(t1 + " " + t3));
@@ -543,13 +542,14 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertTrue("document found", 0 == documents.size());
     }
 
+    @Test
     public void testTimeConversion() throws Exception {
         /*
          * The users time zone is used internally for date conversion, if no other
          * time zone is specified in the requests. We override explicitly with a
          * different one to compare the date conversion between get and search responses.
          */
-        TimeZone userTimeZone = client.getValues().getTimeZone();
+        TimeZone userTimeZone = getClient().getValues().getTimeZone();
         TimeZone clientTimeZone = TimeZones.UTC;
         if (userTimeZone.equals(clientTimeZone)) {
             clientTimeZone = TimeZones.PST;
@@ -559,7 +559,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         String[][] mailIDs = importMail(testFolder.getFullName(), defaultAddress, subject, subject);
         com.openexchange.ajax.mail.actions.GetRequest getMailReq = new com.openexchange.ajax.mail.actions.GetRequest(mailIDs[0][0], mailIDs[0][1]);
         getMailReq.setTimeZone(clientTimeZone);
-        com.openexchange.ajax.mail.actions.GetResponse getMailResp = client.execute(getMailReq);
+        com.openexchange.ajax.mail.actions.GetResponse getMailResp = getClient().execute(getMailReq);
         long origReceivedDate = getMailResp.getMail(clientTimeZone).getReceivedDate().getTime();
 
         List<Facet> possibleFacets = autocomplete(subject);

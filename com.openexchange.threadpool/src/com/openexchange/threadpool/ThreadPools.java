@@ -96,7 +96,11 @@ public final class ThreadPools {
             return threadPool.submit(task, CallerRunsBehavior.<V> getInstance());
         }
 
-        return new GetFuture<V>(execute(task));
+        try {
+            return new GetFuture<V>(execute(task));
+        } catch (Exception e) {
+            return new GetFuture<V>(e);
+        }
     }
 
     /**
@@ -105,8 +109,9 @@ public final class ThreadPools {
      * @param task The task to execute
      * @return The task's return value or <code>null</code> if an {@code Exception} occurred (in that {@link #afterExecute(Throwable)} is
      *         invoked with a non-<code>null</code> {@code Throwable} reference)
+     * @throws Exception If task execution yields an exception
      */
-    public static <V> V execute(Task<V> task) {
+    public static <V> V execute(Task<V> task) throws Exception {
         Thread currentThread = Thread.currentThread();
         if (!(currentThread instanceof ThreadRenamer)) {
             return innerExecute(task, currentThread);
@@ -127,8 +132,9 @@ public final class ThreadPools {
      * @param task The task to execute
      * @param currentThread The current thread
      * @return The return value or <code>null</code>
+     * @throws Exception If task execution yields an exception
      */
-    private static <V> V innerExecute(Task<V> task, Thread currentThread) {
+    private static <V> V innerExecute(Task<V> task, Thread currentThread) throws Exception {
         V retval = null;
         boolean ran = false;
         task.beforeExecute(currentThread);
@@ -139,6 +145,7 @@ public final class ThreadPools {
         } catch (final Exception ex) {
             if (!ran) {
                 task.afterExecute(ex);
+                throw ex;
             }
             // Else the exception occurred within
             // afterExecute itself in which case we don't
@@ -842,9 +849,16 @@ public final class ThreadPools {
     private static final class GetFuture<V> implements Future<V> {
 
         private final V result;
+        private final Exception e;
 
         GetFuture(V result) {
             this.result = result;
+            e = null;
+        }
+
+        GetFuture(Exception e) {
+            result = null;
+            this.e = e;
         }
 
         @Override
@@ -864,11 +878,17 @@ public final class ThreadPools {
 
         @Override
         public V get() throws InterruptedException, ExecutionException {
+            if (e != null) {
+                throw new ExecutionException(e);
+            }
             return result;
         }
 
         @Override
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            if (e != null) {
+                throw new ExecutionException(e);
+            }
             return result;
         }
     }

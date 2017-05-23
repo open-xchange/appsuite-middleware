@@ -1,0 +1,42 @@
+feature_name: Import
+feature_description: |
+  Import configuration - settings for import of CSV, iCal or vCard files 
+properties:
+    - key: com.openexchange.import.mapper.path
+      description: |
+        Configures path to mappings of ox fields to other csv formats (like Outlook).
+      defaultValue: "@rootinstalldir@/importCSV/"
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: import.properties
+      packageName: open-xchange-core
+      tags: ["Import"]
+    - key: com.openexchange.import.ical.limit
+      description: |
+        Sets a limit on how many entries a single import of ical data may contain.
+
+        Note:  
+        That this limit applies for each type, so you can have, for example, 10000 VEVENTS and 10000 VFREEBUSY entries in a single file. 
+        <code>-1</code> means unlimited.
+      defaultValue: 10000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: import.properties
+      packageName: open-xchange-core
+      tags: ["Import", "Limit"]
+    - key: com.openexchange.import.contacts.limit
+      description: |
+        Sets the limit on how many contacts can be imported at once.
+        <code>-1</code> means unlimited.
+      defaultValue: -1
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: import.properties
+      packageName: open-xchange-core
+      tags: ["Import", "Limit"]

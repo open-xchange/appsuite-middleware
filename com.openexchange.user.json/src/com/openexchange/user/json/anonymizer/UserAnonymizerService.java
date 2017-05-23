@@ -205,8 +205,8 @@ public class UserAnonymizerService implements AnonymizerService<User> {
         }
 
         @Override
-        public Map<String, Set<String>> getAttributes() {
-            return new HashMap<String, Set<String>>(0);
+        public Map<String, String> getAttributes() {
+            return new HashMap<String, String>(0);
         }
 
         @Override

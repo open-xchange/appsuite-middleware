@@ -54,6 +54,7 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent;
 import org.glassfish.grizzly.comet.DefaultCometHandler;
@@ -79,7 +80,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
 
     private final DriveSession session;
     private final List<String> rootFolderIDs;
-    private long initializationTime;
+    private final AtomicLong initializationTime;
 
     /**
      * Initializes a new {@link DriveCometHandler}.
@@ -91,6 +92,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
         super();
         this.session = session;
         this.rootFolderIDs = rootFolderIDs;
+        initializationTime = new AtomicLong();
     }
 
     /**
@@ -99,14 +101,14 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
      */
     @Override
     public void onInitialize(CometEvent event) throws IOException {
-        initializationTime = System.currentTimeMillis();
+        initializationTime.set(System.currentTimeMillis());
         LOG.trace("{}: initialized.", this);
     }
 
     @Override
     public void onEvent(CometEvent event) throws IOException {
         try {
-            LOG.debug("{}: Got EVENT after {}ms: {} [{}]", this, String.valueOf(System.currentTimeMillis() - initializationTime), event.getType(), event.attachment());
+            LOG.debug("{}: Got EVENT after {}ms: {} [{}]", this, String.valueOf(System.currentTimeMillis() - initializationTime.get()), event.getType(), event.attachment());
             /*
              * create and return resulting actions if available
              */
@@ -134,7 +136,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onTerminate(CometEvent event) throws IOException {
         try {
-            LOG.trace("{}: Got TERMINATE after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime));
+            LOG.trace("{}: Got TERMINATE after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime.get()));
         } finally {
             resume(event.getCometContext());
         }
@@ -147,7 +149,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onInterrupt(CometEvent event) throws IOException {
         try {
-            LOG.trace("{}: Got INTERRUPT after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime));
+            LOG.trace("{}: Got INTERRUPT after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime.get()));
             CometContext cometContext = event.getCometContext();
             if (null != cometContext && cometContext.isActive(this)) {
                 LOG.debug("{}: Comet context still active, returning empty drive actions.", this);

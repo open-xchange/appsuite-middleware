@@ -2,7 +2,7 @@ Source: open-xchange-admin-autocontextid
 Section: web
 Priority: optional
 Maintainer: Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>=@OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk | java7-sdk, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>=@OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 

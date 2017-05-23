@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Hazelcast Realtime Components
 Bundle-SymbolicName: com.openexchange.realtime.hazelcast
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.realtime.hazelcast.osgi.HazelcastRealtimeActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -15,6 +15,7 @@ Import-Package: com.google.common.base,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
  com.hazelcast.transaction,
+ com.hazelcast.util,
  com.openexchange.exception,
  com.openexchange.hazelcast.configuration,
  com.openexchange.hazelcast.serialization,

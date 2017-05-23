@@ -57,6 +57,7 @@ public class NewCallParser extends AbstractAJAXParser<NewCallResponse> {
 
     /**
      * Default constructor.
+     * 
      * @param userId
      */
     public NewCallParser(final boolean failOnError) {

@@ -59,13 +59,15 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-import junit.framework.TestCase;
-import com.openexchange.configuration.MailConfig;
+import org.junit.After;
+import org.junit.Before;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.MailAccess;
@@ -77,6 +79,8 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -85,7 +89,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public abstract class AbstractMailTest extends TestCase {
+public abstract class AbstractMailTest {
 
     private String server;
 
@@ -97,7 +101,7 @@ public abstract class AbstractMailTest extends TestCase {
 
     private String password;
 
-    private int user;
+    private int userId;
 
     private int cid;
 
@@ -105,42 +109,35 @@ public abstract class AbstractMailTest extends TestCase {
 
     private SessionObject session;
 
-    /**
-     *
-     */
-    public AbstractMailTest() {
-        super();
-    }
+    private String user;
 
-    /**
-     * @param name
-     */
-    public AbstractMailTest(final String name) {
-        super(name);
-    }
+    private Context context;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         /*
          * Init
          */
         Init.startServer();
-        /*
-         * Init test environment
-         */
-        MailConfig.init();
-        server = MailConfig.getProperty(MailConfig.Property.SERVER);
-        port = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT));
-        login = MailConfig.getProperty(MailConfig.Property.LOGIN);
-        secondUser = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.SECOND_USER));
-        password = MailConfig.getProperty(MailConfig.Property.PASSWORD);
-        user = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.USER));
-        cid = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.CONTEXT));
-        testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        final TestConfig config = new TestConfig();
+
+        user = config.getUser();
+        final TestContextToolkit tools = new TestContextToolkit();
+        context = tools.getDefaultContext();
+
+        userId = tools.resolveUser(user, context);
+        server = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        port = Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.MAIL_PORT));
+        password = AJAXConfig.getProperty(AJAXConfig.Property.PASSWORD);
+        cid = context.getContextId();
+        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+
+        String secondUser2 = config.getSecondUser();
+        secondUser = tools.resolveUser(secondUser2, context);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Init.stopServer();
     }
 
@@ -153,8 +150,9 @@ public abstract class AbstractMailTest extends TestCase {
      * @throws OXException If an error occurs
      */
     protected int getMessageCount(final MailAccess<?, ?> mailAccess, final String fullName) throws OXException {
-        if (mailAccess.getFolderStorage() instanceof IMailFolderStorageEnhanced) {
-            return ((IMailFolderStorageEnhanced) mailAccess.getFolderStorage()).getTotalCounter(fullName);
+        IMailFolderStorageEnhanced storageEnhanced = mailAccess.getFolderStorage().supports(IMailFolderStorageEnhanced.class);
+        if (null != storageEnhanced) {
+            return storageEnhanced.getTotalCounter(fullName);
         }
         return getMessageCount(mailAccess.getAccountId(), fullName);
     }
@@ -260,7 +258,7 @@ public abstract class AbstractMailTest extends TestCase {
      * @return the user
      */
     protected final int getUser() {
-        return user;
+        return userId;
     }
 
     /**
@@ -361,10 +359,10 @@ public abstract class AbstractMailTest extends TestCase {
      * @throws OXException
      *             If conversion from RFC822 message fails
      */
-    protected static final MailMessage[] getMessages(final String dir, final int limit) throws MessagingException,
-            IOException, OXException {
+    protected static final MailMessage[] getMessages(final String dir, final int limit) throws MessagingException, IOException, OXException {
         final File fdir = new File(dir);
         final File[] messageFiles = fdir.listFiles(new FilenameFilter() {
+
             @Override
             public boolean accept(final File dir, final String name) {
                 return Pattern.compile("mail.*\\.eml").matcher(name).matches();

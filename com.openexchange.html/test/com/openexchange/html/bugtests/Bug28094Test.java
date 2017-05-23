@@ -51,7 +51,6 @@ package com.openexchange.html.bugtests;
 
 import org.junit.Assert;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 /**
@@ -60,8 +59,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug28094Test extends AbstractSanitizing {
-    @Test
-    public void testInsecureHref() throws OXException {
+     @Test
+     public void testInsecureHref() throws Exception {
         String content = "<a href=\"http://www.raumausstatter-innung-schwalm-eder.de/"
             + "index.php?eID=tx_cms_showpic&amp;file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg"
             + "&amp;width=500m&amp;height=500&amp;bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E"

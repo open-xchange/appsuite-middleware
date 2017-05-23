@@ -56,7 +56,7 @@ import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.recaptcha.osgi.ReCaptchaServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,6 +71,18 @@ public class ReCaptchaServlet extends DataServlet {
     private static final String ACTION_HTML = "html";
 
     private static final String ACTION_KEY = "key";
+
+    // -----------------------------------------------------------------------------------------------------
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link ReCaptchaServlet}.
+     */
+    public ReCaptchaServlet(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
@@ -97,11 +109,11 @@ public class ReCaptchaServlet extends DataServlet {
     }
 
     private void doGetPublicKey(final Response response) {
-        response.setData(ReCaptchaServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("publicKey"));
+        response.setData(services.getService(ConfigurationService.class).getProperty("publicKey"));
     }
 
     private void doGetHtml(final Response response) {
-        response.setData(ReCaptchaServiceRegistry.getInstance().getService(ReCaptchaService.class).getHTML());
+        response.setData(services.getService(ReCaptchaService.class).getHTML());
     }
 
 }

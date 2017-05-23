@@ -331,6 +331,10 @@ public final class ThreadSortUtil {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
                 }
+
+                if (retval == null) {
+                    throw new ProtocolException(new StringBuilder("An unexpected error occured while communicating with the imap server: ").append(response.toString()).toString());
+                }
                 return toUnifiedThreadResponse(retval);
             }
         });
@@ -350,7 +354,7 @@ public final class ThreadSortUtil {
         if (false == matcher.find()) {
             return result;
         }
-        
+
         StringBuffer sb = new StringBuffer(result.length() + (result.length() >> 1));
         StringBuilder tmp = new StringBuilder(8);
         // First match

@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -60,13 +61,19 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class AddressbookHomeSet extends SingleXMLPropertyMixin {
 
+    /** The static path to a user's addressbook home */
+    public static final WebdavPath ADDRESSBOOK_HOME = new WebdavPath("carddav");
+
+    /**
+     * Initializes a new {@link AddressbookHomeSet}.
+     */
     public AddressbookHomeSet() {
         super("urn:ietf:params:xml:ns:carddav", "addressbook-home-set");
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/carddav/</D:href>";
+        return "<D:href>" + ADDRESSBOOK_HOME + "/</D:href>";
     }
 
 }

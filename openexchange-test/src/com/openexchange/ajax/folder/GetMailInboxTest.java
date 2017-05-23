@@ -49,13 +49,16 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -68,25 +71,19 @@ import com.openexchange.mail.utils.MailFolderUtility;
  */
 public class GetMailInboxTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link GetMailInboxTest}.
+     * 
      * @param name name of the test.
      */
-    public GetMailInboxTest(String name) {
-        super(name);
+    public GetMailInboxTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
+    @Test
     public void testGetMailInbox() throws Throwable {
         ListRequest request = new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        ListResponse response = client.execute(request);
+        ListResponse response = getClient().execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject defaultIMAPFolder = null;
         String primaryMailFolder = MailFolderUtility.prepareFullname(0, MailFolder.DEFAULT_FOLDER_ID);
@@ -100,7 +97,7 @@ public class GetMailInboxTest extends AbstractAJAXSession {
         assertNotNull("Default email folder not found.", defaultIMAPFolder);
         assertTrue("Default email folder has no subfolders.", defaultIMAPFolder.hasSubfolders());
         request = new ListRequest(EnumAPI.OX_OLD, defaultIMAPFolder.getFullName());
-        response = client.execute(request);
+        response = getClient().execute(request);
         iter = response.getFolder();
         FolderObject inboxFolder = null;
         while (iter.hasNext()) {
@@ -111,9 +108,8 @@ public class GetMailInboxTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Inbox folder for default mail account not found.", inboxFolder);
-        GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, inboxFolder.getFullName(), new int[] {
-            FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
-        GetResponse response2 = client.execute(request2);
+        GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, inboxFolder.getFullName(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
+        GetResponse response2 = getClient().execute(request2);
         assertFalse("Get failed.", response2.hasError());
     }
 }

@@ -49,12 +49,14 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
-
 
 /**
  * {@link LockActionTest}
@@ -63,6 +65,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
  */
 public class LockActionTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -72,6 +75,7 @@ public class LockActionTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testAction() throws OXException {
         request().param("id", "12").param("diff", "1337");
 

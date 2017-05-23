@@ -61,8 +61,8 @@ import com.openexchange.html.AssertionHelper;
  */
 public class Bug26153Test extends AbstractSanitizing {
 
-    @Test
-    public void testDocumentize() {
+     @Test
+     public void testDocumentize() {
         String htmlContent = "<p>my html document without html, or body tags</p>";
         String actual = getHtmlService().documentizeContent(htmlContent, "UTF-8");
         StringBuilder expectedBuilder = new StringBuilder();

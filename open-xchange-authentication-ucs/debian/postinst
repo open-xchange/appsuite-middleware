@@ -28,6 +28,40 @@ postFix() {
 
     # SoftwareChange_Request-2523
     ox_add_property com.openexchange.authentication.ucs.passwordChangeURL "" /opt/open-xchange/etc/authplugin.properties
+
+    # SoftwareChange_Request-3944
+    pfile=/opt/open-xchange/etc/authplugin.properties
+    if ox_exists_property LDAP_HOST $pfile; then
+       ohost=$(ox_read_property LDAP_HOST $pfile)
+       oport=$(ox_read_property LDAP_PORT $pfile)
+       ox_set_property com.openexchange.authentication.ucs.ldapUrl "ldap://$ohost:$oport" $pfile
+       ox_remove_property LDAP_HOST $pfile
+       ox_remove_property LDAP_PORT $pfile
+    fi
+    if ox_exists_property LDAP_BASE $pfile; then
+       oval=$(ox_read_property LDAP_BASE $pfile)
+       ox_set_property com.openexchange.authentication.ucs.baseDn "$oval" $pfile
+       ox_remove_property LDAP_BASE $pfile
+    fi
+    if ox_exists_property LDAP_SEARCH $pfile; then
+       oval=$(ox_read_property LDAP_SEARCH $pfile | sed 's;@USER@;%s;g')
+       ox_set_property com.openexchange.authentication.ucs.searchFilter "$oval" $pfile
+       ox_remove_property LDAP_SEARCH $pfile
+    fi
+    if ox_exists_property LDAP_ATTRIBUTE $pfile; then
+       oval=$(ox_read_property LDAP_ATTRIBUTE $pfile)
+       ox_set_property com.openexchange.authentication.ucs.mailAttribute "$oval" $pfile
+       ox_remove_property LDAP_ATTRIBUTE $pfile
+    fi
+    if ox_exists_property USE_POOL $pfile; then
+       oval=$(ox_read_property USE_POOL $pfile)
+       ox_set_property com.openexchange.authentication.ucs.useLdapPool "$oval" $pfile
+       ox_remove_property USE_POOL $pfile
+    fi
+    ox_add_property com.openexchange.authentication.ucs.loginAttribute "uid" $pfile
+    ox_add_property com.openexchange.authentication.ucs.contextIdAttribute "" $pfile
+    ox_add_property com.openexchange.authentication.ucs.bindDn "" $pfile
+    ox_add_property com.openexchange.authentication.ucs.bindPassword "" $pfile
 }
 
 

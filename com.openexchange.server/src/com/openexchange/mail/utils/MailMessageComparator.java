@@ -62,7 +62,6 @@ import com.openexchange.java.Collators;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.PlainTextAddress;
 
@@ -101,6 +100,9 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private static abstract class FieldComparer implements IFieldComparer {
 
+        /**
+         * Initializes a new {@link FieldComparer}.
+         */
         protected FieldComparer() {
             super();
         }
@@ -119,11 +121,18 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private static abstract class LocalizedFieldComparer extends FieldComparer {
 
-        public final Locale locale;
+        /** The locale */
+        final Locale locale;
 
-        public final Collator collator;
+        /** The collator to use */
+        final Collator collator;
 
-        public LocalizedFieldComparer(final Locale locale) {
+        /**
+         * Initializes a new {@link LocalizedFieldComparer}.
+         *
+         * @param locale The associated locale
+         */
+        LocalizedFieldComparer(Locale locale) {
             super();
             this.locale = locale;
             collator = Collators.getSecondaryInstance(locale);
@@ -142,7 +151,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
      * @param descendingDirection <code>true</code> for descending order; otherwise <code>false</code>
      * @param locale The locale
      */
-    public MailMessageComparator(final boolean descendingDirection, final Locale locale) {
+    public MailMessageComparator(boolean descendingDirection, Locale locale) {
         this(MailSortField.SENT_DATE, descendingDirection, locale);
     }
 
@@ -153,8 +162,8 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
      * @param descendingDirection <code>true</code> for descending order; otherwise <code>false</code>
      * @param locale The locale
      */
-    public MailMessageComparator(final MailSortField sortField, final boolean descendingDirection, final Locale locale) {
-        this(sortField, descendingDirection, locale, MailProperties.getInstance().isUserFlagsEnabled());
+    public MailMessageComparator(MailSortField sortField, boolean descendingDirection, Locale locale) {
+        this(sortField, descendingDirection, locale, true);
     }
 
     /**
@@ -165,7 +174,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
      * @param locale The locale
      * @param userFlagsEnabled <code>true</code> to signal support for user flags; otherwise <code>false</code>
      */
-    public MailMessageComparator(final MailSortField sortField, final boolean descendingDirection, final Locale locale, final boolean userFlagsEnabled) {
+    public MailMessageComparator(MailSortField sortField, boolean descendingDirection, Locale locale, boolean userFlagsEnabled) {
         super();
         descendingDir = descendingDirection;
         if (MailSortField.COLOR_LABEL.equals(sortField) && !userFlagsEnabled) {
@@ -173,14 +182,14 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         } else {
             IFieldComparer tmp = COMPARERS.get(sortField);
             if (null == tmp) {
-                tmp = createFieldComparer(sortField, locale);
+                tmp = createFieldComparer(sortField, null == locale ? Locale.US : locale);
             }
             fieldComparer = tmp;
         }
     }
 
     @Override
-    public int compare(final MailMessage msg1, final MailMessage msg2) {
+    public int compare(MailMessage msg1, MailMessage msg2) {
         try {
             return descendingDir ? fieldComparer.compareFieldsDesc(msg1, msg2) : fieldComparer.compareFields(msg1, msg2);
         } catch (final MessagingException e) {
@@ -191,7 +200,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     // ------------------------------------------------------------------------------------------------------------------------ //
 
-    static int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale, final Collator collator) {
+    static int compareAddrs(Address[] addrs1, Address[] addrs2, Locale locale, Collator collator) {
         if (isEmptyAddrArray(addrs1) && !isEmptyAddrArray(addrs2)) {
             return -1;
         } else if (!isEmptyAddrArray(addrs1) && isEmptyAddrArray(addrs2)) {
@@ -372,7 +381,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     return cl2 <= 0 ? 0 : 1;
                 }
                 if (cl2 <= 0) {
-                    return cl1 <= 0 ? 0 : -1;
+                    return -1;
                 }
                 return (cl1 < cl2 ? -1 : (cl1 == cl2 ? 0 : 1));
             }

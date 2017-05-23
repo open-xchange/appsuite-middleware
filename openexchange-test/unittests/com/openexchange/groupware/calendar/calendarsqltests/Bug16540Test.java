@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import org.osgi.service.event.Event;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -74,6 +76,7 @@ public class Bug16540Test extends CalendarSqlTest {
         super();
     }
 
+    @Test
     public void testShouldTriggerEventOnUpdateToAlarmFlag() throws OXException {
         Calendar c = TimeTools.createCalendar(TimeZones.UTC);
         c.add(Calendar.DATE, 1); // Must be in the future for the reminder to not be rejected.

@@ -107,5 +107,7 @@ public interface AttributeSwitch {
     public Object mailOAuth();
     public Object transportOAuth();
     public Object rootFolder();
+    public Object mailDisabled();
+    public Object transportDisabled();
 
 }

@@ -597,8 +597,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     private List<MailPart> createPreviewPart(Map<String, String> cidMapping, Map<String, ThresholdFileHolder> previews) throws OXException {
         try {
             List<MailPart> parts = new ArrayList<>(cidMapping.size());
-            for (String id : cidMapping.keySet()) {
-                String contentId = cidMapping.get(id);
+            for (Map.Entry<String, String> entry : cidMapping.entrySet()) {
+                String id = entry.getKey();
+                String contentId = entry.getValue();
                 MimeBodyPart imagePart = new MimeBodyPart();
                 imagePart.setDisposition("inline");
                 imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "image/jpeg");
@@ -695,7 +696,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
             try {
-                ImageTransformations transformed = transformationService.transfom(image).scale(200, 150, ScaleType.COVER_AND_CROP, true);
+                ImageTransformations transformed = transformationService.transfom(image).rotate().scale(200, 150, ScaleType.COVER_AND_CROP, true);
                 ThresholdFileHolder transformedImage = new ThresholdFileHolder();
                 transformedImage.write(transformed.getFullTransformedImage(mimeType).getImageStream());
                 return transformedImage;

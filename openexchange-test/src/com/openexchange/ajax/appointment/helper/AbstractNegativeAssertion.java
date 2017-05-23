@@ -66,7 +66,7 @@ public abstract class AbstractNegativeAssertion extends AbstractAssertion {
         this.folder = folderToWorkIn;
     }
 
-    public void check(Changes changes, OXException expectedError){
+    public void check(Changes changes, OXException expectedError) {
         check(generateDefaultAppointment(), changes, expectedError);
     }
 
@@ -95,9 +95,7 @@ public abstract class AbstractNegativeAssertion extends AbstractAssertion {
         assertTrue(state() + " Expecting exception, did not get one", manager.hasLastException());
         try {
             OXException lastException = (OXException) manager.getLastException();
-            assertTrue(
-                state() + " Expected error: " + expectedError + ", actual error: " + lastException.getErrorCode(),
-                expectedError.similarTo(lastException));
+            assertTrue(state() + " Expected error: " + expectedError + ", actual error: " + lastException.getErrorCode(), expectedError.similarTo(lastException));
         } catch (ClassCastException e) {
             fail2("Should have an OXException, but could not cast it into one");
         }

@@ -56,6 +56,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 
@@ -65,15 +67,8 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
-
-    /**
-     * Initializes a new {@link PlistSMSUserLimitTest}.
-     * 
-     * @param name
-     */
-    public PlistSMSUserLimitTest() {
-    }
 
     @Override
     public void setUp() throws Exception {
@@ -91,7 +86,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
 
         for (int x = 0; x < 3; x++) {
             ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-            OnboardingTestResponse response = client.execute(req);
+            OnboardingTestResponse response = getAjaxClient().execute(req);
             assertNotNull("Response is empty!", response);
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
 
@@ -116,7 +111,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
 
         for (int x = 0; x < 10; x++) {
             ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-            OnboardingTestResponse response = client.execute(req);
+            OnboardingTestResponse response = getAjaxClient().execute(req);
             assertNotNull("Response is empty!", response);
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
 
@@ -130,11 +125,11 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         }
 
         //Wait until sms tokens are refreshed
-        Thread.sleep(61000);
+        Thread.sleep(122000);
 
         //Execute another sms request which shouldn't run into the user sms limit
         ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-        OnboardingTestResponse response = client.execute(req);
+        OnboardingTestResponse response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
@@ -146,7 +141,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
     protected Map<String, String> getNeededConfigurations() {
         Map<String, String> map = new HashMap<String, String>();
         map.put("com.openexchange.sms.userlimit", String.valueOf(2));
-        map.put("com.openexchange.sms.userlimit.refreshInterval", String.valueOf(1));
+        map.put("com.openexchange.sms.userlimit.refreshInterval", String.valueOf(2));
         return map;
     }
 

@@ -56,17 +56,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assume;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.capabilities.actions.AllRequest;
 import com.openexchange.ajax.capabilities.actions.AllResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 
@@ -78,6 +76,7 @@ import com.openexchange.mail.categories.MailCategoriesConstants;
  */
 public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjaxSession {
 
+    protected static final int[] COLUMNS = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652 };
 
     protected static final String CAT_GENERAL = "general";
     protected static final String CAT_1 = "social";
@@ -89,64 +88,28 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
 
     protected String EML;
 
-    /**
-     * Initializes a new {@link AbstractMailCategoriesTest}.
-     *
-     * @param name
-     */
-    public AbstractMailCategoriesTest() {
-    }
-
     @Override
     public void setUp() throws Exception {
-        AJAXClient configClient = new AJAXClient(User.User1);
-        setUpConfiguration(configClient, true);
         super.setUp();
-        AllResponse response = getClient().execute(new AllRequest());
+        setUpConfiguration();
+        AllResponse response = getAjaxClient().execute(new AllRequest());
         Assume.assumeTrue("User does not have the mail_categories capability. Probably the mailserver does not support imap4flags.", response.getCapabilities().contains("mail_categories"));
-        values = getClient().getValues();
+        values = getAjaxClient().getValues();
         clearFolder(values.getInboxFolder()); // always start with an empty inbox
-        EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" +
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Message-ID: <1508703313.17483.1353357411049>\n" +
-            "Subject: Test mail\n" +
-            "MIME-Version: 1.0\n" +
-            "Content-Type: multipart/alternative; \n" +
-            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" +
-            "\n" +
-            "------=_Part_17482_1388684087.1353357411002\n" +
-            "MIME-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=UTF-8\n" +
-            "Content-Transfer-Encoding: 7bit\n" +
-            "\n" +
-            "Test\n" +
-            "------=_Part_17482_1388684087.1353357411002\n" +
-            "MIME-Version: 1.0\n" +
-            "Content-Type: text/html; charset=UTF-8\n" +
-            "Content-Transfer-Encoding: 7bit\n" +
-            "\n" +
-            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" +
-            " <head>\n" +
-            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" +
-            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" +
-            " \n" +
-            "  <div>\n" +
-            "   Test\n" +
-            "  </div>\n" +
-            " \n" +
-            "</body></html>\n" +
-            "------=_Part_17482_1388684087.1353357411002--\n";
+        EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Message-ID: <1508703313.17483.1353357411049>\n" + "Subject: Test mail\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n" + "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + "\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Test\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" + " <head>\n" + "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + " \n" + "  <div>\n" + "   Test\n" + "  </div>\n" + " \n" + "</body></html>\n" + "------=_Part_17482_1388684087.1353357411002--\n";
     }
 
     @Override
     public void tearDown() throws Exception {
-        if (values != null) {
-            clearFolder(values.getSentFolder());
-            clearFolder(values.getInboxFolder());
-            clearFolder(values.getDraftsFolder());
+        try {
+            if (values != null) {
+                clearFolder(values.getSentFolder());
+                clearFolder(values.getInboxFolder());
+                clearFolder(values.getDraftsFolder());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     @Override
@@ -182,31 +145,31 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
      * @param folder
      *            The folder
      */
-    protected final void clearFolder(final String folder) throws OXException, IOException, SAXException, JSONException {
-        Executor.execute(getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
+    protected final void clearFolder(final String folder) throws OXException, IOException, JSONException {
+        Executor.execute(getAjaxClient().getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
     }
 
     /**
      * @return User's default send address
      */
     protected String getSendAddress() throws OXException, IOException, JSONException {
-        return getSendAddress(getClient());
+        return getSendAddress(getAjaxClient());
     }
 
-    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
+    protected String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
         return client.getValues().getSendAddress();
     }
 
-    protected String getInboxFolder() throws OXException, IOException, SAXException, JSONException {
-        return getClient().getValues().getInboxFolder();
+    protected String getInboxFolder() throws OXException, IOException, JSONException {
+        return getAjaxClient().getValues().getInboxFolder();
     }
 
-    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, SAXException, JSONException {
-        final CommonAllResponse response = getClient().execute(new com.openexchange.ajax.mail.actions.AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
+    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, JSONException {
+        final CommonAllResponse response = getAjaxClient().execute(new com.openexchange.ajax.mail.actions.AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
         final JSONArray arr = (JSONArray) response.getData();
         final JSONArray mailFields = arr.getJSONArray(0);
         final String id = mailFields.getString(0);
-        final AbstractAJAXResponse response2 = getClient().execute(new GetRequest(inboxFolder, id));
+        final AbstractAJAXResponse response2 = getAjaxClient().execute(new GetRequest(inboxFolder, id));
         return (JSONObject) response2.getData();
     }
 }

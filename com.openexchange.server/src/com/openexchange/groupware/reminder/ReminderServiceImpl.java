@@ -128,7 +128,7 @@ public class ReminderServiceImpl implements ReminderService{
         try {
             ReminderObject oldReminder = ReminderHandler.getInstance().loadReminder(reminder.getObjectId(), writeConnection, serverSession.getContext());
             checkPermission(session, oldReminder, true);
-            ReminderHandler.getInstance().deleteReminder(oldReminder, serverSession.getContext());
+            ReminderHandler.getInstance().deleteReminder(oldReminder, serverSession.getContext(), writeConnection);
         } finally {
             if (writeConnection != null) {
                 Database.back(serverSession.getContext(), true, writeConnection);
@@ -177,7 +177,7 @@ public class ReminderServiceImpl implements ReminderService{
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         ReminderObject oldReminder = ReminderHandler.getInstance().loadReminder(targetId, userId, module, writeCon, serverSession.getContext());
         checkPermission(session, oldReminder, true);
-        ReminderHandler.getInstance().deleteReminder(oldReminder.getTargetId(), oldReminder.getModule(), userId, writeCon, serverSession.getContext());
+        ReminderHandler.getInstance().deleteReminder(oldReminder.getTargetId(), userId, oldReminder.getModule(), writeCon, serverSession.getContext());
 
     }
 
@@ -203,7 +203,7 @@ public class ReminderServiceImpl implements ReminderService{
             checkPermission(session, oldReminder, true);
             return true;
         } catch (OXException e) {
-            if (e.equals(ReminderExceptionCode.NOT_FOUND)) {
+            if (ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 return false;
             }
             throw e;
@@ -265,17 +265,17 @@ public class ReminderServiceImpl implements ReminderService{
     @Override
     public List<ReminderObject> getArisingReminder(Session session, Context ctx, User user, Date end) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        SearchIterator<ReminderObject> oldReminders = ReminderHandler.getInstance().getArisingReminder(serverSession, ctx, user, end);
+        SearchIterator<ReminderObject> reminders = ReminderHandler.getInstance().getArisingReminder(serverSession, ctx, user, end);
         try {
-            List<ReminderObject> result = new ArrayList<>(oldReminders.size());
-            while (oldReminders.hasNext()) {
-                ReminderObject reminder = oldReminders.next();
+            List<ReminderObject> result = new ArrayList<ReminderObject>();
+            while (reminders.hasNext()) {
+                ReminderObject reminder = reminders.next();
                 checkPermission(session, reminder, false);
                 result.add(reminder);
             }
             return result;
         } finally {
-            SearchIterators.close(oldReminders);
+            SearchIterators.close(reminders);
         }
     }
 
@@ -304,17 +304,17 @@ public class ReminderServiceImpl implements ReminderService{
     @Override
     public List<ReminderObject> listModifiedReminder(Session session, int userId, Date lastModified) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        SearchIterator<ReminderObject> oldReminders = ReminderHandler.getInstance().listModifiedReminder(userId, lastModified, serverSession.getContext());
+        SearchIterator<ReminderObject> reminders = ReminderHandler.getInstance().listModifiedReminder(userId, lastModified, serverSession.getContext());
         try {
-            List<ReminderObject> result = new ArrayList<>(oldReminders.size());
-            while (oldReminders.hasNext()) {
-                ReminderObject reminder = oldReminders.next();
+            List<ReminderObject> result = new ArrayList<ReminderObject>();
+            while (reminders.hasNext()) {
+                ReminderObject reminder = reminders.next();
                 checkPermission(session, reminder, false);
                 result.add(reminder);
             }
             return result;
         } finally {
-            SearchIterators.close(oldReminders);
+            SearchIterators.close(reminders);
         }
     }
 

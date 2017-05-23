@@ -49,13 +49,16 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link MoveMailTest}
@@ -66,66 +69,39 @@ public class CopyMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public CopyMailTest(String name) {
-        super(name);
+    public CopyMailTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        clearFolder( values.getSentFolder() );
-        clearFolder( values.getInboxFolder() );
-        clearFolder( values.getDraftsFolder() );
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            clearFolder(values.getSentFolder());
+            clearFolder(values.getInboxFolder());
+            clearFolder(values.getDraftsFolder());
+        } finally {
+            super.tearDown();
+        }
     }
 
-    public void testShouldCopyFromSentToDrafts() throws OXException, IOException, SAXException, JSONException{
-        MailTestManager manager = new MailTestManager(client, false);
+    @Test
+    public void testShouldCopyFromSentToDrafts() throws OXException, IOException, SAXException, JSONException {
+        MailTestManager manager = new MailTestManager(getClient(), false);
 
-        final String eml =
-            "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
-            "From: " + getSendAddress() + "\n" +
-            "To: " + getSendAddress() + "\n" +
-            "Message-ID: <1508703313.17483.1353357411049>\n" + 
-            "Subject: Copy a mail\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: multipart/alternative; \n" + 
-            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + 
-            "\n" + 
-            "------=_Part_17482_1388684087.1353357411002\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: text/plain; charset=UTF-8\n" + 
-            "Content-Transfer-Encoding: 7bit\n" + 
-            "\n" + 
-            "Copy from sent to drafts\n" + 
-            "------=_Part_17482_1388684087.1353357411002\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: text/html; charset=UTF-8\n" + 
-            "Content-Transfer-Encoding: 7bit\n" + 
-            "\n" + 
-            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" +
-            " <head>\n" + 
-            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + 
-            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + 
-            " \n" + 
-            "  <div>\n" + 
-            "   Copy from sent to drafts\n" + 
-            "  </div>\n" + 
-            " \n" + 
-            "</body></html>\n" + 
-            "------=_Part_17482_1388684087.1353357411002--\n";
+        final String eml = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Message-ID: <1508703313.17483.1353357411049>\n" + "Subject: Copy a mail\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n" + "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + "\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Copy from sent to drafts\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" + " <head>\n" + "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + " \n" + "  <div>\n" + "   Copy from sent to drafts\n" + "  </div>\n" + " \n" + "</body></html>\n" + "------=_Part_17482_1388684087.1353357411002--\n";
 
         getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
 
         String origin = values.getInboxFolder();
         String destination = values.getDraftsFolder();
 
-        TestMail myMail = new TestMail( getFirstMailInFolder( origin) );
+        TestMail myMail = new TestMail(getFirstMailInFolder(origin));
         myMail.getId();
 
         TestMail copiedMail = manager.copy(myMail, destination);
@@ -133,8 +109,8 @@ public class CopyMailTest extends AbstractMailTest {
         // System.out.println("***** newID : "+newID);
 
         manager.get(destination, newID);
-        assertTrue("Should produce no errors when getting copied e-mail", !manager.getLastResponse().hasError() );
-        assertTrue("Should produce no conflicts when getting copied e-mail", !manager.getLastResponse().hasConflicts() );
+        assertTrue("Should produce no errors when getting copied e-mail", !manager.getLastResponse().hasError());
+        assertTrue("Should produce no conflicts when getting copied e-mail", !manager.getLastResponse().hasConflicts());
 
     }
 

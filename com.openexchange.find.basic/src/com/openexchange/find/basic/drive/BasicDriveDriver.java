@@ -234,18 +234,37 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
             IDBasedFolderAccess folderAccess = Services.getIdBasedFolderAccessFactory().createAccess(session);
             IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
-
+            
+            boolean includeSubfolders = searchRequest.getOptions().getBoolOption("includeSubfolders", true);
+            
+            // Sort field
+            String sortFieldOption = searchRequest.getOptions().getOption("sort", null);
+            Field sortField;
+            if (sortFieldOption == null) {
+                sortField = Field.TITLE;
+            } else {
+                sortField = Field.get(sortFieldOption);
+            }
+            // Sort direction;
+            String sortDirectionOption = searchRequest.getOptions().getOption("order", null);
+            SortDirection sortDirection;
+            if (sortDirectionOption == null) {
+                sortDirection = SortDirection.DEFAULT;
+            } else {
+                sortDirection = SortDirection.get(sortDirectionOption);
+            }
+            
             if (supportsSearchByTerm(accountAccess)) {
-                return advancedSearch(searchRequest, session, accountAccess, folderAccess, fileAccess, fields);
+                return advancedSearch(searchRequest, session, accountAccess, folderAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
             }
 
-            return simpleSearch(searchRequest, session, accountAccess, folderAccess, fileAccess, fields);
+            return simpleSearch(searchRequest, session, accountAccess, folderAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
         } finally {
             accountAccess.close();
         }
     }
 
-    private SearchResult advancedSearch(SearchRequest searchRequest, ServerSession session, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, IDBasedFileAccess fileAccess, List<Field> fields) throws OXException {
+    private SearchResult advancedSearch(SearchRequest searchRequest, ServerSession session, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
         // Search by term only if supported
         SearchTerm<?> term = prepareSearchTerm(searchRequest);
         if (term == null) {
@@ -281,7 +300,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         List<Document> results = new ArrayList<Document>();
         SearchIterator<File> searchIterator = null;
         try {
-            searchIterator = fileAccess.search(folderID, true, term, fields, Field.TITLE, SortDirection.DEFAULT, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
+            searchIterator = fileAccess.search(folderID, includeSubfolders, term, fields, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
             while (searchIterator.hasNext()) {
                 results.add(new FileDocument(searchIterator.next()));
             }
@@ -291,7 +310,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
-    private SearchResult simpleSearch(SearchRequest searchRequest, ServerSession session, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, IDBasedFileAccess fileAccess, List<Field> fields) throws OXException {
+    private SearchResult simpleSearch(SearchRequest searchRequest, ServerSession session, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
         // Search by simple pattern as fallback and filter folders manually
         List<String> queries = searchRequest.getQueries();
         String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
@@ -306,7 +325,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         List<File> files;
         SearchIterator<File> searchIterator = null;
         try {
-            searchIterator = fileAccess.search(pattern, fields, folderID, true, File.Field.TITLE, SortDirection.DEFAULT, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
+            searchIterator = fileAccess.search(pattern, fields, folderID, includeSubfolders, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
             files = SearchIterators.asList(searchIterator);
         } finally {
             SearchIterators.close(searchIterator);

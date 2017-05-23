@@ -57,7 +57,6 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TaskTestManager;
 
-
 /**
  * {@link TaskCreateStep}
  *
@@ -69,8 +68,10 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     private final Task entry;
     private boolean inserted;
     private TaskTestManager manager;
+
     /**
      * Initializes a new {@link TaskCreateStep}.
+     * 
      * @param name
      * @param expectedError
      */
@@ -79,28 +80,34 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         this.entry = entry;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
      */
     @Override
     public void assumeIdentity(Task task) {
-        task.setObjectID( entry.getObjectID() );
-        task.setParentFolderID( entry.getParentFolderID());
-        task.setLastModified( entry.getLastModified());
+        task.setObjectID(entry.getObjectID());
+        task.setParentFolderID(entry.getParentFolderID());
+        task.setLastModified(entry.getLastModified());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
      */
     @Override
     public void rememberIdentityValues(Task task) {
         entry.setLastModified(task.getLastModified());
-        if(task.containsParentFolderID()) {
+        if (task.containsParentFolderID()) {
             entry.setParentFolderID(task.getParentFolderID());
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
      */
     @Override
@@ -108,18 +115,22 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         inserted = false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
     @Override
     public void cleanUp() throws Exception {
-        if(!inserted) {
+        if (!inserted) {
             return;
         }
-        manager.deleteTaskOnServer(entry,false);
+        manager.deleteTaskOnServer(entry, false);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
      */
     @Override

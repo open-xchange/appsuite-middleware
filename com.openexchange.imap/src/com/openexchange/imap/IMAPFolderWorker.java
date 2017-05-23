@@ -71,7 +71,6 @@ import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
-import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -514,10 +513,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
                     }
 
-                    if ((desiredMode == Folder.READ_WRITE) && imapAccess.notifyRecent()) {
-                        IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
-                    }
-
                     // Open identical folder in right mode
                     openFolder(desiredMode, imapFolder);
                     return imapFolder;
@@ -527,9 +522,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
         // Get IMAP folder for full name
         IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
-        if (imapAccess.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
-            IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
-        }
 
         // Obtain folder lock once to avoid repetitive acquires/releases when invoking folder's getXXX() methods
         synchronized (retval) {

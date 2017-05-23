@@ -49,12 +49,9 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 public class MockUser implements User {
 
@@ -171,7 +168,7 @@ public class MockUser implements User {
     private long fileStorageQuota;
     private int fileStorageOwner;
 
-    private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+    private final Map<String, String> attributes = new HashMap<String, String>();
 
     public MockUser(int id) {
         super();
@@ -373,12 +370,12 @@ public class MockUser implements User {
     }
 
     @Override
-    public Map<String, Set<String>> getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes ;
     }
 
-    public void setAttribute(String key, String... values) {
-        attributes.put(key, new HashSet<String>(Arrays.asList(values)));
+    public void setAttribute(String key, String value) {
+        attributes.put(key, value);
     }
 
     /**

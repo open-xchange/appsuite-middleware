@@ -62,7 +62,6 @@ import com.openexchange.ajax.framework.Params;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.share.ShareTarget;
 
-
 /**
  * {@link GetLinkRequest}
  *
@@ -110,9 +109,7 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "getLink"
-        ).toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "getLink").toArray();
     }
 
     @Override

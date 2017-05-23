@@ -50,7 +50,9 @@
 package com.openexchange.ajax.requesthandler.crypto;
 
 import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link CryptographicServiceAuthenticationFactory} parses authentication for cryptographic services from HTTP requests.
@@ -65,6 +67,33 @@ public interface CryptographicServiceAuthenticationFactory {
      *
      * @param request The request to parse the authentication information from.
      * @return The authentication information obtained from the request, or null if the request does not contain all necessary information.
+     * @throws OXException
      */
     String createAuthenticationFrom(HttpServletRequest request) throws OXException;
+
+    /**
+     * Parses authentication information for a given {@link AJAXRequestData} object.
+     *
+     * @param requestData The {@link AJAXRequestData} to parse the authentication information from
+     * @return The authentication information obtained from the {@link AJAXRequestData} object, or null if the {@link AJAXRequestData} object does not contain all necessary information.
+     * @throws OXException
+     */
+    String createAuthenticationFrom(AJAXRequestData requestData) throws OXException;
+
+    /**
+     * Gets the authentication token for specified session
+     *
+     * @param session The session
+     * @return The authentication token
+     * @throws OXException If authentication token cannot be returned
+     */
+    String getAuthTokenFromSession(Session session) throws OXException;
+
+    /**
+     * Gets the token value from full authentication token's string
+     *
+     * @param string The authentication token's string
+     * @return The token value
+     */
+    String getTokenValueFromString(String string);
 }

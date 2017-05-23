@@ -49,23 +49,17 @@
 
 package com.openexchange.freebusy.test;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    NormalizeTest.class
+})
 public class UnitTests {
-
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(NormalizeTest.class);
-        return tests;
-    }
 }

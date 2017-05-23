@@ -672,9 +672,9 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/update", ht);
         triggerEvent(event);
-        if (null != newFolder && FolderObject.INFOSTORE == newFolder.getModule()) {
+        if (FolderObject.INFOSTORE == newFolder.getModule()) {
             Dictionary<String, Object> properties = getEventProperties(newFolder, parentFolder, folderPath);
-            if (null != oldFolder && oldFolder.getParentFolderID() != newFolder.getParentFolderID()) {
+            if (oldFolder.getParentFolderID() != newFolder.getParentFolderID()) {
                 properties.put(FileStorageEventConstants.OLD_PARENT_FOLDER_ID, String.valueOf(oldFolder.getParentFolderID()));
             }
             triggerEvent(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, properties));

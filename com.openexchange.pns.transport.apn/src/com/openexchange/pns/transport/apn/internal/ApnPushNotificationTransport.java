@@ -365,7 +365,10 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         } catch (InvalidDeviceTokenFormatException e) {
             LOG.warn("Invalid device token: '{}', removing from subscription store.", match.getToken(), e);
             try {
-                subscriptionRegistry.unregisterSubscription(DefaultPushSubscription.instanceFor(match));
+                boolean unregistered = subscriptionRegistry.unregisterSubscription(DefaultPushSubscription.instanceFor(match));
+                if (false == unregistered) {
+                    LOG.error("Failed to remove subscription for invalid token {}", match.getToken());
+                }
             } catch (OXException x) {
                 LOG.error("Failed to remove subscription for invalid token {}", match.getToken(), x);
             }
@@ -428,26 +431,32 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.
      */
     public void queryFeedbackService() {
+        Map<String, ApnOptions> options = getAllHighestRankedApnOptions();
+        if (options.isEmpty()) {
+            return;
+        }
+
         LOG.info("Querying APNS feedback service for 'apn'...");
         long start = System.currentTimeMillis();
 
-        Map<String, ApnOptions> options = getAllHighestRankedApnOptions();
-        for (ApnOptions apnOptions : options.values()) {
+        for (Map.Entry<String, ApnOptions> entry : options.entrySet()) {
             List<Device> devices = null;
             try {
+                ApnOptions apnOptions = entry.getValue();
                 devices = Push.feedback(apnOptions.getKeystore(), apnOptions.getPassword(), apnOptions.isProduction());
             } catch (Exception e) {
                 LOG.warn("error querying feedback service", e);
             }
 
+            String clientId = entry.getKey();
             if (null != devices && !devices.isEmpty()) {
                 for (Device device : devices) {
                     LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
                     int numRemoved = removeSubscriptions(device);
-                    LOG.info("Removed {} subscriptions for device with token: {}.", numRemoved, device.getToken());
+                    LOG.info("Removed {} subscriptions associated with client {} for device with token: {}.", numRemoved, clientId, device.getToken());
                 }
             } else {
-                LOG.info("No devices to unregister received from feedback service.");
+                LOG.info("No devices to unregister received from feedback service for client {}.", clientId);
             }
         }
 

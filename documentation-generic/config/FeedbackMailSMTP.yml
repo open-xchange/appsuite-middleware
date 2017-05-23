@@ -1,0 +1,134 @@
+feature_name: Feedback Mail SMTP-Service
+properties:
+
+  - key: com.openexchange.userfeedback.mail.senderName
+    description: |
+      The sender name, that should be displayed to the recepients.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail"]
+
+  - key: com.openexchange.userfeedback.mail.senderAddress
+    description: |
+      The address that should be displayed for the recepients.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail"]
+
+  - key: com.openexchange.userfeedback.mail.exportPrefix
+    description: |
+      Prefix for mail attachment.
+    defaultValue: OX_App_Suite_Feedback_Report
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail"]
+
+  - key: com.openexchange.userfeedback.smtp.hostname
+    description: |
+      The SMTP server to connect to.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "Host", "SMTP"]
+
+  - key: com.openexchange.userfeedback.smtp.port
+    description: |
+      The SMTP server port to connect to.
+    defaultValue: 587
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "Port", "SMTP"]
+
+  - key: com.openexchange.userfeedback.smtp.timeout
+    description: |
+      Socket read timeout value in milliseconds.
+    defaultValue: 50000
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "SMTP", "Timeout"]
+
+  - key: com.openexchange.userfeedback.smtp.connectionTimeout
+    description: |
+      Socket connection timeout value in milliseconds.
+    defaultValue: 10000
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "SMTP", "Timeout"]
+
+  - key: com.openexchange.userfeedback.smtp.username
+    description: |
+      Default username for SMTP.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "Credential", "SMTP"]
+
+  - key: com.openexchange.userfeedback.smtp.password
+    description: |
+      Password for the provided username.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "Credential", "SMTP"]
+
+  - key: com.openexchange.userfeedback.pgp.signKeyFile
+    description: |
+      Path to PGP secret key used to sign mails.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "Encryption"]
+
+  - key: com.openexchange.userfeedback.pgp.signKeyPassword
+    description: |
+      Password for PGP secret key used to sign mails.
+    defaultValue: 
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: userfeedbackmail.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback", "Mail", "Encryption"]

@@ -49,26 +49,19 @@
 
 package com.openexchange.sessiond.impl;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    Bug16158Test.class,
+    Bug22838Test.class,
+    SessionHandlerTest.class
+})
 public class UnitTests {
-
-    private UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug16158Test.class);
-        tests.addTestSuite(Bug22838Test.class);
-        tests.addTest(new JUnit4TestAdapter(SessionHandlerTest.class));
-        return tests;
-    }
 }

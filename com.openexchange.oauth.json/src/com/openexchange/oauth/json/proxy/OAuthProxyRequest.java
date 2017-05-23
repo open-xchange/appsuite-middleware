@@ -180,8 +180,8 @@ public class OAuthProxyRequest {
 
 			return oauthService.getDefaultAccount(api, session);
 		}
-		req.require("id");
-		return null; //should not be reached
+
+		throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
 	}
 
 	public API getAPI() throws OXException {

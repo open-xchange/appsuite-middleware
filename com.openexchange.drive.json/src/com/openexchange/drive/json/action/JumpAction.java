@@ -132,7 +132,7 @@ public class JumpAction extends AbstractDriveAction {
             String client = getClient();
             String hash = HashCalculator.getInstance().getHash(request, requestData.getUserAgent(), client);
             boolean forceHTTPS = com.openexchange.tools.servlet.http.Tools.considerSecure(request, forceHTTPS());
-            LoginRequestImpl req = new LoginRequestImpl(session.getServerSession().getLogin(), session.getServerSession().getPassword(), session.getServerSession().getLocalIp(), userAgent, authId, client, "Drive Jump", hash, Interface.HTTP_JSON, headers, cookies, forceHTTPS, request.getServerName(), request.getServerPort(), requestData.getRoute());
+            LoginRequestImpl req = new LoginRequestImpl(session.getServerSession().getLogin(), session.getServerSession().getPassword(), session.getServerSession().getLocalIp(), userAgent, authId, client, "Drive Jump", hash, Interface.HTTP_JSON, headers, request.getParameterMap(), cookies, forceHTTPS, request.getServerName(), request.getServerPort(), requestData.getRoute());
             req.setClientToken(clientToken);
             LoginResult res = LoginPerformer.getInstance().doLogin(req);
             String serverToken = res.getServerToken();

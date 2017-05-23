@@ -1,18 +1,19 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class AddDefaultValueChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         AddDefaultValueChange change = new AddDefaultValueChange();
         change.setTableName("TABLE_NAME");
@@ -170,8 +171,7 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         assertEquals("addDefaultValue", ChangeFactory.getInstance().getChangeMetaData(new AddDefaultValueChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         AddDefaultValueChange change = new AddDefaultValueChange();
         change.setSchemaName("SCHEMA_NAME");

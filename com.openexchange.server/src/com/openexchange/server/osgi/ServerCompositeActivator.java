@@ -75,6 +75,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.filemanagement.osgi.ManagedFileManagementActivator(),
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
+        new com.openexchange.ajax.ipcheck.osgi.IPCheckActivator(),
         new com.openexchange.groupware.settings.impl.osgi.SettingsActivator(),
         new com.openexchange.ajax.printing.osgi.AJAXPrintingActivator(),
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
@@ -111,6 +112,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.anonymizer.osgi.AnonymizerActivator(),
         new com.openexchange.server.osgi.inspector.SessionInspectorChainActivator(),
         new com.openexchange.groupware.upload.osgi.UploadActivator(),
+        new com.openexchange.net.ssl.management.osgi.SSLCertificateManagementActivator(),
+        new com.openexchange.net.ssl.management.json.osgi.SSLCertificateManagementJSONActivator(),
     };
 
     public ServerCompositeActivator() {

@@ -49,7 +49,9 @@
 
 package com.openexchange.realtime.packet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -78,8 +80,8 @@ public class PresenceTest {
 
     private static byte priority = 1;
 
-    @Test
-    public void testInitialPresenceBuilder() throws OXException {
+     @Test
+     public void testInitialPresenceBuilder() throws OXException {
         RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
         
         Presence initialPresence = Presence.builder()
@@ -97,8 +99,8 @@ public class PresenceTest {
         assertEquals(4, initialPresence.getPayloadTrees().size());
     }
 
-    @Test
-    public void testUpdatePresenceBuilder() {
+     @Test
+     public void testUpdatePresenceBuilder() {
         // @formatter:off
         Presence updatePresence = Presence.builder()
             .from(fromID)
@@ -133,8 +135,8 @@ public class PresenceTest {
 
     }
 
-    @Test
-    public void testCopyConstructor() throws OXException {
+     @Test
+     public void testCopyConstructor() throws OXException {
         // @formatter:off
         Presence awayPresence = Presence.builder()
             .from(fromID)
@@ -166,8 +168,8 @@ public class PresenceTest {
         return payloads.get(0).getRoot().getData();
     }
 
-    @Test
-    public void testInitialPresencePayloads() {
+     @Test
+     public void testInitialPresencePayloads() {
         Presence presence = new Presence();
         Optional<Byte> priorityOpt = presence.getSinglePayload(Presence.PRIORITY_PATH, Byte.class);
         assertEquals(0, priorityOpt.get().byteValue());
@@ -181,8 +183,8 @@ public class PresenceTest {
         assertEquals(Optional.absent(), presence.getSinglePayload(Presence.ERROR_PATH, RealtimeException.class));
     }
 
-    @Test
-    public void testMessageRemoval() {
+     @Test
+     public void testMessageRemoval() {
         Presence presence = new Presence();
 
         Optional<String> messageOpt = presence.getSinglePayload(Presence.MESSAGE_PATH, String.class);

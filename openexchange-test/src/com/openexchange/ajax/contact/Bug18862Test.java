@@ -49,30 +49,34 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 public class Bug18862Test extends AbstractManagedContactTest {
-	
-	/**
-	 * Size of the contact image in bytes, should be larger than the 
-	 * configured <code>max_image_size</code>.
-	 */
-	private static final int IMAGE_SIZE = 100 * 1024;
-	
-	private static final String EXPECTED_CODE = "CON-0101";
 
-	public Bug18862Test(String name) {
-		super(name);
-	}
-	
-	public void testUploadTooLargeImage() throws Exception {
+    /**
+     * Size of the contact image in bytes, should be larger than the
+     * configured <code>max_image_size</code>.
+     */
+    private static final int IMAGE_SIZE = 100 * 1024;
+
+    private static final String EXPECTED_CODE = "CON-0101";
+
+    public Bug18862Test() {
+        super();
+    }
+
+    @Test
+    public void testUploadTooLargeImage() throws Exception {
         final Contact contact = super.generateContact();
         contact.setImage1(new byte[IMAGE_SIZE]);
         contact.setImageContentType("image/jpg");
         contact.setNumberOfImages(1);
-    	super.manager.newAction(contact);
-    	assertNotNull("got no response", super.manager.getLastResponse());
-    	assertNotNull("no exception thrown", super.manager.getLastResponse().getException());
-    	assertEquals("unexpected error code", EXPECTED_CODE, super.manager.getLastResponse().getException().getErrorCode());
-	}
+        super.cotm.newAction(contact);
+        assertNotNull("got no response", super.cotm.getLastResponse());
+        assertNotNull("no exception thrown", super.cotm.getLastResponse().getException());
+        assertEquals("unexpected error code", EXPECTED_CODE, super.cotm.getLastResponse().getException().getErrorCode());
+    }
 }

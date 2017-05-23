@@ -54,7 +54,6 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
@@ -86,12 +85,13 @@ public class Bug36024Test  {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         service = null;
     }
 
-    @Test
-    public void testPositionFixedReplacedByDisplayBlock() throws OXException {
+     @Test
+     public void testPositionFixedReplacedByDisplayBlock() throws Exception {
         String content = "<a href=\"http://example.com/attack.html\" style=\"position: fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
         String sanitized = service.sanitize(content, null, true, null, null);
         assertTrue("CSS style not sanitized", (sanitized.indexOf("display: block") > -1));

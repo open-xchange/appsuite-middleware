@@ -53,15 +53,16 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link MobileNotifierSubscribeParser}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobileNotifierSubscribeParser extends AbstractAJAXParser<MobileNotifierSubscribeResponse> {
+
     /**
      * Initializes a new {@link MobileNotifierSubscribeParser}.
+     * 
      * @param failOnError
      */
     public MobileNotifierSubscribeParser(boolean failOnError) {

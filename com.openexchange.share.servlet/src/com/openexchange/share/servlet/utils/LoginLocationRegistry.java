@@ -106,19 +106,12 @@ public class LoginLocationRegistry {
     }
 
     /**
-     * Puts specified login location into this registry.
-     *
-     * @param loginLocation The associated login location
-     * @return The token referring to the login location
-     */
-    public String put2(LoginLocation loginLocation) {
-        String token = UUIDs.getUnformattedString(UUID.randomUUID());
-        cache.put(token, loginLocation);
-        return token;
-    }
-
-    /**
      * Puts specified login location into this registry and performs the redirect using {@link LoginLocation#DEFAULT_ALLOWED_ATTRIBUTES default allowed attributes}.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: Specified <tt>HttpServletResponse</tt> is required to be not yet in {@link HttpServletResponse#isCommitted() committed} state. Otherwise calling this method has no effect.
+     * </div>
+     * <p>
      *
      * @param loginLocation The associated login location
      * @param response The associated HTTP response
@@ -130,6 +123,11 @@ public class LoginLocationRegistry {
 
     /**
      * Puts specified login location into this registry and performs the redirect.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: Specified <tt>HttpServletResponse</tt> is required to be not yet in {@link HttpServletResponse#isCommitted() committed} state. Otherwise calling this method has no effect.
+     * </div>
+     * <p>
      *
      * @param loginLocation The associated login location
      * @param response The associated HTTP response
@@ -137,6 +135,12 @@ public class LoginLocationRegistry {
      * @throws IOException If redirect fails due to an I/O error
      */
     public void putAndRedirect(LoginLocation loginLocation, HttpServletResponse response, Collection<String> allowedAttributes) throws IOException {
+        if (response.isCommitted()) {
+            // HTTP response has already been comitted. Most likely because outgoing data were already in transfer, but connection to client got lost.
+            // Hence, no redirect possible...
+            return;
+        }
+
         String token = UUIDs.getUnformattedString(UUID.randomUUID());
         cache.put(token, loginLocation);
         response.sendRedirect(LoginLocation.buildRedirectWith(token, loginLocation, allowedAttributes));

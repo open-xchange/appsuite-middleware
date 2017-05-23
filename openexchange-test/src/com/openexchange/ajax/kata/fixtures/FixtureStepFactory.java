@@ -81,7 +81,7 @@ public class FixtureStepFactory {
         return steps;
     }
 
-    private <T> void addFixtures(Class<T> aClass, Fixtures<T> fixtures, List<Step> steps,  String filename) throws OXException {
+    private <T> void addFixtures(Class<T> aClass, Fixtures<T> fixtures, List<Step> steps, String filename) throws OXException {
         List<FixtureTransformer> transformer = getAllTransformers();
 
         List<Entry<T>> entries = new ArrayList<Entry<T>>();
@@ -91,10 +91,10 @@ public class FixtureStepFactory {
         }
         Collections.sort(entries);
 
-        for(Entry<T> entry : entries) {
-            for(FixtureTransformer trans : transformer) {
-                if(trans.handles(aClass, entry.name, entry.fixture)) {
-                    steps.add( trans.transform(aClass, entry.name, entry.fixture, filename+": Step "+entry.fixture.getAttribute("step")) );
+        for (Entry<T> entry : entries) {
+            for (FixtureTransformer trans : transformer) {
+                if (trans.handles(aClass, entry.name, entry.fixture)) {
+                    steps.add(trans.transform(aClass, entry.name, entry.fixture, filename + ": Step " + entry.fixture.getAttribute("step")));
                 }
             }
         }
@@ -105,15 +105,19 @@ public class FixtureStepFactory {
     }
 
     private List<FixtureTransformer> getAllTransformers() {
-        return new ArrayList<FixtureTransformer>(){{
-            add(new AppointmentFixtureTransformer());
-			add(new TaskFixtureTransformer());
-            add(new ContactFixtureTransformer());
-            add(new FolderFixtureTransformer());
-        }};
+        return new ArrayList<FixtureTransformer>() {
+
+            {
+                add(new AppointmentFixtureTransformer());
+                add(new TaskFixtureTransformer());
+                add(new ContactFixtureTransformer());
+                add(new FolderFixtureTransformer());
+            }
+        };
     }
 
-    private static final class Entry<T> implements Comparable<Entry<T>>{
+    private static final class Entry<T> implements Comparable<Entry<T>> {
+
         public String name;
         public Fixture<T> fixture;
 
@@ -124,8 +128,8 @@ public class FixtureStepFactory {
 
         @Override
         public int compareTo(Entry<T> o) {
-            Long myStep = fixture.getAttribute("step") != null ? (Long)fixture.getAttribute("step") : Long.valueOf(0);
-            Long otherStep = o.fixture.getAttribute("step") != null ? (Long)o.fixture.getAttribute("step") : Long.valueOf(0);
+            Long myStep = fixture.getAttribute("step") != null ? (Long) fixture.getAttribute("step") : Long.valueOf(0);
+            Long otherStep = o.fixture.getAttribute("step") != null ? (Long) o.fixture.getAttribute("step") : Long.valueOf(0);
             return new Long(myStep.longValue() - otherStep.longValue()).intValue();
         }
 

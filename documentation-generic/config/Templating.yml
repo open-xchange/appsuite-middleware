@@ -1,0 +1,55 @@
+feature_name: Templating
+properties:
+    - key: com.openexchange.templating.path
+      description: |
+        Specifies the templating path.
+      defaultValue: "@templatepath@"
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: templating.properties
+      packageName: open-xchange-core
+      tags: ["Template"]
+    - key: com.openexchange.templating.assets.path
+      description: |
+        Specifies the assets path.
+      defaultValue: "@templatepath@/assets/"
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: templating.properties
+      packageName: open-xchange-core
+      tags: ["Template"]
+    - key: com.openexchange.templating.trusted
+      description: |
+        Define which kind of templates should be trusted.  
+        Possible values:
+        <ul>
+          <li><code>server</code></li>
+          <li><code>user</code></li>
+          <li><code>true</code></li>
+          <li><code>false</code></li>
+        </ul>
+      defaultValue: server
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: templating.properties
+      packageName: open-xchange-core
+      tags: ["Template"]
+    - key: com.openexchange.templating.usertemplating
+      description: |
+        Define whether users can use templating. This would involve 
+        applying templates located in the user's OXMF Templates folder.
+        If set to <code>false</code>, only server templates will be used.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: templating.properties
+      packageName: open-xchange-core
+      tags: ["Template"]

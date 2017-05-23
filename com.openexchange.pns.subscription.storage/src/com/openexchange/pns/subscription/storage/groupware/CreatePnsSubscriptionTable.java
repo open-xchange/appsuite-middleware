@@ -73,7 +73,7 @@ public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
             "transport VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
             "last_modified BIGINT(64) NOT NULL," +
             "all_flag TINYINT UNSIGNED NOT NULL default '0'," +
-            "PRIMARY KEY (cid, user, token)," +
+            "PRIMARY KEY (cid, user, token, client)," +
             "UNIQUE KEY `subscription_id` (`id`)" +
             // "INDEX `affiliationIndex` (cid, user, affiliation)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";

@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.login;
 
-import java.util.List;
-import com.openexchange.configuration.ClientWhitelist;
+import java.util.Set;
+import com.openexchange.capabilities.Capability;
 import com.openexchange.configuration.CookieHashSource;
-import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
+import com.openexchange.login.ConfigurationProperty;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 
 /**
  * Object to store the configuration parameters for the different login process mechanisms.
@@ -60,6 +65,8 @@ import com.openexchange.sessiond.impl.IPRange;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class LoginConfiguration {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(LoginConfiguration.class);
 
     private final String uiWebPath;
     private final boolean sessiondAutoLogin;
@@ -71,16 +78,13 @@ public final class LoginConfiguration {
     private final int cookieExpiry;
     private final boolean insecure;
     private final boolean cookieForceHTTPS;
-    private final boolean ipCheck;
-    private final ClientWhitelist ipCheckWhitelist;
     private final boolean redirectIPChangeAllowed;
-    private final List<IPRange> ranges;
     private final boolean disableTrimLogin;
     private final boolean formLoginWithoutAuthId;
     private final boolean isRandomTokenEnabled;
     private final boolean checkPunyCodeLoginString;
 
-    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, List<IPRange> ranges, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled, boolean checkPunyCodeLoginString) {
+    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean redirectIPChangeAllowed, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled, boolean checkPunyCodeLoginString) {
         super();
         this.uiWebPath = uiWebPath;
         this.sessiondAutoLogin = sessiondAutoLogin;
@@ -92,10 +96,7 @@ public final class LoginConfiguration {
         this.cookieExpiry = cookieExpiry;
         this.cookieForceHTTPS = cookieForceHTTPS;
         this.insecure = insecure;
-        this.ipCheck = ipCheck;
-        this.ipCheckWhitelist = ipCheckWhitelist;
         this.redirectIPChangeAllowed = redirectIPChangeAllowed;
-        this.ranges = ranges;
         this.disableTrimLogin = disableTrimLogin;
         this.formLoginWithoutAuthId = formLoginWithoutAuthId;
         this.isRandomTokenEnabled = isRandomTokenEnabled;
@@ -106,7 +107,44 @@ public final class LoginConfiguration {
         return uiWebPath;
     }
 
+    /**
+     * Checks if auto-login is enabled.
+     * <p>
+     * This routine tries to determine the host name associated with calling thread in order to check reliably using {@link #isSessiondAutoLogin(String)} method.
+     * If host name cannot be determined, global auto-login property is considered.
+     *
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     */
     public boolean isSessiondAutoLogin() {
+        String hostname = LogProperties.getHostName();
+        if (hostname != null) {
+            return isSessiondAutoLogin(hostname);
+        }
+        return sessiondAutoLogin;
+    }
+
+    private static final Capability CAPABILITY_AUTOLOGIN = new Capability("autologin");
+
+    /**
+     * Checks if auto-login is enabled for given host name
+     *
+     * @param hostName The host name to check for
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     */
+    public boolean isSessiondAutoLogin(String hostName) {
+        try {
+            ServerConfigService configService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+            ServerConfig config = configService.getServerConfig(hostName, -1, -1);
+            Set<Capability> capabilities = config.getCapabilities();
+            if (null != capabilities) {
+                return capabilities.contains(CAPABILITY_AUTOLOGIN);
+            }
+
+            LOGGER.warn("Retrieved server configuration for host {} misses the capabilities set. Using default '{}' as fall-back (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
+        } catch (OXException e) {
+            // fallback to default
+            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
+        }
         return sessiondAutoLogin;
     }
 
@@ -142,20 +180,8 @@ public final class LoginConfiguration {
         return cookieForceHTTPS;
     }
 
-    public boolean isIpCheck() {
-        return ipCheck;
-    }
-
-    public ClientWhitelist getIpCheckWhitelist() {
-        return ipCheckWhitelist;
-    }
-
     public boolean isRedirectIPChangeAllowed() {
         return redirectIPChangeAllowed;
-    }
-
-    public List<IPRange> getRanges() {
-        return ranges;
     }
 
     public boolean isDisableTrimLogin() {

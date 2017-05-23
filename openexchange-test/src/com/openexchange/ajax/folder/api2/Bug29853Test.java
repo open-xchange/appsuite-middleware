@@ -49,8 +49,18 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Iterator;
 import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -66,18 +76,15 @@ import com.openexchange.groupware.container.FolderObject;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class Bug29853Test extends AbstractFolderTest {
 
     private static final int THREAD_COUNT = 20;
 
     private FolderObject folder;
 
-    public Bug29853Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         folder = createSingle(FolderObject.INFOSTORE, UUID.randomUUID().toString());
         folder.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
@@ -86,14 +93,18 @@ public class Bug29853Test extends AbstractFolderTest {
         insertResponse.fillObject(folder);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != folder) {
-            super.deleteFolders(true,folder);
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != folder) {
+                super.deleteFolders(true, folder);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testCreateWithSameName() throws Throwable {
         String folderName = "a";
         FolderObject subfolder = createSingle(FolderObject.INFOSTORE, folderName);
@@ -124,6 +135,7 @@ public class Bug29853Test extends AbstractFolderTest {
         assertFalse("Folder was created " + listResponse.getArray().length + " times: " + listResponse.getResponse(), iterator.hasNext());
     }
 
+    @Test
     public void testRenameToSameName() throws Throwable {
         FolderObject[] subfolders = new FolderObject[THREAD_COUNT];
         for (int i = 0; i < THREAD_COUNT; i++) {

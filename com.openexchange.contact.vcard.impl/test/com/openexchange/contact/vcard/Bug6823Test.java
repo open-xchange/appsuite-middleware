@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -67,7 +69,8 @@ public class Bug6823Test extends VCardTest {
         super();
     }
 
-    public void testImportVCard() throws Exception {
+         @Test
+     public void testImportVCard() throws Exception {
         /*
          * import vCard
          */

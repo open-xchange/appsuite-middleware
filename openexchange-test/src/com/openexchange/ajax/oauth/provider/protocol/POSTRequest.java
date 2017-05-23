@@ -59,9 +59,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.ajax.oauth.provider.EndpointTest;
-
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -108,11 +106,7 @@ public class POSTRequest extends AbstractRequest<POSTRequest> {
 
         List<NameValuePair> params = prepareParams(requestSpecificParams);
         try {
-            HttpPost request = new HttpPost(new URIBuilder()
-                .setScheme(scheme)
-                .setHost(hostname)
-                .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
-                .build());
+            HttpPost request = new HttpPost(new URIBuilder().setScheme(scheme).setHost(hostname).setPath(EndpointTest.AUTHORIZATION_ENDPOINT).build());
 
             for (String header : headers.keySet()) {
                 String value = headers.get(header);

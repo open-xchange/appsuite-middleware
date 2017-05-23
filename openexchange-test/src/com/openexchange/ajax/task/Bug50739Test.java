@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import org.junit.After;
 import org.junit.Before;
@@ -57,14 +59,12 @@ import com.openexchange.ajax.attach.actions.AllRequest;
 import com.openexchange.ajax.attach.actions.AllResponse;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug50739Test}
@@ -78,43 +78,18 @@ public class Bug50739Test extends AbstractAJAXSession {
 
     private AJAXClient client1;
     private AJAXClient client2;
-    FolderTestManager folderTestManager;
     FolderObject privateFolder;
     FolderObject sharedFolder;
 
-    /**
-     * Initializes a new {@link Bug50739Test}.
-     *
-     * @param name The test name
-     */
-    public Bug50739Test(String name) {
-        super(name);
-    }
-
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(User.User2);
-        folderTestManager = new FolderTestManager(client1);
-        privateFolder = folderTestManager.insertFolderOnServer(folderTestManager.generatePrivateFolder(
+        client2 = getClient2();
+        privateFolder = ftm.insertFolderOnServer(ftm.generatePrivateFolder(
             UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK, client1.getValues().getPrivateTaskFolder(), client1.getValues().getUserId()));
-        sharedFolder = folderTestManager.insertFolderOnServer(folderTestManager.generateSharedFolder(
+        sharedFolder = ftm.insertFolderOnServer(ftm.generateSharedFolder(
             UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK, client1.getValues().getPrivateTaskFolder(), client1.getValues().getUserId(), client2.getValues().getUserId()));
-    }
-
-    @After
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != folderTestManager) {
-            folderTestManager.cleanUp();
-        }
-        if (null != client2) {
-            client2.logout();
-            client2 = null;
-        }
-        super.tearDown();
     }
 
     @Test
@@ -123,7 +98,7 @@ public class Bug50739Test extends AbstractAJAXSession {
          * create task with attachments in private folder as user a
          */
         Task task = Create.createWithDefaults(privateFolder.getObjectID(), "test");
-        client1.execute(new InsertRequest(task, client.getValues().getTimeZone(), true)).fillTask(task);
+        client1.execute(new InsertRequest(task, client1.getValues().getTimeZone(), true)).fillTask(task);
         client1.execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("test".getBytes()), "text/plain"));
         /*
          * try to access attachment of task in private folder as user b, using the identifier of the shared folder

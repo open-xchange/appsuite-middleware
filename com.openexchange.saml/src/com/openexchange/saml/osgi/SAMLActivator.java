@@ -49,8 +49,11 @@
 
 package com.openexchange.saml.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.saml.impl.DefaultConfig;
+import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
+import com.openexchange.saml.spi.SAMLConfigRegistry;
 
 /**
  * OSGi activator for com.openexchange.saml.
@@ -59,21 +62,31 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLActivator implements BundleActivator {
+public class SAMLActivator extends HousekeepingActivator {
 
     private SAMLFeature samlFeature;
 
     @Override
-    public void start(BundleContext context) throws Exception {
-      samlFeature = new SAMLFeature(context);
-      samlFeature.open();
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{ConfigurationService.class};
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void startBundle() throws Exception {
+        samlFeature = new SAMLFeature(context);
+        samlFeature.open();
+        DefaultConfig config = DefaultConfig.init(getService(ConfigurationService.class));
+        SAMLConfigRegistryImpl.getInstance().registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
+        registerService(SAMLConfigRegistry.class, SAMLConfigRegistryImpl.getInstance());
+
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
         if (samlFeature != null) {
             samlFeature.close();
         }
+        super.stopBundle();
     }
 
 }

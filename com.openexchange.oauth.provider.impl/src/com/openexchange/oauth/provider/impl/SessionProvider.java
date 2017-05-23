@@ -213,11 +213,12 @@ public class SessionProvider {
             httpRequest.getRemoteAddr(),
             userAgent,
             UUIDs.getUnformattedStringFromRandom(), /* auth id */
-        client,
+            client,
             "1.0",
             hash,
             Interface.HTTP_JSON,
             headers,
+            httpRequest.getParameterMap(),
             cookies,
             forceHTTPS,
             httpRequest.getServerName(),

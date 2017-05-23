@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
-import java.util.EnumSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriter;
@@ -93,7 +92,7 @@ public class SizeTestWriterImpl extends AbstractWriterImpl<SizeTestArgument> {
             final ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
             compWriter.write((Comparison<ComparisonArgument>) comparison, jsonObject);
         }
-        
+
         return jsonObject;
     }
 }

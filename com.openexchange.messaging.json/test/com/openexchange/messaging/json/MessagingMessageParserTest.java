@@ -58,10 +58,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.ContentType;
@@ -74,6 +74,10 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.tools.encoding.Base64;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -81,9 +85,9 @@ import com.openexchange.tools.encoding.Base64;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MessagingMessageParserTest extends TestCase {
-
-    public void testParseSimpleFields() throws JSONException, OXException, IOException {
+public class MessagingMessageParserTest {
+         @Test
+     public void testParseSimpleFields() throws JSONException, OXException, IOException {
         final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("colorLabel", 12);
@@ -130,7 +134,8 @@ public class MessagingMessageParserTest extends TestCase {
     }
 
 
-    public void testHeaders() throws JSONException, OXException, IOException {
+         @Test
+     public void testHeaders() throws JSONException, OXException, IOException {
         final JSONObject messageJSON = new JSONObject();
 
         final JSONObject headers = new JSONObject();
@@ -164,7 +169,8 @@ public class MessagingMessageParserTest extends TestCase {
     }
 
 
-    public void testSpecialHeader() throws JSONException, OXException, IOException {
+         @Test
+     public void testSpecialHeader() throws JSONException, OXException, IOException {
         final JSONObject messageJSON = new JSONObject();
 
         final JSONObject headers = new JSONObject();
@@ -184,7 +190,8 @@ public class MessagingMessageParserTest extends TestCase {
         assertEquals("Value1", header.iterator().next().getValue());
     }
 
-    public void testParseHeaderAsAttributeIfItIsAMessagingField() throws JSONException, OXException, IOException {
+         @Test
+     public void testParseHeaderAsAttributeIfItIsAMessagingField() throws JSONException, OXException, IOException {
         final String date = "Sun, 7 Feb 2010 19:20:40 +0100 (CET)";
         final JSONObject messageJSON = new JSONObject("{'to':[{'address':'to.clark.kent@dailyplanet.com'}],'flags':0,'subject':'Subject-Value','bcc':[{'address':'bcc.clark.kent@dailyplanet.com'}],'contentType':{'params':{},'type':'text/plain'},'from':[{'address':'from.clark.kent@dailyplanet.com'}],'size':0,'threadLevel':0,'dispositionNotificationTo':[{'address':'disp.notification.to.clark.kent@dailyplanet.com'}],'priority':'12','sentDate':'"+date+"','cc':[{'address':'cc.clark.kent@dailyplanet.com'}]}");
 
@@ -201,12 +208,14 @@ public class MessagingMessageParserTest extends TestCase {
         }
     }
 
-    public void testAttributeTrumpsHeader() {
+         @Test
+     public void testAttributeTrumpsHeader() {
 
     }
 
 
-    public void testPlainBody() throws JSONException, OXException, IOException {
+         @Test
+     public void testPlainBody() throws JSONException, OXException, IOException {
         final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", "I am the content");
@@ -237,7 +246,8 @@ public class MessagingMessageParserTest extends TestCase {
     }
 
 
-    public void testBinaryBodyInBase64() throws OXException, JSONException, IOException {
+         @Test
+     public void testBinaryBodyInBase64() throws OXException, JSONException, IOException {
         final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", Base64.encode("I am the content"));
@@ -259,7 +269,8 @@ public class MessagingMessageParserTest extends TestCase {
 
     }
 
-    public void testBinaryBodyByReference() throws OXException, IOException, JSONException {
+         @Test
+     public void testBinaryBodyByReference() throws OXException, IOException, JSONException {
         final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", new JSONObject("{ref : '12'}"));
@@ -283,7 +294,8 @@ public class MessagingMessageParserTest extends TestCase {
         assertEquals("Mock value", inputStream2String( ((BinaryContent) content).getData() ));
     }
 
-    public void testMultipart() throws JSONException, OXException, IOException {
+         @Test
+     public void testMultipart() throws JSONException, OXException, IOException {
         final JSONObject messageJSON = new JSONObject("{headers : {'content-type' : 'multipart/mixed'}}");
 
         final JSONArray multipartJSON = new JSONArray();
@@ -341,7 +353,8 @@ public class MessagingMessageParserTest extends TestCase {
 
     }
 
-    public void testSpecialBody() throws OXException, JSONException, IOException {
+         @Test
+     public void testSpecialBody() throws OXException, JSONException, IOException {
         final JSONObject messageJSON = new JSONObject();
 
         messageJSON.put("body", "tnetnoc eht ma I");

@@ -57,9 +57,7 @@ public abstract class AbstractTransportProvider implements TransportProvider {
 
         if ("websocket".equals(transportName)) {
             type = TransportType.from(transportName);
-        }
-
-        if ("polling".equals(transportName)) {
+        } else if ("polling".equals(transportName)) {
             if (request.getParameter(EngineIOProtocol.JSONP_INDEX) != null) {
                 type = TransportType.JSONP_POLLING;
             } else {

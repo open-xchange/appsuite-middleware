@@ -55,6 +55,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -74,10 +75,7 @@ public final class Bug12338Test extends AbstractWebDAVSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug12338Test.class);
 
-    public Bug12338Test(final String name) {
-        super(name);
-    }
-
+    @Test
     public void testStrangeExternal() throws Throwable {
         final WebDAVClient client = getClient();
         final FolderObject folder = client.getFolderTools().getDefaultAppointmentFolder();
@@ -94,16 +92,14 @@ public final class Bug12338Test extends AbstractWebDAVSession {
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.setIgnoreConflicts(true);
-        appointment.setParticipants(new Participant[] {
-            new UserParticipant(client.getGroupUserTools().getUserId()),
-            new ExternalUserParticipant("/O=COMPARIS/OU=FIRST ADMINISTRATIVE GROUP/CN=RECIPIENTS/CN=Johann.burkhard")
+        appointment.setParticipants(new Participant[] { new UserParticipant(client.getGroupUserTools().getUserId()), new ExternalUserParticipant("/O=COMPARIS/OU=FIRST ADMINISTRATIVE GROUP/CN=RECIPIENTS/CN=Johann.burkhard")
         });
         final InsertRequest request = new SpecialInsertRequest(appointment, client.getGroupUserTools().getUserId());
         final InsertResponse response = client.execute(request);
         response.fillObject(appointment);
         LOG.info("Identifier: " + appointment.getObjectID());
         LOG.info("Timestamp: " + appointment.getLastModified());
-//        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+        //        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
     }
 
     private class SpecialInsertRequest extends InsertRequest {
@@ -121,18 +117,18 @@ public final class Bug12338Test extends AbstractWebDAVSession {
             eProp.removeChild("participants", NS);
             final Element participants = new Element("participants", NS);
             eProp.addContent(participants);
-//            participants.addContent(new Text(
-//                "<ox:user " +
-//                "xmlns:ox=\"http://www.open-xchange.org\" ox:displayname=\"comparis.ch - Ralf Beyeler\" " +
-//                "xmlns:ox=\"http://www.open-xchange.org\" ox:external=\"true\" " +
-//                "xmlns:ox=\"http://www.open-xchange.org\" ox:confirm=\"none\" " +
-//                "xmlns:ox=\"http://www.open-xchange.org\" >/O=COMPARIS/OU=FIRST ADMINISTRATIVE GROUP/CN=RECIPIENTS/CN=Ralf.beyeler" +
-//                "</ox:user>" +
-//                "<ox:user " +
-//                "xmlns:ox=\"http://www.open-xchange.org\" ox:external=\"false\" " +
-//                "xmlns:ox=\"http://www.open-xchange.org\" ox:confirm=\"accept\" " +
-//                "xmlns:ox=\"http://www.open-xchange.org\" >" + userId +
-//                "</ox:user>"));
+            //            participants.addContent(new Text(
+            //                "<ox:user " +
+            //                "xmlns:ox=\"http://www.open-xchange.org\" ox:displayname=\"comparis.ch - Ralf Beyeler\" " +
+            //                "xmlns:ox=\"http://www.open-xchange.org\" ox:external=\"true\" " +
+            //                "xmlns:ox=\"http://www.open-xchange.org\" ox:confirm=\"none\" " +
+            //                "xmlns:ox=\"http://www.open-xchange.org\" >/O=COMPARIS/OU=FIRST ADMINISTRATIVE GROUP/CN=RECIPIENTS/CN=Ralf.beyeler" +
+            //                "</ox:user>" +
+            //                "<ox:user " +
+            //                "xmlns:ox=\"http://www.open-xchange.org\" ox:external=\"false\" " +
+            //                "xmlns:ox=\"http://www.open-xchange.org\" ox:confirm=\"accept\" " +
+            //                "xmlns:ox=\"http://www.open-xchange.org\" >" + userId +
+            //                "</ox:user>"));
             final Element user1 = new Element("user", createNS());
             participants.addContent(user1);
             user1.addNamespaceDeclaration(createNS());

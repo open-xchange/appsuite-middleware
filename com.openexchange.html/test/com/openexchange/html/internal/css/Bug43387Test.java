@@ -67,8 +67,8 @@ import com.openexchange.java.Stringer;
  */
 public class Bug43387Test {
 
-    @Test
-    public void testBug43387() {
+     @Test
+     public void testBug43387() {
         final Stringer cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         String css = "position: absolute;border: 1px solid black;background: #FFF;width: 5px;height: 5px;z-index: 10000";
 

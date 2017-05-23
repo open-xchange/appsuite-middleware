@@ -53,6 +53,8 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.client.onboarding.ClientDevice;
+import com.openexchange.client.onboarding.ClientDevices;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DeviceAwareScenario;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -88,7 +90,13 @@ public class AllScenariosAction extends AbstractOnboardingAction {
             throw OnboardingExceptionCodes.INVALID_DEVICE_ID.create(deviceId);
         }
 
-        List<DeviceAwareScenario> scenarios = onboardingService.getScenariosFor(device, session);
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
+
+        List<DeviceAwareScenario> scenarios = onboardingService.getScenariosFor(clientDevice, device, session);
         return new AJAXRequestResult(scenarios, "onboardingScenario");
     }
 

@@ -394,42 +394,36 @@ public class SocketFetcher {
 	 * If we want an SSL connection and we didn't get an SSLSocket,
 	 * wrap our plain Socket with an SSLSocket.
 	 */
-   if ((useSSL || sf instanceof SSLSocketFactory) &&
-        !(socket instanceof SSLSocket)) {
-        String trusted;
-        SSLSocketFactory ssf;
-        if ((trusted = props.getProperty(prefix + ".ssl.trust")) != null) {
-        try {
-            MailSSLSocketFactory msf = new MailSSLSocketFactory();
-            if (trusted.equals("*")) {
+	boolean error = true;
+	Socket closeMeOnError = socket;
+	try {
+	if ((useSSL || sf instanceof SSLSocketFactory) &&
+		!(socket instanceof SSLSocket)) {
+	    String trusted;
+	    SSLSocketFactory ssf;
+	    if ((trusted = props.getProperty(prefix + ".ssl.trust")) != null) {
+		try {
+		    MailSSLSocketFactory msf = new MailSSLSocketFactory();
+		    if (trusted.equals("*")) {
                 msf.setTrustAllHosts(true);
             } else {
                 msf.setTrustedHosts(trusted.split("\\s+"));
             }
-            ssf = msf;
-        } catch (GeneralSecurityException gex) {
-            IOException ioex = new IOException(
-                    "Can't create MailSSLSocketFactory");
-            ioex.initCause(gex);
-            throw ioex;
-        }
-        } else if (sf instanceof SSLSocketFactory) {
+		    ssf = msf;
+		} catch (GeneralSecurityException gex) {
+		    IOException ioex = new IOException(
+				    "Can't create MailSSLSocketFactory");
+		    ioex.initCause(gex);
+		    throw ioex;
+		}
+	    } else if (sf instanceof SSLSocketFactory) {
             ssf = (SSLSocketFactory)sf;
         } else {
             ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
         }
-        boolean error = true;
-        try {
-        Socket newSocket = ssf.createSocket(socket, host, port, true);
-        error = false;
-        socket = newSocket;
-        sf = ssf;
-        } finally {
-            if (error) {
-                socket.close();
-            }
-        }
-    }
+	    socket = ssf.createSocket(socket, host, port, true);
+	    sf = ssf;
+	}
 
 	/*
 	 * No matter how we created the socket, if it turns out to be an
@@ -437,7 +431,17 @@ public class SocketFetcher {
 	 */
 	configureSSLSocket(socket, host, props, prefix, sf);
 
+	/*
+	 * Apparently, everything went fine
+	 */
+	error = false;
 	return socket;
+	} finally {
+	    if (error) {
+	        closeMeOnError.close();
+            socket.close();
+        }
+	}
     }
 
     /**

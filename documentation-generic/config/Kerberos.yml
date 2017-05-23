@@ -1,0 +1,88 @@
+feature_name: Kerberos
+feature_description: |
+  This page shows configurations for the Kerberos authentication bundle.
+properties:
+    - key: com.openexchange.kerberos.moduleName
+      description: |
+        Name of the module in the authentication and authorization configuration file. Must be an entry in the file named by
+        [[java.security.auth.login.config]].
+      defaultValue: Open-Xchange
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: java.security.auth.login.config
+      file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
+      tags: ["Kerberos", "Authentication"]
+    - key: com.openexchange.kerberos.userModuleName
+      description: |
+        Name of the module in the authentication and authorization configuration file used for username and password authentication. Must be an
+        entry in the file named by [[java.security.auth.login.config]].
+      defaultValue: Open-Xchange-User-Auth
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: java.security.auth.login.config
+      file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
+      tags: ["Kerberos", "Authentication"]
+    - key: com.openexchange.kerberos.proxyDelimiter
+      description: |
+        Define a delimiter to be used to separate proxy authentication from normal user login on the frontend login screen. If defined, a proxy
+        user can login on behalf of a user using the form &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;.
+
+        NOTE:  
+        Login to the mail server is not supported. The implementation for mail filter implementation based on SIEVE protocol does not
+        support a proxy authentication, so it will raise error messages.
+      defaultValue: +
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
+      tags: ["Kerberos", "Authentication"]
+    - key: com.openexchange.kerberos.proxyUser
+      description: |
+        Comma separated list of proxy user logins allowed to login as a proxy user for every other user account.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
+      tags: ["Kerberos", "Authentication"]
+    - key: java.security.auth.login.config
+      description: |
+        Path to the Java authentication and authorization configuration file.
+      defaultValue: /opt/open-xchange/etc/kerberosLogin.conf
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
+      tags: ["Kerberos", "Authentication"]
+    - key: sun.security.krb5.debug
+      description: |
+        Enable kerberos debugging.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
+      tags: ["Kerberos", "Authentication", "Logging"]
+    - key: java.security.krb5.conf
+      description: |
+        Path to the krb5.conf configuration file.
+      defaultValue: /opt/open-xchange/etc/krb5.conf
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: kerberos.properties
+      packageName: open-xchange-authentication-kerberos
+      tags: ["Kerberos", "Authentication"]

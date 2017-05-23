@@ -113,10 +113,6 @@ public enum KnownApi implements API {
      * Copy.com
      */
     COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom"),
-    /**
-     * SurDoc
-     */
-    SURDOC("SurDoc", "com.openexchange.oauth.surdoc", "surdoc"),
     ;
 
     private final String serviceId;

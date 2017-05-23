@@ -161,9 +161,17 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         if (!pop3) {
             session.setParameter("mail-account.validate.type", "create");
             try {
-                if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings, true).booleanValue()) {
+                if (false == ValidateAction.actionValidateBoolean(accountDescription, session, true, warnings, true).booleanValue()) {
                     valid = false;
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                    warning.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(0, warning);
+                } else if (false == ValidateAction.actionValidateMailTransportBoolean(accountDescription, session, warnings, true).booleanValue()) {
+                    String login = accountDescription.getTransportLogin();
+                    if (false == ValidateAction.seemsValid(login)) {
+                        login = accountDescription.getLogin();
+                    }
+                    OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getTransportServer(), login);
                     warning.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(0, warning);
                 }
@@ -219,8 +227,9 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                     mailAccess = getMailAccess(accountDescription, session, warnings);
                     mailAccess.connect(false);
                     IMailFolderStorage storage = mailAccess.getFolderStorage();
-                    if (storage instanceof IMailFolderStorageDefaultFolderAware) {
-                        defaultFolderNames = ((IMailFolderStorageDefaultFolderAware) storage).getSpecialUseFolder();
+                    IMailFolderStorageDefaultFolderAware defaultFolderAware = storage.supports(IMailFolderStorageDefaultFolderAware.class);
+                    if (null != defaultFolderAware) {
+                        defaultFolderNames = defaultFolderAware.getSpecialUseFolder();
                     }
                     mailAccess.close(false);
                     mailAccess = null;

@@ -50,11 +50,15 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.Calendar;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-
 
 /**
  * {@link Bug30361Test}
@@ -65,7 +69,7 @@ public class Bug30361Test extends CalendarSqlTest {
 
     private CalendarDataObject appointment;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -80,7 +84,8 @@ public class Bug30361Test extends CalendarSqlTest {
         appointments.save(appointment);
         clean.add(appointment);
     }
-    
+
+    @Test
     public void testBug30361() throws Exception {
         try {
             CalendarDataObject cdao = appointments.getObjectById(appointment.getObjectID(), appointment.getParentFolderID() + 1);
@@ -91,8 +96,7 @@ public class Bug30361Test extends CalendarSqlTest {
         fail("Exception expected.");
     }
 
-
-    @Override
+    @After
     public void tearDown() throws Exception {
         super.tearDown();
     }

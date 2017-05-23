@@ -49,18 +49,19 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.Assume;
+import org.junit.Test;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
@@ -73,53 +74,50 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 
 public class AdminListTest extends AbstractMailFilterTest {
 
-    private AJAXClient userClient;
-
-    private AJAXClient adminClient;
-
     private Rule rule;
     private int rid = -1;
-
-    public AdminListTest(final String name) {
-        super(name);
-    }
+    private AJAXClient adminClient;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        adminClient = new AJAXClient(User.OXAdmin);
-        Context ctx = new Context(adminClient.getValues().getContextId());
+        adminClient = new AJAXClient(admin);
+        Context ctx = new Context(getClient().getValues().getContextId());
         ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
 
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
+        TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+        Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
         OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
         ctxInterface.change(ctx, credentials);
 
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
         Set<String> cap = new HashSet<String>(1);
         cap.add("webmail");
-        Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
+        Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         Set<String> emptySet = Collections.emptySet();
-        usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, cap, emptySet, emptySet, userCreds);
+        usrInterface.changeCapabilities(new Context(getClient().getValues().getContextId()), user, cap, emptySet, emptySet, userCreds);
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
-            Context ctx = new Context(adminClient.getValues().getContextId());
+            Context ctx = new Context(getClient().getValues().getContextId());
             ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "false");
-            Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
+            TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
+            Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
             OXContextInterface iface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
             iface.change(ctx, credentials);
 
             com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
             Set<String> cap = new HashSet<String>(1);
             cap.add("webmail");
-            Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
+            Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
             OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
             Set<String> emptySet = Collections.emptySet();
             usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, emptySet, cap, emptySet, userCreds);
@@ -133,9 +131,8 @@ public class AdminListTest extends AbstractMailFilterTest {
         }
     }
 
+    @Test
     public void testUserHasAccessToOtherUsersRules() throws Exception {
-        userClient = getClient();
-
         // Insert new rule as user
         rule = new Rule();
         rule.setName("testUserHasAccessToOtherUsersRules");
@@ -144,18 +141,19 @@ public class AdminListTest extends AbstractMailFilterTest {
         rule.setTest(new HeaderTest(new IsComparison(), new String[] { "testheader" }, new String[] { "testvalue" }));
 
         rid = mailFilterAPI.createRule(rule);
+        rememberRule(rid);
 
         // Get rules of user
         List<Rule> rules = mailFilterAPI.listRules();
 
         // Get rules of user as admin
         MailAccountGetRequest getMailAcc = new MailAccountGetRequest(0, false);
-        MailAccountGetResponse response = userClient.execute(getMailAcc);
+        MailAccountGetResponse response = getClient().execute(getMailAcc);
         MailAccountDescription description = response.getAsDescription();
         final String userImapLogin = description.getLogin();
 
         MailFilterAPI adminFilterAPI = new MailFilterAPI(adminClient);
-        try{
+        try {
             List<Rule> adminRules = adminFilterAPI.listRules(userImapLogin, false);
             for (final Rule ur : rules) {
                 boolean foundRule = false;
@@ -167,10 +165,10 @@ public class AdminListTest extends AbstractMailFilterTest {
                 }
                 assertTrue("Did not find rule.", foundRule);
             }
-        }catch(OXException e){
-            if(e.getPrefix().equals("MAIL_FILTER") && e.getCode()==2){
+        } catch (OXException e) {
+            if (e.getPrefix().equals("MAIL_FILTER") && e.getCode() == 2) {
                 Assume.assumeTrue("The context admin is unable to login to the sieve server. This is probably a configuration problem (e.g. imaplogin==null).", false);
-            }else {
+            } else {
                 throw e;
             }
         }

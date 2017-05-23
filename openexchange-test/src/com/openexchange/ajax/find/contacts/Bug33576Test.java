@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
@@ -59,28 +61,20 @@ import com.openexchange.groupware.container.Contact;
 /**
  * {@link Bug33576Test}
  *
- *  Autocomplete for contacts only shows contacts with e-mail address
+ * Autocomplete for contacts only shows contacts with e-mail address
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug33576Test extends ContactsFindTest {
 
-    /**
-     * Initializes a new {@link Bug33576Test}.
-     *
-     * @param name The test name
-     */
-    public Bug33576Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testAutocompleteContactWithoutEMailAddress() throws Exception {
         Contact contact = randomContact();
         contact.removeEmail1();
-        contact = manager.newAction(contact);
+        contact = cotm.newAction(contact);
         String prefix = contact.getGivenName().substring(0, 6);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact).getDisplayName());
         assertNotNull("no facet value found for: " + contact.getGivenName(), foundFacetValue);
     }

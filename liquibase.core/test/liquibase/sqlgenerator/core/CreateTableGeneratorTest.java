@@ -2,6 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import static org.junit.Assert.assertEquals;
 import java.math.BigInteger;
+import org.junit.Ignore;
+import org.junit.Test;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -23,8 +25,6 @@ import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTableStatement> {
 
@@ -45,8 +45,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         return statement;
     }
 
-    @Test
-    public void testWithColumnWithDefaultValue() {
+     @Test
+     public void testWithColumnWithDefaultValue() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database instanceof OracleDatabase) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -58,8 +58,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         }
     }
 
-    @Test
-    public void testWithColumnSpecificIntType() {
+     @Test
+     public void testWithColumnSpecificIntType() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int(11) unsigned"));
@@ -362,8 +362,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 //                });
 //    }
 
-    @Test
-    public void testAutoIncrementDB2Database() throws Exception {
+     @Test
+     public void testAutoIncrementDB2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof DB2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -380,8 +380,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithDB2Database() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithDB2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof DB2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -398,8 +398,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementByDB2Database() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementByDB2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof DB2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -416,8 +416,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementDerbyDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementDerbyDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof DerbyDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -434,8 +434,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithDerbyDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithDerbyDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof DerbyDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -452,8 +452,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementByDerbyDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementByDerbyDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof DerbyDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -470,8 +470,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementH2Database() throws Exception {
+     @Test
+     public void testAutoIncrementH2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof H2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -488,8 +488,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithH2Database() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithH2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof H2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -506,8 +506,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementByH2Database() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementByH2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof H2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -524,8 +524,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementHsqlDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementHsqlDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof HsqlDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -542,8 +542,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithHsqlDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithHsqlDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof HsqlDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -560,8 +560,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementByHsqlDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementByHsqlDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof HsqlDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -578,8 +578,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementMSSQLDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementMSSQLDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof MSSQLDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -596,8 +596,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithMSSQLDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithMSSQLDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof MSSQLDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -614,8 +614,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementByMSSQLDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementByMSSQLDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof MSSQLDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -632,8 +632,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementMySQLDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementMySQLDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof MySQLDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -651,8 +651,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     }
 
     @Ignore // unfortunately does not work
-    @Test
-    public void testAutoIncrementStartWithMySQLDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithMySQLDatabase() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database instanceof MySQLDatabase) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -671,8 +671,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
 
     @Ignore // unfortunately does not work
-    @Test
-    public void testAutoIncrementStartWithIncrementByMySQLDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementByMySQLDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof MySQLDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -690,8 +690,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementPostgresDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementPostgresDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof PostgresDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -708,8 +708,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithPostgresDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithPostgresDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof PostgresDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -727,8 +727,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementByPostgresDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementByPostgresDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof PostgresDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -746,8 +746,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementSQLiteDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementSQLiteDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SQLiteDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -764,8 +764,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithSQLiteDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithSQLiteDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SQLiteDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -783,8 +783,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementBySQLiteDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementBySQLiteDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SQLiteDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -802,8 +802,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementSybaseASADatabase() throws Exception {
+     @Test
+     public void testAutoIncrementSybaseASADatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SybaseASADatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -820,8 +820,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithSybaseASADatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithSybaseASADatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SybaseASADatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -839,8 +839,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementBySybaseASADatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementBySybaseASADatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SybaseASADatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -858,8 +858,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementSybaseDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementSybaseDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SybaseDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -876,8 +876,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithSybaseDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithSybaseDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SybaseDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
@@ -895,8 +895,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     	}
     }
 
-    @Test
-    public void testAutoIncrementStartWithIncrementBySybaseDatabase() throws Exception {
+     @Test
+     public void testAutoIncrementStartWithIncrementBySybaseDatabase() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
     		if (database instanceof SybaseDatabase) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);

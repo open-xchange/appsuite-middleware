@@ -1,0 +1,440 @@
+feature_name: Config DB
+feature_description: |
+  This page describes the properties needed to configure the JDBC connections to the configdb.
+  The configdb holds data about where to find context specific data.
+  The driver properties should be kept at their defaults.
+properties:
+    - key: readDriverClass
+      description: |
+        The read driver class.
+      defaultValue: com.mysql.jdbc.Driver
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readUrl
+      description: |
+        The readURL holds the database host and the used schema name.
+        The read connection must point to the database slave.
+      defaultValue: jdbc:mysql://localhost/configdb
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Host"]
+    - key: readProperty.1
+      description: |
+        The db user name.
+      defaultValue: user=openexchange
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Credential"]
+    - key: readProperty.2
+      description: |
+        The database password.
+      defaultValue: password=secret
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Credential"]
+    - key: readProperty.3
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: useUnicode=true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readProperty.4
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: characterEncoding=UTF-8
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readProperty.5
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: autoReconnect=false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readProperty.6
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: useServerPrepStmts=false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readProperty.7
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: useTimezone=true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readProperty.8
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: serverTimezone=UTC
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readProperty.9
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: connectTimeout=15000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Timeout"] 
+    - key: readProperty.10
+      description: |
+        A property of the db read connection. Should be kept at its default.
+      defaultValue: socketTimeout=15000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Timeout"]           
+    - key: writeDriverClass
+      description: |
+        The write driver class.
+      defaultValue: com.mysql.jdbc.Driver
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: readUrl
+      description: |
+        The writeURL holds the database host and the used schema name.
+        The write connection must point to the database master.
+      defaultValue: jdbc:mysql://localhost/configdb
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Host"]
+    - key: writeProperty.1
+      description: |
+        The db user name.
+      defaultValue: user=openexchange
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: writeProperty.2
+      description: |
+        The database password.
+      defaultValue: password=secret
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Credential"]
+    - key: writeProperty.3
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: useUnicode=true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: writeProperty.4
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: characterEncoding=UTF-8
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: writeProperty.5
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: autoReconnect=false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: writeProperty.6
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: useServerPrepStmts=false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: writeProperty.7
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: useTimezone=true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: writeProperty.8
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: serverTimezone=UTC
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: writeProperty.9
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: connectTimeout=15000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Timeout"] 
+    - key: writeProperty.10
+      description: |
+        A property of the db write connection. Should be kept at its default.
+      defaultValue: socketTimeout=15000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Timeout"]
+    - key: cleanerInterval
+      description: |
+        Timeinterval of cleaner thread in milliseconds. 
+        This thread removes idle timed out database connections and 
+        removes not used database connection pools after each cleanerInterval.
+      defaultValue: 10000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Thread"]
+    - key: maxIdle
+      description: |
+        Number of maximum idle connections. More connections aren't pooled and closed.
+        <code>-1</code> stands for unlimited.
+      defaultValue: -1
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Limit"]
+    - key: maxIdleTime
+      description: |
+        Maximum time in milliseconds a connection can be idle. If this time is 
+        exceeded, the connection gets closed.
+      defaultValue: 60000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Limit"]
+    - key: maxActive
+      description: |
+        If exhaustedAction is set to BLOCK, not more than maxActive connections
+        will be opened to the mysql database.
+        This value is overwritten for OX databases from configdb.
+      defaultValue: 100
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: exhaustedAction
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Limit"]
+    - key: maxWait
+      description: |
+        If exhaustedAction is set to BLOCK, a thread will not wait for more than 
+        maxWait milliseconds.
+      defaultValue: 10000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: exhaustedAction
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Limit", "Thread"]
+    - key: maxLifeTime
+      description: |
+        Maximum time in milliseconds a connection will be used. After this time
+        the connection get closed.
+      defaultValue: 600000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Limit"]
+    - key: exhaustedAction
+      description: |
+        Possible values:
+        <ul>
+         <li><code>BLOCK</code> - If maxActive number of connections is reached threads have to wait for a connection.</li>
+         <li><code>FAIL</code> - If maxActive number of connections is reached an exception is thrown.</li>
+         <li><code>GROW</code> - Open more connections even if maxActive is already reached.</li>
+        </ul>
+        This value is overwritten for OX databases from configdb.
+      defaultValue: BLOCK
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["maxWait", "maxActive"]
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: testOnActivate
+      description: |
+        Validate connections if they are activated. This is not necessary because the
+        activation already includes a check if the connection isn't closed.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: testOnDeactivate
+      description: |
+        Check if connections can be reused after they are returned to the pool.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: testOnIdle
+      description: |
+        Not useful for connections.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: testThreads
+      description: |
+        If testThreads is set to true, more information is logged to the Open-Xchange
+        log files about database connections.  If this option is enabled the
+        performance may degrade dramatically. The JVM has to generate then a lot of
+        method call stack dumps.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Logging", "Thread"]
+    - key: com.openexchange.database.replicationMonitor
+      description: |
+        This property allows to disable the replication monitor. This option is only useful if you have a MySQL master and slave setup.
+        If the application code releases a connection to the MySQL master, a writing operation on the database is assumed. To be able to monitor
+        the replication to the slave, a counter is increased after releasing the connection. Reading this counter from the slave indicates, the
+        write operation is not replicated yet and instead of a slave connection a master connection is then used to read data. This prevents data
+        reading inconsistencies. Unfortunately will this produce additional IO load on MySQL master and slave.
+        This mechanism can be disabled with this property. This saves IO load but it may cause data inconsistencies. Especially newly
+        created objects can disappear in the following refresh requests.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database"]
+    - key: com.openexchange.database.checkWriteCons
+      description: |
+        If this property is set to <code>true</code>, a warning will be logged every time when a writable connection is used to
+        perform only SELECT queries. It should be set to <code>false</code> to avoid flooding of log files.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: configdb.properties
+      packageName: open-xchange-core
+      tags: ["Config DB", "Database", "Logging"]

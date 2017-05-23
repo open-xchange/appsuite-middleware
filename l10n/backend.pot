@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -1663,6 +1674,14 @@ msgstr ""
 msgid "The DoveAdm resource does not exist"
 msgstr ""
 
+#. A temporary failure because a subsystem is down. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:249
+msgid ""
+"A temporary failure because a subsystem is down (maybe due to maintenance). "
+"Please try again later."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
 msgid ""
 "Download denied because download limits have been exceeded. Please try again "
@@ -1974,7 +1993,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
@@ -2104,9 +2123,9 @@ msgstr ""
 msgid "The file %1$s doesn't have any content."
 msgstr ""
 
-#. The associated %2$s account does no more exist
+#. The associated %2$s account no longer exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
-msgid "The associated %2$s account does no more exist"
+msgid "The associated %2$s account no longer exists."
 msgstr ""
 
 #. Individual permissions are not supported in account \"%1$s\".
@@ -3345,6 +3364,11 @@ msgid ""
 "login %2$s. Please try again."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+msgid ""
+"Update of folder failed. Owner is required to keep administrative rights."
+msgstr ""
+
 #. The specified group \"%4$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
 msgid "The specified group \"%4$s\" is not supported."
@@ -3667,16 +3691,72 @@ msgstr ""
 msgid "Invalid OAuth account specified."
 msgstr ""
 
+#. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
+msgid ""
+"The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in "
+"context '%3$s'"
+msgstr ""
+
 #. The certificate for domain "%1$s" is untrusted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:64
 msgid "The certificate for domain \"%1$s\" is untrusted."
 msgstr ""
 
 #. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:67
 msgid ""
 "The certificate for domain \"%1$s\" is untrusted. You can change your "
 "general trust level in the settings."
+msgstr ""
+
+#. The certificate '%1$s' is not trusted by the user '%2$s' in context '%3$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:70
+msgid ""
+"The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in "
+"context '%3$s'"
+msgstr ""
+
+#. The root certificate issued by '%1$s' is not trusted
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:73
+msgid "The root certificate issued by '%1$s' is not trusted"
+msgstr ""
+
+#. The certificate is self-signed
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:63
+msgid "The certificate is self-signed"
+msgstr ""
+
+#. The certificate is expired
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:69
+msgid "The certificate is expired"
+msgstr ""
+
+#. The common name for the certificate is invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:82
+msgid "The common name for the certificate is invalid"
+msgstr ""
+
+#. The certificate was signed by an untrusted issuer
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:66
+msgid "The certificate was signed by an untrusted issuer"
+msgstr ""
+
+#. The user does not trust this certificate
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:72
+msgid "The user does not trust this certificate"
+msgstr ""
+
+#. Invalid common name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:75
+msgid "Invalid common name"
+msgstr ""
+
+#. The certificate is untrusted
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:78
+msgid "The certificate is untrusted"
 msgstr ""
 
 #.
@@ -3896,7 +3976,12 @@ msgstr ""
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
-msgid "The scope %1$s is not supported by the provider"
+msgid "The scope %1$s is not supported by the provider or has been disabled"
+msgstr ""
+
+#. Thrown in case OAuth for a certain provider access has been disabled for a user
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
+msgid "'%1$s' OAuth service is not enabled for you."
 msgstr ""
 
 #. *
@@ -4705,6 +4790,18 @@ msgstr ""
 msgid "Invalid mail address for external participant: %1$s"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:102
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for appointments."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for tasks."
+msgstr ""
+
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 msgid "You do not have a valid session. Please login again."
@@ -4915,12 +5012,12 @@ msgid "Appointments must have at least one participant."
 msgstr ""
 
 #. *
-#. * You do not have the appropriate permissions to read appointments in folder %1$d.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments in folder "
-"%1$d."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
 
 #. *
@@ -4984,11 +5081,10 @@ msgid "Required value \"Title\" was not supplied."
 msgstr ""
 
 #. *
-#. * Move not supported: Cannot move an appointment from folder %d to folder %d.
+#. * Move not supported. You cannot move an appointment into that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:123
-msgid ""
-"Move not supported: Cannot move an appointment from folder %d to folder %d."
+msgid "Move not supported. You cannot move an appointment into that folder."
 msgstr ""
 
 #. *
@@ -5130,20 +5226,20 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr ""
 
 #. *
-#. * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
+#. * Cannot create that appointment. An appointment having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
 msgid ""
-"Cannot insert appointment (%1$s). An appointment with the unique identifier "
-"(%2$s) already exists."
+"Cannot create that appointment. An appointment having the same unique "
+"identifier already exists."
 msgstr ""
 
 #. *
-#. * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+#. * Cannot create that task. A task having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:223
 msgid ""
-"Cannot insert task (%1$s). A task with the unique identifier (%2$s) already "
+"Cannot create that task. A task having the same unique identifier already "
 "exists."
 msgstr ""
 
@@ -5317,7 +5413,7 @@ msgid "Getting the value of %s requires at least a ContactObject"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
 "problematic character and try again."
@@ -5331,6 +5427,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
 msgid "The pattern \"%1$s\" has been ignored during search."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
+msgid "Invalid number of properties for distribution list."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
@@ -6433,6 +6533,10 @@ msgstr ""
 msgid "Broken CSV file."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
+msgid "Error at row %1$s: %2$s"
+msgstr ""
+
 #. The document you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:98
@@ -6939,7 +7043,7 @@ msgid "Error while inserting task."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "Folder \"%1$s\" is not a task folder."
+msgid "This is not a task folder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
@@ -6975,8 +7079,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:83
 msgid ""
-"You do not have the appropriate permissions to read the contents of the "
-"folder with id %1$d."
+"You do not have the appropriate permissions to read the contents in that "
+"folder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
@@ -6985,8 +7089,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid ""
-"You do not have the appropriate permissions to create tasks in folder \"%1$s"
-"\"."
+"You do not have the appropriate permissions to create tasks in that folder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
@@ -7009,12 +7112,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
 msgid ""
-"You do not have the appropriate permissions to edit tasks in the folder with "
-"id %1$d."
+"You do not have the appropriate permissions to edit tasks in that folder"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
-msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
+msgid "Moving items from or into a shared folder is not allowed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
@@ -7040,7 +7142,7 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
-msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
+msgid "Tasks with private flag cannot be moved to a public folder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
@@ -7052,33 +7154,27 @@ msgid "External participants without E-Mail address can not be added."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
-msgid ""
-"You do not have the appropriate permisson to see the task %1$d in folder "
-"%2$s."
+msgid "You do not have the appropriate permisson to see the task."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
-msgid "The task %1$d is not stored in folder %2$s."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
 msgid "Priority is %d but must be between 1 and 3."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:134
-msgid "This folder (%1$d) is not visible."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+msgid "You do not have the appropriate permisson to see the folder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
@@ -7658,11 +7754,32 @@ msgid ""
 "Layer Security (TLS) is not in use, the client could try STARTTLS)"
 msgstr ""
 
-#. A temporary failure because a subsystem is down. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:249
+#. Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:252
 msgid ""
-"A temporary failure because a subsystem is down (maybe due to maintenance). "
-"Please try again later."
+"Your mail account %2$s was disabled due to invalid credentials. Please edit "
+"the account and enter correct credentials to enable it again"
+msgstr ""
+
+#. Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:255
+msgid ""
+"Your mail account %2$s was disabled because of authorization issues. Please "
+"reauthorize the account %5$s to enable it again."
+msgstr ""
+
+#. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:258
+msgid ""
+"Your mail transport for  %2$s was disabled due to invalid credentials. "
+"Please edit the account and enter correct credentials to enable it again"
+msgstr ""
+
+#. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
+msgid ""
+"Your mail transport for %2$s was disabled because of authorization issues. "
+"Please reauthorize the account %5$s to enable it again."
 msgstr ""
 
 #. The default name for a file
@@ -7739,7 +7856,7 @@ msgstr ""
 #. * The provided login information seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
-msgid "The provided login information seem to be wrong. Please try again."
+msgid "The provided login data seem to be wrong. Please correct them."
 msgstr ""
 
 #. *
@@ -7747,8 +7864,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid ""
-"The provided login information to access mail server %1$s seem to be wrong. "
-"Please try again."
+"The provided login data to access mail server %1$s seem to be wrong. Please "
+"correct them."
 msgstr ""
 
 #. *
@@ -7978,7 +8095,7 @@ msgstr ""
 
 #. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
-msgid "Account is current being set-up."
+msgid "Account is currently being set-up."
 msgstr ""
 
 #. Cannot find mail account for user "%2$s".
@@ -8534,65 +8651,69 @@ msgid "The share you are looking for does not exist."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
-msgid "We were unable to process your request."
+msgid "This share cannot be accessed with your Web Browser."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+msgid "We were unable to process your request."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
 msgstr ""
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
 msgstr ""
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr ""
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
 msgstr ""
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
 msgstr ""
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
 msgstr ""
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr ""
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -8600,7 +8721,7 @@ msgid ""
 msgstr ""
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -8608,7 +8729,7 @@ msgid ""
 msgstr ""
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -8616,7 +8737,7 @@ msgid ""
 msgstr ""
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -8624,7 +8745,7 @@ msgid ""
 msgstr ""
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -8632,7 +8753,7 @@ msgid ""
 msgstr ""
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -8640,7 +8761,7 @@ msgid ""
 msgstr ""
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:121
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -8648,14 +8769,14 @@ msgid ""
 msgstr ""
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
 msgstr ""
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -8663,7 +8784,7 @@ msgid ""
 msgstr ""
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -8671,7 +8792,7 @@ msgid ""
 msgstr ""
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -8679,7 +8800,7 @@ msgid ""
 msgstr ""
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -9470,6 +9591,26 @@ msgstr ""
 msgid ""
 "The user's files are owned by user %1$s in source context %2$s. Please set "
 "individual or context-associated file storage first."
+msgstr ""
+
+#. The provided feedback score is invalid. Please choose a number > 0.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
+msgid "The provided feedback score is invalid. Please choose a number > 0."
+msgstr ""
+
+#. The provided feedback for key 'score' has an invalid type.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
+msgid "The provided feedback for key 'score' has an invalid type."
+msgstr ""
+
+#. The provided feedback does not contain required key "score".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
+msgid "The provided feedback does not contain required key '%s'."
+msgstr ""
+
+#. The provided feedback for key "score" cannot be parsed..
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr ""
 
 #. The value given in the property %1$s is no integer value

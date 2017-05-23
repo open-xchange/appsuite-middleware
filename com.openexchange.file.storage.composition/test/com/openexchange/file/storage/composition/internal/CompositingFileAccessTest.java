@@ -89,7 +89,6 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
-import com.openexchange.sim.Block;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.threadpool.SimThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -123,16 +122,12 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     private final FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
 
-    private final FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
-
-    private final IDSetter setId = new IDSetter(fileId.getFileId());
-
     public CompositingFileAccessTest() {
         super(new SimSession());
     }
 
-    @Test
-    public void testExists() throws OXException {
+     @Test
+     public void testExists() throws OXException {
         fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(true);
 
         assertTrue(exists(fileId.toUniqueID(), "12"));
@@ -141,8 +136,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetDeltaWithoutSort() throws OXException {
+     @Test
+     public void testGetDeltaWithoutSort() throws OXException {
 
         fileAccess.expectCall("getDelta", folderId.getFolderId(), 12L, Arrays.asList(
             File.Field.TITLE,
@@ -156,8 +151,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetDeltaWithSort() throws OXException {
+     @Test
+     public void testGetDeltaWithSort() throws OXException {
 
         fileAccess.expectCall("getDelta", folderId.getFolderId(), 12L, Arrays.asList(
             File.Field.TITLE,
@@ -171,8 +166,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetDocument() throws OXException {
+     @Test
+     public void testGetDocument() throws OXException {
         fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), "12");
 
         getDocument(fileId.toUniqueID(), "12");
@@ -181,8 +176,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetDocuments1() throws OXException {
+     @Test
+     public void testGetDocuments1() throws OXException {
         fileAccess.expectCall("getDocuments", folderId.getFolderId());
 
         getDocuments(folderId.toUniqueID());
@@ -191,8 +186,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetDocuments2() throws OXException {
+     @Test
+     public void testGetDocuments2() throws OXException {
         fileAccess.expectCall("getDocuments", folderId.getFolderId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -205,8 +200,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetDocuments3() throws OXException {
+     @Test
+     public void testGetDocuments3() throws OXException {
         fileAccess.expectCall("getDocuments", folderId.getFolderId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -219,8 +214,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetDocuments4() throws OXException {
+     @Test
+     public void testGetDocuments4() throws OXException {
         final DefaultFile defaultFile = new DefaultFile();
         defaultFile.setLastModified(new Date());
         defaultFile.setId(fileId.getFileId());
@@ -247,8 +242,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetFileMetadata() throws OXException {
+     @Test
+     public void testGetFileMetadata() throws OXException {
         final DefaultFile file = new DefaultFile();
         file.setId(fileId.getFileId());
         file.setFolderId(fileId.getFolderId());
@@ -260,8 +255,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetVersions1() throws OXException {
+     @Test
+     public void testGetVersions1() throws OXException {
         fileAccess.expectCall("getVersions", fileId.getFolderId(), fileId.getFileId());
 
         getVersions(fileId.toUniqueID());
@@ -269,8 +264,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetVersions2() throws OXException {
+     @Test
+     public void testGetVersions2() throws OXException {
         fileAccess.expectCall("getVersions", fileId.getFolderId(), fileId.getFileId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -282,8 +277,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testGetVersions3() throws OXException {
+     @Test
+     public void testGetVersions3() throws OXException {
         fileAccess.expectCall("getVersions", fileId.getFolderId(), fileId.getFileId(), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -295,8 +290,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testLock() throws OXException {
+     @Test
+     public void testLock() throws OXException {
         fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337L);
         fileAccess.expectCall("commit");
@@ -307,8 +302,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testUnlock() throws OXException {
+     @Test
+     public void testUnlock() throws OXException {
         fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("unlock", fileId.getFolderId(), fileId.getFileId());
         fileAccess.expectCall("commit");
@@ -319,8 +314,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testTouch() throws OXException {
+     @Test
+     public void testTouch() throws OXException {
         fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("touch", fileId.getFolderId(), fileId.getFileId());
         fileAccess.expectCall("commit");
@@ -331,8 +326,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testRemoveDocument() throws OXException {
+     @Test
+     public void testRemoveDocument() throws OXException {
         fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeDocument", folderId.getFolderId(), 12L);
         fileAccess.expectCall("commit");
@@ -344,8 +339,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     }
 
     // Somewhat brittle test
-    @Test
-    public void testRemoveDocuments() throws OXException {
+     @Test
+     public void testRemoveDocuments() throws OXException {
         final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
         final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
@@ -373,8 +368,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testRemoveVersions() throws OXException {
+     @Test
+     public void testRemoveVersions() throws OXException {
         final String[] versions = new String[] { "1", "2", "3" };
 
         fileAccess.expectCall("startTransaction");
@@ -387,8 +382,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testSearch() throws OXException {
+     @Test
+     public void testSearch() throws OXException {
         fileAccess.expectCall("search", "query", Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
@@ -402,8 +397,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    @Test
-    public void testSearchInAllFolders() throws OXException {
+     @Test
+     public void testSearchInAllFolders() throws OXException {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(ThreadPools.class);
 
@@ -419,8 +414,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     }
 
     // create file
-    @Test
-    public void testCreateDocument1() throws OXException {
+     @Test
+     public void testCreateDocument1() throws OXException {
         final File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -439,8 +434,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         assertEquals(file.getId(), fileId.toUniqueID());
     }
 
-    @Test
-    public void testCreateDocument2() throws OXException {
+     @Test
+     public void testCreateDocument2() throws OXException {
         final File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -459,8 +454,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         assertEquals(file.getId(), fileId.toUniqueID());
     }
 
-    @Test
-    public void testCreateMetadata1() throws OXException {
+     @Test
+     public void testCreateMetadata1() throws OXException {
         final File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -479,8 +474,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         assertEquals(file.getId(), fileId.toUniqueID());
     }
 
-    @Test
-    public void testCreateMetadata2() throws OXException {
+     @Test
+     public void testCreateMetadata2() throws OXException {
         final File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
@@ -501,8 +496,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     // update file
 
-    @Test
-    public void testUpdateDocument1() throws OXException {
+     @Test
+     public void testUpdateDocument1() throws OXException {
         final File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -521,8 +516,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         assertEquals(file.getId(), fileId.getFileId());
     }
 
-    @Test
-    public void testUpdateDocument2() throws OXException {
+     @Test
+     public void testUpdateDocument2() throws OXException {
         final File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -541,8 +536,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         assertEquals(file.getId(), fileId.getFileId());
     }
 
-    @Test
-    public void testUpdateMetadata1() throws OXException {
+     @Test
+     public void testUpdateMetadata1() throws OXException {
         final File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -561,8 +556,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         assertEquals(file.getId(), fileId.getFileId());
     }
 
-    @Test
-    public void testUpdateMetadata2() throws OXException {
+     @Test
+     public void testUpdateMetadata2() throws OXException {
         final File file = new DefaultFile();
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
@@ -579,169 +574,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
 
         assertEquals(file.getId(), fileId.getFileId());
-    }
-
-    // Moving across filestores
-
-    //TODO: don't know how to properly include the return value here
-    //@Test
-    public void testMoveACompleteFileWithANewUpload() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId2.toUniqueID()); // We start in FileStore 2
-        file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
-
-        // Firstly the file should be created in the destination as a new file
-        final File destinationFile = new DefaultFile();
-        destinationFile.setId(FileStorageFileAccess.NEW);
-        destinationFile.setFolderId(folderId.getFolderId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        // Secondly the original must be deleted
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        move(file, EMPTY_INPUT_STREAM, 1337, null, true);
-
-        verifyAccount(); // Store on destination account then
-        verifyAccount2(); // Remove from source account
-
-        fileAccess.assertAllWereCalled();
-
-        // The document will receive a new ID
-        assertEquals(file.getId(), fileId.toUniqueID());
-    }
-
-    //TODO: don't know how to properly include the return value here
-    //@Test
-    public void testPartialMetadataWithANewUpload() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId2.toUniqueID()); // We start in FileStore 2
-        file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
-        file.setTitle("New Title"); // And we want to set a new title
-
-        // Since this is only a partial file, firstly the original document should be loaded
-        final File storedFile = new DefaultFile();
-        storedFile.setTitle("Old Title");
-        storedFile.setDescription("Old Description"); // We want to keep the old description
-        fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(storedFile);
-
-        // Next the file should be created in the destination as a new file
-        final File destinationFile = new DefaultFile();
-        destinationFile.setId(FileStorageFileAccess.NEW);
-        destinationFile.setFolderId(folderId.getFolderId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        // And lastly the original must be deleted
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID), true); // Title and FolderID have been changed
-
-        fileAccess.assertAllWereCalled();
-
-        // The document will receive a new ID
-        assertEquals(file.getId(), fileId.toUniqueID());
-
-        final File fileThatWasCreated = setId.getFile();
-
-        assertEquals("New Title", fileThatWasCreated.getTitle());
-        assertEquals("Old Description", fileThatWasCreated.getDescription());
-    }
-
-    //TODO: don't know how to properly include the return value here
-    //@Test
-    public void testMoveCompleteFileWithoutUpload() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId2.toUniqueID()); // We start in FileStore 2
-        file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
-
-        // No Input Stream is provided, so load the file from the source store
-        fileAccess.expectCall("getDocument", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(EMPTY_INPUT_STREAM);
-
-        // Next the file should be created in the destination as a new file, with the input stream provided above
-        final File destinationFile = new DefaultFile();
-        destinationFile.setId(FileStorageFileAccess.NEW);
-        destinationFile.setFolderId(folderId.getFolderId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        // Lastly the original must be deleted
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        move(file, null, 1337, null, true);
-
-        fileAccess.assertAllWereCalled();
-
-        // The document will receive a new ID
-        assertEquals(file.getId(), fileId.toUniqueID());
-    }
-
-    //TODO: don't know how to properly include the return value here
-    //@Test
-    public void testMovePartialFileWithoutUpload() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId2.toUniqueID()); // We start in FileStore 2
-        file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
-        file.setTitle("New Title"); // And we want to set a new title
-
-        // No Input Stream is provided, so load the file from the source store
-        fileAccess.expectCall("getDocument", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(EMPTY_INPUT_STREAM);
-
-        // Since this is only a partial file, firstly the original document should be loaded
-        final File storedFile = new DefaultFile();
-        storedFile.setTitle("Old Title");
-        storedFile.setDescription("Old Description"); // We want to keep the old description
-        fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(storedFile);
-
-        // Next the file should be created in the destination as a new file
-        final File destinationFile = new DefaultFile();
-        destinationFile.setId(FileStorageFileAccess.NEW);
-        destinationFile.setFolderId(folderId.getFolderId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        // And lastly the original must be deleted
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L, true);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID), true); // Title and FolderID have been changed
-
-        fileAccess.assertAllWereCalled();
-
-        // The document will receive a new ID
-        assertEquals(file.getId(), fileId.toUniqueID());
-
-        final File fileThatWasCreated = setId.getFile();
-
-        assertEquals("New Title", fileThatWasCreated.getTitle());
-        assertEquals("Old Description", fileThatWasCreated.getDescription());
     }
 
     private void verifyAccount() {
@@ -1008,36 +840,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
         // Nothing to do
-
-    }
-
-    private static final class IDSetter implements Block {
-
-        private String id;
-        private File file;
-
-        private IDSetter(final String id) {
-            super();
-            this.id = id;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(final String id) {
-            this.id = id;
-        }
-
-            @Override
-            public Object perform(final Object self, final Object... arguments) {
-            (this.file = (File) arguments[0]).setId(id);
-            return null;
-        }
-
-        public File getFile() {
-            return file;
-        }
 
     }
 

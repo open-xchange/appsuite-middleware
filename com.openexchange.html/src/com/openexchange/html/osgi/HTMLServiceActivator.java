@@ -64,13 +64,13 @@ import java.util.Properties;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.WhitelistedSchemes;
+import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.html.internal.jericho.JerichoParser;
-import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
+import com.openexchange.html.internal.jsoup.JsoupParser;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
@@ -125,7 +125,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              * Other start-up stuff
              */
             Config.LoggerProvider = LoggerProvider.DISABLED;
-            HTMLFilterHandler.loadWhitelist();
+            FilterMaps.loadWhitelist();
             WhitelistedSchemes.initInstance(configService);
         } catch (final Exception e) {
             LOG.error("", e);
@@ -140,8 +140,9 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              * Other shut-down stuff
              */
             WhitelistedSchemes.dropInstance();
-            HTMLFilterHandler.resetWhitelist();
+            FilterMaps.resetWhitelist();
             JerichoParser.shutDown();
+            JsoupParser.shutDown();
             /*
              * Close trackers
              */

@@ -49,8 +49,8 @@
 
 package com.openexchange.sms;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * {@link SMSTestSuite}
@@ -58,19 +58,10 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class SMSTestSuite extends TestSuite {
-
-    /**
-     * Initializes a new {@link SMSTestSuite}.
-     */
-    public SMSTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        TestSuite smsSuite = new TestSuite();
-        smsSuite.addTestSuite(PhoneNumberParserServiceTest.class);
-        return smsSuite;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    PhoneNumberParserServiceTest.class
+})
+public class SMSTestSuite  {
 
 }

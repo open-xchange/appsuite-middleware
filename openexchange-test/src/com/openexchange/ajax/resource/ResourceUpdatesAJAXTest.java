@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.resource;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
@@ -59,26 +64,25 @@ import com.openexchange.ajax.resource.actions.ResourceUpdatesRequest;
 import com.openexchange.ajax.resource.actions.ResourceUpdatesResponse;
 import com.openexchange.resource.Resource;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
+public class ResourceUpdatesAJAXTest extends AbstractResourceTest {
 
     private Resource resource;
 
     /**
      * Initializes a new {@link ResourceUpdatesAJAXTest}.
+     *
      * @param name
      */
-    public ResourceUpdatesAJAXTest(String name) {
-        super(name);
+    public ResourceUpdatesAJAXTest() {
+        super();
     }
 
-
-
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         resource = new Resource();
@@ -87,20 +91,22 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
         resource.setSimpleName("SimpleName");
         resource.setDisplayName("DisplayName");
         resource.setDescription("Description");
-        final ResourceNewResponse newResponse = Executor.execute(getSession(),
-                new ResourceNewRequest(resource, true));
+        final ResourceNewResponse newResponse = Executor.execute(getSession(), new ResourceNewRequest(resource, true));
         resource.setIdentifier(newResponse.getID());
         resource.setLastModified(newResponse.getTimestamp());
     }
 
-
-
     @Override
-    protected void tearDown() throws Exception {
-        if(resource != null) {
-            Executor.execute(getSession(), new ResourceDeleteRequest(resource));
+    @After
+    public void tearDown() throws Exception {
+        try {
+            AJAXSession session = getSession();
+            if (null != session && null != resource && 0 < resource.getIdentifier()) {
+                Executor.execute(session, new ResourceDeleteRequest(resource, Long.MAX_VALUE, false));
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     private boolean containsResource(List<Resource> resources, int resourceId) {
@@ -114,38 +120,37 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
         return containsResource;
     }
 
-    public void testUpdatesSinceBeginning() throws Exception{
-        final ResourceUpdatesResponse response = Executor.execute(getSession(),
-            new ResourceUpdatesRequest(new Date(0), true));
+    @Test
+    public void testUpdatesSinceBeginning() throws Exception {
+        final ResourceUpdatesResponse response = Executor.execute(getSession(), new ResourceUpdatesRequest(new Date(0), true));
         assertTrue("Should find more than 0 new elements", response.getNew().size() > 0);
         assertTrue("Should find more than 0 updated elements", response.getModified().size() > 0);
         List<Resource> modified = response.getModified();
         assertTrue(containsResource(modified, resource.getIdentifier()));
     }
 
-    public void testUpdates() throws Exception{
+    @Test
+    public void testUpdates() throws Exception {
         Date since = new Date(resource.getLastModified().getTime() - 1);
 
-        final ResourceUpdatesResponse response = Executor.execute(getSession(),
-            new ResourceUpdatesRequest(since, true));
+        final ResourceUpdatesResponse response = Executor.execute(getSession(), new ResourceUpdatesRequest(since, true));
 
         List<Resource> modified = response.getModified();
         assertEquals("Should find one updated element", 1, modified.size());
         assertEquals("Should have matching ID", resource.getIdentifier(), modified.get(0).getIdentifier());
     }
 
-    public void testUpdatesShouldContainDeletes() throws Exception{
+    @Test
+    public void testUpdatesShouldContainDeletes() throws Exception {
         Date since = new Date(resource.getLastModified().getTime() - 1);
 
-        ResourceUpdatesResponse response = Executor.execute(getSession(),
-            new ResourceUpdatesRequest(since, true));
+        ResourceUpdatesResponse response = Executor.execute(getSession(), new ResourceUpdatesRequest(since, true));
         int deletedBefore = response.getDeleted().size();
 
         Executor.execute(getSession(), new ResourceDeleteRequest(resource));
 
-        response = Executor.execute(getSession(),
-            new ResourceUpdatesRequest(since, true));
-        int deletedAfter =  response.getDeleted().size();
+        response = Executor.execute(getSession(), new ResourceUpdatesRequest(since, true));
+        int deletedAfter = response.getDeleted().size();
 
         int identifier = resource.getIdentifier();
         resource = null; //so it does not get deleted in the tearDown()

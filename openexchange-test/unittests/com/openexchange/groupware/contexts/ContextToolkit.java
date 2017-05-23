@@ -67,6 +67,7 @@ public final class ContextToolkit {
     private ContextToolkit() {
         super();
     }
+
     public static Context getDefaultContext() throws OXException {
         final TestConfig config = new TestConfig();
 

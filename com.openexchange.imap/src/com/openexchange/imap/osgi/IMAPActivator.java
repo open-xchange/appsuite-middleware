@@ -64,6 +64,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.charset.CharsetService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -74,8 +76,6 @@ import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
-import com.openexchange.imap.notify.IMAPNotifierRegistryService;
-import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.osgi.console.ClearListLsubCommandProvider;
 import com.openexchange.imap.osgi.console.ListLsubCommandProvider;
 import com.openexchange.imap.services.Services;
@@ -149,16 +149,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                 registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
             }
             /*
-             * Register IMAP notifier registry
-             */
-            if (IMAPProperties.getInstance().notifyRecent()) {
-                final ConfigurationService service = getService(ConfigurationService.class);
-                final boolean register = service.getBoolProperty("com.openexchange.imap.registerIMAPNotifierRegistryService", false);
-                if (register) {
-                    registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
-                }
-            }
-            /*
              * Trackers
              */
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
@@ -173,6 +163,18 @@ public final class IMAPActivator extends HousekeepingActivator {
             registerService(CommandProvider.class, new ListLsubCommandProvider());
             registerService(CommandProvider.class, new ClearListLsubCommandProvider());
             registerService(MailAccountDeleteListener.class, listLsubInvalidator);
+            registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+                @Override
+                public void reloadConfiguration(ConfigurationService configService) {
+                    IMAPProperties.invalidateCache();
+                }
+
+                @Override
+                public Interests getInterests() {
+                    return null;
+                }
+            });
             /*
              * Initialize cache regions
              */
@@ -264,7 +266,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false, false);
                                 IMAPStoreCache.getInstance().dropFor(userId.intValue(), contextId.intValue());
 
-                                IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());
                                 ConversationCache.getInstance().removeUserConversations(userId.intValue(), contextId.intValue());
                             }
                         }

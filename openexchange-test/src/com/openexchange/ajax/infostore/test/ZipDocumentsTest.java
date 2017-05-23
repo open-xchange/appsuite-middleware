@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,8 +82,8 @@ public final class ZipDocumentsTest extends AbstractObjectCountTest {
      *
      * @param name
      */
-    public ZipDocumentsTest(String name) {
-        super(name);
+    public ZipDocumentsTest() {
+        super();
     }
 
     @Test
@@ -119,7 +121,7 @@ public final class ZipDocumentsTest extends AbstractObjectCountTest {
                 expected.setFolderId(folder.getID());
                 expected.setTitle("InfostoreCreateDeleteTest File2");
                 expected.setLastModified(new Date());
-                java.io.File file = new java.io.File(TestInit.getTestProperty("webdavPropertiesFile"));
+                java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
                 infostoreTestManager.newAction(expected, file);
                 assertFalse("Creating an entry should work", infostoreTestManager.getLastResponse().hasError());

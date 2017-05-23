@@ -84,7 +84,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.CountingOutputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -304,14 +303,10 @@ public final class StructureMailMessageParser {
         }
     }
 
-    private void parseMailContent(final MailPart mailPartArg, final StructureHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
+    private void parseMailContent(final MailPart mailPart, final StructureHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
-        /*
-         * Part modifier
-         */
-        final MailPart mailPart = MailConfig.usePartModifier() ? MailConfig.getPartModifier().modifyPart(mailPartArg) : mailPartArg;
         /*
          * Set part information
          */
@@ -351,7 +346,7 @@ public final class StructureMailMessageParser {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
                 final UUEncodedMultiPart uuencodedMP;
-                if (parseUUEncodedParts && (uuencodedMP = new UUEncodedMultiPart(content)).isUUEncoded()) {
+                if (parseUUEncodedParts && (uuencodedMP = UUEncodedMultiPart.valueFor(content)) != null && uuencodedMP.isUUEncoded()) {
                     /*
                      * UUEncoded content detected. Handle normal text.
                      */
@@ -724,16 +719,16 @@ public final class StructureMailMessageParser {
                                     HDR_CONTENT_DISPOSITION,
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
-                            CountingOutputStream counter = new CountingOutputStream();
-                            attachment.writeTo(counter);
-                            bodyPart.setSize((int) counter.getCount());
+                            try (CountingOutputStream counter = new CountingOutputStream()) {
+                                attachment.writeTo(counter);
+                                bodyPart.setSize((int) counter.getCount());
+                            }
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
                              * Nested message
                              */
-                            final MimeMessage nestedMessage =
-                                TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
+                            MimeMessage nestedMessage = TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MimeTypes.MIME_MESSAGE_RFC822)));

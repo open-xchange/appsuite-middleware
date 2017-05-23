@@ -1,0 +1,56 @@
+/userfeedback/v1/{context-group}/{type}:
+  delete:
+    operationId: delete
+    tags:
+      - Userfeedback
+    summary: Deletes user feedback
+    produces:
+      - application/json
+    parameters:
+      - in: path
+        name: context-group
+        description: The context group identifying the global DB where the feedback is stored.
+        required: true
+        type: string
+      - in: path
+        name: type
+        description: The feedback type to delete.
+        required: true
+        type: string
+      - 
+        name: start
+        in: query
+        description: Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.
+        required: false
+        type: integer
+        format: int64
+      - 
+        name: end
+        in: query
+        description: End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.
+        required: false
+        type: integer
+        format: int64
+    responses:
+      200:
+        description: Info message when successfull.
+        schema:
+          type: string
+      400:
+        description: Bad request, response contains error message.
+        schema:
+          type: string
+      401:
+        description: Not authorized  
+      404:
+        description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
+      500:
+        description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
+    x-ox-examples:
+      Example:
+        description: Delete user feedback from 2016-01-01 to 2016-12-31
+        example: DELETE http://localhost:8009/userfeedback/v1/default/star-rating-v1?start=1451606400&end=1483228799

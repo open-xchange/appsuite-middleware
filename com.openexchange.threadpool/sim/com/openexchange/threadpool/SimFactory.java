@@ -62,7 +62,7 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
  */
 public class SimFactory {
 
-    private static final ThreadPoolServiceImpl POOL = ThreadPoolServiceImpl.newInstance(-1, 100, 1000l, "synchronous", 10, true, "abort");
+    private static final ThreadPoolServiceImpl POOL = ThreadPoolServiceImpl.newInstance(-1, 100, 1000l, "synchronous", 10, true, "abort", 60000, 20000);
 
     public static ThreadPoolService newThreadPoolService() {
         return POOL;

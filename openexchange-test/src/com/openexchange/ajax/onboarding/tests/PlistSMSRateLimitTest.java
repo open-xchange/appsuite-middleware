@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,41 +71,33 @@ import com.openexchange.sms.SMSExceptionCode;
  */
 public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
 
-    /**
-     * Initializes a new {@link PlistSMSRateLimitTest}.
-     * 
-     * @param name
-     */
-    public PlistSMSRateLimitTest() {
-    }
-
     @Test
     public void testRateLimit() throws OXException, IOException, JSONException, InterruptedException {
         String jsonString = "{\"sms\":\"+49276183850\"}";
         JSONObject body = new JSONObject(jsonString);
 
         ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-        OnboardingTestResponse response = client.execute(req);
+        OnboardingTestResponse response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(SMSExceptionCode.NOT_SENT));
 
         // Expecting an SENT_QUOTA_EXCEEDED exeption
-        response = client.execute(req);
+        response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED));
 
         // Wait until user should be able to send sms again 
         Thread.sleep(11000);
 
-        response = client.execute(req);
+        response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
+        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(SMSExceptionCode.NOT_SENT));
     }
 
     @Override

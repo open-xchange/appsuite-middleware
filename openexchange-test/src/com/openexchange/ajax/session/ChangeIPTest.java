@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.session;
 
-import com.openexchange.ajax.framework.AJAXClient;
+import static org.junit.Assert.*;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.ChangeIPRequest;
 import com.openexchange.ajax.session.actions.ChangeIPResponse;
@@ -66,32 +67,15 @@ import com.openexchange.sessiond.SessionExceptionCodes;
  */
 public final class ChangeIPTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    public ChangeIPTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        client = null;
-        super.tearDown();
-    }
-
+    @Test
     public void testIPChange() throws Throwable {
         String ipAdress = "192.168.123.321";
         final ChangeIPRequest request1 = new ChangeIPRequest(ipAdress, false);
-        final ChangeIPResponse response1 = client.execute(request1);
+        final ChangeIPResponse response1 = getClient().execute(request1);
         assertFalse("Change IP response contains an exception.", response1.hasError());
         assertTrue("Change IP response contains wrong data.", response1.hasCorrectResponse());
         final RefreshSecretRequest request2 = new RefreshSecretRequest(false);
-        final RefreshSecretResponse response2 = client.execute(request2);
+        final RefreshSecretResponse response2 = getClient().execute(request2);
         assertTrue("Refresh request should be denied because of wrong IP.", response2.hasError());
         final OXException e = response2.getException();
         assertEquals("Wrong exception message.", SessionExceptionCodes.WRONG_CLIENT_IP.getPrefix(), e.getPrefix());

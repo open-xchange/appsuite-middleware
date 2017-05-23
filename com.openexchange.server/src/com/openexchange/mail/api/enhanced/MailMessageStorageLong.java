@@ -50,6 +50,7 @@
 package com.openexchange.mail.api.enhanced;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -232,11 +233,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws OXException If no image can be found whose <code>Content-Id</code> header matches given <code>contentId</code>.
      */
     public MailPart getImageAttachmentLong(final String folder, final long mailId, final String contentId) throws OXException {
-        final ImageMessageHandler handler = new ImageMessageHandler(contentId);
+        if (Strings.isEmpty(contentId)) {
+            return null;
+        }
         final MailMessage mail = getMessageLong(folder, mailId, false);
         if (null == mail) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), folder);
         }
+        final ImageMessageHandler handler = new ImageMessageHandler(contentId);
         new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart imagePart = handler.getImagePart();
         if (null == imagePart) {
@@ -594,7 +598,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     /**
      * Like {@link #updateMessageFlagsLong(String, long[], int, boolean)} but also updates user flags
-     * 
+     *
      * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param flags The bit pattern for the flags to alter

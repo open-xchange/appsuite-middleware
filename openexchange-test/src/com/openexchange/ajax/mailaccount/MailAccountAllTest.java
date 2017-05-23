@@ -49,16 +49,20 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-
 
 /**
  * {@link MailAccountAllTest}
@@ -67,38 +71,38 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class MailAccountAllTest extends AbstractMailAccountTest {
 
-    public MailAccountAllTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         createMailAccount();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
-            deleteMailAccount();
+        try {
+            if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
+                deleteMailAccount();
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testAllShouldNotIncludePassword() throws OXException, IOException, SAXException, JSONException {
-        int[] fields = new int[]{Attribute.ID_LITERAL.getId(), Attribute.PASSWORD_LITERAL.getId()};
+        int[] fields = new int[] { Attribute.ID_LITERAL.getId(), Attribute.PASSWORD_LITERAL.getId() };
         MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
 
         List<MailAccountDescription> descriptions = response.getDescriptions();
         assertFalse(descriptions.isEmpty());
 
         boolean found = false;
-        for(MailAccountDescription description : descriptions) {
-            if(description.getId() == mailAccountDescription.getId()) {
+        for (MailAccountDescription description : descriptions) {
+            if (description.getId() == mailAccountDescription.getId()) {
                 assertTrue("Password was not null", null == description.getPassword());
                 found = true;
             }
         }
-        assertTrue("Did not find mail account in response" ,found);
+        assertTrue("Did not find mail account in response", found);
     }
 }

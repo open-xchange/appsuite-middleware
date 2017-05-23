@@ -70,11 +70,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -88,8 +91,17 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.tree.modules.mail.AllMessagesFolder;
+import com.openexchange.groupware.settings.tree.modules.mail.DeleteDraftOnTransport;
+import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
+import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
@@ -97,7 +109,9 @@ import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailOAuthConstants;
@@ -107,6 +121,8 @@ import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
+import com.openexchange.mail.service.EncryptedMailService;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
@@ -149,7 +165,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class };
+        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class, CryptographicServiceAuthenticationFactory.class, CryptographicAwareMailAccessFactory.class, EncryptedMailService.class, PGPMailRecognizer.class };
     }
 
     @Override
@@ -231,7 +247,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(), properties);
+            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(this), properties);
         }
 
         {
@@ -271,6 +287,20 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         registerService(Reloadable.class, MailReloadable.getInstance());
         registerService(Reloadable.class, TransportReloadable.getInstance());
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                MailConfig.invalidateAuthTypeCache();
+                MaliciousFolders.invalidateCache();
+                MailProperties.invalidateCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
 
         registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(this));
 
@@ -284,6 +314,24 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.WEBMAIL.getCapabilityName());
             }
         });
+
+        MailColorModePreferenceItem colorItem = new MailColorModePreferenceItem(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, colorItem);
+
+        MailFlaggedModePreferenceItem flaggedItem = new MailFlaggedModePreferenceItem(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, flaggedItem);
+
+        MaliciousCheck maliciousCheck = new MaliciousCheck(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, maliciousCheck);
+
+        MaliciousListing maliciousListing = new MaliciousListing(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, maliciousListing);
+
+        AllMessagesFolder allMessagesFolder = new AllMessagesFolder(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, allMessagesFolder);
+
+        DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);
     }
 
     @Override

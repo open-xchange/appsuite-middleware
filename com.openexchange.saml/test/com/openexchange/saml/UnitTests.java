@@ -64,7 +64,9 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     KeySpecCredentialProviderTest.class,
     SAMLWebSSOProviderTest.class,
-    HzStateManagementTest.class
+    SAMLWebSSOProviderOAuthTest.class,
+    HzStateManagementTest.class,
+    MultiSAMLTest.class
 })
 public class UnitTests {
 

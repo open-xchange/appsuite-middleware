@@ -61,7 +61,7 @@ public class CommonAllParser extends AbstractColumnsParser<CommonAllResponse> {
      * Default constructor.
      */
     protected CommonAllParser(final boolean failOnError, final int[] columns) {
-        super(failOnError,columns);
+        super(failOnError, columns);
     }
 
     @Override

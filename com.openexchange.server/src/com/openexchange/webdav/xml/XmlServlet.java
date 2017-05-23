@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.LinkedList;
@@ -75,6 +76,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.openexchange.webdav.LastModifiedCache;
@@ -167,11 +169,16 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         LOG.debug("PROPPATCH");
 
         XmlPullParser parser = null;
+        InputStream in = null;
         final PendingInvocations<I> pendingInvocations = new PendingInvocations<I>(new LinkedList<QueuedAction<I>>(), new LastModifiedCache());
         try {
+            // Initialize parser
             parser = new KXmlParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-            parser.setInput(req.getInputStream(), "UTF-8");
+            
+            // Apply input stream to parser
+            in = req.getInputStream();
+            parser.setInput(in, "UTF-8");
 
             resp.setStatus(SC_MULTISTATUS);
             resp.setContentType(_contentType);
@@ -206,6 +213,8 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         } catch (final OXException e) {
             LOG.error("doPropPatch", e);
             doOXError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, parser);
+        } finally {
+           Streams.close(in);
         }
     }
 

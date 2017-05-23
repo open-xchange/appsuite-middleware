@@ -73,8 +73,8 @@ public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscrip
         return columns;
     }
 
-    public Parameter getColumnsAsParameter(){
-        if(getColumns() == null) {
+    public Parameter getColumnsAsParameter() {
+        if (getColumns() == null) {
             return null;
         }
         return new Parameter("columns", Strings.join(getColumns(), ","));
@@ -88,8 +88,8 @@ public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscrip
         return dynamicColumns;
     }
 
-    public Params getDynamicColumnsAsParameter(){
-        if(getDynamicColumns() == null) {
+    public Params getDynamicColumnsAsParameter() {
+        if (getDynamicColumns() == null) {
             return null;
         }
 
@@ -99,6 +99,5 @@ public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscrip
         }
         return params;
     }
-
 
 }

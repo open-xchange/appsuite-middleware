@@ -49,98 +49,85 @@
 
 package com.openexchange.ajax.task;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for all task tests.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    TasksTest.class,
+    TaskAttachmentTests.class,
+    
+    // Now several single function tests.
+    InsertTest.class,
+    CharsetTest.class,
+    TruncationTest.class,
+    FloatTest.class,
+    AllTest.class,
+    ListTest.class,
+    UpdatesTest.class,
+    TaskRecurrenceTest.class,
+    ConfirmTest.class,
+    AllAliasTest.class,
+    ListAliasTest.class,
+    TaskDurationAndCostsTest.class,
+    DeleteMultipleTaskTest.class,
+    DateTimeTest.class,
+    
+    // Nodes
+    LastModifiedUTCTest.class,
+    
+    // And finally bug tests.
+    Bug6335Test.class,
+    Bug7276Test.class,
+    Bug7380Test.class,
+    Bug7377Test.class,
+    Bug8935Test.class,
+    Bug9252Test.class,
+    Bug10071Test.class,
+    Bug10119Test.class,
+    Bug10400Test.class,
+    Bug11075Test.class,
+    Bug11190Test.class,
+    Bug11195Test.class,
+    Bug11397Test.class,
+    Bug11619Test.class,
+    Bug11650Test.class,
+    Bug11659Test.class,
+    Bug11848Test.class,
+    Bug12364Test.class,
+    Bug12727Test.class,
+    Bug12926Test.class,
+    Bug13173Test.class,
+    Bug14002Test.class,
+    Bug15291Test.class,
+    Bug15580Test.class,
+    Bug15897Test.class,
+    Bug15937Test.class,
+    Bug16006Test.class,
+    Bug18204Test.class,
+    Bug20008Test.class,
+    Bug21026Test.class,
+    Bug22305Test.class,
+    Bug23444Test.class,
+    Bug26217Test.class,
+    Bug27840Test.class,
+    Bug28089Test.class,
+    Bug30015Test.class,
+    Bug32044Test.class,
+    Bug33258Test.class,
+    Bug35992Test.class,
+    Bug36943Test.class,
+    Bug37002Test.class,
+    Bug37424Test.class,
+    Bug37927Test.class,
+    Bug38782Test.class,
+    Bug50739Test.class,
+})
 public final class TaskTestSuite {
-
-    /**
-     * Prevent instantiation
-     */
-    private TaskTestSuite() {
-        super();
-    }
-
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.task.TaskTestSuite");
-        // First the function tests.
-        tests.addTestSuite(TasksTest.class);
-        tests.addTestSuite(TaskAttachmentTests.class);
-
-        // Now several single function tests.
-        tests.addTestSuite(InsertTest.class);
-        tests.addTestSuite(CharsetTest.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(FloatTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(TaskRecurrenceTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(TaskDurationAndCostsTest.class);
-        tests.addTestSuite(DeleteMultipleTaskTest.class);
-        tests.addTest(new JUnit4TestAdapter(DateTimeTest.class));
-
-        // Nodes
-        tests.addTestSuite(LastModifiedUTCTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug7276Test.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(Bug8935Test.class);
-        tests.addTestSuite(Bug9252Test.class);
-        tests.addTestSuite(Bug10071Test.class);
-        tests.addTestSuite(Bug10119Test.class);
-        tests.addTestSuite(Bug10400Test.class);
-        tests.addTestSuite(Bug11075Test.class);
-        tests.addTestSuite(Bug11190Test.class);
-        tests.addTestSuite(Bug11195Test.class);
-        tests.addTestSuite(Bug11397Test.class);
-        tests.addTestSuite(Bug11619Test.class);
-        tests.addTestSuite(Bug11650Test.class);
-        tests.addTestSuite(Bug11659Test.class);
-        tests.addTestSuite(Bug11848Test.class);
-        tests.addTestSuite(Bug12364Test.class);
-        tests.addTestSuite(Bug12727Test.class);
-        tests.addTestSuite(Bug12926Test.class);
-        tests.addTestSuite(Bug13173Test.class);
-        tests.addTestSuite(Bug14002Test.class);
-        tests.addTest(new JUnit4TestAdapter(Bug15291Test.class));
-        tests.addTestSuite(Bug15580Test.class);
-        tests.addTestSuite(Bug15897Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug16006Test.class);
-        tests.addTestSuite(Bug18204Test.class);
-        tests.addTestSuite(Bug20008Test.class);
-        tests.addTestSuite(Bug21026Test.class);
-        tests.addTestSuite(Bug22305Test.class);
-        tests.addTestSuite(Bug23444Test.class);
-        tests.addTest(new JUnit4TestAdapter(Bug26217Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug27840Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug28089Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug30015Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug32044Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug33258Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug35992Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug36943Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug37002Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug37424Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug37927Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug38782Test.class));
-        tests.addTest(new JUnit4TestAdapter(Bug50739Test.class));
-        return tests;
-    }
 }

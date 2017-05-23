@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FlagsRuleFieldMapper}
@@ -74,7 +75,7 @@ public class FlagsRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
      */
     @Override
@@ -84,7 +85,7 @@ public class FlagsRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
      */
     @Override
@@ -94,7 +95,7 @@ public class FlagsRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
      */
     @Override
@@ -111,11 +112,11 @@ public class FlagsRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
      */
     @Override
-    public void setAttribute(Rule rule, Object attribute) throws JSONException, SieveException, OXException {
+    public void setAttribute(Rule rule, Object attribute, ServerSession session) throws JSONException, SieveException, OXException {
         JSONArray array = (JSONArray) attribute;
         ArrayList<String> list = new ArrayList<String>(array.length());
         for (int i = 0; i < array.length(); i++) {

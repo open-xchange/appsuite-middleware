@@ -49,13 +49,16 @@
 
 package com.openexchange.sessionstorage;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.ServiceListing;
 
 /**
  * {@link SessionStorageConfiguration} - Provides configuration settings for session storage.
@@ -64,6 +67,8 @@ import com.openexchange.java.Strings;
  * @since v7.6.1
  */
 public class SessionStorageConfiguration {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionStorageConfiguration.class);
 
     private static volatile SessionStorageConfiguration instance;
 
@@ -79,11 +84,12 @@ public class SessionStorageConfiguration {
     /**
      * Initializes the session storage configuration instance.
      *
-     * @param configService The configuration service to use
+     * @param configService The service to use
+     * @param providers The providers listing
      */
-    public static void initInstance(ConfigurationService configService) {
+    public static void initInstance(ConfigurationService configService, ServiceListing<SessionStorageParameterNamesProvider> providers) {
         synchronized (SessionStorageConfiguration.class) {
-            instance = new SessionStorageConfiguration(configService);
+            instance = new SessionStorageConfiguration(configService, providers);
         }
     }
 
@@ -98,15 +104,16 @@ public class SessionStorageConfiguration {
 
     // --------------------------------------------------------------------------------------------------------------- //
 
-    private List<String> remoteParameterNames;
+    private final List<String> configuredRemoteParameterNames;
+    private final ServiceListing<SessionStorageParameterNamesProvider> providers;
 
     /**
      * Initializes a new {@link SessionStorageConfiguration}.
      */
-    private SessionStorageConfiguration(ConfigurationService configService) {
+    private SessionStorageConfiguration(ConfigurationService configService, ServiceListing<SessionStorageParameterNamesProvider> providers) {
         super();
-        remoteParameterNames = Collections.emptyList();
-        init(configService);
+        this.providers = providers;
+        configuredRemoteParameterNames = init(configService);
     }
 
     /**
@@ -114,39 +121,59 @@ public class SessionStorageConfiguration {
      *
      * @param configService The configuration service to use
      */
-    private void init(ConfigurationService configService) {
-        {
-            String tmp = configService.getProperty("com.openexchange.sessiond.remoteParameterNames");
-            if (Strings.isEmpty(tmp)) {
-                remoteParameterNames = Collections.emptyList();
-            } else {
-                Set<String> names = new TreeSet<String>();
-                int length = tmp.length();
-
-                int prev = 0;
-                int pos;
-                while (prev < length && (pos = tmp.indexOf(':', prev)) >= 0) {
-                    if (pos > 0) {
-                        names.add(tmp.substring(prev, pos));
-                    }
-                    prev = pos + 1;
-                }
-                if (prev < length) {
-                    names.add(tmp.substring(prev));
-                }
-
-                remoteParameterNames = Collections.unmodifiableList(new ArrayList<String>(names));
-            }
+    private static List<String> init(ConfigurationService configService) {
+        String tmp = configService.getProperty("com.openexchange.sessiond.remoteParameterNames");
+        if (Strings.isEmpty(tmp)) {
+            return Collections.emptyList();
         }
+
+        Set<String> names = new TreeSet<String>();
+        int length = tmp.length();
+
+        int prev = 0;
+        int pos;
+        while (prev < length && (pos = tmp.indexOf(':', prev)) >= 0) {
+            if (pos > 0) {
+                names.add(tmp.substring(prev, pos));
+            }
+            prev = pos + 1;
+        }
+        if (prev < length) {
+            names.add(tmp.substring(prev));
+        }
+
+        return ImmutableList.copyOf(names);
     }
 
     /**
      * Gets the names of such parameters that are supposed to be taken over from session to stored session representation.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The parameter names
      */
-    public List<String> getRemoteParameterNames() {
-        return remoteParameterNames;
+    public Collection<String> getRemoteParameterNames(int userId, int contextId) {
+        Iterator<SessionStorageParameterNamesProvider> iter = providers.iterator();
+        if (false == iter.hasNext()) {
+            return configuredRemoteParameterNames;
+        }
+
+        Set<String> names = null;
+        do {
+            SessionStorageParameterNamesProvider provider = iter.next();
+            try {
+                List<String> parameterNames = provider.getParameterNames(userId, contextId);
+                if (null != parameterNames && !parameterNames.isEmpty()) {
+                    if (null == names) {
+                        names = new TreeSet<String>(configuredRemoteParameterNames);
+                    }
+                    names.addAll(parameterNames);
+                }
+            } catch (Exception e) {
+                LOG.warn("Failed to retrieve remote parameter names from provider '{}'", provider.getClass().getName(), e);
+            }
+        } while (iter.hasNext());
+        return null == names ? configuredRemoteParameterNames : Collections.unmodifiableSet(names);
     }
 
 }

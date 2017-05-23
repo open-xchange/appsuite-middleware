@@ -50,46 +50,45 @@
 package com.openexchange.mailfilter;
 
 import javax.security.auth.Subject;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.mailfilter.properties.CredentialSource;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * This class holds the credentials to login into the imap server.
+ * This class holds the credentials to login into the SIEVE server.
  */
 public class Credentials {
 
+    private static final String SESSION_FULL_LOGIN = CredentialSource.SESSION_FULL_LOGIN.name;
+
     private String username;
-
     private String authname;
-
     private String password;
-
     private final int userid;
-
     private final int contextid;
-
     private final boolean b_contextid;
-
     private final Subject subject;
-    
+    private final String oauthToken;
+
     /**
      * Initializes a new {@link Credentials} out of a {@link ServerSession}
-     * 
+     *
      * @param session ServerSession
      */
-    public Credentials(final Session session) {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
-            authname = session.getLogin();
-        } else {
-            authname = session.getLoginName();
-        }
+    public Credentials(Session session) {
+        super();
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
+        String credsrc = config.getProperty(session.getUserId(), session.getContextId(), MailFilterProperty.credentialSource);
+        authname = SESSION_FULL_LOGIN.equals(credsrc) ? session.getLogin() : session.getLoginName();
+
         password = session.getPassword();
         userid = session.getUserId();
         contextid = session.getContextId();
         subject = (Subject) session.getParameter("kerberosSubject");
+        oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
         username = null;
         b_contextid = true;
     }
@@ -100,7 +99,7 @@ public class Credentials {
      * @param userid The session users user id.
      * @param contextid The session users context id.
      */
-    public Credentials(final String authname, final String password, final int userid, final int contextid) {
+    public Credentials(String authname, String password, int userid, int contextid) {
         this(authname, password, userid, contextid, null);
     }
 
@@ -109,13 +108,25 @@ public class Credentials {
      * @param password The password.
      * @param userid The session users user id.
      * @param contextid The session users context id.
-     * @param username The user name of the effected user which configuration is beeing touched.
+     * @param username The user name of the effected user which configuration is being touched.
      */
-    public Credentials(final String authname, final String password, final int userid, final int contextid, final String username) {
-        this(authname, password, userid, contextid, username, null);
+    public Credentials(String authname, String password, int userid, int contextid, String username) {
+        this(authname, password, userid, contextid, username, null, null);
     }
 
-    public Credentials(final String authname, final String password, final int userid, final int contextid, final String username, final Subject subject) {
+    /**
+     *
+     * Initializes a new {@link Credentials}.
+     *
+     * @param authname The user name for authentication.
+     * @param password The password.
+     * @param userid The session users user id.
+     * @param contextid The session users context id.
+     * @param username The user name of the effected user which configuration is being touched.
+     * @param subject The kerberos subject
+     * @param oauthToken The oauth token
+     */
+    public Credentials(String authname, String password, int userid, int contextid, String username, Subject subject, String oauthToken) {
         super();
         this.authname = authname;
         this.password = password;
@@ -124,6 +135,7 @@ public class Credentials {
         this.username = username;
         b_contextid = true;
         this.subject = subject;
+        this.oauthToken = oauthToken;
     }
 
     /**
@@ -194,27 +206,34 @@ public class Credentials {
 
     /**
      * Gets the string value of context ID if a context ID is present; otherwise "unknown" is returned
-     * 
+     *
      * @return The string value of context ID if a context ID is present; otherwise "unknown" is returned
      */
     public final String getContextString() {
-        if (!b_contextid) {
-            return "unknown";
-        }
-        return String.valueOf(contextid);
+        return b_contextid ? String.valueOf(contextid) : "unknown";
     }
 
     /**
      * Gets the subject
-     * 
-     * @return The subject
+     *
+     * @return The subject or <code>null</code> if absent
      */
     public Subject getSubject() {
         return subject;
     }
 
+    /**
+     * Gets the OAuth token
+     *
+     * @return The OAuth token or <code>null</code> if absent
+     */
+    public String getOauthToken() {
+        return oauthToken;
+    }
+
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

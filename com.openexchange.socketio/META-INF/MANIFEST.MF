@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Socket.IO bundle
 Bundle-SymbolicName: com.openexchange.socketio
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.annotation,
@@ -38,6 +38,7 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.google.common.collect,
  com.google.common.io,
  com.openexchange.ajax,
+ com.openexchange.ajax.container,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.management,

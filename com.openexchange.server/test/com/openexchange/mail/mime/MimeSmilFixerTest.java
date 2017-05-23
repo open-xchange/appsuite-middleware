@@ -53,8 +53,12 @@ import java.io.ByteArrayInputStream;
 import javax.mail.BodyPart;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
+import org.junit.Test;
 import com.openexchange.mail.MailcapInitialization;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -63,8 +67,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.0
  */
-public class MimeSmilFixerTest extends TestCase {
-
+public class MimeSmilFixerTest {
     /**
      * Initializes a new {@link MimeSmilFixerTest}.
      */
@@ -72,7 +75,8 @@ public class MimeSmilFixerTest extends TestCase {
         super();
     }
 
-    public void testFixSmil() {
+         @Test
+     public void testFixSmil() {
         try {
             String src = "From: \"Mobile Inbound Agent\" incomingmessage@service-provider.com\n" +
                 "To: someone@example.com\n" +

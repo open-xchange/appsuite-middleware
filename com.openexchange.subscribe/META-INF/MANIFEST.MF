@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Subscribe Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.subscribe.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -85,6 +85,13 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tx,
  com.openexchange.user,
  com.openexchange.userconf,
+ javax.imageio,
+ javax.imageio.event,
+ javax.imageio.metadata,
+ javax.imageio.plugins.bmp,
+ javax.imageio.plugins.jpeg,
+ javax.imageio.spi,
+ javax.imageio.stream,
  javax.mail,
  javax.mail.internet,
  javax.net,

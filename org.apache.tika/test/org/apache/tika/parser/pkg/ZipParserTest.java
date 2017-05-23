@@ -16,10 +16,12 @@
  */
 package org.apache.tika.parser.pkg;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.tika.Tika;
 import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.metadata.Metadata;
@@ -27,6 +29,7 @@ import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 
 /**
@@ -34,7 +37,8 @@ import org.xml.sax.ContentHandler;
  */
 public class ZipParserTest extends AbstractPkgTest {
 
-    public void testZipParsing() throws Exception {
+         @Test
+     public void testZipParsing() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
@@ -73,7 +77,8 @@ public class ZipParserTest extends AbstractPkgTest {
      * Tests that the ParseContext parser is correctly
      *  fired for all the embedded entries.
      */
-    public void testEmbedded() throws Exception {
+         @Test
+     public void testEmbedded() throws Exception {
        Parser parser = new AutoDetectParser(); // Should auto-detect!
        ContentHandler handler = new BodyContentHandler();
        Metadata metadata = new Metadata();
@@ -114,7 +119,8 @@ public class ZipParserTest extends AbstractPkgTest {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-346">TIKA-346</a>
      */
-    public void testUnsupportedZipCompressionMethod() throws Exception {
+         @Test
+     public void testUnsupportedZipCompressionMethod() throws Exception {
         String content = new Tika().parseToString(
                 ZipParserTest.class.getResourceAsStream(
                         "/test-documents/moby.zip"));
@@ -137,7 +143,8 @@ public class ZipParserTest extends AbstractPkgTest {
     }
 
     // TIKA-1036
-    public void testPlaceholders() throws Exception {
+         @Test
+     public void testPlaceholders() throws Exception {
         String xml = getXML("testEmbedded.zip").xml;
         assertContains("<div class=\"embedded\" id=\"test1.txt\"/>", xml);
         assertContains("<div class=\"embedded\" id=\"test2.txt\"/>", xml);

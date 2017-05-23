@@ -330,6 +330,24 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
+        boolean disabled = delegate.incrementFailedMailAuthCount(accountId, userId, contextId);
+        if (disabled) {
+            invalidateMailAccount(accountId, userId, contextId);
+        }
+        return disabled;
+    }
+
+    @Override
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
+        boolean disabled = delegate.incrementFailedTransportAuthCount(accountId, userId, contextId);
+        if (disabled) {
+            invalidateMailAccount(accountId, userId, contextId);
+        }
+        return disabled;
+    }
+
+    @Override
     public MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
@@ -638,6 +656,18 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             CacheKey key = newCacheKey(cacheService, mailAccount.getId(), userId, contextId);
             cache.put(key, changedAccount, false);
         }
+    }
+
+    @Override
+    public void enableMailAccount(int accountId, int userId, int contextId) throws OXException {
+        delegate.enableMailAccount(accountId, userId, contextId);
+        invalidateMailAccount(accountId, userId, contextId);
+    }
+
+    @Override
+    public void enableMailAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        delegate.enableMailAccount(accountId, userId, contextId, con);
+        invalidateMailAccount(accountId, userId, contextId);
     }
 
     @Override

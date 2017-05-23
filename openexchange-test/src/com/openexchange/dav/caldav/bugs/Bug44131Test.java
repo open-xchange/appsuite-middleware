@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +63,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -81,21 +82,30 @@ import com.openexchange.test.CalendarTestManager;
 public class Bug44131Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
+    private AJAXClient client3;
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
+        
+        client3 = new AJAXClient(testContext.acquireUser());
     }
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
             }
+            if (null != client3) {
+                client3.logout();
+            }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test
@@ -120,7 +130,7 @@ public class Bug44131Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
         Date clientLastModified = manager2.getLastModification();
@@ -134,7 +144,7 @@ public class Bug44131Test extends CalDAVTest {
         exception.setLastModified(clientLastModified);
         exception.setParentFolderID(appointment.getParentFolderID());
         exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        exception.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         manager2.update(exception);
         clientLastModified = getManager().getLastModification();
@@ -192,7 +202,7 @@ public class Bug44131Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
         Date clientLastModified = manager2.getLastModification();
@@ -206,7 +216,7 @@ public class Bug44131Test extends CalDAVTest {
         exception.setLastModified(clientLastModified);
         exception.setParentFolderID(appointment.getParentFolderID());
         exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        exception.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         manager2.update(exception);
         clientLastModified = manager2.getLastModification();
@@ -224,7 +234,7 @@ public class Bug44131Test extends CalDAVTest {
          */
         exception.removeParticipants();
         exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        exception.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         exception.setLastModified(clientLastModified);
         manager2.update(exception);
         clientLastModified = manager2.getLastModification();
@@ -266,7 +276,7 @@ public class Bug44131Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
@@ -321,7 +331,7 @@ public class Bug44131Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
@@ -340,7 +350,7 @@ public class Bug44131Test extends CalDAVTest {
          */
         appointment.removeParticipants();
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client3.getValues().getUserId()));
         appointment.setLastModified(clientLastModified);
         manager2.update(appointment);
         /*
@@ -362,5 +372,3 @@ public class Bug44131Test extends CalDAVTest {
     }
 
 }
-
-

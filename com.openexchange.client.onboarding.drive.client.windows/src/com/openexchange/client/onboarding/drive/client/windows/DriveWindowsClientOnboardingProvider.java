@@ -134,7 +134,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
         }
 
         Scenario scenario = request.getScenario();
-        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+        if (!Device.getActionsFor(request.getClientDevice(), device, scenario.getType(), session).contains(request.getAction())) {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
@@ -155,7 +155,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     }
 
     private Result linkResult(OnboardingRequest request, Session session) throws OXException {
-        return new LinkResult(new Link(getDownloadLink(request, session), LinkType.COMMON));
+        return new LinkResult(new Link(getDownloadLink(request, session), LinkType.COMMON, null));
     }
 
     private String getDownloadLink(OnboardingRequest request, Session session) throws OXException {

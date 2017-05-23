@@ -58,13 +58,14 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.json.fields.AddressEnvelopeAndHeaderTestField;
+import com.openexchange.mailfilter.json.ajax.json.fields.HeaderTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.BodyTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BodyTestCommandParser}
@@ -86,7 +87,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.BODY.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
         argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName)));
@@ -104,7 +105,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
             }
         }
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.values.name(), commandName)));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), commandName)));
         return new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>());
     }
 

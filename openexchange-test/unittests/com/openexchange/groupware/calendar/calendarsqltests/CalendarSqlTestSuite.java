@@ -49,71 +49,64 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.groupware.calendar.calendarsqltests.untiltests.UntilTestSuite;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    FullTimeSeries.class,
+    Bug9950Test.class,
+    Bug5557Test.class,
+    Bug4778Test.class,
+    Bug13358Test.class,
+    Bug13121Test.class,
+    Bug13068Test.class,
+    Bug12923Test.class,
+    Bug12681Test.class,
+    Bug12662Test.class,
+    Bug12659Test.class,
+    Bug12601Test.class,
+    Bug12571Test.class,
+    Bug12509Test.class,
+    Bug12496Test.class,
+    Bug12489Test.class,
+    Bug12466Test.class,
+    Bug12413Test.class,
+    Bug12377Test.class,
+    Bug12269Test.class,
+    Bug12072Test.class,
+    Bug11865Test.class,
+    Bug11803Test.class,
+    Bug11730Test.class,
+    Bug11708Test.class,
+    Bug11695Test.class,
+    Bug11453Test.class,
+    Bug11424Test.class,
+    Bug11316Test.class,
+    Bug11307Test.class,
+    Bug11148Test.class,
+    Bug11059Test.class,
+    Bug11051Test.class,
+    Bug10806Test.class,
+    Bug10154Test.class,
+    Node1077Test.class,
+    ParticipantsAgreeViaDifferentLoadMethods.class,
+    Bug13995And14922Test.class,
+    Bug13446Test.class,
+    Bug11210Test.class,
+    Bug13226Test.class,
+    Bug14625Test.class,
+    Bug15155Test.class,
+    Bug15031Test.class,
+    Bug16540Test.class,
+    Bug24682Test.class,
+    Bug29339Test.class,
+    Bug30361Test.class,
+    UserStory1906Test.class,
+})
 public class CalendarSqlTestSuite {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-
-        tests.addTestSuite(FullTimeSeries.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug5557Test.class);
-        tests.addTestSuite(Bug4778Test.class);
-        tests.addTestSuite(Bug13358Test.class);
-        tests.addTestSuite(Bug13121Test.class);
-        tests.addTestSuite(Bug13068Test.class);
-        tests.addTestSuite(Bug12923Test.class);
-        tests.addTestSuite(Bug12681Test.class);
-        tests.addTestSuite(Bug12662Test.class);
-        tests.addTestSuite(Bug12659Test.class);
-        tests.addTestSuite(Bug12601Test.class);
-        tests.addTestSuite(Bug12571Test.class);
-        tests.addTestSuite(Bug12509Test.class);
-        tests.addTestSuite(Bug12496Test.class);
-        tests.addTestSuite(Bug12489Test.class);
-        tests.addTestSuite(Bug12466Test.class);
-        tests.addTestSuite(Bug12413Test.class);
-        tests.addTestSuite(Bug12377Test.class);
-        tests.addTestSuite(Bug12269Test.class);
-        tests.addTestSuite(Bug12072Test.class);
-        tests.addTestSuite(Bug11865Test.class);
-        tests.addTestSuite(Bug11803Test.class);
-        tests.addTestSuite(Bug11730Test.class);
-        tests.addTestSuite(Bug11708Test.class);
-        tests.addTestSuite(Bug11695Test.class);
-        tests.addTestSuite(Bug11453Test.class);
-        tests.addTestSuite(Bug11424Test.class);
-        tests.addTestSuite(Bug11316Test.class);
-        tests.addTestSuite(Bug11307Test.class);
-        tests.addTestSuite(Bug11148Test.class);
-        tests.addTestSuite(Bug11059Test.class);
-        tests.addTestSuite(Bug11051Test.class);
-        tests.addTestSuite(Bug10806Test.class);
-        tests.addTestSuite(Bug10154Test.class);
-        tests.addTestSuite(Node1077Test.class);
-        tests.addTestSuite(ParticipantsAgreeViaDifferentLoadMethods.class);
-        tests.addTestSuite(Bug13995And14922Test.class);
-        tests.addTestSuite(Bug13446Test.class);
-        tests.addTestSuite(Bug11210Test.class);
-        tests.addTestSuite(Bug13226Test.class);
-        tests.addTestSuite(Bug14625Test.class);
-        tests.addTestSuite(Bug15155Test.class);
-        tests.addTestSuite(Bug15031Test.class);
-        tests.addTestSuite(Bug16540Test.class);
-        tests.addTestSuite(Bug24682Test.class);
-        tests.addTestSuite(Bug29339Test.class);
-        tests.addTestSuite(Bug30361Test.class);
-
-        tests.addTestSuite(UserStory1906Test.class);
-
-        tests.addTest(UntilTestSuite.suite());
-
-        return tests;
-    }
 }

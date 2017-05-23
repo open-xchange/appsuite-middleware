@@ -302,4 +302,14 @@ public abstract class AbstractAttributeSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object mailDisabled() {
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
+        return null;
+    }
+
 }

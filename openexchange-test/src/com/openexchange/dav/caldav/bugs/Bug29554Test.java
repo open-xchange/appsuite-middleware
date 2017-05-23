@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,15 +74,14 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class Bug29554Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testSupportedComponentSets() throws Exception {
         /*
          * discover supported component sets of root collection
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/",
-                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);

@@ -59,8 +59,9 @@ public class SearchParser extends AbstractSearchParser<SearchResponse> {
 
     /**
      * Default constructor.
+     * 
      * @param failOnError <code>true</code> and this parser checks the server
-     *                    response for containing error messages and lets the test fail.
+     *            response for containing error messages and lets the test fail.
      */
     protected SearchParser(boolean failOnError, int[] columns) {
         super(failOnError, columns);

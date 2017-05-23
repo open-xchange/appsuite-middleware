@@ -24,3 +24,9 @@ properties:
   vcard:
     type: integer
     description: The user's VCard.
+  security:
+    type: array
+    description: Specifies security actions, such as encrypt, sign, and authentication
+    items: {
+      $ref: "#/definitions/GuardSendSecurity"
+    }

@@ -4014,6 +4014,30 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
+     * Return the name of the primary mail account
+     * @return A {@link String} containing the name of the primary mail account
+     */
+    final public String getPrimaryAccountName(){
+        return primaryAccountName;
+    }
+
+    /**
+     * Sets the name of the primary mail account for this user object
+     *
+     * @param primaryAccountName A {@link String} containing the name of the primary mail account
+     */
+    final public void setPrimaryAccountName(final String primaryAccountName) {
+        if (null == this.primaryAccountName) {
+            this.primaryAccountNameSet = true;
+        }
+        this.primaryAccountName = primaryAccountName;
+    }
+
+    final public boolean isPrimaryAccountNameSet() {
+        return primaryAccountNameSet;
+    }
+
+    /**
      * Sets the E-Mail aliases for this user object
      *
      * @param aliases A {@link HashSet} containing the E-Mail aliases
@@ -4417,6 +4441,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.driveFolderMode = null;
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
+        this.primaryAccountName = null;
     }
 
     /**

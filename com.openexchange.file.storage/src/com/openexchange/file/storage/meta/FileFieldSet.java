@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.meta;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
@@ -158,7 +159,8 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object lockedUntil(final Object... args) {
-        md(args).setLockedUntil(date(1, args));
+        long value = longValue(1, args);
+        md(args).setLockedUntil(0 < value ? new Date(value) : null);
         return ret(args);
     }
 

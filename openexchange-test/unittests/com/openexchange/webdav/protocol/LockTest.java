@@ -1,15 +1,20 @@
+
 package com.openexchange.webdav.protocol;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
-public class LockTest extends TestCase{
-	public void testTimeout() throws Exception {
-		final WebdavLock lock = new WebdavLock();
-		lock.setTimeout(1000);
-		Thread.sleep(500);
-		assertTrue(lock.getTimeout()<=500);
-		lock.setTimeout(WebdavLock.NEVER);
-		assertEquals(WebdavLock.NEVER,lock.getTimeout());
-	}
+public class LockTest {
+
+    @Test
+    public void testTimeout() throws Exception {
+        final WebdavLock lock = new WebdavLock();
+        lock.setTimeout(1000);
+        Thread.sleep(500);
+        assertTrue(lock.getTimeout() <= 500);
+        lock.setTimeout(WebdavLock.NEVER);
+        assertEquals(WebdavLock.NEVER, lock.getTimeout());
+    }
 
 }

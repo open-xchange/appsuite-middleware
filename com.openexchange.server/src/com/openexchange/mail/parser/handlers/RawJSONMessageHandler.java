@@ -71,6 +71,7 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -178,9 +179,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     }
                 }
                 if (mail.containsOriginalFolder()) {
-                    String originalFolder = mail.getOriginalFolder();
+                    FullnameArgument originalFolder = mail.getOriginalFolder();
                     if (null != originalFolder) {
-                        jsonObject.put(MailJSONField.ORIGINAL_FOLDER_ID.getKey(), originalFolder);
+                        jsonObject.put(MailJSONField.ORIGINAL_FOLDER_ID.getKey(), originalFolder.getPreparedName());
                     }
                 }
             }
@@ -527,9 +528,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 discardJSONObject();
                 return false;
             }
-            asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
-            textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
-            bodyAdded = true;
+            if (null != plainTextContentArg) {
+                asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
+                textWasEmpty = plainTextContentArg.isEmpty();
+                bodyAdded = true;
+            }
         }
         return true;
     }
@@ -934,9 +937,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             final JSONObject jsonObject = new JSONObject();
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
-            jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
+            jsonObject.put(MailJSONField.SIZE.getKey(), null == content ? 0 : content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
-            jsonObject.put(MailJSONField.CONTENT.getKey(), content);
+            jsonObject.put(MailJSONField.CONTENT.getKey(), null == content ? JSONObject.NULL : content);
 
             final JSONArray bodyArr = getBodyArr();
             final int len = bodyArr.length();

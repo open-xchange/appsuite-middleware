@@ -131,7 +131,7 @@ public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
 
     @Override
     public void destroy() {
-        hzQueue.destroy();
+        // Nothing to do
     }
 
     @Override

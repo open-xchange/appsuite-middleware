@@ -49,16 +49,18 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
 import java.sql.SQLException;
 import java.util.Date;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-
 
 public class Bug10806Test extends CalendarSqlTest {
     // Bug 10806
 
+    @Test
     public void testReschedulingOfPrivateRecurringAppointmentWithOneResourceParticipant() throws OXException, SQLException {
         final Date start = D("04/06/2007 10:00");
         final Date end = D("04/06/2007 12:00");

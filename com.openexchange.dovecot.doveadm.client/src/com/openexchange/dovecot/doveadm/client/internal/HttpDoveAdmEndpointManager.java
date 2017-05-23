@@ -149,9 +149,9 @@ public class HttpDoveAdmEndpointManager {
             maxConnectionsPerRoute = totalConnections / l.size();
         }
         propPrefix.setLength(resetLen);
-        int readTimeout = configService.getIntProperty(propPrefix.append("readTimeout").toString(), 2500);
+        int readTimeout = configService.getIntProperty(propPrefix.append("readTimeout").toString(), 10000);
         propPrefix.setLength(resetLen);
-        int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 1500);
+        int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 3000);
         propPrefix.setLength(resetLen);
         int checkInterval = configService.getIntProperty(propPrefix.append("checkInterval").toString(), 60000);
 

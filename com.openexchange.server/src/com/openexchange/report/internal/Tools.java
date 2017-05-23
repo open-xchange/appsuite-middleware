@@ -56,9 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.ArrayUtils;
@@ -70,7 +68,6 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -260,35 +257,21 @@ public class Tools {
     }
 
     public static final Map<String, Integer> getAllSchemata(final org.slf4j.Logger logger) throws SQLException, OXException {
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Map<String, Integer> schemaMap = new LinkedHashMap<String, Integer>(50); // Keep insertion order
-        {
-            final Connection readcon;
-            try {
-                readcon = dbService.getReadOnly();
-            } catch (final OXException e) {
-                logger.error("", e);
-                throw e;
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection readcon = dbService.getReadOnly();
+        try {
+            return dbService.getAllSchemata(readcon);
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof SQLException) {
+                SQLException sqle = (SQLException) cause;
+                logger.error("", sqle);
+                throw sqle;
             }
-            /*
-             * Get all schemas and put them into a map.
-             */
-            Statement statement = null;
-            ResultSet rs = null;
-            try {
-                statement = readcon.createStatement();
-                rs = statement.executeQuery("SELECT read_db_pool_id, db_schema FROM context_server2db_pool GROUP BY db_schema");
-                while (rs.next()) {
-                    schemaMap.put(rs.getString(2), Integer.valueOf(rs.getInt(1)));
-                }
-            } catch (final SQLException e) {
-                logger.error("", e);
-                throw e;
-            } finally {
-                DBUtils.closeSQLStuff(rs, statement);
-                dbService.backReadOnly(readcon);
-            }
+            logger.error("", e);
+            throw e;
+        } finally {
+            dbService.backReadOnly(readcon);
         }
-        return schemaMap;
     }
 }

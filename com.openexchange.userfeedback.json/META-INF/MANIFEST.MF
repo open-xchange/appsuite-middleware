@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange user feedback json bundle
+Bundle-SymbolicName: com.openexchange.userfeedback.json
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.exception,
+ com.openexchange.groupware.notify.hostname,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ com.openexchange.userfeedback,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.userfeedback.json.osgi.UserFeedbackJSONActivator

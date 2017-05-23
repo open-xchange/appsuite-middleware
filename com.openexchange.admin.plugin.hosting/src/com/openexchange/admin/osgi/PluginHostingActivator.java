@@ -151,8 +151,7 @@ public class PluginHostingActivator extends HousekeepingActivator {
         if (starter != null) {
             starter.stop();
         }
-        closeTrackers();
-        cleanUp();
+        super.stopBundle();
         PluginInterfaces.setInstance(null);
     }
 

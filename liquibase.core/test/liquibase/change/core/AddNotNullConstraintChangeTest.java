@@ -1,26 +1,24 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.change.core.AddNotNullConstraintChange}
  */
 public class AddNotNullConstraintChangeTest extends StandardChangeTest {
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("addNotNullConstraint", ChangeFactory.getInstance().getChangeMetaData(new AddNotNullConstraintChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
 
 //        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
@@ -51,8 +49,7 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
 //        });
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         AddNotNullConstraintChange change = new AddNotNullConstraintChange();
         change.setTableName("TABLE_NAME");

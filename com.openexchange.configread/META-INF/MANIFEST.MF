@@ -2,10 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange ConfigRead
 Bundle-SymbolicName: com.openexchange.configread
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.annotation,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.annotation,
  com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.java,

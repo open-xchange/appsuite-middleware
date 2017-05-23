@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -59,7 +62,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
@@ -93,23 +95,20 @@ public final class Bug32044Test extends AbstractAJAXSession {
     private Task task;
     private FolderObject folder1, folder2;
 
-    public Bug32044Test(String name) {
-        super(name);
+    public Bug32044Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         timeZone1 = client1.getValues().getTimeZone();
-        client2 = new AJAXClient(User.User2);
+        client2 = getClient2();
         timeZone2 = client2.getValues().getTimeZone();
         cal = TimeTools.createCalendar(TimeZones.UTC);
         // Create a shared folder
-        folder1 = com.openexchange.ajax.folder.Create.createPrivateFolder("test for bug 32044 folder 1", FolderObject.TASK, client1.getValues().getUserId(),
-            com.openexchange.ajax.folder.Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS)
-        );
+        folder1 = com.openexchange.ajax.folder.Create.createPrivateFolder("test for bug 32044 folder 1", FolderObject.TASK, client1.getValues().getUserId(), com.openexchange.ajax.folder.Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS));
         folder1.setParentFolderID(client1.getValues().getPrivateTaskFolder());
         CommonInsertResponse response = client1.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder1));
         folder1.setObjectID(response.getId());
@@ -145,20 +144,22 @@ public final class Bug32044Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        task = client1.execute(new GetRequest(task)).getTask(timeZone1);
-        client1.execute(new DeleteRequest(task));
-        GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder2.getObjectID(), false));
-        if (!response.hasError()) {
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder2));
+    public void tearDown() throws Exception {
+        try {
+            task = client1.execute(new GetRequest(task)).getTask(timeZone1);
+            client1.execute(new DeleteRequest(task));
+            GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder2.getObjectID(), false));
+            if (!response.hasError()) {
+                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder2));
+            }
+            response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder1.getObjectID(), false));
+            if (!response.hasError()) {
+                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder1));
+            }
+            client2.logout();
+        } finally {
+            super.tearDown();
         }
-        response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder1.getObjectID(), false));
-        if (!response.hasError()) {
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder1));
-        }
-        client2.logout();
-        super.tearDown();
     }
 
     @Test

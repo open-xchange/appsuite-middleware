@@ -16,21 +16,22 @@
  */
 package org.apache.tika.parser.xml;
 
-import junit.framework.TestCase;
+import java.io.InputStream;
 import org.apache.tika.extractor.ContainerExtractor;
-import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.extractor.ParserContainerExtractor;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.microsoft.AbstractPOIContainerExtractionTest;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import java.io.InputStream;
-
-public class FictionBookParserTest extends TestCase {
-    public void testFB2() throws Exception {
+public class FictionBookParserTest {         @Test
+     public void testFB2() throws Exception {
         InputStream input = FictionBookParserTest.class.getResourceAsStream("/test-documents/test.fb2");
         try {
             Metadata metadata = new Metadata();
@@ -44,7 +45,8 @@ public class FictionBookParserTest extends TestCase {
         }
     }
 
-    public void testEmbedded() throws Exception {
+         @Test
+     public void testEmbedded() throws Exception {
         InputStream input = FictionBookParserTest.class.getResourceAsStream("/test-documents/test.fb2");
         try {
             ContainerExtractor extractor = new ParserContainerExtractor();

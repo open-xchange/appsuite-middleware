@@ -90,7 +90,6 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -392,11 +391,18 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR = "includeStackTraceOnError";
 
+    public static final String PARAMETER_AUTH_TOKEN = "cryptoauth";
+
     /**
      * The <code><b>&quot;delivery&quot;</b></code> parameter specifies how to deliver binary data; e.g. <code>&quot;view&quot;</code> for
      * inlined display or <code>&quot;download&quot;</code>.
      */
     public static final String PARAMETER_DELIVERY = "delivery".intern();
+
+    /**
+     * The parameter that signals that client expects plain JSON; no JavaScript callback.
+     */
+    public static final String PARAM_PLAIN_JSON = "plainJson";
 
     /**
      * The content type if the response body contains javascript data. Set it with
@@ -527,8 +533,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     protected void doService(HttpServletRequest req, HttpServletResponse resp, boolean checkRateLimit) throws ServletException, IOException {
         incrementRequests();
-        // We already have a tracking id...
-        // LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
@@ -555,7 +559,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw se;
         } finally {
             decrementRequests();
-            LogProperties.removeProperty(LogProperties.Name.AJAX_REQUEST_NUMBER);
         }
     }
 
@@ -989,8 +992,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     public static String substituteJS(String json, String action) {
-        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
-            action);
+        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**", sanitizeParam(action));
     }
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */

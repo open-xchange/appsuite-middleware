@@ -19,34 +19,30 @@ package org.apache.tika.parser.chm;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class TestChmDocumentInformation extends TestCase {
-    private CHMDocumentInformation chmDoc = null;
+public class TestChmDocumentInformation {    private CHMDocumentInformation chmDoc = null;
 
     public void setUp() throws Exception {
         chmDoc = CHMDocumentInformation.load(
                 new ByteArrayInputStream(TestParameters.chmData));
     }
 
-    public void testGetCHMDocInformation() throws TikaException, IOException {
+         @Test
+     public void testGetCHMDocInformation() throws TikaException, IOException {
         Metadata md = new Metadata();
         chmDoc.getCHMDocInformation(md);
         Assert.assertEquals(TestParameters.VP_CHM_MIME_TYPE, md.toString()
                 .trim());
     }
 
-    public void testGetText() throws TikaException {
+         @Test
+     public void testGetText() throws TikaException {
         Assert.assertTrue(chmDoc.getText().contains(
                 "The TCard method accepts only numeric arguments"));
-    }
-
-    public void tearDown() throws Exception {
     }
 
 }

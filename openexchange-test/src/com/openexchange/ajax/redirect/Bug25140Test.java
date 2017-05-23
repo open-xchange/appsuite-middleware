@@ -50,15 +50,15 @@
 package com.openexchange.ajax.redirect;
 
 import static com.openexchange.java.Autoboxing.I;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.params.ClientPNames;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.redirect.actions.RedirectRequest;
 import com.openexchange.ajax.redirect.actions.RedirectResponse;
 import com.openexchange.exception.OXException;
@@ -68,25 +68,20 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug25140Test {
+public final class Bug25140Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    public Bug25140Test() {
-        super();
-    }
-
+    @Override
     @Before
-    public void setUp() throws OXException {
-        client = new AJAXClient();
-        client.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+    public void setUp() throws Exception {
+        super.setUp();
+        getClient().getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
     @Test
     public void testForArbitraryURLRedirect() throws OXException, IOException, JSONException {
         RedirectRequest request = new RedirectRequest("%0d/", "www.google.de");
-        RedirectResponse response = client.execute(request);
-        Assert.assertThat("Backend should return status code 500 if to another URL should be redirected.", I(500), equalTo(I(response.getStatusCode())));
+        RedirectResponse response = getClient().execute(request);
+        Assert.assertThat("Backend should return status code 400 if to another URL should be redirected.", I(response.getStatusCode()), equalTo(I(HttpServletResponse.SC_BAD_REQUEST)));
         Assert.assertThat("Backend should not return redirects to other URLs.", "//www.google.de", not(equalTo(response.getLocation())));
     }
 }

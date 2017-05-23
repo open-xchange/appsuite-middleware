@@ -148,8 +148,8 @@ public class DistributedGroupManagerImplTest {
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#add(com.openexchange.realtime.packet.ID, com.openexchange.realtime.packet.ID)}.
      * @throws OXException
      */
-    @Test
-    public void testAdd() throws Exception {
+     @Test
+     public void testAdd() throws Exception {
         fillGroupManager();
         Collection<? extends SelectorChoice> groupsForUser1 = groupManager.getGroups(user1);
         Collection<? extends SelectorChoice> groupsForUser2 = groupManager.getGroups(user2);
@@ -164,8 +164,8 @@ public class DistributedGroupManagerImplTest {
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#removeClient(com.openexchange.realtime.packet.ID)}.
      * @throws Exception
      */
-    @Test
-    public void testRemoveID() throws Exception {
+     @Test
+     public void testRemoveID() throws Exception {
         fillGroupManager();
         Collection<? extends SelectorChoice> removedGroupsForUser1 = groupManager.removeClient(user1);
         assertEquals(3, removedGroupsForUser1.size());
@@ -190,8 +190,8 @@ public class DistributedGroupManagerImplTest {
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#remove(com.openexchange.realtime.packet.ID, com.openexchange.realtime.packet.ID)}.
      * @throws Exception
      */
-    @Test
-    public void testRemoveIDID() throws Exception {
+     @Test
+     public void testRemoveIDID() throws Exception {
         fillGroupManager();
         Collection<? extends SelectorChoice> groups = groupManager.getGroups(user1);
         assertEquals(3, groups.size());
@@ -206,8 +206,8 @@ public class DistributedGroupManagerImplTest {
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getGroups(com.openexchange.realtime.packet.ID)}.
      * @throws Exception
      */
-    @Test
-    public void testGetGroups() throws Exception {
+     @Test
+     public void testGetGroups() throws Exception {
         fillGroupManager();
         Collection<? extends SelectorChoice> groups = groupManager.getGroups(user1);
         assertEquals(3, groups.size());
@@ -248,8 +248,8 @@ public class DistributedGroupManagerImplTest {
      *
      * @throws Exception
      */
-    @Test
-    public void testGetMembers() throws Exception {
+     @Test
+     public void testGetMembers() throws Exception {
         fillGroupManager();
 
         Collection<? extends SelectorChoice> members = groupManager.getMembers(group1);
@@ -298,8 +298,8 @@ public class DistributedGroupManagerImplTest {
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#setInactivity(com.openexchange.realtime.packet.ID, com.openexchange.realtime.util.Duration)}.
      * @throws Exception
      */
-    @Test
-    public void testSetInactivity() throws Exception {
+     @Test
+     public void testSetInactivity() throws Exception {
         fillGroupManager();
         groupManager.setInactivity(user1, Duration.TEN_SECONDS);
         IDMap<Duration> durationMap = getDurationMap();
@@ -328,8 +328,8 @@ public class DistributedGroupManagerImplTest {
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#cleanupForId(com.openexchange.realtime.packet.ID)}.
      * @throws Exception
      */
-    @Test
-    public void testCleanupForId() throws Exception {
+     @Test
+     public void testCleanupForId() throws Exception {
         fillGroupManager();
         groupManager.setInactivity(user1, Duration.TEN_SECONDS);
         groupManager.setInactivity(user2, Duration.FOUR_MINUTES);
@@ -350,8 +350,8 @@ public class DistributedGroupManagerImplTest {
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#cleanupForId(com.openexchange.realtime.packet.ID)}.
      * @throws Exception
      */
-    @Test
-    public void testCleanupForSyntheticId() throws Exception {
+     @Test
+     public void testCleanupForSyntheticId() throws Exception {
         fillGroupManager();
         //Remove the group
         groupManager.removeGroup(group3);
@@ -373,8 +373,8 @@ public class DistributedGroupManagerImplTest {
     /**
      * Test method for {@link com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl#getManagementObject()}.
      */
-    @Test
-    public void testGetManagementObject() {
+     @Test
+     public void testGetManagementObject() {
         assertNotNull(groupManager.getManagementObject());
     }
 

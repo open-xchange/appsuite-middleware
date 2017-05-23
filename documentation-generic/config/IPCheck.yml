@@ -1,0 +1,22 @@
+feature_name: IPCheck
+properties:
+    - key: com.openexchange.ipcheck.mode
+      description: |
+        Specifies the IP check mechanisms to apply.
+        Known values are:
+        <ul>
+          <li><code>none</code> - Implies that no IP check takes place at all</li>
+          <li><code>strict</code> - Implies that IP addresses are checked for equality</li>
+          <li><code>countrycode</code> - Requires open-xchange-geoip being installed and performs a plausibility check against IP addresses' country codes</li>
+        </ul>
+        Note:   
+        The [[com.openexchange.IPCheck]] property still has precedence over this property;  
+        i.e. if [[com.openexchange.IPCheck]] is set to <code>true</code>, strict IP check is enabled.
+      defaultValue: 
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.IPCheck
+      file: server.properties
+      packageName: open-xchange-core
+      tags: ["Session"]

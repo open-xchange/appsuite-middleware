@@ -983,11 +983,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 recColl.checkAndFillIfUserIsParticipant(cdao, up);
             } else {
                 if (!recColl.checkIfUserIsParticipant(edao, up)) {
-                    if (edao.getFolderType() == FolderObject.PRIVATE) {
+                    if (FolderObject.PRIVATE == edao.getFolderType()) {
                         recColl.removeParticipant(cdao, uid);
                         recColl.removeUserParticipant(cdao, uid);
                     }
-                    if (null != edao && FolderObject.SHARED == edao.getFolderType()) {
+                    if (FolderObject.SHARED == edao.getFolderType()) {
                         recColl.removeUserParticipant(cdao, edao.getSharedFolderOwner());
                     }
                     recColl.checkAndFillIfUserIsUser(cdao, up);
@@ -1828,7 +1828,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             recColl.simpleParticipantCheck(cdao);
         }
     }
-    
+
     private CalendarDataObject getUpdateWithAppropriateTimes(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
         CalendarDataObject clone = cdao.clone();
         recColl.setStartAndEndDate(clone, edao);

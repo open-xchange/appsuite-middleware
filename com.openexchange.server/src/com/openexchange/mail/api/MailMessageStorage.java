@@ -50,6 +50,7 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -83,6 +84,26 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
 
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
+
+    /**
+     * Initializes a new {@link MailMessageStorage}.
+     */
+    protected MailMessageStorage() {
+        super();
+    }
+
+    @Override
+    public <T> T supports(Class<T> iface) throws OXException {
+        if (iface.isInstance(this)) {
+            return (T) this;
+        }
+
+        if (IMailMessageStorageDelegator.class.isInstance(this)) {
+            return ((IMailMessageStorageDelegator) this).getDelegateMessageStorage().supports(iface);
+        }
+
+        return null;
+    }
 
     @Override
     public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws OXException;
@@ -134,6 +155,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
+        if (Strings.isEmpty(contentId)) {
+            return null;
+        }
         final MailMessage mail = getMessage(folder, mailId, false);
         if (null == mail) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);

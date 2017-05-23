@@ -119,6 +119,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -686,9 +687,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // #################################################################
 
-            if (!isEmpty(usrdata.getPrimaryEmail())) {
+            String primaryEmail = usrdata.getPrimaryEmail();
+            if (!isEmpty(primaryEmail)) {
                 stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getPrimaryEmail());
+                stmt.setString(1, primaryEmail);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
@@ -1007,6 +1009,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                                 stmt.setNull(db, java.sql.Types.DATE);
                             }
                         }
+                    } else if (returntype.equalsIgnoreCase("java.lang.Long")) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(db, result);
+                        } else {
+                            final Method methodbool = getMethodforbooleanparameter(method);
+                            final boolean test = ((Boolean) methodbool.invoke(usrdata, (Object[]) null)).booleanValue();
+                            if (test) {
+                                stmt.setNull(db, java.sql.Types.BIGINT);
+                            }
+                        }
                     }
                     // TODO: d7 rewrite log
                     // log.debug("******************* " +
@@ -1297,14 +1310,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
                         cache = cacheService.getCache("QuotaFileStorages");
-                        cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                        if (null != quotaAffectedUserIDs) {
-                            List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
-                            for (Integer userID : quotaAffectedUserIDs) {
-                                keys.add(userID);
-                            }
-                            cache.removeFromGroup(keys, String.valueOf(ctx.getId()));
-                        }
+                        cache.invalidateGroup(Integer.toString(contextId));
                         if (displayNameUpdate) {
                             final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
                             if (fuid > 0) {
@@ -1433,7 +1439,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final Set<Attribute> changed = new HashSet<>();
         account.setDefaultFlag(true);
         account.setId(0);
-        account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        if(user.isPrimaryAccountNameSet()){
+            account.setName(Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
+            changed.add(Attribute.NAME_LITERAL);
+        } else {
+            account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        }
         if (user.isImapServerset() || null != user.getImapServerString()) {
             changed.add(Attribute.MAIL_URL_LITERAL);
             String imapServer = user.getImapServerString();
@@ -1859,6 +1870,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             placeHolders.append("?,");
                             methodlist2.add(method);
                         }
+                    } else if (Long.class.equals(returnType)) {
+                        final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            contactInsert.append(Mapper.method2field.get(methodName));
+                            contactInsert.append(",");
+                            placeHolders.append("?,");
+                            methodlist2.add(method);
+                        }
                     }
                 }
                 placeHolders.deleteCharAt(placeHolders.length() - 1);
@@ -1905,6 +1924,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setTimestamp(pos++, new Timestamp(result.getTime()));
                         } else {
                             stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                        }
+                    } else if (Long.class.equals(returntype)) {
+                        final long result = ((Integer) method.invoke(usrdata, (Object[]) null)).longValue();
+                        if (-1 != result) {
+                            stmt.setLong(pos++, result);
+                        } else {
+                            stmt.setNull(pos++, java.sql.Types.BIGINT);
                         }
                     }
                 }
@@ -1954,15 +1980,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     std_mail_folder_confirmed_ham = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
                 }
 
-                // insert all multi valued attribs to the user_attribute table,
-                // here we fill the alias attribute in it
-                UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                // Insert aliases
                 if (usrdata.getAliases() != null && usrdata.getAliases().size() > 0) {
-                    final Iterator<String> itr = usrdata.getAliases().iterator();
-                    while (itr.hasNext()) {
-                        final String tmp_mail = itr.next().toString().trim();
+                    UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                    for (Iterator<String> itr = usrdata.getAliases().iterator(); itr.hasNext();) {
+                        String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail);
+                            userAlias.createAlias(con, ctx.getId().intValue(), userId, tmp_mail);
                         }
                     }
                 }
@@ -2151,11 +2175,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
             stmt.setInt(1, cid);
             stmt.setInt(2, userId);
-            for(final Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
-                final String namespace = namespaced.getKey();
-                for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
-                    final String name = namespace + "/" + pair.getKey();
-                    final String value = pair.getValue();
+            for (Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
+                String namespace = namespaced.getKey();
+                StringBuilder nameBuilder = null;
+                for (Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                    if (null == nameBuilder) {
+                        nameBuilder = new StringBuilder(48);
+                    } else {
+                        nameBuilder.setLength(0);
+                    }
+                    String name = nameBuilder.append(namespace).append('/').append(pair.getKey()).toString();
+                    String value = pair.getValue();
                     stmt.setString(3, name);
                     stmt.setString(4, value);
                     UUID uuid = UUID.randomUUID();
@@ -2176,7 +2206,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         final MailAccountDescription account = new MailAccountDescription();
         account.setDefaultFlag(true);
-        account.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        account.setName( (!user.isPrimaryAccountNameSet()) || Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
         String imapServer = user.getImapServerString();
         if (null == imapServer) {
             imapServer = DEFAULT_IMAP_SERVER_CREATE;
@@ -2686,7 +2716,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmtuserattributes.setInt(1, contextId);
             stmtusm = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
             stmtusm.setInt(1, contextId);
-            stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
+            stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname, name FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
             stmtacc.setInt(1, contextId);
             ResultSet rs = null;
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
@@ -2823,6 +2853,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     newuser.setMail_folder_archive_full_name(rs.getString("archive_fullname"));
                     newuser.setMail_folder_confirmed_ham_name(rs.getString("confirmed_ham"));
                     newuser.setMail_folder_confirmed_spam_name(rs.getString("confirmed_spam"));
+                    newuser.setPrimaryAccountName(rs.getString("name"));
                 }
                 rs.close();
 
@@ -2949,7 +2980,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         if (owner <= 0 || owner == userId) {
                             // Delete file storage
                             QuotaFileStorageService qfsService = FileStorages.getQuotaFileStorageService();
-                            QuotaFileStorage quotaFileStorage = qfsService.getQuotaFileStorage(userId, contextId);
+                            QuotaFileStorage quotaFileStorage = qfsService.getQuotaFileStorage(userId, contextId, Info.administrative());
 
                             try {
                                 quotaFileStorage.remove();
@@ -3063,7 +3094,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
-                            cache.removeFromGroup(user.getId(), ctx.getId().toString());
+                            cache.invalidateGroup(Integer.toString(contextId));
                         } catch (final OXException e) {
                             log.error("", e);
                         }
@@ -3241,7 +3272,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                             cache = cacheService.getCache("QuotaFileStorages");
-                            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
+                            cache.invalidateGroup(Integer.toString(contextId));
                         }
                     } catch (final OXException e) {
                         log.error("", e);
@@ -3694,7 +3725,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             Databases.closeSQLStuff(stmt);
         }
     }
-    
+
     private List<Pair<Integer, String>> prepareFolders(int contextId, int userId, Connection con) throws SQLException {
         List<Pair<Integer, String>> result = new ArrayList<>(6);
         String language = getLanguage(contextId, userId, con);
@@ -3746,7 +3777,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             Databases.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     private String getLanguage(int contextId, int userId, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -3760,7 +3791,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 language = rs.getString(1);
                 if (Strings.isNotEmpty(language)) {
                     return language;
-                } 
+                }
             }
             return Locale.getDefault().getLanguage();
         } finally {

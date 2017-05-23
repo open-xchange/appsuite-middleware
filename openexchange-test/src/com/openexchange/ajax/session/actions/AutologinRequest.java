@@ -53,7 +53,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link AutologinRequest}
  *
@@ -66,6 +65,7 @@ public class AutologinRequest extends AbstractRequest<AutologinResponse> {
 
     /**
      * Initializes a new {@link AutologinRequest}.
+     * 
      * @param parameters
      */
     public AutologinRequest(Parameter[] parameters, boolean failOnError) {
@@ -74,9 +74,7 @@ public class AutologinRequest extends AbstractRequest<AutologinResponse> {
     }
 
     public AutologinRequest(AutologinParameters parameters, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_AUTOLOGIN),
-            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient())
+        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_AUTOLOGIN), new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient())
         }, failOnError);
     }
 

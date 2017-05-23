@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
-import com.openexchange.test.TaskTestManager;
 
 /**
  * Test that we can remove start and end date from tasks with an update.
@@ -61,44 +63,33 @@ import com.openexchange.test.TaskTestManager;
  */
 public class Bug10941Test extends AbstractAJAXSession {
 
-    private TaskTestManager taskManager;
-
     private TestTask task;
 
-    public Bug10941Test(String name) {
-        super(name);
+    public Bug10941Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        taskManager = new TaskTestManager(getClient());
-        task = taskManager.newTask(getName() + " Task")
-            .startsTomorrow()
-            .endsTheFollowingDay();
 
-        taskManager.insertTaskOnServer(task);
+        task = ttm.newTask(this.getClass().getCanonicalName() + " Task").startsTomorrow().endsTheFollowingDay();
+
+        ttm.insertTaskOnServer(task);
     }
 
+    @Test
     public void testRemoveStartAndEndDateOnUpdate() {
-        TestTask update = new TestTask().relatedTo( task );
+        TestTask update = new TestTask().relatedTo(task);
 
         update.setStartDate(null);
         update.setEndDate(null);
 
-        taskManager.updateTaskOnServer( update );
+        ttm.updateTaskOnServer(update);
 
-        Task saved = taskManager.getTaskFromServer(update);
+        Task saved = ttm.getTaskFromServer(update);
 
         assertEquals(null, saved.getStartDate());
         assertEquals(null, saved.getEndDate());
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        taskManager.cleanUp();
-        super.tearDown();
-    }
-
-
 }

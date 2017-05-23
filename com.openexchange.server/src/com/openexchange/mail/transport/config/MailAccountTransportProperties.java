@@ -49,11 +49,8 @@
 
 package com.openexchange.mail.transport.config;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.mail.config.AbstractMailAccountProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountTransportProperties} - Transport properties read from mail account with fallback to properties read from properties
@@ -61,90 +58,36 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountTransportProperties implements ITransportProperties {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountTransportProperties.class);
-
-    protected Boolean enforceSecureConnection;
-    protected final Map<String, String> properties;
+public class MailAccountTransportProperties extends AbstractMailAccountProperties implements ITransportProperties {
 
     /**
      * Initializes a new {@link MailAccountTransportProperties}.
      *
      * @param mailAccount The mail account providing the properties
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountTransportProperties(MailAccount mailAccount) {
-        super();
+    public MailAccountTransportProperties(MailAccount mailAccount, int userId, int contextId) {
+        super(mailAccount, userId, contextId);
         if (null == mailAccount) {
             throw new IllegalArgumentException("mail account is null.");
         }
-        properties = mailAccount.getProperties();
     }
 
     /**
      * Initializes a new {@link MailAccountTransportProperties} with empty properties.
-     */
-    protected MailAccountTransportProperties() {
-        super();
-        properties = new HashMap<String, String>(0);
-    }
-
-    /**
-     * Looks-up the denoted property.
      *
-     * @param name The property name
-     * @return The looked-up value or <code>null</code>
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    protected String lookUpProperty(String name) {
-        return lookUpProperty(name, null);
-    }
-
-    /**
-     * Looks-up the denoted property.
-     *
-     * @param name The property name
-     * @param defaultValue The default value to return if absent
-     * @return The looked-up value or given <code>defaultValue</code>
-     */
-    protected String lookUpProperty(String name, String defaultValue) {
-        ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        return null == service ? defaultValue : service.getProperty(name, defaultValue);
+    protected MailAccountTransportProperties(int userId, int contextId) {
+        super(null, userId, contextId);
     }
 
     @Override
     public int getReferencedPartLimit() {
-        final String referencedPartLimitStr = properties.get("com.openexchange.mail.transport.referencedPartLimit");
-        if (null == referencedPartLimitStr) {
-            return TransportProperties.getInstance().getReferencedPartLimit();
-        }
-
-        try {
-            return Integer.parseInt(referencedPartLimitStr);
-        } catch (final NumberFormatException e) {
-            LOG.error("Referenced Part Limit: Invalid value.", e);
-            return TransportProperties.getInstance().getReferencedPartLimit();
-        }
-    }
-
-    @Override
-    public boolean isEnforceSecureConnection() {
-        Boolean b = this.enforceSecureConnection;
-        if (null != b) {
-            return b.booleanValue();
-        }
-
-        String tmp = properties.get("com.openexchange.mail.enforceSecureConnection");
-        if (null == tmp) {
-            return TransportProperties.getInstance().isEnforceSecureConnection();
-        }
-
-        return Boolean.parseBoolean(tmp.trim());
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        this.enforceSecureConnection = Boolean.valueOf(enforceSecureConnection);
+        return lookUpIntProperty("com.openexchange.mail.transport.referencedPartLimit", TransportProperties.getInstance().getReferencedPartLimit());
     }
 
 }

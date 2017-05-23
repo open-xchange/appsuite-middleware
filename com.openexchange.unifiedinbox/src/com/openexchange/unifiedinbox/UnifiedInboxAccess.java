@@ -307,7 +307,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             return new MailAccountUnifiedINBOXProperties(storageService.getMailAccount(
                 accountId,
                 session.getUserId(),
-                session.getContextId()));
+                session.getContextId()), session.getUserId(), session.getContextId());
         } catch (final OXException e) {
             throw e;
         }

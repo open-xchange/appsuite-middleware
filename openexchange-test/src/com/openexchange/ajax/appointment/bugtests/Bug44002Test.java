@@ -49,16 +49,15 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug44002Test}
@@ -72,17 +71,15 @@ public class Bug44002Test extends AbstractAJAXSession {
 
     private Appointment conflict;
     private Appointment series;
-    private CalendarTestManager ctm;
 
-    public Bug44002Test(String name) {
-        super(name);
+    public Bug44002Test() {
+        super();
     }
 
     @Before
-    @Override
     public void setUp() throws Exception {
         super.setUp();
-        ctm = new CalendarTestManager(client);
+       
         conflict = new Appointment();
         series = new Appointment();
 
@@ -102,7 +99,7 @@ public class Bug44002Test extends AbstractAJAXSession {
         series.setRecurrenceType(Appointment.WEEKLY);
         series.setDays(Appointment.THURSDAY);
         series.setInterval(1);
-        series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         series.setIgnoreConflicts(true);
         series.setAlarm(15);
 
@@ -112,11 +109,11 @@ public class Bug44002Test extends AbstractAJAXSession {
         c.add(Calendar.HOUR_OF_DAY, 1);
         conflict.setEndDate(new Date(c.getTimeInMillis()));
         conflict.setIgnoreConflicts(true);
-        conflict.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        conflict.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         conflict.setAlarm(15);
 
-        ctm.insert(series);
-        ctm.insert(conflict);
+        catm.insert(series);
+        catm.insert(conflict);
     }
 
     /**
@@ -129,7 +126,7 @@ public class Bug44002Test extends AbstractAJAXSession {
             series.setRecurrenceType(Appointment.NO_RECURRENCE);
             series.removeInterval();
             series.removeDays();
-            ctm.update(series);
+            catm.update(series);
         } else {
             Appointment updateForSeries = new Appointment();
             updateForSeries.setParentFolderID(series.getParentFolderID());
@@ -137,9 +134,9 @@ public class Bug44002Test extends AbstractAJAXSession {
             updateForSeries.setRecurrenceType(Appointment.NO_RECURRENCE);
             updateForSeries.setLastModified(series.getLastModified());
             updateForSeries.setIgnoreConflicts(false);
-            ctm.update(updateForSeries);
+            catm.update(updateForSeries);
         }
-        List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
+        List<ConflictObject> conflicts = catm.getLastResponse().getConflicts();
         if (conflicts != null) {
             for (ConflictObject conf : conflicts) {
                 if (conf.getId() == conflict.getObjectID()) {
@@ -147,12 +144,5 @@ public class Bug44002Test extends AbstractAJAXSession {
                 }
             }
         }
-    }
-
-    @After
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-        super.tearDown();
     }
 }

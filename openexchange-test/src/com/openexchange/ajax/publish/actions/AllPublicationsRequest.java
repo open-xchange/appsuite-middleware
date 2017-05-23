@@ -74,8 +74,8 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
     private List<String> columns; // a list of column names to load (id, entityId, entityModule, url, target)
 
     private Map<String, List<String>> dynamicColumns;   // add a parameter for every plugin whose columns you want to load listing the column
-                                                        // names that need to be loaded in the response. If a plugin is not used by a certain
-                                                        // publication all values will be null.
+                                                     // names that need to be loaded in the response. If a plugin is not used by a certain
+                                                     // publication all values will be null.
 
     public AllPublicationsRequest() {
         super();
@@ -95,11 +95,11 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
     }
 
     public AllPublicationsRequest(List<String> columns) {
-    	this(null, -1, null, columns);
+        this(null, -1, null, columns);
     }
 
     public AllPublicationsRequest(int id, String entityModule, List<String> columns) {
-    	this(null, id, entityModule, columns);
+        this(null, id, entityModule, columns);
     }
 
     public void setDynamicColumns(Map<String, List<String>> dynamicColumns) {
@@ -157,23 +157,23 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
 
-        if( getId() > -1) {
+        if (getId() > -1) {
             params.add(new Parameter("id", getId()));
         }
 
-        if( getFolder() != null) {
+        if (getFolder() != null) {
             params.add(new Parameter("folder", getFolder()));
         }
 
-        if( getEntityModule() != null) {
+        if (getEntityModule() != null) {
             params.add(new Parameter("entityModule", getEntityModule()));
         }
 
-        if(getColumns() != null){
+        if (getColumns() != null) {
             params.add(new Parameter("columns", Strings.join(getColumns(), ",")));
         }
 
-        if(getDynamicColumns() != null){
+        if (getDynamicColumns() != null) {
             for (String plugin : getDynamicColumns().keySet()) {
                 params.add(new Parameter(plugin, Strings.join(getDynamicColumns().get(plugin), ",")));
             }

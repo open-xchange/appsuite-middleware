@@ -62,6 +62,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link HasFlagCommandParser}
@@ -77,7 +78,7 @@ public class HasFlagCommandParser implements CommandParser<TestCommand> {
     }
 
     @Override
-    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         List<Object> flagArgList = new ArrayList<Object>(4);
         flagArgList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, Fields.comparison.name(), Commands.HASFLAG.getCommandName())));
         flagArgList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, Fields.values.name(), Commands.HASFLAG.getCommandName())));

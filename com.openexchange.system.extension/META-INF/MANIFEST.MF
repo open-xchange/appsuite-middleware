@@ -3,13 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange System Extension Bundle
 Bundle-Description: Open-Xchange Extension Bundle exporting Sun classes
 Bundle-SymbolicName: com.openexchange.system.extension
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Fragment-Host: system.bundle;extension:=framework
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: sun.security,
- sun.security.util,
- com.sun.istack.internal,
+Export-Package: com.sun.istack.internal,
  com.sun.net,
  com.sun.net.ssl,
  com.sun.xml.bind,
@@ -43,7 +41,10 @@ Export-Package: sun.security,
  com.sun.xml.internal.ws.util,
  sun.nio.ch,
  sun.nio.cs,
+ sun.security,
  sun.security.action,
+ sun.security.ssl,
+ sun.security.util,
  sun.misc,
  sun.reflect,
  javax.activation;version="1.1.0",

@@ -56,7 +56,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -74,15 +73,10 @@ import com.openexchange.test.FolderTestManager;
 public class Bug53073Test extends AbstractAJAXSession {
     
 
-    public Bug53073Test(String name) {
-    	super(name);
-	}
-
-	private AJAXClient client;
+    private AJAXClient client;
     private AJAXClient client2;
     private CalendarTestManager catm2;
     private FolderTestManager ftm2;
-	private FolderTestManager ftm;
 
     @Override
     @Before
@@ -90,10 +84,9 @@ public class Bug53073Test extends AbstractAJAXSession {
         super.setUp();
         
         client = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = getClient2();
         catm2 = new CalendarTestManager(client2);
         ftm2 = new FolderTestManager(client2);
-        ftm = new FolderTestManager(client);
     }
 
     @Test
@@ -132,9 +125,11 @@ public class Bug53073Test extends AbstractAJAXSession {
     @Override
     @After
     public void tearDown() throws Exception {
-        catm2.cleanUp();
-        ftm2.cleanUp();
-        super.tearDown();
+        try {
+            catm2.cleanUp();
+            ftm2.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
-
 }

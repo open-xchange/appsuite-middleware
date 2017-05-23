@@ -57,6 +57,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
@@ -82,15 +83,11 @@ public class MailOnboardingConfigurationActivator extends HousekeepingActivator 
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(CustomLoginSource.class);
-        registerService(OnboardingProvider.class, new MailOnboardingProvider(this));
+        RankingAwareNearRegistryServiceTracker<CustomLoginSource> customLoginSources = new RankingAwareNearRegistryServiceTracker<>(context, CustomLoginSource.class);
+        rememberTracker(customLoginSources);
         openTrackers();
-    }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        closeTrackers();
+        registerService(OnboardingProvider.class, new MailOnboardingProvider(customLoginSources, this));
     }
 
 }

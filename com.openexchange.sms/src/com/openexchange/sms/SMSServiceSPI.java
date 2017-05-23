@@ -52,9 +52,10 @@ package com.openexchange.sms;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link SMSServiceSPI}
+ * {@link SMSServiceSPI} - The SMS service provider interface, which is called to send an SMS to given phone numbers on behalf of a certain user.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added <code>userId</code> and <code>contextId</code> parameters to {@link #sendMessage(String[], String, int, int) sendMessage()}
  * @since v7.8.1
  */
 public interface SMSServiceSPI {
@@ -65,10 +66,10 @@ public interface SMSServiceSPI {
      *
      * @param recipients An array contains recipients' phone numbers in E.123 format, e.g. <code>"+49 123 4567890"</code>
      * @param message The message to send
-     * @param session The session of the user sending the SMS
+     * @param userId The identifier of the user on whose behalf the SMS is supposed to be sent
+     * @param contextId The identifier of the context in which the user resides
      * @throws OXException If SMS cannot be sent
      */
-    void sendMessage(String[] recipients, String message) throws OXException;
-
+    void sendMessage(String[] recipients, String message, int userId, int contextId) throws OXException;
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.dav.carddav.reports;
 
-
 /**
  * {@link PropFilter}
  *
@@ -61,7 +60,7 @@ public class PropFilter {
     private String name;
     private String matchType;
     private String textMatch;
-    
+
     /**
      * Initializes a new {@link PropFilter}.
      * 
@@ -75,7 +74,7 @@ public class PropFilter {
         this.matchType = matchType;
         this.textMatch = textMatch;
     }
-    
+
     /**
      * Gets the name
      *
@@ -84,7 +83,7 @@ public class PropFilter {
     public String getName() {
         return name;
     }
-    
+
     /**
      * Sets the name
      *
@@ -129,6 +128,5 @@ public class PropFilter {
     public void setTextMatch(String textMatch) {
         this.textMatch = textMatch;
     }
-
 
 }

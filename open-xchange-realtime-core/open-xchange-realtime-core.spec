@@ -12,10 +12,14 @@ BuildRequires: open-xchange-core
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
 %endif
+%endif
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -93,47 +97,17 @@ fi
 
 %changelog
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-05-19 (4176)
-* Mon May 08 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-05-15 (4132)
-* Fri Apr 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-05-02 (4113)
-* Wed Apr 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-04-18 (4084)
-* Fri Mar 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-04-03 (4050)
-* Tue Mar 28 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-03-27 (4066)
-* Thu Mar 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-03-20 (4016)
-* Mon Mar 06 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-03-06 (3985)
-* Fri Feb 24 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-24 (3994)
-* Wed Feb 22 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-22 (3969)
-* Tue Feb 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-20 (3952)
-* Tue Jan 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-06 (3918)
-* Thu Jan 26 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-01-26 (3925)
-* Wed Jan 18 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-01-23 (3879)
-* Wed Jan 04 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-01-09 (3849)
-* Tue Dec 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-23 (3857)
-* Wed Dec 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-19 (3814)
-* Tue Dec 13 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-14 (3806)
-* Tue Dec 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-12 (3775)
+First candidate for 7.8.4 release
+* Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview of 7.8.4 release
+* Mon Apr 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>

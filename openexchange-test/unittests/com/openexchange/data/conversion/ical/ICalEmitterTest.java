@@ -54,6 +54,8 @@ import static com.openexchange.data.conversion.ical.Assert.assertProperty;
 import static com.openexchange.data.conversion.ical.Assert.assertStandardAppFields;
 import static com.openexchange.data.conversion.ical.Assert.assertStandardTaskFields;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
@@ -64,7 +66,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
@@ -86,13 +90,12 @@ import com.openexchange.groupware.tasks.Task;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ICalEmitterTest extends TestCase {
+public class ICalEmitterTest {
 
     private ICal4JEmitter emitter;
     private MockUserLookup users;
     private UserResolver oldUserResolver;
     private final TimeZone tz = TimeZone.getDefault();
-
 
     private Appointment getDefault() {
         final Appointment app = new Appointment();
@@ -106,6 +109,7 @@ public class ICalEmitterTest extends TestCase {
 
     }
 
+    @Test
     public void testSimpleAppointment() throws Exception {
         final Appointment app = new Appointment();
 
@@ -123,13 +127,13 @@ public class ICalEmitterTest extends TestCase {
         final ICalFile ical = serialize(app);
 
         assertStandardAppFields(ical, start, end);
-        assertProperty(ical, "SUMMARY","The Title");
-        assertProperty(ical, "DESCRIPTION","The Note");
-        assertProperty(ical, "CATEGORIES","cat1, cat2, cat3");
-        assertProperty(ical, "LOCATION","The Location");
+        assertProperty(ical, "SUMMARY", "The Title");
+        assertProperty(ical, "DESCRIPTION", "The Note");
+        assertProperty(ical, "CATEGORIES", "cat1, cat2, cat3");
+        assertProperty(ical, "LOCATION", "The Location");
     }
 
-
+    @Test
     public void testAppWholeDay() throws IOException {
         final Appointment app = new Appointment();
         app.setStartDate(D("24/02/1981 00:00"));
@@ -142,6 +146,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "DTEND", "VALUE=DATE", "19810226");
     }
 
+    @Test
     public void testCategoriesMayBeNullOrUnset() throws Exception {
         final Appointment app = new Appointment();
         ICalFile ical = serialize(app);
@@ -154,6 +159,7 @@ public class ICalEmitterTest extends TestCase {
         assertNoProperty(ical, "CATEGORIES");
     }
 
+    @Test
     public void testDeleteExceptionsMayBeNull() throws Exception {
         final Appointment app = new Appointment();
         app.setDeleteExceptions((Date[]) null);
@@ -161,6 +167,7 @@ public class ICalEmitterTest extends TestCase {
         assertTrue("Just testing survival", true);
     }
 
+    @Test
     public void testAppCreated() throws IOException {
         final Appointment appointment = getDefault();
         appointment.setCreationDate(D("24/02/1981 10:00"));
@@ -170,6 +177,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "CREATED", "19810224T100000Z");
     }
 
+    @Test
     public void testAppLastModified() throws IOException {
         final Appointment appointment = getDefault();
         appointment.setLastModified(D("24/02/1981 10:00"));
@@ -179,6 +187,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "LAST-MODIFIED", "19810224T100000Z");
     }
 
+    @Test
     public void testAppRecurrence() throws IOException {
 
         // DAILY
@@ -219,7 +228,6 @@ public class ICalEmitterTest extends TestCase {
 
         assertProperty(ical, "RRULE", "FREQ=MONTHLY;COUNT=3;INTERVAL=2;BYMONTHDAY=23");
 
-
         // Second form : the 2nd monday and tuesday every 2 months
 
         appointment.setDayInMonth(3);
@@ -232,7 +240,6 @@ public class ICalEmitterTest extends TestCase {
         ical = serialize(appointment);
 
         assertProperty(ical, "RRULE", "FREQ=MONTHLY;COUNT=3;INTERVAL=2;BYDAY=MO,TU;BYSETPOS=3");
-
 
         // Second form : the last tuesday every 2 months
 
@@ -292,6 +299,7 @@ public class ICalEmitterTest extends TestCase {
 
     }
 
+    @Test
     public void testAppRecurrenceId() throws IOException {
         final Appointment appointment = getDefault();
         appointment.setRecurrenceID(12);
@@ -302,11 +310,12 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "RECURRENCE-ID", "20110626");
     }
 
+    @Test
     public void testAppAlarm() throws IOException {
         final int MINUTES = 1;
 
         final Appointment appointment = getDefault();
-        appointment.setAlarm(15 *MINUTES);
+        appointment.setAlarm(15 * MINUTES);
         appointment.setNote("Blupp");
 
         final ICalFile ical = serialize(appointment);
@@ -316,9 +325,9 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "TRIGGER", "-PT15M");
         assertProperty(ical, "DESCRIPTION", "Blupp");
 
-
     }
 
+    @Test
     public void testAppPrivateFlag() throws IOException {
         final Appointment app = getDefault();
 
@@ -333,12 +342,12 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "CLASS", "PRIVATE");
     }
 
+    @Test
     public void testAppTransparency() throws IOException {
         // RESERVED
 
         final Appointment app = getDefault();
         app.setShownAs(Appointment.RESERVED);
-
 
         ICalFile ical = serialize(app);
 
@@ -348,17 +357,16 @@ public class ICalEmitterTest extends TestCase {
 
         app.setShownAs(Appointment.FREE);
 
-
         ical = serialize(app);
 
         assertProperty(ical, "TRANSP", "TRANSPARENT");
 
-
     }
 
+    @Test
     public void testAppAttendees() throws IOException {
         Appointment app = getDefault();
-        setParticipants(app, new String[]{"user1@internal.invalid", "user2@internal.invalid"}, new String[]{"external1@external.invalid", "external2@external.invalid"});
+        setParticipants(app, new String[] { "user1@internal.invalid", "user2@internal.invalid" }, new String[] { "external1@external.invalid", "external2@external.invalid" });
 
         ICalFile ical = serialize(app);
 
@@ -369,7 +377,7 @@ public class ICalEmitterTest extends TestCase {
 
         app = getDefault();
 
-        setUserParticipants(app, 2,4,6);
+        setUserParticipants(app, 2, 4, 6);
 
         ical = serialize(app);
 
@@ -377,16 +385,14 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "ATTENDEE", "mailto:user3@test.invalid");
         assertProperty(ical, "ATTENDEE", "mailto:user5@test.invalid");
 
-
     }
 
-    private void setUserParticipants(final Appointment app, final int...ids) {
+    private void setUserParticipants(final Appointment app, final int... ids) {
         final Participant[] allParticipants = new Participant[ids.length];
         final UserParticipant[] users = new UserParticipant[ids.length];
 
-
-        int i = 0,j = 0;
-        for(final int id : ids) {
+        int i = 0, j = 0;
+        for (final int id : ids) {
             final UserParticipant p = new UserParticipant(id);
             allParticipants[i++] = p;
             users[j++] = p;
@@ -395,14 +401,12 @@ public class ICalEmitterTest extends TestCase {
         app.setUsers(users);
     }
 
-
     private void setParticipants(final CalendarObject calendarObject, final String[] internal, final String[] external) {
-        final Participant[] allParticipants = new Participant[internal.length+ external.length];
+        final Participant[] allParticipants = new Participant[internal.length + external.length];
         final UserParticipant[] users = new UserParticipant[internal.length];
 
-
-        int i = 0,j = 0;
-        for(final String mail : internal) {
+        int i = 0, j = 0;
+        for (final String mail : internal) {
             final UserParticipant p = new UserParticipant(-1);
             p.setEmailAddress(mail);
             allParticipants[i++] = p;
@@ -410,7 +414,7 @@ public class ICalEmitterTest extends TestCase {
         }
 
         j = 0;
-        for(final String mail : external) {
+        for (final String mail : external) {
             final ExternalUserParticipant p = new ExternalUserParticipant(mail);
             allParticipants[i++] = p;
         }
@@ -420,7 +424,7 @@ public class ICalEmitterTest extends TestCase {
 
     }
 
-
+    @Test
     public void testAppResources() throws IOException {
         final Appointment app = getDefault();
         setResources(app, "beamer", "toaster", "deflector");
@@ -428,13 +432,12 @@ public class ICalEmitterTest extends TestCase {
 
         assertProperty(ical, "RESOURCES", "beamer,toaster,deflector");
 
-
     }
 
-    private void setResources(final CalendarObject calendarObject, final String...displayNames) {
+    private void setResources(final CalendarObject calendarObject, final String... displayNames) {
         final Participant[] participants = new Participant[displayNames.length];
         int i = 0;
-        for(final String displayName : displayNames) {
+        for (final String displayName : displayNames) {
             final ResourceParticipant p = new ResourceParticipant(-1);
             p.setDisplayName(displayName);
             participants[i++] = p;
@@ -443,12 +446,13 @@ public class ICalEmitterTest extends TestCase {
 
     }
 
+    @Test
     public void testAppDeleteExceptions() throws IOException {
         final Appointment app = getDefault();
         app.setRecurrenceType(Appointment.DAILY);
         app.setInterval(3);
         app.setOccurrence(5);
-        app.setDeleteExceptions(new Date[]{D("25/02/2009 10:00"), D("28/02/2009 12:00")});
+        app.setDeleteExceptions(new Date[] { D("25/02/2009 10:00"), D("28/02/2009 12:00") });
 
         final ICalFile ical = serialize(app);
 
@@ -456,6 +460,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "EXDATE", "20090228T120000Z");
     }
 
+    @Test
     public void testAppUid() throws IOException {
         final Appointment appointment = getDefault();
         appointment.setUid("nexn787n478478onzwo87nwiuhi");
@@ -465,6 +470,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
     }
 
+    @Test
     public void testAppOrganizer() throws IOException {
         final Appointment appointment = getDefault();
         appointment.setOrganizer("organizer");
@@ -474,6 +480,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "ORGANIZER", "mailto:organizer");
     }
 
+    @Test
     public void testAppSequence() throws IOException {
         final Appointment appointment = getDefault();
         appointment.setSequence(5);
@@ -485,12 +492,12 @@ public class ICalEmitterTest extends TestCase {
 
     // Omitting: DURATION. This is all handled with DTStart and DTEnd in emitting
 
-
     // --------------------------------- Tasks ---------------------------------
 
     /**
      * Tests task emitter for title and note.
      */
+    @Test
     public void testTaskSimpleFields() throws IOException {
         final Task task = new Task();
         task.setTitle("The Title");
@@ -501,10 +508,11 @@ public class ICalEmitterTest extends TestCase {
         final ICalFile ical = serialize(task);
         assertProperty(ical, "SUMMARY", "The Title");
         assertProperty(ical, "DESCRIPTION", "The Note");
-        assertProperty(ical, "CATEGORIES","cat1, cat2, cat3");
+        assertProperty(ical, "CATEGORIES", "cat1, cat2, cat3");
         assertProperty(ical, "PERCENT-COMPLETE", "23");
     }
 
+    @Test
     public void testTaskCompleted() throws IOException {
         final Task task = new Task();
         task.setTitle("The Title");
@@ -518,6 +526,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "PERCENT-COMPLETE", "100");
     }
 
+    @Test
     public void testTaskCategoriesMayBeNullOrUnset() throws Exception {
         final Task task = new Task();
         ICalFile ical = serialize(task);
@@ -530,6 +539,7 @@ public class ICalEmitterTest extends TestCase {
         assertNoProperty(ical, "CATEGORIES");
     }
 
+    @Test
     public void testTaskCreated() throws IOException {
         final Task task = new Task();
         task.setCreationDate(D("24/02/1981 10:00"));
@@ -539,6 +549,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "CREATED", "19810224T100000Z");
     }
 
+    @Test
     public void testTaskLastModified() throws IOException {
         final Task task = new Task();
         task.setLastModified(D("24/02/1981 10:00"));
@@ -548,7 +559,7 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "LAST-MODIFIED", "19810224T100000Z");
     }
 
-
+    @Test
     public void testTaskDateFields() throws IOException {
         final Task task = new Task();
         final Date start = D("13/07/1976 15:00");
@@ -559,6 +570,7 @@ public class ICalEmitterTest extends TestCase {
         assertStandardTaskFields(ical, start, end);
     }
 
+    @Test
     public void testTaskUid() throws IOException {
         final Task task = new Task();
         task.setUid("nexn787n478478onzwo87nwiuhi");
@@ -568,7 +580,8 @@ public class ICalEmitterTest extends TestCase {
         assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
     }
 
-    public void testShouldNotUseDTENDasEndForIndividualAppointmentsInASeries() throws IOException{
+    @Test
+    public void testShouldNotUseDTENDasEndForIndividualAppointmentsInASeries() throws IOException {
         final int occurences = 4;
 
         final Calendar cal = Calendar.getInstance();
@@ -605,21 +618,22 @@ public class ICalEmitterTest extends TestCase {
 
     // SetUp
 
-    @Override
-    public void setUp() throws Exception{
-    	Init.startServer();
-    	NotificationConfig.override(NotificationProperty.FROM_SOURCE, "internal");
-    	users = new MockUserLookup();
+    @Before
+    public void setUp() throws Exception {
+        Init.startServer();
+        NotificationConfig.override(NotificationProperty.FROM_SOURCE, "internal");
+        users = new MockUserLookup();
         emitter = new ICal4JEmitter();
         oldUserResolver = com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver;
-        com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = new UserResolver(){
+        com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = new UserResolver() {
+
             @Override
             public List<User> findUsers(final List<String> mails, final Context ctx) {
                 final List<User> found = new LinkedList<User>();
-                for(final String mail : mails) {
+                for (final String mail : mails) {
                     final User user = ICalEmitterTest.this.users.getUserByMail(mail);
-                    if(user != null) {
-                        found.add( user );
+                    if (user != null) {
+                        found.add(user);
                     }
                 }
 
@@ -633,14 +647,13 @@ public class ICalEmitterTest extends TestCase {
         };
     }
 
-    @Override
+    @After
     public void tearDown() {
         com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = oldUserResolver;
         NotificationConfig.forgetOverrides();
     }
 
     // Helper Class
-
 
     private ICalFile serialize(final Appointment app) throws IOException {
         final String icalText = emitter.writeAppointments(Arrays.asList(app), new ContextImpl(1), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
@@ -649,15 +662,12 @@ public class ICalEmitterTest extends TestCase {
 
     /**
      * Serializes a task.
+     * 
      * @param task task to serialize.
      * @return an iCal file.
      * @throws IOException if serialization fails.
      */
     private ICalFile serialize(final Task task) throws IOException {
-        return new ICalFile(new StringReader(
-            emitter.writeTasks(
-                Arrays.asList(task),
-                new ArrayList<ConversionError>(),
-                new ArrayList<ConversionWarning>(), null)));
+        return new ICalFile(new StringReader(emitter.writeTasks(Arrays.asList(task), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>(), null)));
     }
 }

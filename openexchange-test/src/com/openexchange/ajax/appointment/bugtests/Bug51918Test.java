@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -75,7 +77,7 @@ public class Bug51918Test extends AbstractAJAXSession {
     private int hourOfDay;
 
     public Bug51918Test(int hour) {
-        super(Bug51918Test.class.getName());
+        super();
         this.hourOfDay = hour;
     }
 

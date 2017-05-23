@@ -63,9 +63,7 @@ public class ChangeIPRequest extends AbstractRequest<ChangeIPResponse> {
     private final boolean failOnError;
 
     public ChangeIPRequest(final String newIP, final boolean failOnError) {
-        super(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, LoginServlet.ACTION_CHANGEIP),
-            new FieldParameter(LoginFields.CLIENT_IP_PARAM, newIP)
+        super(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, LoginServlet.ACTION_CHANGEIP), new FieldParameter(LoginFields.CLIENT_IP_PARAM, newIP)
         });
         this.failOnError = failOnError;
     }

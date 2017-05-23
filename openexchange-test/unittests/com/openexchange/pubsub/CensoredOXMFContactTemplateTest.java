@@ -51,7 +51,6 @@ package com.openexchange.pubsub;
 
 import com.openexchange.templating.OXTemplate;
 
-
 /**
  * {@link CensoredOXMFContactTemplateTest}
  *

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -87,9 +86,9 @@ public final class SpellCheck implements PreferencesItemService {
         return new AbstractUserFuncs() {
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final Set<String> set = user.getAttributes().get(NAME);
-                if (null != set && !set.isEmpty()) {
-                    setting.setSingleValue(Boolean.valueOf(set.iterator().next()));
+                String set = user.getAttributes().get(NAME);
+                if (null != set) {
+                    setting.setSingleValue(Boolean.valueOf(set));
                 } else {
                     setting.setSingleValue(Boolean.FALSE);
                 }

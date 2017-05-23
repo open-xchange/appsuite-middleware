@@ -74,7 +74,7 @@ public final class Databases {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Databases.class);
 
-    /** The default limit for SQL-IN expressions */
+    /** The default limit for SQL-IN expressions: <code>1000</code */
     public static final int IN_LIMIT = 1000;
 
     private Databases() {

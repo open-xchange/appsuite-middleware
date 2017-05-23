@@ -49,15 +49,12 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -85,48 +82,42 @@ public class Bug45028Test extends CalDAVTest {
     private FolderObject publicFolder;
     private String publicFolderId;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
         FolderObject folder = new FolderObject();
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        folder.setPermissions(PermissionTools.P(
-            Integer.valueOf(manager2.getClient().getValues().getUserId()), PermissionTools.ADMIN,
-            Integer.valueOf(client.getValues().getUserId()), "vr")
-        );
+        folder.setPermissions(PermissionTools.P(Integer.valueOf(manager2.getClient().getValues().getUserId()), PermissionTools.ADMIN, Integer.valueOf(getClient().getValues().getUserId()), "vr"));
         folder.setFolderName(randomUID());
-        com.openexchange.ajax.folder.actions.InsertRequest request =
-            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
-        com.openexchange.ajax.folder.actions.InsertResponse response = manager2.getClient().execute(request);
-        response.fillObject(folder);
-        publicFolder = folder;
-        publicFolderId = String.valueOf(folder.getObjectID());
+        ftm.setClient(getClient2());
+        publicFolder = ftm.insertFolderOnServer(folder);
+        publicFolderId = String.valueOf(publicFolder.getObjectID());
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
-        if (null != manager2) {
-            manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                if (null != publicFolder) {
-                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, false, publicFolder));
-                }
-                manager2.getClient().logout();
-            }
+        try {
+            if (null != manager2) {
+                manager2.cleanUp();
+            }           
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test
-	public void testSetAlarmInReadOnlyFolder() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(fetchSyncToken(publicFolderId));
-		/*
-		 * create appointment with users A and B on server as user B in public folder
-		 */
+    public void testSetAlarmInReadOnlyFolder() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken(publicFolderId));
+        /*
+         * create appointment with users A and B on server as user B in public folder
+         */
         String uid = randomUID();
         Appointment appointment = new Appointment();
         appointment.setUid(uid);
@@ -136,7 +127,7 @@ public class Bug45028Test extends CalDAVTest {
         appointment.setEndDate(TimeTools.D("next monday at 16:30"));
         appointment.setParentFolderID(publicFolder.getObjectID());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(client.getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         manager2.insert(appointment);
         /*
          * synchronize the public calendar as user A
@@ -150,14 +141,7 @@ public class Bug45028Test extends CalDAVTest {
          * add reminder in user a's client
          */
         iCalResource.getVEvent().getComponents().clear();
-        String iCal =
-            "BEGIN:VALARM\r\n" +
-            "ACTION:DISPLAY\r\n" +
-            "DESCRIPTION:Alarm\r\n" +
-            "TRIGGER:-PT25M\r\n" +
-            "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
-            "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
-            "END:VALARM\r\n";
+        String iCal = "BEGIN:VALARM\r\n" + "ACTION:DISPLAY\r\n" + "DESCRIPTION:Alarm\r\n" + "TRIGGER:-PT25M\r\n" + "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "END:VALARM\r\n";
         ;
         Component vAlarm = SimpleICal.parse(iCal, "VALARM");
         iCalResource.getVEvent().getComponents().add(vAlarm);
@@ -177,8 +161,6 @@ public class Bug45028Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT25M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-	}
+    }
 
 }
-
-

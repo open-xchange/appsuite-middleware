@@ -37,7 +37,8 @@ public class ListOXBuildVersions {
             attrs = new Manifest(rememberCloseable(manifestURL.openStream(), closeables)).getMainAttributes();
             serverVersion = Integer.parseInt(attrs.getValue("Build"));
 
-            BufferedReader guireader = rememberCloseable(new BufferedReader(new FileReader("/var/www/ox6/concat_init.js")), closeables);
+            FileReader fileReader = rememberCloseable(new FileReader("/var/www/ox6/concat_init.js"), closeables);
+            BufferedReader guireader = rememberCloseable(new BufferedReader(fileReader), closeables);
             String line = null;
             int guiVersion = -1;
             do {

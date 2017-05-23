@@ -52,7 +52,6 @@ package com.openexchange.calendar;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
 import com.openexchange.calendar.itip.analyzers.AddITipAnalyzerTest;
 import com.openexchange.calendar.itip.analyzers.CancelITipAnalyzerTest;
 import com.openexchange.calendar.itip.analyzers.DeclineCounterITipAnalyzerTest;

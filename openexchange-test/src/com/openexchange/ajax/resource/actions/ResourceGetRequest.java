@@ -62,84 +62,84 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class ResourceGetRequest extends AbstractResourceRequest {
+public final class ResourceGetRequest extends AbstractResourceRequest<ResourceGetResponse> {
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	private final int resourceId;
+    private final int resourceId;
 
-	/**
-	 * Initializes a new {@link ResourceGetRequest}
-	 *
-	 * @param failOnError
-	 *            <code>true</code> to fail on error; otherwise
-	 *            <code>false</code>
-	 */
-	public ResourceGetRequest(final int resourceId, final boolean failOnError) {
-		super();
-		this.resourceId = resourceId;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link ResourceGetRequest}
+     *
+     * @param failOnError
+     *            <code>true</code> to fail on error; otherwise
+     *            <code>false</code>
+     */
+    public ResourceGetRequest(final int resourceId, final boolean failOnError) {
+        super();
+        this.resourceId = resourceId;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return null;
-	}
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
-		params.add(new Parameter(AJAXServlet.PARAMETER_ID, resourceId));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, resourceId));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public ResourceGetParser getParser() {
-		return new ResourceGetParser(failOnError);
-	}
+        return new ResourceGetParser(failOnError);
+    }
 
-	private static final class ResourceGetParser extends AbstractAJAXParser<ResourceGetResponse> {
+    private static final class ResourceGetParser extends AbstractAJAXParser<ResourceGetResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		ResourceGetParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        ResourceGetParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected ResourceGetResponse createResponse(final Response response) throws JSONException {
-			return new ResourceGetResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected ResourceGetResponse createResponse(final Response response) throws JSONException {
+            return new ResourceGetResponse(response);
+        }
+    }
 
 }

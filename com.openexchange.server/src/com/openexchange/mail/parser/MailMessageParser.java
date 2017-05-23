@@ -92,7 +92,6 @@ import com.openexchange.java.CountingOutputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -379,14 +378,10 @@ public final class MailMessageParser {
         handler.handleMessageEnd(mail);
     }
 
-    private void parseMailContent(final MailPart mailPartArg, final MailMessageHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
+    private void parseMailContent(final MailPart mailPart, final MailMessageHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
-        /*
-         * Part modifier
-         */
-        final MailPart mailPart = MailConfig.usePartModifier() ? MailConfig.getPartModifier().modifyPart(mailPartArg) : mailPartArg;
         /*
          * Set part information
          */
@@ -398,7 +393,7 @@ public final class MailMessageParser {
         if (null != mimeFilter && mimeFilter.ignorable(lcct, mailPart)) {
             return;
         }
-        final String fileName = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
+        final String fileName = getFileName(mailPart.getFileName(), contentType, getSequenceId(prefix, partCount), lcct);
         /*
          * Parse part dependent on its MIME type
          */
@@ -471,13 +466,18 @@ public final class MailMessageParser {
                 }
             } else {
                 if (isInline) {
-                    if (null != mailPart.getFileName()) {
-                        contentType.setParameter("realfilename", mailPart.getFileName());
+                    boolean dropTmpParameter = false;
+                    {
+                        String fn = mailPart.getFileName();
+                        if (null != fn) {
+                            contentType.setParameter("realfilename", fn);
+                            dropTmpParameter = true;
+                        }
                     }
                     try {
                         String content = readContent(mailPart, contentType, mailId, folder);
-                        UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                        if (uuencodedMP.isUUEncoded()) {
+                        UUEncodedMultiPart uuencodedMP = UUEncodedMultiPart.valueFor(content);
+                        if (null != uuencodedMP && uuencodedMP.isUUEncoded()) {
                             /*
                              * UUEncoded content detected. Handle normal text.
                              */
@@ -523,7 +523,9 @@ public final class MailMessageParser {
                             }
                         }
                     } finally {
-                        contentType.removeParameter("realfilename");
+                        if (dropTmpParameter) {
+                            contentType.removeParameter("realfilename");
+                        }
                     }
                 } else {
                     /*
@@ -593,7 +595,7 @@ public final class MailMessageParser {
                 stop = true;
                 return;
             }
-            
+
         } else if (TNEFUtils.isTNEFMimeType(lcct)) {
             try {
                 /*
@@ -693,9 +695,11 @@ public final class MailMessageParser {
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
-                            final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
-                            if (summary != null) {
-                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                            if(vEvent != null) {
+                                final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
+                                if (summary != null) {
+                                    part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                                }
                             }
                         }
                         /*
@@ -1013,8 +1017,6 @@ public final class MailMessageParser {
         handler.handleHeaders(headersSize, headersSize > 0 ? mail.getHeadersIterator() : EMPTY_ITER);
     }
 
-    private static final String PREFIX = "Part_";
-
     /**
      * Generates an appropriate filename from either specified <code>rawFileName</code> if not <code>null</code> or generates a filename
      * composed with <code>"Part_" + sequenceId</code>
@@ -1025,10 +1027,26 @@ public final class MailMessageParser {
      * @return An appropriate filename
      */
     public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
+        return getFileName(rawFileName, null, sequenceId, baseMimeType);
+    }
+
+    private static final String PREFIX = "Part_";
+
+    /**
+     * Generates an appropriate filename from either specified <code>rawFileName</code> if not <code>null</code> or generates a filename
+     * composed with <code>"Part_" + sequenceId</code>
+     *
+     * @param rawFileName The raw filename obtained from mail part
+     * @param contentType The Content-Type obtained from mail part
+     * @param sequenceId The part's sequence ID
+     * @param baseMimeType The base MIME type to look up an appropriate file extension, if <code>rawFileName</code> is <code>null</code>
+     * @return An appropriate filename
+     */
+    private static String getFileName(String rawFileName, ContentType contentType, String sequenceId, String baseMimeType) {
         String filename = rawFileName;
-        if ((filename == null) || com.openexchange.java.Strings.isEmpty(filename)) {
-            final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
+        if (Strings.isEmpty(filename)) {
+            List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
+            StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -1037,6 +1055,13 @@ public final class MailMessageParser {
             filename = sb.toString();
         } else {
             filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
+            if (filename.indexOf('.') < 0) {
+                // No file extension given. Check if "name" parameter from Content-Type provides a better "alternative" value
+                String name = null == contentType ? null : contentType.getNameParameter();
+                if (Strings.isNotEmpty(name) && name.indexOf('.') > 0) {
+                    filename = MimeMessageUtility.decodeMultiEncodedHeader(name);
+                }
+            }
         }
         return filename;
     }

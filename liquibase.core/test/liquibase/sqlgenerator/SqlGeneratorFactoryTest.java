@@ -1,5 +1,13 @@
 package liquibase.sqlgenerator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.util.Collection;
+import java.util.SortedSet;
+import org.junit.After;
+import org.junit.Test;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.exception.ValidationErrors;
@@ -11,17 +19,12 @@ import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2;
 import liquibase.sqlgenerator.core.AddColumnGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import java.util.Collection;
-import java.util.SortedSet;
 
 public class SqlGeneratorFactoryTest {
 
     @After
-    public void teardown() {
+    public void tearDown()
+ {
         SqlGeneratorFactory.reset();
     }
 

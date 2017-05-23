@@ -49,7 +49,10 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.json.JSONArray;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -72,7 +75,8 @@ public class AllTest extends AbstractMessagingActionTest {
 
     // Success Cases
 
-    public void testAll() throws OXException {
+         @Test
+     public void testAll() throws OXException {
         final AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
 
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -104,7 +108,8 @@ public class AllTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testAllWithSorting() throws OXException {
+         @Test
+     public void testAllWithSorting() throws OXException {
         final AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
 
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -136,7 +141,8 @@ public class AllTest extends AbstractMessagingActionTest {
         assertEqualFields(args[4], MessagingField.ID, MessagingField.SUBJECT);
     }
 
-    public void testAllWithSortingAndDirection() throws OXException {
+         @Test
+     public void testAllWithSortingAndDirection() throws OXException {
         final AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
 
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -170,7 +176,8 @@ public class AllTest extends AbstractMessagingActionTest {
 
     }
 
-/*    public void testAllWithIndex() throws OXException {
+/*         @Test
+     public void testAllWithIndex() throws OXException {
         AllAction action = new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
 
         AJAXRequestData requestData = new AJAXRequestData();
@@ -203,7 +210,8 @@ public class AllTest extends AbstractMessagingActionTest {
 
     // Error Cases
 
-    public void testUnknownSortingColumn() throws OXException {
+         @Test
+     public void testUnknownSortingColumn() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
@@ -216,7 +224,8 @@ public class AllTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testUnknownColumn() throws OXException {
+         @Test
+     public void testUnknownColumn() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
@@ -227,7 +236,8 @@ public class AllTest extends AbstractMessagingActionTest {
         assertFails(requestData);
     }
 
-    public void testMissingColumns() throws OXException {
+         @Test
+     public void testMissingColumns() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
@@ -238,11 +248,13 @@ public class AllTest extends AbstractMessagingActionTest {
 
     }
 
-/*    public void testInvalidIndex() {
+/*         @Test
+     public void testInvalidIndex() {
 
     } */ // Later
 
-    public void testAllWithInvalidDirection() throws OXException {
+         @Test
+     public void testAllWithInvalidDirection() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
@@ -255,7 +267,8 @@ public class AllTest extends AbstractMessagingActionTest {
         assertFails(requestData);
     }
 
-    public void testMissingServiceID() throws OXException {
+         @Test
+     public void testMissingServiceID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("folder", "theFolderID");
@@ -266,7 +279,8 @@ public class AllTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testMissingAccountID() throws OXException {
+         @Test
+     public void testMissingAccountID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
@@ -276,7 +290,8 @@ public class AllTest extends AbstractMessagingActionTest {
         assertFails(requestData);
    }
 
-    public void testMissingFolderID() throws OXException {
+         @Test
+     public void testMissingFolderID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");
@@ -287,7 +302,8 @@ public class AllTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testNumberFormatExceptionInAccountID() throws OXException {
+         @Test
+     public void testNumberFormatExceptionInAccountID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
         requestData.putParameter("messagingService", "com.openexchange.test1");

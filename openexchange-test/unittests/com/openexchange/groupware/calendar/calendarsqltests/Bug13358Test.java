@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
+import org.junit.Test;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Participant;
@@ -61,6 +64,7 @@ public class Bug13358Test extends CalendarSqlTest {
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13358">bug #13358</a>
      */
+    @Test
     public void testDeleteUserGroup() throws Throwable {
         final CalendarDataObject appointment = appointments.buildAppointmentWithGroupParticipants(group);
         appointment.setTitle("Bug 13358 Test");

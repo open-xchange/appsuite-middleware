@@ -5,6 +5,8 @@ title: SAML 2.0 SSO Integration
 # Introduction
 
 Starting with 7.8.0 OX App Suite supports single sign-on via SAML 2.0. In concrete the backend supports the *Web Browser SSO Profile* and the *Single Logout Profile*, supported bindings are *HTTP-Redirect* and *HTTP-POST*. The core implementation of SAML needs always be complemented by an environment-specific counterpart. Such a counterpart is called a *SAML backend*. It is responsible for resolving users by incoming assertions and can make use of several extension points that allow to customize the generation and processing of SAML messages.
+Starting with 7.8.4 OX App Suite supports multiple *SAML backends* at a time where each of those can be configured to be responsible for individual servlet paths.
+When multiple *SAML backends* are present, the path will be /appsuite/api/saml/<segment>/.. instead of /appsuite/api/saml/..
 
 
 #Supported Message Flows
@@ -58,11 +60,13 @@ After development of the SAML backend is done you can setup OX App Suite as usua
 
 ### Backend Configuration
 
-The main configuration takes place in `/opt/open-xchange/etc/saml.properties`. Step through this file and set the property values in accordance to their explanation.
+The main configuration takes place in `/opt/open-xchange/etc/saml.properties`. Step through this file and set the property values. See [saml configuration](https://documentation.open-xchange.com/components/middleware/config/develop/index.html#mode=features&feature=Saml) for further explanations.
+
+When multiple *SAML backends* are installed, it may be required to have individual configuration. Please refer to the specific *SAML backend* documentation if it supplies own configuration or relies upon `/opt/open-xchange/etc/saml.properties`.
 
 As the lifetime of user sessions is under control of the SAML IdP, you must not activate autologin. It's currently not supported anyway. Make sure that `com.openexchange.sessiond.autologin` in `/opt/open-xchange/etc/sessiond.properties` is set to `false`. Also have a look at the other properties within that file. Its noteworthy that every refresh (e.g. closing the App Suite browser tab and opening it again at a later point) will create a new user session. So the lifetime of App Suite sessions should be short while a user should be able to acquire quite some sessions in parallel.
 
-The path of the final login redirect that ends up in the web UI along with a valid session must be configured via `/opt/open-xchange/etc/server.properties`. If you haven't already (because of other requirements), set `com.openexchange.UIWebPath` to `/appsuite/`. App Suite is the only officially supported frontend for SAML authentication.
+The path of the final login redirect that ends up in the web UI along with a valid session must be configured via `/opt/open-xchange/etc/server.properties`. If you haven't already (because of other requirements), set [com.openexchange.UIWebPath](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.UIWebPath) to `/appsuite/`. App Suite is the only officially supported frontend for SAML authentication.
 
 Note that session fail-over is currently not possible, because the central session storage only works with autologin enabled.
 

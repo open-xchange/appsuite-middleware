@@ -50,9 +50,11 @@
 package com.openexchange.oauth.impl;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -68,49 +70,66 @@ import com.openexchange.oauth.scope.OAuthScope;
  */
 public class OAuthScopeConfigurationService {
 
-    private static final OAuthScopeConfigurationService INSTANCE = new OAuthScopeConfigurationService();
     private static final String PROPERTY_PREFIX = "com.openexchange.oauth.modules.enabled.";
+
+    private static final OAuthScopeConfigurationService INSTANCE = new OAuthScopeConfigurationService();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static OAuthScopeConfigurationService getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------
 
     private OAuthScopeConfigurationService() {
         super();
     }
 
-    public static OAuthScopeConfigurationService getInstance() {
-        return INSTANCE;
-    }
-
     /**
-     * Filters all disabled scopes from the given list of scopes for the given user and oauth api.
-     * 
+     * Filters all disabled scopes from the given list of scopes for the given user and OAuth API.
+     *
      * @param availableScopes All available scopes
-     * @param userId The user id
-     * @param ctxId The context id
-     * @param oauthApiName The OAuth api name
+     * @param userId The user identifier
+     * @param ctxId The context identifier
+     * @param oauthApiName The OAuth API name;: e.g. <code>"google"</code>
      * @return A set of enabled and available OAuthScopes
-     * @throws OXException if the configured scopes couldn't be retrieved for the given user
+     * @throws OXException If the configured scopes couldn't be retrieved for the given user
      */
     Set<OAuthScope> getScopes(Set<OAuthScope> availableScopes, int userId, int ctxId, String oauthApiName) throws OXException {
-
-        Set<OAuthScope> result = new HashSet<>();
-
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(userId, ctxId);
-        String enabledModulesStr = view.opt(PROPERTY_PREFIX + oauthApiName, String.class, null);
-        if (enabledModulesStr == null) {
-            // Fallback to all enabled
+
+        ComposedConfigProperty<String> property = view.property(PROPERTY_PREFIX + oauthApiName, String.class);
+
+        if (false == property.isDefined()) {
+            // Fall-back to all enabled
             return availableScopes;
         }
-        
-        List<String> enabledScopes = Arrays.asList(Strings.splitByComma(enabledModulesStr));
-        
+
+        String enabledModulesStr = property.get();
+        if (Strings.isEmpty(enabledModulesStr)) {
+            // Defined, but none set
+            return Collections.emptySet();
+        }
+
+        String[] tokens = Strings.splitByComma(enabledModulesStr);
+        if (null == tokens || tokens.length <= 0) {
+            // Defined, but none set
+            return Collections.emptySet();
+        }
+
+        Set<String> enabledScopes = new LinkedHashSet<>(Arrays.asList(tokens));
+        ImmutableSet.Builder<OAuthScope> result = ImmutableSet.builder();
         for (OAuthScope availableScope : availableScopes) {
             if (enabledScopes.contains(availableScope.getOXScope().name())) {
                 result.add(availableScope);
             }
         }
-
-        return result;
-
+        return result.build();
     }
 
 }

@@ -52,13 +52,17 @@ package com.openexchange.messaging.json;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -66,8 +70,8 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContentTypeParserTest extends TestCase {
-    public void testParseComplex() throws JSONException, OXException {
+public class ContentTypeParserTest {         @Test
+     public void testParseComplex() throws JSONException, OXException {
         final ContentTypeParser parser = new ContentTypeParser();
 
         assertTrue(parser.handles("content-type", null));
@@ -102,7 +106,8 @@ public class ContentTypeParserTest extends TestCase {
     }
 
 
-    public void testParseBasic() throws OXException, JSONException {
+         @Test
+     public void testParseBasic() throws OXException, JSONException {
         final ContentTypeParser parser = new ContentTypeParser();
 
         final String stringCType = "text/plain;charset=UTF-8;name=something.txt";

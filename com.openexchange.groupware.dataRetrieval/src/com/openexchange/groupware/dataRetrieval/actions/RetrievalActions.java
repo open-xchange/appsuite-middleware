@@ -51,7 +51,6 @@ package com.openexchange.groupware.dataRetrieval.actions;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -114,18 +113,12 @@ public class RetrievalActions implements AJAXActionServiceFactory {
                 provider = registry.getProvider(id);
                 state = provider.start();
 
-                final Map<String, Object> parameters = new HashMap<String, Object>();
+                Map<String, Object> parameters = new HashMap<String, Object>(requestData.getParameters());
 
-                final Iterator<String> parameterNames = requestData.getParameterNames();
-                while (parameterNames.hasNext()) {
-                    final String name = parameterNames.next();
-                    parameters.put(name, requestData.getParameter(name));
-                }
-
-                final FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
+                FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
                 parameters.put(Constants.SESSION_KEY, session);
                 parameters.put(Constants.CREATED, System.currentTimeMillis());
-                final String token = paramMap.rememberForSession(session, parameters);
+                String token = paramMap.rememberForSession(session, parameters);
 
                 return new AJAXRequestResult(toJSON(metadata, getURI(token, requestData)));
             } finally {

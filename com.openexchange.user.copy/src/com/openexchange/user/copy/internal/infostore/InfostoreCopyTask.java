@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
@@ -181,8 +182,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         final Map<DocumentMetadata, List<DocumentMetadata>> originDocuments = loadInfostoreDocumentsFromDB(infostoreFolders, srcCon, i(srcCtxId));
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
-        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId);
-        dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId);
+        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId, Info.drive());
+        dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId, Info.drive());
 
         copyFiles(originDocuments, srcFileStorage, dstFileStorage);
         exchangeFolderIds(originDocuments, folderMapping, dstCon, i(dstCtxId));
@@ -197,7 +198,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         try {
             stmt1 = con.prepareStatement(INSERT_INFOSTORE_MASTERS);
             stmt2 = con.prepareStatement(INSERT_INFOSTORE_VERSIONS);
-            for (final DocumentMetadata master : documents.keySet()) {
+            for (Map.Entry<DocumentMetadata, List<DocumentMetadata>> entry : documents.entrySet()) {
+                DocumentMetadata master = entry.getKey();
                 final int newId = IDGenerator.getId(cid, Types.INFOSTORE, con);
                 int i = 1;
                 stmt1.setInt(i++, cid);
@@ -212,7 +214,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
                 stmt1.setInt(i++, uid);
 
                 stmt1.addBatch();
-                final List<DocumentMetadata> versions = documents.get(master);
+                final List<DocumentMetadata> versions = entry.getValue();
                 for (final DocumentMetadata version : versions) {
                     i = 1;
                     stmt2.setInt(i++, cid);
@@ -257,8 +259,9 @@ public class InfostoreCopyTask implements CopyUserTaskService {
     }
 
     private void copyFiles(final Map<DocumentMetadata, List<DocumentMetadata>> documents, final QuotaFileStorage srcFileStorage, final QuotaFileStorage dstFileStorage) throws OXException {
-        for (final DocumentMetadata master : documents.keySet()) {
-            final List<DocumentMetadata> versions = documents.get(master);
+        for (Map.Entry<DocumentMetadata, List<DocumentMetadata>> entry : documents.entrySet()) {
+            DocumentMetadata master = entry.getKey();
+            final List<DocumentMetadata> versions = entry.getValue();
             for (final DocumentMetadata version : versions) {
                 final String location = version.getFilestoreLocation();
                 if (location != null) {
@@ -309,8 +312,9 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
-            for (final DocumentMetadata master : documents.keySet()) {
-                final List<DocumentMetadata> versions = documents.get(master);
+            for (Map.Entry<DocumentMetadata, List<DocumentMetadata>> entry : documents.entrySet()) {
+                DocumentMetadata master = entry.getKey();
+                List<DocumentMetadata> versions = entry.getValue();
                 try {
                     stmt = con.prepareStatement(SELECT_INFOSTORE_VERSIONS);
                     stmt.setInt(1, cid);

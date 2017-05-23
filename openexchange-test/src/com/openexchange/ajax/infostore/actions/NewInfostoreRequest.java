@@ -104,6 +104,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
 
     /**
      * Initializes a new {@link NewInfostoreRequest}.
+     * 
      * @param data The document
      * @param upload The file data
      * @throws FileNotFoundException
@@ -127,6 +128,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
 
     /**
      * Initializes a new {@link NewInfostoreRequest}.
+     * 
      * @param data The document
      * @param input The file data
      */

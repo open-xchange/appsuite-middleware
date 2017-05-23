@@ -63,6 +63,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 
 /**
@@ -84,7 +85,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#initialise()
      */
     @Override
@@ -92,7 +93,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), getSession(), getSession().getUserId(), getSession().getContextId());
-            verifyAccount(oauthAccount);
+            verifyAccount(oauthAccount, OXScope.drive);
 
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
             String accessToken = oauthAccount.getToken();
@@ -107,7 +108,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
      */
     @Override
@@ -117,7 +118,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#ping()
      */
     @Override
@@ -133,7 +134,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
      */
     @Override

@@ -97,16 +97,19 @@ public class SchemaStoreImpl extends SchemaStore {
     private static final String LOCKED = "LOCKED";
     private static final String BACKGROUND = "BACKGROUND";
 
-    final Lock cacheLock = new ReentrantLock();
+    private final Lock cacheLock = new ReentrantLock();
+    private volatile Cache cache;
 
-    Cache cache;
-
+    /**
+     * Initializes a new {@link SchemaStoreImpl}.
+     */
     public SchemaStoreImpl() {
         super();
     }
 
     @Override
     protected SchemaUpdateState getSchema(final int poolId, final String schemaName, final Connection con) throws OXException {
+        final Cache cache = this.cache;
         return SerializedCachingLoader.fetch(cache, CACHE_REGION, null, cacheLock, new StorageLoader<SchemaUpdateState>() {
             @Override
             public Serializable getKey() {
@@ -121,18 +124,22 @@ public class SchemaStoreImpl extends SchemaStore {
 
     static SchemaUpdateState loadSchema(Connection con) throws OXException {
         final SchemaUpdateState retval;
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             checkForTable(con);
             retval = loadSchemaStatus(con);
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
         }
         return retval;
@@ -161,6 +168,7 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void lockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
         final int poolId = Database.resolvePool(contextId, true);
+        Cache cache = this.cache;
         CacheKey key = null;
         if (null != cache) {
             key = cache.newCacheKey(poolId, schema.getSchema());
@@ -181,20 +189,24 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void lockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
-        final Connection con = Database.get(contextId, true);
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
         try {
             con.setAutoCommit(false); // BEGIN
+            rollback = true;
             // Insert lock
             insertLock(con, schema, background ? BACKGROUND : LOCKED);
             // Everything went fine. Schema is marked as locked
             con.commit();
+            rollback = false;
         } catch (final OXException e) {
-            rollback(con);
             throw e;
         } catch (final SQLException e) {
-            rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.back(contextId, true, con);
         }
@@ -270,6 +282,7 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public boolean tryRefreshSchemaLock(Schema schema, int contextId, boolean background) throws OXException {
         int poolId = Database.resolvePool(contextId, true);
+        Cache cache = this.cache;
         CacheKey key = null;
         if (null != cache) {
             key = cache.newCacheKey(poolId, schema.getSchema());
@@ -304,7 +317,7 @@ public class SchemaStoreImpl extends SchemaStore {
         // Refresh lock
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=? AND taskName=?");
+            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=0 AND taskName=?");
             stmt.setLong(1, System.currentTimeMillis());
             stmt.setString(2, idiom);
             return stmt.executeUpdate() > 0;
@@ -318,6 +331,7 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
         final int poolId = Database.resolvePool(contextId, true);
+        Cache cache = this.cache;
         CacheKey key = null;
         if (null != cache) {
             key = cache.newCacheKey(poolId, schema.getSchema());
@@ -338,21 +352,25 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void unlockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
-        final Connection con = Database.get(contextId, true);
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
         try {
             // End of update process, so unlock schema
             con.setAutoCommit(false);
+            rollback = true;
             // Delete lock
             deleteLock(con, schema, background ? BACKGROUND : LOCKED);
             // Everything went fine. Schema is marked as unlocked
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            rollback(con);
             throw e;
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.back(contextId, true, con);
         }
@@ -419,28 +437,35 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static ExecutedTask[] readUpdateTasks(final Connection con) throws OXException {
-        final String sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
-        Statement stmt = null;
-        ResultSet result = null;
-        final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
-        try {
-            stmt = con.createStatement();
-            result = stmt.executeQuery(sql);
-            while (result.next()) {
-                final ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
-                retval.add(task);
+        List<ExecutedTask> retval = null;
+        {
+            Statement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = con.createStatement();
+                result = stmt.executeQuery("SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE");
+                if (false == result.next()) {
+                    return new ExecutedTask[0];
+                }
+
+                retval = new ArrayList<ExecutedTask>(512);
+                do {
+                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                    retval.add(task);
+                } while (result.next());
+            } catch (final SQLException e) {
+                throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            } finally {
+                closeSQLStuff(result, stmt);
             }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
+
         Collections.sort(retval, new Comparator<ExecutedTask>() {
 
             @Override
-            public int compare(final ExecutedTask o1, final ExecutedTask o2) {
-                final Date lastModified1 = o1.getLastModified();
-                final Date lastModified2 = o2.getLastModified();
+            public int compare(ExecutedTask o1, ExecutedTask o2) {
+                Date lastModified1 = o1.getLastModified();
+                Date lastModified2 = o2.getLastModified();
                 if (null == lastModified1) {
                     return null == lastModified2 ? 0 : -1;
                 } else if (null == lastModified2) {
@@ -455,6 +480,7 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void addExecutedTask(final Connection con, final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
         addExecutedTask(con, taskName, success);
+        Cache cache = this.cache;
         if (null != cache) {
             final CacheKey key = cache.newCacheKey(poolId, schema);
             try {
@@ -539,18 +565,17 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public ExecutedTask[] getExecutedTasks(final int poolId, final String schemaName) throws OXException {
         final Connection con = Database.get(poolId, schemaName);
-        final ExecutedTask[] retval;
         try {
             con.setAutoCommit(false);
-            retval = readUpdateTasks(con);
+            ExecutedTask[] tasks = readUpdateTasks(con);
             con.commit();
+            return tasks;
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.back(poolId, con);
         }
-        return retval;
     }
 
     @Override
@@ -564,13 +589,14 @@ public class SchemaStoreImpl extends SchemaStore {
 
     @Override
     public void removeCacheService() {
+        Cache cache = this.cache;
         if (null != cache) {
+            this.cache = null;
             try {
                 cache.clear();
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            cache = null;
         }
     }
 

@@ -72,8 +72,7 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
         return folderID;
     }
 
-    public AllSubscriptionsRequest(){
-    }
+    public AllSubscriptionsRequest() {}
 
     public AllSubscriptionsRequest(String folder, List<String> columns) {
         this();
@@ -81,7 +80,7 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
         setColumns(columns);
     }
 
-    public AllSubscriptionsRequest(String folder, List<String> columns, Map<String,List<String>> dynamicColumns) {
+    public AllSubscriptionsRequest(String folder, List<String> columns, Map<String, List<String>> dynamicColumns) {
         this(folder, columns);
         setDynamicColumns(dynamicColumns);
     }
@@ -89,7 +88,6 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
     public AllSubscriptionsRequest(List<String> columns) {
         this(null, columns);
     }
-
 
     @Override
     public Object getBody() throws JSONException {
@@ -105,7 +103,7 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
     public Parameter[] getParameters() {
         Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
         if (getFolderID() != null) {
-            params.add("folder",getFolderID());
+            params.add("folder", getFolderID());
         }
 
         if (getColumns() != null) {

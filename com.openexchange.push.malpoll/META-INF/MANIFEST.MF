@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange MAL Poll Bundle
 Bundle-SymbolicName: com.openexchange.push.malpoll
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
@@ -17,7 +17,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.update,
  com.openexchange.imap,
  com.openexchange.imap.config,
- com.openexchange.imap.notify,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,

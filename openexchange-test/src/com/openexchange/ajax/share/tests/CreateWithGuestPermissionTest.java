@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -67,30 +69,26 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class CreateWithGuestPermissionTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link CreateWithGuestPermissionTest}.
-     *
-     * @param name The test name
-     */
-    public CreateWithGuestPermissionTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testCreateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testCreateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
-    public void notTestCreateSharedFolderExtensively() throws Exception {
+    public void noTestCreateSharedFolderExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
+                    if (isReadOnlySharing(module) && false == isReadOnly(guestPermission)) {
+                        continue;
+                    }
                     testCreateSharedFolder(api, module, guestPermission);
                 }
             }
         }
     }
 
+    @Test
     public void testCreateSharedFileRandomly() throws Exception {
         testCreateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
@@ -115,7 +113,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -153,7 +151,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
          */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

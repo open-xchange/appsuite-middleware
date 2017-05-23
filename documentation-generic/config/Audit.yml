@@ -1,0 +1,226 @@
+feature_name: Audit
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/auditlogging.html]] 
+  for more informations about audit logging.
+properties:
+    - key: com.openexchange.audit.logging.AuditFileHandler.enabled
+      description: |
+        Enables the audit feature.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      packageName: open-xchange-audit
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.pattern
+      description: |
+        The location of the log file.
+      defaultValue: /var/log/open-xchange/audit.log
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: audit.properties
+      packageName: open-xchange-audit
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.level
+      description: |
+        The log level.
+      defaultValue: ALL
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      packageName: open-xchange-audit
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.limit
+      description: |
+        The maximum file size.
+      defaultValue: 2097152
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      packageName: open-xchange-audit
+      tags: ["Audit", "Limit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.formatter
+      description: |
+        The logging formatter.
+      defaultValue: java.util.logging.SimpleFormatter
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      packageName: open-xchange-audit
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.AuditFileHandler.append
+      description: |
+        A flag indicating whether the log should be appended or not.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      packageName: open-xchange-audit
+      tags: ["Audit"]
+    - key: com.openexchange.audit.logging.FileAccessLogging.enabled
+      description: |
+        Set to true to enable logging of file accesses and downloads.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: audit.properties
+      packageName: open-xchange-audit
+      tags: ["Audit"]
+    - key: com.openexchange.log.audit.slf4j.enabled
+      description: |
+        Enables/disables audit logging.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.level
+      description: |
+        Specifies the log level to use.
+        Possible values: <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code> or <code>error</code>.
+      defaultValue: info
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.delimiter
+      description: |
+        Specifies the delimiter to use. Surrounding quotes are removed for real usage.
+      defaultValue: "\", \""
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.includeAttributeNames
+      description: |
+        Specifies whether attribute names shall be logged.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.date.pattern
+      description: |
+        Specifies the optional date pattern to use.
+        Accepts a pattern according to: [[https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html]]. 
+
+        An empty value means standard ISO-8601 formatting is used and accompanying properties
+        [[com.openexchange.log.audit.slf4j.date.locale]] and [[com.openexchange.log.audit.slf4j.date.timezone]] are ignored.
+        
+        If a pattern is specified for this property the accompanying properties may optionally be used to also define
+        the locale and time zone to use for date formatting.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.log.audit.slf4j.date.locale", "com.openexchange.log.audit.slf4j.date.timezone"]
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.date.locale
+      description: |
+        Specifies the locale to use for date formatting.
+      defaultValue: en_US
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.log.audit.slf4j.date.pattern
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.date.timezone
+      description: |
+        Specifies the timezone to use for date formatting.
+      defaultValue: GMT
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.log.audit.slf4j.date.pattern
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.file.location
+      description: |
+        Specifies the file location to use.
+          
+        An empty value means regular App Suite logging is used and accompanying properties
+        [[com.openexchange.log.audit.slf4j.file.size]], [[com.openexchange.log.audit.slf4j.file.count]] and [[com.openexchange.log.audit.slf4j.file.pattern]] are ignored.
+          
+        Once a file location/pattern is set, audit logger will no more use regular App Suite logging, but output its log messages to rotating files.
+        E.g. a file location/pattern might be: "/var/log/open-xchange/my-audit.log"
+
+        It is then possible to configure how that logging is done:
+        <ul>
+          <li>[[com.openexchange.log.audit.slf4j.file.size]] - specifies the max. file size to use</li>
+          <li>[[com.openexchange.log.audit.slf4j.file.count]] - defines the max. number of files to use for rotation</li>
+          <li>[[com.openexchange.log.audit.slf4j.file.pattern]] - defines the layout pattern of the log entry</li>
+        </ul>
+        For more patterns see [[http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout]]
+      defaultValue: GMT
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.log.audit.slf4j.file.size", "com.openexchange.log.audit.slf4j.file.count", "com.openexchange.log.audit.slf4j.file.pattern"]
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]
+    - key: com.openexchange.log.audit.slf4j.file.size
+      description: |
+        Specifies the max. file size to use.
+      defaultValue: 2097152
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.log.audit.slf4j.file.location
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging", "Limit"]
+    - key: com.openexchange.log.audit.slf4j.file.count
+      description: |
+        Specifies the max. number of files to use for rotation.
+      defaultValue: 99
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.log.audit.slf4j.file.location
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging", "Limit"]
+    - key: com.openexchange.log.audit.slf4j.file.pattern
+      description: |
+        Defines the layout pattern of the log entry.
+        For more patterns see [[http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout]]
+      defaultValue: "\"%sanitisedMessage%n\""
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.log.audit.slf4j.file.location
+      file: slf4j-auditlog.properties
+      packageName: open-xchange-core
+      tags: ["Audit", "Logging"]

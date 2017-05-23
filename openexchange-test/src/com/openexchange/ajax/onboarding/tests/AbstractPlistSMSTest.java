@@ -67,20 +67,12 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
 
     protected static final String[] SCENARIOS = new String[] { "apple.iphone/mailsync", "apple.iphone/eassync", "apple.iphone/davsync" };
 
-    /**
-     * Initializes a new {@link AbstractPlistSMSTest}.
-     *
-     * @param name
-     */
-    protected AbstractPlistSMSTest() {
-    }
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        setUpConfiguration(client, false);
-        SetAttributeRequest req = new SetAttributeRequest(client.getValues().getUserId(), "user_sms_link_secret", UID, false);
-        SetAttributeResponse response = client.execute(req);
+        setUpConfiguration();
+        SetAttributeRequest req = new SetAttributeRequest(getAjaxClient().getValues().getUserId(), "user_sms_link_secret", UID, false);
+        SetAttributeResponse response = getAjaxClient().execute(req);
         assertNotNull(response);
     }
 

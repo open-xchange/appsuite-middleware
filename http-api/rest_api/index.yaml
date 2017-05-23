@@ -1,0 +1,27 @@
+swagger: '2.0'
+# Document information
+info:
+  $ref: ./info/index.yaml
+# API host and basePath for testing requests
+host: example.com
+schemes:
+  - http
+  - https
+basePath: /
+# The list of modules and their short descriptions
+tags:
+  - name: Userfeedback
+    description: The user feedback module
+  - name: Advertisement
+    description: The advertisement module
+# References to the definitions, "global" parameters and paths
+definitions:
+  $ref: ./definitions/index.yaml
+parameters:
+  $ref: ./parameters/index.yaml
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: HTTP Basic Authentication.
+paths:
+  source: ./paths/

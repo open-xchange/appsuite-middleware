@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,6 +66,10 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.yahoo.internal.YahooRequestTuner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link YahooSimpleConnectionTest}
@@ -76,8 +79,7 @@ import com.openexchange.oauth.yahoo.internal.YahooRequestTuner;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class YahooSimpleConnectionTest extends TestCase {
-
+public class YahooSimpleConnectionTest {
     private static String singleContact = "{\"contact\":{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"isConnection\":false,\"id\":1,\"fields\":[{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/email/2\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":2,\"type\":\"email\",\"value\":\"christine@example.com\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/birthday/3\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":3,\"type\":\"birthday\"," + "\"value\":{\"day\":\"1\",\"month\":\"4\",\"year\":\"1980\"},\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/notes/4\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":4,\"type\":\"notes\",\"value\":\"My private note on Christine\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/company/5\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":5,\"type\":\"company\",\"value\":\"Christines L�dchen\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com" + "/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/otherid/6\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":6,\"type\":\"otherid\",\"value\":\"christine.weissenbruenner\",\"editedBy\":\"OWNER\",\"flags\":[\"SKYPE\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/jobTitle/7\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":7,\"type\":\"jobTitle\",\"value\":\"Gesch�ftsf�hrerin\",\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/phone/10\",\"created\":\"2009-09-14T15:50:52Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"id\":10," + "\"type\":\"phone\",\"value\":\"02171 123456\",\"editedBy\":\"OWNER\",\"flags\":[\"HOME\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/phone/11\",\"created\":\"2009-09-14T15:50:52Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"id\":11,\"type\":\"phone\",\"value\":\"0171 456987\",\"editedBy\":\"OWNER\",\"flags\":[\"MOBILE\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/phone/12\",\"created\":\"2009-09-14T15:50:52Z\",\"updated\":\"2009-09-14T15:50:52Z\",\"id\":12,\"type\":\"phone\",\"value\":\"0221 987654\",\"editedBy\":\"OWNER\",\"flags\":[\"WORK\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/" + "ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/name/1\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":1,\"type\":\"name\",\"value\":{\"givenName\":\"Christine\",\"middleName\":\"\",\"familyName\":\"Wei�enbr�nner-Doppelname\",\"prefix\":\"\",\"suffix\":\"\",\"givenNameSound\":\"\",\"familyNameSound\":\"\"},\"editedBy\":\"OWNER\",\"flags\":[],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/address/8\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":8,\"type\":\"address\",\"value\":{\"street\":\"An der Luisenburg 2a\",\"city\":\"Leverkusen\",\"stateOrProvince\":\"NRW\",\"postalCode\":\"51379\",\"country\":\"Germany\"," + "\"countryCode\":\"DE\"},\"editedBy\":\"OWNER\",\"flags\":[\"HOME\"],\"categories\":[]},{\"uri\":\"https://social.yahooapis.com/v1/user/ANZAPAEE55TMMWPLYXQCJO7BAM/contact/1/address/9\",\"created\":\"2009-09-14T15:49:21Z\",\"updated\":\"2009-09-14T15:49:21Z\",\"id\":9,\"type\":\"address\",\"value\":{\"street\":\"Bonner Str 207\",\"city\":\"K�ln\",\"stateOrProvince\":\"NRW\",\"postalCode\":\"90768\",\"country\":\"Germany\",\"countryCode\":\"DE\"},\"editedBy\":\"OWNER\",\"flags\":[\"WORK\"],\"categories\":[]}],\"categories\":[]}}";
 
     // This works (REST-API)

@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider.impl.servlets;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -123,7 +124,8 @@ public class TokenInfo extends OAuthTokenValidationEndpoint {
         jResponse.put("audience", grant.getClientId());
         jResponse.put("context_id", grant.getContextId());
         jResponse.put("user_id", grant.getUserId());
-        jResponse.put("expiration_date", ISO8601Utils.format(grant.getExpirationDate(), false, TIME_ZONE_UTC));
+        Date expirationDate = grant.getExpirationDate();
+        jResponse.put("expiration_date", ISO8601Utils.format(null != expirationDate ? expirationDate : new Date(Long.MAX_VALUE), false, TIME_ZONE_UTC));
         jResponse.put("scope", grant.getScope().toString());
 
         resp.setContentType("application/json;charset=UTF-8");

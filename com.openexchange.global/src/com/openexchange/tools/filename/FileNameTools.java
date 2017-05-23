@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.filename;
 
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import com.openexchange.emoji.EmojiRegistry;
 import com.openexchange.java.Strings;
 
@@ -61,7 +63,8 @@ import com.openexchange.java.Strings;
 public class FileNameTools {
 
     /**
-     * Sanitizes specified file name.
+     * Sanitizes specified file name. The string is normalized to {@link Form#NFC} (canonical decomposition, followed by canonical
+     * composition) implicitly.
      * <p>
      * Allows
      * <ul>
@@ -80,7 +83,7 @@ public class FileNameTools {
         if (Strings.isEmpty(fileName)) {
             return fileName;
         }
-
+        fileName = Normalizer.normalize(fileName, Form.NFC);
         StringBuilder sb = null;
         int len = fileName.length();
         for (int i = 0; i < len; i++) {

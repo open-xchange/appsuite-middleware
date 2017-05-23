@@ -173,11 +173,28 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     @Override
     protected AJAXRequestResult perform(MailRequest req) throws OXException {
-        JSONObject bodyObject = (JSONObject) req.getRequest().getData();
+        JSONObject bodyObject = optJSONObject(req);
         if (null == bodyObject) {
             return performGET(req);
         }
         return performPUT(req, bodyObject);
+    }
+
+    private JSONObject optJSONObject(MailRequest req) throws OXException {
+        Object data = req.getRequest().getData();
+        if (null == data) {
+            return null;
+        }
+
+        if (data instanceof JSONObject) {
+            return (JSONObject) data;
+        }
+
+        try {
+            return new JSONObject(data.toString());
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e, new Object[0]);
+        }
     }
 
     /**
@@ -512,6 +529,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             // Get attachment storage
             MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
 
+
             if (!session.getUserPermissionBits().hasInfostore()) {
                 throw MailExceptionCode.NO_MAIL_ACCESS.create();
             }
@@ -569,6 +587,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 String description = parsedFile.getDescription();
                 if (null != description) {
                     storeProps.put("description", description);
+                }
+            }
+
+            {
+                //Check for encryption
+                final boolean encrypt = req.optBool("encrypt");
+                if(encrypt) {
+                    storeProps.put("encrypt", true);
                 }
             }
 

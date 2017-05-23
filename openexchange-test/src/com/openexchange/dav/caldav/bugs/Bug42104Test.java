@@ -71,7 +71,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug42104Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testGetWithIfMatch() throws Exception {
         /*
          * create appointment on server

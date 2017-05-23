@@ -191,7 +191,6 @@ import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.impl.PhoneNumberParserServiceImpl;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
-import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
@@ -595,7 +594,7 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
             final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior());
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior(), 60000, 20000);
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
@@ -861,7 +860,7 @@ public final class Init {
         serviceLookup.add(UserService.class, userService);
         com.openexchange.filestore.impl.osgi.Services.setServiceLookup(serviceLookup);
 
-        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(null, fileStorageStarter);
+        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(null, null, null, fileStorageStarter);
         QuotaFileStorage.setQuotaFileStorageStarter(qfss);
         InfostoreFacadeImpl.setQuotaFileStorageService(qfss);
         services.put(QuotaFileStorageService.class, qfss);
@@ -934,9 +933,6 @@ public final class Init {
     private static void startAndInjectSpamHandler() {
         if (null == SpamHandlerRegistry.getSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName())) {
             SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(), DefaultSpamHandler.getInstance());
-        }
-        if (null == SpamHandlerRegistry.getSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName())) {
-            SpamHandlerRegistry.registerSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName(), SpamAssassinSpamHandler.getInstance());
         }
     }
 

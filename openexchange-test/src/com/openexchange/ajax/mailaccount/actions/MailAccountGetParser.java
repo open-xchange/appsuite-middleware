@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 
-
 /**
  * {@link MailAccountGetParser}
  *

@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-02-08 09:41+0100\n"
+"PO-Revision-Date: 2017-05-05 14:37+0200\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@bureau-cornavin.com>\n"
 "Language-Team: Danish <da@bureau-cornavin.com>\n"
 "Language: da\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Lokalize 1.5\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -1121,7 +1121,7 @@ msgstr "Børn"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:76
 msgid "Profession"
-msgstr "Proffesion"
+msgstr "Profession"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:77
 msgid "Nickname"
@@ -1716,6 +1716,16 @@ msgstr "Godkendelse fejlede: %1$s"
 msgid "The DoveAdm resource does not exist"
 msgstr "»DoveAdm«-ressourcen findes ikke"
 
+#. A temporary failure because a subsystem is down. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:249
+msgid ""
+"A temporary failure because a subsystem is down (maybe due to maintenance). "
+"Please try again later."
+msgstr ""
+"Midlertidig fejl på grund af at et delsystem er ude af drift (måske på grund "
+"af vedligeholdelse).  Prøv venligst igen senere."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
 msgid ""
 "Download denied because download limits have been exceeded. Please try again "
@@ -2045,8 +2055,8 @@ msgstr "Du har ikke ret til at oprette en undermappe til mappen »%1$s«."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "For at foretage søgningen, er der brug for mindst %1$d tegn."
@@ -2191,10 +2201,10 @@ msgstr "Den angivne »%1$s«-ressource findes ikke: %2$s"
 msgid "The file %1$s doesn't have any content."
 msgstr "Filen »%1$s« har ikke noget indhold."
 
-#. The associated %2$s account does no more exist
+#. The associated %2$s account no longer exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
-msgid "The associated %2$s account does no more exist"
-msgstr "Den associerede »%2$s«-konto findes ikke mere"
+msgid "The associated %2$s account no longer exists."
+msgstr "Den tilknyttede %2$s-konto findes ikke mere."
 
 #. Individual permissions are not supported in account \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
@@ -2434,7 +2444,7 @@ msgstr "Du omdirigeres til spanden mens DNS opdaterer."
 #. The provided token must be refreshed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:148
 msgid "The provided token must be refreshed."
-msgstr "Det leverede symbol skal fornyes."
+msgstr "Det leverede symbol skal fornys."
 
 #. The e-mail address you provided does not match any account on record.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
@@ -3225,24 +3235,29 @@ msgstr ""
 #. The HTML content is too big for being parsed and sanitized for a safe display
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:63
 msgid "The HTML content is too big and cannot be displayed"
-msgstr ""
+msgstr "HTML-indholdet er for stort og kan derfor ikke vises"
 
 #. The HTML content seems to be corrupted/invalid and therefore fails being parsed and sanitized for a safe display
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:66
 msgid "The HTML content is invalid and cannot be displayed"
-msgstr ""
+msgstr "HTML-indholdet er ugyldigt og kan derfor ikke vises"
 
 #. Thrown when parser failed or timed-out while processing HTML, in turn it cannot be safely displayed
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:69
 msgid "The HTML content cannot be safely displayed"
-msgstr ""
+msgstr "HTML-indholdet kan ikke vises på sikker vis"
+
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "Denne besked kan kun vises som almindelig tekst"
 
 #. *
 #. * No connection available to access mailbox
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:150
 msgid "No connection available to access mailbox"
 msgstr "Ingen forbindelse til at tilgå mailboks"
 
@@ -3310,7 +3325,7 @@ msgstr "Ingen administrationsadgang angivet for mappe"
 
 #. Denied to update a standard/default folder like Trash
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:191
 msgid "Default folder must not be updated"
 msgstr "Standardmappe må ikke opdateres"
 
@@ -3409,10 +3424,8 @@ msgid "Unknown folder open mode %1$s"
 msgstr "Ukendt mappeåbningsmodus: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
-msgid ""
-"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-msgstr ""
-"Besked(er) %1$s i mappe %2$s kunne ikke slettes på grund af fejlen \"%3$s\""
+msgid "One or more message in folder %2$s could not be deleted"
+msgstr "En eller flere beskeder i mappen »%2$s« kunne ikke slettes"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
 msgid "Not allowed to open folder %1$s due to missing read access"
@@ -3524,7 +3537,7 @@ msgstr "Oversættelse til vCard-format mislykkedes."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:71
 msgid "Cannot import the format %2$s into selected folder."
-msgstr ""
+msgstr "Kan ikke importere formatet »%2$s« ind i den valgte mappe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:73
 msgid "Calendar module is not enabled. Appointments can not be imported."
@@ -3775,7 +3788,7 @@ msgstr "Der opstod en beskedfejl: %1$s"
 #. Wrongly formatted address: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
 msgid "Wrongly formatted address: %1$s."
-msgstr "Forkert formatteret adresse: %1$s."
+msgstr "Forkert formateret adresse: %1$s."
 
 #. Unknown messaging content: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:70
@@ -3838,19 +3851,79 @@ msgstr "Besked %1$s ikke fundet i mappe %2$s."
 msgid "Invalid OAuth account specified."
 msgstr "Ugyldig OAuth konto specificeret."
 
+#. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
+msgid ""
+"The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in "
+"context '%3$s'"
+msgstr ""
+"SSL-certifikatet med fingeraftryk »%1$s« kunne ikke findes for brugeren "
+"»%2$s« i konteksten »%3$s«."
+
 #. The certificate for domain "%1$s" is untrusted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:64
 msgid "The certificate for domain \"%1$s\" is untrusted."
 msgstr "Gyldigheden af certifikatet for domænet »%1$s« kan ikke verificeres."
 
 #. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:67
 msgid ""
 "The certificate for domain \"%1$s\" is untrusted. You can change your "
 "general trust level in the settings."
 msgstr ""
 "Gyldigheden af certifikatet for domænet »%1$s« kan ikke verificeres.  Du kan "
 "ændre dit generelle tillidsniveau i indstillingerne."
+
+#. The certificate '%1$s' is not trusted by the user '%2$s' in context '%3$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:70
+msgid ""
+"The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in "
+"context '%3$s'"
+msgstr ""
+"Brugeren »%2$s« stoler ikke på certifikatet med fingeraftryk »%1$s« i "
+"konteksten »%3$s«."
+
+#. The root certificate issued by '%1$s' is not trusted
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:73
+msgid "The root certificate issued by '%1$s' is not trusted"
+msgstr "Rodcertifikatet udstedt af »%1$s« er ikke til at stole på"
+
+#. The certificate is self-signed
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:63
+msgid "The certificate is self-signed"
+msgstr "Certifikatet er selv-underskrevet"
+
+#. The certificate is expired
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:69
+msgid "The certificate is expired"
+msgstr "Certifikatet er udløbet"
+
+#. The common name for the certificate is invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:82
+msgid "The common name for the certificate is invalid"
+msgstr "Det almindelige navn for certifikatet er ugyldigt"
+
+#. The certificate was signed by an untrusted issuer
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:66
+msgid "The certificate was signed by an untrusted issuer"
+msgstr "Certifikatet er underskrevet af en ikke-betroet udsteder"
+
+#. The user does not trust this certificate
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:72
+msgid "The user does not trust this certificate"
+msgstr "Brugeren stoler ikke på dette certifikat"
+
+#. Invalid common name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:75
+msgid "Invalid common name"
+msgstr "Ugyldigt almindeligt navn"
+
+#. The certificate is untrusted
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:78
+msgid "The certificate is untrusted"
+msgstr "Stoler ikke på certifikatet"
 
 #.
 #. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
@@ -4991,6 +5064,22 @@ msgstr "Element forkortet: %s"
 msgid "Invalid mail address for external participant: %1$s"
 msgstr "Ugyldig e-mail-adresse for ekstern deltager: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:102
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for appointments."
+msgstr ""
+"Samtalen giver nogle objekter, der ikke kunne gemmes, da der ikke er "
+"oprettet en mappe til aftaler."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for tasks."
+msgstr ""
+"Samtalen giver nogle objekter, der ikke kunne gemmes, da der ikke er "
+"oprettet en mappe til opgaver."
+
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 msgid "You do not have a valid session. Please login again."
@@ -5014,7 +5103,7 @@ msgstr "Du har ikke ret til at flytte mappen."
 
 #. A folder named "%1$s" already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
 msgid "A folder named \"%1$s\" already exists."
 msgstr "En mappe med navnet »%1$s« findes allerede."
 
@@ -5210,13 +5299,13 @@ msgid "Appointments must have at least one participant."
 msgstr "Aftaler skal have mindst en deltager."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments in folder %1$d.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments in folder "
-"%1$d."
-msgstr "Du har ikke ret til at læse aftaler i mappen %1$d."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
+msgstr "Du har ikke de rette rettigheder til at læse aftaler i den mappe."
 
 #. *
 #. * End date must not be before start date.
@@ -5282,14 +5371,12 @@ msgid "Required value \"Title\" was not supplied."
 msgstr "Påkrævet værdi \"Titel\" blev ikke givet."
 
 #. *
-#. * Move not supported: Cannot move an appointment from folder %d to folder %d.
+#. * Move not supported. You cannot move an appointment into that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:123
-msgid ""
-"Move not supported: Cannot move an appointment from folder %d to folder %d."
+msgid "Move not supported. You cannot move an appointment into that folder."
 msgstr ""
-"Flytning ikke understøttet: Kan ikke flytte en aftale fra mappe %d til mappe "
-"%d."
+"Flytning ikke understøttet.  Du kan ikke flytte en aftale til den mappe."
 
 #. *
 #. * Move not allowed from shared folders.
@@ -5440,26 +5527,26 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "Flytning af gentaget aftale til en anden mappe er ikke understøttet."
 
 #. *
-#. * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
+#. * Cannot create that appointment. An appointment having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
 msgid ""
-"Cannot insert appointment (%1$s). An appointment with the unique identifier "
-"(%2$s) already exists."
+"Cannot create that appointment. An appointment having the same unique "
+"identifier already exists."
 msgstr ""
-"Kan ikke indsætte aftale (%1$s). En aftale med den unikke identifikator "
-"(%2$s) findes allerede."
+"Kan ikke oprette den aftale.  Der findes allerede en aftale med samme unikke "
+"ID."
 
 #. *
-#. * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+#. * Cannot create that task. A task having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:223
 msgid ""
-"Cannot insert task (%1$s). A task with the unique identifier (%2$s) already "
+"Cannot create that task. A task having the same unique identifier already "
 "exists."
 msgstr ""
-"Kan ikke indsætte opgave (%1$s). En opgave med det unikke id »%2$s« findes "
-"allerede."
+"Kan ikke oprette den opgave.  Der findes allerede en opgave med samme unikke "
+"ID."
 
 #. Sequence number is outdated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -5649,7 +5736,7 @@ msgid "Getting the value of %s requires at least a ContactObject"
 msgstr "At få værdien af %s kræver mindst et ContactObject"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
 "problematic character and try again."
@@ -7687,8 +7774,8 @@ msgid "Error while inserting task."
 msgstr "Fejl under indsættelse af opgave."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "Folder \"%1$s\" is not a task folder."
-msgstr "Mappen »%1$s« er ikke en opgavemappe."
+msgid "This is not a task folder."
+msgstr "Dette er ikke en opgavemappe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
@@ -7710,7 +7797,7 @@ msgstr "Fejl under opdatering af opgave."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:75
 msgid "Error while deleting task."
-msgstr "Fejl under slettelse af opgave."
+msgstr "Fejl under sletning af opgave."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:77
 msgid "Error while listing tasks."
@@ -7726,11 +7813,9 @@ msgstr "Datointerval i søgning skal indeholde 2 og ikke %d værdier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:83
 msgid ""
-"You do not have the appropriate permissions to read the contents of folder "
-"\"%1$s\"."
-msgstr ""
-"Du har ikke de nødvendige rettigheder, til at læse indholdet af mappen \"%1$d"
-"\"."
+"You do not have the appropriate permissions to read the contents in that "
+"folder."
+msgstr "Du har ikke de rette rettigheder til at læse indholdet i den mappe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
@@ -7738,11 +7823,8 @@ msgstr "Opgaver er slået fra for dig."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid ""
-"You do not have the appropriate permissions to create tasks in folder \"%1$s"
-"\"."
-msgstr ""
-"Du har ikke de nødvendige rettigheder, til at oprette opgaver i mappen \"%1$s"
-"\"."
+"You do not have the appropriate permissions to create tasks in that folder."
+msgstr "Du har ikke de rette rettigheder til at oprette opgaver i den mappe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
 msgid "You do not have the appropriate permission to delegate tasks."
@@ -7764,15 +7846,12 @@ msgstr "Opgaver der endnu ikke er påbegyndte skal have 0% udført, ikke %d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
 msgid ""
-"You do not have the appropriate permissions to edit tasks in folder \"%1$s\"."
-msgstr ""
-"Du har ikke de nødvendige rettigheder, til at redigere opgaver i mappen "
-"\"%1$s\"."
+"You do not have the appropriate permissions to edit tasks in that folder"
+msgstr "Du har ikke de rette rettigheder til at redigere opgaver i den mappe"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
-msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
-msgstr ""
-"Det er ikke tilladt at flytte elementer fra/til den delte mappe \"%1$s\"."
+msgid "Moving items from or into a shared folder is not allowed."
+msgstr "Det er ikke tilladt at flytte elementer til eller fra en delt mappe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
 msgid "Unknown recurrence type %d."
@@ -7799,8 +7878,8 @@ msgstr ""
 "nuværende længde på %3$d tegn er større end den tilladte længde på %2$d tegn."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
-msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
-msgstr "Private opgaver kan ikke flyttes til en offentlig mappe »%1$s«."
+msgid "Tasks with private flag cannot be moved to a public folder."
+msgstr "Opgaver markeret som private kan ikke flyttes til en offentlig mappe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -7811,35 +7890,28 @@ msgid "External participants without E-Mail address can not be added."
 msgstr "Eksterne deltagere kan ikke tilføjes uden e-mail-adresse."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
-msgid ""
-"You do not have the appropriate permisson to see the task %1$d in folder "
-"%2$s."
-msgstr ""
-"Du har ikke de nødvendige rettigheder, til at se opgaven %1$d i mappen %2$s."
+msgid "You do not have the appropriate permisson to see the task."
+msgstr "Du har ikke de rette rettigheder til at se opgaven."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
 msgstr "Opgave indeholder ugyldige data: »%1$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
-msgid "The task %1$d is not stored in folder %2$s."
-msgstr "Opgaven %1$d ligger ikke i mappen %2$s."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr "Gruppen %1$d er tom. Du kan ikke føje en tom gruppe til en opgave."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr "Værdi »%1$s« af attribut »%2$s« indholder andet end taltegn."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
 msgid "Priority is %d but must be between 1 and 3."
 msgstr "Prioritet er %d, men skal være mellem 1 og 3."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:134
-msgid "This folder (%2$d) is not visible."
-msgstr "Denne mappe (»%2$d«) er ikke synlig."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+msgid "You do not have the appropriate permisson to see the folder."
+msgstr "Du har ikke de rette rettigheder til at se mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
@@ -8149,6 +8221,14 @@ msgstr ""
 "kopi af beskeden i \"Sendt\"-mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:96
+msgid "Unable to save draft, due to exceeded quota."
+msgstr "Kan ikke gemme kladde.  Kvote overskredet."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:98
+msgid "Unable to save the mail, due to exceeded quota."
+msgstr "Kan ikke gemme e-mail'en, da kvoten er overskredet."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:100
 msgid ""
 "Message has been successfully sent. A copy could not be placed in your sent "
 "folder though."
@@ -8156,30 +8236,30 @@ msgstr ""
 "Beskeden er sendt. Der kunne ikke gemmes en kopi af beskeden i \"Sendt\"-"
 "mappen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:102
 msgid "Bad value \"%1$s\" in parameter \"%2$s\"."
 msgstr "Ugyldig værdi »%1$s« i parameter »%2$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:104
 msgid "No reply on multiple messages possible."
 msgstr "Det er ikke muligt at besvare multi-beskeder."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:106
 msgid ""
 "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"."
 msgstr ""
 "Vedhæftning \"%1$s\" kunne ikke findes i e-mail \"%2$s\" i postmappe \"%3$s"
 "\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:108
 msgid "Folder \"%1$s\" does not hold messages and is therefore not selectable"
 msgstr "Mappen »%1$s« indeholder ikke beskeder og kan derfor ikke vælges"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:110
 msgid "Root folder must not be modified or deleted."
 msgstr "Rodmappe må ikke ændres eller slettes."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:112
 msgid ""
 "Image attachment with content id \"%1$s\" not found inside mail \"%2$s\" of "
 "mail folder \"%3$s\"."
@@ -8187,7 +8267,7 @@ msgstr ""
 "Billedvedhæftning med indholds-id \"%1$s\" findes ikke i e-mail \"%2$s\" i "
 "postmappe \"%3$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:114
 msgid ""
 "The specified E-Mail address \"%1$s\" is not covered by allowed E-Mail "
 "address aliases."
@@ -8195,74 +8275,84 @@ msgstr ""
 "Den angivne e-mail-adresse \"%1$s\" er ikke omfattet af tilladte e-mail-"
 "adresse-aliaser."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:116
 msgid "Checking default folders failed for user %2$s."
 msgstr "Tjek af standardmapper fejlede for bruger %2$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:114
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:118
+msgid ""
+"Default folders cannot be created as mail system denies to create more "
+"folders. Consequently, the mail module is not usable at the moment. Please "
+"delete other folders first in order to re-use the mail module again"
+msgstr ""
+"Standardmapper kan ikke oprettes, da postsystemet nægter at oprette flere "
+"mapper.  Det betyder at postmodulet ikke kan bruges lige nu.  Slet venligst "
+"andre mapper først, for at kunne bruge postmodulet igen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "The types of specified data source are not supported."
 msgstr "Typerne af angivne datakilder er ikke understøttede."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
 msgid "Mail cannot be parsed. Invalid or incomplete mail data."
 msgstr "Mail kan ikke fortolkes. Ugyldige eller ukomplette mail-data."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
 msgid "Mail folder cannot be created/renamed. Empty folder name."
 msgstr "Postmappe kan ikke oprettes/omdøbes. Tomt mappenavn."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:126
 msgid "Invalid folder name. Please avoid the following characters: %2$s"
 msgstr "Ugyldigt mappenavn. Undgå venligst følgende tegn: %2$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:130
 msgid "No create access on mail folder \"%1$s\"."
 msgstr "Ingen skriveadgang i postmappe »%1$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
 msgid "Mail account \"%1$s\" with ID \"%2$s\" does not support mail transport."
 msgstr "Postkonto »%1$s« med id »%2$s« understøtter ikke mail-overførsel."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:134
 msgid "Mail folder could not be found."
 msgstr "Postmappe kunne ikke findes."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:136
 msgid "Referenced mail \"%1$s\" could not be found in folder \"%2$s\"."
 msgstr "Brev(e) »%1$s« kunne ikke findes i mappen »%2$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:134
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:140
 msgid "Mail folder must not be deleted."
 msgstr "Postmappe må ikke slettes."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:142
 msgid "No delete access on mail folder \"%1$s\"."
 msgstr "Ingen sletteadgang i postmappe »%1$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:144
 msgid "Mail folder must not be moved."
 msgstr "Postmappe må ikke flyttes."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:146
 msgid "Mail folder must not be updated."
 msgstr "Postmappe må ikke opdateres."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:142
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:148
 msgid "No write access on mail folder \"%1$s\"."
 msgstr "Ingen skriveadgang i postmappe »%1$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:152
 msgid "Mail could not be found in folder \"%1$s\" by message identifier."
 msgstr "E-mail kunne ikke findes af besked-id i mappen »%1$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:154
 msgid ""
 "Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds."
 msgstr ""
 "Sendt-kvote overskredet. Du har kun lov til at sende en mail hvert %1$s. "
 "sekund."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:156
 msgid ""
 "Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
 "'Send' again."
@@ -8270,19 +8360,19 @@ msgstr ""
 "Begræns antallet af modtagere (\"Til\", \"Cc\" og \"Bcc\" tilsammen) til "
 "%1$s og vælg \"Send\" igen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
 msgid "Unable to parse mail server URI \"%1$s\"."
 msgstr "Forstår ikke mail-server-URI »%1$s«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:160
 msgid "Mail attachment expired or absent."
 msgstr "Vedhæftning udløbet eller fraværende."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:156
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:162
 msgid "Account has been checked successfully but with a non-secure connection."
 msgstr "Konto er afprøvet, men over en usikker forbindelse."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
 msgid ""
 "Cannot forward more than %1$s messages at once. Please divide the messages "
 "to forward in chunks of appropriate size."
@@ -8290,11 +8380,11 @@ msgstr ""
 "Kan ikke videresende flere end %1$s beskeder ad gangen. Del beskederne op i "
 "bunker af en passende størrelse."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
 msgid "Your account has been created but will not use a secure connection."
 msgstr "Din konto er oprettet, men vil bruge en usikker forbindelse."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
 msgid ""
 "Your E-Mail has been successfully sent, but the original E-Mail could not be "
 "flagged as \"replied\" and/or \"forwarded\"."
@@ -8302,7 +8392,7 @@ msgstr ""
 "Din mail er sendt, men den oprindelige mail kunne ikke mærkes som \"besvaret"
 "\" eller \"videresendt\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:170
 msgid ""
 "Mail folder cannot be created/renamed. Folder name exceeds max length of "
 "%1$s."
@@ -8310,7 +8400,7 @@ msgstr ""
 "Postmappe kan ikke oprettes/omdøbes. Mappenavnets længde overskrider den "
 "øvre grænse på %1$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:172
 msgid ""
 "The attachments to this E-Mail exceeded the size limit for attachments. "
 "Instead of sending the attachment with the E-Mail, the attachment was "
@@ -8322,38 +8412,38 @@ msgstr ""
 "vedhæftningen offentliggjort og linket føjet til din mail. Alle der modtager "
 "mailen kan så hente vedhæftningen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:174
 msgid "Draft message could not be saved."
 msgstr "Kladde kunne ikke gemmes."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:176
 msgid "Maximum message size is exceeded. Max. is %1$s."
 msgstr "Loft over beskedstørrelse (%1$s) overskredet."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:172
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
 msgid ""
 "Re-sending message denied because message is not located in \"%1$s\" folder."
 msgstr ""
 "Genudsendelse af besked nægtet, da beskeden ikke ligger i \"%1$s\"-mappen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
 msgid "Validation of server %1$s failed with reason: %3$s"
 msgstr "Validering af server %1$s fejlede med årsag: %3$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:176
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
 msgid "Validation of server %1$s failed due to invalid credentials"
 msgstr ""
 "Validering af server  %1$s fejlede som følge af ugyldige logind-oplysninger"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:184
 msgid "Server %1$s does not support being accessed using a secure connection."
 msgstr "Server %1$s understøtter ikke adgang via en sikker forbindelse."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:186
 msgid "Mail access is disabled for context administrator."
 msgstr "Adgang til e-mail er deaktiveret for en kontekst administrator."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:188
 msgid ""
 "The maximum number of files that may be attached to an E-Mail is exceeded. "
 "Max. is %1$s."
@@ -8362,57 +8452,57 @@ msgstr ""
 "Maksimum er %1$s."
 
 #. The client request is not permitted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:194
 msgid "The client request is not permitted."
 msgstr "Klientens forespørgsel er ikke tilladt."
 
 #. Sending the message denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:191
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:197
 msgid "Sending the message denied."
 msgstr "Afsendelse af beskeden nægtet."
 
 #. Denied to rename a standard/default folder like Trash
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:200
 msgid "Default folder must not be renamed"
 msgstr "Standardmappe må ikke omdøbes"
 
 #. Denied to delete a standard/default folder like Trash
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:197
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
 msgid "Default folder must not be deleted"
 msgstr "Standardmappe må ikke slettes"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:199
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:205
 msgid "Archive folder does not allow subfolders."
 msgstr "Arkivmappe tillader ikke undermapper."
 
 #. The user tries to import a file as a RFC822 message, that is not valid
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:202
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:208
 msgid "No valid file"
 msgstr "Ingen gyldig fil"
 
 #. A part's content could not be read from a message; e.g. an I/O error occurred
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:205
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:211
 msgid "The mail part could not be read"
 msgstr "Post-delen kunne ikke læses"
 
 #. The content/body of the message is too big
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:208
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
 msgid "The content of the mail is too big."
 msgstr "Indholdet af denne e-mail er for stort."
 
 #. Invalid parameter value: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:211
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:217
 msgid "Invalid parameter value: %1$s"
 msgstr "Ugyldig parameterværdi: %1$s"
 
 #. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:220
 msgid ""
 "The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
 msgstr ""
 "Flagnavnet %1$s er ikke gyldigt.  Navne på flag må ikke starte med »\\«."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:216
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
 msgid ""
 "The attachments to this E-Mail exceeded the size limit for attachments. "
 "Instead of sending the attachments with the E-Mail, the attachments are "
@@ -8425,12 +8515,12 @@ msgstr ""
 "mails kan så tilgå vedhæftningerne via URL'erne."
 
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:219
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "You are not allowed to compose a message containing share links"
 msgstr "Du har ikke lov til skrive en besked med delings-URL'er."
 
 #. User wants to compose a share message but does not specify an expiration date which is required
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
 msgid ""
 "Please specify an expiration date in order to compose a message containing "
 "share links"
@@ -8438,32 +8528,32 @@ msgstr ""
 "Angiv venligst en udløbsdato, for at skrive en e-mail med delings-URL'er."
 
 #. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
 msgid "The selected authentication type is not supported by server %2$s"
 msgstr "Den valgte autentificering er ikke understøttet af serveren %2$s"
 
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
 msgid "Please check your mail account: %2$s"
 msgstr "Tjek venligst din e-mail-konto: %2$s"
 
 #. Invalid name specified. Information from mail server: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
 msgid "Invalid name specified. Information from mail server: %1$s"
 msgstr "Ugyldigt navn angivet.  Besked fra e-mail-server: %1$s"
 
 #. Insufficient permissions to perform the operation.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:240
 msgid "Insufficient permissions to perform the operation."
 msgstr "Utilstrækkelige rettigheder til at gennemføre operationen."
 
 #. Such a folder already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
 msgid "Such a folder already exists."
 msgstr "Sådan en mappe findes allerede."
 
 #. A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:240
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:246
 msgid ""
 "Please change mail settings and configure a secure connection (if Transport "
 "Layer Security (TLS) is not in use, the client could try STARTTLS)"
@@ -8471,14 +8561,44 @@ msgstr ""
 "Ret venligst e-post-indstillingerne og sæt en sikker forbindelse op.  (Hvis "
 "der ikke bruges TLS, kan klienten prøve med STARTTLS.)"
 
-#. A temporary failure because a subsystem is down. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
+#. Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:252
 msgid ""
-"A temporary failure because a subsystem is down (maybe due to maintenance). "
-"Please try again later."
+"Your mail account %2$s was disabled due to invalid credentials. Please edit "
+"the account and enter correct credentials to enable it again"
 msgstr ""
-"Midlertidig fejl på grund af at et delsystem er ude af drift (måske på grund "
-"af vedligeholdelse).  Prøv venligst igen senere."
+"Din postkonto, %2$s, blev slået fra på grund af for mange fejlagtige "
+"loginforsøg.  Redigér venligst kontoen og indtast de rette loginoplysninger "
+"for at slå den til igen."
+
+#. Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:255
+msgid ""
+"Your mail account %2$s was disabled because of authorization issues. Please "
+"reauthorize the account %5$s to enable it again."
+msgstr ""
+"Din postkonto, %2$s, blev slået fra på grund af godkendelsesproblemer.  Få "
+"venligst kontoen %5$s godkendt igen for at slå postkontoen til igen."
+
+#. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:258
+msgid ""
+"Your mail transport for  %2$s was disabled due to invalid credentials. "
+"Please edit the account and enter correct credentials to enable it again"
+msgstr ""
+"Den udgående postserver for %2$s blev slået fra på grund af for mange "
+"fejlagtige loginforsøg.  Redigér venligst kontoen og indtast de rette "
+"loginoplysninger for at slå den til igen."
+
+#. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
+msgid ""
+"Your mail transport for %2$s was disabled because of authorization issues. "
+"Please reauthorize the account %5$s to enable it again."
+msgstr ""
+"Din e-mail-transport for %2$s blev slået fra på grund af "
+"godkendelsesproblemer. Gengodkend venligst kontoen %5$s for at slå den til "
+"igen."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8559,21 +8679,19 @@ msgstr ""
 #. * The provided login information seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
-msgid "The provided login information seem to be wrong. Please try again."
-msgstr ""
-"De givne logind-informationer ser ud til at være forkerte. Prøv venligst "
-"igen."
+msgid "The provided login data seem to be wrong. Please correct them."
+msgstr "De givne log-in-data ser ud til at være forkerte.  Ret dem venligst."
 
 #. *
 #. * The provided login information to access mail server %1$s seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid ""
-"The provided login information to access mail server %1$s seem to be wrong. "
-"Please try again."
+"The provided login data to access mail server %1$s seem to be wrong. Please "
+"correct them."
 msgstr ""
-"Den givet information til at opnå adgang til mail-serveren %1$s, er "
-"tilsynladende forkert. Prøv venligst igen."
+"De givne log-in-data til at tilgå e-mail-serveren %1$s ser ud til at være "
+"forkerte.  Ret dem venligst."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -8726,30 +8844,45 @@ msgstr ""
 "fjernserver %1$s."
 
 #. *
-#. * The allowed quota on mail server exceeded.
+#. * The connection to remote server %1$s timed out while awaiting the response.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+msgid ""
+"The connection to remote server %1$s timed out while awaiting the response."
+msgstr "Forbindelsen til fjernserveren %1$s udløb inden der kom svar."
+
+#. *
+#. * Mail server %1$s unexpectedly closed connection for user %2$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+msgid "Mail server %1$s unexpectedly closed connection."
+msgstr "Postserveren %1$s lukkede uventet forbindelsen."
+
+#. *
+#. * The allowed quota on mail server exceeded.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The allowed quota on mail server exceeded."
 msgstr "Kvote på mail-server overskredet."
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "Kvote på mail-server »%1$s« overskredet."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:190
 msgid "The mailbox is already in use. Please try again later."
 msgstr "Postkasse bruges allerede. Prøv venligst igen senere."
 
 #. *
 #. * The mailbox on mail server %1$s for login %2$s is already in use by one of your other processes or clients. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:195
 msgid ""
 "The mailbox on mail server %1$s for login %2$s is already in use by one of "
 "your other processes or clients. Please try again later."
@@ -8758,7 +8891,7 @@ msgstr ""
 "processer eller klienter.  Prøv venligst igen senere."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:198
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -8769,7 +8902,7 @@ msgstr ""
 #. *
 #. * The message could not be sent due to a mail server temporary failure. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:203
 msgid ""
 "The message could not be sent due to a mail server temporary failure. Please "
 "try again later."
@@ -8778,7 +8911,7 @@ msgstr ""
 "venligst igen senere."
 
 #. Timeout while trying to send to the following recipient: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:196
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
 msgid "Timeout while trying to send to the following recipient: %1$s"
 msgstr "Tidsudløb under forsøg på at sende til modtageren %1$s."
 
@@ -8799,12 +8932,17 @@ msgstr ""
 #. The message advertising that affected account is broken and needs to be re-created
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:77
 msgid "Account is broken and needs to be re-created"
-msgstr "Kontoen er gået i stykker og skal gendannes."
+msgstr "Kontoen er gået i stykker og skal gendannes"
 
 #. The message advertising that affected account has been disabled by administrator
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:80
 msgid "Account is disabled."
 msgstr "Kontoen er deaktiveret."
+
+#. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
+msgid "Account is currently being set-up."
+msgstr "Konto er ved at blive sat op."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -9341,8 +9479,8 @@ msgid ""
 "The value \"%1$s\" you set for attribute %2$s must not contain non digit "
 "characters."
 msgstr ""
-"Værdien \"%1$s\", som du satte for attribut %2$s, må ikke indholde andet end "
-"taltegn."
+"Værdien \"%1$s\", som du satte for attribut %2$s, må ikke indeholde andet "
+"end taltegn."
 
 #. *
 #. * You inserted too many digits into field %1$s.
@@ -9415,10 +9553,14 @@ msgid "The share you are looking for does not exist."
 msgstr "Delingen du leder efter findes ikke."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+msgid "This share cannot be accessed with your Web Browser."
+msgstr "Denne deling kan ikke tilgås med din browser."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
 msgid "We were unable to process your request."
 msgstr "Vi kunne ikke behandle din forespørgsel."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -9426,7 +9568,7 @@ msgstr ""
 "Mappen eller elementet du kigger efter er ikke længere tilgængeligt.  Klik "
 "venligst »fortsæt« for at se dine andre delinger."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -9435,7 +9577,7 @@ msgstr ""
 "afbrydes."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -9444,7 +9586,7 @@ msgstr ""
 "hvis du ønsker at se filen igen."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -9453,7 +9595,7 @@ msgstr ""
 "hvis du ønsker at se filen igen."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -9462,7 +9604,7 @@ msgstr ""
 "ejeren, hvis du ønsker at se mappen igen."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -9471,7 +9613,7 @@ msgstr ""
 "hvis du ønsker at se mappen igen."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -9480,7 +9622,7 @@ msgstr ""
 "ejeren, hvis du gerne vil have adgang igen."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -9489,7 +9631,7 @@ msgstr ""
 "%1$s, hvis du gerne vil have adgang igen."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -9500,7 +9642,7 @@ msgstr ""
 "filer."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -9511,7 +9653,7 @@ msgstr ""
 "filer."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -9522,7 +9664,7 @@ msgstr ""
 "andre delte filer."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -9533,7 +9675,7 @@ msgstr ""
 "filer."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -9544,7 +9686,7 @@ msgstr ""
 "dine andre delte filer."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -9555,7 +9697,7 @@ msgstr ""
 "andre delte filer."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:121
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -9566,7 +9708,7 @@ msgstr ""
 "delte filer."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -9576,7 +9718,7 @@ msgstr ""
 "delte filer."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -9587,7 +9729,7 @@ msgstr ""
 "andre delte filer."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -9598,7 +9740,7 @@ msgstr ""
 "delte filer."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -9609,7 +9751,7 @@ msgstr ""
 "dine andre delte filer."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -10141,6 +10283,13 @@ msgstr "Der opstod en fejl.  Vi kunne ikke sende e-mail til »%2$s«."
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr "Der opstod en fejl.  Vi kunne ikke udsende påmindelses-e-mails."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:70
+msgid ""
+"You don't have sufficient permissions to send notifications for this share."
+msgstr ""
+"Du har ikke tilstrækkelige rettigheder til at sende underretninger for denne "
+"deling."
+
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
 msgid ""
@@ -10210,7 +10359,7 @@ msgstr "Du har nået det største tilladte antal billeder i signaturen, %1$s."
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid "You are not allowed to modify the signature"
-msgstr ""
+msgstr "Du har ikke lov til ændre signaturen"
 
 #. The message displayed if the requested subscription cannot be found from the server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:69
@@ -10467,6 +10616,26 @@ msgid ""
 msgstr ""
 "Brugerens filer tilhører brugeren »%1$s« i kildekonteksten »%2$s«.  Fastsæt "
 "venligst individuel eller kontekstafhængig fillagring først."
+
+#. The provided feedback score is invalid. Please choose a number > 0.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
+msgid "The provided feedback score is invalid. Please choose a number > 0."
+msgstr "Den givne vurdering er ugyldig.  Vælg venligst et tal større end 0."
+
+#. The provided feedback for key 'score' has an invalid type.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
+msgid "The provided feedback for key 'score' has an invalid type."
+msgstr "Den givne vurdering for nøglen 'score' har en ugyldig type."
+
+#. The provided feedback does not contain required key "score".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "Den givne vurdering indeholder ikke den påkrævede nøgle »%s«."
+
+#. The provided feedback for key "score" cannot be parsed..
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "Den givne vurdering for nøglen »%s« kan ikke fortolkes."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -11041,1654 +11210,1818 @@ msgid "America/Ensenada"
 msgstr "Amerika/Ensenada"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:113
+msgid "America/Fort Nelson"
+msgstr "Amerika/Fort Nelson"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:114
 msgid "America/Fort Wayne"
 msgstr "Amerika/Fort Wayne"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:114
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:115
 msgid "America/Fortaleza"
 msgstr "Amerika/Fortaleza"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:115
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:116
 msgid "America/Glace Bay"
 msgstr "Amerika/Glace Bay"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:116
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:117
 msgid "America/Godthab"
 msgstr "Amerika/Godthab"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:117
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:118
 msgid "America/Goose Bay"
 msgstr "Amerika/Goose Bay"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:118
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:119
 msgid "America/Grand Turk"
 msgstr "Amerika/Grand Turk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:119
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:120
 msgid "America/Grenada"
 msgstr "Amerika/Grenada"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:120
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:121
 msgid "America/Guadeloupe"
 msgstr "Amerika/Guadeloupe"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:121
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:122
 msgid "America/Guatemala"
 msgstr "Amerika/Guatemala"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:122
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:123
 msgid "America/Guayaquil"
 msgstr "Amerika/Guayaquil"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:123
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:124
 msgid "America/Guyana"
 msgstr "Amerika/Guyana"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:124
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:125
 msgid "America/Halifax"
 msgstr "Amerika/Halifax"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:125
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:126
 msgid "America/Havana"
 msgstr "Amerika/Havana"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:126
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:127
 msgid "America/Hermosillo"
 msgstr "Amerika/Hermosillo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:127
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:128
 msgid "America/Indiana/Indianapolis"
 msgstr "Amerika/Indiana/Indianapolis"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:128
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:129
 msgid "America/Indiana/Knox"
 msgstr "Amerika/Indiana/Knox"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:129
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:130
 msgid "America/Indiana/Marengo"
 msgstr "Amerika/Indiana/Marengo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:130
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:131
 msgid "America/Indiana/Petersburg"
 msgstr "Amerika/Indiana/Petersburg"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:131
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:132
 msgid "America/Indiana/Tell City"
 msgstr "Amerika/Indiana/Tell City"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:132
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:133
 msgid "America/Indiana/Vevay"
 msgstr "Amerika/Indiana/Vevay"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:133
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:134
 msgid "America/Indiana/Vincennes"
 msgstr "Amerika/Indiana/Vincennes"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:134
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:135
 msgid "America/Indiana/Winamac"
 msgstr "Amerika/Indiana/Winamac"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:135
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:136
 msgid "America/Indianapolis"
 msgstr "Amerika/Indianapolis"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:136
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:137
 msgid "America/Inuvik"
 msgstr "Amerika/Inuvik"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:137
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:138
 msgid "America/Iqaluit"
 msgstr "Amerika/Iqaluit"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:138
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:139
 msgid "America/Jamaica"
 msgstr "Amerika/Jamaica"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:139
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:140
 msgid "America/Jujuy"
 msgstr "Amerika/Jujuy"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:140
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:141
 msgid "America/Juneau"
 msgstr "Amerika/Juneau"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:141
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:142
 msgid "America/Kentucky/Louisville"
 msgstr "Amerika/Kentucky/Louisville"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:142
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:143
 msgid "America/Kentucky/Monticello"
 msgstr "Amerika/Kentucky/Monticello"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:143
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:144
 msgid "America/Knox IN"
 msgstr "Amerika/Knox IN"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:144
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:145
 msgid "America/Kralendijk"
 msgstr "Amerika/Kralendijk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:145
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:146
 msgid "America/La Paz"
 msgstr "Amerika/La Paz"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:146
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:147
 msgid "America/Lima"
 msgstr "Amerika/Lima"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:147
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:148
 msgid "America/Los Angeles"
 msgstr "Amerika/Los Angeles"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:148
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:149
 msgid "America/Louisville"
 msgstr "Amerika/Louisville"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:149
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:150
 msgid "America/Lower Princes"
 msgstr "Amerika/Lower Princes"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:150
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:151
 msgid "America/Maceio"
 msgstr "Amerika/Maceio"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:151
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:152
 msgid "America/Managua"
 msgstr "Amerika/Managua"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:152
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:153
 msgid "America/Manaus"
 msgstr "Amerika/Manaus"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:153
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:154
 msgid "America/Marigot"
 msgstr "Amerika/Marigot"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:154
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:155
 msgid "America/Martinique"
 msgstr "Amerika/Martinique"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:155
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:156
 msgid "America/Matamoros"
 msgstr "Amerika/Matamoros"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:156
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:157
 msgid "America/Mazatlan"
 msgstr "Amerika/Mazatlan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:157
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:158
 msgid "America/Mendoza"
 msgstr "Amerika/Mendoza"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:158
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:159
 msgid "America/Menominee"
 msgstr "Amerika/Menominee"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:159
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:160
 msgid "America/Merida"
 msgstr "Amerika/Merida"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:160
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:161
 msgid "America/Metlakatla"
 msgstr "Amerika/Metlakatla"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:161
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:162
 msgid "America/Mexico City"
 msgstr "Amerika/Mexico City"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:162
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:163
 msgid "America/Miquelon"
 msgstr "Amerika/Miquelon"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:163
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:164
 msgid "America/Moncton"
 msgstr "Amerika/Moncton"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:164
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:165
 msgid "America/Monterrey"
 msgstr "Amerika/Monterrey"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:165
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:166
 msgid "America/Montevideo"
 msgstr "Amerika/Montevideo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:166
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:167
 msgid "America/Montreal"
 msgstr "Amerika/Montreal"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:167
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:168
 msgid "America/Montserrat"
 msgstr "Amerika/Montserrat"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:168
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:169
 msgid "America/Nassau"
 msgstr "Amerika/Nassau"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:169
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:170
 msgid "America/New York"
 msgstr "Amerika/New York"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:170
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:171
 msgid "America/Nipigon"
 msgstr "Amerika/Nipigon"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:171
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:172
 msgid "America/Nome"
 msgstr "Amerika/Nome"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:172
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:173
 msgid "America/Noronha"
 msgstr "Amerika/Noronha"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:173
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:174
 msgid "America/North Dakota/Beulah"
 msgstr "Amerika/North Dakota/Beulah"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:174
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:175
 msgid "America/North Dakota/Center"
 msgstr "Amerika/North Dakota/Center"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:175
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:176
 msgid "America/North Dakota/New Salem"
 msgstr "Amerika/North Dakota/New Salem"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:176
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:177
 msgid "America/Ojinaga"
 msgstr "Amerika/Ojinaga"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:177
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:178
 msgid "America/Panama"
 msgstr "Amerika/Panama"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:178
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:179
 msgid "America/Pangnirtung"
 msgstr "Amerika/Pangnirtung"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:179
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:180
 msgid "America/Paramaribo"
 msgstr "Amerika/Paramaribo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:180
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:181
 msgid "America/Phoenix"
 msgstr "Amerika/Phoenix"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:181
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:182
 msgid "America/Port-au-Prince"
 msgstr "Amerika/Port-au-Prince"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:182
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:183
 msgid "America/Port of Spain"
 msgstr "Amerika/Port of Spain"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:183
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:184
 msgid "America/Porto Acre"
 msgstr "Amerika/Porto Acre"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:184
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:185
 msgid "America/Porto Velho"
 msgstr "Amerika/Porto Velho"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:185
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:186
 msgid "America/Puerto Rico"
 msgstr "Amerika/Puerto Rico"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:186
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:187
 msgid "America/Rainy River"
 msgstr "Amerika/Rainy River"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:187
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:188
 msgid "America/Rankin Inlet"
 msgstr "Amerika/Rankin Inlet"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:188
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:189
 msgid "America/Recife"
 msgstr "Amerika/Recife"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:189
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:190
 msgid "America/Regina"
 msgstr "Amerika/Regina"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:190
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:191
 msgid "America/Resolute"
 msgstr "Amerika/Resolute"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:191
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:192
 msgid "America/Rio Branco"
 msgstr "Amerika/Rio Branco"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:192
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:193
 msgid "America/Rosario"
 msgstr "Amerika/Rosario"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:193
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:194
 msgid "America/Santa Isabel"
 msgstr "Amerika/Santa Isabel"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:194
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:195
 msgid "America/Santarem"
 msgstr "Amerika/Santarem"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:195
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:196
 msgid "America/Santiago"
 msgstr "Amerika/Santiago"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:196
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:197
 msgid "America/Santo Domingo"
 msgstr "Amerika/Santo Domingo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:197
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:198
 msgid "America/Sao Paulo"
 msgstr "Amerika/Sao Paulo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:198
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:199
 msgid "America/Scoresbysund"
 msgstr "Amerika/Scoresbysund"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:199
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:200
 msgid "America/Shiprock"
 msgstr "Amerika/Shiprock"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:200
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:201
 msgid "America/Sitka"
 msgstr "Amerika/Sitka"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:201
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:202
 msgid "America/St Barthelemy"
 msgstr "Amerika/St Barthelemy"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:202
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:203
 msgid "America/St Johns"
 msgstr "Amerika/St Johns"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:203
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:204
 msgid "America/St Kitts"
 msgstr "Amerika/St Kitts"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:204
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:205
 msgid "America/St Lucia"
 msgstr "Amerika/St Lucia"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:205
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:206
 msgid "America/St Thomas"
 msgstr "Amerika/St Thomas"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:206
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:207
 msgid "America/St Vincent"
 msgstr "Amerika/St Vincent"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:207
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:208
 msgid "America/Swift Current"
 msgstr "Amerika/Swift Current"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:208
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:209
 msgid "America/Tegucigalpa"
 msgstr "Amerika/Tegucigalpa"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:209
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:210
 msgid "America/Thule"
 msgstr "Amerika/Thule"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:210
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:211
 msgid "America/Thunder Bay"
 msgstr "Amerika/Thunder Bay"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:211
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:212
 msgid "America/Tijuana"
 msgstr "Amerika/Tijuana"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:212
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:213
 msgid "America/Toronto"
 msgstr "Amerika/Toronto"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:213
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:214
 msgid "America/Tortola"
 msgstr "Amerika/Tortola"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:214
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:215
 msgid "America/Vancouver"
 msgstr "Amerika/Vancouver"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:215
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:216
 msgid "America/Virgin"
 msgstr "Amerika/Virgin"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:216
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:217
 msgid "America/Whitehorse"
 msgstr "Amerika/Whitehorse"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:217
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:218
 msgid "America/Winnipeg"
 msgstr "Amerika/Winnipeg"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:218
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:219
 msgid "America/Yakutat"
 msgstr "Amerika/Yakutat"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:219
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:220
 msgid "America/Yellowknife"
 msgstr "Amerika/Yellowknife"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:220
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:221
 msgid "Antarctica/Casey"
 msgstr "Antarktis/Casey"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:221
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:222
 msgid "Antarctica/Davis"
 msgstr "Antarktis/Davis"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:222
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:223
 msgid "Antarctica/DumontDUrville"
 msgstr "Antarktis/DumontDUrville"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:223
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:224
 msgid "Antarctica/Macquarie"
 msgstr "Antarktis/Macquarie"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:224
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:225
 msgid "Antarctica/Mawson"
 msgstr "Antarktis/Mawson"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:225
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:226
 msgid "Antarctica/McMurdo"
 msgstr "Antarktis/McMurdo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:226
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:227
 msgid "Antarctica/Palmer"
 msgstr "Antarktis/Palmer"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:227
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:228
 msgid "Antarctica/Rothera"
 msgstr "Antarktis/Rothera"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:228
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:229
 msgid "Antarctica/South Pole"
 msgstr "Antarktis/South Pole"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:229
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:230
 msgid "Antarctica/Syowa"
 msgstr "Antarktis/Syowa"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:230
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:231
 msgid "Antarctica/Troll"
 msgstr "Antarktis/Troll"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:231
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:232
 msgid "Antarctica/Vostok"
 msgstr "Antarktis/Vostok"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:232
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:233
 msgid "Arctic/Longyearbyen"
 msgstr "Arktis/Longyearbyen"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:233
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:234
 msgid "Asia/Aden"
 msgstr "Asien/Aden"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:234
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:235
 msgid "Asia/Almaty"
 msgstr "Asien/Almaty"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:235
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:236
 msgid "Asia/Amman"
 msgstr "Asien/Amman"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:236
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:237
 msgid "Asia/Anadyr"
 msgstr "Asien/Anadyr"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:237
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:238
 msgid "Asia/Aqtau"
 msgstr "Asien/Aqtau"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:238
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:239
 msgid "Asia/Aqtobe"
 msgstr "Asien/Aqtobe"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:239
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:240
 msgid "Asia/Ashgabat"
 msgstr "Asien/Ashgabat"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:240
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:241
 msgid "Asia/Ashkhabad"
 msgstr "Asien/Ashkhabad"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:241
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:242
+msgid "Asia/Atyrau"
+msgstr "Asien/Atyrau"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:243
 msgid "Asia/Baghdad"
 msgstr "Asien/Baghdad"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:242
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:244
 msgid "Asia/Bahrain"
 msgstr "Asien/Bahrain"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:243
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:245
 msgid "Asia/Baku"
 msgstr "Asien/Baku"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:244
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:246
 msgid "Asia/Bangkok"
 msgstr "Asien/Bangkok"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:245
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:247
+msgid "Asia/Barnaul"
+msgstr "Asien/Barnaul"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:248
 msgid "Asia/Beirut"
 msgstr "Asien/Beirut"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:246
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:249
 msgid "Asia/Bishkek"
 msgstr "Asien/Bishkek"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:247
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:250
 msgid "Asia/Brunei"
 msgstr "Asien/Brunei"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:248
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:251
 msgid "Asia/Calcutta"
 msgstr "Asien/Calcutta"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:249
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:252
 msgid "Asia/Chita"
 msgstr "Asien/Chita"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:250
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:253
 msgid "Asia/Choibalsan"
 msgstr "Asien/Choibalsan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:251
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:254
 msgid "Asia/Chongqing"
 msgstr "Asien/Chongqing"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:252
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:255
 msgid "Asia/Chungking"
 msgstr "Asien/Chungking"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:253
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:256
 msgid "Asia/Colombo"
 msgstr "Asien/Colombo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:254
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:257
 msgid "Asia/Dacca"
 msgstr "Asien/Dacca"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:255
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:258
 msgid "Asia/Damascus"
 msgstr "Asien/Damascus"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:256
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:259
 msgid "Asia/Dhaka"
 msgstr "Asien/Dhaka"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:257
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:260
 msgid "Asia/Dili"
 msgstr "Asien/Dili"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:258
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:261
 msgid "Asia/Dubai"
 msgstr "Asien/Dubai"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:259
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:262
 msgid "Asia/Dushanbe"
 msgstr "Asien/Dushanbe"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:260
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:263
+msgid "Asia/Famagusta"
+msgstr "Asien/Famagusta"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:264
 msgid "Asia/Gaza"
 msgstr "Asien/Gaza"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:261
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:265
 msgid "Asia/Harbin"
 msgstr "Asien/Harbin"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:262
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:266
 msgid "Asia/Hebron"
 msgstr "Asien/Hebron"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:263
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:267
 msgid "Asia/Ho Chi Minh"
 msgstr "Asien/Ho Chi Minh"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:264
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:268
 msgid "Asia/Hong Kong"
 msgstr "Asien/Hong Kong"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:265
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:269
 msgid "Asia/Hovd"
 msgstr "Asien/Hovd"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:266
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:270
 msgid "Asia/Irkutsk"
 msgstr "Asien/Irkutsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:267
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:271
 msgid "Asia/Istanbul"
 msgstr "Asien/Istanbul"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:268
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:272
 msgid "Asia/Jakarta"
 msgstr "Asien/Jakarta"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:269
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:273
 msgid "Asia/Jayapura"
 msgstr "Asien/Jayapura"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:270
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:274
 msgid "Asia/Jerusalem"
 msgstr "Asien/Jerusalem"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:271
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:275
 msgid "Asia/Kabul"
 msgstr "Asien/Kabul"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:272
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:276
 msgid "Asia/Kamchatka"
 msgstr "Asien/Kamchatka"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:273
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:277
 msgid "Asia/Karachi"
 msgstr "Asien/Karachi"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:274
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:278
 msgid "Asia/Kashgar"
 msgstr "Asien/Kashgar"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:275
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:279
 msgid "Asia/Kathmandu"
 msgstr "Asien/Kathmandu"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:276
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:280
 msgid "Asia/Katmandu"
 msgstr "Asien/Katmandu"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:277
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:281
 msgid "Asia/Khandyga"
 msgstr "Asien/Khandyga"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:278
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:282
 msgid "Asia/Kolkata"
 msgstr "Asien/Kolkata"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:279
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:283
 msgid "Asia/Krasnoyarsk"
 msgstr "Asien/Krasnoyarsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:280
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:284
 msgid "Asia/Kuala Lumpur"
 msgstr "Asien/Kuala Lumpur"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:281
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:285
 msgid "Asia/Kuching"
 msgstr "Asien/Kuching"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:282
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:286
 msgid "Asia/Kuwait"
 msgstr "Asien/Kuwait"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:283
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:287
 msgid "Asia/Macao"
 msgstr "Asien/Macao"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:284
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:288
 msgid "Asia/Macau"
 msgstr "Asien/Macau"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:285
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:289
 msgid "Asia/Magadan"
 msgstr "Asien/Magadan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:286
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:290
 msgid "Asia/Makassar"
 msgstr "Asien/Makassar"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:287
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:291
 msgid "Asia/Manila"
 msgstr "Asien/Manila"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:288
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:292
 msgid "Asia/Muscat"
 msgstr "Asien/Muscat"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:289
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:293
 msgid "Asia/Nicosia"
 msgstr "Asien/Nicosia"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:290
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:294
 msgid "Asia/Novokuznetsk"
 msgstr "Asien/Novokuznetsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:291
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:295
 msgid "Asia/Novosibirsk"
 msgstr "Asien/Novosibirsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:292
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:296
 msgid "Asia/Omsk"
 msgstr "Asien/Omsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:293
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:297
 msgid "Asia/Oral"
 msgstr "Asien/Oral"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:294
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:298
 msgid "Asia/Phnom Penh"
 msgstr "Asien/Phnom Penh"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:295
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:299
 msgid "Asia/Pontianak"
 msgstr "Asien/Pontianak"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:296
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:300
 msgid "Asia/Pyongyang"
 msgstr "Asien/Pyongyang"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:297
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:301
 msgid "Asia/Qatar"
 msgstr "Asien/Qatar"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:298
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:302
 msgid "Asia/Qyzylorda"
 msgstr "Asien/Qyzylorda"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:299
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:303
 msgid "Asia/Rangoon"
 msgstr "Asien/Rangoon"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:300
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:304
 msgid "Asia/Riyadh"
 msgstr "Asien/Riyadh"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:301
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:305
 msgid "Asia/Saigon"
 msgstr "Asien/Saigon"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:302
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:306
 msgid "Asia/Sakhalin"
 msgstr "Asien/Sakhalin"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:303
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:307
 msgid "Asia/Samarkand"
 msgstr "Asien/Samarkand"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:304
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:308
 msgid "Asia/Seoul"
 msgstr "Asien/Seoul"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:305
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:309
 msgid "Asia/Shanghai"
 msgstr "Asien/Shanghai"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:306
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:310
 msgid "Asia/Singapore"
 msgstr "Asien/Singapore"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:307
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:311
 msgid "Asia/Srednekolymsk"
 msgstr "Asien/Srednekolymsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:308
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:312
 msgid "Asia/Taipei"
 msgstr "Asien/Taipei"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:309
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:313
 msgid "Asia/Tashkent"
 msgstr "Asien/Tashkent"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:310
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:314
 msgid "Asia/Tbilisi"
 msgstr "Asien/Tbilisi"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:311
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:315
 msgid "Asia/Tehran"
 msgstr "Asien/Tehran"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:312
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:316
 msgid "Asia/Tel Aviv"
 msgstr "Asien/Tel Aviv"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:313
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:317
 msgid "Asia/Thimbu"
 msgstr "Asien/Thimbu"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:314
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:318
 msgid "Asia/Thimphu"
 msgstr "Asien/Thimphu"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:315
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:319
 msgid "Asia/Tokyo"
 msgstr "Asien/Tokyo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:316
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:320
+msgid "Asia/Tomsk"
+msgstr "Asien/Tomsk"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:321
 msgid "Asia/Ujung Pandang"
 msgstr "Asien/Ujung Pandang"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:317
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:322
 msgid "Asia/Ulaanbaatar"
 msgstr "Asien/Ulaanbaatar"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:318
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:323
 msgid "Asia/Ulan Bator"
 msgstr "Asien/Ulan Bator"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:319
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:324
 msgid "Asia/Urumqi"
 msgstr "Asien/Urumqi"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:320
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:325
 msgid "Asia/Ust-Nera"
 msgstr "Asien/Ust-Nera"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:321
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:326
 msgid "Asia/Vientiane"
 msgstr "Asien/Vientiane"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:322
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:327
 msgid "Asia/Vladivostok"
 msgstr "Asien/Vladivostok"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:323
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:328
 msgid "Asia/Yakutsk"
 msgstr "Asien/Yakutsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:324
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:329
+msgid "Asia/Yangon"
+msgstr "Asien/Yangon"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:330
 msgid "Asia/Yekaterinburg"
 msgstr "Asien/Yekaterinburg"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:325
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:331
 msgid "Asia/Yerevan"
 msgstr "Asien/Yerevan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:326
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:332
 msgid "Atlantic/Azores"
 msgstr "Atlanten/Azores"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:327
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:333
 msgid "Atlantic/Bermuda"
 msgstr "Atlanten/Bermuda"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:328
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:334
 msgid "Atlantic/Canary"
 msgstr "Atlanten/Kanariske Øer"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:329
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:335
 msgid "Atlantic/Cape Verde"
 msgstr "Atlanten/Cape Verde"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:330
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:336
 msgid "Atlantic/Faeroe"
 msgstr "Atlanten/Færøerne"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:331
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:337
 msgid "Atlantic/Faroe"
 msgstr "Atlanten/Færøerne"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:332
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:338
 msgid "Atlantic/Jan Mayen"
 msgstr "Atlanten/Jan Mayen"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:333
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:339
 msgid "Atlantic/Madeira"
 msgstr "Atlanten/Madeira"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:334
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:340
 msgid "Atlantic/Reykjavik"
 msgstr "Atlanten/Reykjavik"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:335
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:341
 msgid "Atlantic/South Georgia"
 msgstr "Atlanten/South Georgia"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:336
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:342
 msgid "Atlantic/St Helena"
 msgstr "Atlanten/St Helena"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:337
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:343
 msgid "Atlantic/Stanley"
 msgstr "Atlanten/Stanley"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:338
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:344
 msgid "Australia/ACT"
 msgstr "Australien/ATC"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:339
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:345
 msgid "Australia/Adelaide"
 msgstr "Australien/Adelaide"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:340
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:346
 msgid "Australia/Brisbane"
 msgstr "Australien/Brisbane"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:341
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:347
 msgid "Australia/Broken Hill"
 msgstr "Australien/Broken Hill"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:342
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:348
 msgid "Australia/Canberra"
 msgstr "Australien/Canberra"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:343
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:349
 msgid "Australia/Currie"
 msgstr "Australien/Currie"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:344
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:350
 msgid "Australia/Darwin"
 msgstr "Australien/Darwin"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:345
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:351
 msgid "Australia/Eucla"
 msgstr "Australien/Eucla"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:346
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:352
 msgid "Australia/Hobart"
 msgstr "Australien/Hobart"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:347
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:353
 msgid "Australia/LHI"
 msgstr "Australien/LHI"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:348
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:354
 msgid "Australia/Lindeman"
 msgstr "Australien/Lindeman"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:349
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:355
 msgid "Australia/Lord Howe"
 msgstr "Australien/Lord Howe"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:350
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:356
 msgid "Australia/Melbourne"
 msgstr "Australien/Melbourne"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:351
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:357
 msgid "Australia/NSW"
 msgstr "Australien/NSW"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:352
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:358
 msgid "Australia/North"
 msgstr "Australien/North"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:353
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:359
 msgid "Australia/Perth"
 msgstr "Australien/Perth"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:354
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:360
 msgid "Australia/Queensland"
 msgstr "Australien/Queensland"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:355
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:361
 msgid "Australia/South"
 msgstr "Australien/South"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:356
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:362
 msgid "Australia/Sydney"
 msgstr "Australien/Sydney"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:357
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:363
 msgid "Australia/Tasmania"
 msgstr "Australien/Tasmania"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:358
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:364
 msgid "Australia/Victoria"
 msgstr "Australien/Victoria"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:359
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:365
 msgid "Australia/West"
 msgstr "Australien/West"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:360
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:366
 msgid "Australia/Yancowinna"
 msgstr "Australien/Yancowinna"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:361
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:367
 msgid "Brazil/Acre"
 msgstr "Brasilien/Acre"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:362
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:368
 msgid "Brazil/DeNoronha"
 msgstr "Brasilien/DeNoronha"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:363
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:369
 msgid "Brazil/East"
 msgstr "Brasilien/East"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:364
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:370
 msgid "Brazil/West"
 msgstr "Brasilien/West"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:365
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:371
 msgid "Canada/Atlantic"
 msgstr "Canada/Atlantic"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:366
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:372
 msgid "Canada/Central"
 msgstr "Canada/Central"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:367
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:373
 msgid "Canada/East-Saskatchewan"
 msgstr "Canada/East-Saskatchewan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:368
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:374
 msgid "Canada/Eastern"
 msgstr "Canada/Eastern"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:369
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:375
 msgid "Canada/Mountain"
 msgstr "Canada/Mountain"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:370
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:376
 msgid "Canada/Newfoundland"
 msgstr "Canada/Newfoundland"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:371
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:377
 msgid "Canada/Pacific"
 msgstr "Canada/Pacific"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:372
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:378
 msgid "Canada/Saskatchewan"
 msgstr "Canada/Saskatchewan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:373
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:379
 msgid "Canada/Yukon"
 msgstr "Canada/Yukon"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:374
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:380
 msgid "Chile/Continental"
 msgstr "Chile/Continental"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:375
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:381
 msgid "Chile/EasterIsland"
 msgstr "Chile/EasterIsland"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:376
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:382
 msgid "Cuba"
 msgstr "Cuba"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:377
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:383
 msgid "Egypt"
 msgstr "Egypten"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:378
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:384
 msgid "Eire"
 msgstr "Irland"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:379
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:385
 msgid "Europe/Amsterdam"
 msgstr "Europa/Amsterdam"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:380
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:386
 msgid "Europe/Andorra"
 msgstr "Europa/Andorra"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:381
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:387
+msgid "Europe/Astrakhan"
+msgstr "Europa/Astrakhan"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:388
 msgid "Europe/Athens"
 msgstr "Europa/Athen"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:382
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:389
 msgid "Europe/Belfast"
 msgstr "Europa/Belfast"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:383
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:390
 msgid "Europe/Belgrade"
 msgstr "Europa/Belgrade"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:384
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:391
 msgid "Europe/Berlin"
 msgstr "Europa/Berlin"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:385
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:392
 msgid "Europe/Bratislava"
 msgstr "Europa/Bratislava"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:386
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:393
 msgid "Europe/Brussels"
 msgstr "Europa/Brussels"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:387
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:394
 msgid "Europe/Bucharest"
 msgstr "Europa/Bucharest"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:388
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:395
 msgid "Europe/Budapest"
 msgstr "Europa/Budapest"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:389
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:396
 msgid "Europe/Busingen"
 msgstr "Europa/Busingen"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:390
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:397
 msgid "Europe/Chisinau"
 msgstr "Europa/Chisinau"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:391
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:398
 msgid "Europe/Copenhagen"
 msgstr "Europa/København"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:392
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:399
 msgid "Europe/Dublin"
 msgstr "Europa/Dublin"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:393
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:400
 msgid "Europe/Gibraltar"
 msgstr "Europa/Gibraltar"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:394
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:401
 msgid "Europe/Guernsey"
 msgstr "Europa/Guernsey"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:395
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:402
 msgid "Europe/Helsinki"
 msgstr "Europa/Helsinki"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:396
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:403
 msgid "Europe/Isle of Man"
 msgstr "Europa/Isle of Man"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:397
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:404
 msgid "Europe/Istanbul"
 msgstr "Europa/Istanbul"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:398
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:405
 msgid "Europe/Jersey"
 msgstr "Europa/Jersey"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:399
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:406
 msgid "Europe/Kaliningrad"
 msgstr "Europa/Kaliningrad"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:400
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:407
 msgid "Europe/Kiev"
 msgstr "Europa/Kiev"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:401
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:408
+msgid "Europe/Kirov"
+msgstr "Europe/Kirov"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:409
 msgid "Europe/Lisbon"
 msgstr "Europa/Lisbon"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:402
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:410
 msgid "Europe/Ljubljana"
 msgstr "Europa/Ljubljana"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:403
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:411
 msgid "Europe/London"
 msgstr "Europa/London"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:404
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:412
 msgid "Europe/Luxembourg"
 msgstr "Europa/Luxembourg"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:405
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:413
 msgid "Europe/Madrid"
 msgstr "Europa/Madrid"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:406
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:414
 msgid "Europe/Malta"
 msgstr "Europa/Malta"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:407
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:415
 msgid "Europe/Mariehamn"
 msgstr "Europa/Mariehamn"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:408
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:416
 msgid "Europe/Minsk"
 msgstr "Europa/Minsk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:409
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:417
 msgid "Europe/Monaco"
 msgstr "Europa/Monaco"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:410
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:418
 msgid "Europe/Moscow"
 msgstr "Europa/Moskva"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:411
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:419
 msgid "Europe/Nicosia"
 msgstr "Europa/Nicosia"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:412
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:420
 msgid "Europe/Oslo"
 msgstr "Europa/Oslo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:413
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:421
 msgid "Europe/Paris"
 msgstr "Europa/Paris"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:414
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:422
 msgid "Europe/Podgorica"
 msgstr "Europa/Podgorica"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:415
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:423
 msgid "Europe/Prague"
 msgstr "Europa/Prag"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:416
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:424
 msgid "Europe/Riga"
 msgstr "Europa/Riga"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:417
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:425
 msgid "Europe/Rome"
 msgstr "Europa/Rom"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:418
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:426
 msgid "Europe/Samara"
 msgstr "Europa/Samara"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:419
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:427
 msgid "Europe/San Marino"
 msgstr "Europa/San Marino"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:420
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:428
 msgid "Europe/Sarajevo"
 msgstr "Europa/Sarajevo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:421
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:429
+msgid "Europe/Saratov"
+msgstr "Europa/Saratov"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:430
 msgid "Europe/Simferopol"
 msgstr "Europa/Simferopol"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:422
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:431
 msgid "Europe/Skopje"
 msgstr "Europa/Skopje"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:423
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:432
 msgid "Europe/Sofia"
 msgstr "Europa/Sofia"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:424
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:433
 msgid "Europe/Stockholm"
 msgstr "Europa/Stockholm"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:425
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:434
 msgid "Europe/Tallinn"
 msgstr "Europa/Tallinn"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:426
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:435
 msgid "Europe/Tirane"
 msgstr "Europa/Tirane"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:427
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:436
 msgid "Europe/Tiraspol"
 msgstr "Europa/Tiraspol"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:428
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:437
+msgid "Europe/Ulyanovsk"
+msgstr "Europa/Ulyanovsk"
+
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:438
 msgid "Europe/Uzhgorod"
 msgstr "Europa/Uzhgorod"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:429
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:439
 msgid "Europe/Vaduz"
 msgstr "Europa/Vaduz"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:430
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:440
 msgid "Europe/Vatican"
 msgstr "Europa/Vatikanet"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:431
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:441
 msgid "Europe/Vienna"
 msgstr "Europa/Wien"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:432
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:442
 msgid "Europe/Vilnius"
 msgstr "Europa/Vilnius"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:433
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:443
 msgid "Europe/Volgograd"
 msgstr "Europa/Volgograd"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:434
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:444
 msgid "Europe/Warsaw"
 msgstr "Europa/Warszawa"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:435
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:445
 msgid "Europe/Zagreb"
 msgstr "Europa/Zagreb"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:436
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:446
 msgid "Europe/Zaporozhye"
 msgstr "Europa/Zaporozhye"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:437
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:447
 msgid "Europe/Zurich"
 msgstr "Europa/Zürich"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:438
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:448
 msgid "Greenwich"
 msgstr "Greenwich"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:439
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:449
 msgid "Hongkong"
 msgstr "Hongkong"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:440
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:450
 msgid "Iceland"
 msgstr "Island"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:441
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:451
 msgid "Indian/Antananarivo"
 msgstr "Indien/Antananarivo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:442
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:452
 msgid "Indian/Chagos"
 msgstr "Indien/Chagos"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:443
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:453
 msgid "Indian/Christmas"
 msgstr "Indien/Christmas"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:444
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:454
 msgid "Indian/Cocos"
 msgstr "Indien/Cocos"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:445
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:455
 msgid "Indian/Comoro"
 msgstr "Indien/Comoro"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:446
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:456
 msgid "Indian/Kerguelen"
 msgstr "Indien/Kerguelen"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:447
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:457
 msgid "Indian/Mahe"
 msgstr "Indien/Mahe"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:448
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:458
 msgid "Indian/Maldives"
 msgstr "Indien/Maldives"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:449
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:459
 msgid "Indian/Mauritius"
 msgstr "Indien/Mauritius"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:450
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:460
 msgid "Indian/Mayotte"
 msgstr "Indien/Mayotte"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:451
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:461
 msgid "Indian/Reunion"
 msgstr "Indien/Reunion"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:452
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:462
 msgid "Iran"
 msgstr "Iran"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:453
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:463
 msgid "Israel"
 msgstr "Israel"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:454
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:464
 msgid "Jamaica"
 msgstr "Jamaica"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:455
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:465
 msgid "Japan"
 msgstr "Japan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:456
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:466
 msgid "Kwajalein"
 msgstr "Kwajalein"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:457
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:467
 msgid "Libya"
 msgstr "Libyen"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:458
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:468
 msgid "Mexico/BajaNorte"
 msgstr "Mexico/BajaNorte"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:459
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:469
 msgid "Mexico/BajaSur"
 msgstr "Mexico/BajaSur"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:460
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:470
 msgid "Mexico/General"
 msgstr "Mexico/General"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:461
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:471
 msgid "Navajo"
 msgstr "Navajo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:462
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:472
 msgid "Pacific/Apia"
 msgstr "Stillehavet/Apia"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:463
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:473
 msgid "Pacific/Auckland"
 msgstr "Stillehavet/Auckland"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:464
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:474
 msgid "Pacific/Bougainville"
 msgstr "Stillehavet/Bougainville"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:465
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:475
 msgid "Pacific/Chatham"
 msgstr "Stillehavet/Chatham"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:466
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:476
 msgid "Pacific/Chuuk"
 msgstr "Stillehavet/Chuuk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:467
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:477
 msgid "Pacific/Easter"
 msgstr "Stillehavet/Easter"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:468
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:478
 msgid "Pacific/Efate"
 msgstr "Stillehavet/Efate"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:469
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:479
 msgid "Pacific/Enderbury"
 msgstr "Stillehavet/Enderbury"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:470
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:480
 msgid "Pacific/Fakaofo"
 msgstr "Stillehavet/Fakaofo"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:471
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:481
 msgid "Pacific/Fiji"
 msgstr "Stillehavet/Fiji"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:472
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:482
 msgid "Pacific/Funafuti"
 msgstr "Stillehavet/Funafuti"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:473
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:483
 msgid "Pacific/Galapagos"
 msgstr "Stillehavet/Galapagos Øerne"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:474
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:484
 msgid "Pacific/Gambier"
 msgstr "Stillehavet/Gambier"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:475
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:485
 msgid "Pacific/Guadalcanal"
 msgstr "Stillehavet/Guadalcanal"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:476
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:486
 msgid "Pacific/Guam"
 msgstr "Stillehavet/Guam"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:477
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:487
 msgid "Pacific/Honolulu"
 msgstr "Stillehavet/Honolulu"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:478
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:488
 msgid "Pacific/Johnston"
 msgstr "Stillehavet/Johnston"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:479
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:489
 msgid "Pacific/Kiritimati"
 msgstr "Stillehavet/Kiritimati"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:480
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:490
 msgid "Pacific/Kosrae"
 msgstr "Stillehavet/Kosrae"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:481
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:491
 msgid "Pacific/Kwajalein"
 msgstr "Stillehavet/Kwajalein"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:482
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:492
 msgid "Pacific/Majuro"
 msgstr "Stillehavet/Majuro"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:483
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:493
 msgid "Pacific/Marquesas"
 msgstr "Stillehavet/Marquesas"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:484
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:494
 msgid "Pacific/Midway"
 msgstr "Stillehavet/Midway"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:485
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:495
 msgid "Pacific/Nauru"
 msgstr "Stillehavet/Nauru"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:486
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:496
 msgid "Pacific/Niue"
 msgstr "Stillehavet/Niue"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:487
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:497
 msgid "Pacific/Norfolk"
 msgstr "Stillehavet/Norfolk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:488
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:498
 msgid "Pacific/Noumea"
 msgstr "Stillehavet/Noumea"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:489
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:499
 msgid "Pacific/Pago Pago"
 msgstr "Stillehavet/Pago Pago"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:490
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:500
 msgid "Pacific/Palau"
 msgstr "Stillehavet/Palau"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:491
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:501
 msgid "Pacific/Pitcairn"
 msgstr "Stillehavet/Pitcairn"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:492
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:502
 msgid "Pacific/Pohnpei"
 msgstr "Stillehavet/Pohnpei"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:493
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:503
 msgid "Pacific/Ponape"
 msgstr "Stillehavet/Ponape"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:494
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:504
 msgid "Pacific/Port Moresby"
 msgstr "Stillehavet/Port Moresby"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:495
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:505
 msgid "Pacific/Rarotonga"
 msgstr "Stillehavet/Rarotonga"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:496
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:506
 msgid "Pacific/Saipan"
 msgstr "Stillehavet/Saipan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:497
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:507
 msgid "Pacific/Samoa"
 msgstr "Stillehavet/Samoa"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:498
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:508
 msgid "Pacific/Tahiti"
 msgstr "Stillehavet/Tahiti"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:499
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:509
 msgid "Pacific/Tarawa"
 msgstr "Stillehavet/Tarawa"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:500
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:510
 msgid "Pacific/Tongatapu"
 msgstr "Stillehavet/Tongatapu"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:501
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:511
 msgid "Pacific/Truk"
 msgstr "Stillehavet/Truk"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:502
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:512
 msgid "Pacific/Wake"
 msgstr "Stillehavet/Wake"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:503
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:513
 msgid "Pacific/Wallis"
 msgstr "Stillehavet/Wallis"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:504
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:514
 msgid "Pacific/Yap"
 msgstr "Stillehavet/Yap"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:505
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:515
 msgid "Poland"
 msgstr "Polen"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:506
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:516
 msgid "Portugal"
 msgstr "Portugal"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:507
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:517
 msgid "Singapore"
 msgstr "Singapore"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:508
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:518
 msgid "Turkey"
 msgstr "Tyrkiet"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:509
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:519
 msgid "US/Alaska"
 msgstr "US/Alaska"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:510
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:520
 msgid "US/Aleutian"
 msgstr "US/Aleutian"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:511
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:521
 msgid "US/Arizona"
 msgstr "US/Arizona"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:512
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "US/Central"
 msgstr "US/Central"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:513
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:523
 msgid "US/East-Indiana"
 msgstr "US/East-Indiana"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:514
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "US/Eastern"
 msgstr "US/Eastern"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:515
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:525
 msgid "US/Hawaii"
 msgstr "US/Hawaii"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:516
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:526
 msgid "US/Indiana-Starke"
 msgstr "US/Indiana-Starke"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:517
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:527
 msgid "US/Michigan"
 msgstr "US/Michigan"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:518
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:528
 msgid "US/Mountain"
 msgstr "US/Mountain"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:519
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "US/Pacific"
 msgstr "US/Pacific"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:520
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:530
 msgid "US/Pacific-New"
 msgstr "US/Pacific-New"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:521
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:531
 msgid "US/Samoa"
 msgstr "US/Samoa"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:532
 msgid "UTC"
 msgstr "UTC"
 
-#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:523
+#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr "Du har ikke de rette rettigheder til at læse aftaler fra den mappe."
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "Den givne vurdering indeholder ikke den påkrævede nøgle »%s«.s"
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "Den givne vurdering for nøglen »%s« kan ikke fortolkes."
+
+#~ msgid ""
+#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+#~ msgstr ""
+#~ "Besked(er) %1$s i mappe %2$s kunne ikke slettes på grund af fejlen \"%3$s"
+#~ "\""
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments in "
+#~ "folder %1$d."
+#~ msgstr "Du har ikke ret til at læse aftaler i mappen %1$d."
+
+#~ msgid ""
+#~ "Move not supported: Cannot move an appointment from folder %d to folder "
+#~ "%d."
+#~ msgstr ""
+#~ "Flytning ikke understøttet: Kan ikke flytte en aftale fra mappe %d til "
+#~ "mappe %d."
+
+#~ msgid ""
+#~ "Cannot insert appointment (%1$s). An appointment with the unique "
+#~ "identifier (%2$s) already exists."
+#~ msgstr ""
+#~ "Kan ikke indsætte aftale (%1$s). En aftale med den unikke identifikator "
+#~ "(%2$s) findes allerede."
+
+#~ msgid ""
+#~ "Cannot insert task (%1$s). A task with the unique identifier (%2$s) "
+#~ "already exists."
+#~ msgstr ""
+#~ "Kan ikke indsætte opgave (%1$s). En opgave med det unikke id »%2$s« "
+#~ "findes allerede."
+
+#~ msgid "Folder \"%1$s\" is not a task folder."
+#~ msgstr "Mappen »%1$s« er ikke en opgavemappe."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read the contents of the "
+#~ "folder with id %1$d."
+#~ msgstr ""
+#~ "Du har ikke de nødvendige rettigheder, til at læse indholdet af mappen "
+#~ "med ID %1$d.."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to create tasks in folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Du har ikke de nødvendige rettigheder, til at oprette opgaver i mappen "
+#~ "\"%1$s\"."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to edit tasks in the folder "
+#~ "with id %1$d."
+#~ msgstr ""
+#~ "Du har ikke de nødvendige rettigheder, til at redigere opgaver i mappen "
+#~ "med ID %1$d."
+
+#~ msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
+#~ msgstr ""
+#~ "Det er ikke tilladt at flytte elementer fra/til den delte mappe \"%1$s\"."
+
+#~ msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
+#~ msgstr "Private opgaver kan ikke flyttes til en offentlig mappe »%1$s«."
+
+#~ msgid ""
+#~ "You do not have the appropriate permisson to see the task %1$d in folder "
+#~ "%2$s."
+#~ msgstr ""
+#~ "Du har ikke de nødvendige rettigheder, til at se opgaven %1$d i mappen "
+#~ "%2$s."
+
+#~ msgid "The task %1$d is not stored in folder %2$s."
+#~ msgstr "Opgaven %1$d ligger ikke i mappen %2$s."
+
+#~ msgid "This folder (%1$d) is not visible."
+#~ msgstr "Denne mappe (%1$d) er ikke synlig."
+
+#~ msgid ""
+#~ "Your mail transort for %2$s was disabled because of authorization issues. "
+#~ "Please reauthorize the account %5$s to enable it again."
+#~ msgstr ""
+#~ "Den udgående postserver for %2$s blev slået fra på grund af "
+#~ "godkendelsesproblemer.  Få venligst kontoen %5$s godkendt igen for at slå "
+#~ "postkontoen til igen."
+
+#~ msgid "The provided login information seem to be wrong. Please try again."
+#~ msgstr ""
+#~ "De givne logind-informationer ser ud til at være forkerte. Prøv venligst "
+#~ "igen."
+
+#~ msgid ""
+#~ "The provided login information to access mail server %1$s seem to be "
+#~ "wrong. Please try again."
+#~ msgstr ""
+#~ "Den givet information til at opnå adgang til mail-serveren %1$s, er "
+#~ "tilsynladende forkert. Prøv venligst igen."
+
+#~ msgid "Account is current being set-up."
+#~ msgstr "Kontoen er ved at blive sat op."
+
+#~ msgid "The associated %2$s account does no more exist"
+#~ msgstr "Den associerede »%2$s«-konto findes ikke mere"
 
 #~ msgid "Can not import the format %2$s into folder %1$s."
 #~ msgstr "Kan ikke importere formatet %2$s ind i mappen %1$s."
 
-#~ msgid "America/Fort Nelson"
-#~ msgstr "Amerika/Fort Nelson"
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read the contents of "
+#~ "folder \"%1$s\"."
+#~ msgstr ""
+#~ "Du har ikke de nødvendige rettigheder, til at læse indholdet af mappen "
+#~ "\"%1$d\"."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to edit tasks in folder \"%1$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Du har ikke de nødvendige rettigheder, til at redigere opgaver i mappen "
+#~ "\"%1$s\"."
 
 #~ msgid "All attachments"
 #~ msgstr "Alle vedhæftninger"

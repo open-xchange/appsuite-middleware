@@ -16,16 +16,15 @@
  */
 package org.apache.tika.parser.txt;
 
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStream;
+import org.junit.Test;
 
 public class CharsetDetectorTest {
-  @Test
-  public void testTagDropper() throws IOException {
+     @Test
+     public void testTagDropper() throws IOException {
     InputStream in = CharsetDetectorTest.class.getResourceAsStream( "/test-documents/resume.html" );
 
     try {

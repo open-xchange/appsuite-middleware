@@ -1,8 +1,14 @@
+
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
@@ -22,8 +28,8 @@ import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 
-
 public class Bug16089Test extends AbstractAJAXSession {
+
     private FolderTestManager manager;
 
     private AJAXClient client;
@@ -36,17 +42,17 @@ public class Bug16089Test extends AbstractAJAXSession {
 
     Calendar cal;
 
-    public Bug16089Test(String name) {
-        super(name);
+    public Bug16089Test() {
+        super();
 
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         manager = new FolderTestManager(getClient());
-        timezone = client.getValues().getTimeZone();
+        timezone = getClient().getValues().getTimeZone();
         cal = Calendar.getInstance(timezone);
 
         // create a folder
@@ -57,35 +63,32 @@ public class Bug16089Test extends AbstractAJAXSession {
         folderObject1.setModule(FolderObject.CALENDAR);
         // create permissions
         final OCLPermission perm1 = new OCLPermission();
-        perm1.setEntity(client.getValues().getUserId());
+        perm1.setEntity(getClient().getValues().getUserId());
         perm1.setGroupPermission(false);
         perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1 });
         manager.insertFolderOnServer(folderObject1);
 
         appointment = createAppointment();
     }
 
+    @Test
     public void testConfirmation() throws Exception {
-        GetResponse getAppointmentResp = client.execute(new GetRequest(appointment));
+        GetResponse getAppointmentResp = getClient().execute(new GetRequest(appointment));
         Appointment testApp = getAppointmentResp.getAppointment(timezone);
 
         Participant[] participants = testApp.getParticipants();
         boolean found = false;
         for (Participant p : participants) {
-            if (p.getIdentifier() == client.getValues().getUserId()) {
+            if (p.getIdentifier() == getClient().getValues().getUserId()) {
                 found = true;
                 ConfirmableParticipant[] confirmations = testApp.getConfirmations();
                 for (ConfirmableParticipant c : confirmations) {
-                    if (c.getIdentifier() == client.getValues().getUserId()) {
-                        int ctx = getContextID(client);
-                        int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, client.getValues().getUserId());
-                        assertEquals("Confirm status isn't equal with user setting.", c.getConfirm(),publicConfig);
+                    if (c.getIdentifier() == getClient().getValues().getUserId()) {
+                        int ctx = getContextID(getClient());
+                        int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, getClient().getValues().getUserId());
+                        assertEquals("Confirm status isn't equal with user setting.", c.getConfirm(), publicConfig);
                     }
                 }
             }
@@ -97,19 +100,22 @@ public class Bug16089Test extends AbstractAJAXSession {
     }
 
     private int getContextID(AJAXClient client) throws IOException, SAXException {
-        String url = "http://"+client.getHostname()+"/ajax/config/context_id?session="+client.getSession().getId();
+        String url = "http://" + getClient().getHostname() + "/ajax/config/context_id?session=" + getClient().getSession().getId();
         WebRequest request = new GetMethodWebRequest(url);
-        WebResponse response = client.getSession().getConversation().getResponse(request);
+        WebResponse response = getClient().getSession().getConversation().getResponse(request);
         String text = response.getText();
-        String sub = text.substring(8, text.length()-1); //TODO: exchange ugly hack for JSON parser
+        String sub = text.substring(8, text.length() - 1); //TODO: exchange ugly hack for JSON parser
         return Integer.parseInt(sub);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment, false));
-        manager.cleanUp();
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(appointment, false));
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     private Appointment createAppointment() throws Exception {
@@ -126,7 +132,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         app.setRecurrenceType(Appointment.NO_RECURRENCE);
 
         InsertRequest insApp = new InsertRequest(app, timezone, false);
-        AppointmentInsertResponse execute = client.execute(insApp);
+        AppointmentInsertResponse execute = getClient().execute(insApp);
 
         execute.fillAppointment(app);
 

@@ -137,7 +137,7 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
         }
 
         Scenario scenario = request.getScenario();
-        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+        if (!Device.getActionsFor(request.getClientDevice(), device, scenario.getType(), session).contains(request.getAction())) {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 

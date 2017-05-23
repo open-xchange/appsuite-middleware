@@ -1,0 +1,79 @@
+/userfeedback/v1/send/{context-group}/{type}:
+  post:
+    operationId: send
+    tags:
+      - Userfeedback
+    summary: Exports user feedback and sends exported data to provided recipients
+    parameters:
+      -
+        name: context-group
+        in: path
+        description: The context group identifying the global DB where the feedback is stored.
+        required: true
+        type: string
+        default: default
+      -
+        name: type
+        in: path
+        description: The feedback type to send.
+        required: true
+        type: string
+        default: star-rating-v1
+      - 
+        name: start
+        in: query
+        description: Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.
+        required: false
+        type: integer
+        format: int64
+      - 
+        name: end
+        in: query
+        description: End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.
+        required: false
+        type: integer
+        format: int64
+      - 
+        name: requestBody
+        in: body
+        description: JSONObject with fields "subject" for custom mail subject, "body" for custom mail body, boolean "compress" to compress the mail attachment and "recipients" (an JSON Array containing address, display name and PGP key (if available) for every recipient).
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Info message about sent status
+        schema:
+          type: string
+      400:
+        description: Bad request, response contains error message.
+        schema:
+          type: string
+      401:
+        description: Not authorized
+      404:
+        description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
+      500:
+        description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
+
+    x-ox-examples:
+      Example:
+        description: Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org
+        example: >
+                 POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799
+                 {"subject":"User Feedback",
+                  "body":"User Feedback",
+                  "compress":true,
+                  "recipients": [
+                    {"address":"user1@example.org",
+                     "displayName":"User 1",
+                     "pgp_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."},
+                    {"address":"user2@example.org",
+                     "displayName":"User 2",
+                     "pgp_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: BCPG v1.56...."}
+                  ]
+                 }

@@ -1,0 +1,42 @@
+feature_name: HTML Sanitizer
+feature_description: |
+  Properties for HTML sanitizing
+properties:
+    - key: com.openexchange.html.sanitizer.allowedUrlSchemes
+      description: |
+        Specifies a comma-separated list of allowed protocols contained in URIs inside a HTML content.
+        This is useful to deny possibly harmful URIs like: javascript:alert('Evil XSS') or vbscript:alert('Evil XSS')
+      defaultValue: http,https,ftp,ftps,mailto
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: html-sanitizer.properties
+      packageName: open-xchange-core
+      tags: ["Sanitizing"]
+    - key: com.openexchange.html.maxLength
+      description: |
+        Specifies the max. allowed size for HTML content that will be sanitized.
+        If that size is exceeded an exception is thrown and Middleware tries to return a text-only representation instead with an
+        accompanying warning.
+        
+        Only effective if client does not specify the "max_size" URL parameter
+      defaultValue: 1048576
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: html-sanitizer.properties
+      packageName: open-xchange-core
+      tags: ["Sanitizing"]
+    - key: com.openexchange.html.css.maxLength
+      description: |
+        Specifies the max. allowed size for CSS content that will be sanitized. If that size is exceeded the CSS content is discarded.
+      defaultValue: 98304
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: html-sanitizer.properties
+      packageName: open-xchange-core
+      tags: ["Sanitizing"]

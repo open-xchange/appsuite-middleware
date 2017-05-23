@@ -64,6 +64,9 @@ import org.json.helpers.UnsynchronizedByteArrayOutputStream;
  */
 public final class JSONInputStream extends InputStream {
 
+    /** Pattern to detect unicode escape sequences for supplementary code points */
+    static final Pattern PATTERN_SUPPLEMENTARY_CODE_POINTS = Pattern.compile("\\\\u([0-9a-fA-F]{5,})");
+
     private static final int BUFSIZE = 8192;
 
     private static interface Bufferer {
@@ -101,11 +104,8 @@ public final class JSONInputStream extends InputStream {
 
     private abstract class AbstractBufferer implements Bufferer {
 
-        private final Pattern patternSupplementaryCodePoints;
-
         protected AbstractBufferer() {
             super();
-            patternSupplementaryCodePoints = Pattern.compile("\\\\u([0-9a-fA-F]{5,})");
         }
 
         @Override
@@ -161,16 +161,19 @@ public final class JSONInputStream extends InputStream {
             if (null == str) {
                 return str;
             }
-            final int length = str.length();
-            if (0 == length || isAscii(str, length)) {
+
+            if (0 == str.length() || isAscii(str)) {
                 return replaceSupplementaryCodePoints(str);
             }
-            final StringBuilder sa = new StringBuilder((length * 3) / 2 + 1);
+
+            String s = replaceSupplementaryCodePoints(str);
+            int length = s.length();
+            StringBuilder sa = new StringBuilder((length * 3) / 2 + 1);
             for (int i = 0; i < length; i++) {
-                final char c = str.charAt(i);
+                char c = s.charAt(i);
                 if ((c > 127) || (c < 32) || ('"' == c)) {
                     if (Character.isSupplementaryCodePoint(c)) {
-                        final char[] chars = Character.toChars(c);
+                        char[] chars = Character.toChars(c);
                         for (int j = 0; j < chars.length; j++) {
                             appendAsJsonUnicode(chars[j], sa);
                         }
@@ -181,7 +184,7 @@ public final class JSONInputStream extends InputStream {
                     sa.append(c);
                 }
             }
-            return replaceSupplementaryCodePoints(sa.toString());
+            return sa.toString();
         }
 
         private void appendAsJsonUnicode(final int ch, final StringBuilder sa) {
@@ -193,9 +196,9 @@ public final class JSONInputStream extends InputStream {
             sa.append(hex);
         }
 
-        private boolean isAscii(final String s, final int length) {
+        private boolean isAscii(final String s) {
             boolean isAscci = true;
-            for (int i = 0; isAscci && (i < length); i++) {
+            for (int i = 0, length = s.length(); isAscci && (i < length); i++) {
                 final char c = s.charAt(i);
                 isAscci = (c < 128) && (c > 31) && (c != '"');
             }
@@ -203,11 +206,16 @@ public final class JSONInputStream extends InputStream {
         }
 
         private String replaceSupplementaryCodePoints(final String str) {
-            final Matcher m = patternSupplementaryCodePoints.matcher(str);
+            if (str.indexOf("\\u") < 0) {
+                return str;
+            }
+
+            Matcher m = PATTERN_SUPPLEMENTARY_CODE_POINTS.matcher(str);
             if (!m.find()) {
                 return str;
             }
-            final StringBuffer sb = new StringBuffer(str.length());
+
+            StringBuffer sb = new StringBuffer(str.length());
             do {
                 int codePoint = Integer.parseInt(m.group(1), 16);
                 if (Character.isSupplementaryCodePoint(codePoint)) {

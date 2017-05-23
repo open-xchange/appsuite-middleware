@@ -50,7 +50,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -86,12 +86,18 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  *
- * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
+ * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
 
-import org.glassfish.grizzly.http.server.OXHttpServer;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javax.servlet.Filter;
+import javax.servlet.ServletException;
+import org.glassfish.grizzly.http.server.HttpServer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -110,31 +116,75 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceFactory.class);
 
     private final OSGiMainHandler mainHttpHandler;
+    private final List<FilterAndPath> initialFilters;
+    private final Map<Bundle, OSGiMainHandler> httpHandlers;
 
-    public HttpServiceFactory(final OXHttpServer httpServer, final Bundle bundle) {
-        mainHttpHandler = new OSGiMainHandler(bundle);
+    public HttpServiceFactory(HttpServer httpServer, List<FilterAndPath> initialFilters, Bundle bundle) {
+        super();
+        Map<Bundle, OSGiMainHandler> httpHandlers = new HashMap<>(128, 0.9F);
+        this.httpHandlers = httpHandlers;
+        List<FilterAndPath> filters = new CopyOnWriteArrayList<>(initialFilters);
+        this.initialFilters = filters;
+        mainHttpHandler = new OSGiMainHandler(filters, bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
+        httpHandlers.put(bundle, mainHttpHandler);
+    }
+
+    /**
+     * Adds specified filter to all HTTP contexts.
+     *
+     * @param filter The filter to add
+     * @param path The filter path
+     * @throws ServletException If registering specified filter fails
+     */
+    public synchronized void addServletFilter(Filter filter, String path) throws ServletException {
+        // Add 'initialFilters' to also apply filter to subsequently created OSGiMainHandler instances
+        initialFilters.add(new FilterAndPath(filter, path));
+
+        // Add filter to existing OSGiMainHandler instances
+        for (OSGiMainHandler httpHandler : httpHandlers.values()) {
+            httpHandler.addServletFilter(filter, path);
+        }
+    }
+
+    /**
+     * Removes specified filter from all HTTP contexts.
+     *
+     * @param filter The filter to remove
+     */
+    public synchronized void removeServletFilter(Filter filter) {
+        // Remove filter from existing OSGiMainHandler instances
+        for (OSGiMainHandler httpHandler : httpHandlers.values()) {
+            httpHandler.removeServletFilter(filter);
+        }
+
+        // Also drop from 'initialFilters' to avoid subsequently created OSGiMainHandler instances still use it
+        initialFilters.remove(new FilterAndPath(filter, null));
     }
 
     @Override
-    public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
+    public synchronized HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
         LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
 
-        return new HttpServiceImpl(bundle);
+        OSGiMainHandler mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
+        httpHandlers.put(bundle, mainHttpHandler);
+        return new HttpServiceImpl(mainHttpHandler, bundle);
     }
 
     @Override
-    public void ungetService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration, final HttpService httpServiceObj) {
+    public synchronized void ungetService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration, final HttpService httpServiceObj) {
         LOG.debug("Bundle: {}, is ungetting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
         mainHttpHandler.uregisterAllLocal();
+        httpHandlers.remove(bundle);
     }
 
     /**
      * Clean up.
      */
-    public void stop() {
+    public synchronized void stop() {
         LOG.info("Stoping main handler");
         mainHttpHandler.unregisterAll();
+        httpHandlers.clear();
     }
 
 }

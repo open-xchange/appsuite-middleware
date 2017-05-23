@@ -52,7 +52,6 @@ import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
-import com.openexchange.server.ServiceLookup;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Services.class)
@@ -103,8 +102,8 @@ public class CapabilityHandlerTest {
     //-------------------Tests-------------------
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void testAddContextToEmptyReport() {
+     @Test
+     public void testAddContextToEmptyReport() {
         capabilityHandlerTest.merge(contextReport, report);
         long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, 0l, Long.class);
         String quotaSpec = "fileQuota[" + quota + "]";
@@ -117,8 +116,8 @@ public class CapabilityHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void testAddContextToReportCapSValues() {
+     @Test
+     public void testAddContextToReportCapSValues() {
         capabilityHandlerTest.merge(initContextReport(4), report);
         capabilityHandlerTest.merge(initContextReport(5), report);
         String quotaSpec = "fileQuota[0]";
@@ -131,8 +130,8 @@ public class CapabilityHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void testAddContextToReportTenantMapValues() {
+     @Test
+     public void testAddContextToReportTenantMapValues() {
         capabilityHandlerTest.merge(initContextReport(4), report);
         capabilityHandlerTest.merge(initContextReport(5), report);
         // all thre capS have their entry inside the tenant map on deployment level (index 0)
@@ -144,8 +143,8 @@ public class CapabilityHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void testAddAdminToContextReport() {
+     @Test
+     public void testAddAdminToContextReport() {
         UserReport userReport = initUserReport(7, false, true, false, contextReport, CAPS1);
         capabilityHandlerTest.merge(userReport, contextReport);
         HashMap<String, Object> capS1 = contextReport.get(Report.MACDETAIL, CAPS1, HashMap.class);
@@ -154,8 +153,8 @@ public class CapabilityHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void testAddDisabledUserToContextReport() {
+     @Test
+     public void testAddDisabledUserToContextReport() {
         UserReport userReport = initUserReport(7, false, false, true, contextReport, CAPS2);
         capabilityHandlerTest.merge(userReport, contextReport);
         HashMap<String, Object> capS2 = contextReport.get(Report.MACDETAIL, CAPS2, HashMap.class);
@@ -164,8 +163,8 @@ public class CapabilityHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void testAddGuestUserToContextReport() {
+     @Test
+     public void testAddGuestUserToContextReport() {
         UserReport userReport = initUserReport(7, true, false, false, contextReport, CAPS3);
         capabilityHandlerTest.merge(userReport, contextReport);
         HashMap<String, Object> capS3 = contextReport.get(Report.MACDETAIL, CAPS3, HashMap.class);
@@ -173,16 +172,16 @@ public class CapabilityHandlerTest {
         validateCapSCount(capS3, null, null, 2l, 1l, 8l, null, null, null, null);
     }
 
-    @Test
-    public void testAddUserWithLoginsToContextReport() {
+     @Test
+     public void testAddUserWithLoginsToContextReport() {
         UserReport userReport = initUserReport(7, false, false, false, contextReport, CAPS2);
         capabilityHandlerTest.merge(userReport, contextReport);
         // A logins ArrayList exists and has a size of 2
         assertEquals(2, userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class).size());
     }
 
-    @Test
-    public void testCalculatedDriveMetricsSingleCapS() {
+     @Test
+     public void testCalculatedDriveMetricsSingleCapS() {
         // Mock all potential return values for Drive calculations
         InfostoreInformationService informationService = new InfostoreInformationService() {
 
@@ -228,9 +227,6 @@ public class CapabilityHandlerTest {
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
 
-            @Override
-            public void closeAllDBConnections() {}
-
         };
 
         PowerMockito.mockStatic(Services.class);
@@ -242,8 +238,8 @@ public class CapabilityHandlerTest {
         validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), 15l, 15l, 1l, 1l, 1l, 1l);
     }
 
-    @Test
-    public void testCalculatedDriveMetricsTwoCapS() {
+     @Test
+     public void testCalculatedDriveMetricsTwoCapS() {
         // Mock all potential return values for Drive calculations, for each context different values
         InfostoreInformationService informationService = new InfostoreInformationService() {
 
@@ -311,9 +307,6 @@ public class CapabilityHandlerTest {
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
 
-            @Override
-            public void closeAllDBConnections() {}
-
         };
 
         PowerMockito.mockStatic(Services.class);
@@ -326,8 +319,8 @@ public class CapabilityHandlerTest {
         validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), 33l, 33l, 1l, 1l, 9l, 1l);
     }
 
-    @Test
-    public void testStoreAndMergeReportPartsStore() {
+     @Test
+     public void testStoreAndMergeReportPartsStore() {
         capabilityHandlerTest.storeAndMergeReportParts(reportStoring);
         LinkedList<File> parts = getFilesFromReportFolder(reportStoring, ".part");
         // Have all 4 .part files been created?
@@ -367,14 +360,14 @@ public class CapabilityHandlerTest {
         }
     }
 
-    @Test
-    public void testStoreAndMergeReportPartsCleanUp() {
+     @Test
+     public void testStoreAndMergeReportPartsCleanUp() {
         capabilityHandlerTest.storeAndMergeReportParts(reportStoring);
         assertEquals("Not all capability-set entrys were removed after storing and merge", null, reportStoring.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class));
     }
 
-    @Test
-    public void testStoreAndMergeReportsPartsWithLocks() {
+     @Test
+     public void testStoreAndMergeReportsPartsWithLocks() {
         // Prepare wrong data
         initWrongDataForLocks();
         // Start thread that locks the existing file and replaces the data inside with correct data
@@ -449,8 +442,8 @@ public class CapabilityHandlerTest {
         }
     }
 
-    @Test
-    public void test() {
+     @Test
+     public void test() {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         executorService.shutdown();

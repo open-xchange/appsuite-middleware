@@ -150,7 +150,7 @@ public class GoogleApiClients {
                     defaultAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount), new ExponentialBackOffRetryPolicy());
                 }
             } catch (org.scribe.exceptions.OAuthException e) {
-                throw handleScribeOAuthException(e, defaultAccount);
+                throw handleScribeOAuthException(e, defaultAccount, session);
             }
         }
 
@@ -206,7 +206,7 @@ public class GoogleApiClients {
                     googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
                 }
             } catch (org.scribe.exceptions.OAuthException e) {
-                throw handleScribeOAuthException(e, googleAccount);
+                throw handleScribeOAuthException(e, googleAccount, session);
             }
         }
 
@@ -235,7 +235,7 @@ public class GoogleApiClients {
             // Check expiry
             return scribeOAuthService.getExpiry(googleAccount.getToken());
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw handleScribeOAuthException(e, googleAccount);
+            throw handleScribeOAuthException(e, googleAccount, session);
         }
     }
 
@@ -274,7 +274,7 @@ public class GoogleApiClients {
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
             return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw handleScribeOAuthException(e, googleAccount);
+            throw handleScribeOAuthException(e, googleAccount, session);
         }
     }
 
@@ -307,11 +307,11 @@ public class GoogleApiClients {
             // Check expiry
             return scribeOAuthService.getExpiry(googleAccount.getToken());
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw handleScribeOAuthException(e, googleAccount);
+            throw handleScribeOAuthException(e, googleAccount, session);
         }
     }
 
-    static OXException handleScribeOAuthException(OAuthException e, OAuthAccount googleAccount) {
+    static OXException handleScribeOAuthException(OAuthException e, OAuthAccount googleAccount, Session session) {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
             return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, "www.googleapis.com");
         }
@@ -323,7 +323,7 @@ public class GoogleApiClients {
         }
         if (exMessage.contains("invalid_grant")) {
             if (null != googleAccount) {
-                return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, googleAccount.getDisplayName(), googleAccount.getId());
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, googleAccount.getDisplayName(), googleAccount.getId(), session.getUserId(), session.getContextId());
             }
             return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
@@ -446,7 +446,7 @@ public class GoogleApiClients {
                 return scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
             } catch (OAuthException e) {
                 OAuthAccount dbAccount = getDBAccount();
-                throw handleScribeOAuthException(e, dbAccount);
+                throw handleScribeOAuthException(e, dbAccount, getSession());
             }
         }
     }

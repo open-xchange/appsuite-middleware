@@ -1355,7 +1355,7 @@ public class ContactSetter implements ContactSwitcher {
         if (String.class.isInstance(objects[1])) {
             String[] splitted = ((String)objects[1]).split("(?<!/);");
             if (0 != splitted.length % 2) {
-                throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Invalid number of properties for distribution list");
+                throw ContactExceptionCodes.SET_DISTRIBUTION_LIST_ERROR.create();
             }
             value = new DistributionListEntryObject[splitted.length / 2];
             for (int i = 0; i < value.length; i++) {

@@ -1,0 +1,153 @@
+feature_name: Crawler
+feature_description: |
+   Configuration options for the subscribe crawler component.
+properties:
+    - key: com.openexchange.subscribe.crawler.path
+      description: |
+        Points to the directory containing the workflow definitions of crawlers.
+      defaultValue: crawlers
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.web.de
+      description: |
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.gmx.de
+      description: |
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.msn.de
+      description: |
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.suncontacts
+      description: |
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.suncalendar
+      description: |
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.suntasks
+      description: |
+        Enable / Disable individual crawlers (<code>true</code> / <code>false</code>).
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.web.de.autorunInterval
+      description: |
+        As an enhancement to the subscription module, we allow to configure that subscriptions should run automatically on login
+        if a certain time interval between the last refresh run has elapsed. 
+      defaultValue: 1d
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.gmx.de.autorunInterval
+      description: |
+        As an enhancement to the subscription module, we allow to configure that subscriptions should run automatically on login
+        if a certain time interval between the last refresh run has elapsed. 
+      defaultValue: 1d
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.msn.de.autorunInterval
+      description: |
+        As an enhancement to the subscription module, we allow to configure that subscriptions should run automatically on login
+        if a certain time interval between the last refresh run has elapsed. 
+      defaultValue: 1d
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.suncontacts.autorunInterval
+      description: |
+        As an enhancement to the subscription module, we allow to configure that subscriptions should run automatically on login
+        if a certain time interval between the last refresh run has elapsed. 
+      defaultValue: 1d
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.suncalendar.autorunInterval
+      description: |
+        As an enhancement to the subscription module, we allow to configure that subscriptions should run automatically on login
+        if a certain time interval between the last refresh run has elapsed. 
+      defaultValue: 1d
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]
+    - key: com.openexchange.subscribe.crawler.suntasks.autorunInterval
+      description: |
+        As an enhancement to the subscription module, we allow to configure that subscriptions should run automatically on login
+        if a certain time interval between the last refresh run has elapsed. 
+      defaultValue: 1d
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: crawler.properties
+      packageName: open-xchange-subscribe
+      tags: ["Crawler"]      

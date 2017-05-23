@@ -52,14 +52,19 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -68,8 +73,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @RunWith(PowerMockRunner.class)
-public class ProcessUploadStaticTest extends TestCase {
-
+public class ProcessUploadStaticTest {
     /**
      * Initializes a new {@link ProcessUploadStaticTest}.
      */
@@ -77,7 +81,8 @@ public class ProcessUploadStaticTest extends TestCase {
         super();
     }
 
-    public void testProcessUploadStatic() {
+         @Test
+     public void testProcessUploadStatic() {
         try {
             final CountDownLatch startUpLatch = new CountDownLatch(1);
             final int threadCount = 100;
@@ -103,6 +108,21 @@ public class ProcessUploadStaticTest extends TestCase {
                                 @Override
                                 public int read() throws IOException {
                                     return bin.read();
+                                }
+
+                                @Override
+                                public boolean isFinished() {
+                                    return bin.available() <= 0;
+                                }
+
+                                @Override
+                                public boolean isReady() {
+                                    return true;
+                                }
+
+                                @Override
+                                public void setReadListener(ReadListener readListener) {
+                                    // Ignore
                                 }
                             };
                             PowerMockito.when(mockRequest.getInputStream()).thenReturn(in);
@@ -142,7 +162,8 @@ public class ProcessUploadStaticTest extends TestCase {
         }
     }
 
-    public void testProcessUploadStatic2() {
+         @Test
+     public void testProcessUploadStatic2() {
         try {
             // Mocking
             final HttpServletRequest mockRequest = PowerMockito.mock(HttpServletRequest.class);
@@ -163,6 +184,21 @@ public class ProcessUploadStaticTest extends TestCase {
                 @Override
                 public int read() throws IOException {
                     return bin.read();
+                }
+
+                @Override
+                public boolean isFinished() {
+                    return bin.available() <= 0;
+                }
+
+                @Override
+                public boolean isReady() {
+                    return true;
+                }
+
+                @Override
+                public void setReadListener(ReadListener readListener) {
+                    // Ignore
                 }
             };
             PowerMockito.when(mockRequest.getInputStream()).thenReturn(in);

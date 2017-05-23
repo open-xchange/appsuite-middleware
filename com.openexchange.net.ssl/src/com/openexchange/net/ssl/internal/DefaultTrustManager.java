@@ -62,35 +62,69 @@ import com.openexchange.net.ssl.osgi.Services;
  * {@link DefaultTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class DefaultTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
 
-    public DefaultTrustManager() {
-        super(initDefaultTrustManager());
+    /**
+     * Creates a new {@link DefaultTrustManager} instance.
+     *
+     * @return The new instance or <code>null</code> if initialization failed
+     */
+    public static DefaultTrustManager newInstance() {
+        TrustManagerAndParameters managerAndParameters = initDefaultTrustManager();
+        if (null == managerAndParameters) {
+            return null;
+        }
+        return new DefaultTrustManager(managerAndParameters.trustManager);
     }
 
-    private static X509ExtendedTrustManager initDefaultTrustManager() {
-        boolean useDefaultTruststore = Services.getService(SSLConfigurationService.class).isDefaultTruststoreEnabled();
+    // --------------------------------------------------------------------------------------------
 
-        if (useDefaultTruststore) {
-            try {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
+    /**
+     * Initializes a new {@link CustomTrustManager}.
+     */
+    private DefaultTrustManager(X509ExtendedTrustManager trustManager) {
+        super(trustManager);
+    }
 
-                for (TrustManager tm : tmf.getTrustManagers()) {
-                    if (tm instanceof X509ExtendedTrustManager) {
-                        return (X509ExtendedTrustManager) tm;
-                    }
-                }
-            } catch (KeyStoreException | NoSuchAlgorithmException e) {
-                LOG.error("Unable to initialize default truststore.", e);
-                //TODO re-throw or OXException?
+    /**
+     * Initialises the {@link CustomTrustManager}
+     *
+     * @return An {@link X509ExtendedTrustManager}
+     */
+    private static TrustManagerAndParameters initDefaultTrustManager() {
+        boolean useDefaultTruststore;
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+        {
+            if (null == sslConfigService) {
+                LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
+                useDefaultTruststore = true;
+            } else {
+                useDefaultTruststore = sslConfigService.isDefaultTruststoreEnabled();
             }
-        } else {
-            LOG.info("Using default JVM truststore is disabled by configuration.");
+        }
+
+        if (false == useDefaultTruststore) {
+            LOG.info("Using default JVM truststore is disabled.");
+            return null;
+        }
+
+        try {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
+
+            for (TrustManager tm : tmf.getTrustManagers()) {
+                if (tm instanceof X509ExtendedTrustManager) {
+                    return new TrustManagerAndParameters((X509ExtendedTrustManager) tm);
+                }
+            }
+        } catch (KeyStoreException | NoSuchAlgorithmException e) {
+            LOG.error("Unable to initialize default truststore.", e);
+            //TODO re-throw or OXException?
         }
 
         return null;

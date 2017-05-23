@@ -57,6 +57,7 @@ import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -257,10 +258,21 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void changeCapabilities(final Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
         }
+
+        if (capsToAdd == null) {
+            capsToAdd = Collections.emptySet();
+        }
+        if (capsToRemove == null) {
+            capsToRemove = Collections.emptySet();
+        }
+        if (capsToAdd == null) {
+            capsToDrop = Collections.emptySet();
+        }
+
         if (null == ctx) {
             throw new InvalidDataException("Missing context.");
         }
@@ -1203,9 +1215,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (viewFactory != null) {
             ConfigView view;
             try {
-                view = viewFactory.getView(admin_user.getId(), ctx.getId());
-                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
-                if (check != null && check) {
+                view = viewFactory.getView(admin_user.getId().intValue(), ctx.getId().intValue());
+                Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, true);
+                if (check != null && check.booleanValue()) {
                     ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);
                 }

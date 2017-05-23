@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.oauth.client.actions;
 
-
 /**
  * {@link OAuthService}
  *

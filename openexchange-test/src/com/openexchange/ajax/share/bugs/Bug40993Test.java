@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -73,10 +78,11 @@ public class Bug40993Test extends ShareTest {
      *
      * @param name The test name
      */
-    public Bug40993Test(String name) {
-        super(name);
+    public Bug40993Test() {
+        super();
     }
 
+    @Test
     public void testAccessSubfolderRandomly() throws Exception {
         int module = randomModule();
         testAccessSubfolder(randomFolderAPI(), module, randomGuestPermission(RecipientType.GUEST, module));
@@ -97,7 +103,7 @@ public class Bug40993Test extends ShareTest {
         OCLPermission adminPermission = null;
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
             } else {
                 adminPermission = permission;
@@ -126,7 +132,7 @@ public class Bug40993Test extends ShareTest {
          */
         matchingPermission = null;
         for (OCLPermission permission : subfolder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

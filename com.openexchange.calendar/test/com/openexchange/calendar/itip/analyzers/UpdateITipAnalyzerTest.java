@@ -49,7 +49,11 @@
 
 package com.openexchange.calendar.itip.analyzers;
 
-import static org.junit.Assert.*;
+import static com.openexchange.time.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +68,6 @@ import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.analyzers.UpdateITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
@@ -72,7 +75,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.sim.SimBuilder;
-import static com.openexchange.time.TimeTools.D;
 
 /**
  * {@link UpdateITipAnalyzerTest}
@@ -83,16 +85,16 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
 
     // Happy cases
-    @Test
-    public void testMethods() {
+     @Test
+     public void testMethods() {
         List<ITipMethod> methods = new UpdateITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.REQUEST, ITipMethod.COUNTER, ITipMethod.PUBLISH), methods);
     }
 
     // New Appointments
 
-    @Test
-    public void testNewAppointment() throws OXException {
+     @Test
+     public void testNewAppointment() throws OXException {
         // Simulate ITipIntegration without appointments
         CalendarDataObject appointment = appointment("123-123-123-123");
         SimBuilder integrationBuilder = new SimBuilder();
@@ -123,8 +125,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
     }
 
-    @Test
-    public void testNewWithConflictingAppointments() throws OXException {
+     @Test
+     public void testNewWithConflictingAppointments() throws OXException {
         CalendarDataObject appointment = appointment("123-123-123-123");
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
@@ -157,8 +159,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
     }
 
-    @Test
-    public void testNewSeriesWithExceptions() throws OXException {
+     @Test
+     public void testNewSeriesWithExceptions() throws OXException {
         // Simulate ITipIntegration without appointments
         CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceType(CalendarObject.WEEKLY);
@@ -229,8 +231,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdate() throws OXException {
+     @Test
+     public void testUpdate() throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -269,8 +271,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateWithConflicts() throws OXException {
+     @Test
+     public void testUpdateWithConflicts() throws OXException {
      // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -309,7 +311,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    public void testUpdateButNotReschedule() throws OXException {
+     @Test
+     public void testUpdateButNotReschedule() throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -341,14 +344,14 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
 
-        assertActions(analysis, ITipAction.UPDATE);
+        assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER, ITipAction.UPDATE);
 
 
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testDiff() throws OXException {
+     @Test
+     public void testDiff() throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -390,8 +393,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateWithNewException() throws OXException {
+     @Test
+     public void testUpdateWithNewException() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -437,8 +440,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateWithNewExceptionThatIsntARescheduling() throws OXException {
+     @Test
+     public void testUpdateWithNewExceptionThatIsntARescheduling() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -483,8 +486,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateWithNewExceptionAndConflicts() throws OXException {
+     @Test
+     public void testUpdateWithNewExceptionAndConflicts() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -531,8 +534,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateChangingException() throws OXException {
+     @Test
+     public void testUpdateChangingException() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -588,8 +591,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateChangingExceptionWithoutRescheduling() throws OXException {
+     @Test
+     public void testUpdateChangingExceptionWithoutRescheduling() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -644,8 +647,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateChangingExceptionWithConflicts() throws OXException {
+     @Test
+     public void testUpdateChangingExceptionWithConflicts() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -701,13 +704,13 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testCreateDeleteException() {
+     @Test
+     public void testCreateDeleteException() {
         // TODO
     }
 
-    @Test
-    public void testDeletingChangeException() throws OXException {
+     @Test
+     public void testDeletingChangeException() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -757,13 +760,13 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    @Test
-    public void testUpdateChangingParticipantState() {
+     @Test
+     public void testUpdateChangingParticipantState() {
         // Do this when diffing is implemented for participants
     }
 
-    @Test
-    public void testDelegation() {
+     @Test
+     public void testDelegation() {
         // TODO
     }
 
@@ -771,8 +774,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
     // Irrelevant Conflicts
 
-    @Test
-    public void testAnAppointmentDoesntConflictWithItself() throws OXException {
+     @Test
+     public void testAnAppointmentDoesntConflictWithItself() throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
 
         ITipChange change = new ITipChange();
@@ -793,8 +796,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
     }
 
-    @Test
-    public void testAnAppointmentDoesntConflictWithItsMaster() throws OXException {
+     @Test
+     public void testAnAppointmentDoesntConflictWithItsMaster() throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
 
         ITipChange change = new ITipChange();
@@ -816,8 +819,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
     }
 
-    @Test
-    public void testAnAppointmentDoesntConflictIfItIsChangedToANonConflictingDate() throws OXException {
+     @Test
+     public void testAnAppointmentDoesntConflictIfItIsChangedToANonConflictingDate() throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
 
         ITipChange change = new ITipChange();
@@ -856,8 +859,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
             analysis.getChanges().get(0).getConflicts().isEmpty());
     }
 
-    @Test
-    public void testAnExceptionDoesntConflictIfItIsDeleted() throws OXException {
+     @Test
+     public void testAnExceptionDoesntConflictIfItIsDeleted() throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
 
         ITipChange change = new ITipChange();
@@ -894,8 +897,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
             analysis.getChanges().get(0).getConflicts().isEmpty());
     }
 
-    @Test
-    public void testAConflictCanStillBeAConflictEvenIfItWasChanged() throws OXException {
+     @Test
+     public void testAConflictCanStillBeAConflictEvenIfItWasChanged() throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
 
         ITipChange change = new ITipChange();
@@ -934,8 +937,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
             analysis.getChanges().get(0).getConflicts().isEmpty());
     }
 
-    @Test
-    public void testCounterSuggestsChangingOrDeclining() throws OXException {
+     @Test
+     public void testCounterSuggestsChangingOrDeclining() throws OXException {
      // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -974,17 +977,19 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         integrationBuilder.assertAllWereCalled();
     }
 
-    public void testPartyCrasherViaCounter() {
+         @Test
+     public void testPartyCrasherViaCounter() {
         // TODO: Participant Differ
     }
 
-    public void testMultipleUpdatesWithConflictingActions() {
+         @Test
+     public void testMultipleUpdatesWithConflictingActions() {
         // TODO
     }
 
     // Error cases
-    @Test
-    public void testRejectOlderChange() throws OXException {
+     @Test
+     public void testRejectOlderChange() throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
@@ -1022,8 +1027,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertActions(analysis, ITipAction.IGNORE);
     }
 
-    @Test
-    public void testCounterUnknown() throws OXException {
+     @Test
+     public void testCounterUnknown() throws OXException {
      // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 

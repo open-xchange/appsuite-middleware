@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange User HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.user.json
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -51,8 +51,10 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.i18n.tools,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.mail.api,
  com.openexchange.mail.mime,
  com.openexchange.mail.mime.utils,
+ com.openexchange.mail.service,
  com.openexchange.multiple,
  com.openexchange.oauth.provider.resourceserver.annotations,
  com.openexchange.osgi,

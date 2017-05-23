@@ -1,8 +1,11 @@
+
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.util.Locale;
-
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -16,100 +19,102 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends ContactTest {
 
-	public NewTest(final String name) {
-		super(name);
-	}
+    public NewTest() {
+        super();
+    }
 
-	public void testNewContact() throws Exception {
-		final Contact contactObj = createContactObject("testNewContact");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
-		contactObj.setObjectID(objectId);
-		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
-		compareObject(contactObj, loadContact);
-	}
+    @Test
+    public void testNewContact() throws Exception {
+        final Contact contactObj = createContactObject("testNewContact");
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password);
+        contactObj.setObjectID(objectId);
+        final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword());
+        compareObject(contactObj, loadContact);
+    }
 
-	public void testNewContactWithAttachment() throws Exception {
-		final Contact contactObj = createContactObject("testNewContactWithAttachment");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
-		contactObj.setNumberOfAttachments(2);
-		contactObj.setObjectID(objectId);
+    @Test
+    public void testNewContactWithAttachment() throws Exception {
+        final Contact contactObj = createContactObject("testNewContactWithAttachment");
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password);
+        contactObj.setNumberOfAttachments(2);
+        contactObj.setObjectID(objectId);
 
-		final AttachmentMetadata attachmentObj = new AttachmentImpl();
-		attachmentObj.setFilename(System.currentTimeMillis() + "test1.txt");
-		attachmentObj.setModuleId(Types.CONTACT);
-		attachmentObj.setAttachedId(objectId);
-		attachmentObj.setFolderId(contactFolderId);
-		attachmentObj.setRtfFlag(false);
-		attachmentObj.setFileMIMEType("plain/text");
+        final AttachmentMetadata attachmentObj = new AttachmentImpl();
+        attachmentObj.setFilename(System.currentTimeMillis() + "test1.txt");
+        attachmentObj.setModuleId(Types.CONTACT);
+        attachmentObj.setAttachedId(objectId);
+        attachmentObj.setFolderId(contactFolderId);
+        attachmentObj.setRtfFlag(false);
+        attachmentObj.setFileMIMEType("plain/text");
 
-		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
 
-		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
+        AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostURI(), getLogin(), getPassword());
 
-		byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
-		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
+        byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
+        AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostURI(), getLogin(), getPassword());
 
-		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
-		compareObject(contactObj, loadContact);
-	}
+        final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword());
+        compareObject(contactObj, loadContact);
+    }
 
-	public void testContactInPrivateFlagInPublicFolder() throws Exception {
-		final FolderObject folderObj = new FolderObject();
-		folderObj.setFolderName("testContactInPrivateFlagInPublicFolder" + System.currentTimeMillis());
-		folderObj.setModule(FolderObject.CONTACT);
-		folderObj.setType(FolderObject.PUBLIC);
-		folderObj.setParentFolderID(2);
+    @Test
+    public void testContactInPrivateFlagInPublicFolder() throws Exception {
+        final FolderObject folderObj = new FolderObject();
+        folderObj.setFolderName("testContactInPrivateFlagInPublicFolder" + System.currentTimeMillis());
+        folderObj.setModule(FolderObject.CONTACT);
+        folderObj.setType(FolderObject.PUBLIC);
+        folderObj.setParentFolderID(2);
 
-		final OCLPermission[] permission = new OCLPermission[] {
-			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
-		};
+        final OCLPermission[] permission = new OCLPermission[] { FolderTest.createPermission(userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+        };
 
-		folderObj.setPermissionsAsArray( permission );
+        folderObj.setPermissionsAsArray(permission);
 
-		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, getHostURI(), getLogin(), getPassword());
 
-		final Contact contactObj = new Contact();
-		contactObj.setSurName("testContactInPrivateFlagInPublicFolder");
-		contactObj.setPrivateFlag(true);
-		contactObj.setParentFolderID(parentFolderId);
+        final Contact contactObj = new Contact();
+        contactObj.setSurName("testContactInPrivateFlagInPublicFolder");
+        contactObj.setPrivateFlag(true);
+        contactObj.setParentFolderID(parentFolderId);
 
-		try {
-			final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-			deleteContact(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-			fail("conflict exception expected!");
-		} catch (final OXException exc) {
-			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "CON-0171");
-		}
-	}
+        try {
+            final int objectId = insertContact(getWebConversation(), contactObj, getHostURI(), getLogin(), getPassword());
+            deleteContact(getWebConversation(), objectId, parentFolderId, getHostURI(), getLogin(), getPassword());
+            fail("conflict exception expected!");
+        } catch (final OXException exc) {
+            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), "CON-0171");
+        }
+    }
 
-	public void testContactWithAttachment() throws Exception {
-		final Contact contactObj = createContactObject("testContactWithAttachment");
-		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
-		contactObj.setObjectID(objectId);
-		contactObj.setNumberOfAttachments(1);
+    @Test
+    public void testContactWithAttachment() throws Exception {
+        final Contact contactObj = createContactObject("testContactWithAttachment");
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password);
+        contactObj.setObjectID(objectId);
+        contactObj.setNumberOfAttachments(1);
 
-		final AttachmentMetadata attachmentMeta = new AttachmentImpl();
-		attachmentMeta.setAttachedId(objectId);
-		attachmentMeta.setFolderId(contactFolderId);
-		attachmentMeta.setFileMIMEType("text/plain");
-		attachmentMeta.setModuleId(Types.CONTACT);
-		attachmentMeta.setFilename("test.txt");
+        final AttachmentMetadata attachmentMeta = new AttachmentImpl();
+        attachmentMeta.setAttachedId(objectId);
+        attachmentMeta.setFolderId(contactFolderId);
+        attachmentMeta.setFileMIMEType("text/plain");
+        attachmentMeta.setModuleId(Types.CONTACT);
+        attachmentMeta.setFilename("test.txt");
 
-		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("test".getBytes());
-		AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostName(), getLogin(), getPassword(), context);
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("test".getBytes());
+        AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostURI(), getLogin(), getPassword());
 
-		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
-		final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, decrementDate(loadContact.getLastModified()), true, false, getHostName(), getLogin(), getPassword(), context);
+        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword());
+        final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, decrementDate(loadContact.getLastModified()), true, false, getHostURI(), getLogin(), getPassword());
 
-		boolean found = false;
-		for (int a = 0; a < contactArray.length; a++) {
-			if (contactArray[a].getObjectID() == objectId) {
-				compareObject(contactObj, contactArray[a]);
-				found = true;
-			}
-		}
+        boolean found = false;
+        for (int a = 0; a < contactArray.length; a++) {
+            if (contactArray[a].getObjectID() == objectId) {
+                compareObject(contactObj, contactArray[a]);
+                found = true;
+            }
+        }
 
-		assertTrue("task not found" , found);
-	}
+        assertTrue("task not found", found);
+    }
 }
-

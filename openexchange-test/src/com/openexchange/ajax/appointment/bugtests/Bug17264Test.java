@@ -51,8 +51,12 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -62,7 +66,6 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -91,68 +94,47 @@ public class Bug17264Test extends AbstractAJAXSession {
      *
      * @param name
      */
-    public Bug17264Test(String name) {
-        super(name);
+    public Bug17264Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = getClient2();
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Folder to test bug 17264",
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(
-                clientA.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientB.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 17264", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
 
         appointment = new Appointment();
-        appointment.setUsers(new UserParticipant[] {
-            new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
-        appointment.setParticipants(new Participant[] {
-            new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointment.setUsers(new UserParticipant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
+        appointment.setParticipants(new Participant[] { new UserParticipant(clientA.getValues().getUserId()), new UserParticipant(clientB.getValues().getUserId()) });
         Calendar cal = new GregorianCalendar();
         int thisYear = cal.get(Calendar.YEAR);
-        appointment.setStartDate(D("01.12." + Integer.toString(thisYear+1) + " 08:00"));
-        appointment.setEndDate(D("01.12." + Integer.toString(thisYear+1) + " 09:00"));
+        appointment.setStartDate(D("01.12." + Integer.toString(thisYear + 1) + " 08:00"));
+        appointment.setEndDate(D("01.12." + Integer.toString(thisYear + 1) + " 09:00"));
         appointment.setTitle("Bug 17264 Test");
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setIgnoreConflicts(true);
         appointment.setAlarm(30);
     }
 
+    @Test
     public void testBug17264() throws Exception {
         InsertRequest insertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insertRequest);
         insertResponse.fillObject(appointment);
         checkAlarm(30, 0);
 
-//        appointment.setAlarm(45);
-//        appointment.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
-//        UpdateRequest updateRequest = new UpdateRequest(appointment, clientA.getValues().getTimeZone());
-//        UpdateResponse updateResponse = clientA.execute(updateRequest);
-//        updateResponse.fillObject(appointment);
-//        checkAlarm(45, 0);
+        //        appointment.setAlarm(45);
+        //        appointment.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
+        //        UpdateRequest updateRequest = new UpdateRequest(appointment, clientA.getValues().getTimeZone());
+        //        UpdateResponse updateResponse = clientA.execute(updateRequest);
+        //        updateResponse.fillObject(appointment);
+        //        checkAlarm(45, 0);
 
         appointment.setAlarm(60);
         appointment.setParentFolderID(folder.getObjectID());
@@ -176,6 +158,7 @@ public class Bug17264Test extends AbstractAJAXSession {
         checkAlarm(120, 5);
     }
 
+    @Test
     public void testShareCreate() throws Exception {
         appointment.removeObjectID();
         appointment.setParentFolderID(folder.getObjectID());
@@ -195,16 +178,19 @@ public class Bug17264Test extends AbstractAJAXSession {
 
     private void checkAlarm(AJAXClient client, int folderId, int alarm) throws Exception {
         GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
-        GetResponse getResponse = client.execute(getRequest);
-        Appointment app = getResponse.getAppointment(client.getValues().getTimeZone());
+        GetResponse getResponse = clientA.execute(getRequest);
+        Appointment app = getResponse.getAppointment(clientA.getValues().getTimeZone());
         assertEquals("Wrong alarm value", alarm, app.getAlarm());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        //clientA.execute(new DeleteRequest(appointment));
-        clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
-        super.tearDown();
+        try {
+            //clientA.execute(new DeleteRequest(appointment));
+            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

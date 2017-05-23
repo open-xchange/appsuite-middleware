@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.session;
 
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -56,9 +59,7 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.java.Strings;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * Login using "formlogin" doesn't work after changing IP address of client
@@ -68,39 +69,22 @@ import com.openexchange.java.Strings;
 public class Bug36484Test extends AbstractAJAXSession {
 
     private AJAXClient client;
-    private String login;
-    private String password;
-
-    /**
-     * Initializes a new {@link Bug36484Test}.
-     *
-     * @param name The test name
-     */
-    public Bug36484Test(String name) {
-        super(name);
-    }
+    private TestUser acquiredUser;
 
     @Override
-    protected void setUp() throws Exception {
-        AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        acquiredUser = testContext.acquireUser();
         client = new AJAXClient(new AJAXSession(), true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client && false == Strings.isEmpty(client.getSession().getId())) {
-            client.logout();
-        }
-        super.tearDown();
-    }
-
+    @Test
     public void testAutoFormLoginWithChangedIP() throws Exception {
         /*
          * perform initial form login & store session cookie
          */
-        FormLoginResponse loginResponse = client.execute(new FormLoginRequest(login, password));
+        FormLoginResponse loginResponse = client.execute(new FormLoginRequest(acquiredUser.getLogin(), acquiredUser.getPassword()));
         String firstSessionID = loginResponse.getSessionId();
         assertNotNull("No session ID", firstSessionID);
         client.getSession().setId(firstSessionID);
@@ -108,7 +92,7 @@ public class Bug36484Test extends AbstractAJAXSession {
         /*
          * perform second form login from other IP (faked via X-Forwarded-For header)
          */
-        FormLoginRequest secondLoginRequest = new ChangedIPFormLoginRequest(login, password, "53.246.23.4");
+        FormLoginRequest secondLoginRequest = new ChangedIPFormLoginRequest(acquiredUser.getLogin(), acquiredUser.getPassword(), "53.246.23.4");
         secondLoginRequest.setCookiesNeeded(false);
         FormLoginResponse secondLoginResponse = client.execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();

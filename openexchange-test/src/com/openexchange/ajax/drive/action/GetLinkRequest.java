@@ -83,9 +83,7 @@ public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "getLink"),
-            new Parameter("root", root)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "getLink"), new Parameter("root", root)
         };
     }
 

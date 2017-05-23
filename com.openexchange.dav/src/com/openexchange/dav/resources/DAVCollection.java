@@ -119,6 +119,17 @@ public abstract class DAVCollection extends AbstractCollection {
     }
 
     /**
+     * Gets the topic this collection uses for push notifications.
+     * <p/>
+     * The default implementation returns <code>null</code> (no push available), so override if applicable.
+     *
+     * @return The push topic, or <code>null</code> if not available for this collection
+     */
+    public String getPushTopic() {
+        return null;
+    }
+
+    /**
      * Gets the collection's sync token based on the last modification timestamp.
      *
      * @return The sync token

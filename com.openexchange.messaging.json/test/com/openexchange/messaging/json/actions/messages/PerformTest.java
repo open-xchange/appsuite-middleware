@@ -49,8 +49,10 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static org.junit.Assert.assertEquals;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingMessage;
@@ -69,7 +71,8 @@ public class PerformTest extends AbstractMessagingActionTest {
 
     // Success Cases
 
-    public void testPerformStorageCall() throws OXException {
+         @Test
+     public void testPerformStorageCall() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -91,7 +94,8 @@ public class PerformTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testPerformMessageCall() throws OXException, JSONException {
+         @Test
+     public void testPerformMessageCall() throws OXException, JSONException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -113,7 +117,8 @@ public class PerformTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testPerformNullCall() throws OXException {
+         @Test
+     public void testPerformNullCall() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
@@ -132,7 +137,8 @@ public class PerformTest extends AbstractMessagingActionTest {
 
     // Error Cases
 
-    public void testMissingServiceID() throws OXException {
+         @Test
+     public void testMissingServiceID() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
@@ -142,7 +148,8 @@ public class PerformTest extends AbstractMessagingActionTest {
         assertFails(req);
     }
 
-    public void testMissingAccountID() throws OXException {
+         @Test
+     public void testMissingAccountID() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
@@ -153,7 +160,8 @@ public class PerformTest extends AbstractMessagingActionTest {
 
     }
 
-    public void testMissingAction() throws OXException {
+         @Test
+     public void testMissingAction() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");

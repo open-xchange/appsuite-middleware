@@ -54,7 +54,6 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -89,15 +88,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedFileInputStream;
-import org.apache.james.mime4j.MimeException;
-import org.apache.james.mime4j.parser.ContentHandler;
-import org.apache.james.mime4j.parser.MimeStreamParser;
-import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -107,11 +98,13 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -120,9 +113,11 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -133,10 +128,10 @@ import com.openexchange.mail.mime.filler.SessionCompositionParameters;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.util.MessageRemovedIOException;
 
@@ -409,10 +404,10 @@ public final class MimeMessageConverter {
                     boolean deleteOnError = false;
                     try {
                         if (null == file) {
-                            deleteOnError = true;
                             File newTempFile = fileManagement.newTempFile();
-                            writeToFile(mail, newTempFile);
                             file = newTempFile;
+                            deleteOnError = true;
+                            writeToFile(mail, newTempFile);
                         }
                         mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, mail.getReceivedDateDirect());
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
@@ -1875,20 +1870,6 @@ public final class MimeMessageConverter {
                 }
             }
             /*
-             * Check for special items
-             */
-            if (msg instanceof IMAPMessage) {
-                IMAPMessage imapMessage = (IMAPMessage) msg;
-                Long origUid = (Long) imapMessage.getItem("X-REAL-UID");
-                if (null != origUid) {
-                    mail.setOriginalId(origUid.toString());
-                }
-                String origFolder = (String) imapMessage.getItem("X-MAILBOX");
-                if (null != origFolder) {
-                    mail.setOriginalFolder(origFolder);
-                }
-            }
-            /*
              * Set headers
              */
             setHeaders(msg, mail);
@@ -2021,6 +2002,7 @@ public final class MimeMessageConverter {
              */
             mail.setSubject(getSubject(mail), true);
             mail.setThreadLevel(0);
+            mail.setSecurityInfo(getSecurityInfo(mail));
             return mail;
         } catch (final MessageRemovedException e) {
             final String[] sa = getFolderAndIdSafe(msg);
@@ -2037,6 +2019,30 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if given mail is an encrypted or signed PGP email
+     *
+     * @return <code>true</code> if mail is an encrypted; otherwise <code>false</code>
+     */
+    private static SecurityInfo getSecurityInfo (MimeMailMessage mail) {
+        ServiceLookup services = MailJSONActivator.SERVICES.get();
+        if (null == services) {
+            return null;
+        }
+
+        PGPMailRecognizer recognizer = services.getOptionalService(PGPMailRecognizer.class);
+        if (null == recognizer) {
+            return null;
+        }
+
+        try {
+            return new SecurityInfo (recognizer.isPGPMessage(mail), recognizer.isPGPSignedMessage(mail));
+        } catch (Exception e) {
+            LOG.warn("Failed to check if mail is encrypted", e);
+            return null;
         }
     }
 
@@ -2187,10 +2193,20 @@ public final class MimeMessageConverter {
              * Set all cacheable data
              */
             setHeaders(part, mailPart);
+            boolean contentTypeParsed = false;
             {
                 final String[] contentTypeHdr = mailPart.getHeader(CONTENT_TYPE);
                 if (null != contentTypeHdr && contentTypeHdr.length > 0) {
-                    mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(contentTypeHdr[0]));
+                    try {
+                        mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(contentTypeHdr[0]));
+                        contentTypeParsed = true;
+                    } catch (OXException x) {
+                        LOG.debug("Invalid Content-Type value", x);
+                        ContentType ct = new ContentType();
+                        ct.setPrimaryType("application");
+                        ct.setSubType("octet-stream");
+                        mailPart.setContentType(ct);
+                    }
                 } else {
                     String sct = part.getContentType();
                     if (!Strings.isEmpty(sct)) {
@@ -2207,7 +2223,24 @@ public final class MimeMessageConverter {
             {
                 final String[] tmp = mailPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
                 if ((tmp != null) && (tmp.length > 0)) {
-                    mailPart.setContentDisposition(MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]));
+                    try {
+                        String disposition = MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]);
+                        ContentDisposition contentDisposition = new ContentDisposition(disposition);
+                        mailPart.setContentDisposition(contentDisposition);
+
+                        if (false == contentTypeParsed) {
+                            String filename = contentDisposition.getFilenameParameter();
+                            if (false == Strings.isEmpty(filename)) {
+                                String contentType = MimeType2ExtMap.getContentType(filename);
+                                mailPart.setContentType(contentType);
+                            }
+                        }
+                    } catch (OXException x) {
+                        LOG.debug("Invalid Content-Disposition value", x);
+                        ContentDisposition cd = new ContentDisposition();
+                        cd.setAttachment();
+                        mailPart.setContentDisposition(cd);
+                    }
                 }
             }
             {
@@ -2385,35 +2418,6 @@ public final class MimeMessageConverter {
 
     private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
-    private static volatile Boolean enableMime4j;
-
-    private static boolean useMime4j() {
-        Boolean tmp = enableMime4j;
-        if (null == tmp) {
-            synchronized (MimeMessageConverter.class) {
-                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                tmp = Boolean.valueOf(null == service ? false : service.getBoolProperty("com.openexchange.mail.mime.enableMime4j", false));
-                enableMime4j = tmp;
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                enableMime4j = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.mime.enableMime4j");
-            }
-        });
-    }
-
     private static void setHeaders(final Part part, final MailPart mailPart) throws OXException {
         /*
          * HEADERS
@@ -2421,7 +2425,9 @@ public final class MimeMessageConverter {
         HeaderCollection headers = null;
         try {
             headers = new HeaderCollection(128);
-            if (useMime4j() && (part instanceof IMAPMessage)) {
+            /*-
+             *
+            if (false && (part instanceof IMAPMessage)) {
                 final ContentHandler handler = new HeaderContentHandler(headers);
                 final MimeConfig config = new MimeConfig();
                 config.setMaxLineLen(-1);
@@ -2444,6 +2450,7 @@ public final class MimeMessageConverter {
                     }
                 }
             } else {
+             */
                 for (final Enumeration<?> e = part.getAllHeaders(); e.hasMoreElements();) {
                     final Header h = (Header) e.nextElement();
                     final String value = h.getValue();
@@ -2453,7 +2460,7 @@ public final class MimeMessageConverter {
                         headers.addHeader(h.getName(), unfold(value));
                     }
                 }
-            }
+            //}
         } catch (final MessageRemovedException e) {
             final String[] sa = part instanceof MimeMessage ? getFolderAndIdSafe((MimeMessage) part) : null;
             final String folder = null == sa ? null : sa[0];

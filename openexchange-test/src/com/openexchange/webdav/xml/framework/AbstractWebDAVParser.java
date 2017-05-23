@@ -50,13 +50,12 @@
 package com.openexchange.webdav.xml.framework;
 
 import java.io.IOException;
-import org.junit.Assert;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.junit.Assert;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.types.Response;
 
@@ -79,7 +78,7 @@ public abstract class AbstractWebDAVParser<T extends AbstractWebDAVResponse> ext
         assertEquals("Response code is not okay.", 207, status);
     }
 
-    public T parse(final HttpMethodBase method) throws JDOMException, IOException, OXException, OXException {
+    public T parse(final HttpMethodBase method) throws JDOMException, IOException, OXException {
         final Document document = builder.build(method.getResponseBodyAsStream());
         final Response[] responses = ResponseParser.parse(document, getType());
         return createResponse(document, responses);
@@ -87,5 +86,5 @@ public abstract class AbstractWebDAVParser<T extends AbstractWebDAVResponse> ext
 
     protected abstract int getType();
 
-    protected abstract T createResponse(final Document document, final Response[] responses) throws OXException, TestException;
+    protected abstract T createResponse(final Document document, final Response[] responses) throws OXException;
 }

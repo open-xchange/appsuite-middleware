@@ -51,7 +51,6 @@ package com.openexchange.pubsub;
 
 import com.openexchange.templating.OXTemplate;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */

@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Net SSL Management Bundle
+Bundle-SymbolicName: com.openexchange.net.ssl.management
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: com.openexchange.net.ssl.management,
+ com.openexchange.net.ssl.management.exception
+Import-Package: com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework,
+ org.slf4j

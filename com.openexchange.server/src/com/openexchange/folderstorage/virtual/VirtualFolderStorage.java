@@ -234,6 +234,9 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                  * Default calendar folder
                  */
                 FolderStorage realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, CalendarContentType.getInstance());
+                if (null == realStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, CalendarContentType.getInstance());
+                }
                 checkOpenedStorage(realStorage, params, false, openedStorages);
                 rollback = true;
                 String folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, CalendarContentType.getInstance(), PrivateType.getInstance(), params);
@@ -249,6 +252,9 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                  * Default contact folder
                  */
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, ContactContentType.getInstance());
+                if (null == realStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, ContactContentType.getInstance());
+                }
                 checkOpenedStorage(realStorage, params, false, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, ContactContentType.getInstance(), PrivateType.getInstance(), params);
                 if (!tree.containsFolder(folderID)) {
@@ -262,6 +268,9 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                  * Default task folder
                  */
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, TaskContentType.getInstance());
+                if (null == realStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, TaskContentType.getInstance());
+                }
                 checkOpenedStorage(realStorage, params, false, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, TaskContentType.getInstance(), PrivateType.getInstance(), params);
                 if (!tree.containsFolder(folderID)) {
@@ -275,6 +284,9 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                  * Default mail folder(s)
                  */
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, MailContentType.getInstance());
+                if (null == realStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, MailContentType.getInstance());
+                }
                 checkOpenedStorage(realStorage, params, false, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, MailContentType.getInstance(), PrivateType.getInstance(), params);
                 // INBOX
@@ -817,6 +829,11 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
     @Override
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters params) throws OXException {
         return new String[0];
+    }
+
+    @Override
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
+        return getVisibleFolders(null, contentType, type, storageParameters);
     }
 
     @Override

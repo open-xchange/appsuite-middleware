@@ -16,37 +16,26 @@
  */
 package org.apache.tika.metadata;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 //JDK imports
 import java.util.Date;
 import java.util.Properties;
-
-//Junit imports
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
+import org.junit.Test;
 
 /**
  * JUnit based tests of class {@link org.apache.tika.metadata.Metadata}.
  */
-public class TestMetadata extends TestCase {
-
+public class TestMetadata {
     private static final String CONTENTTYPE = "contenttype";
 
-    public TestMetadata(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(TestMetadata.class);
-    }
-
-    public static void main(String[] args) {
-        TestRunner.run(suite());
-    }
-
     /** Test for the <code>add(String, String)</code> method. */
-    public void testAdd() {
+    @Test
+     public void testAdd() {
         String[] values = null;
         Metadata meta = new Metadata();
 
@@ -83,7 +72,8 @@ public class TestMetadata extends TestCase {
     }
 
     /** Test for the <code>set(String, String)</code> method. */
-    public void testSet() {
+    @Test
+     public void testSet() {
         String[] values = null;
         Metadata meta = new Metadata();
 
@@ -109,7 +99,8 @@ public class TestMetadata extends TestCase {
     }
 
     /** Test for <code>setAll(Properties)</code> method. */
-    public void testSetProperties() {
+    @Test
+     public void testSetProperties() {
         String[] values = null;
         Metadata meta = new Metadata();
         Properties props = new Properties();
@@ -136,7 +127,8 @@ public class TestMetadata extends TestCase {
     }
 
     /** Test for <code>get(String)</code> method. */
-    public void testGet() {
+    @Test
+     public void testGet() {
         Metadata meta = new Metadata();
         assertNull(meta.get("a-name"));
         meta.add("a-name", "value-1");
@@ -146,7 +138,8 @@ public class TestMetadata extends TestCase {
     }
 
     /** Test for <code>isMultiValued()</code> method. */
-    public void testIsMultiValued() {
+    @Test
+     public void testIsMultiValued() {
         Metadata meta = new Metadata();
         assertFalse(meta.isMultiValued("key"));
         meta.add("key", "value1");
@@ -156,7 +149,8 @@ public class TestMetadata extends TestCase {
     }
 
     /** Test for <code>names</code> method. */
-    public void testNames() {
+    @Test
+     public void testNames() {
         String[] names = null;
         Metadata meta = new Metadata();
         names = meta.names();
@@ -172,7 +166,8 @@ public class TestMetadata extends TestCase {
     }
 
     /** Test for <code>remove(String)</code> method. */
-    public void testRemove() {
+    @Test
+     public void testRemove() {
         Metadata meta = new Metadata();
         meta.remove("name-one");
         assertEquals(0, meta.size());
@@ -193,7 +188,8 @@ public class TestMetadata extends TestCase {
     }
 
     /** Test for <code>equals(Object)</code> method. */
-    public void testObject() {
+    @Test
+     public void testObject() {
         Metadata meta1 = new Metadata();
         Metadata meta2 = new Metadata();
         assertFalse(meta1.equals(null));
@@ -221,7 +217,8 @@ public class TestMetadata extends TestCase {
      * Tests for getting and setting integer
      *  based properties
      */
-    public void testGetSetInt() {
+    @Test
+     public void testGetSetInt() {
         Metadata meta = new Metadata();
         
         // Isn't initially set, will get null back
@@ -259,7 +256,8 @@ public class TestMetadata extends TestCase {
      * Tests for getting and setting date
      *  based properties
      */
-    public void testGetSetDate() {
+    @Test
+     public void testGetSetDate() {
         Metadata meta = new Metadata();
         long hour = 60 * 60 * 1000; 
         
@@ -330,7 +328,8 @@ public class TestMetadata extends TestCase {
      * Some documents, like jpegs, might have date in unspecified time zone
      * which should be handled like strings but verified to have parseable ISO 8601 format
      */
-    public void testGetSetDateUnspecifiedTimezone() {
+    @Test
+     public void testGetSetDateUnspecifiedTimezone() {
         Metadata meta = new Metadata();    
         
         meta.set(TikaCoreProperties.CREATED, "1970-01-01T00:00:01");
@@ -343,7 +342,7 @@ public class TestMetadata extends TestCase {
      *  composite the value can be retrieved with the property or the aliases
      */
     @SuppressWarnings("deprecation")
-    public void testCompositeProperty() {
+     public void testCompositeProperty() {
        Metadata meta = new Metadata();
        Property compositeProperty = Property.composite(
              DublinCore.DESCRIPTION, new Property[] { 

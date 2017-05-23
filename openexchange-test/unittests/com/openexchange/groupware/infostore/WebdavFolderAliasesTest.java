@@ -46,15 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.infostore;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class WebdavFolderAliasesTest extends TestCase {
+public class WebdavFolderAliasesTest {
 
     private WebdavFolderAliases aliases = null;
 
@@ -66,20 +69,21 @@ public class WebdavFolderAliasesTest extends TestCase {
     private final int id2 = 1337;
     private final int parent2 = 2017;
 
-
-    @Override
+    @Before
     public void setUp() {
         aliases = new InMemoryAliases();
         aliases.registerNameWithIDAndParent(alias1, id1, parent1);
         aliases.registerNameWithIDAndParent(alias2, id2, parent2);
     }
 
+    @Test
     public void testLookupByID() {
         assertEquals(alias1, aliases.getAlias(id1));
         assertEquals(alias2, aliases.getAlias(id2));
         assertEquals(null, aliases.getAlias(666));
     }
 
+    @Test
     public void testLookupByNameAndParent() {
         assertEquals(id1, aliases.getId(alias1, parent1));
         assertEquals(id2, aliases.getId(alias2, parent2));

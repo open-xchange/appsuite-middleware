@@ -55,9 +55,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.client.onboarding.ClientDevice;
+import com.openexchange.client.onboarding.ClientDevices;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DefaultOnboardingRequest;
 import com.openexchange.client.onboarding.OnboardingAction;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.ResultObject;
 import com.openexchange.client.onboarding.Scenario;
@@ -104,9 +107,20 @@ public class ExecuteAction extends AbstractOnboardingAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("action_id");
         }
 
+        // Target client
         OnboardingAction action = OnboardingAction.actionFor(sAction);
         if (null == action) {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create("action_id");
+        }
+
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
+
+        if (false == clientDevice.implies(compositeId.getDevice())) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(compositeId.getScenarioId());
         }
 
         // Parse optional form content
@@ -122,7 +136,7 @@ public class ExecuteAction extends AbstractOnboardingAction {
         Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), session);
 
         // Create on-boarding request & execute it
-        DefaultOnboardingRequest request = new DefaultOnboardingRequest(scenario, action, compositeId.getDevice(), requestData.getHostData(), input);
+        DefaultOnboardingRequest request = new DefaultOnboardingRequest(scenario, action, clientDevice, compositeId.getDevice(), requestData.getHostData(), input);
         ResultObject resultObject = onboardingService.execute(request, session);
 
         // Return result

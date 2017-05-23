@@ -63,14 +63,14 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class Bug26957Test extends CalDAVTest {
 
-	@Test
-	public void testPutICalWithoutVEvent() throws Exception {
-	    /*
+    @Test
+    public void testPutICalWithoutVEvent() throws Exception {
+        /*
          * try to create appointment
          */
         String uid = randomUID();
         String iCal = "BEGIN:VCALENDAR\nCALSCALE:GREGORIAN\nVERSION:2.0\nMETHOD:PUBLISH\nPRODID:-//Apple Inc.//Mac OS X 10.8.4//EN\nEND:VCALENDAR\n";
         assertEquals("response code wrong", HttpServletResponse.SC_FORBIDDEN, putICal(uid, iCal));
-	}
+    }
 
 }

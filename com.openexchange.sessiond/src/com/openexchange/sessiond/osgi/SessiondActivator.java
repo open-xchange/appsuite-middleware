@@ -302,8 +302,6 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
-            
-            registerService(ObfuscatorService.class, SessionHandler.getObfuscator());
 
             registerService(ObfuscatorService.class, SessionHandler.getObfuscator());
 

@@ -66,6 +66,7 @@ import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.util.InputStreamProvider;
 import com.openexchange.imap.util.ThresholdInputStreamProvider;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -152,8 +153,10 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
                 final ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
                 tisp.write(inp.getInputStream());
                 this.inProvider = tisp;
-            } catch (final IOException e) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (com.sun.mail.util.MessageRemovedIOException e) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw MailExceptionCode.UNREADBALE_PART_CONTENT_SIMPLE.create(e, e.getMessage());
             }
         }
     }
@@ -232,36 +235,38 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
             return;
         }
         {
-            final String disposition = bodystructure.disposition;
-            final ParameterList dParams = bodystructure.dParams;
+            String disposition = bodystructure.disposition;
+            ParameterList dParams = bodystructure.dParams;
             if (null != disposition || null != dParams) {
-                final ContentDisposition contentDisposition = new ContentDisposition();
+                ContentDisposition contentDisposition = new ContentDisposition();
                 if (null != disposition) {
                     contentDisposition.setDisposition(disposition);
                 }
                 if (null != dParams) {
-                    for (final Enumeration<?> names = dParams.getNames(); names.hasMoreElements();) {
-                        final String name = names.nextElement().toString();
-                        contentDisposition.setParameter(name, MimeMessageUtility.decodeEnvelopeHeader(dParams.get(name)));
+                    for (Enumeration<String> names = dParams.getNames(); names.hasMoreElements();) {
+                        String name = names.nextElement();
+                        String value = dParams.get(name);
+                        contentDisposition.setParameter(name, (Strings.isEmpty(value) || (value.indexOf("=?") < 0)) ? value : MimeMessageUtility.decodeEnvelopeHeader(value));
                     }
                 }
                 setContentDisposition(contentDisposition);
             }
         }
         {
-            final ParameterList cParams = bodystructure.cParams;
+            ParameterList cParams = bodystructure.cParams;
             if (null != bodystructure.type || null != bodystructure.subtype || null != cParams) {
-                final ContentType contentType = new ContentType();
+                ContentType contentType = new ContentType();
                 if (null != bodystructure.type) {
-                    contentType.setPrimaryType(com.openexchange.java.Strings.toLowerCase(bodystructure.type));
+                    contentType.setPrimaryType(Strings.asciiLowerCase(bodystructure.type));
                 }
                 if (null != bodystructure.subtype) {
-                    contentType.setSubType(com.openexchange.java.Strings.toLowerCase(bodystructure.subtype));
+                    contentType.setSubType(Strings.asciiLowerCase(bodystructure.subtype));
                 }
                 if (null != cParams) {
-                    for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
-                        final String name = names.nextElement().toString();
-                        contentType.setParameter(name, MimeMessageUtility.decodeEnvelopeHeader(cParams.get(name)));
+                    for (Enumeration<String> names = cParams.getNames(); names.hasMoreElements();) {
+                        String name = names.nextElement();
+                        String value = cParams.get(name);
+                        contentType.setParameter(name, (Strings.isEmpty(value) || (value.indexOf("=?") < 0)) ? value : MimeMessageUtility.decodeEnvelopeHeader(value));
                     }
                 }
                 setContentType(contentType);

@@ -61,6 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.Scenario;
@@ -156,7 +157,7 @@ public class PListDownloadServlet extends WebDavServlet {
             PListDict plist = null;
             try {
                 OnboardingService onboardingService = lookup.getService(OnboardingService.class);
-                scenario = onboardingService.getScenario(scenarioId, device, userId, contextId);
+                scenario = onboardingService.getScenario(scenarioId, ClientDevice.IMPLIES_ALL, device, userId, contextId);
                 String hostName = determineHostName(req, userId, contextId);
 
                 for (OnboardingProvider provider : scenario.getProviders(userId, contextId)) {

@@ -1,0 +1,48 @@
+feature_name: Realtime
+feature_description: |
+  This page shows the properties for the realtime components contained in the package open-xchange-realtime-core.
+properties:
+    - key: com.openexchange.realtime.isTraceAllUsersEnabled
+      description: |
+        Enable tracing for all users.
+        
+        <h3>Tracing</h3>
+        Tracing is done by adding a unique tracer to the client message that enables you
+        to follow the path of a realtime tracer/message as it is handled by different
+        parts of the server stack. This done by logging a status message at the info
+        loglevel.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: realtime.properties
+      packageName: open-xchange-core
+      tags: ["Realtime", "Logging"]
+    - key: com.openexchange.realtime.usersToTrace
+      description: |
+        Enable tracing only for a set of users by using the userID@contextID notation. E.g.: 
+        <pre>com.openexchange.realtime.usersToTrace=1@1, 2@1, 3@1</pre>
+        See [[com.openexchange.realtime.isTraceAllUsersEnabled]] for more informations about tracing.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: realtime.properties
+      packageName: open-xchange-core
+      tags: ["Realtime", "Logging"]
+    - key: com.openexchange.realtime.numberOfRunLoops
+      description: |
+        Specifies the number of run loops.
+        
+        A high number of synchronous operations e.g. persisting documents might lead to timeouts for query
+        actions/stanzas that are still enqueued in the the runloop and wait to be handled.
+      defaultValue: 16
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: realtime.properties
+      packageName: open-xchange-core
+      tags: ["Realtime"]

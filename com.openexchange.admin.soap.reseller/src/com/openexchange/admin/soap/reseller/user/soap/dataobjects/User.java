@@ -146,15 +146,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield18" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
-<<<<<<< HEAD
-=======
  *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
-<<<<<<< HEAD
- *         &lt;element name="remove_drive_folder_flags" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
->>>>>>> 2b50186a082... MW-488: Added SOAP & refactoring
-=======
  *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
->>>>>>> c60111aa698... MW-488: Changed parameter name
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

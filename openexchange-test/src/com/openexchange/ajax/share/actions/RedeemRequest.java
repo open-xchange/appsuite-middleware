@@ -60,7 +60,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 
-
 /**
  * {@link RedeemRequest}
  *
@@ -68,16 +67,16 @@ import com.openexchange.ajax.framework.Params;
  * @since v7.8.2
  */
 public class RedeemRequest implements AJAXRequest<RedeemResponse> {
-    
+
     private final String token;
     private final boolean failOnError;
-    
+
     public RedeemRequest(String token) {
         super();
         this.token = token;
         this.failOnError = false;
     }
-    
+
     public RedeemRequest(String token, boolean failOnError) {
         super();
         this.token = token;
@@ -113,9 +112,9 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
     public Header[] getHeaders() {
         return NO_HEADER;
     }
-    
+
     private static final class RedeemParser extends AbstractAJAXParser<RedeemResponse> {
-        
+
         public RedeemParser(boolean failOnError) {
             super(failOnError);
         }
@@ -124,27 +123,15 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
         protected RedeemResponse createResponse(Response response) throws JSONException {
             if (!response.hasError()) {
                 Map<String, String> properties = new HashMap<String, String>();
-                JSONObject data = (JSONObject) response.getJSON();
-                if (data.hasAndNotNull("share")) {
-                    properties.put("share", data.getString("share"));
-                }
-                if (data.hasAndNotNull("login_type")) {
-                    properties.put("login_type", data.getString("login_type"));
-                }
-                if (data.hasAndNotNull("message_type")) {
-                    properties.put("message_type", data.getString("message_type"));
-                }
-                if (data.hasAndNotNull("message")) {
-                    properties.put("message", data.getString("message"));
-                }
-                if (data.hasAndNotNull("target")) {
-                    properties.put("target", data.getString("target"));
+                JSONObject data = response.getJSON();
+                for (String key : data.keySet()) {
+                    properties.put(key, data.getString(key));
                 }
                 return new RedeemResponse(response, properties);
             }
             return new RedeemResponse(response, null);
         }
-        
+
     }
 
 }

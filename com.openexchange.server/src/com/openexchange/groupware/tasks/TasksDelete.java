@@ -167,12 +167,6 @@ public class TasksDelete implements DeleteListener {
                 final int taskId = folderAndTask[1];
                 final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId, type);
                 if (folders.size() == 0) {
-                    final String folderName;
-                    if (null == folder) {
-                        folderName = "unknown";
-                    } else {
-                        folderName = folder.getFolderName();
-                    }
                     throw TaskExceptionCode.NO_PERMISSION.create(I(taskId), I(folderId));
                 } else if (folders.size() > 1) {
                     // Participant with userId already removed by

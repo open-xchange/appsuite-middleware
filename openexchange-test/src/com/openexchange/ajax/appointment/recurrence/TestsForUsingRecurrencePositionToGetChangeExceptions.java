@@ -49,11 +49,12 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
-
 
 /**
  * These tests document a strange behaviour of the HTTP API: If you ask
@@ -68,18 +69,17 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
     private Changes changes;
     private Appointment update;
 
-    public TestsForUsingRecurrencePositionToGetChangeExceptions(String name) {
-        super(name);
+    public TestsForUsingRecurrencePositionToGetChangeExceptions() {
+        super();
     }
 
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         app = generateDailyAppointment();
         app.setOccurrence(3);
 
-        calendarManager.insert(app);
+        catm.insert(app);
 
         changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 2);
@@ -88,12 +88,13 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
 
         update = app.clone();
         changes.update(update);
-        calendarManager.update(update);
+        catm.update(update);
 
     }
 
-    public void testShouldFindUnchangedFirstOccurrence() throws OXException{
-        Appointment actual = calendarManager.get(folder.getObjectID(), app.getObjectID(), 1);
+    @Test
+    public void testShouldFindUnchangedFirstOccurrence() throws OXException {
+        Appointment actual = catm.get(folder.getObjectID(), app.getObjectID(), 1);
 
         Expectations expectations = new Expectations();
         expectations.put(Appointment.START_DATE, D("1/1/2008 1:00"));
@@ -102,8 +103,9 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
         expectations.verify(actual);
     }
 
-    public void testShouldFindSomethingElseAsSecondOccurrenceButDoesNot() throws OXException{
-        Appointment actual = calendarManager.get(folder.getObjectID(), app.getObjectID(), 2);
+    @Test
+    public void testShouldFindSomethingElseAsSecondOccurrenceButDoesNot() throws OXException {
+        Appointment actual = catm.get(folder.getObjectID(), app.getObjectID(), 2);
 
         Expectations expectations = new Expectations();
         expectations.put(Appointment.START_DATE, D("2/1/2008 1:00"));
@@ -112,8 +114,9 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
         expectations.verify(actual);
     }
 
-    public void testShouldFindUnchangedLastOccurrence() throws OXException{
-        Appointment actual = calendarManager.get(folder.getObjectID(), app.getObjectID(), 3);
+    @Test
+    public void testShouldFindUnchangedLastOccurrence() throws OXException {
+        Appointment actual = catm.get(folder.getObjectID(), app.getObjectID(), 3);
 
         Expectations expectations = new Expectations();
         expectations.put(Appointment.START_DATE, D("3/1/2008 1:00"));

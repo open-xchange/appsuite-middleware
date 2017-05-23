@@ -53,7 +53,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * A {@link CapabilityChecker} can check capabilities.
+ * A {@link CapabilityChecker} can check {@link CapabilityService#declareCapability(String) previously declared} capabilities.
+ * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+ * <b>Note</b>: It does only apply to declared ones!
+ * </div>
  * <p>
  * OSGi-wise registration of a {@code CapabilityChecker} may be accompanied by service properties providing the <code>"capabilities"</code>
  * property that specifies to what capabilities that check applies.<br>

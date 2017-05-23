@@ -61,7 +61,7 @@ import org.powermock.api.mockito.PowerMockito;
 
 /**
  * Unit tests for {@link TestServlet}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -85,7 +85,7 @@ public class TestServletTest {
     /**
      * Header and attribute name parameters
      */
-    private Enumeration<?> parameters;
+    private Enumeration<String> parameters;
 
     /**
      * @throws java.lang.Exception
@@ -110,7 +110,7 @@ public class TestServletTest {
     }
 
     @Test(timeout = 500)
-    public void testDoGet_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
+     public void testDoGet_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
         this.testServlet = new TestServlet() {
 
             @Override
@@ -123,7 +123,7 @@ public class TestServletTest {
     }
 
     @Test(timeout = 500)
-    public void testDoPut_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
+     public void testDoPut_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
         this.testServlet = new TestServlet() {
 
             @Override

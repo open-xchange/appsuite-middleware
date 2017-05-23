@@ -90,11 +90,11 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
         try {
             // Determine keys to read from config service
             List<String> allKeys = null == configKeys || configKeys.length == 0 ? new ArrayList<String>(6) : new ArrayList<String>(Arrays.asList(configKeys));
-            allKeys.add(Property.IP_CHECK.getPropertyName());
             allKeys.add(Property.COOKIE_HASH.getPropertyName());
-            allKeys.add(Property.IP_CHECK_WHITELIST.getPropertyName());
-            allKeys.add(Property.IP_MASK_V4.getPropertyName());
-            allKeys.add(Property.IP_MASK_V6.getPropertyName());
+            // allKeys.add(Property.IP_CHECK.getPropertyName());           --> IP check mechanism may also be specified through "com.openexchange.ipcheck.mode"
+            // allKeys.add(Property.IP_CHECK_WHITELIST.getPropertyName()); --> Now initialized in IPCheckServiceImpl.newConfigurationFor(Session)
+            // allKeys.add(Property.IP_MASK_V4.getPropertyName());         --> Now initialized in IPCheckServiceImpl.newConfigurationFor(Session)
+            // allKeys.add(Property.IP_MASK_V6.getPropertyName());         --> Now initialized in IPCheckServiceImpl.newConfigurationFor(Session)
 
             // Fill Servlet's init parameters with keys' values
             Dictionary<String, String> initParams = createInitParameters(allKeys, alias, servlet);

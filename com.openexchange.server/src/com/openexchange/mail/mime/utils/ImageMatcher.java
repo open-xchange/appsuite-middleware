@@ -106,9 +106,9 @@ public final class ImageMatcher {
         } else {
             String prefix = "[a-zA-Z_0-9&-.]+/";
             final String regexImageUrl =
-                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^a-zA-Z][^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
             final String regexFileUrl =
-                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + "file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
+                "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + "file([^a-zA-Z][^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
             PATTERN_REF_IMG =
                 Pattern.compile("(?:" + regexFileUrl + ")|(?:" + regexImageUrl + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL);

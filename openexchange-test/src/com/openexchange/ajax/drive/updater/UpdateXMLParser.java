@@ -60,7 +60,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
  * {@link UpdateXMLParser}
  *
@@ -72,6 +71,7 @@ public class UpdateXMLParser extends AbstractAJAXParser<UpdateXMLResponse> {
 
     /**
      * Initializes a new {@link UpdateXMLParser}.
+     * 
      * @param failOnError
      */
     protected UpdateXMLParser(boolean failOnError) {
@@ -79,7 +79,7 @@ public class UpdateXMLParser extends AbstractAJAXParser<UpdateXMLResponse> {
     }
 
     @Override
-    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException ,IOException {
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
         xml = EntityUtils.toString(entity);

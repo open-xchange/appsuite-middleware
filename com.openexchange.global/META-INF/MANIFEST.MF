@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Global
 Bundle-SymbolicName: com.openexchange.global
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.openexchange.ajax.fileholder,
@@ -54,7 +54,8 @@ Export-Package: com.openexchange.ajax.fileholder,
  com.openexchange.tools.id,
  com.openexchange.tools.iterator,
  com.openexchange.tools.stream,
- com.openexchange.tools.strings
+ com.openexchange.tools.strings,
+ com.openexchange.tools.validate
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.boolex,
  ch.qos.logback.classic.db,
@@ -120,6 +121,9 @@ Import-Package: ch.qos.logback.classic,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.java.util,
@@ -151,12 +155,16 @@ Import-Package: ch.qos.logback.classic,
  javax.management.remote,
  javax.servlet,
  javax.servlet.http,
+ javax.ws.rs,
+ javax.ws.rs.client,
+ javax.ws.rs.core,
  net.htmlparser.jericho,
  net.htmlparser.jericho.nodoc,
  org.apache.commons.cli,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.net,
+ org.apache.commons.io,
  org.apache.commons.logging,
  org.apache.log4j,
  org.apache.log4j.helpers,

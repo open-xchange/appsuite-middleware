@@ -49,13 +49,17 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
-
 public class Bug13121Test extends CalendarSqlTest {
+
     /**
      * Test for <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=13121">bug #13121</a>
      */
+    @Test
     public void testDeleteParticipantInSharedFolder() throws Throwable {
         try {
             /*-

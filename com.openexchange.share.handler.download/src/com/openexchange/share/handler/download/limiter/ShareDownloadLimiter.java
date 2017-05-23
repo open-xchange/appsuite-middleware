@@ -92,7 +92,7 @@ public class ShareDownloadLimiter extends GuestDownloadLimiter implements Render
         try {
             super.onRequestInitialized(request);
         } catch (OXException oxException) {
-            if (oxException.similarTo(DownloadLimitedExceptionCode.COUNT_EXCEEDED) || oxException.similarTo(DownloadLimitedExceptionCode.LIMIT_EXCEEDED)) {
+            if (DownloadLimitedExceptionCode.COUNT_EXCEEDED.equals(oxException) || DownloadLimitedExceptionCode.LIMIT_EXCEEDED.equals(oxException)) {
                 throw new RateLimitedException("429 Download Limits Exceeded", 0);
             }
             throw oxException;

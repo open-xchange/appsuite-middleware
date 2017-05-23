@@ -50,6 +50,10 @@
 package com.openexchange.oauth.internal;
 
 import static com.openexchange.junit.Assert.assertEqualAttributes;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,6 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.Test;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.id.SimIDGenerator;
@@ -138,6 +143,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     // Success Cases
 
+    @Test
     public void testCreateAccount() throws OXException, SQLException {
         final OAuthAccount authAccount = createTestAccount();
 
@@ -180,6 +186,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         return authAccount;
     }
 
+    @Test
     public void testDefaultDisplayName() throws OXException {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
@@ -207,6 +214,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         assertEquals("The cool oauthService", authAccount.getDisplayName());
     }
 
+    @Test
     public void testGetAccount() throws Exception {
         final OAuthAccount authAccount = createTestAccount();
 
@@ -216,6 +224,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         assertEqualAttributes(authAccount, account);
     }
 
+    @Test
     public void testGetAccountsForUser() throws Exception {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,1,'account1user1', '1234', '4321', 'com.openexchange.test');");
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,2,'account2user1', '1234', '4321', 'com.openexchange.test');");
@@ -238,6 +247,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     }
 
+    @Test
     public void testGetAccountsForUserAndService() throws Exception {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,1,'account1user1', '1234', '4321', 'com.openexchange.test');");
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,2,'account2user1', '1234', '4321', 'com.openexchange.test');");
@@ -260,13 +270,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         }
     }
 
+    @Test
     public void testUpdateAccount() throws Exception {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,1,'account1', '1234', '4321', 'com.openexchange.test');");
 
         Set<OAuthScope> scopes = new HashSet<>();
         scopes.add(TestOAuthScope.calendar);
         scopes.add(TestOAuthScope.drive);
-        
+
         final Map<String, Object> update = new HashMap<String, Object>();
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
         update.put(OAuthConstants.ARGUMENT_SESSION, null);
@@ -275,6 +286,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         assertResult("SELECT 1 FROM oauthAccounts WHERE cid = 1 AND user = 23 AND displayName = 'updatedDisplayName' AND id = 1");
     }
 
+    @Test
     public void testDeleteAccount() throws Exception {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,1,'account1', '1234', '4321', 'com.openexchange.test');");
 
@@ -285,6 +297,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     // Error Cases
 
+    @Test
     public void testUnknownAccountMetadataOnCreate() {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
@@ -315,6 +328,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         }
     }
 
+    @Test
     public void testUnknownIdOnGet() {
         try {
             oauth.getAccount(12, null, 1, 23);
@@ -324,12 +338,13 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         }
     }
 
+    @Test
     public void testUnknownIdOnUpdate() {
         try {
             Set<OAuthScope> scopes = new HashSet<>();
             scopes.add(TestOAuthScope.calendar);
             scopes.add(TestOAuthScope.drive);
-            
+
             final Map<String, Object> update = new HashMap<String, Object>();
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
             update.put(OAuthConstants.ARGUMENT_SESSION, null);
@@ -340,6 +355,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         }
     }
 
+    @Test
     public void testUnknownIdOnDelete() {
         try {
             oauth.deleteAccount(12, 1, 23);

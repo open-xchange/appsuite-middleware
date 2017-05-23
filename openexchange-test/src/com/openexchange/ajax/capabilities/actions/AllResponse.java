@@ -58,7 +58,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 
-
 /**
  * {@link AllResponse}
  *
@@ -69,6 +68,7 @@ public class AllResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link AllResponse}.
+     * 
      * @param response
      */
     protected AllResponse(Response response) {

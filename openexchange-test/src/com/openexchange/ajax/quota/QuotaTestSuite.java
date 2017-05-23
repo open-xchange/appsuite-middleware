@@ -49,34 +49,22 @@
 
 package com.openexchange.ajax.quota;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link QuotaTestSuite}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class QuotaTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    GetQuotaTest.class,
+    MailQuotaTest.class,
+    FilestoreQuotaTest.class,
 
-    /**
-     * Initializes a new {@link QuotaTestSuite}.
-     */
-    private QuotaTestSuite() {
-        super();
-    }
-
-    /**
-     * Gets the test suite.
-     *
-     * @return The test suite
-     */
-    public static Test suite() {
-        TestSuite suite = new TestSuite(QuotaTestSuite.class.getName());
-        suite.addTestSuite(GetQuotaTest.class);
-        suite.addTestSuite(MailQuotaTest.class);
-        suite.addTestSuite(FilestoreQuotaTest.class);
-        return suite;
-    }
+})
+public final class QuotaTestSuite  {
 
 }

@@ -57,7 +57,6 @@ import org.apache.http.ParseException;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AbstractRedirectParser;
 
-
 /**
  * {@link TokenLoginV2Parser}
  *

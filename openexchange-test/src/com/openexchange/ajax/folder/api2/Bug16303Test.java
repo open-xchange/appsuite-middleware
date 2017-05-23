@@ -50,18 +50,17 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.Iterator;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -78,23 +77,18 @@ public class Bug16303Test extends AbstractAJAXSession {
     private AJAXClient clientB;
     private FolderObject createdFolder;
 
-    public Bug16303Test(String name) {
-        super(name);
-    }
-
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = getClient2();
         createdFolder = new FolderObject();
         createdFolder.setModule(FolderObject.CALENDAR);
-        createdFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        createdFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         createdFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN, I(clientB.getValues().getUserId()), "arawada"));
         createdFolder.setFolderName("testFolder4Bug16303");
-        InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdFolder);
-        InsertResponse iResp = client.execute(iReq);
-        iResp.fillObject(createdFolder);
+        ftm.insertFolderOnServer(createdFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         createdFolder.setLastModified(new Date());
 
@@ -112,7 +106,6 @@ public class Bug16303Test extends AbstractAJAXSession {
         }
         assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
-        @SuppressWarnings("null")
         ListRequest listRequest2 = new ListRequest(EnumAPI.OUTLOOK, foundUserShared.getFullName());
         listResponse = clientB.execute(listRequest2);
         iter = listResponse.getFolder();
@@ -126,12 +119,7 @@ public class Bug16303Test extends AbstractAJAXSession {
         assertNotNull("Shared folder expected below shared parent folder.", foundShared);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdFolder));
-        super.tearDown();
-    }
-
+    @Test
     public void testForDisappearingFolder() throws Throwable {
         GetRequest request = new GetRequest(EnumAPI.OUTLOOK, clientA.getValues().getPrivateAppointmentFolder());
         GetResponse response = clientA.execute(request);

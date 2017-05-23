@@ -55,17 +55,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.osgi.service.http.HttpService;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.jolokia.JolokiaConfig;
-import com.openexchange.jolokia.osgi.CustomJolokiaBundleActivator;
 import com.openexchange.osgi.DeferredActivator;
 
 /**
  * {@link StartupTest}
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 @RunWith(PowerMockRunner.class)
@@ -77,7 +75,7 @@ public class StartupTest {
 
     @Mock
     private HttpService httpService;
-    
+
     CustomJolokiaBundleActivator myActivator;
 
     @Before
@@ -87,84 +85,82 @@ public class StartupTest {
         // Prevent/stub logic in super.save()
         Mockito.when(((DeferredActivator) myActivator).getService(ConfigurationService.class)).thenReturn(this.configurationService);
         Mockito.when(((DeferredActivator) myActivator).getService(HttpService.class)).thenReturn(this.httpService);
-        PowerMockito.mockStatic(JolokiaConfig.class);
-        PowerMockito.when(JolokiaConfig.getInstance()).thenReturn(new JolokiaConfig());
 
         Mockito.when(this.configurationService.getBoolProperty("com.openexchange.jolokia.start", false)).thenReturn(true);
     }
 
-    @Test
-    public void testMissingConfigServiceShouldNotStart() throws Exception {
+     @Test
+     public void testMissingConfigServiceShouldNotStart() throws Exception {
         Mockito.when(((DeferredActivator) myActivator).getService(ConfigurationService.class)).thenReturn(null);
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testMissingHttpServiceShouldNotStart() throws Exception {
+     @Test
+     public void testMissingHttpServiceShouldNotStart() throws Exception {
         Mockito.when(((DeferredActivator) myActivator).getService(HttpService.class)).thenReturn(null);
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testNameAndPasswordMissingShouldNotStart() throws Exception {
+     @Test
+     public void testNameAndPasswordMissingShouldNotStart() throws Exception {
         Mockito.when(this.configurationService.getBoolProperty("com.openexchange.jolokia.start", false)).thenReturn(false);
 
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testMissingNameShouldNotStart() throws Exception {
+     @Test
+     public void testMissingNameShouldNotStart() throws Exception {
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.password", "")).thenReturn("password");
 
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testTooShortNameShouldNotStart() throws Exception {
+     @Test
+     public void testTooShortNameShouldNotStart() throws Exception {
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.user", "")).thenReturn("");
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.password", "")).thenReturn("password");
 
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testMissingPasswordShouldNotStart() throws Exception {
+     @Test
+     public void testMissingPasswordShouldNotStart() throws Exception {
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.user", "")).thenReturn("user");
 
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testTooShortPasswordShouldNotStart() throws Exception {
+     @Test
+     public void testTooShortPasswordShouldNotStart() throws Exception {
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.user", "")).thenReturn("user");
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.password", "")).thenReturn("");
 
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testNameAndPasswordTooShortShouldNotStart() throws Exception {
+     @Test
+     public void testNameAndPasswordTooShortShouldNotStart() throws Exception {
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.user", "")).thenReturn("");
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.password", "")).thenReturn("");
 
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(1)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(1)).notStarted();
     }
 
-    @Test
-    public void testShouldStart() throws Exception {
+     @Test
+     public void testShouldStart() throws Exception {
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.user", "")).thenReturn("user");
         Mockito.when(this.configurationService.getProperty("com.openexchange.jolokia.password", "")).thenReturn("password");
 
         myActivator.startBundle();
-        Mockito.verify(myActivator, Mockito.times(0)).stopBundle();
+        Mockito.verify(myActivator, Mockito.times(0)).notStarted();
         myActivator.stopBundle();
     }
 

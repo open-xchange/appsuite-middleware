@@ -49,12 +49,17 @@
 
 package com.openexchange.mail.structure;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import org.json.JSONObject;
-import com.openexchange.configuration.MailConfig;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -70,26 +75,10 @@ public class Bug20425_StructureTest extends AbstractMailTest {
 
     private byte[] smime;
 
-    /**
-     * Initializes a new {@link Bug20425_StructureTest}.
-     */
-    public Bug20425_StructureTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link Bug20425_StructureTest}.
-     *
-     * @param name The test name
-     */
-    public Bug20425_StructureTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
-        final String testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        final String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         final InputStream is = new FileInputStream(new File(testMailDir, "bug20425.eml"));
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.transfer(is, baos);
@@ -98,6 +87,7 @@ public class Bug20425_StructureTest extends AbstractMailTest {
         baos.close();
     }
 
+    @Test
     public void testMIMEStructure() {
         try {
             getSession();

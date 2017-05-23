@@ -49,9 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +58,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -72,6 +68,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link Bug23181Test}
@@ -83,20 +80,30 @@ import com.openexchange.test.CalendarTestManager;
 public class Bug23181Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
+    private TestUser testUser2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
+        testUser2 = testContext.acquireUser();
+
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
+                if (null != manager2.getClient()) {
+                    manager2.getClient().logout();
+                }
             }
+        } finally {
+            super.tearDown();
         }
     }
 
@@ -109,7 +116,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = client.execute(new GetRequest(Tree.DefaultAddress)).getString();
+        String userA = getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
         String userB = manager2.getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
         String uid = randomUID();
         String summary = "Bug23181Test";
@@ -128,11 +135,11 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * confirm updated appointment as user A in client
          */
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR" + "\r\n" +
             "METHOD:REQUEST" + "\r\n" +
             "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
-            "VERSION:2.0" + "\r\n" +
+            "VERSION:2.0" + "\r\n" + 
             "CALSCALE:GREGORIAN" + "\r\n" +
             "BEGIN:VEVENT" + "\r\n" +
             "ORGANIZER;CN=Extern 1:MAILTO:extern1@example.com" + "\r\n" +
@@ -152,7 +159,7 @@ public class Bug23181Test extends CalDAVTest {
             "SEQUENCE:1" + "\r\n" +
             "END:VEVENT" + "\r\n" +
             "END:VCALENDAR"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
          * verify appointment as user A on server
@@ -221,8 +228,8 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = super.getLogin(User.User1);
-        String userB = super.getLogin(User.User2);
+        String userA = testUser.getLogin();
+        String userB = testUser2.getLogin();
         String uid = randomUID();
         String summary = "Bug23181Test2";
         String location = "tbd";
@@ -240,7 +247,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * try to confirm updated appointment as user A in client
          */
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR" + "\r\n" +
             "METHOD:REQUEST" + "\r\n" +
             "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
@@ -264,7 +271,7 @@ public class Bug23181Test extends CalDAVTest {
             "SEQUENCE:0" + "\r\n" +
             "END:VEVENT" + "\r\n" +
             "END:VCALENDAR"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
     }
 
@@ -273,8 +280,8 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = super.getLogin(User.User1);
-        String userB = super.getLogin(User.User2);
+        String userA = testUser.getLogin();
+        String userB = testUser2.getLogin();
         String uid = randomUID();
         String summary = "Bug23181Test3";
         String location = "tbd";
@@ -292,7 +299,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * try to confirm updated appointment as user A in client
          */
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR" + "\r\n" +
             "METHOD:REQUEST" + "\r\n" +
             "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
@@ -316,7 +323,7 @@ public class Bug23181Test extends CalDAVTest {
             "SEQUENCE:1" + "\r\n" +
             "END:VEVENT" + "\r\n" +
             "END:VCALENDAR"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
     }
 

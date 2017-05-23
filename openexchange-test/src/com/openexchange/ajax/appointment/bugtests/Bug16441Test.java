@@ -51,6 +51,9 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -65,12 +68,13 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug16441Test extends AbstractAJAXSession {
 
     private Appointment appointment;
-    public Bug16441Test(String name) {
-        super(name);
+
+    public Bug16441Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         appointment = new Appointment();
         appointment.setStartDate(D("16.04.2010 07:00"));
@@ -85,17 +89,21 @@ public class Bug16441Test extends AbstractAJAXSession {
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
     }
 
+    @Test
     public void testBug16441() throws Exception {
         AppointmentInsertResponse response = getClient().execute(new InsertRequest(appointment, getClient().getValues().getTimeZone()));
         response.fillAppointment(appointment);
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), 5, appointment.getLastModified()));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        appointment.setLastModified(new Date(Long.MAX_VALUE));
-        client.execute(new DeleteRequest(appointment));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            appointment.setLastModified(new Date(Long.MAX_VALUE));
+            getClient().execute(new DeleteRequest(appointment));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

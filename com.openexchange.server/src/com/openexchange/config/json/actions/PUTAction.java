@@ -84,6 +84,8 @@ import com.openexchange.tools.session.ServerSession;
 @OAuthAction(ConfigActionFactory.OAUTH_WRITE_SCOPE)
 public final class PUTAction extends AbstractConfigAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PUTAction.class);
+
     /** The paths to ignore */
     private final Set<String> ignorees;
 
@@ -119,16 +121,20 @@ public final class PUTAction extends AbstractConfigAction {
             }
             text = service.getText("paths.perfMap");
             if (!com.openexchange.java.Strings.isEmpty(text)) {
-                for (final String line : SPLIT.split(text, 0)) {
+                for (String line : SPLIT.split(text, 0)) {
                     if (!isComment(line)) {
-                        final int pos = line.indexOf('>');
+                        int pos = line.indexOf('>');
                         if (pos > 0) {
-                            final String sPath = preparePath(line.substring(pos + 1));
-                            final int keyPos = sPath.lastIndexOf('/');
-                            final String path = sPath.substring(0, keyPos);
-                            if (null != path) {
-                                ignorees.add('/' + path);
-                                ignorees.add("/meta/" + path);
+                            String sPath = preparePath(line.substring(pos + 1));
+                            int keyPos = sPath.lastIndexOf('/');
+                            if (keyPos < 0) {
+                                LOG.warn("Invalid line in \"paths.perfMap\" file: {}", line);
+                            } else {
+                                String path = sPath.substring(0, keyPos);
+                                if (null != path) {
+                                    ignorees.add('/' + path);
+                                    ignorees.add("/meta/" + path);
+                                }
                             }
                         }
                     }

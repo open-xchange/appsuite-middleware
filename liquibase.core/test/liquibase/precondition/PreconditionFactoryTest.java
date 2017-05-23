@@ -1,14 +1,15 @@
 package liquibase.precondition;
 
-import liquibase.precondition.core.AndPrecondition;
-import liquibase.precondition.core.OrPrecondition;
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Map;
+import liquibase.precondition.core.AndPrecondition;
+import liquibase.precondition.core.OrPrecondition;
 
 public class PreconditionFactoryTest {
 

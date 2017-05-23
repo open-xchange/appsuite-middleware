@@ -155,6 +155,24 @@ public class MailLogicTools {
         return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm, setFrom);
     }
 
+    /**
+     * Creates a reply message for the message specified by <code>originalMail</code>.
+     * <p>
+     * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
+     * {@link MimeReply#getReplyMail(MailMessage, boolean, Session)} and can be left unchanged. Otherwise an message data specific
+     * implementation is needed.
+     *
+     * @param originalMail The original mail
+     * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param fromAddressProvider The provider for <code>"From"</code> address
+     * @return An instance of {@link MailMessage} representing the reply message
+     * @throws OXException If reply message cannot be generated
+     */
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm, final FromAddressProvider fromAddressProvider) throws OXException {
+        return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm, fromAddressProvider);
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
@@ -192,6 +210,24 @@ public class MailLogicTools {
      */
     public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm, boolean setFrom) throws OXException {
         return MimeForward.getFowardMail(originalMails, session, accountId, usm, setFrom);
+    }
+
+    /**
+     * Creates a forward message for the messages specified by <code>originalMails</code>. If multiple messages are specified then these
+     * messages are forwarded as <b>attachment</b> since no inline forward is possible.
+     * <p>
+     * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
+     * {@link MimeForward#getFowardMail(MailMessage[], Session)} and can be left unchanged. Otherwise a message data specific implementation
+     * is needed.
+     *
+     * @param originalMails The original mails
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param fromAddressProvider The provider for <code>"From"</code> address
+     * @return An instance of {@link MailMessage} representing the forward message
+     * @throws OXException If forward message cannot be generated
+     */
+    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
+        return MimeForward.getFowardMail(originalMails, session, accountId, usm, fromAddressProvider);
     }
 
 }

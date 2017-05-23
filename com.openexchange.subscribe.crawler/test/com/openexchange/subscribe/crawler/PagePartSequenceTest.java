@@ -56,16 +56,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PagePartSequenceTest extends TestCase {
-
-    public void testPagePartSequence() {
+public class PagePartSequenceTest {
+         @Test
+     public void testPagePartSequence() {
         String page = getStringFromFile("test-resources/GoogleMailResultTestPage.txt");
 
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
@@ -136,7 +140,8 @@ public class PagePartSequenceTest extends TestCase {
         return page;
     }
 
-    public void testWebDeSubpage(){
+         @Test
+     public void testWebDeSubpage(){
         String page =">51379\u00a0Leverkusen<br>Germany</td>";
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
@@ -151,7 +156,8 @@ public class PagePartSequenceTest extends TestCase {
         assertEquals("Germany", map.get("country_home"));
     }
 
-    public void testRetrieveMultipleInformation(){
+         @Test
+     public void testRetrieveMultipleInformation(){
         String page ="<FIRST_NAME>Peter</FIRST_NAME><LAST_NAME>Mueller</LAST_NAME>\n"
             +"<FIRST_NAME>Hans-Georg</FIRST_NAME><LAST_NAME>Walter</LAST_NAME>";
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
@@ -177,7 +183,8 @@ public class PagePartSequenceTest extends TestCase {
         assertTrue("contact Hans-Georg Walter was not retrieved", hansGeorgFound);
     }
 
-    public void testYahooCom(){
+         @Test
+     public void testYahooCom(){
         String page = getStringFromFile("test-resources/YahooCom.html");
         String VALID_NAME = GenericSubscribeServiceTestHelpers.VALID_NAME;
         String VALID_EMAIL_REGEX = GenericSubscribeServiceTestHelpers.VALID_EMAIL_REGEX;

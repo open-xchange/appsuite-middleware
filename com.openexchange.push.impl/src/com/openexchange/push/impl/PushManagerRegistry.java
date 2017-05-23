@@ -751,11 +751,11 @@ public final class PushManagerRegistry implements PushListenerService {
 
         // Password
         {
-            PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+            PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(userId, contextId);
             switch (passwordSource) {
                 case GLOBAL: {
                     // Just for convenience
-                    String masterPassword = MailProperties.getInstance().getMasterPassword();
+                    String masterPassword = MailProperties.getInstance().getMasterPassword(userId, contextId);
                     if (null == masterPassword) {
                         throw PushExceptionCodes.MISSING_MASTER_PASSWORD.create();
                     }

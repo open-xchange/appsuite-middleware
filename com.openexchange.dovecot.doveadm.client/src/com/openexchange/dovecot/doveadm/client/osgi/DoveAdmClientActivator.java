@@ -117,7 +117,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         }
 
         // Initialize client to Dovecot REST interface
-        HttpDoveAdmClient client = new HttpDoveAdmClient(apiSecret, endpointManager);
+        HttpDoveAdmClient client = new HttpDoveAdmClient(apiSecret, endpointManager, this);
         this.client = client;
         registerService(DoveAdmClient.class, client);
 

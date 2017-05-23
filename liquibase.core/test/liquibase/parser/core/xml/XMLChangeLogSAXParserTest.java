@@ -1,5 +1,11 @@
 package liquibase.parser.core.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.AddColumnChange;
@@ -7,17 +13,14 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
-import static org.junit.Assert.*;
-
-import org.junit.Test;
 
 public class XMLChangeLogSAXParserTest {
 
@@ -150,8 +153,8 @@ public class XMLChangeLogSAXParserTest {
         assertEquals(1, changeLog.getChangeSets().size());
     }
 
-    @Test
-    public void testNestedChangeLog() throws Exception {
+     @Test
+     public void testNestedChangeLog() throws Exception {
     	final String nestedFileName = "liquibase/parser/core/xml/nestedChangeLog.xml";
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/nestedChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
         nestedFileAssertions(changeLog, nestedFileName);

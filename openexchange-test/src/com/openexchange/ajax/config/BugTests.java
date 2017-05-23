@@ -50,93 +50,82 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
-import java.util.Random;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.tools.RandomString;
 
 /**
  * Tests resulting from bug reports.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class BugTests extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    private Random rand;
-
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public BugTests(final String name) {
-        super(name);
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-        rand = new Random(System.currentTimeMillis());
-    }
-
     /**
      * Tests if the mail folder are sent correctly to the GUI.
      */
+    @Test
     public void testBug5607() throws Throwable {
-        final String drafts = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
+        final String drafts = getClient().execute(new GetRequest(Tree.DraftsFolder)).getString();
         assertNotNull("Can't get drafts folder.", drafts);
-        final String sent = client.execute(new GetRequest(Tree.SentFolder)).getString();
+        final String sent = getClient().execute(new GetRequest(Tree.SentFolder)).getString();
         assertNotNull("Can't get sent folder.", sent);
-        final String spam = client.execute(new GetRequest(Tree.SpamFolder)).getString();
+        final String spam = getClient().execute(new GetRequest(Tree.SpamFolder)).getString();
         assertNotNull("Can't get spam folder.", spam);
-        final String trash = client.execute(new GetRequest(Tree.TrashFolder)).getString();
+        final String trash = getClient().execute(new GetRequest(Tree.TrashFolder)).getString();
         assertNotNull("Can't get trash folder.", trash);
     }
 
     /**
      * Tests if calendar and task notifications can be properly turned on and
      * off.
+     * 
      * @throws Throwable if an exception occurs.
      */
+    @Test
     public void testBug6462() throws Throwable {
         for (Tree tree : new Tree[] { Tree.CalendarNotification, Tree.TaskNotification }) {
-            boolean origValue = client.execute(new GetRequest(tree)).getBoolean();
+            boolean origValue = getClient().execute(new GetRequest(tree)).getBoolean();
             for (final boolean test : new boolean[] { true, false }) {
-                client.execute(new SetRequest(tree, Boolean.toString(test)));
-                boolean testValue = client.execute(new GetRequest(tree)).getBoolean();
+                getClient().execute(new SetRequest(tree, Boolean.toString(test)));
+                boolean testValue = getClient().execute(new GetRequest(tree)).getBoolean();
                 assertEquals("Setting calendar/task notification failed.", test, testValue);
             }
-            client.execute(new SetRequest(tree, B(origValue)));
-            boolean testValue = client.execute(new GetRequest(tree)).getBoolean();
+            getClient().execute(new SetRequest(tree, B(origValue)));
+            boolean testValue = getClient().execute(new GetRequest(tree)).getBoolean();
             assertEquals("Restoring original value failed.", origValue, testValue);
         }
     }
 
     /**
      * Tests if any desired senderAddress can be written to the config tree.
+     * 
      * @throws Throwable
      */
+    @Test
     public void testWriteSenderAddress() throws Throwable {
         // Get original value.
-        final String origAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();
+        final String origAddress = getClient().execute(new GetRequest(Tree.SendAddress)).getString();
         try {
             // Write something for the test.
             String garbage;
             do {
                 garbage = RandomString.generateLetter(20);
             } while (garbage.equals(origAddress));
-            final SetResponse response = client.execute(new SetRequest(Tree.SendAddress, garbage, false));
+            final SetResponse response = getClient().execute(new SetRequest(Tree.SendAddress, garbage, false));
             if (!response.hasError()) {
                 fail("SendAddress in config tree can be written with garbage.");
             }
         } finally {
             // Restore original value
-            client.execute(new SetRequest(Tree.SendAddress, origAddress));
+            getClient().execute(new SetRequest(Tree.SendAddress, origAddress));
         }
     }
 }

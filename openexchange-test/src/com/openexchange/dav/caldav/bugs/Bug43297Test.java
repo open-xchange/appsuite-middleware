@@ -49,9 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +58,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -91,12 +87,15 @@ public class Bug43297Test extends CalDAVTest {
     private FolderObject subfolder;
     private String sharedFolderID;
 
+    @Override
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
-        FolderObject calendarFolder = manager2.getClient().execute(
-            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
+        manager2.resetDefaultFolderPermissions();
+        ftm.setClient(getClient2());        
+        FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder());
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);
@@ -110,24 +109,21 @@ public class Bug43297Test extends CalDAVTest {
         List<OCLPermission> permissions = calendarFolder.getPermissions();
         permissions.add(perm);
         folder.setPermissions(calendarFolder.getPermissions());
-        InsertResponse response = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
-        folder.setObjectID(response.getId());
-        folder.setLastModified(response.getTimestamp());
-        subfolder = folder;
-        sharedFolderID = String.valueOf(folder.getObjectID());
+        subfolder = ftm.insertFolderOnServer(folder);
+        sharedFolderID = String.valueOf(subfolder.getObjectID());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            if (null != subfolder) {
-                manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
             }
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
-            }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test

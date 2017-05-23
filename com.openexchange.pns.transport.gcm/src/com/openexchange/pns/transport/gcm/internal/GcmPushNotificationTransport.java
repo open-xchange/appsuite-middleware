@@ -65,6 +65,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.google.android.gcm.Constants;
+import com.google.android.gcm.Endpoint;
 import com.google.android.gcm.Message;
 import com.google.android.gcm.Message.Priority;
 import com.google.common.cache.Cache;
@@ -271,7 +272,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                 if (!registrationIDs.isEmpty()) {
                     MulticastResult result = null;
                     try {
-                        result = sender.sendNoRetry(getMessage(client, notification), registrationIDs);
+                        result = sender.sendNoRetry(getMessage(client, notification), registrationIDs, Endpoint.FCM);
 
                         // Log it
                         Object ostr = new Object() {

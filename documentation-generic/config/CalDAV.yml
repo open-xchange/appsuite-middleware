@@ -1,0 +1,72 @@
+feature_name: CalDAV
+properties:
+    - key: com.openexchange.caldav.enabled
+      description: |
+        Whether CalDAV is enabled or not
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV"]
+    - key: com.openexchange.caldav.tree
+      description: |
+        Configures the ID of the folder tree used by the CalDAV interface.
+      defaultValue: 0
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Folder"]
+    - key: com.openexchange.caldav.interval.start
+      description: |
+        Appointments and tasks are available via the CalDAV interface if they fall 
+        into a configurable timeframe. This value specifies the start time of this 
+        interval, i.e. how far past appointments should be considered. More formal, 
+        this value defines the negative offset relative to the current date 
+        representing the minimum end time of appointments to be synchronized.
+        Possible values are: <code>one_month</code>, <code>one_year</code> and <code>six_months</code>.
+      defaultValue: one_month
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Limit", "Appointment"]
+    - key: com.openexchange.caldav.interval.end
+      description: |
+        Appointments and tasks are available via the CalDAV interface if they fall 
+        into a configurable timeframe. This value specifies the end time of this
+        interval, i.e. how far future appointments should be considered. More 
+        formal, this value defines the positive offset relative to the current date 
+        representing the maximum start time of appointments to be synchronized.
+        Possible values are: <code>one_year</code> and <code>two_years</code>.
+      defaultValue: one_year
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Limit", "Appointment"]
+    - key: com.openexchange.caldav.url
+      description: |
+        Tells users where to find a caldav folder. This can be displayed in frontends.
+        You can use the variables [hostname] and [folderId]. 
+        If you chose to deploy caldav as a virtual host (say 'dav.open-xchange.com') use
+        <code>https://dav.open-xchange.com/caldav/[folderId]</code> as the value
+        If you are using user-agent sniffing use
+        <code>https://[hostname]/caldav/[folderId]</code>
+      defaultValue: https://[hostname]/caldav/[folderId]
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Folder", "Host"]

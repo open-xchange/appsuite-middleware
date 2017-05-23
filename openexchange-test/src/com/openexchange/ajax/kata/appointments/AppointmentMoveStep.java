@@ -55,7 +55,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.Appointment;
 
-
 /**
  * {@link AppointmentMoveStep}
  *
@@ -65,7 +64,6 @@ import com.openexchange.groupware.container.Appointment;
 public class AppointmentMoveStep extends NeedExistingStep<Appointment> {
 
     private final int destination;
-
 
     public AppointmentMoveStep(int destination, String fixtureName, String expectedError) {
         super(fixtureName, expectedError);
@@ -84,10 +82,10 @@ public class AppointmentMoveStep extends NeedExistingStep<Appointment> {
         assumeIdentity(appointment);
         int inFolder = appointment.getParentFolderID();
         appointment.setParentFolderID(destination);
-        UpdateRequest request = new UpdateRequest( inFolder, appointment, getTimeZone(), false );
+        UpdateRequest request = new UpdateRequest(inFolder, appointment, getTimeZone(), false);
         UpdateResponse response = client.execute(request);
         checkError(response);
-        appointment.setLastModified( response.getTimestamp() );
+        appointment.setLastModified(response.getTimestamp());
         rememberIdentityValues(appointment);
 
     }

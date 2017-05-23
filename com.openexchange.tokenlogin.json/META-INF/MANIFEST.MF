@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange token login JSON bundle
 Bundle-SymbolicName: com.openexchange.tokenlogin.json
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.tokenlogin.json.osgi.TokenLoginJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

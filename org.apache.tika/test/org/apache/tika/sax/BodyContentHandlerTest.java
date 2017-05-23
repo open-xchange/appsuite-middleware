@@ -18,23 +18,25 @@ package org.apache.tika.sax;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link BodyContentHandler} class.
  */
-public class BodyContentHandlerTest extends TestCase {
-
+public class BodyContentHandlerTest {
     /**
      * Test that the conversion to an {@link OutputStream} doesn't leave
      * characters unflushed in an internal buffer.
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-179">TIKA-179</a>
      */
-    public void testOutputStream() throws Exception {
+         @Test
+     public void testOutputStream() throws Exception {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
         XHTMLContentHandler xhtml = new XHTMLContentHandler(

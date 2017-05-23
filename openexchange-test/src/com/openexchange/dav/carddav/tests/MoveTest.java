@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
@@ -66,31 +67,30 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class MoveTest extends CardDAVTest {
 
-	public MoveTest() {
-		super();
-	}
+    public MoveTest() {
+        super();
+    }
 
-	@Test
-	public void testMoveContactToSubfolderOnServer() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create subfolder and contact on server
-		 */
-    	String subFolderName = "testfolder_" + randomUID();
-    	FolderObject subFolder = super.createFolder(subFolderName);
-		super.rememberForCleanUp(subFolder);
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "jaqueline";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact));
+    @Test
+    public void testMoveContactToSubfolderOnServer() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create subfolder and contact on server
+         */
+        String subFolderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(subFolderName);
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "jaqueline";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact));
         /*
          * verify contact on client
          */
@@ -118,27 +118,26 @@ public class MoveTest extends CardDAVTest {
         assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
     }
 
-	@Test
-	public void testMoveContactToDefaultFolderOnServer() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create subfolder and contact on server
-		 */
-    	String subFolderName = "testfolder_" + randomUID();
-    	FolderObject subFolder = super.createFolder(subFolderName);
-		super.rememberForCleanUp(subFolder);
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "jaqueline";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact, subFolder.getObjectID()));
+    @Test
+    public void testMoveContactToDefaultFolderOnServer() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create subfolder and contact on server
+         */
+        String subFolderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(subFolderName);
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "jaqueline";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact, subFolder.getObjectID()));
         /*
          * verify contact on client
          */

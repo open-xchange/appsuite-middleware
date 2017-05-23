@@ -67,97 +67,96 @@ import com.openexchange.resource.json.ResourceWriter;
  */
 public final class ResourceDeleteRequest extends AbstractResourceRequest<ResourceDeleteResponse> {
 
-	private final JSONObject resourceJSON;
+    private final JSONObject resourceJSON;
 
-	private final long clientLastModified;
+    private final long clientLastModified;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link ResourceDeleteRequest}
-	 *
-	 * @param deleteMe
-	 *            The resource to delete
-	 * @param clientLastModified
-	 *            The client last-modified timestamp to verify request on server
-	 *            (possible concurrent modification)
-	 * @param failOnError
-	 *            <code>true</code> to fail on error; otherwise
-	 *            <code>false</code>
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public ResourceDeleteRequest(final Resource deleteMe, final long clientLastModified, final boolean failOnError)
-			throws JSONException {
-		super();
-		this.failOnError = failOnError;
-		this.clientLastModified = clientLastModified;
-		resourceJSON = ResourceWriter.writeResource(deleteMe);
-	}
+    /**
+     * Initializes a new {@link ResourceDeleteRequest}
+     *
+     * @param deleteMe
+     *            The resource to delete
+     * @param clientLastModified
+     *            The client last-modified timestamp to verify request on server
+     *            (possible concurrent modification)
+     * @param failOnError
+     *            <code>true</code> to fail on error; otherwise
+     *            <code>false</code>
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public ResourceDeleteRequest(final Resource deleteMe, final long clientLastModified, final boolean failOnError) throws JSONException {
+        super();
+        this.failOnError = failOnError;
+        this.clientLastModified = clientLastModified;
+        resourceJSON = ResourceWriter.writeResource(deleteMe);
+    }
 
-	public ResourceDeleteRequest(final Resource resource) throws JSONException {
-	    this(resource, resource.getLastModified().getTime(), true);
-	}
+    public ResourceDeleteRequest(final Resource resource) throws JSONException {
+        this(resource, resource.getLastModified().getTime(), true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return resourceJSON;
-	}
+        return resourceJSON;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
-		params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, clientLastModified));
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
+        params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, clientLastModified));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public ResourceDeleteParser getParser() {
-		return new ResourceDeleteParser(failOnError);
-	}
+        return new ResourceDeleteParser(failOnError);
+    }
 
-	private static final class ResourceDeleteParser extends AbstractAJAXParser<ResourceDeleteResponse> {
+    private static final class ResourceDeleteParser extends AbstractAJAXParser<ResourceDeleteResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		ResourceDeleteParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        ResourceDeleteParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected ResourceDeleteResponse createResponse(final Response response) throws JSONException {
-			return new ResourceDeleteResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected ResourceDeleteResponse createResponse(final Response response) throws JSONException {
+            return new ResourceDeleteResponse(response);
+        }
+    }
 
 }

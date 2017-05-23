@@ -231,18 +231,22 @@ public final class MailRequest {
         } else if (parameter.equals("list")) {
             l = new ArrayList<Column>(Arrays.asList(AbstractMailAction.COLUMNS_LIST_ALIAS));
         } else {
+            ServerSession session = requestData.getSession();
+            int userId = session.getUserId();
+            int contextId = session.getContextId();
+
             String[] sa = SPLIT.split(parameter, 0);
             l = new ArrayList<Column>(sa.length);
             for (String s : sa) {
                 int field = Tools.getUnsignedInteger(s);
                 if (field > 0) {
                     if (field == MailListField.DATE.getField()) {
-                        field = MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                        field = MailProperties.getInstance().isPreferSentDate(userId, contextId) ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
                     }
                     l.add(Column.field(field));
                 } else {
                     if (MailJSONField.DATE.getKey().equalsIgnoreCase(s)) {
-                        field = MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                        field = MailProperties.getInstance().isPreferSentDate(userId, contextId) ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
                         l.add(Column.field(field));
                     } else {
                         l.add(Column.header(s));
@@ -323,13 +327,13 @@ public final class MailRequest {
         String parseMe = sort.trim();
 
         if (MailJSONField.DATE.getKey().equalsIgnoreCase(parseMe)) {
-            return MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+            return MailProperties.getInstance().isPreferSentDate(session.getUserId(), session.getContextId()) ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
         }
 
         try {
             int field = Integer.parseInt(parseMe);
             if (MailListField.DATE.getField() == field) {
-                return (MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField());
+                return (MailProperties.getInstance().isPreferSentDate(session.getUserId(), session.getContextId()) ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField());
             }
 
             return field < 0 ? MailListField.RECEIVED_DATE.getField() : field;

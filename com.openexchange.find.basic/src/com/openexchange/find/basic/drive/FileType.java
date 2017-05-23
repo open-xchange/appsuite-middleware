@@ -76,6 +76,22 @@ public enum FileType {
      * Other file types.
      */
     OTHER("other"),
+    /**
+     * Text app files.
+     */
+    DOC_TEXT("doc-text"),
+    /**
+     * Spreadsheet app files.
+     */
+    DOC_SPREADSHEET("doc-spreadsheet"),
+    /**
+     * Presentation app files.
+     */
+    DOC_PRESENTATION("doc-presentation"),
+    /**
+     * PDF files.
+     */
+    PDF("pdf")
     ;
 
     private final String identifier;

@@ -88,11 +88,10 @@ public final class Props {
      * @return The backing map
      */
     public Map<LogProperties.Name, Object> getMap() {
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> map = MDC.getCopyOfContextMap();
+        final Map<String, String> map = MDC.getCopyOfContextMap();
 
         final Map<LogProperties.Name, Object> retval = new EnumMap<LogProperties.Name, Object>(LogProperties.Name.class);
-        for (Entry<String, Object> entry : map.entrySet()) {
+        for (Entry<String, String> entry : map.entrySet()) {
             final LogProperties.Name name = LogProperties.Name.nameFor(entry.getKey());
             if (null != name) {
                 retval.put(name, entry.getValue());
@@ -107,7 +106,7 @@ public final class Props {
      *
      * @return The map
      */
-    public Map<String, Object> asMap() {
+    public Map<String, String> asMap() {
         return asMap(false);
     }
 
@@ -117,11 +116,10 @@ public final class Props {
      * @param sorted Whether returned map shall be sorted.
      * @return The map
      */
-    public Map<String, Object> asMap(final boolean sorted) {
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> map = MDC.getCopyOfContextMap();
-        final Map<String, Object> m = sorted ? new TreeMap<String, Object>() : new HashMap<String, Object>(map.size());
-        for (final Entry<String, Object> entry : map.entrySet()) {
+    public Map<String, String> asMap(final boolean sorted) {
+        final Map<String, String> map = MDC.getCopyOfContextMap();
+        final Map<String, String> m = sorted ? new TreeMap<String, String>() : new HashMap<String, String>(map.size());
+        for (final Entry<String, String> entry : map.entrySet()) {
             m.put(entry.getKey(), entry.getValue());
         }
         return m;

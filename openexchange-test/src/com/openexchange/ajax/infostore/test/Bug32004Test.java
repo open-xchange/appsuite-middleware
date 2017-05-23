@@ -49,11 +49,13 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.groupware.container.FolderObject;
-
 
 /**
  * {@link Bug32004Test}
@@ -69,18 +71,19 @@ public class Bug32004Test extends AbstractInfostoreTest {
      *
      * @param name The test name
      */
-    public Bug32004Test(final String name) {
-        super(name);
+    public Bug32004Test() {
+        super();
     }
 
+    @Test
     public void testCreateFolderBelowTrash() throws Exception {
         /*
          * create folder below trash
          */
-        int trashFolderID = client.getValues().getInfostoreTrashFolder();
+        int trashFolderID = getClient().getValues().getInfostoreTrashFolder();
         String name = UUID.randomUUID().toString();
-        FolderObject folder = fMgr.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, client.getValues().getUserId());
-        folder = fMgr.insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePrivateFolder(name, FolderObject.INFOSTORE, trashFolderID, getClient().getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
         /*
          * reload folder in different trees and check name
          */
@@ -94,7 +97,7 @@ public class Bug32004Test extends AbstractInfostoreTest {
 
     private FolderObject loadFolder(EnumAPI api, int folderID) throws Exception {
         GetRequest request = new GetRequest(api, String.valueOf(folderID), FolderObject.ALL_COLUMNS);
-        return client.execute(request).getFolder();
+        return getClient().execute(request).getFolder();
     }
 
 }

@@ -95,13 +95,14 @@ public class TestServletTest {
     /**
      * Test if we can send a get request with more than the allowed max amount of parameters (30 by default).
      * Expects an HttpInternalErrorException when the requests receives a 500 because of too many parameters.
+     * 
      * @throws Exception
      */
-    @Test(expected = com.meterware.httpunit.HttpInternalErrorException.class)
+    @Test
     public void testMaxParam() throws Exception {
         WebConversation conversation = new WebConversation();
         WebRequest request = new GetMethodWebRequest(URL);
-        for (int i = 0; i <31; i++) {
+        for (int i = 0; i < 31; i++) {
             request.setParameter("param" + i, "value" + i);
         }
         WebResponse response = conversation.getResponse(request);

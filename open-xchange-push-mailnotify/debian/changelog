@@ -1,116 +1,26 @@
-open-xchange-push-mailnotify (7.8.3-24) stable; urgency=medium
+open-xchange-push-mailnotify (7.8.4-3) stable; urgency=medium
 
-  * Build for patch 2017-05-19 (4176)
+  * First candidate for 7.8.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 19 May 2017 10:17:02 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 19 May 2017 13:32:51 +0200
 
-open-xchange-push-mailnotify (7.8.3-23) stable; urgency=medium
+open-xchange-push-mailnotify (7.8.4-2) stable; urgency=medium
 
-  * Build for patch 2017-05-15 (4132)
+  * Second preview of 7.8.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 08 May 2017 17:34:52 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 04 May 2017 15:14:20 +0200
 
-open-xchange-push-mailnotify (7.8.3-22) stable; urgency=medium
+open-xchange-push-mailnotify (7.8.4-1) stable; urgency=medium
 
-  * Build for patch 2017-05-02 (4113)
+  * First preview of 7.8.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 21 Apr 2017 16:02:56 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 03 Apr 2017 15:18:34 +0200
 
-open-xchange-push-mailnotify (7.8.3-21) stable; urgency=medium
+open-xchange-push-mailnotify (7.8.4-0) unstable; urgency=medium
 
-  * Build for patch 2017-04-18 (4084)
+  * prepare for 7.8.4 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Apr 2017 11:40:07 +0200
-
-open-xchange-push-mailnotify (7.8.3-20) stable; urgency=medium
-
-  * Build for patch 2017-04-03 (4050)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 31 Mar 2017 12:56:57 +0200
-
-open-xchange-push-mailnotify (7.8.3-19) stable; urgency=medium
-
-  * Build for patch 2017-03-27 (4066)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 28 Mar 2017 23:37:22 +0200
-
-open-xchange-push-mailnotify (7.8.3-18) stable; urgency=medium
-
-  * Build for patch 2017-03-20 (4016)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 16 Mar 2017 17:22:01 +0100
-
-open-xchange-push-mailnotify (7.8.3-17) stable; urgency=medium
-
-  * Build for patch 2017-03-06 (3985)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 06 Mar 2017 10:44:04 +0100
-
-open-xchange-push-mailnotify (7.8.3-16) stable; urgency=medium
-
-  * Build for patch 2017-02-24 (3994)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 24 Feb 2017 11:21:40 +0100
-
-open-xchange-push-mailnotify (7.8.3-15) stable; urgency=medium
-
-  * Build for patch 2017-02-22 (3969)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 22 Feb 2017 12:37:36 +0100
-
-open-xchange-push-mailnotify (7.8.3-14) stable; urgency=medium
-
-  * Build for patch 2017-02-20 (3952)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 14 Feb 2017 15:56:16 +0100
-
-open-xchange-push-mailnotify (7.8.3-13) stable; urgency=medium
-
-  * Build for patch 2017-02-06 (3918)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 31 Jan 2017 16:42:22 +0100
-
-open-xchange-push-mailnotify (7.8.3-12) stable; urgency=medium
-
-  * Build for patch 2017-01-26 (3925)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 26 Jan 2017 14:16:56 +0100
-
-open-xchange-push-mailnotify (7.8.3-11) stable; urgency=medium
-
-  * Build for patch 2017-01-23 (3879)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 18 Jan 2017 16:58:12 +0100
-
-open-xchange-push-mailnotify (7.8.3-10) stable; urgency=medium
-
-  * Build for patch 2017-01-09 (3849)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 04 Jan 2017 10:41:03 +0100
-
-open-xchange-push-mailnotify (7.8.3-9) stable; urgency=medium
-
-  * Build for patch 2016-12-23 (3857)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 20 Dec 2016 20:21:42 +0100
-
-open-xchange-push-mailnotify (7.8.3-8) stable; urgency=medium
-
-  * Build for patch 2016-12-19 (3814)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 14 Dec 2016 11:40:42 +0100
-
-open-xchange-push-mailnotify (7.8.3-7) stable; urgency=medium
-
-  * Build for patch 2016-12-14 (3806)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 13 Dec 2016 15:24:07 +0100
-
-open-xchange-push-mailnotify (7.8.3-6) stable; urgency=medium
-
-  * Build for patch 2016-12-12 (3775)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 06 Dec 2016 09:27:05 +0100
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 24 Nov 2016 11:05:21 +0100
 
 open-xchange-push-mailnotify (7.8.3-5) stable; urgency=medium
 

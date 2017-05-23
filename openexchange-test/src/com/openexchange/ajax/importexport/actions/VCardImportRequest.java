@@ -66,8 +66,7 @@ public final class VCardImportRequest extends AbstractImportRequest<VCardImportR
         this(folderId, vcard, true);
     }
 
-    public VCardImportRequest(final int folderId, final InputStream vcard,
-        final boolean failOnError) {
+    public VCardImportRequest(final int folderId, final InputStream vcard, final boolean failOnError) {
         super(Action.VCard, folderId, vcard);
         this.failOnError = failOnError;
     }

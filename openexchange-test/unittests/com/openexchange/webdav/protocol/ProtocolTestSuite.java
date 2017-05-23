@@ -1,17 +1,16 @@
+
 package com.openexchange.webdav.protocol;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class ProtocolTestSuite extends TestSuite {
-
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(ResourceTest.class);
-		tests.addTestSuite(CollectionTest.class);
-		tests.addTestSuite(LockTest.class);
-		tests.addTestSuite(LockInteractionTest.class);
-		return tests;
-	}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    ResourceTest.class,
+    CollectionTest.class,
+    LockTest.class,
+    LockInteractionTest.class,
+})
+public class ProtocolTestSuite {
 
 }

@@ -56,7 +56,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */

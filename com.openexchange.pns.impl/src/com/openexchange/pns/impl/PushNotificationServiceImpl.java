@@ -52,6 +52,7 @@ package com.openexchange.pns.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedBufferingQueue;
 import com.openexchange.pns.Hit;
 import com.openexchange.pns.Hits;
+import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
@@ -301,16 +303,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 return;
             }
 
-            boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
-            if (added) {
-                if (numOfSubmittedNotifications.incrementAndGet() < 0L) {
-                    numOfSubmittedNotifications.set(0L);
-                }
-                LOGGER.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
-            } else {
-                LOGGER.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
-            }
+            // Add to queue
+            addToQueue(notification);
 
+            // Fire off worker if paused
             if (null == scheduledTimerTask) {
                 Runnable task = new Runnable() {
 
@@ -325,6 +321,60 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             }
         } finally {
             lock.unlock();
+        }
+    }
+
+    @Override
+    public void handle(Collection<PushNotification> notifications) throws OXException {
+        if (null == notifications || notifications.isEmpty()) {
+            return;
+        }
+
+        lock.lock();
+        try {
+            if (stopped) {
+                return;
+            }
+
+            // Collection is known to be non-empty. Thus at least one element is contained
+            Iterator<PushNotification> iterator = notifications.iterator();
+
+            // Grab first one for bootstrapping
+            PushNotification firstNotification = iterator.next();
+            addToQueue(firstNotification);
+
+            // Fire off worker if paused
+            if (null == scheduledTimerTask) {
+                Runnable task = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        checkNotifications();
+                    }
+                };
+                long initialDelay = delayDuration(configService);
+                long delay = timerFrequency(configService);
+                scheduledTimerTask = timerService.scheduleWithFixedDelay(task, initialDelay, delay);
+            }
+
+            // Add rest to queue
+            while (iterator.hasNext()) {
+                addToQueue(iterator.next());
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void addToQueue(PushNotification notification) {
+        boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
+        if (added) {
+            if (numOfSubmittedNotifications.incrementAndGet() < 0L) {
+                numOfSubmittedNotifications.set(0L);
+            }
+            LOGGER.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+        } else {
+            LOGGER.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
         }
     }
 
@@ -434,11 +484,14 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             } else {
                 if (isTransportAllowed(transport, topic, client, userId, contextId)) {
                     for (PushNotification notification : notifications) {
-                        LOGGER.debug("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
-                        try {
-                            transport.transport(notification, hit.getMatches());
-                        } catch (Exception e) {
-                            LOGGER.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                        List<PushMatch> matches = filterSourceToken(hit.getMatches(), notification.getSourceToken());
+                        if (null != matches && 0 < matches.size()) {
+                            LOGGER.debug("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
+                            try {
+                                transport.transport(notification, hit.getMatches());
+                            } catch (Exception e) {
+                                LOGGER.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                            }
                         }
                     }
                 } else {
@@ -457,6 +510,18 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             LOGGER.error("Failed to check whether notification \"{}\" is allowed to be sent via transport '{}' to client '{}' for user {} in context {}. Transport will be denied...", topic, transport.getId(), client, I(userId), I(contextId), e);
             return false;
         }
+    }
+
+    private List<PushMatch> filterSourceToken(List<PushMatch> matches, String sourceToken) {
+        if (null != sourceToken && null != matches) {
+            for (Iterator<PushMatch> iterator = matches.iterator(); iterator.hasNext();) {
+                if (sourceToken.equals(iterator.next().getToken())) {
+                    LOGGER.debug("Skipping push match for source token {}", sourceToken);
+                    iterator.remove();
+                }
+            }
+        }
+        return matches;
     }
 
     private void addNumOfProcessedNotifications(int numOfNotifications) {

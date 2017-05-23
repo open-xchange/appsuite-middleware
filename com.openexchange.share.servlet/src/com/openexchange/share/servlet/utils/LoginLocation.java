@@ -172,6 +172,17 @@ public class LoginLocation {
     }
 
     /**
+     * Appends the status parameter to pass to the client.
+     *
+     * @param status The message status
+     * @return The builder
+     */
+    public LoginLocation status(String status) {
+        parameter("status", status);
+        return this;
+    }
+
+    /**
      * Appends a message to pass to the client along with the redirect location.
      *
      * @param type The message type

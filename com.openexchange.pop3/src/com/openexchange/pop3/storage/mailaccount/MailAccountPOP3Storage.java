@@ -281,7 +281,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e) || (e.getCode()==MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() && e.getPrefix().equals("IMAP"))) {
                         // Ignore
                         LOG.trace("", e);
                     } else {
@@ -293,7 +293,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
                 } catch (final OXException e) {
-                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
+                    if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e) || (e.getCode()==MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() && e.getPrefix().equals("IMAP"))) {
                         // Ignore
                         LOG.trace("", e);
                     } else {
@@ -584,7 +584,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         POP3Store pop3Store = null;
         try {
             POP3Config pop3Config = pop3Access.getPOP3Config();
-            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || pop3Config.getMailProperties().isEnforceSecureConnection());
+            boolean forceSecure = pop3AccountId > 0 && pop3Config.isRequireTls();
             final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, pop3AccountId, session, !expunge, forceSecure);
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;

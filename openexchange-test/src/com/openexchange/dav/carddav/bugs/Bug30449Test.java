@@ -49,16 +49,16 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-import net.sourceforge.cardme.vcard.types.ExtendedType;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import net.sourceforge.cardme.vcard.types.ExtendedType;
 
 /**
  * {@link Bug30449Test}
@@ -69,13 +69,13 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug30449Test extends CardDAVTest {
 
-	public Bug30449Test() {
-		super();
-	}
+    public Bug30449Test() {
+        super();
+    }
 
-	@Test
-	public void testDontIncludeX_OPEN_XCHANGE_CTYPE() throws Exception {
-	    /*
+    @Test
+    public void testDontIncludeX_OPEN_XCHANGE_CTYPE() throws Exception {
+        /*
          * fetch sync token for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
@@ -84,7 +84,6 @@ public class Bug30449Test extends CardDAVTest {
          */
         String folderName = "testfolder_" + randomUID();
         FolderObject subFolder = super.createFolder(folderName);
-        super.rememberForCleanUp(subFolder);
         String uid = randomUID();
         String firstName = "gerd";
         String lastName = "gurke";
@@ -103,6 +102,6 @@ public class Bug30449Test extends CardDAVTest {
         VCardResource contactCard = assertContains(uid, addressData);
         List<ExtendedType> extendedTypes = contactCard.getExtendedTypes("X-OPEN-XCHANGE-CTYPE");
         assertTrue("X-OPEN-XCHANGE-CTYPE found", null == extendedTypes || 0 == extendedTypes.size());
-	}
+    }
 
 }

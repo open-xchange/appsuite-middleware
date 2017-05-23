@@ -144,6 +144,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
@@ -914,9 +915,10 @@ public class Mail extends PermissionServlet {
                 }
                 data = MessageWriter.writeMailMessage(
                     mailInterface.getAccountID(),
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave, false),
+                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave, FromAddressProvider.none()),
                     displayMode,
                     false,
+                    true,
                     session,
                     usmNoSave,
                     warnings,
@@ -1016,6 +1018,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave, setFrom),
                     displayMode,
                     false,
+                    true,
                     session,
                     usmNoSave,
                     warnings,
@@ -2480,6 +2483,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave, setFrom),
                     DisplayMode.MODIFYABLE,
                     false,
+                    true,
                     session,
                     usmNoSave,
                     warnings,
@@ -4114,7 +4118,8 @@ public class Mail extends PermissionServlet {
                 /*
                  * Manually detect&set \Answered flag
                  */
-                if (mailAccess.getMessageStorage() instanceof IMailMessageStorageExt) {
+                IMailMessageStorageExt messageStorageExt = mailAccess.getMessageStorage().supports(IMailMessageStorageExt.class);
+                if (null != messageStorageExt) {
                     final List<String> lst = new ArrayList<String>(2);
                     {
                         final String inReplyTo = sentMail.getFirstHeader("In-Reply-To");
@@ -4130,7 +4135,6 @@ public class Mail extends PermissionServlet {
                         }
                     }
                     if (!lst.isEmpty()) {
-                        final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) mailAccess.getMessageStorage();
                         final MailMessage[] mails = messageStorageExt.getMessagesByMessageID(lst.toArray(new String[lst.size()]));
                         for (final MailMessage mail : mails) {
                             if (null != mail) {

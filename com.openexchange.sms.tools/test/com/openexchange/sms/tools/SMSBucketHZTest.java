@@ -51,13 +51,10 @@ package com.openexchange.sms.tools;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.hamcrest.CoreMatchers;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -168,10 +165,7 @@ public class SMSBucketHZTest {
         smsBucketService = new SMSBucketServiceImpl(hz1);
     }
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Test
+    @Test(expected = OXException.class)
     public void testSMSBucket() throws OXException {
 
         IMap<String, SMSBucket> map = hz2.getMap("SMS_Bucket");
@@ -185,9 +179,6 @@ public class SMSBucketHZTest {
                 assertEquals("", -1, map.get("1/1").removeToken(10));
             }
         }
-        thrown.expect(OXException.class);
-        thrown.expectMessage(CoreMatchers.containsString("You have exceeded the maximum number of sms allowed. Please try again after"));
-        smsBucketService.getSMSToken(fake);
     }
 
 }

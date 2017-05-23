@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.attach;
 
-import static com.openexchange.ajax.framework.AJAXClient.User.User1;
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -65,18 +64,16 @@ import com.openexchange.ajax.attach.actions.GetDocumentResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug30701Test}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Bug30701Test {
-
-    private AJAXClient client;
+public class Bug30701Test extends AbstractAJAXSession {
 
     private Contact contactA;
 
@@ -86,35 +83,42 @@ public class Bug30701Test {
 
     private TimeZone tz;
 
+    @Override
     @Before
     public void setUp() throws Exception {
-        client = new AJAXClient(User1);
-        folderID = client.getValues().getPrivateContactFolder();
-        tz = client.getValues().getTimeZone();
+        super.setUp();
+
+        folderID = getClient().getValues().getPrivateContactFolder();
+        tz = getClient().getValues().getTimeZone();
         contactA = new Contact();
         contactA.setGivenName("Test");
         contactA.setMiddleName("for");
         contactA.setSurName("Bug 30701");
         contactA.setDisplayName("Test for bug 30701");
         contactA.setParentFolderID(folderID);
-        client.execute(new InsertRequest(contactA)).fillObject(contactA);
+        getClient().execute(new InsertRequest(contactA)).fillObject(contactA);
         InputStream data = new ByteArrayInputStream("Test document with arbitrary data".getBytes());
-        attachmentID = client.execute(new AttachRequest(contactA, "doc.txt", data, "text/plain")).getId();
-        contactA = client.execute(new GetRequest(contactA, tz)).getContact();
+        attachmentID = getClient().execute(new AttachRequest(contactA, "doc.txt", data, "text/plain")).getId();
+        contactA = getClient().execute(new GetRequest(contactA, tz)).getContact();
         contactA.getLastModifiedOfNewestAttachment().getTime();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contactA));
-        client.logout();
+        try {
+            getClient().execute(new DeleteRequest(contactA));
+            getClient().logout();
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test
     public void testGetDocumentWithOffLenParameter() throws OXException, IOException, JSONException {
         final int length = 8;
-        GetDocumentRequest getDocReq = new GetDocumentRequest(contactA, 7, "text/plain", folderID, attachmentID, 5, length, true);
-        GetDocumentResponse getDocResp = client.execute(getDocReq);
+        GetDocumentRequest getDocReq = new GetDocumentRequest(folderID, attachmentID, 7, contactA.getObjectID(), "text/plain", 5, length, true);
+        GetDocumentResponse getDocResp = getClient().execute(getDocReq);
         assertEquals("Wrong Content-Length in response", length, getDocResp.getContentLength());
     }
 }

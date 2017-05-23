@@ -58,14 +58,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -94,12 +92,13 @@ import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
-import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
-import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.storecache.IMAPStoreContainer;
+import com.openexchange.imap.util.HostAndPort;
+import com.openexchange.imap.util.HostAndPortAndCredentials;
+import com.openexchange.imap.util.StampAndOXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -130,6 +129,8 @@ import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.sun.mail.iap.ConnectQuotaExceededException;
@@ -161,11 +162,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     private static final long MAX_TEMP_DOWN = 300000L;
 
-    /**
-     * The timeout for failed logins.
-     */
-    protected static final AtomicLong FAILED_AUTH_TIMEOUT = new AtomicLong();
-
     private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
 
     /**
@@ -178,6 +174,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * a server-port-pair will throw an appropriate exception.
      */
     private static volatile Map<HostAndPort, Long> timedOutServers;
+
+    /**
+     * Remembers auth-failed servers for {@link IIMAPProperties#getImapTemporaryDown()} milliseconds. Any further attempts to connect to such
+     * a server-port-pair will throw an appropriate exception.
+     */
+    private static volatile Map<HostAndPortAndCredentials, StampAndOXException> authFailedServers;
 
     /**
      * Gets the timedOutServers
@@ -536,8 +538,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             case OAUTH:
                 try {
                     IMAPConfig imapConfig = getIMAPConfig();
-                    final String serverUrl = new StringBuilder().append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
-                    return IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=XOAUTH2");
+                    return IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()), imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=XOAUTH2");
+                } catch (IOException e) {
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                }
+            case OAUTHBEARER:
+                try {
+                    IMAPConfig imapConfig = getIMAPConfig();
+                    return IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()), imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=OAUTHBEARER");
                 } catch (IOException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
@@ -623,8 +631,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             javax.mail.Session imapSession;
             {
-                boolean forceSecure = imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection();
-                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure);
+                boolean forceSecure = imapConfig.isRequireTls();
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
              * Check if debug should be enabled
@@ -719,9 +727,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (certainPassword) {
                 encodedPassword = "secret";
             }
-            /*
-             * Check for already failed authentication
-             */
             String user = config.getLogin();
             String proxyUser = null;
             boolean isProxyAuth = false;
@@ -764,8 +769,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                boolean forceSecure = accountId > 0 && (imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection());
-                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure);
+                boolean forceSecure = accountId > 0 && imapConfig.isRequireTls();
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure, session.getUserId(), session.getContextId());
             }
             /*
              * Check if debug should be enabled
@@ -792,12 +797,37 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.port = config.getPort();
             this.login = isProxyAuth ? proxyUser : user;
             this.password = encodedPassword;
+            /*
+             * Check for already failed authentication
+             */
+            checkAuthFailed(this.login, this.password, imapConfProps);
             this.clientIp = clientIp;
             maxCount = getMaxCount();
             try {
                 imapStore = connectIMAPStore(maxCount);
             } catch (final AuthenticationFailedException e) {
-                throw e;
+                if (accountId != MailAccount.DEFAULT_ID) {
+                    AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
+                            if (null != mass) {
+                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
+                            }
+                            return null;
+                        }
+                    };
+                    ThreadPools.getThreadPool().submit(task);
+                }
+                OXException oxe = MimeMailException.handleMessagingException(e, config, session);
+                if (imapConfProps.getImapFailedAuthTimeout() > 0) {
+                    Map<HostAndPortAndCredentials, StampAndOXException> map = authFailedServers;
+                    if (null != map) {
+                        map.put(new HostAndPortAndCredentials(this.login, this.password, this.server, this.port), new StampAndOXException(oxe, System.currentTimeMillis()));
+                    }
+                }
+                throw oxe;
             } catch (final MessagingException e) {
                 /*
                  * Check for a SocketTimeoutException
@@ -823,15 +853,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 throw e;
             }
             this.connected = true;
-            /*
-             * Register notifier task if enabled
-             */
-            if (MailAccount.DEFAULT_ID == accountId && config.getIMAPProperties().notifyRecent()) {
-                /*
-                 * This call is re-invoked during IMAPNotifierTask's run
-                 */
-                IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session);
-            }
             /*
              * Add folder listener
              */
@@ -937,13 +958,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         imapSession.getProperties().put("mail.imap.failOnNOFetch", "true");
 
         /*
-         * Cache failed authentication attempts
-         */
-        final long authTimeout = FAILED_AUTH_TIMEOUT.get();
-        if (authTimeout > 0) {
-            imapSession.getProperties().put("mail.imap.authTimeout", Long.toString(authTimeout));
-        }
-        /*
          * Set log properties
          */
         LogProperties.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId));
@@ -1014,27 +1028,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * ... and connect it
          */
-        try {
-            if (null != preAuthStartTlsCap) {
-                try {
-                    final String serverUrl = new StringBuilder(36).append(IDNA.toASCII(server)).append(':').append(port).toString();
-                    final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, IMAPProperties.getInstance());
-                    if (null != capabilities) {
-                        preAuthStartTlsCap[0] = capabilities.containsKey("STARTTLS");
-                    }
-                } catch (Exception e) {
-                    // Ignore
+        if (null != preAuthStartTlsCap) {
+            try {
+                Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(server), port), false, IMAPProperties.getInstance());
+                if (null != capabilities) {
+                    preAuthStartTlsCap[0] = capabilities.containsKey("STARTTLS");
                 }
+            } catch (Exception e) {
+                // Ignore
             }
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, knownExternal);
-        } catch (final AuthenticationFailedException e) {
-            /*
-             * Retry connect with AUTH=PLAIN disabled
-             */
-            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-            imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, knownExternal);
         }
+        doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, knownExternal);
 
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
         if (null != sessionInformation) {
@@ -1098,6 +1102,26 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  * Still considered as being temporary broken
                  */
                 throw MimeMailExceptionCode.CONNECT_ERROR.create(mailConfig.getServer(), mailConfig.getLogin()).markLightWeight();
+            }
+            map.remove(key);
+        }
+    }
+
+    private void checkAuthFailed(String user, String password, IIMAPProperties imapConfProps) throws OXException, IMAPException {
+        Map<HostAndPortAndCredentials, StampAndOXException> map = authFailedServers;
+        if (null == map) {
+            return;
+        }
+
+        MailConfig mailConfig = getMailConfig();
+        HostAndPortAndCredentials key = new HostAndPortAndCredentials(user, password, mailConfig.getServer(), mailConfig.getPort());
+        StampAndOXException range = map.get(key);
+        if (range != null) {
+            if (System.currentTimeMillis() - range.getStamp() <= imapConfProps.getImapFailedAuthTimeout()) {
+                /*
+                 * Still considered as being temporary broken
+                 */
+                throw range.getOXException().markLightWeight();
             }
             map.remove(key);
         }
@@ -1177,16 +1201,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapSession;
     }
 
-    /**
-     * Whether to notify about recent messages. Notification is enabled if both conditions are met:<br>
-     * It's the primary account's IMAP store <b>AND</b> notify-recent has been enabled by configuration.
-     *
-     * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
-     */
-    public boolean notifyRecent() {
-        return MailAccount.DEFAULT_ID == accountId && getIMAPConfig().getIMAPProperties().notifyRecent();
-    }
-
     @Override
     protected void startup() throws OXException {
         initMaps();
@@ -1200,18 +1214,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         final ConfigurationService confService = Services.getService(ConfigurationService.class);
         final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
         USE_IMAP_STORE_CACHE.set(useIMAPStoreCache);
-        long failedAuthTimeout;
-        try {
-            failedAuthTimeout = null == confService ? 10000L : Long.parseLong(confService.getProperty("com.openexchange.imap.failedAuthTimeout", "10000"));
-        } catch (final NumberFormatException e) {
-            failedAuthTimeout = 10000L;
-        }
-        FAILED_AUTH_TIMEOUT.set(failedAuthTimeout);
     }
 
     private static synchronized void initMaps() {
         if (null == timedOutServers) {
             timedOutServers = new NonBlockingHashMap<>();
+        }
+        if (null == authFailedServers) {
+            authFailedServers = new NonBlockingHashMap<>();
         }
         if (null == aclCapableServers) {
             aclCapableServers = new NonBlockingHashMap<>();
@@ -1220,6 +1230,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             final TimerService timerService = Services.getService(TimerService.class);
             if (null != timerService) {
                 final Map<HostAndPort, Long> map1 = timedOutServers;
+                final Map<HostAndPortAndCredentials, StampAndOXException> map2 = authFailedServers;
                 final Runnable r = new Runnable() {
 
                     @Override
@@ -1233,10 +1244,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                                 iter.remove();
                             }
                         }
-                        /*
-                         * Clean-up failed-login map
-                         */
-                        IMAPStore.cleanUpFailedAuths(FAILED_AUTH_TIMEOUT.get());
+                        for (final Iterator<Entry<HostAndPortAndCredentials, StampAndOXException>> iter = map2.entrySet().iterator(); iter.hasNext();) {
+                            final Entry<HostAndPortAndCredentials, StampAndOXException> entry = iter.next();
+                            if (System.currentTimeMillis() - entry.getValue().getStamp() > MAX_TEMP_DOWN) {
+                                iter.remove();
+                            }
+                        }
                     }
                 };
                 /*
@@ -1257,7 +1270,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         MBoxEnabledCache.tearDown();
         RootSubfoldersEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
-        IMAPNotifierMessageRecentListener.dropFullNameChecker();
         dropMaps();
     }
 
@@ -1269,6 +1281,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         aclCapableServers = null;
         timedOutServers = null;
+        authFailedServers = null;
     }
 
     @Override
@@ -1297,70 +1310,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return new HostAndPort(host, port);
     }
 
-    /** Simple class to hold host and port for an IMAP end-point */
-    public static final class HostAndPort {
-
-        private final String host;
-        private final int port;
-        private final int hashCode;
-
-        /**
-         * Initializes a new {@link HostAndPort}.
-         *
-         * @param host The host name or IP address of the IMAP server
-         * @param port The port
-         */
-        HostAndPort(final String host, final int port) {
-            super();
-            if (port < 0 || port > 0xFFFF) {
-                throw new IllegalArgumentException("port out of range:" + port);
-            }
-            if (host == null) {
-                throw new IllegalArgumentException("hostname can't be null");
-            }
-            this.host = host;
-            this.port = port;
-            hashCode = (host.toLowerCase(Locale.ENGLISH).hashCode()) ^ port;
-        }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final HostAndPort other = (HostAndPort) obj;
-            if (host == null) {
-                if (other.host != null) {
-                    return false;
-                }
-            } else if (!host.equals(other.host)) {
-                return false;
-            }
-            if (port != other.port) {
-                return false;
-            }
-            return true;
-        }
-    }
-
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, userId, contextId), userId, contextId);
     }
 
-    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass, final boolean forceSecure) throws OXException {
+    private static javax.mail.Session setConnectProperties(IMAPConfig config, int timeout, int connectionTimeout, Properties imapProps, Class<? extends IMAPStore> storeClass, boolean forceSecure, int userId, int contextId) throws OXException {
         /*
          * Custom IMAP store
          */
@@ -1398,7 +1356,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Greeting listener (for primary IMAP)
          */
         if (config.getAccountId() == MailAccount.DEFAULT_ID) {
-            GreetingListener greetingListener = IMAPProperties.getInstance().getHostNameRegex();
+            GreetingListener greetingListener = IMAPProperties.getInstance().getHostNameRegex(userId, contextId);
             if (null != greetingListener) {
                 imapProps.put("mail.imap.greeting.listeners", Collections.singletonList(greetingListener));
             }
@@ -1407,9 +1365,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Allow round-robin address election for primary IMAP account
          */
         if (config.getAccountId() == MailAccount.DEFAULT_ID) {
-            boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses();
+            boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses(userId, contextId);
             if (useMultipleAddresses) {
                 imapProps.put("mail.imap.multiAddress.enabled", "true");
+                /*
+                 * Pass hash if needed
+                 */
+                boolean useMultipleAddressesUserHash = IMAPProperties.getInstance().isUseMultipleAddressesUserHash(userId, contextId);
+                if (useMultipleAddressesUserHash) {
+                    int hash = getHashFor(userId, contextId);
+                    imapProps.put("mail.imap.multiAddress.key", Integer.toString(hash));
+                }
             }
         }
         /*
@@ -1417,6 +1383,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (AuthType.OAUTH == config.getAuthType()) {
             imapProps.put("mail.imap.auth.mechanisms", "XOAUTH2");
+        } else if (AuthType.OAUTHBEARER == config.getAuthType()) {
+            imapProps.put("mail.imap.auth.mechanisms", "OAUTHBEARER");
+        } else {
+            imapProps.put("mail.imap.auth.mechanisms", "PLAIN LOGIN NTLM");
         }
         /*
          * Check if a secure IMAP connection should be established

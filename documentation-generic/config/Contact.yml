@@ -1,0 +1,399 @@
+feature_name: Contact
+properties:
+  - key: contact_first_letter_field
+    description: |
+      First Letter Field, the field you sort in when you hit one of the start letters.
+
+      <code>field02</code> - Last name  
+      <code>field03</code> - First name
+    defaultValue: field02 
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: validate_contact_email
+    description: |
+      Check the entered email address from a new contact for correctness
+      (syntactic check user@domain.tld).
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: max_image_size
+    description: |
+      The maximum size in bytes for the upload of contact images. Remember: If you decrease the size after some images where uploaded already, 
+      you might trigger errors, for example when trying to modify the contact without adding an image of the correct size.
+    defaultValue: 4194304
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.mailAddressAutoSearch
+    description: |
+      Determines if a search is triggered if the dialog for searching for emailable
+      contacts is opened. This dialog is used for selecting recipients for an email
+      and for creating distribution lists.
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties 
+    packageName: open-xchange-core
+    tags: ["Contact"]   
+  - key: com.openexchange.contact.singleFolderSearch
+    description: |
+      Searching for contacts can be done in a single folder or globally across all folders. Searching across all folders can cause high server
+      and database load because first all visible folders must be determined and if a user has object read permissions in that folders. Software
+      internal default is true to prevent high load if the property is not defined. Default here is false because it is easier for the user to
+      find contacts.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"] 
+  - key: com.openexchange.contacts.characterSearch
+    description: |
+      Enables/Disables the start letter based quick select of contacts
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"] 
+  - key: com.openexchange.contacts.allFoldersForAutoComplete
+    description: |
+      The auto complete search for email addresses may be triggered easily and quite often if a new email is written and a part of a recipients
+      address is written. This can lead to high load on the database system if a context has a lot of users and a lot of contacts. Therefore the
+      scope if this search can be configured. Set this parameter to <code>true</code> and the auto complete search looks in every readable contact folder for
+      contacts with emails addresses matching the already typed letters. If this parameter is configured to <code>false</code>, only three folders are
+      considered for the search: the users private default contact folder, his contact folder for collected contacts and the global address book
+      if that is enabled for the user.
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.scaleVCardImages
+    description: |
+      Enables/Disables the start letter based quick select of contacts.
+    defaultValue: 200x200
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties 
+    tags: ["Contact"]
+  - key: com.openexchange.contact.storeVCards
+    description: |
+      Specifies whether the original files are persisted during vCard import or 
+      CardDAV synchronization. If enabled, the original vCard files will be stored 
+      in the appropriate filestore and are considered during export again. If 
+      disabled, all not mapped information is discarded and is no longer available
+      when exporting the vCard again. 
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.maxVCardSize
+    description: |
+      Configures the maximum allowed size of a (single) vCard file in bytes. 
+      vCards larger than the configured maximum size are rejected and not parsed 
+      by the server. A value of <code>0</code> or smaller is considered as unlimited. 
+    defaultValue: 4194304
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.image.scaleImages
+    description: |
+      Enables/Disables the scaling of contact images to a smaller size. 
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.image.maxWidth
+    description: |
+      Defines the width of scaled contact images.
+    defaultValue: 250
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.image.maxHeight
+    description: |
+      Defines the height of scaled contact images.
+    defaultValue: 250
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.image.scaleType
+    description: |
+      Defines the scale type:
+      <ul>
+       <li><code>1</code> = contain - maxWidth and maxHeight defines the maximum target dimension</li>
+       <li><code>2</code> = cover - maxWidth and maxHeight defines the minimum target dimension</li>
+       <li><code>3</code> = auto</li>
+      </ul>
+    defaultValue: 2
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.fulltextAutocomplete
+    description: |
+      Configures if a FULLTEXT index dedicated for auto-completion can be used or
+      not. Once enabled, an appropriate index is created on the 'prg_contacts' 
+      table automatically (covering fields specified through [[com.openexchange.contact.fulltextIndexFields]] property),
+      and is used afterwards to serve the "find as you type" 
+      auto-completion requests in an efficient way.
+      Note that this index requires support for FULLTEXT index types on the used
+      InnoDB table, which is available starting with MySQL 5.6.4 (see
+      [[http://dev.mysql.com/doc/refman/5.6/en/fulltext-restrictions.html]] for 
+      details).
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.fulltextIndexFields
+    description: |
+      Specifies the contact fields for which a FULLTEXT index is supposed to be created
+      provided that property [[com.openexchange.contact.fulltextAutocomplete]] is set to <code>true</code>.
+      
+      Supported fields:
+      <ul>
+       <li><code>DISPLAY_NAME</code></li>
+       <li><code>SUR_NAME</code></li>
+       <li><code>GIVEN_NAME</code></li>
+       <li><code>TITLE</code></li>
+       <li><code>SUFFIX</code></li>
+       <li><code>MIDDLE_NAME</code></li>
+       <li><code>COMPANY</code></li>
+       <li><code>EMAIL1</code></li>
+       <li><code>EMAIL2</code></li>
+       <li><code>EMAIL3</code></li>
+       <li><code>DEPARTMENT</code></li>
+      </ul>
+
+      Note:  
+      These fields are only checked one time if [[com.openexchange.contact.fulltextAutocomplete]] is set to <code>true</code>.
+      In case the fields are altered later on, manual execution of the associated update task is required to adapt
+      the FULLTEXT index to the newly specified fields:
+      
+      <pre>/opt/open-xchange/sbin/forceupdatetask --task com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask &lt;other command-line arguments&gt;</pre>
+    defaultValue: DISPLAY_NAME, SUR_NAME, GIVEN_NAME, TITLE, SUFFIX, MIDDLE_NAME, COMPANY, EMAIL1, EMAIL2, EMAIL3 
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.autocomplete.fields
+    description: |
+      Defines the fields considered within the autocomplete search operation.
+      Must be a comma separated list of available fields.
+      The available fields are: <code>GIVEN_NAME</code>, <code>SUR_NAME</code>, <code>DISPLAY_NAME</code>, <code>EMAIL1</code>, <code>EMAIL2</code>, <code>EMAIL3</code>, <code>DEPARTMENT</code>
+    defaultValue: GIVEN_NAME, SUR_NAME, DISPLAY_NAME, EMAIL1, EMAIL2, EMAIL3
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contact.search.fields
+    description: |
+      Defines the fields considered within the normal search operation.
+      Must be a comma separated list of available fields, groups of fields or any combination of both.
+
+      The available groups and their fields are the following:
+      <ul>
+      <li><code>ADDRESS_FIELDS</code>
+        <ul>
+         <li><code>STREET_BUSINESS</code></li>
+         <li><code>STREET_HOME</code></li>
+         <li><code>STREET_OTHER</code></li>
+         <li><code>POSTAL_CODE_BUSINESS</code></li>
+         <li><code>POSTAL_CODE_HOME</code></li>
+         <li><code>POSTAL_CODE_OTHER</code></li>
+         <li><code>CITY_BUSINESS</code></li>
+         <li><code>CITY_HOME</code></li>
+         <li><code>CITY_OTHER</code></li>
+         <li><code>STATE_BUSINESS</code></li>
+         <li><code>STATE_HOME</code></li>
+         <li><code>STATE_OTHER</code></li>
+         <li><code>COUNTRY_BUSINESS</code></li>
+         <li><code>COUNTRY_HOME</code></li>
+         <li><code>COUNTRY_OTHER</code></li>
+        </ul>
+      </li>
+      <li><code>EMAIL_FIELDS</code>
+        <ul>
+         <li><code>EMAIL1</code></li>
+         <li><code>EMAIL2</code></li>
+         <li><code>EMAIL3</code></li>
+         <li><code>DISTRIBUTIONLIST</code></li>
+        </ul>
+      </li>
+      <li><code>NAME_FIELDS</code>
+        <ul>
+         <li><code>DISPLAY_NAME</code></li>
+         <li><code>SUR_NAME</code></li>
+         <li><code>MIDDLE_NAME</code></li>
+         <li><code>GIVEN_NAME</code></li>
+         <li><code>TITLE</code></li>
+         <li><code>YOMI_FIRST_NAME</code></li>
+         <li><code>YOMI_LAST_NAME</code></li>
+         <li><code>SUFFIX</code></li></li>
+        </ul>
+      </li>
+      <li><code>PHONE_FIELDS</code>
+        <ul>
+         <li><code>TELEPHONE_ASSISTANT</code></li>
+         <li><code>TELEPHONE_BUSINESS1</code></li>
+         <li><code>TELEPHONE_BUSINESS2</code></li>
+         <li><code>TELEPHONE_CALLBACK</code></li>
+         <li><code>TELEPHONE_CAR</code></li>
+         <li><code>TELEPHONE_COMPANY</code></li>
+         <li><code>TELEPHONE_HOME1</code></li>
+         <li><code>TELEPHONE_HOME2</code></li>
+         <li><code>TELEPHONE_IP</code></li>
+         <li><code>TELEPHONE_ISDN</code></li>
+         <li><code>TELEPHONE_OTHER</code></li>
+         <li><code>TELEPHONE_PAGER</code></li>
+         <li><code>TELEPHONE_PRIMARY</code></li>
+         <li><code>TELEPHONE_RADIO</code></li>
+         <li><code>TELEPHONE_TELEX</code></li>
+         <li><code>TELEPHONE_TTYTDD</code></li>
+         <li><code>CELLULAR_TELEPHONE1</code></li>
+         <li><code>CELLULAR_TELEPHONE2</code></li>
+         <li><code>NUMBER_OF_CHILDREN</code> </li>
+        </ul>
+      </li>
+      <li><code>USER_FIELDS</code>
+        <ul>
+         <li><code>USERFIELD01</code></li>
+         <li><code>USERFIELD02</code></li>
+         <li><code>USERFIELD03</code></li>
+         <li><code>USERFIELD04</code></li>
+         <li><code>USERFIELD05</code></li>
+         <li><code>USERFIELD06</code></li>
+         <li><code>USERFIELD07</code></li>
+         <li><code>USERFIELD08</code></li>
+         <li><code>USERFIELD09</code></li>
+         <li><code>USERFIELD10</code></li>
+         <li><code>USERFIELD11</code></li>
+         <li><code>USERFIELD12</code></li>
+         <li><code>USERFIELD13</code></li>
+         <li><code>USERFIELD14</code></li>
+         <li><code>USERFIELD15</code></li>
+         <li><code>USERFIELD16</code></li>
+         <li><code>USERFIELD17</code></li>
+         <li><code>USERFIELD18</code></li>
+         <li><code>USERFIELD19</code></li>
+         <li><code>USERFIELD20</code></li>
+        </ul>
+      </li>
+      <li>Remaining unassigned fields
+        <ul>
+         <li><code>CATEGORIES</code></li>
+         <li><code>COMPANY</code></li>
+         <li><code>DEPARTMENT</code></li>
+         <li><code>COMMERCIAL_REGISTER</code></li>
+         <li><code>MARITAL_STATUS</code></li>
+         <li><code>PROFESSION</code></li>
+         <li><code>NICKNAME</code></li>
+         <li><code>SPOUSE_NAME</code></li>
+         <li><code>NOTE</code></li>
+         <li><code>POSITION</code></li>
+         <li><code>EMPLOYEE_TYPE</code></li>
+         <li><code>ROOM_NUMBER</code></li>
+         <li><code>TAX_ID</code></li>
+         <li><code>BRANCHES</code></li>
+         <li><code>BUSINESS_CATEGORY</code></li>
+         <li><code>INFO</code></li>
+         <li><code>MANAGER_NAME</code></li>
+         <li><code>ASSISTANT_NAME</code></li>
+         <li><code>FAX_BUSINESS</code></li>
+         <li><code>FAX_HOME</code></li>
+         <li><code>FAX_OTHER</code></li>
+         <li><code>URL</code></li>
+         <li><code>INSTANT_MESSENGER1</code></li>
+         <li><code>INSTANT_MESSENGER2</code></li>
+        </ul>
+      </li>
+      </ul>
+    defaultValue: ADDRESS_FIELDS, EMAIL_FIELDS, NAME_FIELDS, PHONE_FIELDS, CATEGORIES, COMPANY, DEPARTMENT, COMMERCIAL_REGISTER, POSITION
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"] 
+  - key: com.openexchange.contactcollector.enabled
+    description: |
+      Whether enabled or disabled regardless of bundle start-up.
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: contactcollector.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
+  - key: com.openexchange.contactcollector.folder.deleteDenied
+    description: |
+      Whether deletion of contact collector folder will be denied.
+    defaultValue: false
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contactcollector.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]   

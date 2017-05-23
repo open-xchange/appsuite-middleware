@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,8 +61,6 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -86,18 +85,21 @@ public class Bug48917Test extends CalDAVTest {
 
     @Before
     public void setUp() throws Exception {
-        manager2 = new CalendarTestManager(new AJAXClient(User.User2));
+        super.setUp();
+        manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
     }
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
+        try {
+            if (null != this.manager2) {
+                this.manager2.cleanUp();
             }
+        } finally {
+            super.tearDown();
         }
+
     }
 
     @Test
@@ -200,5 +202,3 @@ public class Bug48917Test extends CalDAVTest {
     }
 
 }
-
-

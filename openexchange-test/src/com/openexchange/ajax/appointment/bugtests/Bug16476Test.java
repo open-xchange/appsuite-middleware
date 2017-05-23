@@ -51,7 +51,11 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -60,7 +64,6 @@ import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -84,36 +87,21 @@ public class Bug16476Test extends AbstractAJAXSession {
      *
      * @param name
      */
-    public Bug16476Test(String name) {
-        super(name);
+    public Bug16476Test() {
+        super();
 
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = getClient2();
 
-        folder = Create.folder(
-            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "Folder to test bug 16476",
-            FolderObject.CALENDAR,
-            FolderObject.PRIVATE,
-            ocl(clientA.getValues().getUserId(), false, true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(clientB.getValues().getUserId(), false, false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
-
-        CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
-        response.fillObject(folder);
-
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 16476", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
+        
+        folder = ftm.insertFolderOnServer(folder);
+        
         appointment = new Appointment();
         appointment.setStartDate(D("01.06.2010 08:00"));
         appointment.setEndDate(D("01.06.2010 09:00"));
@@ -123,6 +111,7 @@ public class Bug16476Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug16476() throws Exception {
         InsertRequest insert = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insert);
@@ -133,12 +122,4 @@ public class Bug16476Test extends AbstractAJAXSession {
         JSONArray jsonArray = (JSONArray) searchResponse.getResponse().getData();
         assertTrue("No results expected", jsonArray.length() == 0);
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-        clientA.execute(new DeleteRequest(appointment));
-        clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
-        super.tearDown();
-    }
-
 }

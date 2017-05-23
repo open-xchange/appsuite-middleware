@@ -76,8 +76,7 @@ public final class ICalImportParser extends AbstractUploadParser<ICalImportRespo
      * {@inheritDoc}
      */
     @Override
-    protected ICalImportResponse createResponse(final Response response)
-        throws JSONException {
+    protected ICalImportResponse createResponse(final Response response) throws JSONException {
         final ICalImportResponse retval = new ICalImportResponse(response);
         final Object data = response.getData();
         if (data instanceof JSONArray) {
@@ -91,7 +90,7 @@ public final class ICalImportParser extends AbstractUploadParser<ICalImportRespo
                 final OXException e = result.getException();
                 final String msg = e == null ? null : e.getMessage();
                 if (failOnError) {
-                	assertFalse(msg, result.hasError());
+                    assertFalse(msg, result.hasError());
                 }
             }
         } else if (failOnError) {

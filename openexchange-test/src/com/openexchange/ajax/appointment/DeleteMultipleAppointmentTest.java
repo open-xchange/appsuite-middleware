@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.appointment;
 
+import static org.junit.Assert.assertFalse;
 import java.util.Date;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -57,11 +60,8 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.Appointment;
-
 
 /**
  * {@link DeleteMultipleAppointmentTest}
@@ -69,70 +69,65 @@ import com.openexchange.groupware.container.Appointment;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DeleteMultipleAppointmentTest extends AppointmentTest {
-    
-    private AJAXClient client;
+
     private Appointment appointment1, appointment2;
 
-    /**
-     * Initializes a new {@link DeleteMultipleAppointmentTest}.
-     * @param name
-     */
-    public DeleteMultipleAppointmentTest(String name) {
-        super(name);
-    }
-
     @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
 
         appointment1 = new Appointment();
         appointment1.setIgnoreConflicts(true);
         appointment1.setTitle("Test 1");
-        appointment1.setTimezone(timeZone.getDisplayName());
+        appointment1.setTimezone(timeZone.getID());
         appointment1.setStartDate(new Date());
-        appointment1.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *2));
-        appointment1.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment1.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
+        appointment1.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         InsertRequest insReq1 = new InsertRequest(appointment1, timeZone);
-        AppointmentInsertResponse insRes1 = client.execute(insReq1);
+        AppointmentInsertResponse insRes1 = getClient().execute(insReq1);
         insRes1.fillAppointment(appointment1);
-        
+
         appointment2 = new Appointment();
         appointment2.setIgnoreConflicts(true);
         appointment2.setTitle("Test 2");
-        appointment2.setTimezone(timeZone.getDisplayName());
+        appointment2.setTimezone(timeZone.getID());
         appointment2.setStartDate(new Date());
-        appointment2.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *2));
-        appointment2.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment2.setEndDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2));
+        appointment2.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         InsertRequest insReq2 = new InsertRequest(appointment2, timeZone);
-        AppointmentInsertResponse insRes2 = client.execute(insReq2);
+        AppointmentInsertResponse insRes2 = getClient().execute(insReq2);
         insRes2.fillAppointment(appointment2);
     }
-    
+
     @Override
+    @After
     public void tearDown() throws Exception {
-        GetRequest getReq1 = new GetRequest(appointment1, false);
-        GetResponse getRes1 = client.execute(getReq1);
-        if (!getRes1.hasError()) {
-            DeleteRequest delReq = new DeleteRequest(appointment1);
-            client.execute(delReq);
-        }
+        try {
+            GetRequest getReq1 = new GetRequest(appointment1, false);
+            GetResponse getRes1 = getClient().execute(getReq1);
+            if (!getRes1.hasError()) {
+                DeleteRequest delReq = new DeleteRequest(appointment1);
+                getClient().execute(delReq);
+            }
 
-        GetRequest getReq2 = new GetRequest(appointment2, false);
-        GetResponse getRes2 = client.execute(getReq2);
-        if (!getRes2.hasError()) {
-            DeleteRequest delReq = new DeleteRequest(appointment2);
-            client.execute(delReq);
-        }
+            GetRequest getReq2 = new GetRequest(appointment2, false);
+            GetResponse getRes2 = getClient().execute(getReq2);
+            if (!getRes2.hasError()) {
+                DeleteRequest delReq = new DeleteRequest(appointment2);
+                getClient().execute(delReq);
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
-    
+
     @Test
     public void testDeleteMultiple() throws Exception {
-        int[] ids = new int[] {appointment1.getObjectID(), appointment2.getObjectID()};
-        DeleteRequest delReq = new DeleteRequest(ids, client.getValues().getPrivateAppointmentFolder(), new Date(System.currentTimeMillis() + 300000L), true);
-        CommonDeleteResponse delRes = client.execute(delReq);
+        int[] ids = new int[] { appointment1.getObjectID(), appointment2.getObjectID() };
+        DeleteRequest delReq = new DeleteRequest(ids, getClient().getValues().getPrivateAppointmentFolder(), new Date(System.currentTimeMillis() + 300000L), true);
+        CommonDeleteResponse delRes = getClient().execute(delReq);
         assertFalse("Multiple delete failed: " + delRes.getErrorMessage(), delRes.hasError());
     }
 }

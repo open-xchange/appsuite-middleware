@@ -212,6 +212,14 @@ public class ConversionWarning extends OXException {
          * Invalid mail address for external participant: %1$s
          */
         INVALID_MAIL_ADDRESS("Invalid mail address for external participant: %1$s", CATEGORY_USER_INPUT, 22, ConversionWarningMessage.INVALID_MAIL_ADDRESS_MSG),
+        /**
+         * The conversion yields some objects which could not be stored due to missing folder for %1$s
+         */
+        NO_FOLDER_FOR_APPOINTMENTS("The conversion yields some objects which could not be stored due to missing folder for appointments.", CATEGORY_WARNING, 23, ConversionWarningMessage.NO_FOLDER_FOR_APPOINTMENTS),
+        /**
+         * The conversion yields some objects which could not be stored due to missing folder for %1$s
+         */
+        NO_FOLDER_FOR_TASKS("The conversion yields some objects which could not be stored due to missing folder for tasks.", CATEGORY_WARNING, 23, ConversionWarningMessage.NO_FOLDER_FOR_TASKS),
 
         ;
 

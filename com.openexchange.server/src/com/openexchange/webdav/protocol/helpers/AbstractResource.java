@@ -215,7 +215,11 @@ public abstract class AbstractResource implements WebdavResource {
         for (final PropertyMixin mixin : mixins) {
             List<WebdavProperty> properties;
             try {
-                properties = mixin.getAllProperties();
+                if (ResourcePropertyMixin.class.isInstance(mixin)) {
+                    properties = ((ResourcePropertyMixin) mixin).getAllProperties(this);
+                } else {
+                    properties = mixin.getAllProperties();
+                }
             } catch (final OXException e) {
                 if (e instanceof WebdavProtocolException) {
                     throw (WebdavProtocolException) e;
@@ -232,7 +236,11 @@ public abstract class AbstractResource implements WebdavResource {
         for (final PropertyMixin mixin : mixins) {
             WebdavProperty property;
             try {
-                property = mixin.getProperty(namespace, name);
+                if (ResourcePropertyMixin.class.isInstance(mixin)) {
+                    property = ((ResourcePropertyMixin) mixin).getProperty(this, namespace, name);
+                } else {
+                    property = mixin.getProperty(namespace, name);
+                }
             } catch (final OXException e) {
                 if (e instanceof WebdavProtocolException) {
                     throw (WebdavProtocolException) e;

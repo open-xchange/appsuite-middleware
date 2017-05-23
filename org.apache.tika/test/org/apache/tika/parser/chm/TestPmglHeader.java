@@ -16,15 +16,14 @@
  */
 package org.apache.tika.parser.chm;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.tika.parser.chm.accessor.ChmPmglHeader;
 import org.apache.tika.parser.chm.core.ChmCommons;
 import org.apache.tika.parser.chm.core.ChmConstants;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class TestPmglHeader extends TestCase {
-    ChmPmglHeader chmPmglHeader = null;
+public class TestPmglHeader {    ChmPmglHeader chmPmglHeader = null;
 
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
@@ -34,36 +33,44 @@ public class TestPmglHeader extends TestCase {
                         + ChmConstants.CHM_PMGL_LEN + 10), chmPmglHeader);
     }
 
-    public void testToString() {
+         @Test
+     public void testToString() {
         Assert.assertTrue((chmPmglHeader != null)
                 && chmPmglHeader.toString().length() > 0);
     }
 
-    public void testChmPmglHeaderGet() {
+         @Test
+     public void testChmPmglHeaderGet() {
         Assert.assertEquals(TestParameters.VP_PMGL_SIGNATURE, new String(
                 chmPmglHeader.getSignature()));
     }
 
-    public void testGetBlockNext() {
+         @Test
+     public void testGetBlockNext() {
         Assert.assertEquals(TestParameters.VP_PMGL_BLOCK_NEXT,
                 chmPmglHeader.getBlockNext());
     }
 
-    public void testGetBlockPrev() {
+         @Test
+     public void testGetBlockPrev() {
         Assert.assertEquals(TestParameters.VP_PMGL_BLOCK_PREV,
                 chmPmglHeader.getBlockPrev());
     }
 
-    public void testGetFreeSpace() {
+         @Test
+     public void testGetFreeSpace() {
         Assert.assertEquals(TestParameters.VP_PMGL_FREE_SPACE,
                 chmPmglHeader.getFreeSpace());
     }
 
-    public void testGetUnknown0008() {
+         @Test
+     public void testGetUnknown0008() {
         Assert.assertEquals(TestParameters.VP_PMGL_UNKNOWN_008,
                 chmPmglHeader.getUnknown0008());
     }
 
-    public void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
     }
 }

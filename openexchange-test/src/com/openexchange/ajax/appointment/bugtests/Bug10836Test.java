@@ -49,13 +49,14 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -66,55 +67,57 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * Checks if the calendar has a vulnerability in the list request.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug10836Test extends AbstractAJAXSession {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10836Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10836Test.class);
 
-	/**
-	 * Default constructor.
-	 * @param name Name of the test.
-	 */
-	public Bug10836Test(final String name) {
-		super(name);
-	}
+    /**
+     * Default constructor.
+     * 
+     * @param name Name of the test.
+     */
+    public Bug10836Test() {
+        super();
+    }
 
-	/**
-	 * Creates a private appointment with user A and tries to read it with user
-	 * B through a list request.
-	 * @throws Throwable if some exception occurs.
-	 */
-	public void testVulnerability() throws Throwable {
-		final AJAXClient clientA = getClient();
-		final AJAXClient clientB = new AJAXClient(User.User2);
-		final int folderA = clientA.getValues().getPrivateAppointmentFolder();
-		final int folderB = clientB.getValues().getPrivateAppointmentFolder();
-		final TimeZone tz = clientA.getValues().getTimeZone();
-		final Appointment app = new Appointment();
-		app.setParentFolderID(folderA);
-		app.setTitle("Bug10836Test");
-		app.setStartDate(new Date(TimeTools.getHour(0, tz)));
-		app.setEndDate(new Date(TimeTools.getHour(1, tz)));
-		app.setIgnoreConflicts(true);
-		final CommonInsertResponse insertR = clientA.execute(new InsertRequest(app, tz));
-		try {
-		    final ListIDs list = new ListIDs();
-		    list.add(new ListIDInt(folderB, insertR.getId()));
-			final CommonListResponse listR = clientB.execute(new ListRequest(list,
-		        new int[] { Appointment.TITLE }, false));
+    /**
+     * Creates a private appointment with user A and tries to read it with user
+     * B through a list request.
+     * 
+     * @throws Throwable if some exception occurs.
+     */
+    @Test
+    public void testVulnerability() throws Throwable {
+        final AJAXClient clientA = getClient();
+        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
+        final int folderA = clientA.getValues().getPrivateAppointmentFolder();
+        final int folderB = clientB.getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = clientA.getValues().getTimeZone();
+        final Appointment app = new Appointment();
+        app.setParentFolderID(folderA);
+        app.setTitle("Bug10836Test");
+        app.setStartDate(new Date(TimeTools.getHour(0, tz)));
+        app.setEndDate(new Date(TimeTools.getHour(1, tz)));
+        app.setIgnoreConflicts(true);
+        final CommonInsertResponse insertR = clientA.execute(new InsertRequest(app, tz));
+        try {
+            final ListIDs list = new ListIDs();
+            list.add(new ListIDInt(folderB, insertR.getId()));
+            final CommonListResponse listR = clientB.execute(new ListRequest(list, new int[] { Appointment.TITLE }, false));
 
-			assertTrue(listR.hasError());
-			/*
-			for (Object[] obj1 : listR) {
-				for (Object obj2 : obj1) {
-					assertNull(obj2);
-				}
-			}
-			*/
-		} finally {
-			clientA.execute(new DeleteRequest(insertR.getId(), folderA,
-			    insertR.getTimestamp()));
-		}
-	}
+            assertTrue(listR.hasError());
+            /*
+             * for (Object[] obj1 : listR) {
+             * for (Object obj2 : obj1) {
+             * assertNull(obj2);
+             * }
+             * }
+             */
+        } finally {
+            clientA.execute(new DeleteRequest(insertR.getId(), folderA, insertR.getTimestamp()));
+        }
+    }
 }

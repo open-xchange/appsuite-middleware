@@ -56,7 +56,6 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * Depends on bundle com.openexchange.test.pop3, contained in backend-test.
  *
@@ -94,11 +93,7 @@ public class StartPOP3ServerRequest implements AJAXRequest<StartPOP3ServerRespon
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new URLParameter("action", "startServer"),
-            new URLParameter("failOnConnect", failOnConnect),
-            new URLParameter("failOnAuth", failOnAuth),
-            new URLParameter("acceptedConnects", acceptedConnects),
+        return new Parameter[] { new URLParameter("action", "startServer"), new URLParameter("failOnConnect", failOnConnect), new URLParameter("failOnAuth", failOnAuth), new URLParameter("acceptedConnects", acceptedConnects),
         };
     }
 
@@ -118,8 +113,10 @@ public class StartPOP3ServerRequest implements AJAXRequest<StartPOP3ServerRespon
     }
 
     private static final class Parser extends AbstractAJAXParser<StartPOP3ServerResponse> {
+
         /**
          * Initializes a new {@link Parser}.
+         * 
          * @param failOnError
          */
         protected Parser(boolean failOnError) {

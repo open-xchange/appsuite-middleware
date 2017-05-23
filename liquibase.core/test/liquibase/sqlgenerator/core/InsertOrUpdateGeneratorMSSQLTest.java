@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.statement.core.InsertOrUpdateStatement;
 import org.junit.Assert;
 import org.junit.Test;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorMSSQLTest {
 

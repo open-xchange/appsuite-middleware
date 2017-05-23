@@ -56,12 +56,17 @@ import static com.openexchange.groupware.container.Appointment.SHOWN_AS;
 import static com.openexchange.groupware.container.Appointment.TIMEZONE;
 import static com.openexchange.groupware.container.CalendarObject.ALARM;
 import static com.openexchange.groupware.container.CalendarObject.FULL_TIME;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class AppointmentObjectTest extends CalendarObjectTest {
 
+    @Test
     public void testCloneShouldNotChangeContainsStatus() {
         Appointment a = new Appointment();
         assertFalse(a.containsShownAs());
@@ -69,7 +74,7 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertFalse(b.containsShownAs());
     }
 
-    @Override
+    @Test
     public void testAttrAccessors() {
         Appointment object = new Appointment();
 
@@ -82,14 +87,12 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertTrue(object.containsShownAs());
         assertEquals(-12, object.get(SHOWN_AS));
 
-        object.set(SHOWN_AS,12);
+        object.set(SHOWN_AS, 12);
         assertEquals(12, object.getShownAs());
 
         object.remove(SHOWN_AS);
         assertFalse(object.contains(SHOWN_AS));
         assertFalse(object.containsShownAs());
-
-
 
         // ALARM
         assertFalse(object.contains(ALARM));
@@ -100,14 +103,12 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertTrue(object.containsAlarm());
         assertEquals(-12, object.get(ALARM));
 
-        object.set(ALARM,12);
+        object.set(ALARM, 12);
         assertEquals(12, object.getAlarm());
 
         object.remove(ALARM);
         assertFalse(object.contains(ALARM));
         assertFalse(object.containsAlarm());
-
-
 
         // FULL_TIME
         assertFalse(object.contains(FULL_TIME));
@@ -118,14 +119,12 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertTrue(object.containsFullTime());
         assertEquals(false, object.get(FULL_TIME));
 
-        object.set(FULL_TIME,true);
+        object.set(FULL_TIME, true);
         assertEquals(true, object.getFullTime());
 
         object.remove(FULL_TIME);
         assertFalse(object.contains(FULL_TIME));
         assertFalse(object.containsFullTime());
-
-
 
         // TIMEZONE
         assertFalse(object.contains(TIMEZONE));
@@ -136,14 +135,12 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertTrue(object.containsTimezone());
         assertEquals("Bla", object.get(TIMEZONE));
 
-        object.set(TIMEZONE,"Blupp");
+        object.set(TIMEZONE, "Blupp");
         assertEquals("Blupp", object.getTimezone());
 
         object.remove(TIMEZONE);
         assertFalse(object.contains(TIMEZONE));
         assertFalse(object.containsTimezone());
-
-
 
         // RECURRENCE_START
         assertFalse(object.contains(RECURRENCE_START));
@@ -157,14 +154,12 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertTrue(object.containsRecurringStart());
         assertEquals(start, object.get(RECURRENCE_START));
 
-        object.set(RECURRENCE_START,otherStart);
+        object.set(RECURRENCE_START, otherStart);
         assertEquals(otherStart, object.getRecurringStart());
 
         object.remove(RECURRENCE_START);
         assertFalse(object.contains(RECURRENCE_START));
         assertFalse(object.containsRecurringStart());
-
-
 
         // LOCATION
         assertFalse(object.contains(LOCATION));
@@ -175,7 +170,7 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertTrue(object.containsLocation());
         assertEquals("Bla", object.get(LOCATION));
 
-        object.set(LOCATION,"Blupp");
+        object.set(LOCATION, "Blupp");
         assertEquals("Blupp", object.getLocation());
 
         object.remove(LOCATION);
@@ -183,7 +178,6 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertFalse(object.containsLocation());
 
     }
-
 
     public Appointment getAppointmentObject() {
         Appointment object = new Appointment();

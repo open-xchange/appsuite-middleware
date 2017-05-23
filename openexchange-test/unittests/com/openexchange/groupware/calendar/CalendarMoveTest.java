@@ -49,8 +49,13 @@
 
 package com.openexchange.groupware.calendar;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -78,6 +83,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromPrivateToPrivate() throws Throwable {
         try {
             // Create 2 private calendar folders
@@ -139,6 +145,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromPrivateToShared() throws Throwable {
         try {
             // Create 1 shared private calendar folder
@@ -146,11 +153,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             cleanFolders.add(folder1);
 
             final OCLPermission oclp = new OCLPermission();
-            oclp.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            oclp.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             folders.sharePrivateFolder(session, ctx, secondUserId, folder1, oclp);
 
@@ -174,9 +177,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, appointments.getPrivateFolder());
 
             // Search appointment in folders
-            final List<Appointment> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(
-                appointments.getPrivateFolder(),
-                columns);
+            final List<Appointment> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(appointments.getPrivateFolder(), columns);
             final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
 
             boolean found = false;
@@ -214,16 +215,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromPrivateToPublic() throws Throwable {
         try {
             // Create 1 public calendar folder
-            final FolderObject folder1 = folders.createPublicFolderFor(
-                session,
-                ctx,
-                "folder1",
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                userId,
-                secondUserId);
+            final FolderObject folder1 = folders.createPublicFolderFor(session, ctx, "folder1", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
             cleanFolders.add(folder1);
 
             // Change user
@@ -246,9 +242,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             appointments.move(appointmentMove, appointments.getPrivateFolder());
 
             // Search appointment in folders
-            final List<Appointment> appointmentsPrivateFolder = appointments.getAppointmentsInFolder(
-                appointments.getPrivateFolder(),
-                columns);
+            final List<Appointment> appointmentsPrivateFolder = appointments.getAppointmentsInFolder(appointments.getPrivateFolder(), columns);
             final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
 
             boolean found = false;
@@ -284,6 +278,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromSharedToPrivate() throws Throwable {
         try {
             // Create 1 shared private calendar folder
@@ -291,11 +286,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             cleanFolders.add(folder1);
 
             final OCLPermission oclp = new OCLPermission();
-            oclp.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            oclp.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             folders.sharePrivateFolder(session, ctx, secondUserId, folder1, oclp);
 
@@ -320,9 +311,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
             // Search appointment in folders
             final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<Appointment> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(
-                appointments.getPrivateFolder(),
-                columns);
+            final List<Appointment> appointmentsInPrivateFolder = appointments.getAppointmentsInFolder(appointments.getPrivateFolder(), columns);
 
             boolean found = false;
             for (final Appointment object : appointmentsInFolder1) {
@@ -359,6 +348,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromSharedToSharedSameUser() throws Throwable {
         try {
             // Create 2 shared private calendar folders
@@ -368,11 +358,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
             cleanFolders.add(folder2);
 
             final OCLPermission oclp = new OCLPermission();
-            oclp.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            oclp.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             folders.sharePrivateFolder(session, ctx, secondUserId, folder1, oclp);
             folders.sharePrivateFolder(session, ctx, secondUserId, folder2, oclp);
@@ -433,26 +419,17 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromSharedToPublic() throws Throwable {
         try {
             // Create 1 shared private and 1 public calendar folder
             final FolderObject folder1 = folders.createPrivateFolderForSessionUser(session, ctx, "folder1", appointments.getPrivateFolder());
             cleanFolders.add(folder1);
-            final FolderObject folder2 = folders.createPublicFolderFor(
-                session,
-                ctx,
-                "folder2",
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                userId,
-                secondUserId);
+            final FolderObject folder2 = folders.createPublicFolderFor(session, ctx, "folder2", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
             cleanFolders.add(folder2);
 
             final OCLPermission oclp = new OCLPermission();
-            oclp.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            oclp.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             folders.sharePrivateFolder(session, ctx, secondUserId, folder1, oclp);
 
@@ -513,16 +490,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromPublicToPrivate1() throws Throwable {
         try {
             // Create 1 public calendar folder
-            final FolderObject folder1 = folders.createPublicFolderFor(
-                session,
-                ctx,
-                "folder1",
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                userId,
-                secondUserId);
+            final FolderObject folder1 = folders.createPublicFolderFor(session, ctx, "folder1", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
             cleanFolders.add(folder1);
 
             // Change user
@@ -546,9 +518,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
             // Search appointment in folders
             final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(
-                appointments.getPrivateFolder(),
-                columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(appointments.getPrivateFolder(), columns);
 
             boolean found = false;
             for (final Appointment object : appointmentsInFolder1) {
@@ -586,16 +556,11 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromPublicToPrivate2() throws Throwable {
         try {
             // Create 1 public calendar folder
-            final FolderObject folder1 = folders.createPublicFolderFor(
-                session,
-                ctx,
-                "folder1",
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                userId,
-                secondUserId);
+            final FolderObject folder1 = folders.createPublicFolderFor(session, ctx, "folder1", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
             cleanFolders.add(folder1);
 
             // Create appointment
@@ -619,9 +584,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
 
             // Search appointment in folders
             final List<Appointment> appointmentsInFolder1 = appointments.getAppointmentsInFolder(folder1.getObjectID(), columns);
-            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(
-                appointments.getPrivateFolder(),
-                columns);
+            final List<Appointment> appointmentsInFolder2 = appointments.getAppointmentsInFolder(appointments.getPrivateFolder(), columns);
 
             boolean found = false;
             for (final Appointment object : appointmentsInFolder1) {
@@ -660,26 +623,17 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromPublicToShared() throws Throwable {
         try {
             // Create 1 shared private and 1 public calendar folder
-            final FolderObject folder1 = folders.createPublicFolderFor(
-                session,
-                ctx,
-                "folder1",
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                userId,
-                secondUserId);
+            final FolderObject folder1 = folders.createPublicFolderFor(session, ctx, "folder1", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
             cleanFolders.add(folder1);
             final FolderObject folder2 = folders.createPrivateFolderForSessionUser(session, ctx, "folder2", appointments.getPrivateFolder());
             cleanFolders.add(folder2);
 
             final OCLPermission oclp = new OCLPermission();
-            oclp.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            oclp.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             folders.sharePrivateFolder(session, ctx, secondUserId, folder2, oclp);
 
@@ -741,24 +695,13 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromPublicToPublic() throws Throwable {
         try {
             // Create 2 public calendar folders
-            final FolderObject folder1 = folders.createPublicFolderFor(
-                session,
-                ctx,
-                "folder1",
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                userId,
-                secondUserId);
+            final FolderObject folder1 = folders.createPublicFolderFor(session, ctx, "folder1", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
             cleanFolders.add(folder1);
-            final FolderObject folder2 = folders.createPublicFolderFor(
-                session,
-                ctx,
-                "folder2",
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                userId,
-                secondUserId);
+            final FolderObject folder2 = folders.createPublicFolderFor(session, ctx, "folder2", FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId, secondUserId);
             cleanFolders.add(folder2);
 
             // Change user
@@ -817,32 +760,21 @@ public class CalendarMoveTest extends AbstractCalendarTest {
      *
      * @throws Throwable
      */
+    @Test
     public void testMoveFromSharedToSharedDifferentUser() throws Throwable {
         try {
             // Create 1 shared private calendar folder with first user
-            final FolderObject folder1 = folders.createPrivateFolderForSessionUser(
-                session,
-                ctx,
-                "folder1" + System.currentTimeMillis(),
-                appointments.getPrivateFolder());
+            final FolderObject folder1 = folders.createPrivateFolderForSessionUser(session, ctx, "folder1" + System.currentTimeMillis(), appointments.getPrivateFolder());
             cleanFolders.add(folder1);
 
             OCLPermission oclp = new OCLPermission();
-            oclp.setAllPermission(
-                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_ALL_OBJECTS,
-                OCLPermission.DELETE_ALL_OBJECTS);
+            oclp.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
             folders.sharePrivateFolder(session, ctx, thirdUserId, folder1, oclp);
 
             // Create 1 shared private calendar folder with second user
             appointments.switchUser(secondUser);
-            final FolderObject folder2 = folders.createPrivateFolderForSessionUser(
-                session2,
-                ctx,
-                "folder2" + System.currentTimeMillis(),
-                appointments.getPrivateFolder());
+            final FolderObject folder2 = folders.createPrivateFolderForSessionUser(session2, ctx, "folder2" + System.currentTimeMillis(), appointments.getPrivateFolder());
             cleanFolders.add(folder2);
 
             folders.sharePrivateFolder(session2, ctx, thirdUserId, folder2, oclp);
@@ -925,9 +857,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
                     break;
                 }
             }
-            assertTrue(
-                "Did not found Participant (id: " + participantExpected.getIdentifier() + ", display name: " + participantExpected.getDisplayName() + ")",
-                found);
+            assertTrue("Did not found Participant (id: " + participantExpected.getIdentifier() + ", display name: " + participantExpected.getDisplayName() + ")", found);
         }
     }
 }

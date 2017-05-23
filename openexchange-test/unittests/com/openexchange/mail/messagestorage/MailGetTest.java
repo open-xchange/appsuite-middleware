@@ -49,9 +49,14 @@
 
 package com.openexchange.mail.messagestorage;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.activation.DataHandler;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -73,6 +78,12 @@ public final class MailGetTest extends MessageStorageTest {
          */
         private static final long serialVersionUID = 4645951099640670488L;
 
+        /**
+         * Initializes a new {@link TestMailMessage}.
+         */
+        public TestMailMessage() {
+            super();            
+        }
 
         @Override
         public String getMailId() {
@@ -124,7 +135,41 @@ public final class MailGetTest extends MessageStorageTest {
 
         @Override
         public InputStream getInputStream() throws OXException {
-            return new ByteArrayInputStream(brokenContentTypeMail.getBytes());
+            String linebreak = "\n";
+            
+            StringBuilder builder = new StringBuilder();
+            builder.append("Return-Path: <schweigi@open-xchange.com>").append(linebreak);
+            builder.append("Date: Thu, 20 Sep 2007 11:01:25 +0200").append(linebreak);
+            builder.append("From: Thomas Schweiger <schweigi@open-xchange.com>").append(linebreak);
+            builder.append("To: Thomas Schweiger <schweigi@open-xchange.com>").append(linebreak);
+            builder.append("Subject: test PGP signed mail").append(linebreak);
+            builder.append("Message-ID: <20070920090125.GA12567@open-xchange.com>").append(linebreak);
+            builder.append("Mime-Version: 1.0").append(linebreak);
+            builder.append("Content-Type: multipart/signed; micalg=pgp-sha1; protocol=\"application/pgp-signature\" boundary=\"mP3DRpeJDSE+ciuQ\"").append(linebreak);
+            builder.append("Content-Disposition: inline").append(linebreak);
+            builder.append("X-Operating-System: SUSE LINUX").append(linebreak);
+            builder.append("X-Mailer: Open-Xchange v6.0 Console Mailer").append(linebreak);
+            builder.append("X-PGP-Key: 1024D/D532F2E8").append(linebreak);
+            builder.append("X-PGP-Fingerprint: 815B 2A54 E23A FEF9 1AED 6CF9 2603 813F D532 F2E8").append(linebreak);
+            builder.append("X-Message-Flag: \"Es ist Wahnsinn, das Leben so zu sehen wie es ist, anstatt es zu sehen wie es sein sollte.\"").append(linebreak);
+            builder.append("X-Private-URL1: http://www.schweigisito.de").append(linebreak);
+            builder.append("X-Private-URL2: http://www.straight-live.de").append(linebreak).append(linebreak).append(linebreak);
+            builder.append("--mP3DRpeJDSE+ciuQ").append(linebreak);
+            builder.append("Content-Type: text/plain; charset=us-ascii").append(linebreak);
+            builder.append("Content-Disposition: inline").append(linebreak).append(linebreak);
+            builder.append("This mail contains a PGP signature.").append(linebreak).append(linebreak).append(linebreak);
+            builder.append("--mP3DRpeJDSE+ciuQ").append(linebreak);
+            builder.append("Content-Type: application/pgp-signature").append(linebreak);
+            builder.append("Content-Disposition: inline").append(linebreak).append(linebreak);
+            builder.append("-----BEGIN PGP SIGNATURE-----").append(linebreak);
+            builder.append("Version: GnuPG v1.4.2 (GNU/Linux)").append(linebreak).append(linebreak);
+            builder.append("iD8DBQFG8jblJgOBP9Uy8ugRAp4+AJ9iAZcBh6ke0zrqkrtLMWH+QKfTGgCffF+5").append(linebreak);
+            builder.append("F2P9TrHERgiiyRTA6x6BR2U=").append(linebreak);
+            builder.append("=Wk8C").append(linebreak);
+            builder.append("-----END PGP SIGNATURE-----").append(linebreak).append(linebreak);
+            builder.append("--mP3DRpeJDSE+ciuQ--").append(linebreak);
+            
+            return new ByteArrayInputStream(builder.toString().getBytes());
         }
 
         @Override
@@ -141,65 +186,15 @@ public final class MailGetTest extends MessageStorageTest {
 
     }
 
-    private static char linebreak = '\n';
-    private final String brokenContentTypeMail = "Return-Path: <schweigi@open-xchange.com>" + linebreak +
-        "Date: Thu, 20 Sep 2007 11:01:25 +0200" + linebreak +
-        "From: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak +
-        "To: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak +
-        "Subject: test PGP signed mail" + linebreak +
-        "Message-ID: <20070920090125.GA12567@open-xchange.com>" + linebreak +
-        "Mime-Version: 1.0" + linebreak +
-        "Content-Type: multipart/signed; micalg=pgp-sha1; protocol=\"application/pgp-signature\" boundary=\"mP3DRpeJDSE+ciuQ\"" + linebreak +
-        "Content-Disposition: inline" + linebreak +
-        "X-Operating-System: SUSE LINUX" + linebreak +
-        "X-Mailer: Open-Xchange v6.0 Console Mailer" + linebreak +
-        "X-PGP-Key: 1024D/D532F2E8" + linebreak +
-        "X-PGP-Fingerprint: 815B 2A54 E23A FEF9 1AED 6CF9 2603 813F D532 F2E8" + linebreak +
-        "X-Message-Flag: \"Es ist Wahnsinn, das Leben so zu sehen wie es ist, anstatt es zu sehen wie es sein sollte.\"" + linebreak +
-        "X-Private-URL1: http://www.schweigisito.de" + linebreak +
-        "X-Private-URL2: http://www.straight-live.de" + linebreak +
-        linebreak +
-        linebreak +
-        "--mP3DRpeJDSE+ciuQ" + linebreak +
-        "Content-Type: text/plain; charset=us-ascii" + linebreak +
-        "Content-Disposition: inline" + linebreak +
-        + linebreak +
-        "This mail contains a PGP signature." + linebreak +
-        linebreak +
-        linebreak +
-        "--mP3DRpeJDSE+ciuQ" + linebreak +
-        "Content-Type: application/pgp-signature" + linebreak +
-        "Content-Disposition: inline" + linebreak +
-        linebreak +
-        "-----BEGIN PGP SIGNATURE-----" + linebreak +
-        "Version: GnuPG v1.4.2 (GNU/Linux)" + linebreak +
-        linebreak +
-        "iD8DBQFG8jblJgOBP9Uy8ugRAp4+AJ9iAZcBh6ke0zrqkrtLMWH+QKfTGgCffF+5" + linebreak +
-        "F2P9TrHERgiiyRTA6x6BR2U=" + linebreak +
-        "=Wk8C" + linebreak +
-        "-----END PGP SIGNATURE-----" + linebreak +
-        linebreak +
-        "--mP3DRpeJDSE+ciuQ--" + linebreak;
-
-    /**
-     *
-     */
-    public MailGetTest() {
-        super();
-    }
-
     private static final MailField[] FIELDS_ID = { MailField.ID };
 
-    private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
-            MailField.BODY };
+    private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
 
-    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
-            MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL,
-            MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY,
-            MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
+    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
 
     private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
+    @Test
     public void testMailGetNotExistingMails() throws OXException {
         try {
             final MailMessage message = mailAccess.getMessageStorage().getMessage("INBOX", String.valueOf(System.currentTimeMillis()), true);
@@ -209,6 +204,7 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailGetNotExistingFolder() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -220,6 +216,7 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailGet() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -293,19 +290,20 @@ public final class MailGetTest extends MessageStorageTest {
     }
 
     // Added for bug 14276
+    @Test
     public void testMailGetBrokenContentTypeList() throws OXException {
-        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
+        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[] { new TestMailMessage() });
         try {
-            final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
-            for (int i = 0; i < fetchedMails.length; i++) {
-                assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
-                assertTrue("Missing content type", fetchedMails[i].containsContentType());
-                assertTrue("Missing flags", fetchedMails[i].containsFlags());
-                assertTrue("Message must contain attachment information", fetchedMails[i].containsHasAttachment());
-                if (fetchedMails[i].getContentType().startsWith("multipart/")) {
-                    assertTrue("Message is of type '"+fetchedMails[i].getContentType()+"' but signals no attachment", fetchedMails[i].hasAttachment());
+            for(MailMessage fetchedMail : mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE)) {
+                assertFalse("Missing mail ID", fetchedMail.getMailId() == null);
+                assertTrue("Missing content type", fetchedMail.containsContentType());
+                assertTrue("Missing flags", fetchedMail.containsFlags());
+                assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment());
+                if (fetchedMail.getContentType().isMimeType("multipart/*")) {
+                    // Signed mails are no longer re
+                    assertFalse("Message is of type '" + fetchedMail.getContentType() + "' but signals attachment", fetchedMail.hasAttachment());
                 } else {
-                    assertTrue("Message is not of type multipart/*, but signals to hold attachments", !fetchedMails[i].hasAttachment());
+                    assertFalse("Message is not of type multipart/*, but signals to hold attachments", fetchedMail.hasAttachment());
                 }
             }
 
@@ -314,18 +312,19 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
 
+    @Test
     public void testMailGetBrokenContentTypeGet() throws OXException {
-        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
+        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[] { new TestMailMessage() });
         try {
             final MailMessage fetchedMail = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
             assertFalse("Missing mail ID", fetchedMail.getMailId() == null);
             assertTrue("Missing content type", fetchedMail.containsContentType());
             assertTrue("Missing flags", fetchedMail.containsFlags());
             assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment());
-            if (fetchedMail.getContentType().startsWith("multipart/")) {
-                assertTrue("Message is of type '"+fetchedMail.getContentType()+"' but signals no attachment", fetchedMail.hasAttachment());
+            if (fetchedMail.getContentType().isMimeType("multipart/*")) {
+                assertFalse("Message is of type '" + fetchedMail.getContentType() + "' but signals attachment", fetchedMail.hasAttachment());
             } else {
-                assertTrue("Message is not of type multipart/*, but signals to hold attachments", !fetchedMail.hasAttachment());
+                assertFalse("Message is not of type multipart/*, but signals to hold attachments", fetchedMail.hasAttachment());
             }
 
         } finally {

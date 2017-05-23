@@ -56,6 +56,10 @@ import static com.openexchange.find.calendar.CalendarFacetType.RANGE;
 import static com.openexchange.find.calendar.CalendarFacetType.RECURRING_TYPE;
 import static com.openexchange.find.calendar.CalendarFacetType.STATUS;
 import static com.openexchange.find.calendar.CalendarFacetType.SUBJECT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -63,9 +67,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.Module;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
@@ -87,15 +91,7 @@ import com.openexchange.groupware.container.UserParticipant;
  */
 public class QueryTest extends CalendarFindTest {
 
-    /**
-     * Initializes a new {@link QueryTest}.
-     *
-     * @param name The test name
-     */
-    public QueryTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testFilterChaining() throws Exception {
         Appointment appointment = randomPrivateAppointment();
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
@@ -105,13 +101,14 @@ public class QueryTest extends CalendarFindTest {
         facets.add(createActiveFacet(RANGE, "one_month", "range", "one_month"));
         facets.add(createActiveFacet(STATUS, "accepted", "status", "accepted"));
         facets.add(createActiveFacet(RECURRING_TYPE, "single", "type", "single"));
-        facets.add(createActiveFacet(PARTICIPANT, String.valueOf(client.getValues().getUserId()), "users", String.valueOf(client.getValues().getUserId())));
+        facets.add(createActiveFacet(PARTICIPANT, String.valueOf(getClient().getValues().getUserId()), "users", String.valueOf(getClient().getValues().getUserId())));
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(facets);
         assertTrue("no appointments found", 0 < documents.size());
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
     }
 
+    @Test
     public void testFilterSubject() throws Exception {
         Appointment appointment = randomPrivateAppointment();
         appointment.setTitle(randomUID());
@@ -121,6 +118,7 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
     }
 
+    @Test
     public void testEmptyFilter() throws Exception {
         Appointment appointment = randomPrivateAppointment();
         appointment.setTitle(randomUID());
@@ -130,6 +128,7 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
     }
 
+    @Test
     public void testFilterLocation() throws Exception {
         Appointment appointment = randomPrivateAppointment();
         appointment.setLocation(randomUID());
@@ -139,6 +138,7 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("appointment not found", findByProperty(documents, "location", appointment.getLocation()));
     }
 
+    @Test
     public void testFilterDescription() throws Exception {
         Appointment appointment = randomPrivateAppointment();
         appointment.setNote(randomUID());
@@ -148,6 +148,7 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("appointment not found", findByProperty(documents, "note", appointment.getNote()));
     }
 
+    @Test
     public void testFilterRange() throws Exception {
         Appointment soonAppointment = randomPrivateAppointment();
         soonAppointment.setStartDate(TimeTools.D("tomorrow at noon"));
@@ -169,6 +170,7 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("expected appointment not found", findByProperty(oneYearDocuments, "title", soonAppointment.getTitle()));
     }
 
+    @Test
     public void testFilterStatus() throws Exception {
         Appointment acceptedAppointment = randomPrivateAppointment();
         acceptedAppointment = manager.insert(acceptedAppointment);
@@ -212,6 +214,7 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("no status appointment not found", findByProperty(noStatusDocuments, "title", noneAppointment.getTitle()));
     }
 
+    @Test
     public void testFilterRecurringType() throws Exception {
         Appointment appointment = manager.insert(randomPrivateAppointment());
         Appointment recurringAppointment = randomPrivateAppointment();
@@ -230,6 +233,7 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("recurring appointment not found", findByProperty(recurringDocuments, "title", recurringAppointment.getTitle()));
     }
 
+    @Test
     public void testFilterParticipants() throws Exception {
         ExternalUserParticipant participant = new ExternalUserParticipant(randomUID() + "@example.com");
         Appointment appointment = randomPrivateAppointment();
@@ -240,8 +244,9 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
     }
 
+    @Test
     public void testFilterUsers() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
         client2.logout();
         UserParticipant userParticipant = new UserParticipant(userId);
@@ -253,13 +258,14 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
     }
 
+    @Test
     public void testCorrectTimeZone() throws Exception {
         /*
          * We search for an appointment and request the dates in a different
          * time zone than the one used when the appointment was created. Afterwards
          * we expect the dates in the response object to match the requested time zone.
          */
-        TimeZone userTimeZone = client.getValues().getTimeZone();
+        TimeZone userTimeZone = getClient().getValues().getTimeZone();
         TimeZone responseTimeZone = TimeZone.getTimeZone("America/New York");
         if (responseTimeZone.getRawOffset() == userTimeZone.getRawOffset()) { // we need different time zones for creation and query response
             responseTimeZone = TimeZone.getTimeZone("Europe/Berlin");
@@ -275,7 +281,7 @@ public class QueryTest extends CalendarFindTest {
         appointment.setTitle(randomUID());
         appointment = manager.insert(appointment);
 
-        List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle()))),Collections.singletonMap("timezone", responseTimeZone.getID()));
+        List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle()))), Collections.singletonMap("timezone", responseTimeZone.getID()));
         assertTrue("no appointments found", 0 < documents.size());
         PropDocument document = findByProperty(documents, "title", appointment.getTitle());
         assertNotNull("appointment not found", document);
@@ -286,6 +292,7 @@ public class QueryTest extends CalendarFindTest {
         assertEquals(expectedStartDate, responseStartDate);
     }
 
+    @Test
     public void testTokenizedQuery() throws Exception {
         Appointment appointment = randomPrivateAppointment();
         String t1 = randomUID();
@@ -309,25 +316,13 @@ public class QueryTest extends CalendarFindTest {
         assertTrue("appointments found", 0 == documents.size());
     }
 
+    @Test
     public void testFolderTypeFacet() throws Exception {
         FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
         FolderObject[] folders = new FolderObject[3];
-        folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
-            randomUID(),
-            FolderObject.CALENDAR,
-            client.getValues().getPrivateAppointmentFolder(),
-            client.getValues().getUserId()));
-        folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(
-            randomUID(),
-            FolderObject.CALENDAR,
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            client.getValues().getUserId()));
-        folders[2] = folderManager2.insertFolderOnServer(folderManager.generateSharedFolder(
-            randomUID(),
-            FolderObject.CALENDAR,
-            client2.getValues().getPrivateAppointmentFolder(),
-            client2.getValues().getUserId(),
-            client.getValues().getUserId()));
+        folders[0] = ftm.insertFolderOnServer(ftm.generatePrivateFolder(randomUID(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId()));
+        folders[1] = ftm.insertFolderOnServer(ftm.generatePublicFolder(randomUID(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, getClient().getValues().getUserId()));
+        folders[2] = folderManager2.insertFolderOnServer(ftm.generateSharedFolder(randomUID(), FolderObject.CALENDAR, client2.getValues().getPrivateAppointmentFolder(), client2.getValues().getUserId(), getClient().getValues().getUserId()));
 
         Appointment[] appointments = new Appointment[3];
         appointments[0] = manager.insert(randomAppointment(folders[0].getObjectID()));

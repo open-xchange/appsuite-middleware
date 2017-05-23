@@ -1,116 +1,26 @@
-open-xchange-admin-autocontextid (7.8.3-24) stable; urgency=medium
+open-xchange-admin-autocontextid (7.8.4-3) stable; urgency=medium
 
-  * Build for patch 2017-05-19 (4176)
+  * First candidate for 7.8.4 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 19 May 2017 10:15:49 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 19 May 2017 13:31:36 +0200
 
-open-xchange-admin-autocontextid (7.8.3-23) stable; urgency=medium
+open-xchange-admin-autocontextid (7.8.4-2) stable; urgency=medium
 
-  * Build for patch 2017-05-15 (4132)
+  * Second preview of 7.8.4 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 08 May 2017 17:33:47 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 04 May 2017 15:13:12 +0200
 
-open-xchange-admin-autocontextid (7.8.3-22) stable; urgency=medium
+open-xchange-admin-autocontextid (7.8.4-1) stable; urgency=medium
 
-  * Build for patch 2017-05-02 (4113)
+  * First preview of 7.8.4 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 21 Apr 2017 16:01:44 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 03 Apr 2017 15:17:23 +0200
 
-open-xchange-admin-autocontextid (7.8.3-21) stable; urgency=medium
+open-xchange-admin-autocontextid (7.8.4-0) unstable; urgency=medium
 
-  * Build for patch 2017-04-18 (4084)
+  * prepare for 7.8.4 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 12 Apr 2017 11:39:02 +0200
-
-open-xchange-admin-autocontextid (7.8.3-20) stable; urgency=medium
-
-  * Build for patch 2017-04-03 (4050)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 31 Mar 2017 12:55:28 +0200
-
-open-xchange-admin-autocontextid (7.8.3-19) stable; urgency=medium
-
-  * Build for patch 2017-03-27 (4066)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 28 Mar 2017 23:36:09 +0200
-
-open-xchange-admin-autocontextid (7.8.3-18) stable; urgency=medium
-
-  * Build for patch 2017-03-20 (4016)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 16 Mar 2017 17:20:26 +0100
-
-open-xchange-admin-autocontextid (7.8.3-17) stable; urgency=medium
-
-  * Build for patch 2017-03-06 (3985)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 06 Mar 2017 10:42:43 +0100
-
-open-xchange-admin-autocontextid (7.8.3-16) stable; urgency=medium
-
-  * Build for patch 2017-02-24 (3994)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 24 Feb 2017 11:20:37 +0100
-
-open-xchange-admin-autocontextid (7.8.3-15) stable; urgency=medium
-
-  * Build for patch 2017-02-22 (3969)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 22 Feb 2017 12:36:26 +0100
-
-open-xchange-admin-autocontextid (7.8.3-14) stable; urgency=medium
-
-  * Build for patch 2017-02-20 (3952)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 14 Feb 2017 15:55:08 +0100
-
-open-xchange-admin-autocontextid (7.8.3-13) stable; urgency=medium
-
-  * Build for patch 2017-02-06 (3918)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 31 Jan 2017 16:41:20 +0100
-
-open-xchange-admin-autocontextid (7.8.3-12) stable; urgency=medium
-
-  * Build for patch 2017-01-26 (3925)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 26 Jan 2017 14:15:00 +0100
-
-open-xchange-admin-autocontextid (7.8.3-11) stable; urgency=medium
-
-  * Build for patch 2017-01-23 (3879)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 18 Jan 2017 16:56:41 +0100
-
-open-xchange-admin-autocontextid (7.8.3-10) stable; urgency=medium
-
-  * Build for patch 2017-01-09 (3849)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 04 Jan 2017 10:39:38 +0100
-
-open-xchange-admin-autocontextid (7.8.3-9) stable; urgency=medium
-
-  * Build for patch 2016-12-23 (3857)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 20 Dec 2016 20:20:20 +0100
-
-open-xchange-admin-autocontextid (7.8.3-8) stable; urgency=medium
-
-  * Build for patch 2016-12-19 (3814)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 14 Dec 2016 11:39:33 +0100
-
-open-xchange-admin-autocontextid (7.8.3-7) stable; urgency=medium
-
-  * Build for patch 2016-12-14 (3806)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 13 Dec 2016 15:23:05 +0100
-
-open-xchange-admin-autocontextid (7.8.3-6) stable; urgency=medium
-
-  * Build for patch 2016-12-12 (3775)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 06 Dec 2016 09:25:58 +0100
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 24 Nov 2016 11:04:44 +0100
 
 open-xchange-admin-autocontextid (7.8.3-5) stable; urgency=medium
 

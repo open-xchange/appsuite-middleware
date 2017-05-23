@@ -49,12 +49,13 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -66,23 +67,18 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class CreateTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link CreateTest}.
      *
      * @param name The name of the test.
      */
-    public CreateTest(final String name) {
-        super(name);
+    public CreateTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
 
+
+    @Test
     public void testCreatePrivate() throws Throwable {
         // Get root folder
         String newId = null;
@@ -93,18 +89,14 @@ public class CreateTest extends AbstractAJAXSession {
             fo.setModule(FolderObject.CALENDAR);
 
             final OCLPermission oclP = new OCLPermission();
-            oclP.setEntity(client.getValues().getUserId());
+            oclP.setEntity(getClient().getValues().getUserId());
             oclP.setGroupPermission(false);
             oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
             final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
-            final InsertResponse response = client.execute(request);
+            final InsertResponse response = getClient().execute(request);
 
             newId = (String) response.getResponse().getData();
             assertNotNull("New ID must not be null!", newId);
@@ -113,7 +105,7 @@ public class CreateTest extends AbstractAJAXSession {
                 // Delete folder
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
-                    client.execute(deleteRequest);
+                    getClient().execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }

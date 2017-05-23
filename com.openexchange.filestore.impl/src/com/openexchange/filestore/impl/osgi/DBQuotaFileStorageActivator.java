@@ -56,19 +56,30 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FilestoreDataMoveListener;
 import com.openexchange.filestore.impl.DatabaseAccessServiceImpl;
 import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
 import com.openexchange.filestore.impl.groupware.AddFilestoreOwnerColumnToUserTable;
 import com.openexchange.filestore.impl.groupware.AddInitialUserFilestoreUsage;
 import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTable;
 import com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable;
+import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaDeleteListener;
+import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener;
+import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.user.UserService;
 
 /**
@@ -99,27 +110,37 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         // Service trackers
+        RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> unifiedQuotaServices = new RankingAwareNearRegistryServiceTracker<>(context, UnifiedQuotaService.class, 0);
+        rememberTracker(unifiedQuotaServices);
         {
             QuotaFileStorageListenerTracker listenerTracker = new QuotaFileStorageListenerTracker(context);
             rememberTracker(listenerTracker);
-            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(listenerTracker, context));
+
+            FileStorageListenerRegistry listenerRegistry = new FileStorageListenerRegistry(context);
+            rememberTracker(listenerRegistry);
+
+            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(listenerRegistry, unifiedQuotaServices, listenerTracker, context));
             rememberTracker(tracker);
+
             trackService(ContextService.class);
             trackService(UserService.class);
+            trackService(ConfigViewFactory.class);
 
             {
                 ServiceTrackerCustomizer<CacheService, CacheService> customizer = new ServiceTrackerCustomizer<CacheService, CacheService>() {
 
-                    private final String regionName = "QuotaFileStorages";
+                    private final String[] regionNames = { "QuotaFileStorages" };
 
                     @Override
                     public CacheService addingService(ServiceReference<CacheService> reference) {
-                        try {
-                            CacheService cacheService = context.getService(reference);
+                        CacheService cacheService = context.getService(reference);
 
-                            int idleSeconds = 7200; // 2 hours
-                            int shrinkInterval = 600; // Every 10 minutes
-                            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                        int idleSeconds = 7200; // 2 hours
+                        int shrinkInterval = 600; // Every 10 minutes
+
+                        for (String regionName : regionNames) {
+                            try {
+                                byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
                                 "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
                                 "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
                                 "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
@@ -133,17 +154,15 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
                                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-
-                            cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
-                            addService(CacheService.class, cacheService);
-                            return cacheService;
-                        } catch (Exception e) {
-                            // Failed to initialize cache region
-                            logger.warn("Failed to initialize cache region {}", regionName, e);
+                                cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
+                            } catch (Exception e) {
+                                // Failed to initialize cache region
+                                logger.warn("Failed to initialize cache region {}", regionName, e);
+                            }
                         }
 
-                        context.ungetService(reference);
-                        return null;
+                        addService(CacheService.class, cacheService);
+                        return cacheService;
                     }
 
                     @Override
@@ -153,10 +172,12 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
                     @Override
                     public void removedService(ServiceReference<CacheService> reference, CacheService service) {
-                        try {
-                            service.freeCache(regionName);
-                        } catch (Exception e) {
-                            // Ignore
+                        for (String regionName : regionNames) {
+                            try {
+                                service.freeCache(regionName);
+                            } catch (Exception e) {
+                                // Ignore
+                            }
                         }
                         removeService(CacheService.class);
                         context.ungetService(reference);
@@ -176,6 +197,22 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
         // Update tasks
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddFilestoreOwnerColumnToUserTable(), new AddUserColumnToFilestoreUsageTable(), new AddInitialUserFilestoreUsage(), new MakeQuotaMaxConsistentInUserTable()));
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                UnifiedQuotaUtils.invalidateCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        }, null);
+
+        registerService(DeleteListener.class, new UnifiedQuotaDeleteListener(unifiedQuotaServices), null);
+        registerService(FilestoreDataMoveListener.class, new UnifiedQuotaFilestoreDataMoveListener(unifiedQuotaServices), null);
 
         logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
     }

@@ -51,11 +51,8 @@
 
 package com.openexchange.authentication.ucs.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -70,12 +67,16 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
-import javax.security.auth.login.LoginException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  *
@@ -91,23 +92,44 @@ import com.openexchange.exception.OXException;
  * @author Manuel Kraft
  *
  */
-public class UCSAuthentication implements AuthenticationService {
+public class UCSAuthentication implements AuthenticationService,Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSAuthentication.class);
-    private static Properties props;
+    public static final String CONFIGFILE = "authplugin.properties";
 
-    private static Hashtable<String, String> LDAP_CONFIG = null;
-    private final static String LDAP_PROPERTY_FILE = "/opt/open-xchange/etc/authplugin.properties";
-    
     private static final String PASSWORD_CHANGE_URL_OPTION = "com.openexchange.authentication.ucs.passwordChangeURL";
-    
-    private static URL passwordChangeURL = null;
+    private static final String BINDDN_OPTION = "com.openexchange.authentication.ucs.bindDn";
+    private static final String BINDPW_OPTION = "com.openexchange.authentication.ucs.bindPassword";
+    private static final String CONTEXTIDATTR_OPTION = "com.openexchange.authentication.ucs.contextIdAttribute";
+    private static final String LDAPURL_OPTION = "com.openexchange.authentication.ucs.ldapUrl";
+    private static final String LDAPBASE_OPTION = "com.openexchange.authentication.ucs.baseDn";
+    private static final String SEARCHFILTER_OPTION = "com.openexchange.authentication.ucs.searchFilter";
+    private static final String MAILATTR_OPTION = "com.openexchange.authentication.ucs.mailAttribute";
+    private static final String LOGINATTR_OPTION = "com.openexchange.authentication.ucs.loginAttribute";
+    private static final String LDAPPOOL_OPTION = "com.openexchange.authentication.ucs.useLdapPool";
+
+    private Hashtable<String, String> ldapConfig;
+    private URL passwordChangeURL;
+    private Properties props;
+    private String binddn;
+    private String bindpw;
+    private String contextIdAttr;
+    private String ldapUrl;
+    private String baseDn;
+    private String searchFilter;
+    private String mailAttr;
+    private String loginAttr;
 
     /**
      * Default constructor.
+     *
+     * @param configService The service to use
+     * @throws OXException If initialization fails
      */
-    public UCSAuthentication() {
+    public UCSAuthentication(Properties props) throws OXException {
         super();
+        this.props = props;
+        init();
     }
 
     /**
@@ -115,160 +137,179 @@ public class UCSAuthentication implements AuthenticationService {
      */
     @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
-
         DirContext ctx = null;
-        NamingEnumeration<SearchResult> result = null;
-
         try {
-
-            initConfig();
-            initLdap();
-
-
             if (loginInfo.getUsername()==null || loginInfo.getPassword()==null) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
-            final String[] splitted = split(loginInfo.getUsername());
-
-            LOG.debug("Splitted:{}", Arrays.toString(splitted));
-
-
-            if (splitted[0] == null || splitted[0].length() == 0 || splitted[0].equals("defaultcontext")){
-                splitted[0] = (String) props.get("OX_DEFAULTCONTEXT");
-            }
-
-            final String context_or_domain = splitted[0];
-
-            LOG.debug("Context is {}", context_or_domain);
-
-            final String uid = splitted[1];
+            final String loginString = loginInfo.getUsername();
             final String password = loginInfo.getPassword();
-
-            if ("".equals(uid.trim()) || "".equals(password.trim())) {
+            if ("".equals(loginString.trim()) || "".equals(password.trim())) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
-            // we have no context part in this auth, context is resolved from ldap later
-            if (context_or_domain == null) {
+            // Search LDAP server without any credentials to get the users dn to bind with
+            boolean doBind = null != binddn && binddn.trim().length() > 0 && null != bindpw && bindpw .trim().length() > 0;
+            if ( doBind ) {
+                ldapConfig.put(Context.SECURITY_AUTHENTICATION, "simple");
+                ldapConfig.put(Context.SECURITY_PRINCIPAL, binddn);
+                ldapConfig.put(Context.SECURITY_CREDENTIALS, bindpw);
+            } else {
+                LOG.debug("either {}, {} or both not set, doing anonymous bind", BINDDN_OPTION, BINDPW_OPTION);
+                ldapConfig.put(Context.SECURITY_AUTHENTICATION, "none");
+            }
+            ctx = new InitialDirContext(ldapConfig);
 
-                // search ldap server without any credentials to get the users dn to bind with
-                LDAP_CONFIG.put(Context.SECURITY_AUTHENTICATION, "none");
-                ctx = new InitialDirContext(LDAP_CONFIG);
-                final SearchControls sc = new SearchControls();
+            String user_dn = null;
+            {
+
+                SearchControls sc = new SearchControls();
                 sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                sc.setReturningAttributes(new String[]{"dn"});
 
-                String search_pattern = (String) props.get("LDAP_SEARCH");
-                search_pattern = search_pattern.replaceFirst("@USER@", uid);
+                final String search_pattern = searchFilter.replaceAll("%s", escapeString(loginString));
 
+                LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", ldapUrl, loginString, baseDn, search_pattern);
 
-                result = ctx.search("",search_pattern,sc);
-
-                LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", LDAP_CONFIG.get(Context.PROVIDER_URL), uid, props.get("LDAP_BASE"), search_pattern);
-
-                String user_dn = null;
-                String user_part = null;
-                int count = 0;
-                while(result.hasMoreElements()){
+                NamingEnumeration<SearchResult> result = ctx.search(baseDn, search_pattern, sc);
+                try {
+                    if ( !result.hasMoreElements() ) {
+                        LOG.error("User {} not found in LDAP", loginString);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    }
                     final SearchResult sr = result.next();
-                    user_part = sr.getName();
                     LOG.debug("User found : {}", sr.getName());
-                    user_dn = sr.getName()+","+(String) props.get("LDAP_BASE");
-                    count++;
-                }
+                    user_dn = sr.getName() + "," + baseDn;
 
-                if(count!=1){
-                    // found more than 1 user or no user , this is not good :)
-                    LOG.debug("User {} not found in LDAP", uid);
-                    throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
-                }
-                if (null != ctx) {
+                    if (result.hasMoreElements()) {
+                        LOG.error("More than one user for login string {} found in LDAP", loginString);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    }
+                } finally {
                     try {
-                        // unbind old context
-                        ctx.close();
-                    } catch (final NamingException e) {
+                        result.close();
+                    } catch (NamingException e) {
                         LOG.error("", e);
                     }
                 }
+            }
 
-                // after we found the users dn, auth with this dn and given password
-                LDAP_CONFIG.put(Context.SECURITY_AUTHENTICATION, "simple");
-                LDAP_CONFIG.put(Context.SECURITY_PRINCIPAL,user_dn);
-                LDAP_CONFIG.put(Context.SECURITY_CREDENTIALS, password);
-
-                LOG.debug("NOW trying to bind with DN: {} to fetch Attribute {}", user_dn, props.get("LDAP_ATTRIBUTE"));
-                ctx = new InitialDirContext(LDAP_CONFIG);
-
-                final String[] attribs = {(String) props.get("LDAP_ATTRIBUTE"),"shadowLastChange","shadowMax"};
-                final Attributes users_attr = ctx.getAttributes(user_part,attribs);
-
-                // Fetch the users mail attribute and parse the configured attribute to get the context name (domain part of email in this case)
-                LOG.debug("Bind with DN successfull!\nNow parsing attribute "+(String) props.get("LDAP_ATTRIBUTE")+" to resolv context!");
-                final Attribute emailattrib = users_attr.get((String) props.get("LDAP_ATTRIBUTE"));
-
-                // ### Needed for password expired check against ldap ###
-                final Attribute shadowlastchange = users_attr.get("shadowLastChange");
-                final Attribute shadowmax = users_attr.get("shadowMax");
-                long shadowlastchange_days = 0;
-                long shadowmax_days = 0;
-                if(shadowlastchange != null && shadowmax != null){
-
-                    try{
-                        shadowlastchange_days = Long.parseLong(((String)shadowlastchange.get()));
-                        shadowmax_days = Long.parseLong(((String)shadowmax.get()));
-                        LOG.debug("Found  shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
-                    }catch(final Exception exp){
-                        LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values!",exp);
-                    }
-
-                    /**
-                     * Bug #12593
-                     * Check if password is already expired.
-                     * This is done by calculating the sum of the both shadow attributes,
-                     * if the sum is lower than day count since 1.1.1970 then password is expired
-                     */
-                    final Calendar cal = Calendar.getInstance();
-                    final long days_since_1970 = cal.getTimeInMillis()/86400000;
-                    final long sum_up = shadowlastchange_days+shadowmax_days;
-                    if(sum_up<days_since_1970){
-                        LOG.info("Password for account \"{}\" seems to be expired({}<{})!", uid, sum_up, days_since_1970);
-                        throw LoginExceptionCodes.PASSWORD_EXPIRED.create(passwordChangeURL.toString());
-                    }
-                }else{
-                    LOG.debug("LDAP Attributes shadowlastchange and shadowmax NOT found in LDAP! No password expired calculation will be done!");
+            {
+                try {
+                    // unbind old context
+                    ctx.close();
+                } catch (NamingException e) {
+                    LOG.error("", e);
                 }
+                ctx = null;
+            }
 
+            // after we found the users dn, auth with this dn and given password
+            if( ! doBind ) {
+                ldapConfig.put(Context.SECURITY_AUTHENTICATION, "simple");
+            }
+            ldapConfig.put(Context.SECURITY_PRINCIPAL, user_dn);
+            ldapConfig.put(Context.SECURITY_CREDENTIALS, password);
 
-
-                if(emailattrib.size()!=1){
-                    // more than one (String) props.get("LDAP_ATTRIBUTE") value found, cannot resolve correct context
-                    LOG.error("FATAL! More than one "+(String) props.get("LDAP_ATTRIBUTE")+" value found, cannot resolv correct context");
-                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                }else{
-                    final String[] data  = ((String)emailattrib.get()).split("@");
-                    if(data.length!=2){
-                        LOG.error("FATAL! Email address {} could not be splitted correctly!!", emailattrib.get());
-                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                    }else{
-                        splitted[0] = data[1];
-                        splitted[1] = uid;
-                        LOG.debug("Returning {} to OX API!", Arrays.toString(splitted));
-                        // return username AND context-name to the OX API
-                        return new Authenticated() {
-                            @Override
-                            public String getContextInfo() {
-                                return splitted[0];
-                            }
-                            @Override
-                            public String getUserInfo() {
-                                return splitted[1];
-                            }
-                        };
-                    }
-                }
+            final String[] attribs;
+            if ( null != contextIdAttr ) {
+                attribs = new String[]{contextIdAttr, mailAttr, loginAttr, "shadowLastChange","shadowMax"};
+                LOG.debug("Also fetching contextId attribute {}", contextIdAttr);
             } else {
+                attribs = new String[]{mailAttr, loginAttr, "shadowLastChange","shadowMax"};
+            }
+
+            LOG.debug("trying to bind with DN: {}", user_dn);
+            ctx = new InitialDirContext(ldapConfig);
+
+            final Attributes users_attr = ctx.getAttributes(user_dn,attribs);
+            
+            final String ldapCtxId;
+            if ( null != contextIdAttr && null != users_attr.get(contextIdAttr)) {
+                ldapCtxId = (String) users_attr.get(contextIdAttr).get(0);
+            } else {
+                ldapCtxId = null;
+            }
+
+            final String login;
+            if ( null == users_attr.get(loginAttr)) {
+                LOG.error("unable to get ox login name from ldap attribute {}", loginAttr);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
+            login = (String) users_attr.get(loginAttr).get(0);
+            
+            // ### Needed for password expired check against ldap ###
+            final Attribute shadowlastchange = users_attr.get("shadowLastChange");
+            final Attribute shadowmax = users_attr.get("shadowMax");
+            long shadowlastchange_days = 0;
+            long shadowmax_days = 0;
+            if (shadowlastchange != null && shadowmax != null) {
+
+                try {
+                    shadowlastchange_days = Long.parseLong(((String) shadowlastchange.get()));
+                    shadowmax_days = Long.parseLong(((String) shadowmax.get()));
+                    LOG.debug("Found shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
+                } catch (final Exception exp) {
+                    LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values!", exp);
+                }
+
+                /**
+                 * Bug #12593
+                 * Check if password is already expired.
+                 * This is done by calculating the sum of the both shadow attributes,
+                 * if the sum is lower than day count since 1.1.1970 then password is expired
+                 */
+                final Calendar cal = Calendar.getInstance();
+                final long days_since_1970 = cal.getTimeInMillis() / 86400000;
+                final long sum_up = shadowlastchange_days + shadowmax_days;
+                if (sum_up < days_since_1970) {
+                    LOG.info("Password for account \"{}\" seems to be expired({}<{})!", login, sum_up, days_since_1970);
+                    throw LoginExceptionCodes.PASSWORD_EXPIRED.create(passwordChangeURL.toString());
+                }
+            } else {
+                LOG.debug("LDAP Attributes shadowlastchange and shadowmax not found in LDAP, no password expiry calculation will be done!");
+            }
+
+            final String contextIdOrName;
+            if (null != ldapCtxId) {
+                LOG.debug("Bind with DN successfull, using context id {} as found in ldap attribute {} as context", ldapCtxId, contextIdAttr);
+                contextIdOrName = ldapCtxId;
+            } else {
+                // Fetch the users mail attribute and parse the configured attribute to get the context name (domain part of email in this case)
+                LOG.debug("Bind with DN successfull, now parsing attribute " + mailAttr + " to resolve context");
+                final Attribute emailattrib = users_attr.get(mailAttr);
+
+                if (emailattrib.size() != 1) {
+                    // more than one mailAttr value found, cannot resolve correct context
+                    LOG.error("Fatal, more than one " + mailAttr + " value found, cannot resolv correct context");
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                }
+
+                String[] data = ((String) emailattrib.get()).split("@");
+                if (data.length != 2) {
+                    LOG.error("Fatal, Email address {} could not be splitted correctly!!", emailattrib.get());
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                }
+
+                contextIdOrName = data[1];
+            }
+
+            LOG.debug("Returning context={}, user={} to OX API!", contextIdOrName, login);
+
+            // return username AND context-name to the OX API
+            return new Authenticated() {
+
+                @Override
+                public String getContextInfo() {
+                    return contextIdOrName;
+                }
+
+                @Override
+                public String getUserInfo() {
+                    return login;
+                }
+            };
         } catch (final InvalidNameException e) {
             LOG.error("Invalid name error", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
@@ -282,13 +323,6 @@ public class UCSAuthentication implements AuthenticationService {
             LOG.error("Internal error!", e1);
             throw LoginExceptionCodes.COMMUNICATION.create(e1);
         } finally {
-            if (null != result) {
-                try {
-                    result.close();
-                } catch (NamingException e) {
-                    LOG.error("", e);
-                }
-            }
             if (null != ctx) {
                 try {
                     ctx.close();
@@ -297,107 +331,128 @@ public class UCSAuthentication implements AuthenticationService {
                 }
             }
         }
-
-
-
-
-
     }
 
-    private void initLdap() throws NamingException {
-        if (LDAP_CONFIG == null) {
-            LDAP_CONFIG = new Hashtable<String, String>();
-
-        }
-        final String usepool = (String) props.get("USE_POOL");
-        if (usepool.trim().equalsIgnoreCase("true")) {
-            LDAP_CONFIG.put("com.sun.jndi.ldap.connect.pool", "true");
-        }
-
-        LDAP_CONFIG.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
-
-        // we choose normal ldap without secure socket,
-        LDAP_CONFIG.put(Context.PROVIDER_URL, "ldap://"+ (String) props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+ (String) props.get("LDAP_BASE"));
-
-    }
-
-    private static void initConfig() throws OXException {
-        synchronized (UCSAuthentication.class) {
-
-            if (null == props) {
-                final File file = new File(LDAP_PROPERTY_FILE);
-                if (!file.exists()) {
-                    throw LoginExceptionCodes.MISSING_PROPERTY.create(file.getAbsolutePath());
-                }
-                FileInputStream fis = null;
-                try {
-                    fis = new FileInputStream(file);
-                    props = new Properties();
-                    props.load(fis);
-                    if( props.containsKey(PASSWORD_CHANGE_URL_OPTION) && ((String)props.get(PASSWORD_CHANGE_URL_OPTION)).length() > 0 ) {
-                        passwordChangeURL = new URL((String)props.get(PASSWORD_CHANGE_URL_OPTION));
-                    } else {
-                        OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
-                        LOG.error("",e);
-                        throw e;
-                    }
-                } catch (final IOException e) {
-                    LOG.error("",e);
-                    throw LoginExceptionCodes.UNKNOWN.create(file.getAbsolutePath());
-                } finally {
-                    try {
-                        if (null != fis) {
-                            fis.close();
-                        }
-                    } catch (final IOException e) {
-                        LOG.error("",e);
-                        throw LoginExceptionCodes.UNKNOWN.create("Error closing stream for file:"+file.getAbsolutePath());
-                    }
-                }
+    /**
+     * Escape string to be used as ldap filter
+     * 
+     * @param input
+     * @return
+     */
+    private static final String escapeString(String input) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < input.length(); i++) {
+            char cur = input.charAt(i);
+            switch (cur) {
+            case '\\':
+                sb.append("\\5c");
+                break;
+            case '*':
+                sb.append("\\2a");
+                break;
+            case '(':
+                sb.append("\\28");
+                break;
+            case ')':
+                sb.append("\\29");
+                break;
+            case '\u0000':
+                sb.append("\\00");
+                break;
+            default:
+                sb.append(cur);
             }
         }
+        return sb.toString();
     }
-
-    /**
-     * Splits user name and context.
-     *
-     * @param loginInfo
-     * combined information seperated by an @ sign.
-     * @return a string array with context and user name (in this order).
-     * @throws LoginException
-     *             if no seperator is found.
-     */
-    private String[] split(final String loginInfo) {
-        return split(loginInfo, '@');
-    }
-
-    /**
-     * Splits user name and context.
-     *
-     * @param loginInfo
-     * combined information seperated by an @ sign.
-     * @param separator
-     *            for spliting user name and context.
-     * @return a string array with context and user name (in this order).
-     * @throws LoginException
-     *             if no seperator is found.
-     */
-    private String[] split(final String loginInfo, final char separator) {
-        final int pos = loginInfo.lastIndexOf(separator);
-        final String[] splitted = new String[2];
-        if (-1 == pos) {
-            splitted[1] = loginInfo;
-            splitted[0] = "defaultcontext";
-        } else {
-            splitted[1] = loginInfo.substring(0, pos);
-            splitted[0] = loginInfo.substring(pos + 1);
+    
+    private void init() throws OXException {
+        ldapUrl = props.getProperty(LDAPURL_OPTION);
+        if( null == ldapUrl || ldapUrl.length() == 0) {
+            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPURL_OPTION);
+            LOG.error("", e);
+            throw e;
         }
-        return splitted;
-    }
 
+        baseDn = props.getProperty(LDAPBASE_OPTION);
+        if( null == baseDn || baseDn.length() == 0) {
+            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPBASE_OPTION);
+            LOG.error("", e);
+            throw e;
+        }
+
+        searchFilter = props.getProperty(SEARCHFILTER_OPTION);
+        if( null == searchFilter || searchFilter.length() == 0) {
+            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + SEARCHFILTER_OPTION);
+            LOG.error("", e);
+            throw e;
+        }
+
+        mailAttr = props.getProperty(MAILATTR_OPTION);
+        if( null == mailAttr || mailAttr.length() == 0) {
+            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + MAILATTR_OPTION);
+            LOG.error("", e);
+            throw e;
+        }
+
+        loginAttr = props.getProperty(LOGINATTR_OPTION);
+        if( null == loginAttr || loginAttr.length() == 0) {
+            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LOGINATTR_OPTION);
+            LOG.error("", e);
+            throw e;
+        }
+
+        String sURL = (String) props.get(PASSWORD_CHANGE_URL_OPTION);
+        if( null == sURL || sURL.length() == 0) {
+            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
+            LOG.error("", e);
+            throw e;
+        }
+        try {
+            passwordChangeURL = new URL(sURL);
+        } catch (MalformedURLException e) {
+            throw LoginExceptionCodes.UNKNOWN.create("Invalid option " + PASSWORD_CHANGE_URL_OPTION + ": " + sURL);
+        }
+
+        ldapConfig = new Hashtable<String, String>();
+
+        String usepool = (String) props.get(LDAPPOOL_OPTION);
+        if ( null != usepool && usepool.trim().equalsIgnoreCase("true")) {
+            ldapConfig.put("com.sun.jndi.ldap.connect.pool", "true");
+        }
+
+        ldapConfig.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+
+        ldapConfig.put(Context.PROVIDER_URL, ldapUrl);
+        if (ldapUrl.startsWith("ldaps")) {
+            ldapConfig.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
+        }
+        
+        binddn = props.getProperty(BINDDN_OPTION);
+        bindpw = props.getProperty(BINDPW_OPTION);
+        
+        contextIdAttr = props.getProperty(CONTEXTIDATTR_OPTION);
+    }
+    
     @Override
     public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
         throw LoginExceptionCodes.NOT_SUPPORTED.create(UCSAuthentication.class.getName());
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        Properties properties = configService.getFile(CONFIGFILE);
+        this.props = properties;
+        try {
+            init();
+        } catch (OXException e) {
+            LOG.error("Error reloading configuration for bundle com.openexchange.authentication.ucs: {}", e);
+        }
+    }
+
+    @Override
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames(CONFIGFILE).build();
     }
 
 }

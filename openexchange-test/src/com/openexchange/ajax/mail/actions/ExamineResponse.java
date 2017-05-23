@@ -59,8 +59,9 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 
 public class ExamineResponse extends AbstractAJAXResponse {
-	protected ExamineResponse(final Response response) {
-		super(response);
-	}
-	
+
+    protected ExamineResponse(final Response response) {
+        super(response);
+    }
+
 }

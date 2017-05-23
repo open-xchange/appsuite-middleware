@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding;
 
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.Service;
 import com.openexchange.session.Session;
 
 /**
@@ -60,6 +61,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
+@Service
 public interface OnboardingProvider {
 
     /**

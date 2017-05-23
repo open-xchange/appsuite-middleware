@@ -52,6 +52,7 @@ package com.openexchange.test;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -66,6 +67,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.ConfirmWithTaskInBodyRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -84,17 +86,22 @@ import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TestTask;
+import com.openexchange.java.ConcurrentLinkedList;
 
 /**
  * {@link TaskTestManager}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TaskTestManager implements TestManager{
+public class TaskTestManager implements TestManager {
 
     protected List<Task> createdEntities;
+    
+    protected List<Task> createdEntities2;
 
     private AJAXClient client;
+    
+    private AJAXClient client2;    
 
     protected TimeZone timezone;
 
@@ -109,13 +116,9 @@ public class TaskTestManager implements TestManager{
     public TaskTestManager(AJAXClient client) {
         setFailOnError(true);
         this.setClient(client);
-        createdEntities = new LinkedList<Task>();
+        createdEntities = new ConcurrentLinkedList<Task>();
         try {
             taskFolderId = client.getValues().getPrivateTaskFolder();
-        } catch (Exception e) {
-            doHandleExeption(e, "getting private task folder from user values");
-        }
-        try {
             timezone = client.getValues().getTimeZone();
         } catch (OXException e) {
             //no matter, fix it in finally block
@@ -134,7 +137,6 @@ public class TaskTestManager implements TestManager{
      * Creates a task via HTTP-API and updates it with new id, timestamp and all other information that is updated after such requests.
      */
     public Task insertTaskOnServer(Task taskToCreate) {
-        createdEntities.add(taskToCreate);
         InsertRequest request = new InsertRequest(taskToCreate, timezone);
         InsertResponse response = null;
         try {
@@ -144,6 +146,7 @@ public class TaskTestManager implements TestManager{
         } catch (Exception e) {
             doHandleExeption(e, "NewRequest on folder " + taskToCreate.getParentFolderID());
         }
+        createdEntities.add(taskToCreate);
 
         return taskToCreate;
     }
@@ -180,6 +183,15 @@ public class TaskTestManager implements TestManager{
         return taskToMove;
     }
 
+    public void confirm(Task task) {
+        ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, task.getConfirm(), task.getConfirmMessage());
+        try {
+            setLastResponse(getClient().execute(request));
+        } catch (Exception e) {
+            doHandleExeption(e, "ConfirmRequest for " + task.getObjectID());
+        }
+    }
+
     public void deleteTaskOnServer(Task taskToDelete) {
         deleteTaskOnServer(taskToDelete, true);
     }
@@ -188,6 +200,9 @@ public class TaskTestManager implements TestManager{
         DeleteRequest request = new DeleteRequest(taskToDelete, failOnErrorOverride);
         try {
             setLastResponse(getClient().execute(request));
+            if(lastResponse.hasError() && null != getClient2()) {
+                setLastResponse(getClient2().execute(request));
+            }
         } catch (Exception e) {
             doHandleExeption(e, "DeleteRequest for " + taskToDelete.getObjectID());
         }
@@ -268,7 +283,7 @@ public class TaskTestManager implements TestManager{
         } catch (Exception e) {
             doHandleExeption(e, "ListRequest");
         }
-        return (tasks == null) ? null : tasks.toArray(new Task[]{});
+        return (tasks == null) ? null : tasks.toArray(new Task[] {});
     }
 
     public Task searchForTasksOnServer() {
@@ -285,45 +300,46 @@ public class TaskTestManager implements TestManager{
     protected static Object transformColumn(final int column, final Object value) {
         final Object retval;
         switch (column) {
-        case Task.CREATION_DATE:
-        case Appointment.LAST_MODIFIED:
-        case Task.START_DATE:
-        case Task.END_DATE:
-        case Task.RECURRENCE_DATE_POSITION:
-        case Task.UNTIL:
-        case Task.DATE_COMPLETED:
-            retval = new Date(((Long) value).longValue());
-            break;
-        case Task.ACTUAL_DURATION:
-        case Task.TARGET_DURATION:
-            retval = Long.valueOf((String) value);
-            break;
-        case Task.ACTUAL_COSTS:
-        case Task.TARGET_COSTS:
-            retval = new BigDecimal(value.toString());
-            break;
-//        case Task.PERCENT_COMPLETED:
-//            retval = Integer.valueOf(((Long) value).intValue());
-//            break;
-        case Task.BILLING_INFORMATION:
-            retval = value;
-            break;
-        case Task.PRIORITY:
-            retval = Integer.valueOf(String.valueOf(value));
-            break;
-        default:
-            retval = value;
+            case Task.CREATION_DATE:
+            case Appointment.LAST_MODIFIED:
+            case Task.START_DATE:
+            case Task.END_DATE:
+            case Task.RECURRENCE_DATE_POSITION:
+            case Task.UNTIL:
+            case Task.DATE_COMPLETED:
+                retval = new Date(((Long) value).longValue());
+                break;
+            case Task.ACTUAL_DURATION:
+            case Task.TARGET_DURATION:
+                retval = Long.valueOf((String) value);
+                break;
+            case Task.ACTUAL_COSTS:
+            case Task.TARGET_COSTS:
+                retval = new BigDecimal(value.toString());
+                break;
+            //        case Task.PERCENT_COMPLETED:
+            //            retval = Integer.valueOf(((Long) value).intValue());
+            //            break;
+            case Task.BILLING_INFORMATION:
+                retval = value;
+                break;
+            case Task.PRIORITY:
+                retval = Integer.valueOf(String.valueOf(value));
+                break;
+            default:
+                retval = value;
         }
         return retval;
     }
 
-    protected List<Task> transformArrayToTasks(JSONArray tasks, int[] columns) throws JSONException{
+    protected List<Task> transformArrayToTasks(JSONArray tasks, int[] columns) throws JSONException {
         LinkedList<Task> results = new LinkedList<Task>();
-        for(int i = 0, length = tasks.length(); i < length; i++){
-            results.add(transformArrayToTask( tasks.getJSONArray(i), columns));
+        for (int i = 0, length = tasks.length(); i < length; i++) {
+            results.add(transformArrayToTask(tasks.getJSONArray(i), columns));
         }
         return results;
     }
+
     /**
      * An AllRequest answers with a JSONArray of JSONArrays, each of which contains a field belonging to a task. This method assembles a
      * task from this array.
@@ -354,9 +370,18 @@ public class TaskTestManager implements TestManager{
      */
     @Override
     public void cleanUp() {
-        for (Task task : new LinkedList<Task>(createdEntities)) {
-            deleteTaskOnServer(task);
+        List<Task> objects = new ArrayList<Task>(createdEntities.size());
+        for (Task task : createdEntities) {
+            objects.add(task);
         }
+        for (Task task : objects) {
+            deleteTaskOnServer(task, false);
+            if (getLastResponse().hasError()) {
+                org.slf4j.LoggerFactory.getLogger(TaskTestManager.class).warn("Unable to delete the task with id {} in folder {} with name '{}': {}", task.getObjectID(), task.getParentFolderID(), task.getTitle(), getLastResponse().getException().getMessage());
+            }
+
+        }
+        createdEntities = new ConcurrentLinkedList<Task>();
     }
 
     /**
@@ -485,5 +510,21 @@ public class TaskTestManager implements TestManager{
     @Override
     public boolean hasLastException() {
         return this.lastException != null;
+    }
+    
+    public void addEntities(final Task task){
+        this.createdEntities.add(task);
+    }    
+    
+    public AJAXClient getClient2() {
+        return client2;
+    }
+
+    public void setClient2(AJAXClient client2) {
+        this.client2 = client2;
+    }    
+    
+    public void addEntities2(final Task task){
+        this.createdEntities2.add(task);
     }
 }

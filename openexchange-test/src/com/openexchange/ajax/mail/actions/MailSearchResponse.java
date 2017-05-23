@@ -62,16 +62,14 @@ import com.openexchange.ajax.framework.CommonSearchResponse;
  */
 public class MailSearchResponse extends CommonSearchResponse {
 
-
     private JSONArray data;
 
     protected MailSearchResponse(Response response) {
         super(response);
     }
 
-
     public JSONArray getDataAsJSONArray() {
-        if(data == null){
+        if (data == null) {
             data = (JSONArray) super.getData();
         }
         return data;

@@ -57,17 +57,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.PriorityBlockingQueue;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.preview.Delegating;
@@ -90,7 +88,7 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
 
     private final PreviewService delegate;
 
-    private final ConcurrentMap<String, ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>>> serviceMap;
+    private final ConcurrentMap<String, ConcurrentMap<PreviewOutput, SortableConcurrentList<ComparableInternalPreviewService>>> serviceMap;
 
     /**
      * Initializes a new {@link DelegationPreviewService}.
@@ -100,7 +98,7 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
     public DelegationPreviewService(final PreviewService delegate) {
         super();
         this.delegate = delegate;
-        serviceMap = new ConcurrentHashMap<String, ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>>>();
+        serviceMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -128,7 +126,7 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
             /*
              * Serve with best-fit or delegate preview service
              */
-            final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
+            final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output, session);
             if (previewService == null) {
                 throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
             }
@@ -143,7 +141,7 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
     @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
-        final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
+        final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output, session);
         if (previewService == null) {
             String name = documentData.getDataProperties().get(DataProperties.PROPERTY_NAME);
             throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
@@ -152,74 +150,93 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
     }
 
     @Override
-    public void added(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
+    public synchronized void added(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
         for (final PreviewPolicy policy : service.getPreviewPolicies()) {
             final String mimeType = toLowerCase(policy.getMimeType());
             final PreviewOutput output = policy.getOutput();
-            ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
+            ConcurrentMap<PreviewOutput, SortableConcurrentList<ComparableInternalPreviewService>> map = serviceMap.get(mimeType);
             if (map == null) {
-                final ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>> newMap = new ConcurrentHashMap<PreviewOutput, BlockingQueue<InternalPreviewService>>();
+                final ConcurrentMap<PreviewOutput, SortableConcurrentList<ComparableInternalPreviewService>> newMap = new ConcurrentHashMap<>();
                 map = serviceMap.putIfAbsent(mimeType, newMap);
                 if (null == map) {
                     map = newMap;
                 }
             }
-            BlockingQueue<InternalPreviewService> queue = map.get(output);
-            if (queue == null) {
-                final BlockingQueue<InternalPreviewService> newQueue = new PriorityBlockingQueue<InternalPreviewService>(4, new InternalPreviewServiceComparator(mimeType, output));
-                queue = map.putIfAbsent(output, newQueue);
-                if (queue == null) {
-                    queue = newQueue;
+            SortableConcurrentList<ComparableInternalPreviewService> list = map.get(output);
+            if (list == null) {
+                SortableConcurrentList<ComparableInternalPreviewService> newList = new SortableConcurrentList<>();
+                list = map.putIfAbsent(output, newList);
+                if (list == null) {
+                    list = newList;
                 }
             }
-            queue.add(service);
+            list.addAndSort(new ComparableInternalPreviewService(service, mimeType, output));
         }
     }
 
     @Override
-    public void removed(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
+    public synchronized void removed(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
         final List<PreviewPolicy> previewPolicies = service.getPreviewPolicies();
         for (final PreviewPolicy policy : previewPolicies) {
             final String mimeType = toLowerCase(policy.getMimeType());
             final PreviewOutput output = policy.getOutput();
-            final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
+            final Map<PreviewOutput, SortableConcurrentList<ComparableInternalPreviewService>> map = serviceMap.get(mimeType);
             if (map != null) {
-                final BlockingQueue<InternalPreviewService> queue = map.get(output);
-                if (queue != null)  {
-                    queue.remove(service);
+                SortableConcurrentList<ComparableInternalPreviewService> list = map.get(output);
+                if (list != null)  {
+                    list.remove(new ComparableInternalPreviewService(service, mimeType, output));
                 }
             }
-
         }
     }
 
     @Override
-    public PreviewService getBestFitOrDelegate(final String mimeType, final PreviewOutput output) {
-        final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
+    public PreviewService getBestFitOrDelegate(String mimeType, PreviewOutput output, Session session) throws OXException {
+        final Map<PreviewOutput, SortableConcurrentList<ComparableInternalPreviewService>> map = serviceMap.get(mimeType);
         if (map == null) {
             return null;
         }
-        final BlockingQueue<InternalPreviewService> queue = map.get(output);
-        if (queue == null) {
+        SortableConcurrentList<ComparableInternalPreviewService> list = map.get(output);
+        if (list == null) {
             return null;
         }
-        return queue.peek();
+
+        for (ComparableInternalPreviewService comparableInternalPreviewService : list) {
+            InternalPreviewService internalPreviewService = comparableInternalPreviewService.internalPreviewService;
+            if (internalPreviewService.isSupportedFor(session)) {
+                return internalPreviewService;
+            }
+        }
+
+        return null;
     }
 
-    private static final class InternalPreviewServiceComparator implements Comparator<InternalPreviewService> {
+    private static final class ComparableInternalPreviewService implements Comparable<ComparableInternalPreviewService> {
 
+        final InternalPreviewService internalPreviewService;
         private final PreviewOutput output;
-
         private final String mimeType;
+        private final int hash;
 
-        protected InternalPreviewServiceComparator(final String mimeType, final PreviewOutput output) {
+        ComparableInternalPreviewService(InternalPreviewService internalPreviewService, String mimeType, PreviewOutput output) {
             super();
+            this.internalPreviewService = internalPreviewService;
             this.mimeType = mimeType;
             this.output = output;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((internalPreviewService == null) ? 0 : internalPreviewService.hashCode());
+            result = prime * result + ((mimeType == null) ? 0 : mimeType.hashCode());
+            result = prime * result + ((output == null) ? 0 : output.hashCode());
+            this.hash = result;
         }
 
         @Override
-        public int compare(final InternalPreviewService o1, final InternalPreviewService o2) {
+        public int compareTo(ComparableInternalPreviewService other) {
+            InternalPreviewService o1 = this.internalPreviewService;
+            InternalPreviewService o2 = other.internalPreviewService;
+
             int o1Quality = 0;
             int o2Quality = 0;
             final List<PreviewPolicy> o1Policies = o1.getPreviewPolicies();
@@ -235,6 +252,43 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
                 }
             }
             return o1Quality - o2Quality;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ComparableInternalPreviewService other = (ComparableInternalPreviewService) obj;
+            if (internalPreviewService == null) {
+                if (other.internalPreviewService != null) {
+                    return false;
+                }
+            } else if (!internalPreviewService.equals(other.internalPreviewService)) {
+                return false;
+            }
+            if (mimeType == null) {
+                if (other.mimeType != null) {
+                    return false;
+                }
+            } else if (!mimeType.equals(other.mimeType)) {
+                return false;
+            }
+            if (output != other.output) {
+                return false;
+            }
+            return true;
         }
 
     }

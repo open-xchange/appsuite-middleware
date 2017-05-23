@@ -1,0 +1,314 @@
+feature_name: Share
+properties:
+    - key: com.openexchange.share.notification.usePersonalEmailAddress
+      description: |
+        Specifies whether the user's personal E-Mail address (<code>true</code>) or the configured no-reply address (<code>false</code>) is supposed to be used in case a user
+        without mail permission sends out a sharing invitation.
+      defaultValue: false
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share","Mail"]
+
+    - key: com.openexchange.share.userAgentBlacklist.enabled
+      description: |
+        Enables or disables black-listing of User-Agents that are about to access a share link.
+        If enabled the [[com.openexchange.share.userAgentBlacklist.values]] configuration option specifies what User-Agents to black-list.
+      defaultValue: true
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.share.userAgentBlacklist.values
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Black List"]
+
+    - key: com.openexchange.share.userAgentBlacklist.values
+      description: |
+        Specifies a comma-separated list (ignore-case) of such User-Agents that are supposed to receive a "404 Not Found" when trying to
+        access a share link. Wild-card notation is supported; e.g. "*aolbuild*".
+        This configuration option is only effective if [[com.openexchange.share.userAgentBlacklist.enabled]] is set to <code>true</code>.
+      defaultValue: "*aolbuild*, *baiduspider*, *baidu*search*, *bingbot*, *bingpreview*, *msnbot*, *duckduckgo*, *adsbot-google*, *googlebot*, *mediapartners-google*, *teoma*, *slurp*, *yandex*bot*"
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.share.userAgentBlacklist.enabled
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share","Black List"]
+
+    - key: com.openexchange.share.guestHostname
+      description: |
+        Configures a separate hostname to use for guest users. This hostname is used 
+        when generating external share links, as well as at other locations where 
+        hyperlinks are constructed in the context of guest users.
+        Usually, the guest hostname refers to a separate subdomain of the 
+        installation like "share.example.com", and is defined as an additional named
+        virtual host pointing to the web client's document root in the webserver's 
+        configuration.
+        This property can also be provided through an additionally installed hostname service.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Host"]
+
+    - key: com.openexchange.share.cleanup.guestExpiry
+      description: |
+        Defines the timespan after which an unused named guest user should be 
+        removed from the system. "Unused" time starts after the last share to the 
+        guest user has been revoked. This setting only affects "named" guest users,
+        i.e. users that were invited explicitly and authenticate using their 
+        eMail-address.
+        The value can be defined using units of measurement: "D" (=days), 
+        "W" (=weeks) and "H" (=hours), with a minimum 
+        of "1D" (one day). A value of <code>0</code> disables the delayed guest user deletion, 
+        so that guest users are deleted right after the last share to them was removed.  
+      defaultValue: 2W
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.cleanup.periodicCleanerInterval
+      description: |
+        Defines the interval of a periodic background task that performs 
+        sharing-related cleanup operations like removal of expired shares or final
+        deletion of no longer used guest users. The task is executed only once per 
+        interval in the cluster, so this value should be equally defined on each
+        node. The value can be defined using units of measurement: "D" (=days), 
+        "W" (=weeks) and "H" (=hours), with a minimum of "1H" (one hour). 
+        A value of <code>0</code> disables the periodic background task.
+      defaultValue: 1D
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.quota.share_links
+      description: |
+        Specifies the quota for the number of share links that are allowed being 
+        created by one user. A value < <code>0</code> means unlimited.
+      defaultValue: 100
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Quota", "Limit"]
+
+    - key: com.openexchange.quota.invite_guests
+      description: |
+        Specifies the quota for the number of guest users that are allowed being 
+        created by one user. A value < <code>0</code> means unlimited.
+      defaultValue: 100
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Quota", "Limit"]
+
+    - key: com.openexchange.share.modulemapping
+      description: |
+        Mapping from arbitrary module names to module identifiers and vice versa. 
+        The value must be a comma-separated list of module names and its identifier 
+        linked with an equals sign.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.cryptKey
+      description: |
+        Defines a key that is used to encrypt the password/pin of anonymously 
+        accessible shares in the database.  
+        The property should be changed before the creation of the
+        first share on the system!
+      defaultValue: erE2e8OhAo71
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Encryption", "Security"]
+
+    - key: com.openexchange.share.handler.iCal.futureInterval
+      description: |
+        Defines up to which time in the future appointments and tasks are included 
+        when accessing an iCal-serializable share with a client requesting the 
+        "text/calendar" representation of the resource.
+        Possible values are <code>one_month</code>, <code>six_months</code>, <code>one_year</code> and <code>two_years</code>.
+      defaultValue: one_year
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Ical", "Appointment"]
+
+    - key: com.openexchange.share.handler.iCal.pastInterval
+      description: |
+        Defines up to which time in the past appointments and tasks are included 
+        when accessing an iCal-serializable share with a client requesting the 
+        "text/calendar" representation of the resource.
+        Possible values are <code>two_weeks</code>, <code>one_month</code>, <code>six_months</code> and <code>one_year</code>.
+      defaultValue: two_weeks
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Ical", "Appointment"]
+
+    - key: com.openexchange.share.loginLink
+      description: |
+        Specifies the location to redirect to when accessing a share link that 
+        requires authentication. This is usually the default login page that will 
+        then perform the "anonymous" or "guest" login action.  
+        [uiwebpath] is replaced with the value of [[com.openexchange.UIWebPath]],
+        trimmed by leading and trailing '/' characters.
+      defaultValue: /[uiwebpath]/ui
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.crossContextGuests
+      description: |
+        Configures whether attributes of named guest users should be synchronized 
+        across context boundaries or not, i.e. if their password or other related
+        metadata should be kept equally in each context of the same context group
+        the guest user has shares from. This requires a configured global / cross-
+        context database (see configuration file "globaldb.yml" for details). 
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.notifyInternal
+      description: |
+        Configures if internal users should receive a notification email whenever
+        a folder or item has been shared to them. 
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.guestCapabilityMode
+      description: |
+        As guests are plain user entities internally, they carry a set of capabilities
+        which define the enabled feature set. Basically guest users contain a set
+        of capabilities that allows them to read or write the items that have been
+        shared with them. Additionally it is possible to define further capabilities
+        to let guests have some more of the installed features enabled.  
+        One of three different modes can be chosen:
+        <ul>
+          <li><code>deny_all</code> - Guest users have no additional capabilities applied.</li> 
+          <li><code>static</code> - Every guest user obtains a statically configured set of capabilities ([[com.openexchange.share.staticGuestCapabilities]]).</li>
+          <li><code>inherit</code> - Guest users inherit the capabilities of the user who created the (initial) according share.</li>
+        </ul>
+      defaultValue: static
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.share.staticGuestCapabilities
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.staticGuestCapabilities
+      description: |
+        Defines the static set of capabilities that shall be given to guests with
+        capability mode <code>static</code>. Capabilities must be specified as a comma-separated
+        string. E.g.:
+        <pre>
+        com.openexchange.share.staticGuestCapabilities=drive, document_preview
+        </pre>
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.share.guestCapabilityMode
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.transientSessions
+      description: |
+        Specifies whether guest sessions are treated as transient or not. Transient
+        sessions are only held in the short-term session containers, and are not put
+        into the distributed session storage. 
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share", "Session"]
+
+    - key: com.openexchange.share.autoLogin
+      description: |
+        Enables/disables the auto-login functionality for guest sessions. A value of 
+        <code>true</code> will instruct the client to store an additional cookie, which is then 
+        considered to lookup an existing session when the client is reloaded. 
+        Possible values are <code>true</code>, <code>false</code>, or an empty value to 
+        inherit from [[com.openexchange.sessiond.autologin]].
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]
+
+    - key: com.openexchange.share.cookieTTL
+      description: |
+        Configures the target time-to-live value for the session, secret and share 
+        cookies used within guest sessions. The value can be defined using units of 
+        measurement: "D" (=days), "W" (=weeks) and "H" (=hours). Additionally, to 
+        enforce a "session" cookie lifetime (i.e. cookies are deleted once the client
+        is quit), the value <code>-1</code> or <code>web-browser</code> may be specified. An empty value 
+        will let this setting inherit from [[com.openexchange.cookie.ttl]]. 
+      defaultValue: -1
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share"]

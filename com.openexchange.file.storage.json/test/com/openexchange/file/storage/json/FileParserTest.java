@@ -58,13 +58,16 @@ import static com.openexchange.file.storage.File.Field.MODIFIED_BY;
 import static com.openexchange.file.storage.File.Field.NUMBER_OF_VERSIONS;
 import static com.openexchange.file.storage.File.Field.VERSION;
 import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 
@@ -74,9 +77,9 @@ import com.openexchange.file.storage.File;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileParserTest extends TestCase {
-
-    public void testParse() throws JSONException, OXException {
+public class FileParserTest {
+         @Test
+     public void testParse() throws JSONException, OXException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);
@@ -118,11 +121,12 @@ public class FileParserTest extends TestCase {
         assertEquals(3000, file.getNumberOfVersions());
         assertEquals("nice title", file.getTitle());
         assertEquals("http://some.url", file.getURL());
-        assertEquals(33, file.getVersion());
+        assertEquals("33", file.getVersion());
         assertEquals("This is the best version", file.getVersionComment());
     }
 
-    public void testFindFields() throws JSONException {
+         @Test
+     public void testFindFields() throws JSONException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);

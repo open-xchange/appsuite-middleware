@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Folder HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.folder.json
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.folder.json.osgi.FolderJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -42,6 +42,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.settings,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,

@@ -55,7 +55,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeMessage;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -67,6 +67,10 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -74,8 +78,7 @@ import com.openexchange.sessiond.impl.SessionObject;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeReplyTest extends TestCase {
-
+public final class MimeReplyTest {
     /**
      * Initializes a new {@link MimeReplyTest}.
      */
@@ -83,7 +86,8 @@ public final class MimeReplyTest extends TestCase {
         super();
     }
 
-    public void testForBug33061() {
+         @Test
+     public void testForBug33061() {
         final byte[] bytes = ("Date: Tue, 10 Jun 2014 15:54:55 +0200 (CEST)\n" +
             "From: aaa@open-xchange.com\n" +
             "To: bbb@open-xchange.com\n" +
@@ -189,7 +193,8 @@ public final class MimeReplyTest extends TestCase {
         }
     }
 
-    public void testForBug31644() {
+         @Test
+     public void testForBug31644() {
         final byte[] bytes = ("From: asd@asd.de\n" +
             "To: dfg@dfg.com\n" +
             "Subject: Subject\n" +

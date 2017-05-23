@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -69,26 +73,20 @@ import com.openexchange.mail.utils.MailFolderUtility;
  */
 public class GetSortedMailFolderTest extends AbstractAJAXSession {
 
-    private static final int[] COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS };
-
-    private AJAXClient client;
+    private static final int[] COLUMNS = { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS };
 
     /**
      * Initializes a new {@link GetSortedMailFolderTest}.
+     * 
      * @param name test name.
      */
-    public GetSortedMailFolderTest(String name) {
-        super(name);
+    public GetSortedMailFolderTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
+    @Test
     public void testGetSortedMailFolder() throws Throwable {
+        AJAXClient client = getClient();
         ListRequest request = new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();

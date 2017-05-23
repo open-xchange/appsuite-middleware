@@ -1,0 +1,38 @@
+feature_name: MobileApiFacade
+properties:
+  - key: com.openexchange.pns.mobile.api.facade.apn.badge.enabled
+    description: |
+      Specifies if badges are enabled when using push notifications for the OX Mail app for iOS.
+      These get displayed on the app icon.
+    defaultValue: true
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: pns-mobile-api-facade.properties
+    packageName: open-xchange-pns-mobile-api-facade
+    tags: ["Mail","Push"]
+  - key: com.openexchange.pns.mobile.api.facade.apn.sound.enabled
+    description: |
+      Specifies if a sound should be played when the OX Mail app on iOS receives a push notification.
+    defaultValue: true
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: pns-mobile-api-facade.properties
+    packageName: open-xchange-pns-mobile-api-facade
+    tags: ["Mail","Push"]
+  - key: com.openexchange.pns.mobile.api.facade.apn.sound.filename
+    description: |
+      Specifies the filename of the sound to play when a push notification is received in the OX Mail app on iOS.
+      This file needs to be included in the app, otherwise a default sound is played. The value <code>default</code> also causes
+      the default iOS sound to be played.
+    defaultValue: default
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: pns-mobile-api-facade.properties
+    packageName: open-xchange-pns-mobile-api-facade
+    tags: ["Mail","Push"]

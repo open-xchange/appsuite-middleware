@@ -51,28 +51,18 @@ package com.openexchange.calendar.printing;
 
 import java.util.Calendar;
 import java.util.Date;
-import junit.framework.TestCase;
 
 /**
  * {@link AbstractDateTest}
  *
  * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
-public abstract class AbstractDateTest extends TestCase {
-
-    /**
-     * Initializes a new {@link AbstractDateTest}.
-     */
-    public AbstractDateTest() {
-        super();
-    }
-
+public abstract class AbstractDateTest {
     /**
      * Initializes a new {@link AbstractDateTest}.
      * @param name
      */
-    public AbstractDateTest(String name) {
-        super(name);
+    public AbstractDateTest() {
     }
 
     public Date plusOneHour(Date date){

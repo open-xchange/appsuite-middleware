@@ -72,7 +72,7 @@ tags:
   - name: Multiple
     description: The multiple module allows to bundle multiple requests to most other modules in a single request.
   - name: Quota
-    description: The filestore module allows accesssing information about the use and quota of the filestore.
+    description: The filestore module allows accessing information about the use and quota of the filestore.
   - name: Import
     description: 'The module import allows to import specific module data (like Contacts, Tasks or Appointments) in several formats (iCal, vCard, CSV) into a folder. Please note: The callback for all actions of this bundle is `callback_import`, not `callback_$actionname` for legacy purposes.'
   - name: Export
@@ -89,7 +89,7 @@ tags:
       The test condition consists of a test command and some arguments for this command depending on the command itself. Because the available tests depend on the mail filter server, these tests must be determined at runtime. So that no test field is transferred to the server which it isn't able to handle. Examples for tests are `address`, `allof` and `anyof`.
       Each test has a special comparison. The list of available comparisons depends on the test given and the mail filter server configuration so they have to be determined at runtime too. See chapter [Mail filter](#mail-filter) for more information.
   - name: File
-    description: The ajax file upload module offers to store files in server's dedicated download directory for a configureable amount of time. The files are then accessible for further operations like inline images in (html) mails.
+    description: The ajax file upload module offers to store files in server's dedicated download directory for a configurable amount of time. The files are then accessible for further operations like inline images in (html) mails.
   - name: Image
     description: The image module allows to download images from Open-Xchange server without providing a session ID in request's URL parameters.
   - name: Conversion
@@ -151,6 +151,10 @@ tags:
     description: Via the client on-boarding module the client can retrieve possible on-boarding configurations
   - name: Pns
     description: The interface to add/remove notification subscriptions associated with a token for certain topics
+  - name: Userfeedback
+    description: The user feedback module
+  - name: RSS Feed
+    description: The RSS Feed module
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

@@ -25,14 +25,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-
 import org.apache.tika.metadata.Metadata;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class TikaInputStreamTest extends TestCase {
-
-    public void testFileBased() throws IOException {
+public class TikaInputStreamTest {
+         @Test
+     public void testFileBased() throws IOException {
         File file = createTempFile("Hello, World!");
         InputStream stream = TikaInputStream.get(file);
 
@@ -55,7 +57,8 @@ public class TikaInputStreamTest extends TestCase {
         file.delete();
     }
 
-    public void testStreamBased() throws IOException {
+         @Test
+     public void testStreamBased() throws IOException {
         InputStream input =
             new ByteArrayInputStream("Hello, World!".getBytes("UTF-8"));
         InputStream stream = TikaInputStream.get(input);
@@ -106,7 +109,8 @@ public class TikaInputStreamTest extends TestCase {
         return buffer.toString("UTF-8");
     }
 
-    public void testGetMetadata() throws Exception {
+         @Test
+     public void testGetMetadata() throws Exception {
         URL url = TikaInputStreamTest.class.getResource("test.txt");
         Metadata metadata = new Metadata();
         TikaInputStream.get(url, metadata).close();

@@ -49,11 +49,16 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -65,13 +70,14 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
 
-    public AnotherCreateAndDeleteInfostoreTest(String name) {
-        super(name);
+    public AnotherCreateAndDeleteInfostoreTest() {
+        super();
     }
 
+    @Test
     public void testCreatingOneItem() throws OXException, IOException, SAXException, JSONException, OXException {
-        FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest"+System.currentTimeMillis());
-        fMgr.insertFolderOnServer(folder);
+        FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest" + System.currentTimeMillis());
+        ftm.insertFolderOnServer(folder);
 
         File expected = new DefaultFile();
         expected.setCreated(new Date());
@@ -83,10 +89,10 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         meta.put("customField0013", Integer.valueOf(2));
         expected.setMeta(meta);
 
-        infoMgr.newAction(expected);
-        assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+        itm.newAction(expected);
+        assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
 
-        File actual = infoMgr.getAction(expected.getId());
+        File actual = itm.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
 
         final Map<String, Object> actualMeta = actual.getMeta();
@@ -100,8 +106,8 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         assertNotNull("Unexpected meta value", actualValue);
         assertEquals("Unexpected meta value", "2", actualValue.toString());
 
-        infoMgr.deleteAction(expected);
-        assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
+        itm.deleteAction(expected);
+        assertFalse("Deleting an entry should work", itm.getLastResponse().hasError());
     }
 
 }

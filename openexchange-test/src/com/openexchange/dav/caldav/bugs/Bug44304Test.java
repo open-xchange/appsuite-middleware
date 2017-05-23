@@ -64,9 +64,9 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class Bug44304Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testDeleteScheduleInboxResource() throws Exception {
-	    DeleteMethod delete = null;
+        DeleteMethod delete = null;
         try {
             String href = "/caldav/schedule-inbox/BD9B8F1B-78ED-4768-BE8C-3AB687AC2A90.ics";
             delete = new DeleteMethod(getBaseUri() + href);

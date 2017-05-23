@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,7 @@ import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLVersion;
@@ -82,13 +84,16 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.util.XMLHelper;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.SessionEnhancement;
-import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
@@ -101,6 +106,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
+import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.DefaultExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
@@ -114,7 +120,6 @@ import com.openexchange.session.reservation.SimSessionReservationService;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SimSessiondService;
-import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
 
@@ -173,6 +178,9 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(OAuthAccessTokenService.class)
+@PowerMockIgnore({"javax.net.*","javax.security.*","javax.crypto.*"})
 public class SAMLWebSSOProviderTest {
 
     private static SAMLWebSSOProvider provider;
@@ -207,24 +215,28 @@ public class SAMLWebSSOProviderTest {
                 return "/appsuite/api/";
             }
         });
-        services.add(SAMLBackend.class, new TestSAMLBackend(credentialProvider));
+        TestSAMLBackend samlBackend = new TestSAMLBackend(credentialProvider, config);
+        services.add(SAMLBackend.class, samlBackend);
         sessiondService = new SimSessiondService();
         services.add(SessiondService.class, sessiondService);
         userService = new SimUserService();
         services.add(UserService.class, userService);
+        OAuthAccessTokenService mock = PowerMockito.mock(OAuthAccessTokenService.class);
+        PowerMockito.when(mock, "isConfigured", 1,1).thenReturn(false);
+        services.add(OAuthAccessTokenService.class,mock);
         userService.addUser(new SimUser(1), 1);
         stateManagement = new SimStateManagement();
-        provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services);
+        provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
     }
 
-    @Test
-    public void testMetadata() throws Exception {
+     @Test
+     public void testMetadata() throws Exception {
         String metadataXML = provider.getMetadataXML();
         Assert.assertNotNull(metadataXML);
     }
 
-    @Test
-    public void testLoginRoundtrip() throws Exception {
+     @Test
+     public void testLoginRoundtrip() throws Exception {
         /*
          * Trigger AuthnRequest
          */
@@ -279,8 +291,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testAutoLogin() throws Exception {
+     @Test
+     public void testAutoLogin() throws Exception {
         /*
          * Fake SAML cookie and try auto login
          */
@@ -322,8 +334,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), sessionMatcher.group(1));
     }
 
-    @Test
-    public void testSPInitiatedLogoutRoundtripPOST() throws Exception {
+     @Test
+     public void testSPInitiatedLogoutRoundtripPOST() throws Exception {
         /*
          * Create sim session
          */
@@ -391,8 +403,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), redirectParams.get("session"));
     }
 
-    @Test
-    public void testSPInitiatedLogoutRoundtripREDIRECT() throws Exception {
+     @Test
+     public void testSPInitiatedLogoutRoundtripREDIRECT() throws Exception {
         /*
          * Create sim session
          */
@@ -476,8 +488,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(session.getSessionID(), redirectParams.get("session"));
     }
 
-    @Test
-    public void testIdPInitiatedLogout() throws Exception {
+     @Test
+     public void testIdPInitiatedLogout() throws Exception {
         /*
          * Create sim session
          */
@@ -547,8 +559,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNull(sessiondService.getSession(session.getSessionID()));
     }
 
-    @Test
-    public void testIdPInitiatedLogin() throws Exception {
+     @Test
+     public void testIdPInitiatedLogin() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         /*
@@ -578,8 +590,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testIdPInitiatedLoginWithRelayState() throws Exception {
+     @Test
+     public void testIdPInitiatedLoginWithRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -603,6 +615,7 @@ public class SAMLWebSSOProviderTest {
             .build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
 
@@ -623,8 +636,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
+     @Test
+     public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -662,8 +675,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-    @Test
-    public void testCachingHeadersOnInit() throws Exception {
+     @Test
+     public void testCachingHeadersOnInit() throws Exception {
         InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), new TestLoginConfigurationLookup(), services);
         /*
          * login
@@ -1210,6 +1223,16 @@ public class SAMLWebSSOProviderTest {
             responseStream.reset();
         }
 
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
+            // Nope...
+        }
+
     }
 
     private static final class TestLoginConfigurationLookup implements LoginConfigurationLookup {
@@ -1230,9 +1253,6 @@ public class SAMLWebSSOProviderTest {
                 false,
                 false,
                 false,
-                new ClientWhitelist(),
-                false,
-                Collections.<IPRange>emptyList(),
                 true,
                 true,
                 false,

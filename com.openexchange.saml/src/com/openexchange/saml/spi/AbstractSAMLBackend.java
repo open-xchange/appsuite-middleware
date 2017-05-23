@@ -54,6 +54,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.DecoderException;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
@@ -65,8 +66,11 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.SAMLExceptionCode;
+import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
@@ -98,6 +102,17 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
      * @see SAMLBackend#resolveAuthnResponse(Response, Assertion)
      */
     protected abstract AuthenticationInfo doResolveAuthnResponse(Response response, Assertion assertion) throws OXException;
+
+    /**
+     * Gets the possible available access token from given assertion.
+     *
+     * @param assertion The assertion to get the access token from
+     * @return The access token or <code>null</code>
+     * @throws OXException If determining the OAuth access token fails
+     */
+    protected String doGetAccessToken(Assertion assertion) throws OXException {
+        return null;
+    }
 
     /**
      * @see SAMLBackend#resolveLogoutRequest(LogoutRequest)
@@ -181,6 +196,11 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     }
 
     @Override
+    public String getAccessToken(Assertion assertion) throws OXException {
+        return doGetAccessToken(assertion);
+    }
+
+    @Override
     public LogoutInfo resolveLogoutRequest(LogoutRequest request) throws OXException {
         return doResolveLogoutRequest(request);
     }
@@ -191,31 +211,82 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     }
 
     @Override
-    public AuthnRequestInfo parseRelayState(Response response, String relayState) {
-        LOG_ABSTRACT.debug("RelayState: {}", relayState);
-        DefaultAuthnRequestInfo defaultAuthnRequestInfo = new DefaultAuthnRequestInfo();
-        String string = new String(Base64.decode(relayState.getBytes()));
-        LOG_ABSTRACT.debug("decoded RelayState: {}", string);
-        String[] splitRelayState = string.split(":");
-        for (String s : splitRelayState) {
-            String[] split = s.split("=");
-            if (null != split && split.length == 2) {
-                switch (split[0]) {
-                    case "domain":
-                        defaultAuthnRequestInfo.setDomainName(split[1]);
-                        break;
-                    case "loginpath":
-                        defaultAuthnRequestInfo.setLoginPath(split[1]);
-                        break;
-                    case "client":
-                        defaultAuthnRequestInfo.setClientID(split[1]);
-                        break;
-                    default:
-                        break;
+    public AuthnRequestInfo parseRelayState(Response response, String relayState) throws OXException {
+        try {
+            LOG_ABSTRACT.debug("RelayState: {}", relayState);
+            DefaultAuthnRequestInfo defaultAuthnRequestInfo = new DefaultAuthnRequestInfo();
+            String string = new String(Base64.decode(relayState.getBytes()));
+            LOG_ABSTRACT.debug("decoded RelayState: {}", string);
+            String[] splitRelayState = string.split(":");
+            for (String s : splitRelayState) {
+                String[] split = s.split("=");
+                if (null != split && split.length == 2) {
+                    switch (split[0]) {
+                        case "domain":
+                            defaultAuthnRequestInfo.setDomainName(split[1]);
+                            break;
+                        case "loginpath":
+                            defaultAuthnRequestInfo.setLoginPath(split[1]);
+                            break;
+                        case "client":
+                            defaultAuthnRequestInfo.setClientID(split[1]);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
+            return defaultAuthnRequestInfo;
+        } catch (DecoderException e) {
+            // Base64-decoding failed
+            throw SAMLExceptionCode.INVALID_REQUEST.create(e, "The 'RelayState' parameter is invalid");
+        } catch (RuntimeException e) {
+            // Whatever unexpected uncaught exception
+            throw SAMLExceptionCode.INVALID_REQUEST.create(e, "Parsing the 'RelayState' parameter failed");
         }
-        return defaultAuthnRequestInfo;
     }
 
+    @Override
+    public SAMLConfig getConfig() {
+        return SAMLConfigRegistryImpl.getInstance().getDefaultConfig();
+    }
+
+    @Override
+    public String getPath() {
+        return doGethPath();
+    }
+
+    /**
+     * The implementation of the getPath Method
+     * @return the path part
+     */
+    protected String doGethPath() {
+        return "";
+    }
+
+    @Override
+    public String getStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        return doGetStaticLoginRedirectLocation(httpRequest, httpResponse);
+    }
+
+    /**
+     * The implementation of the getStaticLoginRedirectLocation Method
+     * @return the static redirect at login and relogin time
+     */
+    protected String doGetStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        return null;
+    }
+
+    /**
+     * Retrieves the {@link SAMLConfig} with the given id from the {@link SAMLConfigRegistry}.
+     * @param path The {@link SAMLConfig} id
+     * @return the {@link SAMLConfig} or the default config if path is empty
+     */
+    public SAMLConfig getConfig(String path) {
+        if(Strings.isEmpty(path)){
+            return SAMLConfigRegistryImpl.getInstance().getDefaultConfig();
+        } else {
+            return SAMLConfigRegistryImpl.getInstance().getConfigById(path);
+        }
+    }
 }

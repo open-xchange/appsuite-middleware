@@ -64,16 +64,16 @@ import com.openexchange.mail.dataobjects.MailFolder;
 class FolderInfo {
 
     static FolderInfo getFolderInfo(String fullName, IMailFolderStorage folderStorage) throws OXException {
-        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-            IMailFolderStorageEnhanced2 enhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
-            int[] totalAndUnread = enhanced2.getTotalAndUnreadCounter(fullName);
+        IMailFolderStorageEnhanced2 storageEnhanced2 = folderStorage.supports(IMailFolderStorageEnhanced2.class);
+        if (null != storageEnhanced2) {
+            int[] totalAndUnread = storageEnhanced2.getTotalAndUnreadCounter(fullName);
             return new FolderInfo(totalAndUnread[0], totalAndUnread[1]);
         }
 
-        if (folderStorage instanceof IMailFolderStorageEnhanced) {
-            IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) folderStorage;
-            int total = enhanced.getTotalCounter(fullName);
-            int unread = enhanced.getUnreadCounter(fullName);
+        IMailFolderStorageEnhanced storageEnhanced = folderStorage.supports(IMailFolderStorageEnhanced.class);
+        if (null != storageEnhanced) {
+            int total = storageEnhanced.getTotalCounter(fullName);
+            int unread = storageEnhanced.getUnreadCounter(fullName);
             return new FolderInfo(total, unread);
         }
 

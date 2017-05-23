@@ -52,12 +52,18 @@ package com.openexchange.ajax.session;
 import static com.openexchange.java.Autoboxing.I;
 import static javax.servlet.http.HttpServletResponse.SC_FOUND;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -66,9 +72,6 @@ import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.java.Strings;
 
 /**
  * no autologin with httpauth
@@ -78,35 +81,15 @@ import com.openexchange.java.Strings;
 public class Bug34928Test extends AbstractAJAXSession {
 
     private AJAXClient client;
-    private String login;
-    private String password;
 
-    /**
-     * Initializes a new {@link Bug34928Test}.
-     *
-     * @param name The test name
-     */
-    public Bug34928Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        AJAXConfig.init();
-        login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(Property.PASSWORD);
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
         client = new AJAXClient(new AJAXSession(), true);
         client.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client && false == Strings.isEmpty(client.getSession().getId())) {
-            client.logout();
-        }
-        super.tearDown();
-    }
-
+    @Test
     public void testAutoHttpAuthLogin() throws Exception {
         /*
          * perform initial HTTP Auth login & store session cookie
@@ -127,6 +110,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         client.getSession().setId(firstSessionID);
     }
 
+    @Test
     public void testAutoHttpLoginWithWrongSecretCookie() throws Exception {
         /*
          * perform initial HTTP Auth login & store session cookie
@@ -148,6 +132,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         cookie.setValue(correctSecret);
     }
 
+    @Test
     public void testAutoHttpLoginWithWrongSessionCookie() throws Exception {
         /*
          * perform initial HTTP Auth login & store session cookie
@@ -169,6 +154,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         cookie.setValue(correctSession);
     }
 
+    @Test
     public void testAutoHttpLoginWithoutStore() throws Exception {
         /*
          * perform initial HTTP Auth login, don't store session cookie
@@ -187,7 +173,7 @@ public class Bug34928Test extends AbstractAJAXSession {
     }
 
     private String firstHttpAuthLogin(boolean store) throws Exception {
-        HttpAuthResponse httpAuthResponse = client.execute(new HttpAuthRequest(login, password));
+        HttpAuthResponse httpAuthResponse = client.execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
         String sessionID = extractSessionID(httpAuthResponse);
         client.getSession().setId(sessionID);
         if (store) {

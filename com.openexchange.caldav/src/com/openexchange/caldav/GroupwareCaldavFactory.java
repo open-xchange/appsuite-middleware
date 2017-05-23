@@ -108,7 +108,7 @@ public class GroupwareCaldavFactory extends DAVFactory {
     }
 
     @Override
-    protected String getURLPrefix() {
+    public String getURLPrefix() {
         return "/caldav/";
     }
 
@@ -157,7 +157,9 @@ public class GroupwareCaldavFactory extends DAVFactory {
 
 
     public AppointmentSQLInterface getAppointmentInterface() {
-        return appointments.createAppointmentSql(getSessionObject());
+        AppointmentSQLInterface appointmentSql = appointments.createAppointmentSql(getSessionObject());
+        appointmentSql.setIncludePrivateAppointments(true);
+        return appointmentSql;
     }
 
     public TasksSQLInterface getTaskInterface() {

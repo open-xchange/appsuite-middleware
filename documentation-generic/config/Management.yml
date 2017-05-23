@@ -1,0 +1,77 @@
+feature_name: Management
+properties:
+    - key: JMXPort
+      description: |
+        Define the port for the RMI Registry.
+      defaultValue: 9999
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: management.properties
+      packageName: open-xchange-core
+      tags: ["Management", "RMI", "Port"]
+    - key: JMXServerPort
+      description: |
+        Define the JMX RMI Connector Server port. Typically chosen randomly by the JVM.
+        A value of <code>-1</code> means that the port is randomly determined by the JVM.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: management.properties
+      packageName: open-xchange-core
+      tags: ["Management", "RMI", "Port"]
+    - key: JMXBindAddress
+      description: |
+        Define the bind address for JMX agent.
+        Use value <code>*</code> to let the JMX monitor bind to all interfaces.
+      defaultValue: localhost
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: management.properties
+      packageName: open-xchange-core
+      tags: ["Management", "Monitoring", "Host"]
+    - key: JMXLogin
+      description: |
+        Define the JMX login for authentication.
+        Leaving this property empty means not to use authentication.
+      defaultValue:
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: management.properties
+      packageName: open-xchange-core
+      tags: ["Management", "Authentication", "Credential"]
+    - key: JMXPassword
+      description: |
+        Define the JMX password in SHA hashed version.
+        This property only has effect if property [[JMXLogin]] is set.
+
+        <h3>Using Perl to generate the SHA hash</h3>
+        The following Perl command can be used to generate such a password 
+        (requires to install the Digest::SHA1 Perl module):
+        <pre>
+        perl -M'Digest::SHA1 qw(sha1_base64)' -e 'print sha1_base64("YOURSECRET")."=\n";'
+        </pre>
+
+        Note:  
+        Since Debian Wheezy and Ubuntu 12.04 the corresponding Perl module has been replaced with "Digest::SHA" (and "Digest::SHA1" is no longer maintained)
+
+        <h3>Using ruby to generate the SHA hash</h3>
+        Alternatively, ruby can be used to generate the appropriate SHA1 hash:
+        <pre>
+        ruby -rdigest -e 'puts Digest::SHA1.base64digest("YOURSECRET")'
+        </pre>
+      defaultValue:
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: JMXLogin
+      file: management.properties
+      packageName: open-xchange-core
+      tags: ["Management", "Authentication", "Credential"]

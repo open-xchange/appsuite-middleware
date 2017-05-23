@@ -83,9 +83,7 @@ public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> 
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteLink"),
-            new Parameter("root", root)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteLink"), new Parameter("root", root)
         };
     }
 

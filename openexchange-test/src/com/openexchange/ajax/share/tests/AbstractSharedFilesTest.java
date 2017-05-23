@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
+import org.junit.Before;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.ShareTest;
@@ -80,8 +81,8 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
     protected FolderObject userSourceFolder;
     protected FolderObject userDestFolder;
     protected File file;
-    
-    @Override
+
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         userSourceFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
@@ -89,9 +90,9 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
         file = insertFile(userSourceFolder.getObjectID(), randomUID());
         infoMgr = new InfostoreTestManager(getClient());
     }
-    
-    protected AbstractSharedFilesTest(String name) {
-        super(name);
+
+    protected AbstractSharedFilesTest() {
+        super();
     }
 
     protected void addUserPermission(int userId) throws OXException, IOException, JSONException {

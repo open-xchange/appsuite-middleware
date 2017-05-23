@@ -49,14 +49,16 @@
 
 package com.openexchange.resource;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import junit.framework.TestCase;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -72,305 +74,270 @@ import com.openexchange.test.AjaxInit;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class ResourceUpdateTest extends TestCase {
+public final class ResourceUpdateTest {
 
-	private Context ctx;
+    private Context ctx;
 
-	private User user;
+    private User user;
 
-	private User admin;
+    private User admin;
 
-	/**
-	 * Initializes a new {@link ResourceUpdateTest}
-	 */
-	public ResourceUpdateTest() {
-		super();
-	}
+    private static Context resolveContext(final String ctxStr) throws Exception {
+        try {
+            int pos = -1;
+            final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
+            return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
+        } catch (final Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
 
-	/**
-	 * Initializes a new {@link ResourceUpdateTest}
-	 *
-	 * @param name
-	 *            The test's name
-	 */
-	public ResourceUpdateTest(final String name) {
-		super(name);
-	}
+    private static User resolveUser(final String user, final Context ctx) throws Exception {
+        try {
+            int pos = -1;
+            final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
+            return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
+        } catch (final Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
 
-	private static Context resolveContext(final String ctxStr) throws Exception {
-		try {
-			int pos = -1;
-			final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
-			return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
-		} catch (final Throwable t) {
-			t.printStackTrace();
-			return null;
-		}
-	}
+    @Before
+    public void setUp() throws Exception {
+        try {
+            /*
+             * Init
+             */
+            Init.startServer();
+            /*
+             * Init test environment
+             */
+            final String login = AjaxInit.getAJAXProperty("login");
+            ctx = resolveContext(login);
+            user = resolveUser(login, ctx);
+            admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
-	private static User resolveUser(final String user, final Context ctx) throws Exception {
-		try {
-			int pos = -1;
-			final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
-			return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
-		} catch (final Throwable t) {
-			t.printStackTrace();
-			return null;
-		}
-	}
+    @After
+    public void tearDown() throws Exception {
+        Init.stopServer();
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-		try {
-			/*
-			 * Init
-			 */
-			Init.startServer();
-			/*
-			 * Init test environment
-			 */
-			final String login = AjaxInit.getAJAXProperty("login");
-			ctx = resolveContext(login);
-			user = resolveUser(login, ctx);
-			admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
+    @Test
+    public void testResourceUpdate() throws OXException, OXException {
+        int id = -1;
+        try {
+            final Resource resource = createDummyResource(admin, ctx);
+            id = resource.getIdentifier();
+            assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
+            assertTrue("Invalid last-modified detected: " + resource.getLastModified() + ". Last-modified timestamp has not been properly set through creation", resource.getLastModified() != null && resource.getLastModified().getTime() < System.currentTimeMillis());
+            final long beforeLastModified = resource.getLastModified().getTime();
+            /*
+             * Try to update
+             */
+            resource.setSimpleName("Foobar-12334");
+            resource.setDisplayName("The Foobar Display Name");
+            resource.setAvailable(false);
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
+            /*
+             * Load via storage API
+             */
+            Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+            /*
+             * Compare values
+             */
+            assertTrue("Invalid last-modified timestamp", resource.getLastModified().getTime() > beforeLastModified && resource.getLastModified().getTime() == storageVersion.getLastModified().getTime());
+            assertTrue("Simple name has not been properly updated", resource.getSimpleName().equals(storageVersion.getSimpleName()));
+            assertTrue("Display name has not been properly updated", resource.getDisplayName().equals(storageVersion.getDisplayName()));
+            assertTrue("Availability has not been properly updated", resource.isAvailable() == storageVersion.isAvailable());
+            /*
+             * Try to update
+             */
+            resource.setDisplayName("The Foobar Display Name qwertz");
+            resource.setMail("foobar@somewhere.org");
+            resource.setAvailable(true);
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, storageVersion.getLastModified());
+            /*
+             * Load via storage API
+             */
+            storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+            /*
+             * Compare values
+             */
+            assertTrue("Invalid last-modified timestamp", resource.getLastModified().getTime() > beforeLastModified && resource.getLastModified().getTime() == storageVersion.getLastModified().getTime());
+            assertTrue("Simple name has not been properly updated", resource.getSimpleName().equals(storageVersion.getSimpleName()));
+            assertTrue("Display name has not been properly updated", resource.getDisplayName().equals(storageVersion.getDisplayName()));
+            assertTrue("Availability has not been properly updated", resource.isAvailable() == storageVersion.isAvailable());
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-	@Override
-	protected void tearDown() throws Exception {
-		Init.stopServer();
-	}
+    }
 
-	public void testResourceUpdate() throws OXException, OXException {
-		int id = -1;
-		try {
-			final Resource resource = createDummyResource(admin, ctx);
-			id = resource.getIdentifier();
-			assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
-			assertTrue("Invalid last-modified detected: " + resource.getLastModified()
-					+ ". Last-modified timestamp has not been properly set through creation", resource
-					.getLastModified() != null
-					&& resource.getLastModified().getTime() < System.currentTimeMillis());
-			final long beforeLastModified = resource.getLastModified().getTime();
-			/*
-			 * Try to update
-			 */
-			resource.setSimpleName("Foobar-12334");
-			resource.setDisplayName("The Foobar Display Name");
-			resource.setAvailable(false);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
-					resource.getLastModified());
-			/*
-			 * Load via storage API
-			 */
-			Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
-			/*
-			 * Compare values
-			 */
-			assertTrue("Invalid last-modified timestamp", resource.getLastModified().getTime() > beforeLastModified
-					&& resource.getLastModified().getTime() == storageVersion.getLastModified().getTime());
-			assertTrue("Simple name has not been properly updated", resource.getSimpleName().equals(
-					storageVersion.getSimpleName()));
-			assertTrue("Display name has not been properly updated", resource.getDisplayName().equals(
-					storageVersion.getDisplayName()));
-			assertTrue("Availability has not been properly updated", resource.isAvailable() == storageVersion
-					.isAvailable());
-			/*
-			 * Try to update
-			 */
-			resource.setDisplayName("The Foobar Display Name qwertz");
-			resource.setMail("foobar@somewhere.org");
-			resource.setAvailable(true);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
-					storageVersion.getLastModified());
-			/*
-			 * Load via storage API
-			 */
-			storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
-			/*
-			 * Compare values
-			 */
-			assertTrue("Invalid last-modified timestamp", resource.getLastModified().getTime() > beforeLastModified
-					&& resource.getLastModified().getTime() == storageVersion.getLastModified().getTime());
-			assertTrue("Simple name has not been properly updated", resource.getSimpleName().equals(
-					storageVersion.getSimpleName()));
-			assertTrue("Display name has not been properly updated", resource.getDisplayName().equals(
-					storageVersion.getDisplayName()));
-			assertTrue("Availability has not been properly updated", resource.isAvailable() == storageVersion
-					.isAvailable());
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+    @Test
+    public void testResourceUpdateIncomplete() throws OXException, OXException {
+        int id = -1;
+        try {
+            final Resource resource = createDummyResource(admin, ctx);
+            id = resource.getIdentifier();
+            assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
+            assertTrue("Invalid last-modified detected: " + resource.getLastModified() + ". Last-modified timestamp has not been properly set through creation", resource.getLastModified() != null && resource.getLastModified().getTime() < System.currentTimeMillis());
+            final long beforeLastModified = resource.getLastModified().getTime();
+            final String displayNameBefore = resource.getDisplayName();
+            final String mailBefore = resource.getMail();
+            /*
+             * Try to only update simple name
+             */
+            resource.setSimpleName("Foobar-12334");
+            resource.removeDisplayName();
+            resource.removeMail();
+            resource.removeAvailable();
+            resource.removeDescription();
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
+            /*
+             * Load via storage API
+             */
+            final Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
 
-	}
+            /*
+             * Compare values
+             */
+            assertTrue("Invalid last-modified timestamp", resource.getLastModified().getTime() > beforeLastModified && resource.getLastModified().getTime() == storageVersion.getLastModified().getTime());
+            assertTrue("Simple name has not been properly updated", resource.getSimpleName().equals(storageVersion.getSimpleName()));
+            assertTrue("Display name has been updated, but shouldn't", storageVersion.getDisplayName().equals(displayNameBefore));
+            assertTrue("Email address has been updated, but shouldn't", storageVersion.getMail().equals(mailBefore));
 
-	public void testResourceUpdateIncomplete() throws OXException, OXException {
-		int id = -1;
-		try {
-			final Resource resource = createDummyResource(admin, ctx);
-			id = resource.getIdentifier();
-			assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
-			assertTrue("Invalid last-modified detected: " + resource.getLastModified()
-					+ ". Last-modified timestamp has not been properly set through creation", resource
-					.getLastModified() != null
-					&& resource.getLastModified().getTime() < System.currentTimeMillis());
-			final long beforeLastModified = resource.getLastModified().getTime();
-			final String displayNameBefore = resource.getDisplayName();
-			final String mailBefore = resource.getMail();
-			/*
-			 * Try to only update simple name
-			 */
-			resource.setSimpleName("Foobar-12334");
-			resource.removeDisplayName();
-			resource.removeMail();
-			resource.removeAvailable();
-			resource.removeDescription();
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
-					resource.getLastModified());
-			/*
-			 * Load via storage API
-			 */
-			final Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-			/*
-			 * Compare values
-			 */
-			assertTrue("Invalid last-modified timestamp", resource.getLastModified().getTime() > beforeLastModified
-					&& resource.getLastModified().getTime() == storageVersion.getLastModified().getTime());
-			assertTrue("Simple name has not been properly updated", resource.getSimpleName().equals(
-					storageVersion.getSimpleName()));
-			assertTrue("Display name has been updated, but shouldn't", storageVersion.getDisplayName().equals(
-					displayNameBefore));
-			assertTrue("Email address has been updated, but shouldn't", storageVersion.getMail().equals(mailBefore));
+    }
 
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+    @Test
+    public void testResourceFail001() {
+        int id = -1;
+        try {
+            final Resource resource = createDummyResource(admin, ctx);
+            id = resource.getIdentifier();
 
-	}
+            resource.setSimpleName("\u00f6\u00e4\u00fc\u00df");
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
-	public void testResourceFail001() {
-		int id = -1;
-		try {
-			final Resource resource = createDummyResource(admin, ctx);
-			id = resource.getIdentifier();
+            fail("Update succeeded with invalid string identifier");
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-			resource.setSimpleName("\u00f6\u00e4\u00fc\u00df");
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
-					resource.getLastModified());
+    }
 
-			fail("Update succeeded with invalid string identifier");
-		} catch (final OXException e) {
-			// Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+    @Test
+    public void testResourceFail002() {
+        int id = -1;
+        try {
+            final Resource resource = createDummyResource(admin, ctx);
+            id = resource.getIdentifier();
 
-	}
+            resource.setMail("mytestresourcesomewhere.com");
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
-	public void testResourceFail002() {
-		int id = -1;
-		try {
-			final Resource resource = createDummyResource(admin, ctx);
-			id = resource.getIdentifier();
+            fail("Update succeeded with invalid email address");
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-			resource.setMail("mytestresourcesomewhere.com");
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
-					resource.getLastModified());
+    }
 
-			fail("Update succeeded with invalid email address");
-		} catch (final OXException e) {
-			// Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+    @Test
+    public void testResourceFail007() {
+        int id = -1;
+        try {
+            final Resource resource = createDummyResource(admin, ctx);
+            id = resource.getIdentifier();
 
-	}
+            resource.setSimpleName(null);
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
-	public void testResourceFail007() {
-		int id = -1;
-		try {
-			final Resource resource = createDummyResource(admin, ctx);
-			id = resource.getIdentifier();
+            fail("Update succeeded with missing mandatory field");
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-			resource.setSimpleName(null);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
-					resource.getLastModified());
+    }
 
-			fail("Update succeeded with missing mandatory field");
-		} catch (final OXException e) {
-			// Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+    @Test
+    public void testResourceFail008() {
+        int id = -1;
+        try {
+            final Resource resource = createDummyResource(admin, ctx);
+            id = resource.getIdentifier();
 
-	}
+            resource.setSimpleName(null);
+            ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
-	public void testResourceFail008() {
-		int id = -1;
-		try {
-			final Resource resource = createDummyResource(admin, ctx);
-			id = resource.getIdentifier();
+            fail("Update succeeded with invalid string identifier");
+        } catch (final OXException e) {
+            // Exception is expected
+        } finally {
+            deleteResource(id, ctx.getContextId());
+        }
 
-			resource.setSimpleName(null);
-			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource,
-					resource.getLastModified());
+    }
 
-			fail("Update succeeded with invalid string identifier");
-		} catch (final OXException e) {
-			// Exception is expected
-		} finally {
-			deleteResource(id, ctx.getContextId());
-		}
+    private static final Resource createDummyResource(final User admin, final Context ctx) throws OXException {
+        final Resource resource = new Resource();
+        resource.setAvailable(true);
+        resource.setDescription("My test resource");
+        resource.setDisplayName("MyTestResource");
+        resource.setMail("mytestresource@somewhere.com");
+        resource.setSimpleName("M-T-R");
+        ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
+        return resource;
+    }
 
-	}
+    private static final String SQL_DELETE = "DELETE FROM resource WHERE cid = ? AND id = ?";
 
-	private static final Resource createDummyResource(final User admin, final Context ctx) throws OXException {
-		final Resource resource = new Resource();
-		resource.setAvailable(true);
-		resource.setDescription("My test resource");
-		resource.setDisplayName("MyTestResource");
-		resource.setMail("mytestresource@somewhere.com");
-		resource.setSimpleName("M-T-R");
-		ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
-		return resource;
-	}
+    private static final void deleteResource(final int id, final int cid) {
+        if (-1 == id) {
+            return;
+        }
+        final Connection writeCon;
+        try {
+            writeCon = Database.get(cid, true);
+        } catch (final OXException e) {
+            e.printStackTrace();
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_DELETE);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
 
-	private static final String SQL_DELETE = "DELETE FROM resource WHERE cid = ? AND id = ?";
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != stmt) {
+                try {
+                    stmt.close();
+                } catch (final SQLException e) {
+                }
+                stmt = null;
+            }
+            Database.back(cid, true, writeCon);
+        }
 
-	private static final void deleteResource(final int id, final int cid) {
-		if (-1 == id) {
-			return;
-		}
-		final Connection writeCon;
-		try {
-			writeCon = Database.get(cid, true);
-		} catch (final OXException e) {
-			e.printStackTrace();
-			return;
-		}
-		PreparedStatement stmt = null;
-		try {
-			stmt = writeCon.prepareStatement(SQL_DELETE);
-			stmt.setInt(1, cid);
-			stmt.setInt(2, id);
-			stmt.executeUpdate();
-
-		} catch (final SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if (null != stmt) {
-				try {
-					stmt.close();
-				} catch (final SQLException e) {
-				}
-				stmt = null;
-			}
-			Database.back(cid, true, writeCon);
-		}
-
-	}
+    }
 }

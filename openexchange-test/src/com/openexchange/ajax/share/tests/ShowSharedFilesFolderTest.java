@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Iterator;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -61,7 +64,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
-
 
 /**
  * {@link ShowSharedFilesFolderTest}
@@ -75,18 +77,14 @@ public class ShowSharedFilesFolderTest extends ShareTest {
     private File file;
     private ExtendedPermissionEntity guest;
 
-    public ShowSharedFilesFolderTest(String name) {
-        super(name);
-    }
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
         perm = randomGuestObjectPermission();
-        file = insertSharedFile(client.getValues().getPrivateInfostoreFolder(), perm);
+        file = insertSharedFile(getClient().getValues().getPrivateInfostoreFolder(), perm);
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -101,10 +99,14 @@ public class ShowSharedFilesFolderTest extends ShareTest {
 
     @Override
     public void tearDown() throws Exception {
-        deleteFilesSilently(client, Collections.singletonList(file));
-        super.tearDown();
+        try {
+            deleteFilesSilently(getClient(), Collections.singletonList(file));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testShowSharedFilesFolder() throws Exception {
         GuestClient guestClient = resolveShare(guest, perm.getRecipient());
 

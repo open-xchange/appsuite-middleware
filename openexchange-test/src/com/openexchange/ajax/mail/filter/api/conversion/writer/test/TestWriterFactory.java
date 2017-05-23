@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 import java.util.HashMap;
 import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 
-
 /**
  * TestWriterFactory
  *
@@ -60,17 +59,17 @@ import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
  */
 public class TestWriterFactory {
 
-	final static HashMap<TestCommand, TestWriter> writerMap = new HashMap<TestCommand, TestWriter>();
+    final static HashMap<TestCommand, TestWriter> writerMap = new HashMap<TestCommand, TestWriter>();
 
-	public TestWriterFactory() {
+    public TestWriterFactory() {
 
-	}
+    }
 
-	public static void addWriter(final TestCommand name, final TestWriter actionWriter) {
-		writerMap.put(name, actionWriter);
-	}
+    public static void addWriter(final TestCommand name, final TestWriter actionWriter) {
+        writerMap.put(name, actionWriter);
+    }
 
-	public static TestWriter getWriter(TestCommand name) {
-		return writerMap.get(name);
-	}
+    public static TestWriter getWriter(TestCommand name) {
+        return writerMap.get(name);
+    }
 }

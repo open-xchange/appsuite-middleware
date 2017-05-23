@@ -101,6 +101,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClientExceptionCodes;
 import com.openexchange.dovecot.doveadm.client.DoveAdmCommand;
 import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
@@ -110,6 +113,8 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.endpointpool.Endpoint;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link HttpDoveAdmClient} - The REST client for DoveAdm interface.
@@ -214,13 +219,15 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     private final HttpDoveAdmEndpointManager endpointManager;
     private final BasicHttpContext localcontext;
     private final String authorizationHeaderValue;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link HttpDoveAdmClient}.
      */
-    public HttpDoveAdmClient(String apiKey, HttpDoveAdmEndpointManager endpointManager) {
+    public HttpDoveAdmClient(String apiKey, HttpDoveAdmEndpointManager endpointManager, ServiceLookup services) {
         super();
         this.endpointManager = endpointManager;
+        this.services = services;
 
         // Generate BASIC scheme object and stick it to the local execution context
         final BasicHttpContext context = new BasicHttpContext();
@@ -229,6 +236,26 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         this.localcontext = context;
         String encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
         authorizationHeaderValue = "X-Dovecot-API " + encodedApiKey;
+    }
+
+    @Override
+    public String checkUser(String user, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        String usr = user;
+        String proxyDelim = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.dovecot.doveadm.proxyDelimiter", null, view);
+        if (false == Strings.isEmpty(proxyDelim)) {
+            int pos = usr.indexOf(proxyDelim);
+            if (pos > 0) {
+                usr = usr.substring(0, pos);
+            }
+        }
+        return usr;
     }
 
     private CallProperties getCallProperties(HttpDoveAdmCall call) throws OXException {

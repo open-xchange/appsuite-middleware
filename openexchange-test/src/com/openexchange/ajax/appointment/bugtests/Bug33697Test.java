@@ -49,22 +49,25 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.appointment.AbstractAppointmentTest;
 import com.openexchange.ajax.appointment.AppointmentRangeGenerator.AppointmentRange;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.java.util.Pair;
+import com.openexchange.test.pool.TestUser;
 import edu.emory.mathcs.backport.java.util.Arrays;
-
 
 /**
  * {@link Bug33697Test}
@@ -74,40 +77,39 @@ import edu.emory.mathcs.backport.java.util.Arrays;
  */
 public class Bug33697Test extends AbstractAppointmentTest {
 
-   private static final Logger LOG = LoggerFactory.getLogger(Bug33697Test.class);
-   
-   private User userX, userY, userZ;
-   private AJAXClient clientX, clientY, clientZ;
-   private UserValues userValuesX, userValuesY, userValuesZ;
-   private Appointment bug33697Appointment;
-   private FolderObject bug33697SubfolderX, bug33697SubfolderY, bug33697SubfolderZ;
+    private static final Logger LOG = LoggerFactory.getLogger(Bug33697Test.class);
+
+    private TestUser userX, userY, userZ;
+    private AJAXClient clientX, clientY, clientZ;
+    private UserValues userValuesX, userValuesY, userValuesZ;
+    private Appointment bug33697Appointment;
+    private FolderObject bug33697SubfolderX, bug33697SubfolderY, bug33697SubfolderZ;
 
     /**
      * Initializes a new {@link Bug33697Test}.
+     * 
      * @param name The test name
      */
-    public Bug33697Test(String name) {
-        super(name);
+    public Bug33697Test() {
+        super();
     }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        userX = User.User1;
-        userY = User.User2;
-        userZ = User.User3;
+        userZ = testContext.acquireUser();
 
-        clientX = client;
-        clientY = new AJAXClient(userY);
+        clientX = getClient();
+        clientY = getClient2();
         clientZ = new AJAXClient(userZ);
 
         userValuesX = clientX.getValues();
         userValuesY = clientY.getValues();
         userValuesZ = clientZ.getValues();
 
-        bug33697SubfolderX = createCalendarSubFolder(clientX, "Bug33697SubfolderX", createOwnerPermission(userValuesX.getUserId()), createAuthorPermission(userValuesY.getUserId()));
-        bug33697SubfolderY = createCalendarSubFolder(clientY, "Bug33697SubfolderY", createOwnerPermission(userValuesY.getUserId()));
-        bug33697SubfolderZ = createCalendarSubFolder(clientZ, "Bug33697SubfolderZ", createOwnerPermission(userValuesZ.getUserId()), createAuthorPermission(userValuesY.getUserId()));
+        bug33697SubfolderX = createCalendarSubFolder(clientX, "Bug33697SubfolderX " + System.currentTimeMillis(), createOwnerPermission(userValuesX.getUserId()), createAuthorPermission(userValuesY.getUserId()));
+        bug33697SubfolderY = createCalendarSubFolder(clientY, "Bug33697SubfolderY " + System.currentTimeMillis(), createOwnerPermission(userValuesY.getUserId()));
+        bug33697SubfolderZ = createCalendarSubFolder(clientZ, "Bug33697SubfolderZ " + System.currentTimeMillis(), createOwnerPermission(userValuesZ.getUserId()), createAuthorPermission(userValuesY.getUserId()));
 
         AppointmentRange dateRange = appointmentRangeGenerator.getDateRange();
         bug33697Appointment = createSingle(dateRange.startDate, dateRange.endDate, "Bug33697Appointment");
@@ -117,33 +119,40 @@ public class Bug33697Test extends AbstractAppointmentTest {
 
     @After
     public void tearDown() throws Exception {
-        deleteAppointments(clientX, getAppointment(clientX, userValuesX.getPrivateAppointmentFolder(), bug33697Appointment.getObjectID()));
-        deleteCalendarFolder(clientX, bug33697SubfolderX);
-        deleteCalendarFolder(clientY, bug33697SubfolderY);
-        deleteCalendarFolder(clientZ, bug33697SubfolderZ);
-        clientX.logout();
-        clientY.logout();
-        clientZ.logout();
+        try {
+            deleteAppointments(clientX, getAppointment(clientX, userValuesX.getPrivateAppointmentFolder(), bug33697Appointment.getObjectID()));
+            deleteCalendarFolder(clientX, bug33697SubfolderX);
+            deleteCalendarFolder(clientY, bug33697SubfolderY);
+            deleteCalendarFolder(clientZ, bug33697SubfolderZ);
+            
+            if (null != clientZ) {
+                clientZ.logout();
+                clientZ = null;
+            }
+        } finally {
+            super.tearDown();
+        }
     }
 
     /*
      * - UserX shares a subfolder named "Bug33697SubfolderX" from his private calendar to UserY with the following permissions:
-     *   Folder permissions: create objects and subfolders.
-     *   Object permissions: read all objects, edit all objects, delete all objects.
-     *   The user has administrative rights: No.
+     * Folder permissions: create objects and subfolders.
+     * Object permissions: read all objects, edit all objects, delete all objects.
+     * The user has administrative rights: No.
      * 
      * - UserX creates an appointment "Bug33697Appointment" in subfolder "Bug33697SubfolderX" but doesn't invite UserY as participant.
      * 
      * - UserY moves the "Bug33697Appointment" to a private subfolder "Bug33697SubfolderY"
      * 
      * Expected behaviour:
-     *  - UserX:
-     *    - sees appointment "Bug33697Appointment" in his private calender folder as UserY moved it
-     *    - he is still creator/participant
-     *  - UserY:
-     *    - sees appointment "Bug33697Appointment" in folder "Bug33697AppointmentSubfolderY"
-     *    - he became a participant
+     * - UserX:
+     * - sees appointment "Bug33697Appointment" in his private calender folder as UserY moved it
+     * - he is still creator/participant
+     * - UserY:
+     * - sees appointment "Bug33697Appointment" in folder "Bug33697AppointmentSubfolderY"
+     * - he became a participant
      */
+    @Test
     public void testMoveFromUserXSharedSubFolderToUserYPrivateSubFolder() throws Exception {
         bug33697Appointment.setParentFolderID(bug33697SubfolderY.getObjectID());
         Pair<Appointment, FolderObject> pair = new Pair<Appointment, FolderObject>(bug33697Appointment, bug33697SubfolderX);
@@ -151,7 +160,7 @@ public class Bug33697Test extends AbstractAppointmentTest {
 
         //assert that the appointment is located in the private calendar of clientX and no longer in the private subfolder
         Appointment appointmentViewForX = null;
-        try { 
+        try {
             appointmentViewForX = getAppointment(clientX, userValuesX.getPrivateAppointmentFolder(), bug33697Appointment.getObjectID());
         } catch (Exception e) {
             LOG.error("Error while getting appointment view for userX", e);
@@ -170,9 +179,9 @@ public class Bug33697Test extends AbstractAppointmentTest {
         //assert that both users are still participants
         Participant[] participants = appointmentViewForY.getParticipants();
         assertEquals("Appointment should have exactly 2 participants", 2, participants.length);
-        int[] participantIds = {participants[0].getIdentifier(), participants[1].getIdentifier()};
+        int[] participantIds = { participants[0].getIdentifier(), participants[1].getIdentifier() };
         Arrays.sort(participantIds);
-        int[] clientIds = {userValuesX.getUserId(), userValuesY.getUserId()};
+        int[] clientIds = { userValuesX.getUserId(), userValuesY.getUserId() };
         Arrays.sort(clientIds);
         assertTrue("Participants and clients should be equal for the moved appointment", Arrays.equals(participantIds, clientIds));
 
@@ -180,77 +189,79 @@ public class Bug33697Test extends AbstractAppointmentTest {
 
     /*
      * 
-     * Move from SHARED to SHARED folder isn't implemented, yet 
+     * Move from SHARED to SHARED folder isn't implemented, yet
      * com.openexchange.calendar.api.CalendarCollection.detectFolderMoveAction(CalendarDataObject, CalendarDataObject)
      * 
      * 
      * - UserX shares a subfolder named "Bug33697SubfolderX" from his private calendar to UserY with the following permissions:
-     *   Folder permissions: create objects and subfolders.
-     *   Object permissions: read all objects, edit all objects, delete all objects.
-     *   The user has administrative rights: No.
+     * Folder permissions: create objects and subfolders.
+     * Object permissions: read all objects, edit all objects, delete all objects.
+     * The user has administrative rights: No.
      * 
      * - UserX creates an appointment "Bug33697Appointment" in subfolder "Bug33697SubfolderX" but doesn't invite UserY as participant.
      * 
      * - UserZ shares a subfolder named "Bug33697SubfolderZ" from his private calendar to UserY with the following permissions:
-     *   Folder permissions: create objects and subfolders.
-     *   Object permissions: read all objects, edit all objects, delete all objects.
-     *   The user has administrative rights: No.
+     * Folder permissions: create objects and subfolders.
+     * Object permissions: read all objects, edit all objects, delete all objects.
+     * The user has administrative rights: No.
      * 
      * - UserY moves the "Bug33697Appointment" from "Bug33697SubfolderX" to the private subfolder "Bug33697SubfolderZ"
      * 
      * Expected behaviour:
-     *  - UserX:
-     *    - sees appointment "Bug33697Appointment" in his private calender folder as UserY moved it
-     *    - he is still creator/participant
-     *  -UserY:
-     *    - sees appointment "Bug33697Appointment" in "Bug33697SubfolderZ" and no longer in "Bug33697SubfolderX"
-     *    - didn't become a participant
-     *  - UserZ:
-     *    - sees appointment "Bug33697Appointment" in folder "Bug33697AppointmentSubfolderZ"
-     *    - became a participant
-     
-    @Ignore
-    public void testMoveFromUserXSharedSubFolderToUserZPrivateSubFolder() throws Exception {
-        bug33697Appointment.setParentFolderID(bug33697SubfolderZ.getObjectID());
-        Pair<Appointment, FolderObject> pair = new Pair<Appointment, FolderObject>(bug33697Appointment, bug33697SubfolderX);
-        updateAppointmentsWithOrigin(clientY, Collections.singletonList(pair));
-
-        //assert that userX sees the appointment in his private calendar and no longer in "Bug33697SubfolderX"
-        Appointment appointmentViewForX = null;
-        try {
-            appointmentViewForX = getAppointment(clientX, userValuesX.getPrivateAppointmentFolder(), bug33697Appointment.getObjectID());
-        } catch (Exception e) {
-            LOG.error("Error while getting appointment view for userX", e);
-        }
-        assertNotNull("UserX should see the moved appointment in folder: " + userValuesX.getPrivateAppointmentFolder(), appointmentViewForX);
-
-        //assert that userY sees the appointment in "Bug33697AppointmentSubfolderZ" where he moved it into
-        Appointment appointmentViewForY = null;
-        try {
-            appointmentViewForY = getAppointment(clientY, bug33697SubfolderZ.getObjectID(), bug33697Appointment.getObjectID());
-        } catch (Exception e) {
-            LOG.error("Error while getting appointment view for userY", e);
-        }
-        assertNotNull("UserY should see the moved appointment in folder: " + userValuesZ.getPrivateAppointmentFolder(), appointmentViewForY);
-
-        //assert that the appointment is located in the subfolder of clientZ's private calendar
-        Appointment appointmentViewForZ = null;
-        try {
-            appointmentViewForZ = getAppointment(clientZ, bug33697SubfolderZ.getObjectID(), bug33697Appointment.getObjectID());
-        } catch (Exception e) {
-            LOG.error("Error while getting appointment view for userZ", e);
-        }
-        assertNotNull("Moved appointment should have been found in folder: " + bug33697SubfolderZ, appointmentViewForZ);
-
-        //assert that userZ became an additional participant but not userY
-        Participant[] participants = appointmentViewForZ.getParticipants();
-        assertEquals("Appointment should have exactly 2 participants", 2, participants.length);
-        int[] participantIds = {participants[0].getIdentifier(), participants[1].getIdentifier()};
-        Arrays.sort(participantIds);
-        int[] clientIds = {userValuesX.getUserId(), userValuesZ.getUserId()};
-        Arrays.sort(clientIds);
-        assertTrue("Participants and clients should be equal for the moved appointment", Arrays.equals(participantIds, clientIds));
-    }
-    */
+     * - UserX:
+     * - sees appointment "Bug33697Appointment" in his private calender folder as UserY moved it
+     * - he is still creator/participant
+     * -UserY:
+     * - sees appointment "Bug33697Appointment" in "Bug33697SubfolderZ" and no longer in "Bug33697SubfolderX"
+     * - didn't become a participant
+     * - UserZ:
+     * - sees appointment "Bug33697Appointment" in folder "Bug33697AppointmentSubfolderZ"
+     * - became a participant
+     * 
+     * @Ignore @Test
+     * 
+     * @Test
+     * public void testMoveFromUserXSharedSubFolderToUserZPrivateSubFolder() throws Exception {
+     * bug33697Appointment.setParentFolderID(bug33697SubfolderZ.getObjectID());
+     * Pair<Appointment, FolderObject> pair = new Pair<Appointment, FolderObject>(bug33697Appointment, bug33697SubfolderX);
+     * updateAppointmentsWithOrigin(clientY, Collections.singletonList(pair));
+     * 
+     * //assert that userX sees the appointment in his private calendar and no longer in "Bug33697SubfolderX"
+     * Appointment appointmentViewForX = null;
+     * try {
+     * appointmentViewForX = getAppointment(clientX, userValuesX.getPrivateAppointmentFolder(), bug33697Appointment.getObjectID());
+     * } catch (Exception e) {
+     * LOG.error("Error while getting appointment view for userX", e);
+     * }
+     * assertNotNull("UserX should see the moved appointment in folder: " + userValuesX.getPrivateAppointmentFolder(), appointmentViewForX);
+     * 
+     * //assert that userY sees the appointment in "Bug33697AppointmentSubfolderZ" where he moved it into
+     * Appointment appointmentViewForY = null;
+     * try {
+     * appointmentViewForY = getAppointment(clientY, bug33697SubfolderZ.getObjectID(), bug33697Appointment.getObjectID());
+     * } catch (Exception e) {
+     * LOG.error("Error while getting appointment view for userY", e);
+     * }
+     * assertNotNull("UserY should see the moved appointment in folder: " + userValuesZ.getPrivateAppointmentFolder(), appointmentViewForY);
+     * 
+     * //assert that the appointment is located in the subfolder of clientZ's private calendar
+     * Appointment appointmentViewForZ = null;
+     * try {
+     * appointmentViewForZ = getAppointment(clientZ, bug33697SubfolderZ.getObjectID(), bug33697Appointment.getObjectID());
+     * } catch (Exception e) {
+     * LOG.error("Error while getting appointment view for userZ", e);
+     * }
+     * assertNotNull("Moved appointment should have been found in folder: " + bug33697SubfolderZ, appointmentViewForZ);
+     * 
+     * //assert that userZ became an additional participant but not userY
+     * Participant[] participants = appointmentViewForZ.getParticipants();
+     * assertEquals("Appointment should have exactly 2 participants", 2, participants.length);
+     * int[] participantIds = {participants[0].getIdentifier(), participants[1].getIdentifier()};
+     * Arrays.sort(participantIds);
+     * int[] clientIds = {userValuesX.getUserId(), userValuesZ.getUserId()};
+     * Arrays.sort(clientIds);
+     * assertTrue("Participants and clients should be equal for the moved appointment", Arrays.equals(participantIds, clientIds));
+     * }
+     */
 
 }

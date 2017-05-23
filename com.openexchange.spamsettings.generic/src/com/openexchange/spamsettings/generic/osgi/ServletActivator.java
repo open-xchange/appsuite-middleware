@@ -79,7 +79,7 @@ public class ServletActivator extends DeferredActivator {
     protected void handleAvailability(final Class<?> clazz) {
         if (servletRegisterer != null) {
             LOG.warn("Absent service: {}", clazz.getName());
-    
+
             SpamSettingsServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
             servletRegisterer.registerServlet();
             SpamSettingsModulePreferences.setModule(true);

@@ -121,6 +121,8 @@ public interface OXUserInterface extends Remote {
      *            Credentials for authenticating against server.
      * @param access
      *            UserModuleAccess containing module access for the user.
+     * @param primaryAccountName
+     *            The name of the primary mail account
      * @return int containing the id of the new user.
      *
      * @throws RemoteException
@@ -149,6 +151,8 @@ public interface OXUserInterface extends Remote {
      *            Credentials for authenticating against server.
      * @param access_combination_name
      *            Access combination name identifying the module rights for the new user.
+     * @param primaryAccountName
+     *            The name of the primary mail account
      *
      * @return int containing the id of the new user.
      *
@@ -177,6 +181,8 @@ public interface OXUserInterface extends Remote {
      *            User containing user data.
      * @param auth
      *            Credentials for authenticating against server.
+     * @param primaryAccountName
+     *            The name of the primary mail account
      *
      * @return int containing the id of the new user.
      *
@@ -712,13 +718,13 @@ public interface OXUserInterface extends Remote {
     /**
      * Retrieve all user objects with given filestore for a given context.
      * If filestore_id is null all user objects with a own filestore for a given context are retrieved instead.
-     * 
+     *
      * @param context
      *            Context object.
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] with currently ONLY id set in each User.
-     * 
+     *
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
@@ -918,7 +924,7 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Retrieves all users with an alias within the given domain
-     * 
+     *
      * @param context Context object the user is associated to
      * @param aliasDomain The domain of the alias
      * @param auth Credentials for authenticating against server

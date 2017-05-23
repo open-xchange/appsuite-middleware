@@ -50,16 +50,16 @@
 package com.openexchange.dav.carddav.tests;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link CardDAVTestSuite} - Testsuite for the CardDAV interface.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
+@RunWith(ParallelSuite.class)
+@SuiteClasses({ // @formatter:off
     CurrentUserPrincipalTest.class,
     OptionsTest.class,
     CollectionsTest.class,
@@ -76,9 +76,8 @@ import org.junit.runners.Suite.SuiteClasses;
     BulkImportTest.class,
     AddressbookQueryTest.class,
     AddressbookQueryPartialRetrievalTest.class,
-    AddressbookMultigetPartialRetrievalTest.class,
-    ImageURITest.class
-})
+    AddressbookMultigetPartialRetrievalTest.class, ImageURITest.class
+}) // @formatter:on
 public final class CardDAVTestSuite {
 
 }

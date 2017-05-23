@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -63,7 +68,6 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.exception.OXException;
@@ -80,30 +84,21 @@ public class FunctionTests extends AbstractAJAXSession {
     private AJAXClient client;
     private AJAXClient client2;
 
-    public FunctionTests(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = getClient2();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client2.logout();
-        super.tearDown();
-    }
 
+    @Test
     public void testUnknownAction() throws IOException, JSONException, OXException {
         GetResponse response = client.execute(new UnknownActionRequest(EnumAPI.OX_OLD, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, false));
         assertTrue("JSON response should contain an error message.", response.hasError());
         OXException exception = response.getException();
         String error = exception.getErrorCode(); //was: getOrigMessage, maybe it should be .getCause().getMessage()?
-        assertTrue(
-            "Error is not the expected one: \"" + error + "\"", error.equals("SVL-0001"));
+        assertTrue("Error is not the expected one: \"" + error + "\"", error.equals("SVL-0001"));
     }
 
     private class UnknownActionRequest extends GetRequest {
@@ -120,12 +115,13 @@ public class FunctionTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testInsertUpdateFolder() throws OXException, IOException, JSONException, OXException, OXException {
         FolderObject toDelete = null;
         int userId1 = client.getValues().getUserId();
         int userId2 = client2.getValues().getUserId();
         try {
-            FolderObject folder = Create.createPrivateFolder("ChangeMyPermissions" + System.currentTimeMillis(), FolderObject.CALENDAR, userId1);
+            FolderObject folder = Create.createPrivateFolder("ChangeMyPermissions" + UUID.randomUUID().toString(), FolderObject.CALENDAR, userId1);
             folder.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
             InsertResponse insertR = client.execute(new InsertRequest(EnumAPI.OX_OLD, folder));
             GetResponse getR = client.execute(new GetRequest(EnumAPI.OX_OLD, insertR.getId()));
@@ -147,6 +143,7 @@ public class FunctionTests extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testFailDeleteFolder() throws OXException, IOException, JSONException, OXException, OXException {
         int userId = client.getValues().getUserId();
         int secId = client2.getValues().getUserId();
@@ -155,9 +152,7 @@ public class FunctionTests extends AbstractAJAXSession {
         FolderObject child02 = null;
         FolderObject subChild01 = null;
         try {
-            OCLPermission[] perms = new OCLPermission[] {
-                Create.ocl(userId, false, true, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-                Create.ocl(secId, false, false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+            OCLPermission[] perms = new OCLPermission[] { Create.ocl(userId, false, true, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), Create.ocl(secId, false, false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
             };
             {
                 FolderObject folder = Create.folder(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "DeleteMeImmediately", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
@@ -180,9 +175,7 @@ public class FunctionTests extends AbstractAJAXSession {
                 child02 = response2.getFolder();
                 child02.setLastModified(response2.getTimestamp());
             }
-            perms = new OCLPermission[] {
-                Create.ocl(userId, false, false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-                Create.ocl(secId, false, true, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+            perms = new OCLPermission[] { Create.ocl(userId, false, false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), Create.ocl(secId, false, true, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
             };
             {
                 FolderObject folder = Create.folder(child01.getObjectID(), "NonDeleteableSubChild01", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);

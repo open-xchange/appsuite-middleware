@@ -96,6 +96,7 @@ public final class AccountActionFactory implements AJAXActionServiceFactory {
         tmp.put("delete", new DeleteAction());
         tmp.put("init", new InitAction());
         tmp.put("reauthorize", new ReauthorizeAction());
+        tmp.put("status", new StatusAction());
         return tmp.build();
     }
 

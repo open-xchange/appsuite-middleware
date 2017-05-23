@@ -49,11 +49,16 @@
 
 package com.openexchange.tools.file;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.impl.LocalFileStorageFactory;
 import com.openexchange.groupware.tx.AbstractActionTest;
@@ -62,24 +67,22 @@ import com.openexchange.tx.UndoableAction;
 
 public class SaveFileActionTest extends AbstractActionTest {
 
-	private static final String content = "I am the test content";
+    private static final String content = "I am the test content";
 
-	private File tempFile;
+    private File tempFile;
 
-	private SaveFileAction saveFile = null;
-	private com.openexchange.filestore.FileStorage storage = null;
+    private SaveFileAction saveFile = null;
+    private com.openexchange.filestore.FileStorage storage = null;
 
-	@Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         rmdir(tempFile);
-        super.tearDown();
     }
 
     private static void rmdir(final File tempFile) {
@@ -91,39 +94,39 @@ public class SaveFileActionTest extends AbstractActionTest {
         tempFile.delete();
     }
 
-	@Override
-	protected UndoableAction getAction() throws Exception {
-		storage = new LocalFileStorageFactory().getFileStorage(tempFile.toURI());
-		saveFile = new SaveFileAction(storage, new ByteArrayInputStream(content.getBytes(com.openexchange.java.Charsets.UTF_8)), 0);
-		return saveFile;
-	}
+    @Override
+    protected UndoableAction getAction() throws Exception {
+        storage = new LocalFileStorageFactory().getFileStorage(tempFile.toURI());
+        saveFile = new SaveFileAction(storage, new ByteArrayInputStream(content.getBytes(com.openexchange.java.Charsets.UTF_8)), 0);
+        return saveFile;
+    }
 
-	@Override
-	protected void verifyPerformed() throws Exception {
-		assertTrue(null != saveFile.getFileStorageID());
-		InputStream in = null;
-		final ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			in = new BufferedInputStream(storage.getFile(saveFile.getFileStorageID()), 65536);
-			int b = 0;
-			while((b = in.read()) != -1) {
-				out.write(b);
-			}
-			out.flush();
-		} finally {
-		    Streams.close(in, out);
-		}
-		final String got = new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8);
-		assertEquals(content, got);
-	}
+    @Override
+    protected void verifyPerformed() throws Exception {
+        assertTrue(null != saveFile.getFileStorageID());
+        InputStream in = null;
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            in = new BufferedInputStream(storage.getFile(saveFile.getFileStorageID()), 65536);
+            int b = 0;
+            while ((b = in.read()) != -1) {
+                out.write(b);
+            }
+            out.flush();
+        } finally {
+            Streams.close(in, out);
+        }
+        final String got = new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8);
+        assertEquals(content, got);
+    }
 
-	@Override
-	protected void verifyUndone() throws Exception {
-		try {
-			storage.getFile(saveFile.getFileStorageID());
-			fail("Expected Exception");
-		} catch (final OXException x) {
-			assertTrue(true);
-		}
-	}
+    @Override
+    protected void verifyUndone() throws Exception {
+        try {
+            storage.getFile(saveFile.getFileStorageID());
+            fail("Expected Exception");
+        } catch (final OXException x) {
+            assertTrue(true);
+        }
+    }
 }

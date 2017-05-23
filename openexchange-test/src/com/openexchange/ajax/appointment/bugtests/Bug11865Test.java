@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Calendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -60,10 +65,8 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -74,43 +77,48 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
  * Checks if the data of recurring appointment exceptions is correctly stored
  * and given to the GUI.
  * Checks also, if an old recurring appointment with bad data can be deleted.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public final class Bug11865Test extends AbstractAJAXSession {
 
-	/**
-	 * Default constructor.
-	 * @param name test name.
-	 */
-	public Bug11865Test(final String name) {
-		super(name);
-	}
+    /**
+     * Default constructor.
+     * 
+     * @param name test name.
+     */
+    public Bug11865Test() {
+        super();
+    }
 
-	@Override
-	protected void setUp() throws Exception {
-	    super.setUp();
-	    Init.startServer();
-	}
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        Init.startServer();
+    }
 
-	@Override
-	protected void tearDown() throws Exception {
-	    super.tearDown();
-	    Init.stopServer();
-	}
+    @After
+    public void tearDown() throws Exception {
+        try {
+            Init.stopServer();
+        } finally {
+            super.tearDown();
+        }
+    }
 
-	/**
-	 * Creates an appointment series and modifies one appointment of the series
-	 * to be an exception.
-	 */
-	public void testAppointmentException() throws Throwable {
-        final AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
-		final Appointment series = new Appointment();
+    /**
+     * Creates an appointment series and modifies one appointment of the series
+     * to be an exception.
+     */
+    @Test
+    public void testAppointmentException() throws Throwable {
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = getClient().getValues().getTimeZone();
+        final Appointment series = new Appointment();
         final Calendar calendar = TimeTools.createCalendar(tz);
-		{
-			series.setTitle("Test for bug 11865");
+        {
+            series.setTitle("Test for bug 11865");
             series.setParentFolderID(folderId);
             series.setIgnoreConflicts(true);
             // Start and end date.
@@ -122,45 +130,45 @@ public final class Bug11865Test extends AbstractAJAXSession {
             series.setRecurrenceType(Appointment.DAILY);
             series.setInterval(1);
             series.setOccurrence(5);
-		}
-		{
+        }
+        {
             final InsertRequest request = new InsertRequest(series, tz);
-            final CommonInsertResponse response = client.execute(request);
+            final CommonInsertResponse response = getClient().execute(request);
             response.fillObject(series);
-		}
-		try {
-		    final int recurrence_position = 3;
-			// Load third occurence
-		    final Appointment occurence;
-			{
-				final GetRequest request= new GetRequest(folderId, series.getObjectID(), recurrence_position);
-				final GetResponse response = client.execute(request);
-				occurence = response.getAppointment(tz);
-			}
-			// Try to create exception series
+        }
+        try {
+            final int recurrence_position = 3;
+            // Load third occurence
+            final Appointment occurence;
+            {
+                final GetRequest request = new GetRequest(folderId, series.getObjectID(), recurrence_position);
+                final GetResponse response = getClient().execute(request);
+                occurence = response.getAppointment(tz);
+            }
+            // Try to create exception series
             final Appointment exception = new Appointment();
-			{
+            {
                 exception.setObjectID(occurence.getObjectID());
                 exception.setParentFolderID(folderId);
                 exception.setLastModified(occurence.getLastModified());
                 exception.setRecurrencePosition(occurence.getRecurrencePosition());
-				exception.setTitle(occurence.getTitle() + "-changed");
-	            exception.setIgnoreConflicts(true);
-				calendar.setTime(occurence.getEndDate());
-				exception.setStartDate(calendar.getTime());
-				calendar.add(Calendar.HOUR, 1);
-				exception.setEndDate(calendar.getTime());
-	            // Exception must be again a series.
-				final UpdateRequest request = new UpdateRequest(exception, tz);
-				final UpdateResponse response = client.execute(request);
-				exception.setObjectID(response.getId());
-				exception.setLastModified(response.getTimestamp());
-				series.setLastModified(response.getTimestamp());
-			}
-			// Update exception to the exception with recurrence position 0.
-			// This tries to create again an exception which must be denied.
-			{
-			    final Appointment exception2 = new Appointment();
+                exception.setTitle(occurence.getTitle() + "-changed");
+                exception.setIgnoreConflicts(true);
+                calendar.setTime(occurence.getEndDate());
+                exception.setStartDate(calendar.getTime());
+                calendar.add(Calendar.HOUR, 1);
+                exception.setEndDate(calendar.getTime());
+                // Exception must be again a series.
+                final UpdateRequest request = new UpdateRequest(exception, tz);
+                final UpdateResponse response = getClient().execute(request);
+                exception.setObjectID(response.getId());
+                exception.setLastModified(response.getTimestamp());
+                series.setLastModified(response.getTimestamp());
+            }
+            // Update exception to the exception with recurrence position 0.
+            // This tries to create again an exception which must be denied.
+            {
+                final Appointment exception2 = new Appointment();
                 exception2.setObjectID(exception.getObjectID());
                 exception2.setParentFolderID(folderId);
                 exception2.setLastModified(exception.getLastModified());
@@ -172,23 +180,21 @@ public final class Bug11865Test extends AbstractAJAXSession {
                 calendar.add(Calendar.HOUR, 1);
                 exception2.setEndDate(calendar.getTime());
                 final UpdateRequest request = new UpdateRequest(exception2, tz, false);
-                final UpdateResponse response = client.execute(request);
+                final UpdateResponse response = getClient().execute(request);
                 assertTrue("Exception expected for creating exception from exception.", response.hasError());
-			}
-		} finally {
-            client.execute(new DeleteRequest(series.getObjectID(), folderId,
-                series.getLastModified()));
-		}
-	}
+            }
+        } finally {
+            getClient().execute(new DeleteRequest(series.getObjectID(), folderId, series.getLastModified()));
+        }
+    }
 
-	public void testDeleteBadData() throws Throwable {
-	    AJAXClient client = null;
+    @Test
+    public void testDeleteBadData() throws Throwable {
         int objectId = 0;
         int folderId = 0;
 
-        client = getClient();
-        final TimeZone tz = client.getValues().getTimeZone();
-        folderId = client.getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = getClient().getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
 
         //Create an objectId, which does not longer exist in the database.
         final Appointment dummyAppointment = new Appointment();
@@ -205,14 +211,14 @@ public final class Bug11865Test extends AbstractAJAXSession {
         dummyAppointment.setEndDate(calendar.getTime());
 
         InsertRequest request = new InsertRequest(dummyAppointment, tz);
-        CommonInsertResponse response = client.execute(request);
+        CommonInsertResponse response = getClient().execute(request);
         dummyAppointment.setObjectID(response.getId());
         dummyAppointment.setLastModified(response.getTimestamp());
 
         final int dummyId = dummyAppointment.getObjectID();
 
         DeleteRequest deleteRequest = new DeleteRequest(dummyAppointment.getObjectID(), folderId, dummyAppointment.getLastModified());
-        client.execute(deleteRequest);
+        getClient().execute(deleteRequest);
 
         //Create an Appointment
         final Appointment appointment = new Appointment();
@@ -229,7 +235,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
 
         request = new InsertRequest(appointment, tz);
-        response = client.execute(request);
+        response = getClient().execute(request);
         appointment.setObjectID(response.getId());
         appointment.setLastModified(response.getTimestamp());
 
@@ -238,7 +244,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Manipulate Database to invalidate the appointment
         calendar = TimeTools.createCalendar(TimeZone.getTimeZone("GMT"));
         final ContextStorage ctxStorage = ContextStorage.getInstance();
-        final String context = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
+        final String context = testContext.getName();
         final int contextId = ctxStorage.getContextId(context);
         final Connection writeCon = Database.get(contextId, true);
         final String sql = "UPDATE prg_dates SET intfield02 = ?, field08 = ? WHERE intfield01 = ?";
@@ -253,7 +259,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Try to delete the appointment
         deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());
         try {
-            client.execute(deleteRequest);
+            getClient().execute(deleteRequest);
         } catch (final Exception e) {
             fail("Exception during deletion of corrupted appointment.");
         }
@@ -261,10 +267,10 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Check if appointment still exists
         final GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID(), false);
         // No call with failOnError=true
-        final GetResponse getResponse = client.execute(getRequest);
+        final GetResponse getResponse = getClient().execute(getRequest);
         final Response r = getResponse.getResponse();
         assertTrue(r.hasError());
         assertTrue(r.getErrorMessage().contains("Object not found"));
-	}
+    }
 
 }

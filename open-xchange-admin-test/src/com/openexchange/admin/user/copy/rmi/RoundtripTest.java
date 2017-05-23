@@ -67,6 +67,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.AbstractTest;
@@ -111,6 +112,7 @@ import com.openexchange.ajax.subscribe.actions.AllSubscriptionsRequest;
 import com.openexchange.ajax.subscribe.actions.AllSubscriptionsResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -142,8 +144,6 @@ public class RoundtripTest extends AbstractRMITest {
 
     private OXUserInterface ui;
 
-    private final OXUserCopyInterface oxu;
-
     private User admin;
 
     private Context srcCtx;
@@ -157,11 +157,6 @@ public class RoundtripTest extends AbstractRMITest {
     private AJAXSession userSession;
 
     private AJAXClient userClient, origClient, copiedClient;
-
-    public RoundtripTest() throws Exception {
-        super();
-        oxu = getUserCopyClient();
-    }
 
     @Override
     public void setUp() throws Exception {
@@ -184,13 +179,13 @@ public class RoundtripTest extends AbstractRMITest {
         dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
 
         ui = getUserInterface();
-        final User test = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
-        test.setImapServer("devel-mail.netline.de");
-        test.setImapLogin("steffen.templin424242669");
-        test.setSmtpServer("devel-mail.netline.de");
-        srcUser = ui.create(srcCtx, test, getCredentials());
+        User tmpUser = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+        tmpUser.setImapServer("example.com");
+        tmpUser.setImapLogin("oxuser");
+        tmpUser.setSmtpServer("example.com");
+        srcUser = ui.create(srcCtx, tmpUser, getCredentials());
 
-        userSession = performLogin("user@" + srcCtx.getName(), "secret");
+        userSession = performLogin(tmpUser.getName() + "@" + srcCtx.getName(), "secret");
         userClient = new AJAXClient(userSession, false);
 
         Create.createPrivateFolder("Private folder test", Types.APPOINTMENT, userClient.getValues().getUserId());
@@ -363,12 +358,12 @@ public class RoundtripTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUser() throws Throwable {
-        moved = oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
+        moved = getUserCopyClient().copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
         final User dstUser = ui.getData(dstCtx, moved, getCredentials());
         compareUsers(srcUser, dstUser);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (ui != null) {
             try {
@@ -391,14 +386,15 @@ public class RoundtripTest extends AbstractRMITest {
                 e.printStackTrace();
             }
         }
-
-        super.tearDown();
     }
 
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {
         final AJAXSession session = new AJAXSession();
         final LoginRequest loginRequest = new LoginRequest(login, password, LoginTools.generateAuthId(), "Usermovetest", "6.20");
-        final LoginResponse loginResponse = Executor.execute(session, loginRequest);
+        String protocol = AJAXConfig.getProperty(Property.PROTOCOL);
+        String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
+        org.slf4j.LoggerFactory.getLogger(RoundtripTest.class).info("Try to login to {} with user '{}' and password '{}'", protocol + "://" + hostname, login, password);
+        final LoginResponse loginResponse = Executor.execute(session, loginRequest, protocol, hostname);
         session.setId(loginResponse.getSessionId());
         return session;
     }

@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,15 +69,10 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.IMailMessageStorageExt;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -291,6 +287,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             /*
              * Start response
              */
+            Collection<OXException> warnings = null;
             final long start = System.currentTimeMillis();
             List<MailMessage> mails = new LinkedList<MailMessage>();
             SearchIterator<MailMessage> it = null;
@@ -309,13 +306,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             mails.add(mm);
                         }
                     }
+                    warnings = mailInterface.getWarnings();
                 } else {
                     int sortCol = req.getSortFieldFor(sort);
                     String category_filter = req.getParameter("categoryid");
                     if (filterApplied || category_filter != null) {
                         mailInterface.openFor(folderId);
-                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
-
                         SearchTerm<?> searchTerm;
                         {
                             SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
@@ -380,20 +376,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
 
                         MailMessage[] result;
-                        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-
                         MailField[] fields = MailField.getFields(columns);
-                        if (null != headers && 0 < headers.length) {
-                            if (messageStorage instanceof IMailMessageStorageExt) {
-                                IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
-                                result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
-                            } else {
-                                result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields);
-                                enrichWithHeaders(fa.getFullname(), result, headers, messageStorage);
-                            }
-                        } else {
-                            result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields);
-                        }
+                        result = mailInterface.searchMails(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
 
                         for (MailMessage mm : result) {
                             if (null != mm) {
@@ -403,6 +387,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                 mails.add(mm);
                             }
                         }
+
+                        warnings = mailInterface.getWarnings();
+
                     } else {
                         // Get iterator
                         it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, headers, fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
@@ -415,6 +402,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                 mails.add(mm);
                             }
                         }
+                        warnings = mailInterface.getWarnings();
                     }
                 }
             } finally {
@@ -441,6 +429,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             }
             final AJAXRequestResult result = new AJAXRequestResult(mails, "mail").setDurationByStart(start);
             result.setResponseProperty("cached", Boolean.valueOf(cache));
+            if (warnings != null) {
+                result.addWarnings(warnings);
+            }
             return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -466,36 +457,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 req.getParameter("unseen"),
                 req.getParameter("deleted"));
         return sha1Sum;
-    }
-
-    private void enrichWithHeaders(String fullName, MailMessage[] mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
-        int length = mails.length;
-        MailMessage[] headers;
-        {
-            String[] ids = new String[length];
-            for (int i = ids.length; i-- > 0;) {
-                MailMessage m = mails[i];
-                ids[i] = null == m ? null : m.getMailId();
-            }
-            headers = messageStorage.getMessages(fullName, ids, MailFields.toArray(MailField.HEADERS));
-        }
-
-        for (int i = length; i-- > 0;) {
-            MailMessage mailMessage = mails[i];
-            if (null != mailMessage) {
-                MailMessage header = headers[i];
-                if (null != header) {
-                    for (String headerName : headerNames) {
-                        String[] values = header.getHeader(headerName);
-                        if (null != values) {
-                            for (String value : values) {
-                                mailMessage.addHeader(headerName, value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
 }

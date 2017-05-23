@@ -70,28 +70,28 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class DeleteTest extends CardDAVTest {
 
-	public DeleteTest() {
-		super();
-	}
+    public DeleteTest() {
+        super();
+    }
 
-	@Test
-	public void testDeleteContactOnServer() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create contact on server
-		 */
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "banane";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact));
+    @Test
+    public void testDeleteContactOnServer() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create contact on server
+         */
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "banane";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact));
         /*
          * verify contact on client
          */
@@ -114,27 +114,26 @@ public class DeleteTest extends CardDAVTest {
         eTags = syncCollectionResponse.getETagsStatusOK();
     }
 
-	@Test
-	public void testDeleteContactInSubfolderOnServer() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create folder and contact on server
-		 */
-    	String folderName = "testfolder_" + randomUID();
-    	FolderObject folder = super.createFolder(folderName);
-		super.rememberForCleanUp(folder);
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "otto";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact, folder.getObjectID()));
+    @Test
+    public void testDeleteContactInSubfolderOnServer() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create folder and contact on server
+         */
+        String folderName = "testfolder_" + randomUID();
+        FolderObject folder = super.createFolder(folderName);
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "otto";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact, folder.getObjectID()));
         /*
          * verify contact and folder group on client
          */
@@ -156,28 +155,28 @@ public class DeleteTest extends CardDAVTest {
         assertTrue("no resource deletions reported on sync collection", 0 < syncCollectionResponse.getHrefsStatusNotFound().size());
     }
 
-	@Test
-	public void testDeleteContactOnClient() throws Throwable {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create contact on server
-		 */
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "manfred";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact));
+    @Test
+    public void testDeleteContactOnClient() throws Throwable {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create contact on server
+         */
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "manfred";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact));
         /*
          * verify contact and folder group on client
          */
-		Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource card = assertContains(uid, addressData);

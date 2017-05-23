@@ -153,7 +153,7 @@ public class UserConfigProvider implements ConfigProviderService {
         if (userId == NO_USER) {
             return Collections.emptyList();
         }
-        Map<String, Set<String>> attributes = getUser(userId, services.getService(ContextService.class).getContext(contextId)).getAttributes();
+        Map<String, String> attributes = getUser(userId, services.getService(ContextService.class).getContext(contextId)).getAttributes();
         Set<String> allNames = new HashSet<String>(attributes.size());
 
         String dynamicAttrPrefix = DYNAMIC_ATTR_PREFIX;

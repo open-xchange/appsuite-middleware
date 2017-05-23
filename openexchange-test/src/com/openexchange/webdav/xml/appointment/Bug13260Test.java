@@ -49,10 +49,13 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -61,22 +64,22 @@ import com.openexchange.webdav.xml.AppointmentTest;
  */
 public class Bug13260Test extends AppointmentTest {
 
-    public Bug13260Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testBugAsWritten() throws Exception {
         test(true, false);
     }
 
+    @Test
     public void testBugWithEnd() throws Exception {
         test(false, false);
     }
 
+    @Test
     public void testBugAsWrittenInComment6() throws Exception {
         test(true, true);
     }
 
+    @Test
     public void testBugWithEndAndFullTime() throws Exception {
         test(false, true);
     }
@@ -97,7 +100,7 @@ public class Bug13260Test extends AppointmentTest {
                 appointmentObj.setOccurrence(10);
             }
             appointmentObj.setIgnoreConflicts(true);
-            objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
 
             // Create DeleteException with update
             Calendar delExceptionDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -108,23 +111,17 @@ public class Bug13260Test extends AppointmentTest {
             delExceptionDate.set(Calendar.MILLISECOND, 0);
 
             appointmentObj.setDeleteExceptions(new Date[] { delExceptionDate.getTime() });
-            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+            updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
             // Load Appointment
-            Appointment loadApointment = loadAppointment(
-                getWebConversation(),
-                objectId,
-                appointmentFolderId,
-                getHostName(),
-                getLogin(),
-                getPassword(), context);
+            Appointment loadApointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
             // Checks
             assertNotNull("DeleteException expected.", loadApointment.getDeleteException());
             assertEquals("Exact 1 DeleteException expected.", 1, loadApointment.getDeleteException().length);
         } finally {
             if (objectId != -1) {
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
             }
         }
     }

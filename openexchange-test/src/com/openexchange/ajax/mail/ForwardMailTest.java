@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.exception.OXException;
@@ -65,27 +70,28 @@ public class ForwardMailTest extends AbstractReplyTest {
 
     MailTestManager manager;
 
-    public ForwardMailTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        manager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            manager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testShouldForwardWithoutNotifyingFormerRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
         String mail1 = getClient().getValues().getSendAddress();
 
         JSONObject mySentMail = createEMail(mail1, "Forward test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
-        sendMail(mySentMail.toString());
+        String[] folderAndId = sendMail(mySentMail.toString());
+        assertNotNull(folderAndId);
 
         JSONObject myReceivedMail = getFirstMailInFolder(getInboxFolder());
         TestMail myForwardMail = new TestMail(getForwardMail(new TestMail(myReceivedMail)));
@@ -100,6 +106,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
     }
 
+    @Test
     public void testShouldForwardUsingTestMailManager() throws OXException, IOException, SAXException, JSONException, OXException {
 
         String mail1 = getClient().getValues().getSendAddress();
@@ -110,9 +117,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         TestMail myForwardMail = manager.forwardButDoNotSend(mySentMail);
 
         String subject = myForwardMail.getSubject();
-        assertTrue(
-            "Should contain indicator that this is a forwarded mail in the subject line, which is '" + subject + "'",
-            subject.startsWith("Fwd:"));
+        assertTrue("Should contain indicator that this is a forwarded mail in the subject line, which is '" + subject + "'", subject.startsWith("Fwd:"));
 
         AbstractReplyTest.assertNullOrEmpty("Recipient field should be empty", myForwardMail.getTo());
 
@@ -121,6 +126,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         AbstractReplyTest.assertNullOrEmpty("Blind carbon copy field should be empty", myForwardMail.getBcc());
     }
 
+    @Test
     public void testShouldForwardUsingTestMailManager2() throws OXException, IOException, SAXException, JSONException, OXException {
 
         String mail1 = getClient().getValues().getSendAddress();
@@ -130,9 +136,7 @@ public class ForwardMailTest extends AbstractReplyTest {
         TestMail myForwardMail = manager.forwardAndSendBefore(mySentMail);
 
         String subject = myForwardMail.getSubject();
-        assertTrue(
-            "Should contain indicator that this is a forwarded mail in the subject line, which is '" + subject + "'",
-            subject.startsWith("Fwd:"));
+        assertTrue("Should contain indicator that this is a forwarded mail in the subject line, which is '" + subject + "'", subject.startsWith("Fwd:"));
 
         AbstractReplyTest.assertNullOrEmpty("Recipient field should be empty", myForwardMail.getTo());
 

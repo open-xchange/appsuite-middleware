@@ -1,0 +1,13 @@
+type: object
+properties:
+  verified:
+    type: boolean
+    description: True if the signature was verified and correct
+  missing:
+    type: boolean
+    description: True if the signature could not be verified due to missing public key
+  date:
+    type: integer
+    format: int64
+    description: Date of the signature in ticks
+

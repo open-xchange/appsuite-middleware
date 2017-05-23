@@ -49,19 +49,21 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
-import com.openexchange.ajax.AppointmentTest;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
@@ -76,24 +78,18 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class ClearTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link ClearTest}.
      *
      * @param name The name of the test.
      */
-    public ClearTest(final String name) {
-        super(name);
+    public ClearTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
+    @Test
     public void testClearPrivate() throws Throwable {
+        AJAXClient client = getClient();
         // Get root folder
         String newId = null;
         try {
@@ -106,11 +102,7 @@ public class ClearTest extends AbstractAJAXSession {
             oclP.setEntity(client.getValues().getUserId());
             oclP.setGroupPermission(false);
             oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
             final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
@@ -124,11 +116,7 @@ public class ClearTest extends AbstractAJAXSession {
             if (!protocol.endsWith("://")) {
                 protocol = protocol + "://";
             }
-            final String hostname =
-                null == client.getHostname() ? AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME) : client.getHostname();
 
-            final AJAXSession session = client.getSession();
-            final UserValues values = client.getValues();
             final long s = System.currentTimeMillis();
             {
                 final Appointment appointmentObj = new Appointment();
@@ -139,12 +127,7 @@ public class ClearTest extends AbstractAJAXSession {
                 appointmentObj.setParentFolderID(Integer.parseInt(newId));
                 appointmentObj.setIgnoreConflicts(true);
 
-                AppointmentTest.insertAppointment(
-                    session.getConversation(),
-                    appointmentObj,
-                    values.getTimeZone(),
-                    protocol + hostname,
-                    session.getId());
+                catm.insert(appointmentObj).getObjectID();
             }
             {
                 final Appointment appointmentObj = new Appointment();
@@ -155,17 +138,11 @@ public class ClearTest extends AbstractAJAXSession {
                 appointmentObj.setParentFolderID(Integer.parseInt(newId));
                 appointmentObj.setIgnoreConflicts(true);
 
-                AppointmentTest.insertAppointment(
-                    session.getConversation(),
-                    appointmentObj,
-                    values.getTimeZone(),
-                    protocol + hostname,
-                    session.getId());
+                catm.insert(appointmentObj).getObjectID();
             }
 
             final CalendarTestManager calendarTestManager = new CalendarTestManager(client);
-            final Appointment[] appointments =
-                calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
+            final Appointment[] appointments = calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not created.", null != appointments && appointments.length == 2);
 
@@ -176,8 +153,7 @@ public class ClearTest extends AbstractAJAXSession {
 
             assertEquals("Folder could not be cleared.", 0, nonClearedIDs.length());
 
-            final Appointment[] emptyAppointments =
-                calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
+            final Appointment[] emptyAppointments = calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not cleared.", null == emptyAppointments || emptyAppointments.length == 0);
 

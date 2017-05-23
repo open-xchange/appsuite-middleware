@@ -50,16 +50,17 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.List;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link Bug35687Test}
@@ -68,28 +69,17 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug35687Test extends AbstractAJAXSession {
 
-    private CalendarTestManager ctm;
-    private FolderTestManager ftm;
-    private AJAXClient client2;
     private FolderObject folder;
     private Appointment app;
 
-    public Bug35687Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        client2 = new AJAXClient(User.User2);
-
-        ctm = new CalendarTestManager(client);
-        ftm = new FolderTestManager(client);
-        folder = ftm.generateSharedFolder("Bug35687Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), client2.getValues().getUserId());
+        folder = ftm.generateSharedFolder("Bug35687Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), getClient2().getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
 
-        ctm.setClient(client2);
+        catm.setClient(getClient2());
 
         int nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
@@ -101,24 +91,16 @@ public class Bug35687Test extends AbstractAJAXSession {
         app.setAlarm(15);
         app.setIgnoreConflicts(true);
 
-        app = ctm.insert(app);
-        System.out.println("hello");
+        app = catm.insert(app);
     }
 
+    @Test
     public void testBug35687() throws Exception {
-        Appointment loaded = ctm.get(app);
+        Appointment loaded = catm.get(app);
         assertEquals("Wrong alarm value", 15, loaded.getAlarm());
 
-        List<Appointment> listAppointment = ctm.list(new ListIDs(folder.getObjectID(), app.getObjectID()), new int[] { Appointment.ALARM });
+        List<Appointment> listAppointment = catm.list(new ListIDs(folder.getObjectID(), app.getObjectID()), new int[] { Appointment.ALARM });
         assertTrue("Missing alarm value for list request.", listAppointment.get(0).containsAlarm());
         assertEquals("Wrong alarm value for list request.", 15, listAppointment.get(0).getAlarm());
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        ctm.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
-    }
-
 }

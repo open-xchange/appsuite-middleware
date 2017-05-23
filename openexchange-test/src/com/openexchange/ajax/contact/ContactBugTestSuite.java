@@ -49,40 +49,37 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
-public final class ContactBugTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    Bug4409Test.class,
+    Bug6335Test.class,
+    Bug12716Test.class,
+    Bug13931Test.class,
+    Bug13960Test.class,
+    Bug15317Test.class,
+    Bug15315Test.class,
+    Bug15937Test.class,
+    Bug16515Test.class,
+    Bug16618Test.class,
+    Bug17513Test.class,
+    Bug13915FileAsViaJSON.class,
+    Bug18608Test_SpecialCharsInEmailTest.class,
+    Bug19827Test.class,
+    Bug25300Test.class,
+    Bug28185Test.class,
+    Bug31993Test.class,
+    Bug34075Test.class,
+    Bug32635Test.class,
+    Bug35059Test.class,
+    Bug36943Test.class,
+    Bug42225Test.class,
+    Bug46654Test.class,
 
-    private ContactBugTestSuite() {
-        super();
-    }
+})
+public final class ContactBugTestSuite  {
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4409Test.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug12716Test.class);
-        tests.addTestSuite(Bug13931Test.class);
-        tests.addTestSuite(Bug13960Test.class);
-        tests.addTestSuite(Bug15317Test.class);
-        tests.addTestSuite(Bug15315Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug16515Test.class);
-        tests.addTestSuite(Bug16618Test.class);
-        tests.addTestSuite(Bug17513Test.class);
-        tests.addTestSuite(Bug13915FileAsViaJSON.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(Bug19827Test.class);
-        tests.addTestSuite(Bug25300Test.class);
-        tests.addTestSuite(Bug28185Test.class);
-        tests.addTestSuite(Bug31993Test.class);
-        tests.addTestSuite(Bug34075Test.class);
-        tests.addTestSuite(Bug32635Test.class);
-        tests.addTestSuite(Bug35059Test.class);
-        tests.addTestSuite(Bug36943Test.class);
-        tests.addTestSuite(Bug42225Test.class);
-        tests.addTestSuite(Bug46654Test.class);
-        return tests;
-    }
 }

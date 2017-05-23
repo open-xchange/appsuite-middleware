@@ -72,6 +72,9 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.login.listener.AutoLoginAwareLoginListener;
+import com.openexchange.login.listener.LoginListener;
+import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Reply;
@@ -120,7 +123,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              */
             LoginResult loginResult = AutoLoginTools.tryGuestAutologin(shareConf.getLoginConfig(), req, resp);
             if (null == loginResult) {
-                if (false == conf.isSessiondAutoLogin()) {
+                if (false == conf.isSessiondAutoLogin(req.getServerName())) {
                     // Auto-login disabled per configuration.
                     // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
                     if (doAutoLogin(req, resp)) {
@@ -141,8 +144,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                      * auto-login failed
                      */
                     SessionUtility.removeOXCookies(hash, req, resp);
-                    SessionUtility.removeJSESSIONID(req, resp);
                     if (doAutoLogin(req, resp)) {
+                        SessionUtility.removeJSESSIONID(req, resp);
                         if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
                             return;
                         }
@@ -154,6 +157,14 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             /*
              * auto-login successful, prepare result
              */
+            {
+                List<LoginListener> listeners = LoginListenerRegistryImpl.getInstance().getLoginListeners();
+                for (LoginListener loginListener : listeners) {
+                    if (loginListener instanceof AutoLoginAwareLoginListener) {
+                        ((AutoLoginAwareLoginListener) loginListener).onSucceededAutoLogin(loginResult);
+                    }
+                }
+            }
             ServerSession serverSession = ServerSessionAdapter.valueOf(loginResult.getSession(), loginResult.getContext(), loginResult.getUser());
             session = serverSession;
 
@@ -305,7 +316,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(null).password(null).clientIP(clientIP);
         b.userAgent(userAgent).authId(authId).client(client).version(null);
         b.hash(HashCalculator.getInstance().getHash(req, client));
-        b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
+        b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
+        b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         return b.build();
     }

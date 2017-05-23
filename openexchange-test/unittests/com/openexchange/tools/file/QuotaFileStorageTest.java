@@ -49,15 +49,20 @@
 
 package com.openexchange.tools.file;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.OwnerInfo;
 import com.openexchange.filestore.impl.DBQuotaFileStorage;
 import com.openexchange.filestore.impl.LocalFileStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -65,21 +70,12 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.tools.RandomString;
 
-public class QuotaFileStorageTest extends TestCase {
+public class QuotaFileStorageTest {
 
     private com.openexchange.filestore.FileStorage fs;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testBasic() throws Exception{
+    @Test
+    public void testBasic() throws Exception {
         // Taken from FileStorageTest
         final File tempFile = File.createTempFile("filestorage", ".tmp");
 
@@ -87,7 +83,7 @@ public class QuotaFileStorageTest extends TestCase {
 
         tempFile.delete();
 
-        fs = new LocalFileStorage(new URI("file:"+tempFile.getAbsolutePath()));
+        fs = new LocalFileStorage(new URI("file:" + tempFile.getAbsolutePath()));
 
         SimpleServiceLookup slk = new SimpleServiceLookup();
         slk.add(DatabaseService.class, new DummyDatabaseService());
@@ -97,28 +93,27 @@ public class QuotaFileStorageTest extends TestCase {
         quotaStorage.setQuota(10000);
         // And again, some lines from the original test
         final String fileContent = RandomString.generateLetter(100);
-        final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent
-            .getBytes(com.openexchange.java.Charsets.UTF_8));
+        final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final String id = quotaStorage.saveNewFile(bais);
 
         assertEquals(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length, quotaStorage.getUsage());
         assertEquals(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length, quotaStorage.getFileSize(id));
 
-
         quotaStorage.deleteFile(id);
 
-        assertEquals(0,quotaStorage.getUsage());
+        assertEquals(0, quotaStorage.getUsage());
         rmdir(tempFile);
     }
 
-    public void testFull() throws Exception{
+    @Test
+    public void testFull() throws Exception {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.deleteOnExit();
 
         tempFile.delete();
 
-        fs = new LocalFileStorage(new URI("file://"+tempFile.getAbsolutePath()));
+        fs = new LocalFileStorage(new URI("file://" + tempFile.getAbsolutePath()));
         SimpleServiceLookup slk = new SimpleServiceLookup();
         slk.add(DatabaseService.class, new DummyDatabaseService());
         com.openexchange.filestore.impl.osgi.Services.setServiceLookup(slk);
@@ -127,7 +122,7 @@ public class QuotaFileStorageTest extends TestCase {
 
         final String fileContent = RandomString.generateLetter(100);
 
-        quotaStorage.setQuota(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length-2);
+        quotaStorage.setQuota(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length - 2);
 
         try {
             final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
@@ -139,17 +134,16 @@ public class QuotaFileStorageTest extends TestCase {
         rmdir(tempFile);
     }
 
-
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
         public TestQuotaFileStorage(final Context ctx, final com.openexchange.filestore.FileStorage fs) throws OXException {
-            super(ctx.getContextId(), -1, 0L, fs, null, null);
+            super(ctx.getContextId(), Info.administrative(), OwnerInfo.builder().setOwnerId(0).build(), 0L, fs, null, null, null, null);
         }
 
         private long usage;
         private long quota;
 
-        public void setQuota(final long quota){
+        public void setQuota(final long quota) {
             this.quota = quota;
         }
 
@@ -183,8 +177,6 @@ public class QuotaFileStorageTest extends TestCase {
             this.usage -= removed;
         }
     }
-
-
 
     static final class DummyDatabaseService implements DatabaseService {
 
@@ -481,6 +473,17 @@ public class QuotaFileStorageTest extends TestCase {
 
         @Override
         public Connection getReadOnly(Assignment assignment, boolean noTimeout) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public boolean isGlobalDatabaseAvailable() {
+            return false;
+        }
+
+        @Override
+        public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }

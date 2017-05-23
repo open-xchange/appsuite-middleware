@@ -49,6 +49,9 @@
 
 package com.openexchange.webdav.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -71,10 +74,6 @@ import com.openexchange.webdav.xml.request.PropFindMethod;
 public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
     protected static final int APPEND_MODIFIED = 1000000;
-
-    public AbstractWebdavXMLTest(final String name) {
-        super(name);
-    }
 
     protected static int parseResponse(final Document response, final boolean delete) throws Exception {
         return parseRootElement(response.getRootElement(), delete);
@@ -175,7 +174,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 
     protected int sendPut(final byte b[], final boolean delete) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        req = new PutMethodWebRequest(PROTOCOL + hostName + getURL(), bais, "text/javascript");
+        req = new PutMethodWebRequest(getHostURI() + getURL(), bais, "text/javascript");
         req.setHeaderField("Authorization", "Basic " + authData);
         resp = webCon.getResponse(req);
 
@@ -189,8 +188,8 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
         final HttpClient httpclient = new HttpClient();
 
         httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
-        final PropFindMethod propFindMethod = new PropFindMethod(PROTOCOL + hostName + getURL());
-        propFindMethod.setDoAuthentication( true );
+        final PropFindMethod propFindMethod = new PropFindMethod(getHostURI() + getURL());
+        propFindMethod.setDoAuthentication(true);
 
         InputStream is = new ByteArrayInputStream(requestByte);
         propFindMethod.setRequestBody(is);
@@ -286,13 +285,6 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
         return "no/url";
     }
 
-    public static final String appendPrefix(final String host) {
-        if (host.startsWith("http://")) {
-            return host;
-        }
-        return "http://" + host;
-    }
-
     public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
         if (expect != null) {
             assertNotNull(message + " is null", value);
@@ -305,7 +297,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
             assertNotNull(message + " is null", value);
             assertEquals(message + " date array size is not equals", expect.length, value.length);
             for (int a = 0; a < expect.length; a++) {
-                assertEquals(message + " date in pos (" + a + ") is not equals",  expect[a].getTime(), value[a].getTime());
+                assertEquals(message + " date in pos (" + a + ") is not equals", expect[a].getTime(), value[a].getTime());
             }
         }
     }
@@ -315,7 +307,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
             assertNotNull(message + " is null", value);
             assertEquals(message + " byte array size is not equals", expect.length, value.length);
             for (int a = 0; a < expect.length; a++) {
-                assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a], value[a]);
+                assertEquals(message + " byte in pos (" + a + ") is not equals", expect[a], value[a]);
             }
         }
     }

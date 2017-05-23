@@ -88,6 +88,7 @@ public class ListSnippetRequest extends AbstractSnippetRequest<ListSnippetRespon
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -97,6 +98,7 @@ public class ListSnippetRequest extends AbstractSnippetRequest<ListSnippetRespon
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
@@ -108,6 +110,7 @@ public class ListSnippetRequest extends AbstractSnippetRequest<ListSnippetRespon
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -117,6 +120,7 @@ public class ListSnippetRequest extends AbstractSnippetRequest<ListSnippetRespon
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override

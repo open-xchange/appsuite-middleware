@@ -49,14 +49,16 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ConfigRequest;
 import com.openexchange.ajax.onboarding.actions.ConfigResponse;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Platform;
-
 
 /**
  * {@link ConfigTest}
@@ -64,28 +66,19 @@ import com.openexchange.client.onboarding.Platform;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class ConfigTest extends AbstractAJAXSession {
+public class ConfigTest extends AbstractSmtpAJAXSession {
 
     private final List<Device> EXPECTED_DEVICES = Arrays.asList(Device.values());
     private final List<Platform> EXPECTED_PLATFORMS = Arrays.asList(Platform.values());
 
-    public ConfigTest(String name) {
-        super(name);
+    public ConfigTest() {
+        super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testGetConfig() throws Exception {
         ConfigRequest req = new ConfigRequest(false);
-        ConfigResponse resp = client.execute(req);
+        ConfigResponse resp = getClient().execute(req);
         assertFalse(resp.getErrorMessage(), resp.hasError());
         List<Device> devices = resp.getDevices();
         assertTrue(devices.containsAll(EXPECTED_DEVICES));

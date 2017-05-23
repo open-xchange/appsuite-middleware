@@ -146,7 +146,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
                 fieldRegistry.shutDown();
                 FolderFieldRegistry.releaseInstance();
             }
-            cleanUp();
+            super.stopBundle();
             /*
              * Restore
              */

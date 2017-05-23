@@ -1053,6 +1053,10 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this exception is similar to specified exception code regarding category and code number.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: To check for code number and prefix equality, please use {@link OXExceptionCode#equals(OXException)} instead!
+     * </div>
      *
      * @param exceptionCode The exception code to check against
      * @return <code>true</code> if this exception is similar to specified exception code; otherwise <code>false</code>
@@ -1063,6 +1067,10 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this exception is similar to specified exception regarding category and code number.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: To check for code number and prefix equality, please use {@link OXExceptionCode#equals(OXException)} instead!
+     * </div>
      *
      * @param other The exception to check against
      * @return <code>true</code> if this exception is similar to specified exception; otherwise <code>false</code>

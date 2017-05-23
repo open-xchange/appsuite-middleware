@@ -49,10 +49,13 @@
 
 package com.openexchange.publish.json;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -67,15 +70,13 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class PublicationParserTest extends TestCase {
-
+public class PublicationParserTest {
     private JSONObject object;
     private SimPublicationTargetDiscoveryService discovery;
     private PublicationTarget target;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
 
         target = new PublicationTarget();
         target.setId("com.openexchange.publish.test");
@@ -111,7 +112,8 @@ public class PublicationParserTest extends TestCase {
 
     }
 
-    public void testParse() throws JSONException, OXException, OXException {
+         @Test
+     public void testParse() throws JSONException, OXException, OXException {
         PublicationParser publicationParser = new PublicationParser(discovery);
         Publication publication = publicationParser.parse(object);
 

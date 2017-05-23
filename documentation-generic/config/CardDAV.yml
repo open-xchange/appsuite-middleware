@@ -1,0 +1,85 @@
+feature_name: CardDAV
+properties:
+    - key: com.openexchange.carddav.enabled
+      description: |
+        Whether CardDAV is enabled or not
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: carddav.properties
+      packageName: open-xchange-dav
+      tags: ["CardDAV"]
+    - key: com.openexchange.carddav.ignoreFolders
+      description: |
+        A comma-separated list of folder IDs to exclude from the synchronization. 
+        Use this to disable syncing of very large folders (e.g. the global address 
+        list in large contexts, which always has ID 6).
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: carddav.properties
+      packageName: open-xchange-dav
+      tags: ["CardDAV", "Folder"]
+    - key: com.openexchange.carddav.tree
+      description: |
+        Configures the ID of the folder tree used by the CardDAV interface.
+      defaultValue: 0
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: carddav.properties
+      packageName: open-xchange-dav
+      tags: ["CardDAV", "Folder"]
+    - key: com.openexchange.carddav.exposedCollections
+      description: |
+        Controls which collections are exposed via the CardDAV interface. Possible 
+        values are <code>0</code>, <code>1</code> and <code>2</code>. A value of <code>1</code> 
+        makes each visible folder available as a resource collection, while <code>2</code> only 
+        exposes an aggregated collection containing all contact resources from all visible folders. The 
+        value <code>0</code> exposes either an aggregated collection or individual 
+        collections for each folder, depending on the client's user-agent that is 
+        matched against the pattern in [[com.openexchange.carddav.userAgentForAggregatedCollection]].
+      defaultValue: 0
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.carddav.userAgentForAggregatedCollection
+      file: carddav.properties
+      packageName: open-xchange-dav
+      tags: ["CardDAV", "Folder"]
+    - key: com.openexchange.carddav.userAgentForAggregatedCollection
+      description: |
+        Regular expression to match against the client's user-agent to decide 
+        whether the aggregated collection is exposed or not. The default pattern 
+        matches all known varieties of the Mac OS Addressbook client, that doesn't 
+        support multiple collections. Only used if [[com.openexchange.carddav.exposedCollections]]
+        is set to <code>0</code>. The pattern is used case insensitive. 
+      defaultValue: ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*"
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.carddav.exposedCollections
+      file: carddav.properties
+      packageName: open-xchange-dav
+      tags: ["CardDAV"]
+    - key: com.openexchange.carddav.reducedAggregatedCollection
+      description: |
+        Specifies if all visible folders are used to create the aggregated 
+        collection, or if a reduced set of folders only containing the global 
+        addressbook and the personal contacts folders should be used. This setting
+        only influences the aggregated collection that is used for clients that
+        don't support multiple collections. Possible values are <code>true</code> and <code>false</code>.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: carddav.properties
+      packageName: open-xchange-dav
+      tags: ["CardDAV", "Folder"]
+      

@@ -78,9 +78,9 @@ public class ExportRequest {
 			setColumns(new LinkedList<Integer>());
 			for(String s: split){
 				try {
-					getColumns().add(Integer.parseInt(s));
+					getColumns().add(Integer.valueOf(s));
 				} catch (NumberFormatException e) {
-					throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(s);
+					throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(e, s);
 				}
 			}
 		}

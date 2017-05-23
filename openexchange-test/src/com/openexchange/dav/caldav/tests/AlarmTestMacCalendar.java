@@ -49,11 +49,7 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -82,7 +78,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         String uid = randomUID();
         Date start = TimeTools.D("next sunday at 16:00");
         Date end = TimeTools.D("next sunday at 17:00");
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -132,7 +128,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
@@ -155,7 +151,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
          */
         Date initialAcknowledged = TimeTools.D("next sunday at 15:44");
         Date acknowledgedDate = TimeTools.D("next sunday at 15:47:32");
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -207,7 +203,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment on server
@@ -233,7 +229,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         String relatedUID = randomUID();
         Date start = TimeTools.D("next sunday at 16:00");
         Date end = TimeTools.D("next sunday at 17:00");
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -283,7 +279,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
@@ -307,7 +303,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         Date initialAcknowledged = TimeTools.D("next sunday at 15:44");
         Date acknowledgedDate = TimeTools.D("next sunday at 15:47:32");
         Date nextTrigger = TimeTools.D("next sunday at 15:52:32");
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -367,7 +363,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment on server
@@ -402,7 +398,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         String uid = randomUID();
         Date start = TimeTools.D("next sunday at 16:00");
         Date end = TimeTools.D("next sunday at 17:00");
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -452,7 +448,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
@@ -474,7 +470,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
          * edit reminder in client
          */
         Date initialAcknowledged = TimeTools.D("next sunday at 15:44");
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -525,7 +521,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment on server
@@ -554,7 +550,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         Date start = TimeTools.D("next saturday at 15:30");
         Date end = TimeTools.D("next saturday at 17:15");
         Date initialAcknowledged = TimeTools.D("next saturday at 15:14");
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -604,7 +600,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
@@ -633,7 +629,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         calendar.add(Calendar.MINUTE, 3);
         calendar.add(Calendar.SECOND, 17);
         Date acknowledgedDate = calendar.getTime();
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -685,7 +681,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment on server
@@ -714,7 +710,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         Date start = TimeTools.D("next saturday at 15:30");
         Date end = TimeTools.D("next saturday at 17:15");
         Date initialAcknowledged = TimeTools.D("next saturday at 15:14");
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -764,7 +760,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
@@ -799,7 +795,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         calendar.add(Calendar.MINUTE, 5);
         Date nextTrigger = calendar.getTime();
         String relatedUID = randomUID();
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -887,7 +883,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment & exception on server
@@ -939,7 +935,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         Date start = TimeTools.D("next saturday at 15:30");
         Date end = TimeTools.D("next saturday at 17:15");
         Date initialAcknowledged = TimeTools.D("next saturday at 15:14");
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -989,7 +985,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
@@ -1026,7 +1022,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         calendar.add(Calendar.MINUTE, -1);
         Date nextAcknowledged = calendar.getTime();
         String relatedUID = randomUID();
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -1114,7 +1110,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment & exception on server
@@ -1159,7 +1155,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         calendar.add(Calendar.MINUTE, -16);
         calendar.add(Calendar.DATE, 1);
         Date seriesAcknowledged = calendar.getTime();
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -1237,7 +1233,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment & exception on server
@@ -1274,7 +1270,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         calendar.add(Calendar.MINUTE, -14);
         calendar.add(Calendar.SECOND, 52);
         Date exceptionAcknowledged = calendar.getTime();
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -1357,7 +1353,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment & exception on server
@@ -1406,7 +1402,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         calendar.add(Calendar.MINUTE, -16);
         calendar.add(Calendar.DATE, 1);
         Date seriesAcknowledged = calendar.getTime();
-        String iCal =
+        String iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -1484,7 +1480,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment & exception on server
@@ -1523,7 +1519,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         Date exceptionAcknowledged = calendar.getTime();
         calendar.add(Calendar.MINUTE, 5);
         Date nextTrigger = calendar.getTime();
-        iCal =
+        iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
             "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
@@ -1614,7 +1610,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
             "END:VALARM\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
-        ;
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
         /*
          * verify appointment & exception on server

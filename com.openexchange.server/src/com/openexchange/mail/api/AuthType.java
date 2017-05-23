@@ -67,7 +67,7 @@ public enum AuthType {
      */
     LOGIN("login"),
     /**
-     * The OAuth authentication type.
+     * The XOAUTH2 authentication type; see <a href="https://developers.google.com/gmail/xoauth2_protocol">https://developers.google.com/gmail/xoauth2_protocol</a>
      */
     OAUTH("XOAUTH2"),
     /**

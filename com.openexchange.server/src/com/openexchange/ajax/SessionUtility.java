@@ -53,7 +53,6 @@ import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
-import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -71,6 +70,7 @@ import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -380,21 +380,6 @@ public final class SessionUtility {
     }
 
     /**
-     * Performs the IP check.
-     *
-     * @param session The session to check for
-     * @param actual The current IP for given session
-     * @throws OXException If IP check fails
-     */
-    public static void checkIP(final Session session, final String actual) throws OXException {
-        checkIP(checkIP, getRanges(), session, actual, clientWhitelist);
-    }
-
-    private static Collection<IPRange> getRanges() {
-        return RANGES;
-    }
-
-    /**
      * Checks whether passed exception indicates an IP check error.
      *
      * @param e The exception to check
@@ -406,71 +391,47 @@ public final class SessionUtility {
     }
 
     /**
-     * Checks if the client IP address of the current request matches the one through that the session has been created.
+     * Checks if the client IP address of the current request matches the one associated with given session.
      *
-     * @param doCheck <code>true</code> to deny request with an exception.
-     * @param ranges The white-list ranges
-     * @param session session object
-     * @param actual IP address of the current request.
-     * @param whitelist The optional IP check whitelist (by client identifier)
-     * @throws OXException if the IP addresses don't match.
+     * @param session The session to check for
+     * @param currentIpAddress IP address of the current request.
+     * @throws OXException If the IP check denies given session
      */
-    public static void checkIP(final boolean doCheck, final Collection<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
-        if (null == actual || !actual.equals(session.getLocalIp())) {
-            // IP is missing or changed
-            if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(actual, session.getLocalIp())) {
-                // kick client with changed IP address
-                {
-                    final StringBuilder sb = new StringBuilder(96);
-                    sb.append("Request to server denied (IP check activated) for session: ");
-                    sb.append(session.getSessionID());
-                    sb.append(". Client login IP changed from ");
-                    sb.append(session.getLocalIp());
-                    sb.append(" to ");
-                    sb.append((null == actual ? "<missing>" : actual));
-                    sb.append(" and is not covered by IP white-list or netmask.");
-                    LOG.info(sb.toString());
-                }
-                throw SessionExceptionCodes.WRONG_CLIENT_IP.create(session.getLocalIp(), null == actual ? "<unknown>" : actual);
-            }
-            if (null != actual) {
-                if (isWhitelistedClient(session, whitelist)) {
-                    // change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
-                    session.setLocalIp(actual);
-                } else if (!doCheck) {
-                    // Do not change session's IP address anymore in case of USM/EAS (Bug #29136)
-                    if (!isUsmEas(session.getClient())) {
-                        session.setLocalIp(actual);
-                    }
-                }
-            }
-            if (LOG.isDebugEnabled() && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
-                LOG.debug("Session {} requests now from {} but login came from {}", session.getSessionID(), actual, session.getLocalIp());
+    public static void checkIP(Session session, String currentIpAddress) throws OXException {
+        String oldIp = session.getLocalIp();
+        if (null == currentIpAddress || !currentIpAddress.equals(oldIp)) {
+            // IP is missing or has changed
+            IPCheckService ipChecker = ServerServiceRegistry.getInstance().getService(IPCheckService.class);
+            if (null != ipChecker) {
+                ipChecker.handleChangedIp(currentIpAddress, oldIp, session);
             }
         }
-    }
-
-    private static boolean isUsmEas(final String clientId) {
-        if (Strings.isEmpty(clientId)) {
-            return false;
-        }
-        final String uc = Strings.toUpperCase(clientId);
-        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
     /**
      * White listed clients are necessary for the Mobile Web Interface. This clients often change their IP address in mobile data networks.
      */
-    private static boolean isWhitelistedClient(final Session session, final ClientWhitelist whitelist) {
+    public static boolean isWhitelistedClient(final Session session, final ClientWhitelist whitelist) {
         if (null == whitelist || whitelist.isEmpty()) {
             return false;
         }
         return whitelist.isAllowed(session.getClient());
     }
 
-    public static boolean isWhitelistedFromIPCheck(final String actual, final Collection<IPRange> ranges) {
-        for (final IPRange range : ranges) {
-            if (range.contains(actual)) {
+    /**
+     * Checks if specified IP address is contained in given IP ranges that are supposed to be white-listed.
+     *
+     * @param ipAddress The IP address to check
+     * @param ranges The IP ranges representing the white-list
+     * @return <code>true</code> if IP address is contained and therefore white-listed; otherwise <code>false</code>
+     */
+    public static boolean isWhitelistedFromIPCheck(String ipAddress, Collection<IPRange> ranges) {
+        if (null == ipAddress || null == ranges) {
+            return false;
+        }
+
+        for (IPRange range : ranges) {
+            if (range.contains(ipAddress)) {
                 return true;
             }
         }
@@ -734,6 +695,7 @@ public final class SessionUtility {
     }
 
     private static final String SECRET_PREFIX = LoginServlet.SECRET_PREFIX;
+    private static final String SHARE_PREFIX = LoginServlet.SHARE_PREFIX;
 
     /**
      * Extracts the secret string from specified cookies using given hash string.
@@ -786,7 +748,7 @@ public final class SessionUtility {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             if (cookies.isEmpty()) {
-                LOG.info("Empty Cookies in HTTP request. No session secret can be looked up.");
+                LOG.debug("Empty Cookies in HTTP request. No session secret can be looked up.");
             } else {
                 final String secretPrefix = SECRET_PREFIX;
                 final StringBuilder tmp = new StringBuilder(256);
@@ -928,11 +890,20 @@ public final class SessionUtility {
             return;
         }
 
+        // Check for configured domain and/or host sharding
+        String serverName = req.getServerName();
+        String domain = Cookies.getDomainValue(serverName);
+
+        if (null == domain) {
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            domain = serverName;
+        }
+
         // Drop "open-xchange-session" cookie
         {
             Cookie cookie = cookies.get(SESSION_PREFIX + hash);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
 
@@ -940,7 +911,7 @@ public final class SessionUtility {
         {
             Cookie cookie = cookies.get(SECRET_PREFIX + hash);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
 
@@ -948,7 +919,7 @@ public final class SessionUtility {
         {
             Cookie cookie = cookies.get(LoginServlet.getShareCookieName(req));
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
 
@@ -957,7 +928,7 @@ public final class SessionUtility {
             String cookieName = getPublicSessionCookieName(req, new String[] { Integer.toString(optSession.getContextId()), Integer.toString(optSession.getUserId()) });
             Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                removeCookie(cookie, "invalid", domain, resp);
             }
         }
     }
@@ -978,11 +949,21 @@ public final class SessionUtility {
     public static void removeOXCookies(Session session, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         String sessionHash = session.getHash();
-        removeCookie(cookies, response, SESSION_PREFIX + sessionHash);
-        removeCookie(cookies, response, SECRET_PREFIX + sessionHash);
-        removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
+
+        // Check for configured domain and/or host sharding
+        String serverName = request.getServerName();
+        String domain = Cookies.getDomainValue(serverName);
+
+        if (null == domain) {
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            domain = serverName;
+        }
+
+        removeCookie(cookies, response, SESSION_PREFIX + sessionHash, domain);
+        removeCookie(cookies, response, SECRET_PREFIX + sessionHash, domain);
+        removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID), domain);
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-            removeCookie(cookies, response, LoginServlet.getShareCookieName(request));
+            removeCookie(cookies, response, LoginServlet.getShareCookieName(request), domain);
         }
     }
 
@@ -994,14 +975,27 @@ public final class SessionUtility {
      * @param cookieNames The names of the cookies to remove
      */
     public static void removeOXCookies(final HttpServletRequest req, final HttpServletResponse resp, final List<String> cookieNames) {
-        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies == null) {
             return;
         }
+
+        // Check for configured domain and/or host sharding
+        String serverName = req.getServerName();
+        String domain = Cookies.getDomainValue(serverName);
+        if (null == domain) {
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            domain = serverName;
+        }
+
         for (final String cookieName : cookieNames) {
-            final Cookie cookie = cookies.get(cookieName);
+            Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                removeCookie(cookie, resp);
+                if (startsWithOXPrefix(cookieName)) {
+                    removeCookie(cookie, "invalid", domain, resp);
+                } else {
+                    removeCookie(cookie, null, domain, resp);
+                }
             }
         }
     }
@@ -1020,7 +1014,12 @@ public final class SessionUtility {
         final String name = Tools.JSESSIONID_COOKIE;
         final Cookie cookie = cookies.get(name);
         if (null != cookie) {
-            removeCookie(cookie, resp);
+            // Check for configured domain and/or host sharding
+            String serverName = req.getServerName();
+            String domain = Cookies.getDomainValue(serverName);
+
+            // Anyway, pass server name to consistently drop cookies in case host sharding has been changed
+            removeCookie(cookie, null, null == domain ? serverName : domain, resp);
         }
     }
 
@@ -1028,24 +1027,31 @@ public final class SessionUtility {
      * Removes a given cookie by setting its MaxAge parameter to 0.
      *
      * @param cookie The cookie
+     * @param newValue The optional new value to set
+     * @param domain The optional domain to set
      * @param resp The HTTP Servlet response
      */
-    public static void removeCookie(final Cookie cookie, final HttpServletResponse resp) {
-        final String name = cookie.getName();
-        final String value = cookie.getValue();
-        final Cookie respCookie = new Cookie(name, value);
+    public static void removeCookie(Cookie cookie, String newValue, String domain, HttpServletResponse resp) {
+        String name = cookie.getName();
+        String value = null == newValue ? cookie.getValue() : newValue;
+
+        Cookie respCookie = new Cookie(name, value);
         respCookie.setPath("/");
-        final String domain = extractDomainValue(value);
-        if (null != domain) {
-            respCookie.setDomain(domain);
-            // Once again without domain parameter
-            final Cookie respCookie2 = new Cookie(name, value);
-            respCookie2.setPath("/");
-            respCookie2.setMaxAge(0); // delete
-            resp.addCookie(respCookie2);
-        }
         respCookie.setMaxAge(0); // delete
+
+        if (null == domain) {
+            resp.addCookie(respCookie);
+            return;
+        }
+
+        // Once again w/ and w/o domain parameter
+        respCookie.setDomain(domain);
         resp.addCookie(respCookie);
+
+        Cookie respCookie2 = new Cookie(name, value);
+        respCookie2.setPath("/");
+        respCookie2.setMaxAge(0); // delete
+        resp.addCookie(respCookie2);
     }
 
     /**
@@ -1154,10 +1160,11 @@ public final class SessionUtility {
      * @param existingCookies The currently existing cookies in the client as carried with the corresponding request
      * @param response The response for instructing the client to remove the cookie
      * @param name The name of the cookie to remove
+     * @param domain The optional domain
      * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
      */
-    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name) {
-        return removeCookie(existingCookies, response, name, null);
+    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String domain) {
+        return removeCookie(existingCookies, response, name, null, domain);
     }
 
     /**
@@ -1167,17 +1174,26 @@ public final class SessionUtility {
      * @param response The response for instructing the client to remove the cookie
      * @param name The name of the cookie to remove
      * @param value The value of the cookie to remove, or <code>null</code> to only match by name
+     * @param domain The optional domain
      * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
      */
-    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String value) {
+    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String value, String domain) {
         if (null != existingCookies) {
             Cookie cookie = existingCookies.get(name);
             if (null != cookie && (null == value || value.equals(cookie.getValue()))) {
-                removeCookie(cookie, response);
+                if (startsWithOXPrefix(name)) {
+                    removeCookie(cookie, "invalid", domain, response);
+                } else {
+                    removeCookie(cookie, null, domain, response);
+                }
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean startsWithOXPrefix(String name) {
+        return (name.startsWith(SESSION_PREFIX) || name.startsWith(SECRET_PREFIX) || name.startsWith(PUBLIC_SESSION_PREFIX) || name.startsWith(SHARE_PREFIX));
     }
 
     // ------------------------------------- Private constructor -------------------------------------------------- //

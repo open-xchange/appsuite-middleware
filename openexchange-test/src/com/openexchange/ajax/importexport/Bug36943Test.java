@@ -1,8 +1,14 @@
+
 package com.openexchange.ajax.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
@@ -27,17 +33,17 @@ public class Bug36943Test extends AbstractManagedContactTest {
      *
      * @param name The test name
      */
-	public Bug36943Test(String name) {
-		super(name);
-	}
+    public Bug36943Test() {
+        super();
+    }
 
+    @Test
     public void testImportCSVWithAstralSymbols() throws Exception {
         /*
          * prepare csv
          */
         String lastName = "Pile of \uD83D\uDCA9 poo";
-        String csv = "\"Sur name\",\"Given name\",\"Email 1\"\n" +
-            '"' + lastName + "\",\"Otto\",\"otto@example.com\"\n";
+        String csv = "\"Sur name\",\"Given name\",\"Email 1\"\n" + '"' + lastName + "\",\"Otto\",\"otto@example.com\"\n";
         /*
          * import
          */
@@ -50,13 +56,14 @@ public class Bug36943Test extends AbstractManagedContactTest {
         /*
          * verify imported data
          */
-        Contact contact = manager.getAction(folderID, data.getJSONObject(0).getInt("id"));
+        Contact contact = cotm.getAction(folderID, data.getJSONObject(0).getInt("id"));
         assertNotNull("imported contact not found", contact);
         assertNotNull("no last name imported", contact.getSurName());
         String expectedLastName = lastName.replaceAll("\uD83D\uDCA9", "");
         assertEquals("wrong last name imported", expectedLastName, contact.getSurName());
     }
 
+    @Test
     public void testImportVCardWithAstralSymbols() throws Exception {
         /*
          * prepare vCard
@@ -64,15 +71,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
         String uid = UUIDs.getUnformattedStringFromRandom();
         String firstName = "Pile of \uD83D\uDCA9 poo";
         String lastName = "test";
-        String vCard =
-            "BEGIN:VCARD" + "\r\n" +
-            "VERSION:3.0" + "\r\n" +
-            "N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-            "FN:" + firstName + " " + lastName + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-            "END:VCARD" + "\r\n"
-        ;
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "UID:" + uid + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
         /*
          * import
          */
@@ -87,7 +86,7 @@ public class Bug36943Test extends AbstractManagedContactTest {
         /*
          * verify imported data
          */
-        Contact contact = manager.getAction(folderID, objectID);
+        Contact contact = cotm.getAction(folderID, objectID);
         assertNotNull("imported contact not found", contact);
         assertNotNull("no last name imported", contact.getSurName());
         String expectedLastName = lastName.replaceAll("\uD83D\uDCA9", "");

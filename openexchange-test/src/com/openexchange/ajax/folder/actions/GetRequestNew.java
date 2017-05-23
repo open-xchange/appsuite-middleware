@@ -57,26 +57,25 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.Header;
 
-
 /**
  * {@link GetRequestNew}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class GetRequestNew implements AJAXRequest<GetResponseNew> {
-    
+
     private final boolean failOnError;
-    
+
     private final API api;
 
     private final String folderId;
 
     private final int[] columns;
-    
+
     public GetRequestNew(API api, String folderId, int[] columns) {
         this(api, folderId, columns, true);
     }
-    
+
     public GetRequestNew(API api, String folderId, int[] columns, boolean failOnError) {
         super();
         this.api = api;

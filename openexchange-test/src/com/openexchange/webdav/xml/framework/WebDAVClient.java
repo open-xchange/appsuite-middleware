@@ -54,9 +54,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom2.JDOMException;
-import com.openexchange.configuration.WebDAVConfig;
-import com.openexchange.configuration.WebDAVConfig.Property;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.webdav.xml.folder.FolderTools;
 import com.openexchange.webdav.xml.user.GroupUserTools;
 
@@ -64,6 +64,7 @@ import com.openexchange.webdav.xml.user.GroupUserTools;
  * This class implements the temporary memory of a WebDAV client and provides
  * some convenience methods to determine user specific values for running some
  * tests more easily.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class WebDAVClient {
@@ -82,11 +83,11 @@ public class WebDAVClient {
         this.session = session;
     }
 
-    public WebDAVClient(final User user) throws OXException {
+    public WebDAVClient(final TestUser user) throws OXException {
         this(new WebDAVSession());
-        WebDAVConfig.init();
-        final String login = WebDAVConfig.getProperty(user.getLogin());
-        final String password = WebDAVConfig.getProperty(user.getPassword());
+        AJAXConfig.init();
+        final String login = user.getLogin();
+        final String password = user.getPassword();
         setAuth(login, password);
     }
 
@@ -98,27 +99,6 @@ public class WebDAVClient {
     public final void setAuth(final String login, final String password) {
         final HttpClient client = session.getClient();
         client.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
-    }
-
-    public enum User {
-        User1(Property.LOGIN, Property.PASSWORD),
-        User2(Property.SECONDUSER, Property.PASSWORD);
-
-        private Property login;
-        private Property password;
-
-        private User(final Property login, final Property password) {
-            this.login = login;
-            this.password = password;
-        }
-
-        public Property getLogin() {
-            return login;
-        }
-
-        public Property getPassword() {
-            return password;
-        }
     }
 
     /**
@@ -145,7 +125,7 @@ public class WebDAVClient {
     }
 
     public <T extends AbstractWebDAVResponse> T execute(final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
-         return Executor.execute(this, request);
+        return Executor.execute(this, request);
     }
 
     public <T extends AbstractWebDAVResponse> T execute(final String host, final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
@@ -153,7 +133,7 @@ public class WebDAVClient {
             return execute(request);
         }
         return Executor.execute(this, host, request);
-   }
+    }
 
     public FolderTools getFolderTools() {
         if (null == folderTools) {

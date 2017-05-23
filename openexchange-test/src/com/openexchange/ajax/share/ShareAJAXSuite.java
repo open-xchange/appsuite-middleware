@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.share;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.share.bugs.Bug40369Test;
 import com.openexchange.ajax.share.bugs.Bug40527Test;
 import com.openexchange.ajax.share.bugs.Bug40548Test;
@@ -64,6 +66,7 @@ import com.openexchange.ajax.share.bugs.Bug41537Test;
 import com.openexchange.ajax.share.bugs.Bug41622Test;
 import com.openexchange.ajax.share.bugs.Bug43270Test;
 import com.openexchange.ajax.share.bugs.Bug44962Test;
+import com.openexchange.ajax.share.bugs.Bug52843Test;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AddGuestUserToGroupTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
@@ -98,73 +101,66 @@ import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ResolveLegacyLinkTest;
 import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
 import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link ShareAJAXSuite}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareAJAXSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    CreateWithGuestPermissionTest.class,
+    AddGuestPermissionTest.class,
+    RemoveGuestPermissionTest.class,
+    ExpiredSharesTest.class,
+    CreateSubfolderTest.class,
+    FolderTransactionTest.class,
+    AggregateSharesTest.class,
+    FileStorageTransactionTest.class,
+    GuestContactTest.class,
+    AnonymousGuestPasswordTest.class,
+    GuestPasswordTest.class,
+    GetALinkTest.class,
+    ParallelGuestSessionsTest.class,
+    QuotaTest.class,
+    DownloadHandlerTest.class,
+    MailNotificationTest.class,
+    GuestAutologinTest.class,
+    ConvertToInternalPermissionTest.class,
+    EmptyGuestPasswordTest.class,
+    LoginScreenTest.class,
+    FolderItemCountTest.class,
+    ShowSharedFilesFolderTest.class,
+    AnonymousGuestTest.class,
+    LinkUpdateTest.class,
+    ListFileSharesTest.class,
+    ListFolderSharesTest.class,
+    NotifyFolderSharesTest.class,
+    NotifyFileSharesTest.class,
+    SharedFilesFolderTest.class,
+    CopySharedFilesPermissionRemovalTest.class,
+    CopySharedFilesVersionsRemovalTest.class,
+    Bug40369Test.class,
+    Bug40548Test.class,
+    Bug40596Test.class,
+    Bug40627Test.class,
+    Bug40561Test.class,
+    Bug40527Test.class,
+    Bug40722Test.class,
+    Bug40826Test.class,
+    AddGuestUserToGroupTest.class,
+    PasswordResetServletTest.class,
+    Bug40993Test.class,
+    Bug41184Test.class,
+    Bug41287Test.class,
+    Bug41537Test.class,
+    ResolveLegacyLinkTest.class,
+    Bug41622Test.class,
+    Bug43270Test.class,
+    Bug44962Test.class,
+    Bug52843Test.class
 
-    /**
-     * Gets all share tests in a suite.
-     *
-     * @return The test suite.
-     */
-    public static Test suite() {
-        TestSuite tests = new TestSuite(ShareAJAXSuite.class.getName());
-        tests.addTestSuite(CreateWithGuestPermissionTest.class);
-        tests.addTestSuite(AddGuestPermissionTest.class);
-        tests.addTestSuite(RemoveGuestPermissionTest.class);
-        tests.addTestSuite(ExpiredSharesTest.class);
-        tests.addTestSuite(CreateSubfolderTest.class);
-        tests.addTestSuite(FolderTransactionTest.class);
-        tests.addTestSuite(AggregateSharesTest.class);
-        tests.addTestSuite(FileStorageTransactionTest.class);
-        tests.addTestSuite(GuestContactTest.class);
-        tests.addTestSuite(AnonymousGuestPasswordTest.class);
-        tests.addTestSuite(GuestPasswordTest.class);
-        tests.addTestSuite(GetALinkTest.class);
-        tests.addTestSuite(ParallelGuestSessionsTest.class);
-        tests.addTestSuite(QuotaTest.class);
-        tests.addTestSuite(DownloadHandlerTest.class);
-        tests.addTestSuite(MailNotificationTest.class);
-        tests.addTestSuite(GuestAutologinTest.class);
-        tests.addTestSuite(ConvertToInternalPermissionTest.class);
-        tests.addTestSuite(EmptyGuestPasswordTest.class);
-        tests.addTestSuite(LoginScreenTest.class);
-        tests.addTestSuite(FolderItemCountTest.class);
-        tests.addTestSuite(ShowSharedFilesFolderTest.class);
-        tests.addTestSuite(AnonymousGuestTest.class);
-        tests.addTestSuite(LinkUpdateTest.class);
-        tests.addTestSuite(ListFileSharesTest.class);
-        tests.addTestSuite(ListFolderSharesTest.class);
-        tests.addTestSuite(NotifyFolderSharesTest.class);
-        tests.addTestSuite(NotifyFileSharesTest.class);
-        tests.addTestSuite(SharedFilesFolderTest.class);
-        tests.addTestSuite(CopySharedFilesPermissionRemovalTest.class);
-        tests.addTestSuite(CopySharedFilesVersionsRemovalTest.class);
-        tests.addTestSuite(Bug40369Test.class);
-        tests.addTestSuite(Bug40548Test.class);
-        tests.addTestSuite(Bug40596Test.class);
-        tests.addTestSuite(Bug40627Test.class);
-        tests.addTestSuite(Bug40561Test.class);
-        tests.addTestSuite(Bug40527Test.class);
-        tests.addTestSuite(Bug40722Test.class);
-        tests.addTestSuite(Bug40826Test.class);
-        tests.addTestSuite(AddGuestUserToGroupTest.class);
-        tests.addTestSuite(PasswordResetServletTest.class);
-        tests.addTestSuite(Bug40993Test.class);
-        tests.addTestSuite(Bug41184Test.class);
-        tests.addTestSuite(Bug41287Test.class);
-        tests.addTestSuite(Bug41537Test.class);
-        tests.addTestSuite(ResolveLegacyLinkTest.class);
-        tests.addTestSuite(Bug41622Test.class);
-        tests.addTestSuite(Bug43270Test.class);
-        tests.addTestSuite(Bug44962Test.class);
-        return tests;
-    }
-
+})
+public class ShareAJAXSuite  {
 }

@@ -71,6 +71,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.google.common.collect.Iterators;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServices;
@@ -87,6 +88,8 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.startup.StaticSignalStartedService;
+import com.openexchange.startup.StaticSignalStartedService.State;
 
 /**
  * {@link ConfigurationImpl}
@@ -236,7 +239,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         propertiesByFile = new HashMap<File, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
-        properties = new HashMap<String, String>(2048);
+        properties = new ConcurrentHashMap<String, String>(2048, 0.9f, 1);
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<File, YamlRef>(64);
         yamlPaths = new HashMap<String, File>(64);
@@ -297,8 +300,15 @@ public final class ConfigurationImpl implements ConfigurationService {
 
             @Override
             public void processFile(File file) {
-                byte[] hash = ConfigurationServices.getHash(file);
-                xmlFiles.put(file, hash);
+                try {
+                    byte[] hash = ConfigurationServices.getHash(file);
+                    xmlFiles.put(file, hash);
+                } catch (IllegalStateException e) {
+                    Throwable cause = e.getCause();
+                    String message = "Failed to load XML file '" + file + "'. Reason: " + (null == cause ? e.getMessage() : cause.getMessage());
+                    StaticSignalStartedService.getInstance().setState(State.INVALID_CONFIGURATION, e, message);
+                    throw e;
+                }
             }
         };
 
@@ -495,21 +505,13 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     public Properties getPropertiesInFolder(final String folderName, final PropertyListener listener) {
-        final Properties retval = new Properties();
-        final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-        String fldName = folderName;
-        for (final File dir : dirs) {
-            fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
-            while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
+        Properties retval = new Properties();
+        for (File dir : dirs) {
+            String fldName = dir.getAbsolutePath() + File.separatorChar + folderName + File.separatorChar;
+            for (Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator(); iter.hasNext();) {
+                Map.Entry<String, String> entry = iter.next();
                 if (entry.getValue().startsWith(fldName)) {
-                    final String value;
-                    if (null == listener) {
-                        value = getProperty(entry.getKey());
-                    } else {
-                        value = getProperty(entry.getKey(), listener);
-                    } // FIXME: this could have been overridden by some property
-                      // external to the requested folder.
+                    String value = null == listener ? getProperty(entry.getKey()) : getProperty(entry.getKey(), listener);
                     retval.put(entry.getKey(), value);
                 }
             }
@@ -578,7 +580,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public Iterator<String> propertyNames() {
-        return properties.keySet().iterator();
+        return Iterators.unmodifiableIterator(properties.keySet().iterator());
     }
 
     @Override

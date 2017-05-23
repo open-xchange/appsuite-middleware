@@ -79,7 +79,6 @@ public class Tools {
         return useDateValue ? dateFormat.format(date) : utc.format(date);
     }
 
-
     public static String formatForICalWithoutTimezone(Date date) {
         return new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date);
     }

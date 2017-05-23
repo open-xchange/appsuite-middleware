@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -72,11 +76,11 @@ public class Bug13625Test extends AbstractAJAXSession {
 
     private final int[] columns = new int[] { Appointment.OBJECT_ID };
 
-    public Bug13625Test(String name) {
-        super(name);
+    public Bug13625Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -95,6 +99,7 @@ public class Bug13625Test extends AbstractAJAXSession {
         insertResponse.fillObject(appointment);
     }
 
+    @Test
     public void testBug13625() throws Exception {
         SearchRequest searchRequest = new SearchRequest("eins", getClient().getValues().getPrivateAppointmentFolder(), columns, true);
         SearchResponse searchResponse = getClient().execute(searchRequest);
@@ -112,14 +117,16 @@ public class Bug13625Test extends AbstractAJAXSession {
         assertTrue("Appointment not found", found);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (appointment != null && appointment.getObjectID() != 0) {
-            getClient().execute(
-                new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-        }
+        try {
+            if (appointment != null && appointment.getObjectID() != 0) {
+                getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

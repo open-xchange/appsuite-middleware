@@ -99,7 +99,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public class ServiceCallWrapper {
 
-    static final ConcurrentMap<ServiceKey<?>, ServiceValue> SERVICE_CACHE = new ConcurrentHashMap<>(16, 0.9F, 1);
+    static final ConcurrentMap<ServiceKey<?>, ServiceValue<?>> SERVICE_CACHE = new ConcurrentHashMap<>(16, 0.9F, 1);
 
     static final AtomicReference<BundleContextProvider> BC_PROVIDER_REF = new AtomicReference<BundleContextProvider>(new BundleContextProvider());
 
@@ -112,7 +112,7 @@ public class ServiceCallWrapper {
 
         // Check cache
         {
-            ServiceValue<S> serviceValue = SERVICE_CACHE.get(serviceKey);
+            ServiceValue<S> serviceValue = (ServiceValue<S>) SERVICE_CACHE.get(serviceKey);
             if (null != serviceValue) {
                 return serviceValue;
             }

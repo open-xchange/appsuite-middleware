@@ -1,0 +1,39 @@
+/rss:
+  put:
+    operationId: getRssFeed
+    tags:
+      - RSS
+    summary: Get the RSS Feed of a specific link.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: feedUrl
+        type: array
+        description: An array containing all RSS Feeds to load. Array can consist of one element.
+        required: true
+        items: {
+          type: string
+        }
+      - in: query
+        name: limit
+        type: integer
+        description: Limitation of elements returned (in total).
+        required: false
+      - in: query
+        name: sort
+        type: string
+        description: The identifier which determines the sort order of the response.
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entities should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order.'
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for the rss feed. Each array element describes one article        
+          and is an array itself. The elements of each array contain the information provided by the RSS Feed.
+          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+           $ref: "#/definitions/RssResponse"

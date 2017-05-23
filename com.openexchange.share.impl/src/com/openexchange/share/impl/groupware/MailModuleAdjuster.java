@@ -104,13 +104,13 @@ public class MailModuleAdjuster implements ModuleAdjuster {
             }
 
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (!IMailSharedFolderPathResolver.class.isInstance(folderStorage)) {
+            IMailSharedFolderPathResolver pathResolver = folderStorage.supports(IMailSharedFolderPathResolver.class);
+            if (null == pathResolver) {
                 int module = target.getModule();
                 String m = services.getService(ModuleSupport.class).getShareModule(module);
                 throw ShareExceptionCodes.SHARING_FOLDERS_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m);
             }
 
-            IMailSharedFolderPathResolver pathResolver = (IMailSharedFolderPathResolver) folderStorage;
             if (!pathResolver.isResolvingSharedFolderPathSupported(fa.getFullname())) {
                 int module = target.getModule();
                 String m = services.getService(ModuleSupport.class).getShareModule(module);

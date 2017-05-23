@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
@@ -67,12 +68,12 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug28672Test extends CardDAVTest {
 
-	public Bug28672Test() {
-		super();
-	}
+    public Bug28672Test() {
+        super();
+    }
 
-	@Test
-	public void testImportVCard() throws Exception {
+    @Test
+    public void testImportVCard() throws Exception {
         /*
          * fetch sync token for later synchronization
          */
@@ -81,17 +82,7 @@ public class Bug28672Test extends CardDAVTest {
          * create contact
          */
         String uid = randomUID() + "-ABSPlugin";
-        String vCard = "BEGIN:VCARD" + "\r\n" +
-            "VERSION:3.0" + "\r\n" +
-            "N:sdfsd;sdfsdf;;kulesh;" + "\r\n" +
-            "FN:kulesh sdfsdf sdfsd" + "\r\n" +
-            "EMAIL;type=INTERNET;type=WORK;type=pref:sdf@gmail.com" + "\r\n" +
-            "NOTE:X-OPEN-XCHANGE-CTYPE\\: contact" + "\r\n" +
-            "X-ABUID:4D863654-A664-4196-AFAF-0C3F93F07F12\\:ABPerson" + "\r\n" +
-            "UID:" + uid + "\r\n" +
-            "REV:2013-09-03T06:01:39Z" + "\r\n" +
-            "END:VCARD" + "\r\n"
-        ;
+        String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:sdfsd;sdfsdf;;kulesh;" + "\r\n" + "FN:kulesh sdfsdf sdfsd" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:sdf@gmail.com" + "\r\n" + "NOTE:X-OPEN-XCHANGE-CTYPE\\: contact" + "\r\n" + "X-ABUID:4D863654-A664-4196-AFAF-0C3F93F07F12\\:ABPerson" + "\r\n" + "UID:" + uid + "\r\n" + "REV:2013-09-03T06:01:39Z" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*
          * verify contact on server
@@ -106,6 +97,6 @@ public class Bug28672Test extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         assertContains(uid, addressData);
-	}
+    }
 
 }

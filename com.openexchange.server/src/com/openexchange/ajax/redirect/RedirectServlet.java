@@ -68,6 +68,13 @@ public class RedirectServlet extends HttpServlet {
 
     private static final long serialVersionUID = 6111473866164506367L;
 
+    /**
+     * Initializes a new {@link RedirectServlet}.
+     */
+    public RedirectServlet() {
+        super();
+    }
+
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         // create a new HttpSession if it's missing
@@ -96,7 +103,12 @@ public class RedirectServlet extends HttpServlet {
         }
 
         location = assumeRelative(referer, location);
-        resp.sendRedirect(AJAXUtility.encodeUrl(location, true, true));
+        try {
+            resp.sendRedirect(AJAXUtility.encodeUrl(location, true, true));
+        } catch (IllegalArgumentException e) {
+            // Apparently location is invalid
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Invalid \"location\" parameter");
+        }
     }
 
     private static final Pattern PROTOCOL_PATTERN = Pattern.compile("^(\\w*:)?//");

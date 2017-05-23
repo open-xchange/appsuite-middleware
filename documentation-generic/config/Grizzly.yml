@@ -1,12 +1,178 @@
-array:
-  - data:
-      Key: com.openexchange.http.grizzly.wsTimeoutMillis
-      Description: >
-Specifies the Web Socket timeout in milliseconds
-Default is 900000 (15 Minutes).
-      Default: 900000
-      Version: 7.8.3
-      Reloadable: false
-      Configcascade_Aware: false
-      Related: com.openexchange.websockets.enabled
-      File: grizzly.properties
+feature_name: Grizzly
+feature_description: |
+  This page shows the properties for the grizzly server contained in the package
+  open-xchange-grizzly. In your OX setup grizzly is located behind the
+  load-balancer and accepts incoming client requests. Communication with the
+  load balancer is done via http, e.g via Apache's mod_proxy_http.
+
+  For more informations see [[https://documentation.open-xchange.com/{{version}}/middleware/components/grizzly.html]].
+properties:
+    - key: com.openexchange.http.grizzly.wsTimeoutMillis
+      description: |
+        Specifies the Web Socket timeout in milliseconds
+      defaultValue: 900000
+      version: 7.8.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.websockets.enabled
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly","Websockets", "Timeout"]
+    - key: com.openexchange.http.grizzly.sessionExpiryCheckInterval
+      description: |
+        Specifies the interval in seconds when to check for expired/invalid HTTP sessions
+        This value should be aligned to property [[com.openexchange.servlet.maxInactiveInterval]]
+        that defines how long (in seconds) a HTTP session may stay idle/inactive until considered
+        as invalid.
+      defaultValue: 60
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.servlet.maxInactiveInterval
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly","Session"]
+    - key: com.openexchange.http.grizzly.maxNumberOfConcurrentRequests
+      description: |
+        Specifies the number of concurrent HTTP requests that are allowed being processed.
+        Those requests exceeding that limit will encounter a 503 "The server is temporary overloaded..." status code and accompanying error page
+        A value of less than or equal to <code>0</code> (zero) effectively disables that limitation.
+        The chosen value for this property should be aligned to the configured "ulimit" of the backing operating system. E.g. having "ulimit" set
+        to 8,192 (given that JVM is the only main process running for OS user) implies that ~6,000 should be considered for this property leaving
+        some room for threads not associated with an HTTP request.
+      defaultValue: 0
+      version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly","Limit"]
+    - key: com.openexchange.http.grizzly.keepAlive
+      description: |
+        Enables or disables SO_KEEPALIVE.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.tcpNoDelay
+      description: |
+        Enables/disables TCP_NODELAY (disable/enable Nagle's algorithm).
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.readTimeoutMillis
+      description: |
+        Specifies the read timeout, in milliseconds. A timeout of zero is interpreted as an infinite timeout.
+      defaultValue: 60000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "Limit", "Timeout"]
+    - key: com.openexchange.http.grizzly.writeTimeoutMillis
+      description: |
+        Specifies the write timeout, in milliseconds. A timeout of zero is interpreted as an infinite timeout.
+      defaultValue: 60000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "Limit", "Timeout"]
+    - key: com.openexchange.http.grizzly.hasCometEnabled
+      description: |
+        Comet is an umbrella term used to describe a technique allowing web browser to
+        receive almost real time updates from the server. The two most common
+        approaches are long polling and streaming. Long polling differs from streaming
+        in that each update from the server ultimately results in another follow up
+        request from the client.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "Push"]
+    - key: com.openexchange.http.grizzly.hasWebSocketsEnabled
+      description: |
+        Bi-directional, full-duplex communications channels over a single TCP connection.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "Push", "Websockets"]
+    - key: com.openexchange.http.grizzly.hasJMXEnabled
+      description: |
+        Enabling grizzly monitoring via JMX.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "Monitoring"]
+    - key: com.openexchange.http.grizzly.maxHttpHeaderSize
+      description: |
+        The maximum header size for an HTTP request in bytes. Make sure to increase
+        this value for all components of your infrastructure when you are forced to
+        deal with enormous headers. For Apache as our default balancer see
+        [[http://httpd.apache.org/docs/current/mod/core.html#limitrequestfieldsize]]
+      defaultValue: 8192
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "Limit"]
+    - key: com.openexchange.http.grizzly.hasSSLEnabled
+      description: |
+        Enable secure network listener.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "SSL"]
+    - key: com.openexchange.http.grizzly.enabledCipherSuites
+      description: |
+        Comma-separated list of cipher suites that should be used for secure connections.
+        See [[https://www.openssl.org/docs/manmaster/apps/ciphers.html]].
+        No value means system-default.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "SSL"]
+    - key: com.openexchange.http.grizzly.keystorePath
+      description: |
+        Path to keystore containing certificate for secure connections.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "SSL"]
+    - key: com.openexchange.http.grizzly.keystorePassword
+      description: |
+        Password for keystore containing certificate for secure connections.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly", "SSL" , "Credential"]

@@ -73,6 +73,7 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
     private boolean source;
     private boolean save;
     private boolean failOnError = true;
+    private boolean estimateLength;
     private TimeZone timeZone;
 
     public GetRequest(final String folder, final String id) {
@@ -120,6 +121,11 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         return this;
     }
 
+    public GetRequest setEstimateLength(boolean estimateLength) {
+        this.estimateLength = estimateLength;
+        return this;
+    }
+
     @Override
     public Object getBody() {
         return null;
@@ -150,6 +156,9 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         }
         if (timeZone != null) {
             l.add(new URLParameter(Mail.PARAMETER_TIMEZONE, timeZone.getID()));
+        }
+        if (estimateLength) {
+            l.add(new URLParameter("estimate_length", "true"));
         }
         return l.toArray(new Parameter[l.size()]);
     }
@@ -191,7 +200,9 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         RAW("raw"),
         TEXT("text"),
         HTML("html");
+
         String value;
+
         View(String value) {
             this.value = value;
         }

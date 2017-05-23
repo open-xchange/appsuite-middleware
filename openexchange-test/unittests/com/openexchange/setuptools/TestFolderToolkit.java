@@ -46,14 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.setuptools;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -69,7 +69,7 @@ public class TestFolderToolkit {
 
     public int getStandardFolder(final int user, final Context ctx) {
         final FolderObject fo = getStandardFolderObject(user, ctx);
-        if(fo == null) {
+        if (fo == null) {
             return -1;
         }
         return fo.getObjectID();
@@ -87,14 +87,14 @@ public class TestFolderToolkit {
         return fo;
     }
 
-    public FolderObject createPublicFolderFor(final Session session,final Context ctx, final String name, final int parent, final int...users) {
+    public FolderObject createPublicFolderFor(final Session session, final Context ctx, final String name, final int parent, final int... users) {
         Connection writecon = null;
         try {
-        	writecon = DBPool.pickupWriteable(ctx);
-	        final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
+            writecon = DBPool.pickupWriteable(ctx);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
 
             final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(users.length);
-            for(final int user : users) {
+            for (final int user : users) {
                 final OCLPermission oclp = new OCLPermission();
                 oclp.setEntity(user);
                 oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -102,30 +102,29 @@ public class TestFolderToolkit {
                 permissions.add(oclp);
             }
 
-
             FolderObject fo = new FolderObject();
-	        fo.setFolderName(name);
-	        fo.setParentFolderID(parent);
-	        fo.setModule(FolderObject.CALENDAR);
-	        fo.setType(FolderObject.PUBLIC);
-	        fo.setPermissions(permissions);
+            fo.setFolderName(name);
+            fo.setParentFolderID(parent);
+            fo.setModule(FolderObject.CALENDAR);
+            fo.setType(FolderObject.PUBLIC);
+            fo.setPermissions(permissions);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             return fo;
         } catch (final OXException e) {
             e.printStackTrace();
             return null;
         } finally {
-        	if(writecon != null) {
+            if (writecon != null) {
                 DBPool.pushWrite(ctx, writecon);
             }
         }
     }
 
-    public FolderObject createPrivateFolderForSessionUser(final Session session,final Context ctx, final String name, final int parent) {
+    public FolderObject createPrivateFolderForSessionUser(final Session session, final Context ctx, final String name, final int parent) {
         Connection writecon = null;
         try {
-        	writecon = DBPool.pickupWriteable(ctx);
-	        final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
+            writecon = DBPool.pickupWriteable(ctx);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
 
             final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(1);
             final OCLPermission oclp = new OCLPermission();
@@ -135,18 +134,18 @@ public class TestFolderToolkit {
             permissions.add(oclp);
 
             FolderObject fo = new FolderObject();
-	        fo.setFolderName(name);
-	        fo.setParentFolderID(parent);
-	        fo.setModule(FolderObject.CALENDAR);
-	        fo.setType(FolderObject.PRIVATE);
-	        fo.setPermissions(permissions);
+            fo.setFolderName(name);
+            fo.setParentFolderID(parent);
+            fo.setModule(FolderObject.CALENDAR);
+            fo.setType(FolderObject.PRIVATE);
+            fo.setPermissions(permissions);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             return fo;
         } catch (final OXException e) {
             e.printStackTrace();
             return null;
         } finally {
-        	if(writecon != null) {
+            if (writecon != null) {
                 DBPool.pushWrite(ctx, writecon);
             }
         }
@@ -156,7 +155,7 @@ public class TestFolderToolkit {
         final OXFolderManager oxma;
         try {
             oxma = OXFolderManager.getInstance(session, new CalendarSql(session));
-            for(final FolderObject folder : cleanFolders) {
+            for (final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder, true, System.currentTimeMillis());
             }
         } catch (final OXException e) {
@@ -179,6 +178,7 @@ public class TestFolderToolkit {
 
     /**
      * Shares a given calendar folder to a given userId with Admin permisson.
+     * 
      * @param sssion
      * @param ctx
      * @param otherUserId
@@ -186,11 +186,7 @@ public class TestFolderToolkit {
      */
     public void sharePrivateFolder(Session session, Context ctx, int otherUserId, FolderObject folder) {
         final OCLPermission oclp = new OCLPermission();
-        oclp.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         sharePrivateFolder(session, ctx, otherUserId, folder, oclp);
     }
 
@@ -210,11 +206,7 @@ public class TestFolderToolkit {
             final OCLPermission permission = permissions.get(i);
             if (permission.getEntity() == otherUserId) {
                 mustAdd = false;
-                permission.setAllPermission(
-                    oclp.getFolderPermission(),
-                    oclp.getReadPermission(),
-                    oclp.getWritePermission(),
-                    oclp.getDeletePermission());
+                permission.setAllPermission(oclp.getFolderPermission(), oclp.getReadPermission(), oclp.getWritePermission(), oclp.getDeletePermission());
 
             }
         }
@@ -236,7 +228,7 @@ public class TestFolderToolkit {
         } catch (final OXException e) {
             e.printStackTrace();
         } finally {
-            if(writecon != null) {
+            if (writecon != null) {
                 DBPool.pushWrite(ctx, writecon);
             }
         }

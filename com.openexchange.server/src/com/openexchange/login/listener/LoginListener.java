@@ -98,4 +98,5 @@ public interface LoginListener {
      * @throws OXException If this call-back is supposed to signal a different error
      */
     void onRedirectedAuthentication(LoginRequest request, Map<String, Object> properties, OXException e) throws OXException;
+
 }

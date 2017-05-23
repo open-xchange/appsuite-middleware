@@ -79,7 +79,7 @@ public class Bug34495Test extends SieveHandler {
     private static final String DELIMS = "\"\\\r\n ";
 
     public Bug34495Test() {
-        super(null, null, null, 0, null);
+        super(null, null, null, null, 0, null, null, -1, -1);
     }
 
 
@@ -93,13 +93,13 @@ public class Bug34495Test extends SieveHandler {
         });
     }
 
-    @Test
-    public void testParseMessageWithQuotes() throws Exception {
+     @Test
+     public void testParseMessageWithQuotes() throws Exception {
         testParseMessage(ERROR_MSG_1);
     }
 
-    @Test
-    public void testParseMessageWithLineBreaks() throws Exception {
+     @Test
+     public void testParseMessageWithLineBreaks() throws Exception {
         testParseMessage(ERROR_MSG_2);
     }
 

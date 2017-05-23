@@ -1,0 +1,27 @@
+feature_name: Snippets
+feature_description: |
+  Properties for snippet module.
+properties:
+    - key: com.openexchange.snippet.rdb.supportsAttachments
+      description: |
+        Specify whether the database-backed snippet implementation is supposed to support attachments.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: snippets.properties
+      packageName: open-xchange-core
+      tags: ["Snippet", "Attachment"]
+    - key: com.openexchange.snippet.quota.limit
+      description: |
+        Specify the maximum number of snippets that are allowed being created by a single user.
+        A value of less than <code>0</code> (zero) means unlimited.
+      defaultValue: -1
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: snippets.properties
+      packageName: open-xchange-core
+      tags: ["Snippet", "Limit"]

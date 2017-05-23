@@ -49,11 +49,13 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -61,15 +63,11 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
-import com.openexchange.ajax.share.actions.StartSMTPRequest;
-import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -82,39 +80,26 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
 public class AggregateSharesTest extends ShareTest {
 
     private java.util.Map<AJAXClient, List<Integer>> clientsAndFolders;
-    private AJAXClient client2;
-
-    /**
-     * Initializes a new {@link AggregateSharesTest}.
-     *
-     * @param name The test name
-     */
-    public AggregateSharesTest(String name) {
-        super(name);
-    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(User.User2);
-        client2.execute(new StartSMTPRequest());
         clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
-        clientsAndFolders.put(client, new ArrayList<Integer>());
-        clientsAndFolders.put(client2, new ArrayList<Integer>());
+        clientsAndFolders.put(getClient(), new ArrayList<Integer>());
+        clientsAndFolders.put(getClient2(), new ArrayList<Integer>());
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        if (null != clientsAndFolders) {
-            for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
-                deleteFoldersSilently(entry.getKey(), entry.getValue());
-                if (false == entry.getKey().equals(client)) {
-                    entry.getKey().execute(new StopSMTPRequest());
-                    entry.getKey().logout();
+    public void tearDown() throws Exception {
+        try {
+            if (null != clientsAndFolders) {
+                for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
+                    deleteFoldersSilently(entry.getKey(), entry.getValue());
                 }
             }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     private AJAXClient randomClient() {
@@ -122,6 +107,7 @@ public class AggregateSharesTest extends ShareTest {
         return ajaxClients[random.nextInt(ajaxClients.length)];
     }
 
+    @Test
     public void testAggregateSharesRandomly() throws Exception {
         testAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
@@ -142,6 +128,7 @@ public class AggregateSharesTest extends ShareTest {
         }
     }
 
+    @Test
     public void testRemoveAggregateSharesRandomly() throws Exception {
         testRemoveAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
@@ -261,16 +248,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */
-        FolderObject folderA = Create.createPrivateFolder(randomUID(), module1, client1.getValues().getUserId(), guestPermission);
-        folderA.setParentFolderID(getDefaultFolder(client1, module1));
-        InsertRequest insertRequest1 = new InsertRequest(api, folderA);
-        insertRequest1.setNotifyPermissionEntities(Transport.MAIL);
-        InsertResponse insertResponse1 = client1.execute(insertRequest1);
-        insertResponse1.fillObject(folderA);
+        FolderObject folderA = insertSharedFolder(client1, api, module1, getDefaultFolder(client1, module1), guestPermission);
         clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
-        GetResponse getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
-        folderA = getResponse1.getFolder();
-        folderA.setLastModified(getResponse1.getTimestamp());
         /*
          * check permissions
          */
@@ -292,16 +271,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
-        FolderObject folderB = Create.createPrivateFolder(randomUID(), module2, client2.getValues().getUserId(), guestPermission);
-        folderB.setParentFolderID(getDefaultFolder(client2, module2));
-        InsertRequest insertRequest2 = new InsertRequest(api, folderB);
-        insertRequest2.setNotifyPermissionEntities(Transport.MAIL);
-        InsertResponse insertResponse2 = client2.execute(insertRequest2);
-        insertResponse2.fillObject(folderB);
+        FolderObject folderB = insertSharedFolder(client2, api, module2, getDefaultFolder(client2, module2), guestPermission);
         clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
-        GetResponse getResponse2 = client2.execute(new GetRequest(api, folderB.getObjectID()));
-        folderB = getResponse2.getFolder();
-        folderB.setLastModified(getResponse2.getTimestamp());
         /*
          * check permissions
          */
@@ -346,12 +317,7 @@ public class AggregateSharesTest extends ShareTest {
          * update folder A, revoke guest permissions
          */
         folderA.getPermissions().remove(matchingPermissionA);
-        insertResponse1 = client1.execute(new UpdateRequest(api, folderA));
-        insertResponse1.fillObject(folderA);
-        clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
-        getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
-        folderA = getResponse1.getFolder();
-        folderA.setLastModified(getResponse1.getTimestamp());
+        folderA = updateFolder(client1, api, folderA);
         /*
          * check permissions
          */

@@ -117,7 +117,7 @@ public final class MailServiceImpl implements MailService {
         MailAccount mailAccount = service.getMailAccount(accountId, userId, contextId);
 
         // Return login
-        return MailConfig.getMailLogin(mailAccount, user.getLoginInfo());
+        return MailConfig.getMailLogin(mailAccount, user.getLoginInfo(), userId, contextId);
     }
 
 }

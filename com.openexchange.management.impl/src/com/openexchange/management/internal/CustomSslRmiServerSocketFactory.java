@@ -57,6 +57,7 @@ import java.net.UnknownHostException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import com.openexchange.java.Streams;
 import com.openexchange.management.services.ManagementServiceRegistry;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
@@ -123,20 +124,31 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
             @Override
             public Socket accept() throws IOException {
                 final Socket socket = super.accept();
-                final SSLSocket sslSocket =
-                    (SSLSocket) sslSocketFactory.createSocket(socket, socket.getInetAddress().getHostName(), socket.getPort(), true);
-                sslSocket.setUseClientMode(false);
-                final String[] enabledCipherSuites = getEnabledCipherSuites();
-                if (enabledCipherSuites != null) {
-                    sslSocket.setEnabledCipherSuites(enabledCipherSuites);
+                boolean error = true;
+                try {
+                    SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, socket.getInetAddress().getHostName(), socket.getPort(), true);
+                    sslSocket.setUseClientMode(false);
+
+                    String[] enabledCipherSuites = getEnabledCipherSuites();
+                    if (enabledCipherSuites != null) {
+                        sslSocket.setEnabledCipherSuites(enabledCipherSuites);
+                    }
+
+                    String[] enabledProtocols = getEnabledProtocols();
+                    if (enabledProtocols != null) {
+                        sslSocket.setEnabledProtocols(enabledProtocols);
+                    }
+
+                    boolean needClientAuth = getNeedClientAuth();
+                    sslSocket.setNeedClientAuth(needClientAuth);
+
+                    error = false;
+                    return sslSocket;
+                } finally {
+                    if (error) {
+                        Streams.close(socket);
+                    }
                 }
-                final String[] enabledProtocols = getEnabledProtocols();
-                if (enabledProtocols != null) {
-                    sslSocket.setEnabledProtocols(enabledProtocols);
-                }
-                final boolean needClientAuth = getNeedClientAuth();
-                sslSocket.setNeedClientAuth(needClientAuth);
-                return sslSocket;
             }
         };
 

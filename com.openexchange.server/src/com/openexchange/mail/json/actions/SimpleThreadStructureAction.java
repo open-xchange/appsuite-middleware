@@ -131,7 +131,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     {
                         final int messageCount = mailInterface.getMessageCount(folderId);
                         final int fetchLimit;
-                        if ((messageCount <= 0) || (messageCount <= (fetchLimit = getFetchLimit(mailInterface))) || ((max > 0) && (max <= fetchLimit))) {
+                        if ((messageCount <= 0) || (messageCount <= (fetchLimit = getFetchLimit(mailInterface, session))) || ((max > 0) && (max <= fetchLimit))) {
                             /*
                              * Mailbox considered small enough for direct hand-off
                              */
@@ -209,9 +209,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         return perform0(req, getMailInterface(req), cache);
     }
 
-    private int getFetchLimit(final MailServletInterface mailInterface) throws OXException {
+    private int getFetchLimit(final MailServletInterface mailInterface, ServerSession session) throws OXException {
         if (null == mailInterface) {
-            return MailProperties.getInstance().getMailFetchLimit();
+            return MailProperties.getInstance().getMailFetchLimit(session.getUserId(), session.getContextId());
         }
         try {
             return mailInterface.getMailConfig().getMailProperties().getMailFetchLimit();
@@ -385,7 +385,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             int sortCol = req.getSortFieldFor(sort);
             if (!filterApplied) {
                 List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, null);
-                return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+                AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+                if (!mailInterface.getWarnings().isEmpty()) {
+                    result.addWarnings(mailInterface.getWarnings());
+                }
+                return result;
             }
 
             List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead, searchTerm);
@@ -446,6 +450,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             result.setResponseProperty("cached", Boolean.valueOf(cached));
             if (more > 0) {
                 result.setResponseProperty("more", Integer.valueOf(more));
+            }
+            if (!mailInterface.getWarnings().isEmpty()) {
+                result.addWarnings(mailInterface.getWarnings());
             }
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {

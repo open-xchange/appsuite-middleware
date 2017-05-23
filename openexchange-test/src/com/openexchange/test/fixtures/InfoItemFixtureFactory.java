@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.HashMap;
@@ -59,19 +60,20 @@ import com.openexchange.test.fixtures.transformators.UserIdTransformator;
  */
 public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
 
-	private final FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
-	public InfoItemFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
+    public InfoItemFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
+    }
 
-	@Override
+    @Override
     public Fixtures<InfoItem> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new InfoItemFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class InfoItemFixtures extends DefaultFixtures<InfoItem> implements Fixtures<InfoItem> {
+
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<InfoItem>> knownInfoitems = new HashMap<String, Fixture<InfoItem>>();
 
@@ -95,13 +97,12 @@ public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
             apply(item, values);
 
             if (item.containsVersions()) {
-            	for (final Document version : item.getVersions()) {
-            		version.setParent(item);
-            	}
+                for (final Document version : item.getVersions()) {
+                    version.setParent(item);
+                }
             }
 
-            final Fixture<InfoItem> fixture = new Fixture<InfoItem>(item,
-            		values.keySet().toArray(new String[values.size()]), values);
+            final Fixture<InfoItem> fixture = new Fixture<InfoItem>(item, values.keySet().toArray(new String[values.size()]), values);
             knownInfoitems.put(entryName, fixture);
             return fixture;
         }

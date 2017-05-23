@@ -50,13 +50,12 @@
 package com.openexchange.net.ssl.osgi;
 
 import javax.net.ssl.HttpsURLConnection;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.TrustedSSLSocketFactory;
-import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
+import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -70,7 +69,7 @@ public class SSLActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SSLConfigurationService.class };
+        return new Class[] { SSLConfigurationService.class, SSLCertificateManagementService.class };
     }
 
     @Override
@@ -90,12 +89,10 @@ public class SSLActivator extends HousekeepingActivator {
             SSLConfigurationService sslConfigurationService = getService(SSLConfigurationService.class);
 
             if (sslConfigurationService.isVerifyHostname()) {
-                HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
+                HttpsURLConnection.setDefaultHostnameVerifier(new com.openexchange.net.ssl.apache.DefaultHostnameVerifier());
             } else {
-                HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+                HttpsURLConnection.setDefaultHostnameVerifier(new org.apache.http.conn.ssl.NoopHostnameVerifier());
             }
-
-            HttpsURLConnection.setDefaultSSLSocketFactory(factoryProvider.getDefault());
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
             throw e;

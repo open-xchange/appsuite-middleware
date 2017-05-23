@@ -1,0 +1,87 @@
+feature_name: Jolokia
+feature_description: |
+  This page describes the properties for jolokia contained in the com.openexchange.jolokia bundle.
+
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/jolokia.html]] for more informations.
+properties:
+    - key: com.openexchange.jolokia.start
+      description: |
+        Whether to start jolokia or not.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: jolokia.properties
+      packageName: open-xchange-core
+      tags: ["Jolokia"]
+    - key: com.openexchange.jolokia.servlet.name
+      description: |
+        Under what servlet name jolokia will be published, please bear in mind that this should not be forwarded by apache and kept internal.
+      defaultValue: /monitoring/jolokia
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: jolokia.properties
+      packageName: open-xchange-core
+      tags: ["Jolokia"]
+    - key: com.openexchange.jolokia.user
+      description: |
+        User used for authentication with HTTP Basic Authentication. If not set, jolokia won't start.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: jolokia.properties
+      packageName: open-xchange-core
+      tags: ["Jolokia"]
+    - key: com.openexchange.jolokia.password
+      description: |
+        Password used for authentification with HTTP Basic Authentication. If not set, jolokia won't start.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: jolokia.properties
+      packageName: open-xchange-core
+      tags: ["Jolokia"]
+    - key: com.openexchange.jolokia.maxDepth
+      description: |
+        Maximum depth when traversing bean properties. If set to <code>0</code>, depth checking is disabled.
+      defaultValue: 0
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: jolokia.properties
+      packageName: open-xchange-core
+      tags: ["Jolokia", "Limit"]
+    - key: com.openexchange.jolokia.maxObjects
+      description: |
+        Maximum number of objects which are traversed when serializing a single response.
+        Use this as an airbag to avoid boosting your memory and network traffic. Nevertheless, when set to <code>0</code> no limit is imposed.
+      defaultValue: 100000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: jolokia.properties
+      packageName: open-xchange-core
+      tags: ["Jolokia", "Limit"]
+    - key: com.openexchange.jolokia.restrict.to.localhost
+      description: |
+        This setting will restrict jolokia access to localhost. It is completly ignored when a jolokia-access.xml is present.
+        It is also a second guard and bound to [[com.openexchange.connector.networkListenerHost]].
+        As Jolokia uses the http interface, it is bound to the host for the connector's http network listener
+        which is configured by [[com.openexchange.connector.networkListenerHost]].
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.connector.networkListenerHost
+      file: jolokia.properties
+      packageName: open-xchange-core
+      tags: ["Jolokia"]

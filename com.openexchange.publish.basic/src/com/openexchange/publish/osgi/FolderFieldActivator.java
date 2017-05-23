@@ -66,13 +66,20 @@ public class FolderFieldActivator implements BundleActivator {
 
 	private ServiceRegistration<AdditionalFolderField> registerService;
 
+    /**
+     * Initializes a new {@link FolderFieldActivator}.
+     */
+    public FolderFieldActivator() {
+        super();
+    }
+
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         registerService = context.registerService(AdditionalFolderField.class, new IsPublished(), null);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
         if (null != registerService) {
             registerService.unregister();
             registerService = null;

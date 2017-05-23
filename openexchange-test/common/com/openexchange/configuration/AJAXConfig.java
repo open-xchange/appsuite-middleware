@@ -106,6 +106,7 @@ public class AJAXConfig extends AbstractConfig {
 
     /**
      * Enumeration of all properties in the ajax.properties file.
+     * FIXME only required for unittests. do clean up their setup
      */
     public static enum Property {
         /**
@@ -125,26 +126,32 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * User login.
          */
+        @Deprecated // still required for unit tests
         LOGIN("login"),
         /**
          * User password.
          */
+        @Deprecated // still required for unit tests
         PASSWORD("password"),
         /**
          * Second user login.
          */
+        @Deprecated // still required for unit tests
         SECONDUSER("seconduser"),
         /**
          * Third user login.
          */
+        @Deprecated // still required for unit tests
         THIRDLOGIN("thirdlogin"),
         /**
          * Fourth user login.
          */
+        @Deprecated // still required for unit tests
         FOURTHLOGIN("fourthlogin"),
         /**
          * OXAdmin login.
          */
+        @Deprecated // still required for unit tests
         OXADMIN("oxadmin"),
         /**
          * Whether SP3 or SP4 data
@@ -153,34 +160,52 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Context name.
          */
+        @Deprecated // still required for unit tests
         CONTEXTNAME("contextName"),
 
         /**
          * USER PARTICIPANTS
          */
+        @Deprecated // still required for unit tests
         USER_PARTICIPANT1("user_participant1"),
+        @Deprecated // still required for unit tests
         USER_PARTICIPANT2("user_participant2"),
+        @Deprecated // still required for unit tests
         USER_PARTICIPANT3("user_participant3"),
         /**
          * OXADMINMASTER
          */
+        @Deprecated // still required for unit tests
         OX_ADMIN_MASTER("oxadminmaster"),
+        @Deprecated // still required for unit tests
         OX_ADMIN_MASTER_PWD("oxadminmaster_password"),
         /**
          * Resource Participants
          */
+        @Deprecated // still required for unit tests
         RESOURCE_PARTICIPANT1("resource_participant1"),
+        @Deprecated // still required for unit tests
         RESOURCE_PARTICIPANT2("resource_participant2"),
+        @Deprecated // still required for unit tests
         RESOURCE_PARTICIPANT3("resource_participant3"),
         /**
          * Group Participant
          */
+        @Deprecated // still required for unit tests
         GROUP_PARTICIPANT("group_participant"),
 
         /**
          * Echo header; see property "com.openexchange.servlet.echoHeaderName" in file 'server.properties'
          */
-        ECHO_HEADER("echo_header");
+        ECHO_HEADER("echo_header"),
+
+        /**
+         * Directory which contains test mails (rfc 822 files)
+         */
+        TEST_MAIL_DIR("testMailDir"),
+
+        MAIL_PORT("mailPort"),
+
         ;
 
         /**

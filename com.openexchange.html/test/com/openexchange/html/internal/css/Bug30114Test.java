@@ -64,8 +64,8 @@ import com.openexchange.java.Stringer;
  */
 public class Bug30114Test {
 
-    @Test
-    public void testBug30114() {
+     @Test
+     public void testBug30114() {
         final Stringer cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         String css = "body * { font-family:Tahoma, Geneva, sans-serif; font-size:13px; }\n" +
             "a { color:#000; text-decoration:underline; }\n" +
@@ -89,8 +89,8 @@ public class Bug30114Test {
     }
 
 
-    @Test
-    public void testBug30114_2() {
+     @Test
+     public void testBug30114_2() {
         final Stringer cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         String css = "* { font-family:Tahoma, Geneva, sans-serif; font-size:13px; }\n" +
             "a { color:#000; text-decoration:underline; }\n" +

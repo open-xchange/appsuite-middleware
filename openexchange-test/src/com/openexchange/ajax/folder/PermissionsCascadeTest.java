@@ -49,12 +49,16 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -66,7 +70,6 @@ import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -89,18 +92,21 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @param name
      */
-    public PermissionsCascadeTest(String name) {
-        super(name);
+    public PermissionsCascadeTest() {
+        super();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (CLEANUP) {
-            client.execute(new DeleteRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID(), rootFolder.getLastModified()));
-            client.execute(new ClearRequest(EnumAPI.OUTLOOK, client.getValues().getInfostoreTrashFolder()));
-        }
+        try {
+            if (CLEANUP) {
+                getClient().execute(new DeleteRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID(), rootFolder.getLastModified()));
+                getClient().execute(new ClearRequest(EnumAPI.OUTLOOK, getClient().getValues().getInfostoreTrashFolder()));
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     /**
@@ -110,6 +116,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @throws Exception
      */
+    @Test
     public void testCascadePermissionsInChildrenFolders() throws Exception {
         // Create a simple folder tree
         rootFolder = createSimpleTree("testCascadePermissionsInChildrenFolders", 5);
@@ -121,6 +128,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @throws Exception
      */
+    @Test
     public void testCasccadePermissionsInSiblingFolders() throws Exception {
         rootFolder = createRandomTree("testCasccadePermissionsInSiblingFolders", 20);
         assertCascadePermissions();
@@ -133,29 +141,22 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      */
     private void assertCascadePermissions() throws Exception {
         // Fetch that folder
-        GetResponse response = client.execute(new GetRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID()));
+        GetResponse response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID()));
         JSONObject data = (JSONObject) response.getData();
         long timestamp = data.getLong("last_modified");
 
         // User to share the folder with
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
 
         // Apply permissions 
-        rootFolder.addPermission(Create.ocl(
-            client2.getValues().getUserId(),
-            false,
-            false,
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS));
+        rootFolder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
         rootFolder.setLastModified(new Date(timestamp));
-        client.execute(new UpdateRequest(EnumAPI.OUTLOOK, rootFolder).setCascadePermissions(true));
+        getClient().execute(new UpdateRequest(EnumAPI.OUTLOOK, rootFolder).setCascadePermissions(true));
 
         // Fetch all folders of the tree and make sure that the permissions are cascaded
         for (int i = 2; i < testFolders.size(); i++) {
             FolderObject fo = testFolders.get(i);
-            response = client.execute(new GetRequest(EnumAPI.OUTLOOK, fo.getObjectID(), new int[] { 300, 306 }));
+            response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, fo.getObjectID(), new int[] { 300, 306 }));
             List<OCLPermission> permissions = response.getFolder().getPermissions();
             boolean found = false;
             for (int p = 0; !found && p < permissions.size(); p++) {
@@ -178,13 +179,14 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * 
      * @throws Exception
      */
+    @Test
     public void testCascadePermissionsInTreeRollbackAndThenIgnore() throws Exception {
         rootFolder = createRandomTree("testCascadePermissionsInTreeRollback", 20);
 
         // Pick one folder that has at least one sub-folder
         int rootNodeIdOfSubTree = -1;
         for (int f = 1; f < testFolders.size(); f++) {
-            GetResponse response = client.execute(new GetRequest(EnumAPI.OUTLOOK, testFolders.get(f).getObjectID(), new int[] { 304 }));
+            GetResponse response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, testFolders.get(f).getObjectID(), new int[] { 304 }));
             if (response.getFolder().hasSubfolders()) {
                 rootNodeIdOfSubTree = response.getFolder().getObjectID();
                 break;
@@ -204,25 +206,18 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
         // Fetch information about the leaf folder
         FolderObject leaf = tree.get(tree.size() - 1);
-        GetResponse response = client.execute(new GetRequest(EnumAPI.OUTLOOK, leaf.getObjectID()));
+        GetResponse response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, leaf.getObjectID()));
         JSONObject data = (JSONObject) response.getData();
         long timestamp = data.getLong("last_modified");
         leaf.setPermissions(response.getFolder().getPermissions());
 
         // User to share the folder with
-        AJAXClient client2 = new AJAXClient(User.User2);
+        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
 
         // Make second user an admin
-        leaf.addPermission(Create.ocl(
-            client2.getValues().getUserId(),
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION));
+        leaf.addPermission(Create.ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         leaf.setLastModified(new Date(timestamp));
-        client.execute(new UpdateRequest(EnumAPI.OUTLOOK, leaf));
+        getClient().execute(new UpdateRequest(EnumAPI.OUTLOOK, leaf));
 
         // Create a folder under leaf
         int lol = createFolder("Leaf", leaf.getObjectID(), client2).getObjectID();
@@ -234,51 +229,37 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
         // Apply administrative permissions to the leaf of leaf folder.
         leafOfLeaf.removePermissions();
-        leafOfLeaf.addPermission(Create.ocl(
-            client2.getValues().getUserId(),
-            false,
-            true,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION));
+        leafOfLeaf.addPermission(Create.ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         leafOfLeaf.setLastModified(new Date(timestamp));
         client2.execute(new UpdateRequest(EnumAPI.OUTLOOK, leafOfLeaf));
 
         // Try to apply permissions to the rootNodeOfSubTree and cascade (should fail and roll-back)
-        response = client.execute(new GetRequest(EnumAPI.OUTLOOK, rootNodeIdOfSubTree, new int[] { 5, 306 }));
+        response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, rootNodeIdOfSubTree, new int[] { 5, 306 }));
         FolderObject rootNode = response.getFolder();
         timestamp = ((JSONObject) response.getData()).getLong("last_modified");
 
-        AJAXClient client3 = new AJAXClient(User.User3);
-        rootNode.addPermission(Create.ocl(
-            client3.getValues().getUserId(),
-            false,
-            false,
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS));
+        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
+        rootNode.addPermission(Create.ocl(client3.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
         rootNode.setLastModified(new Date(timestamp));
         UpdateRequest setCascadePermissions = new UpdateRequest(EnumAPI.OUTLOOK, rootNode, false).setCascadePermissions(true);
-        client.execute(setCascadePermissions);
+        getClient().execute(setCascadePermissions);
 
-        int owner = client.getValues().getUserId();
+        int owner = getClient().getValues().getUserId();
         int guest = client2.getValues().getUserId();
         int doe = client3.getValues().getUserId();
 
         // Assert permissions
-        assertPermissions(rootNode, new int[] { owner, doe }, new int[] { guest }, client);
-        assertPermissions(leaf, new int[] { owner, guest }, new int[] { doe }, client);
+        assertPermissions(rootNode, new int[] { owner, doe }, new int[] { guest }, getClient());
+        assertPermissions(leaf, new int[] { owner, guest }, new int[] { doe }, getClient());
         assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
 
         // Ignore warnings and apply permissions to the rootNodeOfSubTree again (should succeed)
         setCascadePermissions.setIgnoreWarnings(true);
-        client.execute(setCascadePermissions);
+        getClient().execute(setCascadePermissions);
 
         // Assert permissions
-        assertPermissions(rootNode, new int[] { owner }, new int[] { guest, doe }, client);
-        assertPermissions(leaf, new int[] { owner, doe }, new int[] { guest }, client);
+        assertPermissions(rootNode, new int[] { owner }, new int[] { guest, doe }, getClient());
+        assertPermissions(leaf, new int[] { owner, doe }, new int[] { guest }, getClient());
         assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
     }
 
@@ -328,7 +309,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * @throws Exception
      */
     private void fetchAllSubfolders(int folderId, List<FolderObject> tree) throws Exception {
-        ListResponse listResponse = client.execute(new ListRequest(EnumAPI.OUTLOOK, Integer.toString(folderId), new int[] { 1, 304, 306 }, false));
+        ListResponse listResponse = getClient().execute(new ListRequest(EnumAPI.OUTLOOK, Integer.toString(folderId), new int[] { 1, 304, 306 }, false));
         Iterator<FolderObject> iterator = listResponse.getFolder();
         while (iterator.hasNext()) {
             FolderObject fo = iterator.next();
@@ -348,7 +329,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * @throws Exception
      */
     private FolderObject createFolder(String folderName, int parent) throws Exception {
-        return createFolder(folderName, parent, client);
+        return createFolder(folderName, parent, getClient());
     }
 
     /**
@@ -377,7 +358,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * @throws Exception
      */
     private FolderObject createSimpleTree(String rootName, int levels) throws Exception {
-        FolderObject rootFolder = createFolder(rootName, client.getValues().getPrivateInfostoreFolder());
+        FolderObject rootFolder = createFolder(rootName, getClient().getValues().getPrivateInfostoreFolder());
         int parent = rootFolder.getObjectID();
         for (int i = 1; i <= levels; i++) {
             parent = createFolder("Level " + i, parent).getObjectID();
@@ -392,7 +373,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * @throws Exception
      */
     private FolderObject createRandomTree(String rootName, int folderCount) throws Exception {
-        FolderObject rootFolder = createFolder(rootName, client.getValues().getPrivateInfostoreFolder());
+        FolderObject rootFolder = createFolder(rootName, getClient().getValues().getPrivateInfostoreFolder());
         int parentId = rootFolder.getObjectID();
         for (int i = 0; i < folderCount; i++) {
             int r = (int) (Math.random() * (testFolders.size() - 1));

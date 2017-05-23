@@ -61,10 +61,10 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 
 /**
- * {@link DefaultArchiveDays} - Checks if <tt>"com.openexchange.mail.enforceSecureConnection"</tt> option is enabled.
+ * {@link DefaultArchiveDays}
  * <p>
  * Path in config tree:<br>
- * <code>modules -&gt; mail -&gt; enforcesecureconnection</code>
+ * <code>modules -&gt; mail -&gt; defaultarchivedays</code>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -99,7 +99,7 @@ public class DefaultArchiveDays implements PreferencesItemService {
             @Override
             public void getValue(Session session, Context ctx, User user,
                     UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(Integer.valueOf(MailProperties.getInstance().getDefaultArchiveDays()));
+                setting.setSingleValue(Integer.valueOf(MailProperties.getInstance().getDefaultArchiveDays(session.getUserId(), session.getContextId())));
             }
         };
     }

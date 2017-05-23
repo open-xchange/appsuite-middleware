@@ -1,6 +1,7 @@
 /**
  *
  */
+
 package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.container.Response;
@@ -68,11 +69,11 @@ public class LoginResponse extends AbstractAJAXResponse {
     public void setJvmRoute(final String jvmRoute) {
         this.jvmRoute = jvmRoute;
     }
-    
+
     public void setPassword(String password) {
         this.password = password;
     }
-    
+
     public String getPassword() {
         return password;
     }

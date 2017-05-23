@@ -51,7 +51,6 @@ package com.openexchange.ajax.subscribe.actions;
 
 import com.openexchange.ajax.container.Response;
 
-
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

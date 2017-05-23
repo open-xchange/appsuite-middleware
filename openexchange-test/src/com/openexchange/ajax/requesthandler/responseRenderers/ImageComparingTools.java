@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-
 /**
  * {@link ImageComparingTools}
  *

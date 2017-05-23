@@ -98,15 +98,15 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
 
     protected String csid;
 
-    public ReplyRequest(){
+    public ReplyRequest() {
 
     }
 
-    public ReplyRequest(String[] folderAndID){
+    public ReplyRequest(String[] folderAndID) {
         this(folderAndID[0], folderAndID[1]);
     }
 
-    public ReplyRequest(String folderID, String mailID){
+    public ReplyRequest(String folderID, String mailID) {
         this.folderID = folderID;
         this.mailID = mailID;
     }
@@ -115,16 +115,13 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         return view;
     }
 
-
     public void setView(ViewOption view) {
         this.view = view;
     }
 
-
     public String getFolderID() {
         return folderID;
     }
-
 
     public void setFolderID(String folderID) {
         this.folderID = folderID;
@@ -134,7 +131,6 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         return csid;
     }
 
-
     public void setCsid(String csid) {
         this.csid = csid;
     }
@@ -143,7 +139,6 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         return mailID;
     }
 
-
     public void setMailID(String mailID) {
         this.mailID = mailID;
     }
@@ -151,7 +146,6 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
     public boolean isFailOnError() {
         return failOnError;
     }
-
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
@@ -167,7 +161,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         return Method.GET;
     }
 
-    public String getAction(){
+    public String getAction() {
         return Mail.ACTION_REPLY;
     }
 
@@ -175,14 +169,14 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<Parameter>();
 
-        list.add( new Parameter(Mail.PARAMETER_ACTION, getAction()) );
-        list.add( new Parameter(Mail.PARAMETER_FOLDERID, folderID) );
-        list.add( new Parameter(Mail.PARAMETER_ID, mailID) );
+        list.add(new Parameter(Mail.PARAMETER_ACTION, getAction()));
+        list.add(new Parameter(Mail.PARAMETER_FOLDERID, folderID));
+        list.add(new Parameter(Mail.PARAMETER_ID, mailID));
         if (getView() != null) {
-            list.add( new Parameter(Mail.PARAMETER_VIEW, getView().toString()) );
+            list.add(new Parameter(Mail.PARAMETER_VIEW, getView().toString()));
         }
 
-        if(!Strings.isEmpty(csid)) {
+        if (!Strings.isEmpty(csid)) {
             list.add(new Parameter(Mail.PARAMETER_CSID, csid));
         }
 
@@ -192,6 +186,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
     @Override
     public AbstractAJAXParser<? extends ReplyResponse> getParser() {
         return new AbstractAJAXParser<ReplyResponse>(failOnError) {
+
             @Override
             protected ReplyResponse createResponse(final Response response) throws JSONException {
                 return new ReplyResponse(response);

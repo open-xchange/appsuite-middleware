@@ -152,6 +152,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield18" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield19" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -294,6 +295,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield18",
     "userfield19",
     "userfield20",
+    "primaryAccountName",
     "convertDriveUserFolders"
 })
 public class User {
@@ -335,7 +337,7 @@ public class User {
     protected String countryHome;
     @XmlElement(name = "country_other", nillable = true)
     protected String countryOther;
-    @XmlElement(name = "drive_folder_mode", nillable = true)
+    @XmlElement(name = "drive_user_folder_mode", nillable = true)
     protected String driveUserFolderMode;
     @XmlElement(nillable = true)
     protected String defaultSenderAddress;
@@ -559,6 +561,8 @@ public class User {
     protected String userfield19;
     @XmlElement(nillable = true)
     protected String userfield20;
+    @XmlElement(nillable = true)
+    private String primaryAccountName;
     @XmlElement(name = "convert_drive_user_folders", nillable = true)
     protected Boolean convertDriveUserFolders;
 
@@ -1019,11 +1023,11 @@ public class User {
     public void setDefaultSenderAddress(final String value) {
         this.defaultSenderAddress = value;
     }
-    
+
 
     /**
      * Get driveUserFolderMode value.
-     * 
+     *
      * @return
      *      possible object is
      *     {@link String }
@@ -3754,6 +3758,24 @@ public class User {
      */
     public void setUserfield20(final String value) {
         this.userfield20 = value;
+    }
+
+    /**
+     * Gets the primaryAccountName
+     *
+     * @return The primaryAccountName
+     */
+    public String getPrimaryAccountName() {
+        return primaryAccountName;
+    }
+
+    /**
+     * Sets the primaryAccountName
+     *
+     * @param primaryAccountName The primaryAccountName to set
+     */
+    public void setPrimaryAccountName(String primaryAccountName) {
+        this.primaryAccountName = primaryAccountName;
     }
 
     public Boolean isConvertDriveUserFolders() {

@@ -60,6 +60,7 @@ import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.locking.SessionInfo;
+import com.openexchange.push.dovecot.registration.RegistrationContext;
 import com.openexchange.push.dovecot.registration.RegistrationPerformer;
 import com.openexchange.push.dovecot.registration.RegistrationResult;
 import com.openexchange.server.ServiceExceptionCode;
@@ -126,7 +127,7 @@ public class DovecotPushListener implements PushListener, Runnable {
     private final String authLogin;
     private final URI uri;
     private final boolean permanent;
-    private final Session session;
+    final RegistrationContext registrationContext;
     private final ServiceLookup services;
     private final DovecotPushManagerService pushManager;
 
@@ -140,32 +141,32 @@ public class DovecotPushListener implements PushListener, Runnable {
      * @param uri The URL end-point
      * @param authLogin The option login
      * @param authPassword The optional password
-     * @param session The session
+     * @param registrationContext The registration context
      * @param permanent <code>true</code> if associated with a permanent listener; otherwise <code>false</code>
      * @param pushManager The Dovecot push manager instance
      * @param services The OSGi service look-up
      */
-    public DovecotPushListener(URI uri, final String authLogin, final String authPassword, Session session, boolean permanent, DovecotPushManagerService pushManager, ServiceLookup services) {
+    public DovecotPushListener(URI uri, final String authLogin, final String authPassword, RegistrationContext registrationContext, boolean permanent, DovecotPushManagerService pushManager, ServiceLookup services) {
         super();
         this.uri = uri;
         this.authLogin = authLogin;
         this.authPassword = authPassword;
         this.pushManager = pushManager;
         this.permanent = permanent;
-        this.session = session;
+        this.registrationContext = registrationContext;
         this.services = services;
     }
 
     private boolean isUserValid() {
         try {
             ContextService contextService = services.getService(ContextService.class);
-            Context context = contextService.loadContext(session.getContextId());
+            Context context = contextService.loadContext(registrationContext.getContextId());
             if (!context.isEnabled()) {
                 return false;
             }
 
             UserService userService = services.getService(UserService.class);
-            User user = userService.getUser(session.getUserId(), context);
+            User user = userService.getUser(registrationContext.getUserId(), context);
             return user.isMailEnabled();
         } catch (OXException e) {
             return false;
@@ -180,19 +181,19 @@ public class DovecotPushListener implements PushListener, Runnable {
                 return;
             }
 
-            pushManager.refreshLock(new SessionInfo(session, permanent));
+            pushManager.refreshLock(new SessionInfo(registrationContext, permanent));
         } catch (Exception e) {
-            LOGGER.warn("Failed to refresh lock for user {} in context {}", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            LOGGER.warn("Failed to refresh lock for user {} in context {}", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()));
         }
     }
 
     /**
-     * Gets the session
+     * Gets the registration context
      *
-     * @return The session
+     * @return The registration context
      */
-    public Session getSession() {
-        return session;
+    public RegistrationContext getRegistrationContext() {
+        return registrationContext;
     }
 
     /**
@@ -230,7 +231,7 @@ public class DovecotPushListener implements PushListener, Runnable {
         String logInfo = null;
         try {
             RegistrationPerformer performer = REGISTRATION_PERFORMER_REFERENCE.get();
-            RegistrationResult registrationResult = performer.initateRegistration(session);
+            RegistrationResult registrationResult = performer.initateRegistration(registrationContext);
             if (registrationResult.isDenied()) {
                 return registrationResult.getReason();
             }
@@ -263,10 +264,49 @@ public class DovecotPushListener implements PushListener, Runnable {
      *
      * @throws OXException If unregistration fails
      */
-    public synchronized boolean unregister(boolean tryToReconnect) throws OXException {
+    public synchronized Runnable unregister(boolean tryToReconnect) throws OXException {
         // Avoid subsequent initialization attempt
         initialized = true;
 
+        // Check if DoveAdm is used
+        if (registrationContext.isDoveAdmBased()) {
+            if (tryToReconnect) {
+                if (permanent) {
+                    // Not associated with a certain session. Keep as-is
+                    return null;
+                }
+
+                // Check if there is still a valid push-capable session available
+                Session session = pushManager.lookUpSessionFor(registrationContext.getUserId(), registrationContext.getContextId(), null);
+                if (null != session) {
+                    // Keep as-is
+                    return null;
+                }
+            }
+
+            // Cancel timer tasks
+            {
+                ScheduledTimerTask retryTask = this.retryTask;
+                if (null != retryTask) {
+                    this.retryTask = null;
+                    retryTask.cancel();
+                }
+
+                ScheduledTimerTask refreshLockTask = this.refreshLockTask;
+                if (null != refreshLockTask) {
+                    this.refreshLockTask = null;
+                    refreshLockTask.cancel();
+                }
+            }
+
+            // Dispose...
+            Runnable cleanUpTask = createCleanUpTask(pushManager);
+            doUnregistration();
+            initialized = false;
+            return cleanUpTask;
+        }
+
+        // Session-based...
         // Cancel timer tasks
         {
             ScheduledTimerTask retryTask = this.retryTask;
@@ -282,43 +322,50 @@ public class DovecotPushListener implements PushListener, Runnable {
             }
         }
 
-        boolean reconnected = false;
-        DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(session) : null;
+        Runnable cleanUpTask = null;
+        DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(registrationContext.getSession()) : null;
         if (null == anotherListener) {
             // No other listener available
             // Give up lock and return
-            try {
-                pushManager.releaseLock(new SessionInfo(session, permanent));
-            } catch (Exception e) {
-                LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-            }
+            cleanUpTask = createCleanUpTask(pushManager);
         } else {
             try {
                 // No need to re-execute registration
-                reconnected = true;
+                cleanUpTask = null;
             } catch (Exception e) {
-                LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
                 // Give up lock and return
-                try {
-                    pushManager.releaseLock(new SessionInfo(session, permanent));
-                } catch (Exception x) {
-                    LOGGER.warn("Failed to release DB lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), x);
-                }
+                cleanUpTask = createCleanUpTask(pushManager);
             }
         }
 
-        if (false == reconnected) {
+        if (null != cleanUpTask) {
             doUnregistration();
             // Mark as uninitialized
             initialized = false;
         }
 
-        return reconnected;
+        return cleanUpTask;
+    }
+
+    private Runnable createCleanUpTask(final DovecotPushManagerService pushManager) {
+        final RegistrationContext registrationContext = this.registrationContext;
+        final boolean permanent = this.permanent;
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    pushManager.releaseLock(new SessionInfo(registrationContext, permanent));
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
+                }
+            }
+        };
     }
 
     private void doUnregistration() throws OXException {
         RegistrationPerformer registrationPerformer = REGISTRATION_PERFORMER_REFERENCE.get();
-        registrationPerformer.unregister(session);
+        registrationPerformer.unregister(registrationContext);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -337,9 +384,9 @@ public class DovecotPushListener implements PushListener, Runnable {
                 initateRegistration();
             } catch (Exception e) {
                 if (null == logInfo) {
-                    LOGGER.error("Failed to initiate Dovecot Push registration for user {} in context {}", session.getUserId(), session.getContextId(), e);
+                    LOGGER.error("Failed to initiate Dovecot Push registration for user {} in context {}", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
                 } else {
-                    LOGGER.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", logInfo, session.getUserId(), session.getContextId(), e);
+                    LOGGER.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", logInfo, Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
                 }
             }
         }

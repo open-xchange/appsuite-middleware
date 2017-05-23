@@ -63,25 +63,25 @@ import com.openexchange.resource.json.ResourceFields;
  */
 public final class ResourceNewResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link ResourceNewResponse}
-	 *
-	 * @param response
-	 *            The JSON response container
-	 */
-	ResourceNewResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ResourceNewResponse}
+     *
+     * @param response
+     *            The JSON response container
+     */
+    ResourceNewResponse(final Response response) {
+        super(response);
+    }
 
-	/**
-	 * Parses the ID out of this NEW response
-	 *
-	 * @return The ID of the newly created resource
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public int getID() throws JSONException {
-		final JSONObject idObj = new JSONObject(getResponse().getData().toString());
-		return idObj.getInt(ResourceFields.ID);
-	}
+    /**
+     * Parses the ID out of this NEW response
+     *
+     * @return The ID of the newly created resource
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public int getID() throws JSONException {
+        final JSONObject idObj = new JSONObject(getResponse().getData().toString());
+        return idObj.getInt(ResourceFields.ID);
+    }
 }

@@ -109,18 +109,16 @@ public abstract class PublicationAbstraction extends UserAbstraction {
      * @throws URISyntaxException If the URL is malformed.
      */
     public String parseAndSetPublicationUrl(final AdminParser parser) throws URISyntaxException {
-        String publicationUrl;
-        final URI url;
+        URI url;
         {
             String pubUrl = (String) parser.getOptionValue(options.get(OPT_PUBLICATION_URL));
             if (pubUrl == null) {
                 return null;
-            } else {
-                url = new URI(pubUrl);
             }
+            url = new URI(pubUrl);
         }
 
-        publicationUrl = url.getPath() + "?" + url.getQuery();
+        String publicationUrl = url.getPath() + "?" + url.getQuery();
         if (!publicationUrl.startsWith("/")) {
             publicationUrl = "/" + publicationUrl;
         }

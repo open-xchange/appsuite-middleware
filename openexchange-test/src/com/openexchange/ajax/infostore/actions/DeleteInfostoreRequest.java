@@ -133,11 +133,7 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        Params params = new Params(
-            AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_DELETE,
-            AJAXServlet.PARAMETER_TIMESTAMP,
-            String.valueOf(getTimestamp().getTime()));
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE, AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(getTimestamp().getTime()));
         if (null != hardDelete) {
             params.add("hardDelete", String.valueOf(hardDelete));
         }

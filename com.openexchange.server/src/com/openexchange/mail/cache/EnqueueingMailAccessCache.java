@@ -68,7 +68,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -320,32 +319,21 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         }
     }
 
-    /**
-     * Clears the cache entries kept for specified user.
-     *
-     * @param session The session
-     * @throws OXException If clearing user entries fails
-     */
     @Override
-    public void clearUserEntries(final Session session) throws OXException {
-        /*
-         * Check if last...
-         */
-        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        final int user = session.getUserId();
-        final int cid = session.getContextId();
-        if (null == service || null == service.getAnyActiveSessionForUser(user, cid)) {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
-            for (final MailAccount mailAccount : accounts) {
-                orderlyClearQueue(keyFor(mailAccount.getId(), session));
-            }
+    public void clearUserEntries(int userId, int contextId) throws OXException {
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId);
+        for (MailAccount mailAccount : accounts) {
+            orderlyClearQueue(keyFor(mailAccount.getId(), userId, contextId));
         }
     }
 
-    private static Key keyFor(final int accountId, final Session session) {
-        return new Key(accountId, session.getUserId(), session.getContextId());
+    private static Key keyFor(int accountId, Session session) {
+        return keyFor(accountId, session.getUserId(), session.getContextId());
+    }
+
+    private static Key keyFor(int accountId, int userId, int contextId) {
+        return new Key(accountId, userId, contextId);
     }
 
     private static final class PurgeExpiredRunnable implements Runnable {

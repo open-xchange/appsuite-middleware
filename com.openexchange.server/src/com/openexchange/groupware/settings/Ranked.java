@@ -56,15 +56,8 @@ package com.openexchange.groupware.settings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public interface Ranked {
+public interface Ranked extends com.openexchange.osgi.Ranked {
 
-    /**
-     * Gets the ranking.
-     * <p>
-     * Default is <code>0</code> (zero)
-     *
-     * @return The ranking
-     */
-    int getRanking();
+    // Empty
 
 }

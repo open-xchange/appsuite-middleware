@@ -74,6 +74,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link VacationActionCommandParser}
@@ -91,17 +92,19 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> arrayList = new ArrayList<Object>();
         final String days = jsonObject.getString(VacationActionField.days.getFieldName());
-        if (null != days) {
-            arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.days));
-            arrayList.add(ArgumentUtil.createNumberArgument(days));
+        if (days == null) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + VacationActionField.days.getFieldName() + " is missing for " + ActionCommand.Commands.VACATION.getJsonName() + " is missing in JSON-Object. This is a required field");
         }
+        arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.days));
+        arrayList.add(ArgumentUtil.createNumberArgument(days));
+        
         final JSONArray addresses = jsonObject.optJSONArray(VacationActionField.addresses.getFieldName());
         if (null != addresses) {
             arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.addresses));
@@ -156,7 +159,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @SuppressWarnings("unchecked")
@@ -189,7 +192,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /**
      * Encodes the specified UTF-8 string if necessary and returns the encoded string
-     * 
+     *
      * @param string The string to encode
      * @param field The field
      * @return The encoded string
@@ -208,7 +211,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
     /**
      * Decodes the specified UTF-8 string if necessary and returns the decoded string
-     * 
+     *
      * @param utf8 The UTF-8 encoded string
      * @param field The field
      * @return The decoded string

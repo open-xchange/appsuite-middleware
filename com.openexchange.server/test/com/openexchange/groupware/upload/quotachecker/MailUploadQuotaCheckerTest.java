@@ -52,21 +52,21 @@ public class MailUploadQuotaCheckerTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testMailUploadQuotaCheckerUserSettingMail_userSettingsNull_throwException() {
+     public void testMailUploadQuotaCheckerUserSettingMail_userSettingsNull_throwException() {
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(null);
     }
 
-    @Test
-    public void testMailUploadQuotaCheckerUserSettingMail_bothZero_maxQuotaZero() {
+     @Test
+     public void testMailUploadQuotaCheckerUserSettingMail_bothZero_maxQuotaZero() {
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
 
         long quotaMax = this.mailUploadQuotaChecker.getQuotaMax();
 
-        Assert.assertEquals(this.unlimitedQuota, quotaMax);
+        Assert.assertEquals(this.unlimitedQuota2, quotaMax);
     }
 
-    @Test
-    public void testMailUploadQuotaCheckerUserSettingMail_bothZero_maxQuotaPerFileNegativ() {
+     @Test
+     public void testMailUploadQuotaCheckerUserSettingMail_bothZero_maxQuotaPerFileNegativ() {
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
 
         long fileQuotaMax = this.mailUploadQuotaChecker.getFileQuotaMax();
@@ -74,8 +74,8 @@ public class MailUploadQuotaCheckerTest {
         Assert.assertEquals(this.unlimitedQuota2, fileQuotaMax);
     }
 
-    @Test
-    public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaSetInDB_setUploadQuota() {
+     @Test
+     public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaSetInDB_setUploadQuota() {
         Mockito.when(userSettingMail.getUploadQuota()).thenReturn(this.quota);
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
@@ -85,8 +85,8 @@ public class MailUploadQuotaCheckerTest {
         Assert.assertEquals(this.quota, quotaMax);
     }
 
-    @Test
-    public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaPerFileSetInDB_setUploadQuotaPerFile() {
+     @Test
+     public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaPerFileSetInDB_setUploadQuotaPerFile() {
         Mockito.when(userSettingMail.getUploadQuotaPerFile()).thenReturn(this.quota);
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
@@ -96,8 +96,8 @@ public class MailUploadQuotaCheckerTest {
         Assert.assertEquals(this.quota, fileQuotaMax);
     }
 
-    @Test
-    public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativ_setUploadQuotaFromServerProperties() {
+     @Test
+     public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativ_setUploadQuotaFromServerProperties() {
         Mockito.when(userSettingMail.getUploadQuota()).thenReturn(-1L);
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
@@ -108,8 +108,8 @@ public class MailUploadQuotaCheckerTest {
         Assert.assertEquals(this.unlimitedQuota2, this.mailUploadQuotaChecker.getFileQuotaMax());
     }
 
-    @Test
-    public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativAndServerConfigException_setUploadQuotaToZero() throws OXException {
+     @Test
+     public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativAndServerConfigException_setUploadQuotaToZero() throws OXException {
         Mockito.when(userSettingMail.getUploadQuota()).thenReturn(-1L);
         PowerMockito.when(ServerConfig.getLong((Property) Matchers.any())).thenThrow(new OXException());
 

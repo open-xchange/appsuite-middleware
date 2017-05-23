@@ -396,6 +396,8 @@ public class DriveServiceImpl implements DriveService {
                 e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
             if (DriveUtils.indicatesQuotaExceeded(e)) {
                 syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(syncSession, e, path, originalVersion, newVersion));
+            } else if (DriveUtils.indicatesLockedContents(e)) {
+                syncResult.addActionsForClient(DriveUtils.handleLockedContents(syncSession, e, path, originalVersion, newVersion));
             } else if (DriveUtils.indicatesFailedSave(e)) {
                 syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, e, true));
             } else {

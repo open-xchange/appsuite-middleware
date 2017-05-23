@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.oauth.types;
 
-
 /**
  * {@link OAuthService}
  *
@@ -93,6 +92,7 @@ public class OAuthService {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -106,6 +106,7 @@ public class OAuthService {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

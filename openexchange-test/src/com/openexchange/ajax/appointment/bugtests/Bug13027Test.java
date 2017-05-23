@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -74,13 +78,35 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug13027Test extends AbstractAJAXSession {
 
-    public Bug13027Test(String name) {
-        super(name);
+    private String originalTimeZone;
+
+    public Bug13027Test() {
+        super();
     }
 
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        originalTimeZone = getClient().execute(new GetRequest(Tree.TimeZone)).getString();
+    }
+
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != originalTimeZone && null != getClient()) {
+                getClient().execute(new SetRequest(Tree.TimeZone, originalTimeZone));
+            }
+        } finally {
+            super.tearDown();
+        }
+    }
+
+    @Test
     public void testNegativeTimeZone() throws Exception {
         AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("America/New York");
         String formerTimeZone = "Europe/Berlin";
         final Appointment appointment = new Appointment();
@@ -92,7 +118,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             GetResponse getResponse = getClient().execute(getRequest);
             formerTimeZone = getResponse.getString();
             SetRequest setRequest = new SetRequest(Tree.TimeZone, "America/New_York");
-            client.execute(setRequest);
+            getClient().execute(setRequest);
 
             // Step 1
             clear(tz, folderId, client);
@@ -112,7 +138,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Insert
             final InsertRequest insertRequest = new InsertRequest(appointment, tz, false);
-            final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
+            final AppointmentInsertResponse insertResponse = getClient().execute(insertRequest);
             appointment.setObjectID(insertResponse.getId());
             appointment.setLastModified(insertResponse.getTimestamp());
             objectId = appointment.getObjectID();
@@ -121,7 +147,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Step 3
             final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
-            final HasResponse hasResponse = client.execute(hasRequest);
+            final HasResponse hasResponse = getClient().execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
             assertFalse("No appointment expected.", values[2]); // 31.12.08
@@ -130,17 +156,18 @@ public class Bug13027Test extends AbstractAJAXSession {
         } finally {
             if (objectId != 0 && lastModified != null) {
                 final DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
-                client.execute(deleteRequest);
+                getClient().execute(deleteRequest);
             }
 
             SetRequest setRequest = new SetRequest(Tree.TimeZone, formerTimeZone);
-            client.execute(setRequest);
+            getClient().execute(setRequest);
         }
     }
 
+    @Test
     public void testPositiveTimeZone() throws Exception {
         AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
         String formerTimeZone = "Europe/Berlin";
         final Appointment appointment = new Appointment();
@@ -152,7 +179,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             GetResponse getResponse = getClient().execute(getRequest);
             formerTimeZone = getResponse.getString();
             SetRequest setRequest = new SetRequest(Tree.TimeZone, "Europe/Berlin");
-            client.execute(setRequest);
+            getClient().execute(setRequest);
 
             // Step 1
             clear(tz, folderId, client);
@@ -172,7 +199,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Insert
             final InsertRequest insertRequest = new InsertRequest(appointment, tz, false);
-            final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
+            final AppointmentInsertResponse insertResponse = getClient().execute(insertRequest);
             appointment.setObjectID(insertResponse.getId());
             appointment.setLastModified(insertResponse.getTimestamp());
             objectId = appointment.getObjectID();
@@ -181,7 +208,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Step 3
             final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
-            final HasResponse hasResponse = client.execute(hasRequest);
+            final HasResponse hasResponse = getClient().execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
             assertFalse("No appointment expected.", values[2]); // 31.12.08
@@ -190,17 +217,18 @@ public class Bug13027Test extends AbstractAJAXSession {
         } finally {
             if (objectId != 0 && lastModified != null) {
                 final DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
-                client.execute(deleteRequest);
+                getClient().execute(deleteRequest);
             }
 
             SetRequest setRequest = new SetRequest(Tree.TimeZone, formerTimeZone);
-            client.execute(setRequest);
+            getClient().execute(setRequest);
         }
     }
 
+    @Test
     public void testUTC() throws Exception {
         AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("UTC");
         String formerTimeZone = "Europe/Berlin";
         final Appointment appointment = new Appointment();
@@ -212,7 +240,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             GetResponse getResponse = getClient().execute(getRequest);
             formerTimeZone = getResponse.getString();
             SetRequest setRequest = new SetRequest(Tree.TimeZone, "Europe/London");
-            client.execute(setRequest);
+            getClient().execute(setRequest);
 
             // Step 1
             clear(tz, folderId, client);
@@ -232,7 +260,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Insert
             final InsertRequest insertRequest = new InsertRequest(appointment, tz, false);
-            final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
+            final AppointmentInsertResponse insertResponse = getClient().execute(insertRequest);
             appointment.setObjectID(insertResponse.getId());
             appointment.setLastModified(insertResponse.getTimestamp());
             objectId = appointment.getObjectID();
@@ -241,7 +269,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Step 3
             final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
-            final HasResponse hasResponse = client.execute(hasRequest);
+            final HasResponse hasResponse = getClient().execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
             assertFalse("No appointment expected.", values[2]); // 31.12.08
@@ -250,17 +278,18 @@ public class Bug13027Test extends AbstractAJAXSession {
         } finally {
             if (objectId != 0 && lastModified != null) {
                 final DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
-                client.execute(deleteRequest);
+                getClient().execute(deleteRequest);
             }
 
             SetRequest setRequest = new SetRequest(Tree.TimeZone, formerTimeZone);
-            client.execute(setRequest);
+            getClient().execute(setRequest);
         }
     }
 
+    @Test
     public void testBugAsWritten() throws Exception {
         AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
+        final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("America/New York");
         String formerTimeZone = "Europe/Berlin";
         final Appointment appointment = new Appointment();
@@ -272,7 +301,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             GetResponse getResponse = getClient().execute(getRequest);
             formerTimeZone = getResponse.getString();
             SetRequest setRequest = new SetRequest(Tree.TimeZone, "America/New_York");
-            client.execute(setRequest);
+            getClient().execute(setRequest);
 
             // Step 1
             clear(tz, folderId, client);
@@ -292,7 +321,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Insert
             final InsertRequest insertRequest = new InsertRequest(appointment, tz, false);
-            final AppointmentInsertResponse insertResponse = client.execute(insertRequest);
+            final AppointmentInsertResponse insertResponse = getClient().execute(insertRequest);
             appointment.setObjectID(insertResponse.getId());
             appointment.setLastModified(insertResponse.getTimestamp());
             objectId = appointment.getObjectID();
@@ -301,7 +330,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
             // Step 3
             final HasRequest hasRequest = new HasRequest(new Date(1230508800000L), new Date(1230854400000L), tz); // 29.12.08 - 02.01.09
-            final HasResponse hasResponse = client.execute(hasRequest);
+            final HasResponse hasResponse = getClient().execute(hasRequest);
             boolean[] values = hasResponse.getValues();
             assertFalse("No appointment expected.", values[1]); // 30.12.08
             assertFalse("No appointment expected.", values[2]); // 31.12.08
@@ -310,11 +339,11 @@ public class Bug13027Test extends AbstractAJAXSession {
         } finally {
             if (objectId != 0 && lastModified != null) {
                 final DeleteRequest deleteRequest = new DeleteRequest(objectId, folderId, lastModified);
-                client.execute(deleteRequest);
+                getClient().execute(deleteRequest);
             }
 
             SetRequest setRequest = new SetRequest(Tree.TimeZone, formerTimeZone);
-            client.execute(setRequest);
+            getClient().execute(setRequest);
         }
     }
 
@@ -339,17 +368,12 @@ public class Bug13027Test extends AbstractAJAXSession {
         end.set(Calendar.SECOND, 0);
         end.set(Calendar.MILLISECOND, 0);
 
-        AllRequest request = new AllRequest(
-            folderId,
-            new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED },
-            start.getTime(),
-            end.getTime(),
-            tz);
-        CommonAllResponse response = client.execute(request);
+        AllRequest request = new AllRequest(folderId, new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED }, start.getTime(), end.getTime(), tz);
+        CommonAllResponse response = getClient().execute(request);
 
         Object[][] responseColumns = response.getArray();
         for (Object[] obj : responseColumns) {
-            client.execute(new DeleteRequest(((Integer) obj[0]).intValue(), folderId, new Date(Long.MAX_VALUE)));
+            getClient().execute(new DeleteRequest(((Integer) obj[0]).intValue(), folderId, new Date(Long.MAX_VALUE)));
         }
     }
 

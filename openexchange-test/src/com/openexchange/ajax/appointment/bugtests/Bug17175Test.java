@@ -50,7 +50,11 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -76,12 +80,12 @@ public class Bug17175Test extends AbstractAJAXSession {
      *
      * @param name
      */
-    public Bug17175Test(String name) {
-        super(name);
+    public Bug17175Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
         appointment = new Appointment();
@@ -92,10 +96,10 @@ public class Bug17175Test extends AbstractAJAXSession {
         appointment.setDays(Appointment.THURSDAY);
         appointment.setInterval(1);
         appointment.setOccurrence(2);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        InsertRequest request = new InsertRequest(appointment, client.getValues().getTimeZone());
-        AppointmentInsertResponse insertResponse = client.execute(request);
+        InsertRequest request = new InsertRequest(appointment, getClient().getValues().getTimeZone());
+        AppointmentInsertResponse insertResponse = getClient().execute(request);
         insertResponse.fillObject(appointment);
 
         updateAppointment = new Appointment();
@@ -108,13 +112,14 @@ public class Bug17175Test extends AbstractAJAXSession {
         updateAppointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testBug17175() throws Exception {
-        UpdateResponse updateResponse = client.execute(new UpdateRequest(updateAppointment, client.getValues().getTimeZone()));
+        UpdateResponse updateResponse = getClient().execute(new UpdateRequest(updateAppointment, getClient().getValues().getTimeZone()));
         appointment.setLastModified(updateResponse.getTimestamp());
 
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.START_DATE, Appointment.END_DATE };
-        AllRequest allRequest = new AllRequest(client.getValues().getPrivateAppointmentFolder(), columns, D("01.11.2010 00:00"), D("01.12.2010 00:00"), client.getValues().getTimeZone(), false);
-        CommonAllResponse allResponse = client.execute(allRequest);
+        AllRequest allRequest = new AllRequest(getClient().getValues().getPrivateAppointmentFolder(), columns, D("01.11.2010 00:00"), D("01.12.2010 00:00"), getClient().getValues().getTimeZone(), false);
+        CommonAllResponse allResponse = getClient().execute(allRequest);
         JSONArray json = (JSONArray) allResponse.getData();
         int count = 0;
         for (int i = 0; i < json.length(); i++) {
@@ -126,9 +131,12 @@ public class Bug17175Test extends AbstractAJAXSession {
         assertEquals("Wrong amount of occurrences", 4, count);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 }

@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -61,7 +64,8 @@ import com.openexchange.file.storage.FileStorageFileAccess;
  */
 public class GetTest extends FileActionTest {
 
-    public void testMissingParameters() {
+         @Test
+     public void testMissingParameters() {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
@@ -70,7 +74,8 @@ public class GetTest extends FileActionTest {
         }
     }
 
-    public void testAction() throws OXException {
+         @Test
+     public void testAction() throws OXException {
         request().param("id", "12");
 
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(new DefaultFile());
@@ -80,7 +85,8 @@ public class GetTest extends FileActionTest {
         fileAccess().assertAllWereCalled();
     }
 
-    public void testWithVersionNumber() throws OXException {
+         @Test
+     public void testWithVersionNumber() throws OXException {
         request().param("id", "12").param("version", "2");
 
         fileAccess().expectCall("getFileMetadata", "12", 2).andReturn(new DefaultFile());

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
@@ -72,16 +73,17 @@ public class Bug46589Test extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link Bug46589Test}.
-     * 
+     *
      * @param name Test case's name
      */
-    public Bug46589Test(String name) {
-        super(name);
+    public Bug46589Test() {
+        super();
     }
 
     /**
      * Insert a single rule in position 0 when list is empty
      */
+    @Test
     public void testBug46589_0() throws Exception {
         // Create the rule
         final Rule expected;
@@ -95,6 +97,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
             expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
         }
 
@@ -105,6 +108,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
     /**
      * Insert multiple rules in positions when list is filled
      */
+    @Test
     public void testBug46589_1() throws Exception {
         // Create 5 rules and insert them
         LinkedList<Rule> expectedRules = new LinkedList<>();
@@ -117,6 +121,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
+            rememberRule(id);
             rule.setId(id);
             rule.setPosition(i);
             expectedRules.add(rule);
@@ -132,6 +137,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
         rule.setTest(new TrueTest());
 
         int id = mailFilterAPI.createRule(rule);
+        rememberRule(id);
         rule.setId(id);
         rule.setPosition(3);
 

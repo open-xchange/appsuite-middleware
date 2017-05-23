@@ -67,6 +67,10 @@ public class EmojiRegistry {
     public static EmojiRegistry getInstance() {
         return INSTANCE;
     }
+
+    /**
+     * Initializes a new {@link EmojiRegistry}.
+     */
     private EmojiRegistry() {
         super();
     }

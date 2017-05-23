@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.participant.ParticipantTools;
@@ -69,7 +73,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
-
 
 /**
  * {@link Bug12926Test}
@@ -88,16 +91,8 @@ public final class Bug12926Test extends AbstractTaskTest {
 
     private Task task;
 
-    /**
-     * Default constructor.
-     * @param name test name.
-     */
-    public Bug12926Test(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         userId = client.getValues().getUserId();
@@ -111,12 +106,16 @@ public final class Bug12926Test extends AbstractTaskTest {
         insertR.fillTask(task);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            client.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testTaskStaysInDelegatorFolder() throws OXException, IOException, SAXException, JSONException {
         final Task task2 = new Task();
         task2.setObjectID(task.getObjectID());

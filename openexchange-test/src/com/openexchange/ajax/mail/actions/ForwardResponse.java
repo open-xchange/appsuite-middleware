@@ -51,16 +51,16 @@ package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.container.Response;
 
-
 /**
  * {@link ForwardResponse}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ForwardResponse extends ReplyResponse{
+public class ForwardResponse extends ReplyResponse {
 
     /**
      * Initializes a new {@link ForwardResponse}.
+     * 
      * @param response
      */
     public ForwardResponse(Response response) {

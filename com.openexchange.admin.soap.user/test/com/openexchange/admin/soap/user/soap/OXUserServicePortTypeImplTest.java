@@ -49,8 +49,12 @@
 
 package com.openexchange.admin.soap.user.soap;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.admin.soap.user.dataobjects.User;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -58,8 +62,7 @@ import com.openexchange.admin.soap.user.dataobjects.User;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXUserServicePortTypeImplTest extends TestCase {
-
+public class OXUserServicePortTypeImplTest {
     /**
      * Initializes a new {@link OXUserServicePortTypeImplTest}.
      */
@@ -67,7 +70,8 @@ public class OXUserServicePortTypeImplTest extends TestCase {
         super();
     }
 
-    public void testSetImapPort() {
+         @Test
+     public void testSetImapPort() {
         User soapUser = new User();
         soapUser.setImapServer("imap.invalid.com:993");
         soapUser.setImapPort(Integer.valueOf(143));
@@ -84,7 +88,8 @@ public class OXUserServicePortTypeImplTest extends TestCase {
         assertEquals("Unexpected SMTP server string.", "smtp://smtp.invalid.com:587", smtpServerString);
     }
 
-    public void testSetImapPortIPv6() {
+         @Test
+     public void testSetImapPortIPv6() {
         User soapUser = new User();
         soapUser.setImapServer("fd9e:21a7:a92c:2323::1");
         soapUser.setImapPort(Integer.valueOf(143));

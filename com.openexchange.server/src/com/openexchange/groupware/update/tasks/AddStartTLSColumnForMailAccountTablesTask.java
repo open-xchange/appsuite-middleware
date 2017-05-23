@@ -75,14 +75,16 @@ import com.openexchange.tools.update.Tools;
  */
 public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter {
 
-    private final String[] TABLES = { "user_mail_account", "user_transport_account" };
-    private final String[] SECURE_PROTOCOLS = { "imaps", "pop3s", "pops", "smtps" };
+    private final String[] tables;
+    private final String[] secureProtocols;
 
     /**
      * Initializes a new {@link AddStartTLSColumnForMailAccountTablesTask}.
      */
     public AddStartTLSColumnForMailAccountTablesTask() {
         super();
+        tables = new String[] { "user_mail_account", "user_transport_account" };
+        secureProtocols = new String[] { "imaps", "pop3s", "pops", "smtps" };
     }
 
     @Override
@@ -96,8 +98,10 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
             con = dbService.getForUpdateTask(contextId);
             con.setAutoCommit(false);
             Column column = new Column("starttls", "TINYINT UNSIGNED NOT NULL DEFAULT 0");
-            for (String table : TABLES) {
-                Tools.addColumns(con, table, new Column[] { column });
+            for (String table : tables) {
+                if (false == Tools.columnExists(con, table, "starttls")) {
+                    Tools.addColumns(con, table, new Column[] { column });
+                }
             }
             if (force) {
                 activateStartTLS(con, force);
@@ -121,28 +125,31 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
     }
 
     private void activateStartTLS(Connection con, boolean forceSecure) throws SQLException {
-        for (String table : TABLES) {
+        for (String table : tables) {
             PreparedStatement stmt = null;
             PreparedStatement stmt2 = null;
             ResultSet rs = null;
             try {
                 stmt = con.prepareStatement("SELECT id, cid, user, url FROM " + table + " WHERE id <> 0 FOR UPDATE");
                 rs = stmt.executeQuery();
-                stmt2 = con.prepareStatement("UPDATE " + table + " SET starttls = ? WHERE id = ? AND cid = ? AND user = ?");
-                while (rs.next()) {
-                    int id = rs.getInt(1);
-                    int cid = rs.getInt(2);
-                    int user = rs.getInt(3);
-                    String url = rs.getString(4);
-                    boolean secure = checkSecureUrl(url) || forceSecure;
+
+                if (rs.next()) {
                     stmt2 = con.prepareStatement("UPDATE " + table + " SET starttls = ? WHERE id = ? AND cid = ? AND user = ?");
-                    stmt2.setBoolean(1, secure);
-                    stmt2.setInt(2, id);
-                    stmt2.setInt(3, cid);
-                    stmt2.setInt(4, user);
-                    stmt2.addBatch();
+                    do {
+                        int id = rs.getInt(1);
+                        int cid = rs.getInt(2);
+                        int user = rs.getInt(3);
+                        String url = rs.getString(4);
+                        boolean secure = checkSecureUrl(url) || forceSecure;
+
+                        stmt2.setBoolean(1, secure);
+                        stmt2.setInt(2, id);
+                        stmt2.setInt(3, cid);
+                        stmt2.setInt(4, user);
+                        stmt2.addBatch();
+                    } while (rs.next());
+                    stmt2.executeBatch();
                 }
-                stmt2.executeBatch();
             } finally {
                 DBUtils.closeSQLStuff(stmt2);
                 DBUtils.closeSQLStuff(rs, stmt);
@@ -154,7 +161,7 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
         if (Strings.isEmpty(url)) {
             return false;
         }
-        for (String protocol : SECURE_PROTOCOLS) {
+        for (String protocol : secureProtocols) {
             if (url.toLowerCase().startsWith(protocol)) {
                 return true;
             }

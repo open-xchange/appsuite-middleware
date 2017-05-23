@@ -53,16 +53,19 @@ import static com.openexchange.subscribe.Asserts.assertDoesNotKnow;
 import static com.openexchange.subscribe.Asserts.assertKnows;
 import static com.openexchange.subscribe.Asserts.assertPriority;
 import static com.openexchange.subscribe.Asserts.assertSources;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.List;
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * {@link SubscriptionSourceCollectorTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SubscriptionSourceCollectorTest extends TestCase {
+public class SubscriptionSourceCollectorTest {
 
     private SubscriptionSourceCollector collector;
 
@@ -70,7 +73,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
 
     private SubscribeService testService1;
 
-    @Override
+    @Before
     public void setUp() {
         collector = new SubscriptionSourceCollector();
         collector.addSubscribeService(testService1 = service("com.openexchange.subscription.test1"));
@@ -81,20 +84,17 @@ public class SubscriptionSourceCollectorTest extends TestCase {
 
     }
 
-
+    @Test
     public void testGetSources() {
         sources = collector.getSources(2);
         assertNotNull("Sources was null!", sources);
-        assertSources(
-            sources,
-            "com.openexchange.subscription.test1",
-            "com.openexchange.subscription.test2",
-            "com.openexchange.subscription.test3");
+        assertSources(sources, "com.openexchange.subscription.test1", "com.openexchange.subscription.test2", "com.openexchange.subscription.test3");
 
         assertPriority(sources, "com.openexchange.subscription.test3", 2);
 
     }
 
+    @Test
     public void testKnows() {
         assertKnows(collector, "com.openexchange.subscription.test1");
         assertKnows(collector, "com.openexchange.subscription.test2");
@@ -103,6 +103,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         assertDoesNotKnow(collector, "unknown");
     }
 
+    @Test
     public void testGet() {
         assertNotNull("Missing com.openexchange.susbscription.test1", collector.getSource("com.openexchange.subscription.test1"));
         assertNotNull("Missing com.openexchange.susbscription.test2", collector.getSource("com.openexchange.subscription.test2"));
@@ -114,14 +115,12 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         assertPriority(collector.getSource("com.openexchange.subscription.test3"), 2);
     }
 
+    @Test
     public void testRemove() {
         collector.removeSubscribeService("com.openexchange.subscription.test1");
         sources = collector.getSources(2);
         assertNotNull("Sources was null!", sources);
-        assertSources(
-            sources,
-            "com.openexchange.subscription.test2",
-            "com.openexchange.subscription.test3");
+        assertSources(sources, "com.openexchange.subscription.test2", "com.openexchange.subscription.test3");
         assertDoesNotKnow(collector, "com.openexchange.subscription.test1");
         assertNull("Didn't expect a source", collector.getSource("com.openexchange.subscription.test1"));
     }
@@ -131,7 +130,6 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         service.getSubscriptionSource().setPriority(i);
         return service;
     }
-
 
     private SubscribeService service(String string) {
         SubscriptionSource source = new SubscriptionSource();

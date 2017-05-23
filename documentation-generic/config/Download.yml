@@ -1,0 +1,130 @@
+feature_name: Download
+feature_description: |
+  Enables download limits (based on donwload counts or sizes)  
+  It is possible to define
+  <ul>
+  <li>limits for guests and links</li>
+  <li>limits only for one kind (by setting time frame to 0 = disabled): guests or links</li>
+  <li>limits only for count/size (by setting time frame > 0 and size/count = 0): e. g. count for guests and size for links</li>
+  </ul>  
+  To show all features a possible configuration might be:
+  <pre>
+  com.openexchange.download.limit.enabled=true // enabled
+  com.openexchange.download.limit.timeFrame.guests=3600000 // 60 minutes, set to 0 to disable checks for guests
+  com.openexchange.download.limit.timeFrame.links=3600000
+  com.openexchange.download.limit.size.guests=0 // disables size check for guests
+  com.openexchange.download.limit.size.links=1073741824 // 1GB within 60 minutes
+  com.openexchange.download.limit.count.guests=100 // 100 downloads within 60 minutes
+  com.openexchange.download.limit.count.links=0 // disables count check for links
+  </pre>
+properties:
+    - key: com.openexchange.download.limit.enabled
+      description: |
+        If the feature is disabled (in general or for guests/links) no downloads will be tracked which means after
+        activation each guest/link starts with used counts/size 0.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: download.properties
+      packageName: open-xchange-core
+      tags: ["Download", "Limit", "Share"]
+
+    - key: com.openexchange.download.limit.timeFrame.guests
+      description: |
+        Specifies the limit (in milliseconds) time window in which to track (and possibly 
+        deny) incoming download requests for known (guests) guest users.
+        That rate limit acts like a sliding window time frame; meaning that it considers only
+        requests that fit into time windows specified through [[com.openexchange.download.limit.guests.timeFrame]]  
+        from current time stamp:
+        <pre>
+        window-end := $now
+        window-start := $window-end - $timeFrame
+        </pre>
+        If you only want to specify only one limit (size or count) you have to set a time frame and specify the desired.
+      defaultValue: 3600000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: download.properties
+      packageName: open-xchange-core
+      tags: ["Download", "Limit", "Share"]
+
+    - key: com.openexchange.download.limit.timeFrame.links
+      description: |
+        Specifies the limit (in milliseconds) time window in which to track (and possibly 
+        deny) incoming download requests for anonymous (links) guest users.
+        That rate limit acts like a sliding window time frame; meaning that it considers only
+        requests that fit into time windows specified through [[com.openexchange.download.limit.links.timeFrame]]  
+        from current time stamp:
+        <pre>
+        window-end := $now
+        window-start := $window-end - $timeFrame
+        </pre>
+        If you only want to specify only one limit (size or count) you have to set a time frame and specify the desired.
+      defaultValue: 3600000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: download.properties
+      packageName: open-xchange-core
+      tags: ["Download", "Limit", "Share"]
+
+    - key: com.openexchange.download.limit.size.guests
+      description: |
+        Specifies the download size limit for guests.
+        A guest that exceeds that limit will receive an error.
+        To disable the size check set value to <code>0</code>.
+      defaultValue: 1073741824
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: download.properties
+      packageName: open-xchange-core
+      tags: ["Download", "Limit", "Share"]
+
+    - key: com.openexchange.download.limit.size.links
+      description: |
+        Specifies the download size limit for link guests.
+        A guest (via link) that exceeds that limit will receive an error.
+        To disable the size check set value to <code>0</code>.
+      defaultValue: 1073741824
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: download.properties
+      packageName: open-xchange-core
+      tags: ["Download", "Limit", "Share"]
+
+    - key: com.openexchange.download.limit.count.guests
+      description: |
+        Specifies the download count limit for guests.
+        A guest that exceeds that limit will receive an error.
+        To disable the count check set value to <code>0</code>.
+      defaultValue: 100
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: download.properties
+      packageName: open-xchange-core
+      tags: ["Download", "Limit", "Share"]
+
+    - key: com.openexchange.download.limit.count.links
+      description: |
+        Specifies the download count limit for link guests.
+        A guest (via link) that exceeds that limit will receive an error.
+        To disable the count check set value to <code>0</code>.
+      defaultValue: 100
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: download.properties
+      packageName: open-xchange-core
+      tags: ["Download", "Limit", "Share"]

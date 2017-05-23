@@ -472,7 +472,11 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						log.info("Could not open properties file "
 								+ atts.getValue("file"));
 					} else {
-						props.load(propertiesStream);
+					    try {					        
+					        props.load(propertiesStream);
+					    } finally {
+					        propertiesStream.close();
+					    }
 
 						for (Map.Entry entry : props.entrySet()) {
 							this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, dbms);

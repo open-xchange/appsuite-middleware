@@ -52,7 +52,8 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.yaml.snakeyaml.Yaml;
+import org.ho.yaml.Yaml;
+import org.junit.Test;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import com.openexchange.subscribe.crawler.internal.Step;
@@ -64,7 +65,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGenericSubscribeServiceForWebDe() {
+         @Test
+     public void testGenericSubscribeServiceForWebDe() {
         // insert valid credentials here
         String username = "peter.mueller1131@web.de";
         String password = "r0deld0del";
@@ -125,7 +127,7 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
 
         Workflow workflow = new Workflow(steps);
         workflow.setUseThreadedRefreshHandler(true);
-        crawler.setWorkflowString(new Yaml().dump(workflow));
+        crawler.setWorkflowString(Yaml.dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         //uncomment this if the if the crawler description was updated to get the new config-files

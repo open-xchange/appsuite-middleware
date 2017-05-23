@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.find.tasks;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,31 +58,25 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.find.AbstractFindTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
  * {@link AbstractFindTasksTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractFindTasksTest extends AbstractFindTest {
+@RunWith(BlockJUnit4ClassRunner.class)
+public abstract class AbstractFindTasksTest extends FindTasksTestEnvironment {
 
-    /**
-     * Initializes a new {@link AbstractFindTasksTest}.
-     */
-    public AbstractFindTasksTest(String name) {
-        super(name);
-
-    }
-    
     /**
      * Fetch the results from the QueryResponse
+     * 
      * @param qr the QueryResponse
      * @return the results as a JSONArray, or null if the respond does not contain a results payload
      */
@@ -90,7 +86,7 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
             ret = ((JSONObject) qr.getData()).optJSONArray("results");
         return ret;
     }
-    
+
     /**
      * Helper method to assert the query response (no paging)
      * 
@@ -103,7 +99,7 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
     protected final void assertResults(int expectedResultCount, List<ActiveFacet> f) throws OXException, IOException, JSONException {
         assertResults(expectedResultCount, f, -1, -1);
     }
-    
+
     /**
      * Helper method to assert the query response (with paging)
      * 
@@ -117,17 +113,17 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
      */
     protected final void assertResults(int expectedResultCount, List<ActiveFacet> f, int start, int size) throws OXException, IOException, JSONException {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
+        facets.add(createGlobalFacet());
         facets.addAll(f);
-        final QueryResponse queryResponse = client.execute(new QueryRequest(start, size, facets, "tasks"));
+        final QueryResponse queryResponse = getClient().execute(new QueryRequest(start, size, facets, "tasks"));
         assertNotNull(queryResponse);
-        JSONArray results  = getResults(queryResponse);
+        JSONArray results = getResults(queryResponse);
         int actualResultCount = results.asList().size();
         assertEquals(expectedResultCount, actualResultCount);
-        
-        for(Object o : results.asList()) {
+
+        for (Object o : results.asList()) {
             Map<String, Object> m = (Map<String, Object>) o;
-            Task t = FindTasksTestEnvironment.getInstance().getTask((Integer) m.get("id"));
+            Task t = getTask((Integer) m.get("id"));
             assertNotNull("Expected object not found", t);
             assertEquals("Not the same", t.getTitle(), m.get("title"));
         }

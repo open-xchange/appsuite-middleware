@@ -112,7 +112,10 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     public static final String NO_SCOPE_PERMISSION = "You need to explicitly authorise %1$s to subscribe to %2$s";
 
     // Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
-    public static final String NO_SUCH_SCOPE_AVAILABLE = "The scope %1$s is not supported by the provider";
+    public static final String NO_SUCH_SCOPE_AVAILABLE = "The scope %1$s is not supported by the provider or has been disabled";
+
+    // Thrown in case OAuth for a certain provider access has been disabled for a user
+    public static final String DISABLED_OAUTH_SERVICE_META_DATA = "'%1$s' OAuth service is not enabled for you.";
 
 
     /**

@@ -51,11 +51,15 @@ package com.openexchange.publish.sql;
 
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.publications;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.SimConfigurationStorageService;
@@ -97,11 +101,10 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
 
     protected PublicationSQLStorage storage;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         loadProperties();
         super.setUp();
-
 
         // First
         final FormElement formElementLogin1 = new FormElement();
@@ -159,11 +162,11 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         formDescription2.addFormElement(formElementLogin2);
         formDescription2.addFormElement(formElementPassword2);
 
-//        PublicationTarget target2 = new PublicationTarget();
-//        target2.setDisplayName("Target 2");
-//        target2.setFormDescription(formDescription2);
-//        target2.setIcon("/path/to/icon2");
-//        target2.setModule(module2);
+        //        PublicationTarget target2 = new PublicationTarget();
+        //        target2.setDisplayName("Target 2");
+        //        target2.setFormDescription(formDescription2);
+        //        target2.setIcon("/path/to/icon2");
+        //        target2.setModule(module2);
 
         pub2 = new Publication();
         pub2.setContext(ctx);
@@ -178,7 +181,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         storage = new PublicationSQLStorage(getDBProvider(), new SimConfigurationStorageService(), discoveryService);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (publicationsToDelete.size() > 0) {
             final List<Expression> placeholder = new ArrayList<Expression>();
@@ -200,36 +203,33 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             getDBProvider().releaseWriteConnection(ctx, writeConnection);
         }
-
-        super.tearDown();
     }
 
-
     protected void assertEquals(final Publication expected, final Publication actual) {
-        assertEquals(expected.getEntityId(), actual.getEntityId());
-        assertEquals(expected.getId(), actual.getId());
-        assertEquals(expected.getModule(), actual.getModule());
-        assertEquals(expected.getUserId(), actual.getUserId());
-        assertEquals(expected.getTarget(), actual.getTarget());
-        assertEquals(expected.isEnabled(), actual.isEnabled());
+        Assert.assertEquals(expected.getEntityId(), actual.getEntityId());
+        Assert.assertEquals(expected.getId(), actual.getId());
+        Assert.assertEquals(expected.getModule(), actual.getModule());
+        Assert.assertEquals(expected.getUserId(), actual.getUserId());
+        Assert.assertEquals(expected.getTarget(), actual.getTarget());
+        Assert.assertEquals(expected.isEnabled(), actual.isEnabled());
     }
 
     protected void assertEquals(final PublicationTarget expected, final PublicationTarget actual) {
-        assertEquals(expected.getDisplayName(), actual.getDisplayName());
-        assertEquals(expected.getIcon(), actual.getIcon());
-        assertEquals(expected.getId(), actual.getId());
-        assertEquals(expected.getModule(), actual.getModule());
-        assertEquals(expected.getFormDescription(), actual.getFormDescription());
+        Assert.assertEquals(expected.getDisplayName(), actual.getDisplayName());
+        Assert.assertEquals(expected.getIcon(), actual.getIcon());
+        Assert.assertEquals(expected.getId(), actual.getId());
+        Assert.assertEquals(expected.getModule(), actual.getModule());
+        Assert.assertEquals(expected.getFormDescription(), actual.getFormDescription());
     }
 
     protected void assertEquals(final DynamicFormDescription expected, final DynamicFormDescription actual) {
-        assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
+        Assert.assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
         for (final FormElement formElementExpected : expected.getFormElements()) {
             boolean found = false;
             for (final FormElement formElementActual : actual.getFormElements()) {
                 if (formElementExpected.getName().equals(formElementActual.getName())) {
                     found = true;
-                    assertEquals(formElementExpected, formElementActual);
+                    Assert.assertEquals(formElementExpected, formElementActual);
                 }
             }
             if (!found) {

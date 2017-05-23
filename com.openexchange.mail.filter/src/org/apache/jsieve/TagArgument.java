@@ -99,4 +99,9 @@ public class TagArgument implements Argument
         return (getValue() == null) ? "null" : getValue().toString();
     }
 
+    @Override
+    public boolean equals(Object o){
+        return o instanceof TagArgument && ((TagArgument) o).getTag().equals(this.getTag());
+    }
+
 }

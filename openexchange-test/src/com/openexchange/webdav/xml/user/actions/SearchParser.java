@@ -78,8 +78,7 @@ public final class SearchParser extends AbstractWebDAVParser<SearchResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected SearchResponse createResponse(final Document document, final Response[] responses)
-        throws OXException, OXException {
+    protected SearchResponse createResponse(final Document document, final Response[] responses) throws OXException, OXException {
         final SearchResponse retval = new SearchResponse(document, responses);
         final Contact[] contacts = new Contact[responses.length];
         for (int a = 0; a < contacts.length; a++) {

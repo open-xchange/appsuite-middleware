@@ -92,7 +92,7 @@ public class NotifyFolderRequest extends AbstractFolderRequest<AbstractAJAXRespo
      * @param id The folder identifier
      * @param entities The entities to notify
      */
-    public NotifyFolderRequest(String id, int...entities) {
+    public NotifyFolderRequest(String id, int... entities) {
         this(id, entities, true);
     }
 
@@ -124,7 +124,7 @@ public class NotifyFolderRequest extends AbstractFolderRequest<AbstractAJAXRespo
 
             @Override
             protected AbstractAJAXResponse createResponse(Response response) throws JSONException {
-                return new AbstractAJAXResponse(response) { };
+                return new AbstractAJAXResponse(response) {};
             }
         };
     }

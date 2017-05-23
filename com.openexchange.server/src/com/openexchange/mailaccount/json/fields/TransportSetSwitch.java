@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.json.fields;
 
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.TransportAccountDescription;
@@ -78,7 +79,7 @@ public class TransportSetSwitch implements AttributeSwitch {
     }
 
     public void setValue(final Object value) {
-        this.value = value;
+        this.value = value == JSONObject.NULL ? null : value;
     }
 
     @Override
@@ -339,6 +340,17 @@ public class TransportSetSwitch implements AttributeSwitch {
 
     @Override
     public Object rootFolder() {
+        return null;
+    }
+
+    @Override
+    public Object mailDisabled() {
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
+        desc.setTransportDisabled(Boolean.parseBoolean(value.toString()));
         return null;
     }
 

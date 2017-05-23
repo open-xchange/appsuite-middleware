@@ -158,7 +158,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             HttpHost target = new HttpHost(url.getHost(), port, url.getProtocol());
             HttpGet req = new HttpGet(url.getPath());
 
-            LOG.info("Executing request retrieve config XML via {} using {}", target, null == proxy ? "no proxy" : proxy);
+            LOG.info("Executing request to retrieve config XML via {} using {}", target, null == proxy ? "no proxy" : proxy);
             HttpResponse rsp = httpclient.execute(target, req);
 
             int httpCode = rsp.getStatusLine().getStatusCode();
@@ -195,7 +195,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             // When HttpClient instance is no longer needed,
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
-            httpclient.getConnectionManager().shutdown();
+            httpclient.close(); // <-- Performs 'getConnectionManager().shutdown();'
         }
     }
 

@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
@@ -91,6 +92,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     private UserSettingMail mailSettings;
     private boolean appendToSentFolder;
     private boolean transportToRecipients;
+    private SecuritySettings securitySettings;
 
     /**
      * Default constructor
@@ -120,6 +122,24 @@ public abstract class ComposedMailMessage extends MailMessage {
      */
     public UserSettingMail getMailSettings() {
         return mailSettings;
+    }
+
+    /**
+     * Sets the security settings
+     *
+     * @param securitySettings The security settings to set
+     */
+    public void setSecuritySettings(SecuritySettings securitySettings) {
+        this.securitySettings = securitySettings;
+    }
+
+    /**
+     * Gets the security settings
+     *
+     * @return The security settings or <code>null</code>
+     */
+    public SecuritySettings getSecuritySettings() {
+        return securitySettings;
     }
 
     /**

@@ -54,7 +54,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
@@ -86,12 +85,13 @@ public class Bug36275Test {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         service = null;
     }
 
-    @Test
-    public void testKeepUnicode() throws OXException {
+     @Test
+     public void testKeepUnicode() throws Exception {
         String content = "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\n" +
             "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n" +
             "</head><body>\n" +

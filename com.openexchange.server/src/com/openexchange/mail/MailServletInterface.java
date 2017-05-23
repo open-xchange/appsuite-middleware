@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -117,6 +118,30 @@ public abstract class MailServletInterface implements Closeable {
      */
     public static final MailServletInterface getInstance(Session session) throws OXException {
         return new MailServletInterfaceImpl(session);
+    }
+
+    /**
+     * Gets a proper implementation of {@link MailServletInterface} which supports email decryption.
+     * <p>
+     * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
+     *
+     * <pre>
+     * MailInterface mailInterface = MailInterface.getInstance(session);
+     * try {
+     *     //Do some stuff here...
+     * } finally {
+     *     mailInterface.close(true);
+     * }
+     * </pre>
+     *
+     * @param session The session
+     * @param cryptoAuthentication authentication for decrypting emails
+     * @return An instance of {@link MailServletInterface}
+     * @throws OXException
+     */
+    public static final MailServletInterface getInstanceWithDecryptionSupport(Session session, String cryptoAuthentication) throws OXException {
+        final boolean doDecryption = true;
+        return new MailServletInterfaceImpl(session, doDecryption, cryptoAuthentication);
     }
 
     /**
@@ -187,6 +212,22 @@ public abstract class MailServletInterface implements Closeable {
         close();
         super.finalize();
     }
+
+    /**
+     * Gets the session associated with this instance.
+     *
+     * @return The session
+     */
+    public abstract Session getSession();
+
+    /**
+     * Gets the separator character for given account
+     *
+     * @param acccountId The account identifier
+     * @return The separator character
+     * @throws OXException If separator character cannot be returned
+     */
+    public abstract char getSeparator(int acccountId) throws OXException;
 
     /**
      * Archives all mails within a given folder which are older than given days
@@ -521,14 +562,32 @@ public abstract class MailServletInterface implements Closeable {
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
      */
-    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException;
+    public MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getReplyMessageForDisplay(folder, replyMsgUID, replyToAll, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Creates an instance of <code>JSONMessageObject</code> which contains the initial reply content of the message identifed through
+     * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
+     * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
+     */
+    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through
      * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
      * the forward.
      */
-    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException;
+    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getForwardMessageForDisplay(folders, fowardMsgUIDs, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through
+     * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
+     * the forward.
+     */
+    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException;
 
     /**
      * Deletes the message located in given folder corresponding to given <code>msgUID</code>
@@ -738,5 +797,24 @@ public abstract class MailServletInterface implements Closeable {
     public MailImportResult[] getMailImportResults() {
         return new MailImportResult[0];
     }
+
+    /**
+     * Searches mails located in given folder.
+     *
+     * @param folder The folder full name
+     * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
+     *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
+     *            range is <code>end - start</code>.
+     * @param sortField The sort field
+     * @param orderDirection Whether ascending or descending sort order
+     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
+     * @param mailFields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @param headerNames The optional header names to pre-fill in returned instances of {@link MailMessage}
+     * @return The desired, pre-filled instances of {@link MailMessage}
+     * @throws OXException If mails cannot be returned
+     */
+    public abstract MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection orderDirection, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException;
+
+
 
 }

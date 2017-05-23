@@ -50,11 +50,16 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -74,11 +79,11 @@ public class Bug14357Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    public Bug14357Test(String name) {
-        super(name);
+    public Bug14357Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -99,6 +104,7 @@ public class Bug14357Test extends AbstractAJAXSession {
         appointmentInsertResponse.fillAppointment(appointment);
     }
 
+    @Test
     public void testBug14357() throws Exception {
         checkYear(1, 2010, 2);
         checkYear(2, 2011, 2);
@@ -112,12 +118,15 @@ public class Bug14357Test extends AbstractAJAXSession {
         checkYear(10, 2019, 4);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-        getClient().execute(appointmentDeleteRequest);
+        try {
+            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
+            getClient().execute(appointmentDeleteRequest);
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
     private void checkYear(int position, int year, int expectedDay) throws Exception {
@@ -125,14 +134,7 @@ public class Bug14357Test extends AbstractAJAXSession {
 
         ListIDs list = new ListIDs();
         list.add(new ListIDInt(getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId()));
-        MyListRequest listRequest = new MyListRequest(
-            list,
-            new int[] { Appointment.OBJECT_ID, Appointment.START_DATE },
-            true,
-            getClient().getValues().getPrivateAppointmentFolder(),
-            position,
-            appointment.getObjectID(),
-            getClient().getValues().getUserId());
+        MyListRequest listRequest = new MyListRequest(list, new int[] { Appointment.OBJECT_ID, Appointment.START_DATE }, true, getClient().getValues().getPrivateAppointmentFolder(), position, appointment.getObjectID(), getClient().getValues().getUserId());
 
         CommonListResponse listResponse = getClient().execute(listRequest);
 

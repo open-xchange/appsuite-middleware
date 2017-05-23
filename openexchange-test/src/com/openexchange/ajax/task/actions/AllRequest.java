@@ -89,7 +89,7 @@ public class AllRequest extends AbstractAllRequest<CommonAllResponse> {
                 return new AllParser(isFailOnError(), TaskAction.COLUMNS_ALL_ALIAS);
             }
             if (getAlias().equals("list")) {
-                return  new AllParser(isFailOnError(), TaskAction.COLUMNS_LIST_ALIAS);
+                return new AllParser(isFailOnError(), TaskAction.COLUMNS_LIST_ALIAS);
             }
         }
         return null;

@@ -329,7 +329,7 @@ public class MailValidator {
                 /*
                  * Consume final LF
                  */
-                i = in.read();
+                in.read();
                 skipLF = false;
             }
 
@@ -393,7 +393,7 @@ public class MailValidator {
                 /*
                  * Consume final LF
                  */
-                i = in.read();
+                in.read();
                 skipLF = false;
             }
 
@@ -457,7 +457,7 @@ public class MailValidator {
                 /*
                  * Consume final LF
                  */
-                i = in.read();
+                in.read();
                 skipLF = false;
             }
 

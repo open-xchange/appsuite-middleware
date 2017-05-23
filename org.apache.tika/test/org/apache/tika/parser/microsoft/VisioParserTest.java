@@ -17,18 +17,20 @@
 package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class VisioParserTest extends TestCase {
-
-    public void testVisioParser() throws Exception {
+public class VisioParserTest {
+         @Test
+     public void testVisioParser() throws Exception {
         InputStream input = VisioParserTest.class.getResourceAsStream(
                 "/test-documents/testVISIO.vsd");
         try {

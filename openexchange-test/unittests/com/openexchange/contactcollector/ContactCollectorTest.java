@@ -50,6 +50,10 @@
 package com.openexchange.contactcollector;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Types;
@@ -58,7 +62,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import javax.mail.internet.InternetAddress;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
@@ -91,7 +97,7 @@ import com.openexchange.userconf.UserConfigurationService;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class ContactCollectorTest extends TestCase {
+public class ContactCollectorTest {
 
     private SimpleServiceLookup services;
 
@@ -109,7 +115,7 @@ public class ContactCollectorTest extends TestCase {
 
     private final String mail = "test-contact-collector@example.invalid";
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         Init.startServer();
 
@@ -143,7 +149,7 @@ public class ContactCollectorTest extends TestCase {
         return user.substring(0, pos);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, false);
         ServerUserSetting.getInstance().setContactCollectOnMailTransport(ctx.getContextId(), userId, false);
@@ -151,6 +157,7 @@ public class ContactCollectorTest extends TestCase {
         deleteContactFromFolder(mail);
     }
 
+    @Test
     public void testNoFolder() throws Throwable {
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
         setFolderNULL();
@@ -162,6 +169,7 @@ public class ContactCollectorTest extends TestCase {
         assertTrue("Invalid folder id", folder > 0);
     }
 
+    @Test
     public void testNewFeature() throws Throwable {
         removeUserEntry();
         Connection con = DBPool.pickupWriteable(ctx);
@@ -173,6 +181,7 @@ public class ContactCollectorTest extends TestCase {
         assertFalse("Should not collect on outgoing mail", setting.isContactCollectOnMailTransport(ctx.getContextId(), userId));
     }
 
+    @Test
     public void testNewContact() throws Throwable {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
@@ -183,7 +192,7 @@ public class ContactCollectorTest extends TestCase {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
             addresses.add(address);
-            collector.memorizeAddresses(addresses, false,  session, false);
+            collector.memorizeAddresses(addresses, false, session, false);
             final List<Contact> contacts = searchContact(mail);
             assertEquals("No object found", 1, contacts.size());
         } finally {
@@ -191,6 +200,7 @@ public class ContactCollectorTest extends TestCase {
         }
     }
 
+    @Test
     public void testExistingContact() throws Throwable {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
@@ -249,8 +259,7 @@ public class ContactCollectorTest extends TestCase {
         final List<Contact> contacts = searchContact(pattern);
         ContactService contactService = services.getService(ContactService.class);
         for (final Contact contact : contacts) {
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact.getObjectID()),
-                contact.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact.getObjectID()), contact.getLastModified());
         }
     }
 

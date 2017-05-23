@@ -78,6 +78,9 @@ public final class DoveAdmClientExceptionMessages implements LocalizableStrings 
 
     // The DoveAdm resource does not exist
     public static final String NOT_FOUND_SIMPLE_MSG = "The DoveAdm resource does not exist";
+    
+    // A temporary failure because a subsystem is down. Please try again later.
+    public static final String DOVEADM_NOT_REACHABLE_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
 
     /**
      * Initializes a new {@link DoveAdmClientExceptionMessages}.

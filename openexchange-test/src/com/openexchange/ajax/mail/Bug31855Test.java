@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,6 +61,9 @@ import java.io.InputStreamReader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -66,7 +72,7 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 
 /**
@@ -80,28 +86,30 @@ public class Bug31855Test extends AbstractMailTest {
 
     String[][] fmid;
 
-    public Bug31855Test(final String name) {
-        super(name);
+    public Bug31855Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != fmid) {
-            client.execute(new DeleteRequest(fmid, true).ignoreError());
+    @After
+    public void tearDown() throws Exception {
+        try {
+            if (null != fmid) {
+                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug31855() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(
-            MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),
-            "bug31855.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug31855.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -109,10 +117,9 @@ public class Bug31855Test extends AbstractMailTest {
             sb.append(buf, 0, length);
         }
         streamReader.close();
-        InputStream inputStream = new ByteArrayInputStream(
-            TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), getClient().getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
         final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream).setStrictParsing(false);
-        final ImportMailResponse importResp = client.execute(importMailRequest);
+        final ImportMailResponse importResp = getClient().execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmid = importResp.getIds();
 
@@ -138,7 +145,7 @@ public class Bug31855Test extends AbstractMailTest {
         assertEquals("Incorrect content type of attachment 3", "application/octet-stream", array.getJSONObject(2).getString("content_type"));
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }

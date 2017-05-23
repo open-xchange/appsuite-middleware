@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
@@ -68,20 +70,13 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class ParallelGuestSessionsTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link ParallelGuestSessionsTest}.
-     *
-     * @param name The test name
-     */
-    public ParallelGuestSessionsTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testParallelInvitedGuestSessions() throws Exception {
         int module = randomModule();
         testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.GUEST, module));
     }
 
+    @Test
     public void testParallelAnonymousGuestSessions() throws Exception {
         int module = randomModule();
         testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.ANONYMOUS, module));
@@ -97,6 +92,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
          */
         folder.addPermission(guestPermission);
         folder = updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+
             @Override
             public void customize(UpdateRequest request) {
                 request.setCascadePermissions(false);
@@ -109,7 +105,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }

@@ -527,7 +527,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             return true;
         }
         pin.unread(read);
-        ref.setValue(pin);
+        if (ref != null) {
+            ref.setValue(pin);
+        }
         return false;
     }
 
@@ -613,10 +615,11 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @param previewService The preview service
      * @param fileHolder The associated file holder
      * @param output The desired preview output
+     * @param session The session to look-up for
      * @return The {@code RemoteInternalPreviewService} representation or <code>null</code>
      */
-    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, IFileHolder fileHolder, PreviewOutput output) {
-        return getRemoteInternalPreviewServiceFrom(previewService, fileHolder.getName(), output);
+    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, IFileHolder fileHolder, PreviewOutput output, Session session) {
+        return getRemoteInternalPreviewServiceFrom(previewService, fileHolder.getName(), output, session);
     }
 
     /**
@@ -625,14 +628,15 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @param previewService The preview service
      * @param fileName The name of the file
      * @param output The desired preview output
+     * @param session The session to look-up for
      * @return The {@code RemoteInternalPreviewService} representation or <code>null</code>
      */
-    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, String fileName, PreviewOutput output) {
+    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, String fileName, PreviewOutput output, Session session) {
         if (previewService instanceof RemoteInternalPreviewService) {
             return (RemoteInternalPreviewService) previewService;
         }
 
-        return getRemoteInternalPreviewServiceWithMime0(previewService, new FileNameMimeTypeProvider(fileName), output);
+        return getRemoteInternalPreviewServiceWithMime0(previewService, new FileNameMimeTypeProvider(fileName), output, session);
     }
 
     /**
@@ -641,14 +645,15 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @param previewService The preview service
      * @param mimeType The MIME type of the file
      * @param output The desired preview output
+     * @param session The session to look-up for
      * @return The {@code RemoteInternalPreviewService} representation or <code>null</code>
      */
-    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceWithMime(PreviewService previewService, String mimeType, PreviewOutput output) {
+    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceWithMime(PreviewService previewService, String mimeType, PreviewOutput output, Session session) {
         if (previewService instanceof RemoteInternalPreviewService) {
             return (RemoteInternalPreviewService) previewService;
         }
 
-        return getRemoteInternalPreviewServiceWithMime0(previewService, new DirectMimeTypeProvider(mimeType), output);
+        return getRemoteInternalPreviewServiceWithMime0(previewService, new DirectMimeTypeProvider(mimeType), output, session);
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------------
@@ -689,7 +694,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
     }
 
-    private static RemoteInternalPreviewService getRemoteInternalPreviewServiceWithMime0(PreviewService previewService, MimeTypeProvider mimeTypeProvider, PreviewOutput output) {
+    private static RemoteInternalPreviewService getRemoteInternalPreviewServiceWithMime0(PreviewService previewService, MimeTypeProvider mimeTypeProvider, PreviewOutput output, Session session) {
         // PreviewService object is no direct RemoteInternalPreviewService instance. Check if it is an instance of Delegating
         if (!(previewService instanceof Delegating)) {
             return null;
@@ -703,7 +708,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
         // Determine candidate
         try {
-            PreviewService bestFit = ((Delegating) previewService).getBestFitOrDelegate(mimeType, output);
+            PreviewService bestFit = ((Delegating) previewService).getBestFitOrDelegate(mimeType, output, session);
             if (bestFit instanceof RemoteInternalPreviewService) {
                 return (RemoteInternalPreviewService) bestFit;
             }
@@ -731,7 +736,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             IFileHolder fileHolder = getFileHolderFromResult(result, true);
 
             // Check for RemoteInternalPreviewService instance
-            RemoteInternalPreviewService candidate = getRemoteInternalPreviewServiceFrom(previewService, fileHolder, output);
+            RemoteInternalPreviewService candidate = getRemoteInternalPreviewServiceFrom(previewService, fileHolder, output, session);
             if (null == candidate) {
                 return null;
             }
@@ -805,7 +810,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             IFileHolder fileHolder = getFileHolderFromResult(result, true);
 
             // Check for RemoteInternalPreviewService instance
-            RemoteInternalPreviewService candidate = getRemoteInternalPreviewServiceFrom(previewService, fileHolder, output);
+            RemoteInternalPreviewService candidate = getRemoteInternalPreviewServiceFrom(previewService, fileHolder, output, session);
             if (null == candidate) {
                 return;
             }

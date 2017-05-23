@@ -72,6 +72,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -113,6 +114,10 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         if (isOAuthRequest(request) && !mayReadViaOAuthRequest(contentType, getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException();
         }
+        String rootFolderId = request.getParameter("root");
+        if (Strings.isEmpty(rootFolderId)) {
+            rootFolderId = null;
+        }
 
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;
@@ -137,35 +142,38 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         final Boolean suppressUnifiedMail = isSuppressUnifiedMail(request, session);
         final FolderResponse<UserizedFolder[]> privateResp =
             folderService.getVisibleFolders(
+                rootFolderId,
                 treeId,
                 contentType,
                 PrivateType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
+                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
                     "mailRootFolders", mailRootFolders).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Get all shared folders
          */
         final FolderResponse<UserizedFolder[]> sharedResp =
             folderService.getVisibleFolders(
+                rootFolderId,
                 treeId,
                 contentType,
                 SharedType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Get all public folders
          */
         final FolderResponse<UserizedFolder[]> publicResp =
             folderService.getVisibleFolders(
+                rootFolderId,
                 treeId,
                 contentType,
                 PublicType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Determine max. last-modified time stamp
          */

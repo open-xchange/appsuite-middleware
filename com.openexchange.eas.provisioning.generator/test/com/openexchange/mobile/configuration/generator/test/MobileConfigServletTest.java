@@ -14,8 +14,8 @@ import com.openexchange.server.SimpleServiceLookup;
 @SuppressWarnings("serial")
 public class MobileConfigServletTest extends MobileConfigServlet  {
 
-    @Test
-    public void testSplitUsernameAndDomain() throws ConfigurationException {
+     @Test
+     public void testSplitUsernameAndDomain() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$USER@$DOMAIN");
 
@@ -28,8 +28,8 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
         Assert.assertEquals("Value at index 1 wrong", "ox.de", splitUsernameAndDomain[1]);
     }
 
-    @Test
-    public void testSplitUsernameAndDomain2() throws ConfigurationException {
+     @Test
+     public void testSplitUsernameAndDomain2() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN@$USER");
 
@@ -42,8 +42,8 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
         Assert.assertEquals("Value at index 1 wrong", "seppel", splitUsernameAndDomain[1]);
     }
 
-    @Test
-    public void testSplitUsernameAndDomain3() throws ConfigurationException {
+     @Test
+     public void testSplitUsernameAndDomain3() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN|$USER");
 
@@ -56,8 +56,8 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
         Assert.assertEquals("Value at index 1 wrong", "defaultcontext", splitUsernameAndDomain[1]);
     }
 
-    @Test
-    public void testSplitUsernameAndDomain4() throws ConfigurationException {
+     @Test
+     public void testSplitUsernameAndDomain4() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN|$USER");
 
@@ -70,8 +70,8 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
         Assert.assertEquals("Value at index 1 wrong", "seppel", splitUsernameAndDomain[1]);
     }
 
-    @Test
-    public void testSplitUsernameAndDomain5() throws ConfigurationException {
+     @Test
+     public void testSplitUsernameAndDomain5() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$USER@$DOMAIN");
 

@@ -83,4 +83,23 @@ public class SAMLSessionParameters {
      */
     public static final String SESSION_COOKIE = "com.openexchange.saml.SessionCookie";
 
+    /**
+     * com.openexchange.saml.AccessToken
+     */
+    public static final String ACCESS_TOKEN = "com.openexchange.saml.AccessToken";
+
+    /**
+     * com.openexchange.saml.RefreshToken
+     */
+    public static final String REFRESH_TOKEN = "com.openexchange.saml.RefreshToken";
+
+    /**
+     * com.openexchange.saml.SamlPath
+     */
+    public static final String SAML_PATH = "com.openexchange.saml.SamlPath";
+
+    /**
+     * com.openexchange.saml.SingleLogout
+     */
+    public static final String SINGLE_LOGOUT = "com.openexchange.saml.SingleLogout";
 }

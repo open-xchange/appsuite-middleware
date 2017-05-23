@@ -51,6 +51,7 @@ package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -91,16 +92,27 @@ public class ShareServlet extends AbstractShareServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServlet.class);
 
     private final RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry;
+    private final AtomicReference<UserAgentBlacklist> userAgentBlacklistRef;
 
     /**
      * Initializes a new {@link ShareServlet}.
      *
-     * @param shareLoginConfig The share login configuration to use
+     * @param userAgentBlacklist The User-Agent black-list to use
      * @param shareHandlerRegistry The handler registry
      */
-    public ShareServlet(RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry) {
+    public ShareServlet(UserAgentBlacklist userAgentBlacklist, RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry) {
         super();
+        this.userAgentBlacklistRef = new AtomicReference<UserAgentBlacklist>(userAgentBlacklist);
         this.shareHandlerRegistry = shareHandlerRegistry;
+    }
+
+    /**
+     * Sets a new User-Agent black-list that shall be used by this servlet.
+     *
+     * @param newBlacklist The new black-list to apply
+     */
+    public void setUserAgentBlacklist(UserAgentBlacklist newBlacklist) {
+        this.userAgentBlacklistRef.set(newBlacklist);
     }
 
     @Override
@@ -125,6 +137,18 @@ public class ShareServlet extends AbstractShareServlet {
                 LOG.debug("No share found at '{}'", pathInfo);
                 sendNotFound(response, translator);
                 return;
+            }
+
+            {
+                UserAgentBlacklist userAgentBlacklist = userAgentBlacklistRef.get();
+                if (null != userAgentBlacklist) {
+                    String userAgent = request.getHeader("User-Agent");
+                    if (userAgentBlacklist.isBlacklisted(userAgent)) {
+                        LOG.info("User-Agent black-listed: '{}'", userAgent);
+                        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_ACCESSIBLE, "client_blacklisted");
+                        return;
+                    }
+                }
             }
 
             GuestInfo guest = ShareServiceLookup.getService(ShareService.class, true).resolveGuest(paths.get(0));
@@ -192,6 +216,7 @@ public class ShareServlet extends AbstractShareServlet {
             } else {
                 LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
                 LoginLocation location = new LoginLocation()
+                    .status("internal_error")
                     .loginType(LoginType.MESSAGE)
                     .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                 LoginLocationRegistry.getInstance().putAndRedirect(location, response);
@@ -219,15 +244,29 @@ public class ShareServlet extends AbstractShareServlet {
     }
 
     /**
-     * Sends a redirect with an appropriate error message for a not found share.
+     * Sends a redirect with an {@link ShareServletStrings#SHARE_NOT_FOUND appropriate error message} for a not found share.
      *
      * @param response The HTTP servlet response to redirect
      * @param translator The translator
      */
     private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException {
+        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_FOUND, "not_found");
+    }
+
+    /**
+     * Sends a redirect with an appropriate error message for a not found share.
+     *
+     * @param response The HTTP servlet response to redirect
+     * @param translator The translator
+     * @param displayMessage The message displayed to the user
+     * @param status The status to signal
+     */
+    private static void sendNotFound(HttpServletResponse response, Translator translator, String displayMessage, String status) throws IOException {
         LoginLocation location = new LoginLocation()
+            .status(status)
+            .parameter("status", status)
             .loginType(LoginType.MESSAGE)
-            .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND));
+            .message(MessageType.ERROR, translator.translate(displayMessage));
         LoginLocationRegistry.getInstance().putAndRedirect(location, response);
         return;
     }

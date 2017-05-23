@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.lang.reflect.InvocationTargetException;
@@ -58,6 +59,7 @@ import com.openexchange.exception.OXException;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Fixture<T> {
+
     private final T entry;
     private final String[] fields;
     private final Map<String, String> attributes;
@@ -70,29 +72,29 @@ public class Fixture<T> {
 
     public boolean matches(final T other) throws OXException {
 
-    	final Class<?> klass = entry.getClass();
+        final Class<?> klass = entry.getClass();
 
-        for(String field : fields) {
+        for (String field : fields) {
             try {
                 final Method get = getMethod(field, klass);
-                if(get == null) {
+                if (get == null) {
                     continue; // Skip fields we don't have access to.
                 }
                 final Object v1 = get.invoke(entry);
                 final Object v2 = get.invoke(other);
 
-                if(v1 == null && v2 != null) {
+                if (v1 == null && v2 != null) {
                     return false;
                 }
 
-                if(v1 != null && v2 == null) {
+                if (v1 != null && v2 == null) {
                     return false;
                 }
                 final Comparator<Object> comp = getComparator(field);
-                if(comp != null && comp.compare(v1, v2) != 0) {
+                if (comp != null && comp.compare(v1, v2) != 0) {
                     return false;
                 }
-                if(comp == null && !v1.equals(v2)) {
+                if (comp == null && !v1.equals(v2)) {
                     return false;
                 }
 
@@ -107,8 +109,8 @@ public class Fixture<T> {
     }
 
     private Method getMethod(final String field, final Class<?> klass) throws OXException {
-        for(Method m : klass.getMethods()) {
-            if(m.getName().equalsIgnoreCase(IntrospectionTools.getterName(field)) && m.getParameterTypes().length == 0) {
+        for (Method m : klass.getMethods()) {
+            if (m.getName().equalsIgnoreCase(IntrospectionTools.getterName(field)) && m.getParameterTypes().length == 0) {
                 return m;
             }
         }
@@ -122,7 +124,7 @@ public class Fixture<T> {
 
     // Override me!
     public Comparator<Object> getComparator(final String field) {
-    	return null;
+        return null;
     }
 
     public Object getAttribute(String attributeName) {

@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -64,27 +67,11 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class GetVirtualTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
 
-    /**
-     * Initializes a new {@link GetVirtualTest}.
-     *
-     * @param name name of the test.
-     */
-    public GetVirtualTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
+    @Test
     public void testGetVirtual() throws Throwable {
-        final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, new int[] {
-            FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
-        final GetResponse getResponse = client.execute(getRequest);
+        final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
+        final GetResponse getResponse = getClient().execute(getRequest);
         assertFalse("GET request failed.", getResponse.hasError());
         final FolderObject folder = getResponse.getFolder();
         assertEquals("Unexpected object ID: ", FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, folder.getObjectID());

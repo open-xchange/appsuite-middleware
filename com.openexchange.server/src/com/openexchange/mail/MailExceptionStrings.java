@@ -248,4 +248,16 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // A temporary failure because a subsystem is down. Please try again later.
     public static final String SUBSYSTEM_DOWN_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
 
+    // Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_ACCESS_DISABLED_MSG = "Your mail account %2$s was disabled due to invalid credentials. Please edit the account and enter correct credentials to enable it again";
+
+    // Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_ACCESS_DISABLED_OAUTH_MSG = "Your mail account %2$s was disabled because of authorization issues. Please reauthorize the account %5$s to enable it again.";
+
+    // Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_TRANSPORT_DISABLED_MSG = "Your mail transport for  %2$s was disabled due to invalid credentials. Please edit the account and enter correct credentials to enable it again";
+
+    // Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
+    public static final String MAIL_TRANSPORT_DISABLED_OAUTH_MSG = "Your mail transport for %2$s was disabled because of authorization issues. Please reauthorize the account %5$s to enable it again.";
+
 }

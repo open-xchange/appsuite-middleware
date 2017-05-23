@@ -1,0 +1,69 @@
+feature_name: Preview
+feature_description: |
+  The properties for preview module
+properties:
+    - key: com.openexchange.preview.cache.enabled
+      description: |
+        The switch to enable/disable the preview cache.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: preview.properties
+      packageName: open-xchange-core
+      tags: ["Preview", "Caching"]
+
+    - key: com.openexchange.preview.cache.quota
+      description: |
+        Specify the total quota for preview cache for each context.
+        This value is used if no individual context quota is defined.
+        A value of zero or less means no quota.
+      defaultValue: 10485760
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: preview.properties
+      packageName: open-xchange-core
+      tags: ["Preview", "Quota", "Caching"]
+
+    - key: com.openexchange.preview.cache.quotaPerDocument
+      description: |
+        Specify the quota per document for preview cache for each context.
+        This value is used if no individual quota per document is defined.
+        A value of zero or less means no quota.
+      defaultValue: 524288
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: preview.properties
+      packageName: open-xchange-core
+      tags: ["Preview", "Quota", "Caching"]
+
+    - key: com.openexchange.preview.cache.type
+      description: |
+        Specifies what type of storage is used for caching previews.
+        Either file store (<code>FS</code>) or database (<code>DB</code>).
+      defaultValue: FS
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: preview.properties
+      packageName: open-xchange-core
+      tags: ["Preview", "Caching"]
+
+    - key: com.openexchange.preview.cache.quotaAware
+      description: |
+        Specifies if storing previews in file store affects user's file store quota or not.
+        Only applies if [[com.openexchange.preview.cache.type]] is set to <code>FS</code>.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.preview.cache.type
+      file: preview.properties
+      packageName: open-xchange-core
+      tags: ["Preview", "Quota", "Caching"]

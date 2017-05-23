@@ -72,9 +72,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.mail.MailSessionCache;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
@@ -82,7 +79,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
@@ -216,12 +212,15 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             }
 
         }
-        // Check standard folder names against full names
-        if (false == isPop3(toUpdate)) {
+        /*-
+         * Check standard folder names against full names
+         *
+        if (false == isPop3(toUpdate) && false == toUpdate.isMailDisabled()) {
             fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
             Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
         }
+         */
 
         // Update
         MailAccount updatedAccount = null;

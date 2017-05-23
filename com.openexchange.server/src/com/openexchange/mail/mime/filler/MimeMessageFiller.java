@@ -120,6 +120,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
@@ -142,6 +143,7 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImage;
 import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -301,13 +303,14 @@ public class MimeMessageFiller {
         /*
          * Set organization to context-admin's company field setting
          */
+        MailProperties mailProperties = MailProperties.getInstance();
         if (accountId <= 0) {
             try {
                 final String organization = compositionParameters.getOrganization();
                 if (null != organization && 0 < organization.length()) {
                     final String encoded = MimeUtility.fold(
                         14,
-                        MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                        MimeUtility.encodeText(organization, mailProperties.getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
@@ -317,14 +320,14 @@ public class MimeMessageFiller {
         /*
          * Add header X-Originating-IP containing the IP address of the client
          */
-        if (MailProperties.getInstance().isAddClientIPAddress()) {
-            addClientIPAddress(mimeMessage);
+        if (mailProperties.isAddClientIPAddress()) {
+            addClientIPAddress(mimeMessage, mailProperties.getIpAddressRenderer());
         }
         {
             String client = compositionParameters.getClient();
             if (!Strings.isEmpty(client)) {
                 try {
-                    final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, mailProperties.getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_X_ORIGINATING_CLIENT, encoded);
                 } catch (final Exception e) {
                     LOG.warn("Header \"X-Originating-Client\" could not be set", e);
@@ -337,12 +340,13 @@ public class MimeMessageFiller {
      * Add "X-Originating-IP" header.
      *
      * @param mimeMessage The MIME message
+     * @param renderer The renderer to use
      * @throws MessagingException If an error occurs
      */
-    private void addClientIPAddress(final MimeMessage mimeMessage) throws OXException, MessagingException {
+    private void addClientIPAddress(MimeMessage mimeMessage, IpAddressRenderer renderer) throws OXException, MessagingException {
         String originatingIP = compositionParameters.getOriginatingIP();
         if (originatingIP != null) {
-            mimeMessage.setHeader("X-Originating-IP", originatingIP);
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? originatingIP : renderer.render(originatingIP));
         }
     }
 
@@ -354,17 +358,19 @@ public class MimeMessageFiller {
      * @throws MessagingException If an error occurs
      */
     public static void addClientIPAddress(final MimeMessage mimeMessage, final Session session) throws MessagingException {
+        IpAddressRenderer renderer = MailProperties.getInstance().getIpAddressRenderer();
         /*
          * Get IP from session
          */
-        final String localIp = session.getLocalIp();
+        String localIp = session.getLocalIp();
         if (isLocalhost(localIp)) {
             LOG.debug("Session provides localhost as client IP address: {}", localIp);
             // Prefer request's remote address if local IP seems to denote local host
             String clientIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
+            clientIp = clientIp == null ? localIp : clientIp;
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? clientIp : renderer.render(clientIp));
         } else {
-            mimeMessage.setHeader("X-Originating-IP", localIp);
+            mimeMessage.setHeader("X-Originating-IP", null == renderer ? localIp : renderer.render(localIp));
         }
     }
 
@@ -1711,7 +1717,14 @@ public class MimeMessageFiller {
                                 continue;
                             }
                             ImageProvider tmp = null;
-                            String prefix = "<" + UUIDs.getUnformattedString(UUID.fromString(id));
+                            String prefix = null;
+                            try {
+                                prefix = "<" + UUIDs.getUnformattedString(UUID.fromString(id));
+                            } catch (IllegalArgumentException e) {
+                                // looks like the id is invalid. Skip image.
+                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                                continue;
+                            }
                             for (int i = size; null == tmp && i-- > 0;) {
                                 MailPart part = mail.getEnclosedMailPart(i);
                                 if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
@@ -1739,6 +1752,10 @@ public class MimeMessageFiller {
                                 ImageLocation il;
                                 try {
                                     il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                                    SecuritySettings securitySettings = mail.getSecuritySettings();
+                                    if (null != securitySettings) {
+                                        il.setAuth(securitySettings.getAuthentication());
+                                    }
                                 } catch (final IllegalArgumentException e) {
                                     final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
                                     srcMatcher.appendReplacement(bblankImageTag, "");

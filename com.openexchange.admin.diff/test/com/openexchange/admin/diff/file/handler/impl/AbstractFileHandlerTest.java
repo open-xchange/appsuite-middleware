@@ -85,32 +85,32 @@ public class AbstractFileHandlerTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void testAddFile_originalFile_fileAdded() {
+     @Test
+     public void testAddFile_originalFile_fileAdded() {
         noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(fileName, "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
 
         Assert.assertEquals(1, noExtensionHandler.originalFiles.size());
         Assert.assertEquals(0, noExtensionHandler.installedFiles.size());
     }
 
-    @Test
-    public void testAddFile_installedFile_fileAdded() {
+     @Test
+     public void testAddFile_installedFile_fileAdded() {
         noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(fileName, "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", false));
 
         Assert.assertEquals(0, noExtensionHandler.originalFiles.size());
         Assert.assertEquals(1, noExtensionHandler.installedFiles.size());
     }
 
-    @Test
-    public void testAddFile_fileToIgnore_fileNotAdded() {
+     @Test
+     public void testAddFile_fileToIgnore_fileNotAdded() {
         noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(mpasswd, "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
 
         Assert.assertEquals(0, noExtensionHandler.originalFiles.size());
         Assert.assertEquals(0, noExtensionHandler.installedFiles.size());
     }
 
-    @Test
-    public void testGetFileDiffs_fileInInstallationMissing_addToMap() {
+     @Test
+     public void testGetFileDiffs_fileInInstallationMissing_addToMap() {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
@@ -127,8 +127,8 @@ public class AbstractFileHandlerTest {
         Assert.assertEquals("/opt/open-xchange/bundles/jar!/conffile2.properties", diffResult.getMissingFiles().get(0).getFullFilePathWithExtension());
     }
 
-    @Test
-    public void testGetFileDiffs_additionalFileInInstallation_addToMap() {
+     @Test
+     public void testGetFileDiffs_additionalFileInInstallation_addToMap() {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
@@ -145,8 +145,8 @@ public class AbstractFileHandlerTest {
         Assert.assertEquals("valueFile2", diffResult.getAdditionalFiles().get(0).getName(), "file2.properties");
     }
 
-    @Test
-    public void testGetFileDiffs_filesEqual_mapsEmpty() {
+     @Test
+     public void testGetFileDiffs_filesEqual_mapsEmpty() {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();

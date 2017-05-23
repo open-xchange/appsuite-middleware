@@ -106,12 +106,12 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -235,7 +235,7 @@ public final class MessageParser {
                 int length = datasourceArray.length();
                 if (length > 0) {
                     // Check max. allowed Drive attachments
-                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
                     if (max > 0 && length > max) {
                         throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
                     }
@@ -278,7 +278,7 @@ public final class MessageParser {
                 int length = ja.length();
                 if (length > 0) {
                     // Check max. allowed Drive attachments
-                    int max = MailProperties.getInstance().getMaxDriveAttachments();
+                    int max = MailProperties.getInstance().getMaxDriveAttachments(session.getUserId(), session.getContextId());
                     if (max > 0 && length > max) {
                         throw MailExceptionCode.MAX_DRIVE_ATTACHMENTS_EXCEEDED.create(Integer.toString(max));
                     }
@@ -422,6 +422,21 @@ public final class MessageParser {
                     transportMail.setContentType(part.getContentType());
                     // Add text part
                     attachmentHandler.setTextPart(part);
+                }
+                JSONObject jSecuritySettings = jsonObj.optJSONObject("security");
+                if (null != jSecuritySettings) {
+                    SecuritySettings settings = SecuritySettings.builder()
+                        .encrypt(jSecuritySettings.optBoolean("encrypt", false))
+                        .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
+                        .sign(jSecuritySettings.optBoolean("sign", false))
+                        .authentication(null)
+                        .guestLanguage(jSecuritySettings.optString("language", null))
+                        .guestMessage(jSecuritySettings.optString("message", null))
+                        .pin(jSecuritySettings.optString("pin", null))
+                        .build();
+                    if (settings.anythingSet()) {
+                        ((ComposedMailMessage) mail).setSecuritySettings(settings);
+                    }
                 }
             }
             /*
@@ -739,7 +754,6 @@ public final class MessageParser {
                             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(msgref.getMailID(), msgref.getFolder());
                         }
                         referencedMail.setAccountId(access.getAccountId());
-                        referencedMail = ManagedMimeMessage.clone(referencedMail);
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
                         referencedMailPart = null == seqId ? null : groupedReferencedParts.get(seqId);
@@ -815,7 +829,6 @@ public final class MessageParser {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(pMsgRef.getMailID(), pMsgRef.getFolder());
         }
         referencedMail.setAccountId(access.getAccountId());
-        referencedMail = ManagedMimeMessage.clone(referencedMail);
         // Get attachments out of referenced mail
         Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
         MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);

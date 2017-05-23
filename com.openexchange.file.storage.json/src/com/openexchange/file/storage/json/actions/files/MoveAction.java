@@ -74,7 +74,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 
-
 /**
  * {@link MoveAction}
  *
@@ -190,7 +189,10 @@ public class MoveAction extends AbstractWriteAction {
 
             {
                 for (String folderId : deleteableFolders) {
-                    try { folderAccess.deleteFolder(folderId, true); } catch (Exception e) {/* ignore */}
+                    try {
+                        folderAccess.deleteFolder(folderId, true);
+                    } catch (Exception e) {
+                        /* ignore */}
                 }
             }
 
@@ -216,7 +218,10 @@ public class MoveAction extends AbstractWriteAction {
         } finally {
             if (error) {
                 for (String folderId : deleteableFolders) {
-                    try { folderAccess.deleteFolder(folderId, true); } catch (Exception e) {/* ignore */}
+                    try {
+                        folderAccess.deleteFolder(folderId, true);
+                    } catch (Exception e) {
+                        /* ignore */}
                 }
             }
         }

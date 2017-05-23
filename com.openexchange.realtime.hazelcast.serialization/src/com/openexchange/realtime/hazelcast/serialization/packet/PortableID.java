@@ -163,14 +163,18 @@ public class PortableID extends ID implements CustomPortable {
     public void readPortable(PortableReader reader) throws IOException {
         String idString = reader.readUTF(FIELD_ID);
         IDComponents idComponents = IDComponentsParser.parse(idString);
-        protocol = idComponents.protocol;
-        component = idComponents.component;
+        if (idComponents.context == null) {
+            throw new IllegalArgumentException("Context information is obligatory for IDs");
+        }
+        if (idComponents.user == null) {
+            throw new IllegalArgumentException("User information is obligatory for IDs");
+        }
+        protocol = saneString(idComponents.protocol);
+        component = saneString(idComponents.component);
         user = idComponents.user;
         context = idComponents.context;
-        resource = idComponents.resource;
+        resource = saneString(idComponents.resource);
         cachedStringRepresentation = idString;
-        sanitize();
-        validate();
     }
 
 }

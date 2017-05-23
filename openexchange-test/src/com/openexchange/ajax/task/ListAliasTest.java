@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -78,23 +83,27 @@ public class ListAliasTest extends AbstractTaskTest {
      *
      * @param name
      */
-    public ListAliasTest(final String name) {
-        super(name);
+    public ListAliasTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        final DeleteRequest delete = new DeleteRequest(task);
-        client.execute(delete);
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            final DeleteRequest delete = new DeleteRequest(task);
+            client.execute(delete);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testAll() throws Throwable {
         task = new Task();
         task.setTitle("Task TestListAlias");

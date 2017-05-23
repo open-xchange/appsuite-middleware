@@ -64,6 +64,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,6 +100,7 @@ import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -843,6 +845,11 @@ public final class Tools {
             return true;
         }
 
+        // Explicitly requested by client
+        if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("plainJson"))) {
+            return true;
+        }
+
         // E.g. "Accept: application/json, text/javascript, ..."
         String acceptHdr = request.getHeader(ACCEPT);
         if (Strings.isEmpty(acceptHdr)) {
@@ -1132,5 +1139,60 @@ public final class Tools {
 
     public static void setConfigurationService(final ConfigurationService configurationService) {
         CONFIG_SERVICE_REF.set(configurationService);
+    }
+
+    /**
+     * Checks if sharding is supposed to be used for specified host/server name.
+     * <p>
+     * That is if administrator configured sub-domains for that host/server name.
+     *
+     * @param serverName The server name
+     * @return <code>true</code> if sharding is supposed to be used; otherwise <code>false</code>
+     */
+    public static boolean validateDomainRegardingSharding(String serverName) {
+        return Cookies.isValidDomainValue(serverName) && useShardingForHost(serverName);
+    }
+
+    /**
+     * Checks whether to use sharding for specified host/server name.
+     *
+     * @param serverName The server name
+     * @return <code>true</code> to use sharding; otherwise <code>false</code>
+     */
+    public static boolean useShardingForHost(String serverName) {
+        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+        if (null == serverConfigService) {
+            LOG.info("Server configuration service unavailable. Assuming no sharding for hosts.");
+            return false;
+        }
+
+        boolean result = false;
+        try {
+            List<Map<String, Object>> customHostConfigurations = serverConfigService.getCustomHostConfigurations(serverName, -1, -1);
+            if (customHostConfigurations != null) {
+                result = areShardingHostsAvailable(customHostConfigurations);
+            }
+        } catch (OXException e) {
+            LOG.error("Unable to load custom host configuration", e);
+        }
+        return result;
+    }
+
+    /**
+     * Checks if one of given host configurations contains a <code>"shardingSubdomains"</code> entry.
+     *
+     * @param customHostConfigurations The host configurations to check
+     * @return <code>true</code> if such a <code>"shardingSubdomains"</code> entry exists; otherwise <code>false</code>
+     */
+    private static boolean areShardingHostsAvailable(List<Map<String, Object>> customHostConfigurations) {
+        List<String> shardingSubdomains = null;
+        for (Iterator<Map<String, Object>> iter = customHostConfigurations.iterator(); null == shardingSubdomains && iter.hasNext();) {
+            Map<String, Object> config = iter.next();
+            Object object = config.get("shardingSubdomains");
+            if (null != object) {
+                shardingSubdomains = (List<String>) object;
+            }
+        }
+        return null == shardingSubdomains || shardingSubdomains.isEmpty() ? false : true;
     }
 }

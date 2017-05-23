@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.mail.filter.tests.bug;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Discard;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
@@ -60,18 +62,18 @@ import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
  * {@link Bug44363Test}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Bug44363Test extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link Bug44363Test}.
-     * 
+     *
      * @param name
      */
-    public Bug44363Test(String name) {
-        super(name);
+    public Bug44363Test() {
+        super();
     }
 
     /**
@@ -83,9 +85,10 @@ public class Bug44363Test extends AbstractMailFilterTest {
      * <li>Deactivate the vacation rule</li>
      * </ul>
      * Assert there are still two rules present
-     * 
+     *
      * @throws Exception if an error is occurred
      */
+    @Test
     public void testBug44363() throws Exception {
         // Create a vacation rule with a single lined dot '.' character
         Rule vacationRule;
@@ -98,6 +101,7 @@ public class Bug44363Test extends AbstractMailFilterTest {
             final ContainsComparison conComp = new ContainsComparison();
             vacationRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Vacation for 44363" }));
             int vacationId = mailFilterAPI.createRule(vacationRule);
+            rememberRule(vacationId);
             vacationRule.setId(vacationId);
         }
 
@@ -111,6 +115,7 @@ public class Bug44363Test extends AbstractMailFilterTest {
             ContainsComparison conComp = new ContainsComparison();
             otherRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug 44363" }));
             int otherId = mailFilterAPI.createRule(otherRule);
+            rememberRule(otherId);
             otherRule.setId(otherId);
         }
 

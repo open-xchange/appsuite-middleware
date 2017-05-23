@@ -59,6 +59,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * Stores the response of searched users.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class SearchResponse extends CommonSearchResponse {
@@ -80,28 +81,28 @@ public final class SearchResponse extends CommonSearchResponse {
             for (final int attribute : userImplAttributes) {
                 final Object value = data[getColumnPos(attribute)];
                 switch (attribute) {
-                case Contact.INTERNAL_USERID:
-                    if(JSONObject.NULL == value) {
+                    case Contact.INTERNAL_USERID:
+                        if (JSONObject.NULL == value) {
+                            break;
+                        }
+                        user.setId(((Integer) value).intValue());
                         break;
-                    }
-                    user.setId(((Integer) value).intValue());
-                    break;
-                case Contact.EMAIL1:
-                    if(JSONObject.NULL == value) {
-                        user.setMail(null);
+                    case Contact.EMAIL1:
+                        if (JSONObject.NULL == value) {
+                            user.setMail(null);
+                            break;
+                        }
+                        user.setMail((String) value);
                         break;
-                    }
-                    user.setMail((String) value);
-                    break;
-                case Contact.DISPLAY_NAME:
-                    user.setDisplayName((value == JSONObject.NULL) ? null : (String) value);
-                    break;
-                case Contact.GIVEN_NAME:
-                    user.setGivenName((value == JSONObject.NULL) ? null : (String) value);
-                    break;
-                case Contact.SUR_NAME:
-                    user.setSurname((value == JSONObject.NULL) ? null : (String) value);
-                    break;
+                    case Contact.DISPLAY_NAME:
+                        user.setDisplayName((value == JSONObject.NULL) ? null : (String) value);
+                        break;
+                    case Contact.GIVEN_NAME:
+                        user.setGivenName((value == JSONObject.NULL) ? null : (String) value);
+                        break;
+                    case Contact.SUR_NAME:
+                        user.setSurname((value == JSONObject.NULL) ? null : (String) value);
+                        break;
                 }
             }
             list.add(user);

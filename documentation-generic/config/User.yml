@@ -1,0 +1,66 @@
+feature_name: User
+feature_description: |
+  This properties can be used to configure defaults used if some user has the according preference not defined.
+properties:
+    - key: com.openexchange.user.beta
+      description: |
+        Specifies whether beta features are enabled/disabled per default. The value is remembered for every user in its attributes.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: user.properties
+      packageName: open-xchange-core
+      tags: ["User"]
+    - key: com.openexchange.folder.tree
+      description: |
+        Defines the default folder tree that should be used if a user has not selected one.
+      defaultValue: 1
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: user.properties
+      packageName: open-xchange-core
+      tags: ["User", "Folder"]
+    - key: com.openexchange.user.contactCollectOnMailAccess
+      description: |
+        Define the default behavior whether to collect contacts on mail access.
+
+        Note:  
+        Appropriate user access permission still needs to be granted in order to take effect.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: user.properties
+      packageName: open-xchange-core
+      tags: ["User", "Mail", "Contact"]
+    - key: com.openexchange.user.contactCollectOnMailTransport
+      description: |
+        Define the default behavior whether to collect contacts on mail transport.
+
+        Note:  
+        Appropriate user access permission still needs to be granted in order to take effect.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: user.properties
+      packageName: open-xchange-core
+      tags: ["User", "Mail", "Contact", "Transport"]
+    - key: com.openexchange.user.maxClientCount
+      description: |
+        Specify the max. allowed number of client identifiers stored/tracked per user.
+        A value equal to or less than zero means unlimited.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: user.properties
+      packageName: open-xchange-core
+      tags: ["User", "Limit"]

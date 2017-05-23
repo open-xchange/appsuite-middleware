@@ -163,7 +163,8 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
                 LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(creds.getLogin()).password(creds.getPassword()).clientIP(clientIP);
                 b.userAgent(userAgent).authId(UUIDs.getUnformattedString(UUID.randomUUID())).client(client).version(version);
                 b.hash(HashCalculator.getInstance().getHash(req, userAgent, client));
-                b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
+                b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
+                b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
                 b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
                 request = b.build();
             }
@@ -230,9 +231,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
          * check & take over remote IP
          */
         String remoteAddress = request.getRemoteAddr();
-        if (conf.isIpCheck()) {
-            SessionUtility.checkIP(true, conf.getRanges(), session, remoteAddress, conf.getIpCheckWhitelist());
-        }
+        SessionUtility.checkIP(session, remoteAddress);
         LoginTools.updateIPAddress(conf, remoteAddress, session);
         /*
          * ensure user & context are enabled

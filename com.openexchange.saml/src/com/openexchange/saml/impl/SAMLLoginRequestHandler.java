@@ -81,7 +81,6 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.tools.SAMLLoginTools;
@@ -108,8 +107,6 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(SAMLLoginRequestHandler.class);
 
-    private final SAMLConfig config;
-
     private final LoginConfigurationLookup loginConfigurationLookup;
 
     private final SAMLBackend backend;
@@ -119,13 +116,13 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
     /**
      * Initializes a new {@link SAMLLoginRequestHandler}.
      */
-    public SAMLLoginRequestHandler(SAMLConfig config, SAMLBackend backend, LoginConfigurationLookup loginConfigurationLookup, ServiceLookup services) {
+    public SAMLLoginRequestHandler(SAMLBackend backend, LoginConfigurationLookup loginConfigurationLookup, ServiceLookup services) {
         super();
-        this.config = config;
         this.backend = backend;
         this.loginConfigurationLookup = loginConfigurationLookup;
         this.services = services;
     }
+
 
     @Override
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -169,7 +166,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
         {
             // try autologin (this is needed for the unsolicited response)
-            String autologinRedirect = tryAutoLogin(req, resp, reservation);
+            String autologinRedirect = tryAutoLogin(req, resp, reservation, backend);
             if (null != autologinRedirect) {
                 resp.sendRedirect(autologinRedirect);
                 return;
@@ -178,7 +175,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
         {
             // try autologin with SessionIndex
-            String sessionIndexAutologinRedirect = trySessionIndexAutoLogin(req, resp, reservation);
+            String sessionIndexAutologinRedirect = trySessionIndexAutoLogin(req, resp, reservation, backend);
             if (null != sessionIndexAutologinRedirect) {
                 resp.sendRedirect(sessionIndexAutologinRedirect);
                 return;
@@ -187,7 +184,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
         // If SAML autologin is enabled we need to set another cookie
         final String samlCookieValue;
-        if (config.isAutoLoginEnabled()) {
+        if (backend.getConfig().isAutoLoginEnabled()) {
             samlCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
         } else {
             samlCookieValue = null;
@@ -282,6 +279,26 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
                         if (samlCookieValue != null) {
                             session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
                         }
+
+                        String singleLogout = reservationState.get(SAMLSessionParameters.SINGLE_LOGOUT);
+                        if (singleLogout != null) {
+                            session.setParameter(SAMLSessionParameters.SINGLE_LOGOUT, Boolean.valueOf(singleLogout));
+                        }
+
+                        String samlPath = reservationState.get(SAMLSessionParameters.SAML_PATH);
+                        if (samlPath != null) {
+                            session.setParameter(SAMLSessionParameters.SAML_PATH, samlPath);
+                        }
+
+                        String accessToken = reservationState.get(SAMLSessionParameters.ACCESS_TOKEN);
+                        if (accessToken != null) {
+                            session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken);
+                        }
+
+                        String refreshToken = reservationState.get(SAMLSessionParameters.REFRESH_TOKEN);
+                        if (refreshToken != null) {
+                            session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, refreshToken);
+                        }
                     }
                 };
 
@@ -325,9 +342,9 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
     }
 
-    private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation) throws OXException {
+    private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation, SAMLBackend samlBackend) throws OXException {
         Cookie samlCookie = null;
-        if (config.isAutoLoginEnabled()) {
+        if (samlBackend.getConfig().isAutoLoginEnabled()) {
             LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
             String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
             Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
@@ -373,8 +390,8 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         return null;
     }
 
-    private String trySessionIndexAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation) throws OXException {
-        if (config.isSessionIndexAutoLoginEnabled()) {
+    private String trySessionIndexAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation, SAMLBackend samlBackend) throws OXException {
+        if (samlBackend.getConfig().isSessionIndexAutoLoginEnabled()) {
             SessiondService sessiondService = services.getService(SessiondService.class);
 
             Map<String, String> state = reservation.getState();

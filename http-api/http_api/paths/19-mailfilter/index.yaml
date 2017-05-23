@@ -7,3 +7,11 @@ requests:
   - UpdateRequest.yaml
   - DeleteScriptRequest.yaml
   - GetScriptRequest.yaml
+  - ConfigRequest_v2.yaml
+  - ListRequest_v2.yaml
+  - NewRequest_v2.yaml
+  - DeleteRequest_v2.yaml
+  - ReorderRequest_v2.yaml
+  - UpdateRequest_v2.yaml
+  - DeleteScriptRequest_v2.yaml
+  - GetScriptRequest_v2.yaml

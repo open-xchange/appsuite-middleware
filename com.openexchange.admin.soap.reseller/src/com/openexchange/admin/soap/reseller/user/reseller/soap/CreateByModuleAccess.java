@@ -39,7 +39,7 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAcce
     "ctx",
     "usrdata",
     "access",
-    "auth"
+    "auth",
 })
 @XmlRootElement(name = "createByModuleAccess")
 public class CreateByModuleAccess {

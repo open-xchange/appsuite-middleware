@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonAllResponse;
 
 /**
@@ -63,29 +66,19 @@ import com.openexchange.ajax.framework.CommonAllResponse;
  */
 public class AllAliasTest extends ContactTest {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link AllAliasTest}.
      *
      * @param name
      */
-    public AllAliasTest(final String name) {
-        super(name);
+    public AllAliasTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = new AJAXClient(User.User1);
-    }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testAllAlias() throws Exception {
+        AJAXClient client = getClient();
         final AllRequest allAliasRequest = new AllRequest(client.getValues().getPrivateContactFolder(), "all");
         final CommonAllResponse allAliasResponse = client.execute(allAliasRequest);
         final Object[][] aliasContacts = allAliasResponse.getArray();

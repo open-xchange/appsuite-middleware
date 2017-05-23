@@ -56,9 +56,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -81,168 +78,177 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     private static OXContextInterface oxctx = null;
 
-    @BeforeClass
-    public static void startup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, OXResellerException {
-        final Credentials creds = DummyMasterCredentials();
+    private ResellerAdmin randomAdmin;
+
+    @Override
+    public final void setUp() throws Exception {
+        super.setUp();
+
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        oxresell.initDatabaseRestrictions(creds);
-    }
+        randomAdmin = RandomAdmin();
 
-    @AfterClass
-    public static void cleanup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
-        final Credentials creds = DummyMasterCredentials();
-        oxresell.removeDatabaseRestrictions(creds);
-    }
-
-    @Before
-    public final void setupAdmin() throws Exception {
-        oxresell.create(FooAdminUser(), DummyMasterCredentials());
+        oxresell.create(randomAdmin, DummyMasterCredentials());
     }
 
     @After
-    public final void deleteAdmin() throws Exception {
+    public final void tearDown() throws Exception {
         final Credentials creds = DummyMasterCredentials();
 
-        final ResellerAdmin[] adms = oxresell.list("*", creds);
+        final ResellerAdmin[] adms = oxresell.list(randomAdmin.getName(), creds);
         for (final ResellerAdmin adm : adms) {
             oxresell.delete(adm, creds);
         }
     }
 
     @Test(expected = InvalidCredentialsException.class)
-    public void testListAllContextInvalidAuthNoUser() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException {
-        oxctx.listAll(ResellerBarCredentials());
+    public void testListAllContextInvalidAuthNoUser() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        ResellerAdmin second = RandomAdmin();
+        oxctx.listAll(ResellerRandomCredentials(second.getName()));
     }
 
     @Test(expected = InvalidCredentialsException.class)
-    public void testListAllContextInvalidAuthWrongpasswd() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException {
-        Credentials creds = ResellerFooCredentials();
+    public void testListAllContextInvalidAuthWrongpasswd() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
         creds.setPassword("wrongpass");
         oxctx.listAll(creds);
     }
 
     @Test
-    public void testListAllContextValidAuth() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException {
-        final Credentials creds = ResellerFooCredentials();
+    public void testListAllContextValidAuth() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
         oxctx.listAll(creds);
     }
 
     @Test
-    public void testCreateTooManyContexts() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        final Credentials creds = DummyMasterCredentials();
+    public void testCreateTooManyContexts() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+        oxresell.delete(randomAdmin, DummyMasterCredentials()); // Delete normaly created FooAdminUser
 
-        oxresell.delete(FooAdminUser(), DummyMasterCredentials()); // Delete normaly created FooAdminUser
+        randomAdmin.setRestrictions(new Restriction[] { MaxContextRestriction() });
+        oxresell.create(randomAdmin, DummyMasterCredentials());
 
-        ResellerAdmin adm = FooAdminUser();
-        adm.setRestrictions(new Restriction[] { MaxContextRestriction() });
-        oxresell.create(adm, creds);
-
-        Context ctx1 = createContext(ResellerFooCredentials());
-        Context ctx2 = createContext(ResellerFooCredentials());
+        Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
+        Context ctx1 = createContext(creds);
+        Context ctx2 = createContext(creds);
         Context ctx3 = null;
         boolean failed_ctx3 = false;
         try {
-            ctx3 = createContext(ResellerFooCredentials());
+            ctx3 = createContext(creds);
         } catch (StorageException e) {
             failed_ctx3 = true;
         }
 
-        deleteContext(ctx1, ResellerFooCredentials());
-        deleteContext(ctx2, ResellerFooCredentials());
+        deleteContext(ctx1, creds);
+        deleteContext(ctx2, creds);
         if (ctx3 != null) {
-            deleteContext(ctx3, ResellerFooCredentials());
+            deleteContext(ctx3, creds);
         }
 
         assertTrue("creation of ctx3 must fail", failed_ctx3);
+
+        oxresell.delete(randomAdmin, DummyMasterCredentials());
     }
 
     @Test
     public void testCreateContextNoQuota() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = DummyMasterCredentials();
+        oxresell.delete(randomAdmin, creds); // Delete normaly created FooAdminUser
 
-        oxresell.delete(FooAdminUser(), DummyMasterCredentials()); // Delete normaly created FooAdminUser
-
-        ResellerAdmin adm = FooAdminUser();
-        adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
-        oxresell.create(adm, creds);
+        randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
+        oxresell.create(randomAdmin, creds);
+       
+        Credentials contextAdmin = ResellerRandomCredentials(randomAdmin.getName());
 
         Context ctx1 = null;
         boolean failed_ctx1 = false;
         try {
-            ctx1 = createContextNoQuota(ResellerFooCredentials());
+            ctx1 = createContextNoQuota(contextAdmin);
         } catch (InvalidDataException e) {
             failed_ctx1 = true;
         }
 
         if (ctx1 != null) {
-            deleteContext(ctx1, ResellerFooCredentials());
+            deleteContext(ctx1, contextAdmin);
         }
         assertTrue("creation of ctx1 must fail", failed_ctx1);
+
+        oxresell.delete(randomAdmin, DummyMasterCredentials());
     }
 
     @Test
     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = DummyMasterCredentials();
 
-        oxresell.delete(FooAdminUser(), DummyMasterCredentials()); // Delete normaly created FooAdminUser
+        oxresell.delete(randomAdmin, DummyMasterCredentials()); // Delete normaly created FooAdminUser
 
-        ResellerAdmin adm = FooAdminUser();
-        adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
-        oxresell.create(adm, creds);
+        randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
+        oxresell.create(randomAdmin, creds);
 
-        Context ctx1 = createContext(ResellerFooCredentials());
-        Context ctx2 = createContext(ResellerFooCredentials());
+        Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
+        Context ctx1 = createContext(resellerRandomCredentials);
+        Context ctx2 = createContext(resellerRandomCredentials);
         Context ctx3 = null;
         boolean failed_ctx3 = false;
         try {
-            ctx3 = createContext(ResellerFooCredentials());
+            ctx3 = createContext(resellerRandomCredentials);
         } catch (StorageException e) {
             failed_ctx3 = true;
         }
-        deleteContext(ctx1, ResellerFooCredentials());
-        deleteContext(ctx2, ResellerFooCredentials());
+        deleteContext(ctx1, resellerRandomCredentials);
+        deleteContext(ctx2, resellerRandomCredentials);
         if (ctx3 != null) {
-            deleteContext(ctx3, ResellerFooCredentials());
+            deleteContext(ctx3, resellerRandomCredentials);
         }
         assertTrue("creation of ctx3 must fail", failed_ctx3);
+
+        oxresell.delete(randomAdmin, creds);
     }
 
     @Test
     public void testListContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = DummyMasterCredentials();
 
-        oxresell.create(BarAdminUser(), creds);
+        ResellerAdmin second = RandomAdmin();
 
-        ownedContext = createContext(ResellerFooCredentials());
+        oxresell.create(second, creds);
+
+        Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
+        ownedContext = createContext(resellerRandomCredentials);
         try {
-            Context[] ret = oxctx.listAll(ResellerFooCredentials());
+            Context[] ret = oxctx.listAll(resellerRandomCredentials);
             assertEquals("listAll must return one entry", 1, ret.length);
 
-            ret = oxctx.listAll(ResellerBarCredentials());
+            ret = oxctx.listAll(ResellerRandomCredentials(second.getName()));
             assertEquals("listAll must return no entries", 0, ret.length);
         } finally {
-            deleteContext(ownedContext, ResellerFooCredentials());
+            deleteContext(ownedContext, resellerRandomCredentials);
             ownedContext = null;
         }
+
+        oxresell.delete(second, creds);
+
     }
 
     @Test
-    public void testGetDataContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        ownedContext = createContext(ResellerFooCredentials());
+    public void testGetDataContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+        Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
+        ownedContext = createContext(resellerRandomCredentials);
         try {
             boolean fail = false;
             try {
-                oxctx.getData(ownedContext, ResellerBarCredentials());
+                ResellerAdmin second = RandomAdmin();
+                Credentials secondCreds = ResellerRandomCredentials(second.getName());
+
+                oxctx.getData(ownedContext, secondCreds);
             } catch (Exception e) {
                 fail = true;
             }
             assertTrue("getData on an unowned context must fail", fail);
 
-            Context ctx = oxctx.getData(ownedContext, ResellerFooCredentials());
+            Context ctx = oxctx.getData(ownedContext, resellerRandomCredentials);
             assertEquals("getData must return context with same id as ownedContext", ownedContext.getId(), ctx.getId());
         } finally {
-            deleteContext(ownedContext, ResellerFooCredentials());
+            deleteContext(ownedContext, resellerRandomCredentials);
             ownedContext = null;
         }
     }

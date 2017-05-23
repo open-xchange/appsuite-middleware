@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -59,6 +60,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -69,8 +72,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-
-
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -84,13 +85,8 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     private int contextId;
     private final DateFormat formatter = new SimpleDateFormat("yyyyMMdd"); //used by freebusy.java
 
-    public FreeBusyTest(String name) {
-        super(name);
-    }
-
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
 
@@ -98,53 +94,46 @@ public class FreeBusyTest extends ManagedAppointmentTest {
 
         appointment = new Appointment();
         now = new Date();
-        inAnHour = new Date( now.getTime() + 1000 * 60 * 60);
-        appointment.setStartDate( now );
-        appointment.setEndDate( inAnHour );
+        inAnHour = new Date(now.getTime() + 1000 * 60 * 60);
+        appointment.setStartDate(now);
+        appointment.setEndDate(inAnHour);
         appointment.setParentFolderID(folder.getObjectID());
     }
 
-
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-
-    public void testReserved() throws Exception{
+    @Test
+    public void testReserved() throws Exception {
         checkFreeBusy(appointment, Appointment.RESERVED);
     }
 
-    public void testTemporary() throws Exception{
+    @Test
+    public void testTemporary() throws Exception {
         checkFreeBusy(appointment, Appointment.TEMPORARY);
     }
 
-    public void testAbsentOnBusiness() throws Exception{
+    @Test
+    public void testAbsentOnBusiness() throws Exception {
         checkFreeBusy(appointment, Appointment.ABSENT);
     }
 
-    public void testFree() throws Exception{
+    @Test
+    public void testFree() throws Exception {
         checkFreeBusy(appointment, Appointment.FREE);
     }
 
-
-    private void checkFreeBusy(Appointment app, int expectedState) throws OXException, Exception{
-        app.setShownAs( expectedState );
-        calendarManager.insert(appointment);
+    private void checkFreeBusy(Appointment app, int expectedState) throws OXException, Exception {
+        app.setShownAs(expectedState);
+        catm.insert(appointment);
         int actualState = getFreeBusyState(app);
         assertEquals("Wrong free/busy state", expectedState, actualState);
     }
 
-
     private int getFreeBusyState(Appointment app) throws IOException, SAXException, OXException, JSONException, ParseException {
         String[] address = values.getDefaultAddress().split("@");
-        assertEquals("Default address ("+values.getDefaultAddress()+") should contain one @", 2, address.length);
+        assertEquals("Default address (" + values.getDefaultAddress() + ") should contain one @", 2, address.length);
 
-        List<FreeBusyInformation> freeBusyStates = getFreeBusyState(getSecondWebConversation(), address[0], address[1], app.getStartDate());
-        for(FreeBusyInformation info : freeBusyStates){
-            if(Math.abs(info.start.getTime() - now.getTime()) < 2000
-            && Math.abs(info.end.getTime() - inAnHour.getTime()) < 2000) {
+        List<FreeBusyInformation> freeBusyStates = getFreeBusyState(getClient2().getSession().getConversation(), address[0], address[1], app.getStartDate());
+        for (FreeBusyInformation info : freeBusyStates) {
+            if (Math.abs(info.start.getTime() - now.getTime()) < 2000 && Math.abs(info.end.getTime() - inAnHour.getTime()) < 2000) {
                 return info.type;
             }
         }
@@ -152,27 +141,26 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     }
 
     protected List<FreeBusyInformation> getFreeBusyState(final WebConversation webCon, String username, String mailserver, Date start) throws IOException, SAXException, ParseException {
-        String startFreebusy = formatter .format(start);
-        String endFreebusy = formatter.format( new Date( start.getTime() + 24*60*60*1000)); //todo: May fail if appointment is > 1day
-        String url = "http://"+getHostName()+"/servlet/webdav.freebusy?contextid="+contextId+"&username="+username+"&server="+mailserver+"&start="+startFreebusy+"&end="+endFreebusy;
+        String startFreebusy = formatter.format(start);
+        String endFreebusy = formatter.format(new Date(start.getTime() + 24 * 60 * 60 * 1000)); //todo: May fail if appointment is > 1day
+        String url = "http://" + getClient().getHostname() + "/servlet/webdav.freebusy?contextid=" + contextId + "&username=" + username + "&server=" + mailserver + "&start=" + startFreebusy + "&end=" + endFreebusy;
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = webCon.getResponse(request);
         List<FreeBusyInformation> states = parseFreeBusyResponse(response);
         return states;
     }
 
-
     private List<FreeBusyInformation> parseFreeBusyResponse(WebResponse response) throws IOException, ParseException {
         List<FreeBusyInformation> result = new LinkedList<FreeBusyInformation>();
         //FREEBUSY;FBTYPE=BUSY-UNAVAILABLE:20100629T104851Z/20100629T114851Z
         String text = response.getText();
         String[] lines = text.split("\n");
-        for(String line: lines){
-            if(line.startsWith("FREEBUSY")){
+        for (String line : lines) {
+            if (line.startsWith("FREEBUSY")) {
                 Pattern pattern = Pattern.compile("FBTYPE=(.+)?:(.+)?/(.+)");
                 Matcher matcher = pattern.matcher(line);
                 matcher.find();
-                assertEquals("Must find three groups."+System.getProperty("line.separator")+text, 3, matcher.groupCount());
+                assertEquals("Must find three groups." + System.getProperty("line.separator") + text, 3, matcher.groupCount());
                 String type = matcher.group(1);
                 String start = matcher.group(2);
                 String end = matcher.group(3);
@@ -184,13 +172,12 @@ public class FreeBusyTest extends ManagedAppointmentTest {
         return result;
     }
 
-
     protected int getContextID(AJAXClient client) throws IOException, SAXException {
-        String url = "http://"+getHostName()+"/ajax/config/context_id?session="+client.getSession().getId();
+        String url = "http://" + getClient().getHostname() + "/ajax/config/context_id?session=" + client.getSession().getId();
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = client.getSession().getConversation().getResponse(request);
         String text = response.getText();
-        String sub = text.substring(8, text.length()-1); //TODO: exchange ugly hack for JSON parser
+        String sub = text.substring(8, text.length() - 1); //TODO: exchange ugly hack for JSON parser
         return Integer.parseInt(sub);
     }
 }

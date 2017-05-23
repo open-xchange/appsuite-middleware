@@ -49,15 +49,15 @@
 
 package com.openexchange.realtime.json.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.realtime.json.impl.EnqueuedStanza;
-import com.openexchange.realtime.json.impl.RTClientStateImpl;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
-import static org.junit.Assert.*;
 
 /**
  * {@link RTClientStateTest}

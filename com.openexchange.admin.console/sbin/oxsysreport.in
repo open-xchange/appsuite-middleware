@@ -843,17 +843,12 @@ not functional. This step may take several minutes and it could happen that you
 need to restart the open-xchange service afterwards manually again.
 
 Please also make sure that you have enough free disk space for processing the
-data in directories which are defined by '--tempdir' and '--log-archive',
-depending on your ox-scriptconf.sh '-Xmx' size of your groupware Java virtual
-machine and amount of logs, several gigabyte could be needed!
+data in directories which are defined by '--tempdir' and '--log-archive'.
+Depending on the max heap size configured in ox-scriptconf.sh and the amount of
+logs several gigabytes might be needed!
 
 System Info:
-Groupware Max Heap Size: $(cat /opt/open-xchange/etc/ox-scriptconf.sh | \
-    grep -A 1 'groupware Java virtual machine' | \
-    sed 's|.*-Xmx|-Xmx|g' | \
-    sed 's|"||g' | \
-    sed 's| .*||g' | \
-    tail -n 1)
+Groupware Max Heap Size: $(ox_get_max_heap /opt/open-xchange/etc/ox-scriptconf.sh)
 OX Log Storage: $(du -h ${OX_LOG_DIR} | sort | tail -n 1)
 
 $(df -h ${TMP})    Processing data within: $(normalize_path ${TMP}/${LOGDIR})

@@ -49,8 +49,10 @@
 
 package com.openexchange.mail.autoconfig.xmlparser;
 
+import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
@@ -58,13 +60,11 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class AutoconfigParserTest extends TestCase {
-
+public class AutoconfigParserTest {
     private FileInputStream autoconfigFile;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         autoconfigFile = new FileInputStream("./testdata/freenet.de.xml");
     }
 
@@ -72,7 +72,8 @@ public class AutoconfigParserTest extends TestCase {
      * Just checking if parsing throws an error.
      * @throws Exception
      */
-    public void testFullFile() throws Exception {
+         @Test
+     public void testFullFile() throws Exception {
         ClientConfig config = new AutoconfigParser().getConfig(autoconfigFile);
         assertTrue(true);
     }

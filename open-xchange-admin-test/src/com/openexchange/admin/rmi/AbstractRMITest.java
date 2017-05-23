@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.After;
-import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -49,19 +47,15 @@ public abstract class AbstractRMITest extends AbstractTest {
     public User testUser;
     protected Resource testResource;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
+        super.setUp();
         adminCredentials = DummyCredentials();
         adminContext = getTestContextObject(adminCredentials);
 
         superAdmin = newUser(OXADMINMASTER, MASTER_PW, "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
         superAdminCredentials = DummyMasterCredentials();
         superAdminContext = getTestContextObject(superAdminCredentials);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
     }
 
     public Integer getContextID() {

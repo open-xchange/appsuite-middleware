@@ -113,6 +113,7 @@ public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {
     @Override
     public AbstractAJAXParser<NewMailResponse> getParser() {
         return new AbstractAJAXParser<NewMailResponse>(failOnError) {
+
             @Override
             protected NewMailResponse createResponse(final Response response) throws JSONException {
                 NewMailResponse retval = new NewMailResponse(response);

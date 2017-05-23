@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -233,7 +232,7 @@ public class UserContact {
 
     private void appendUserAttribute(final JSONArray jsonArray, final String attributePrefix, final List<String> attributes) throws JSONException {
         if (null != attributes && 0 < attributes.size()) {
-        	final Map<String, Set<String>> userAttributes = user.getAttributes();
+        	final Map<String, String> userAttributes = user.getAttributes();
             if (1 == attributes.size() && ALL_ATTRIBUTES.equals(attributes.get(0))) {
                 /*
                  * Wildcard
@@ -242,7 +241,7 @@ public class UserContact {
                     jsonArray.put(JSONObject.NULL);
                 } else {
                 	final JSONObject jsonObject = new JSONObject();
-                	for (Entry<String, Set<String>> entry : userAttributes.entrySet()) {
+                	for (Entry<String, String> entry : userAttributes.entrySet()) {
                 		if (entry.getKey().startsWith(attributePrefix)) {
                 			jsonObject.put(entry.getKey(), toJSONValue(entry.getValue()));
                 		}
@@ -265,18 +264,8 @@ public class UserContact {
         }
     }
 
-    private static Object toJSONValue(final Set<String> values) {
-        if (null == values || values.isEmpty()) {
-            return JSONObject.NULL;
-        }
-        if (values.size() > 1) {
-            final JSONArray ja = new JSONArray();
-            for (final String value : values) {
-                ja.put(value);
-            }
-            return ja;
-        }
-        return values.iterator().next();
+    private static Object toJSONValue(String value) {
+        return null == value ? JSONObject.NULL : value;
     }
 
     /**

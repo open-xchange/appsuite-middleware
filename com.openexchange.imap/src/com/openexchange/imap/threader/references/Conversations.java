@@ -278,7 +278,7 @@ public final class Conversations {
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (r[j] instanceof FetchResponse) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName);
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId());
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);

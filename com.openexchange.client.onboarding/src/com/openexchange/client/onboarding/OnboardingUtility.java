@@ -893,12 +893,12 @@ public class OnboardingUtility {
             LOG.error("UserService is unavailable!");
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("UserService is unavailable");
         }
-        Map<String, Set<String>> attributes = userService.getUser(userId, contextId).getAttributes();
-        if (!attributes.containsKey("loginnamerecorder/user_login")) {
-            LOG.warn("No login user attribute for user %s in context %s.", userId, contextId);
+        Map<String, String> attributes = userService.getUser(userId, contextId).getAttributes();
+        String login = attributes.get("loginnamerecorder/user_login");
+        if (null == login) {
+            LOG.warn("No login user attribute for user {} in context {}.", userId, contextId);
             return null;
         }
-        Set<String> logins = attributes.get("loginnamerecorder/user_login");
-        return logins.iterator().next();
+        return login;
     }
 }

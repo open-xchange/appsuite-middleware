@@ -19,15 +19,17 @@ package org.apache.tika.parser;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
-
-public class ParsingReaderTest extends TestCase {
-
-    public void testPlainText() throws Exception {
+public class ParsingReaderTest {
+         @Test
+     public void testPlainText() throws Exception {
         String data = "test content";
         InputStream stream = new ByteArrayInputStream(data.getBytes("UTF-8"));
         Reader reader = new ParsingReader(stream, "test.txt");
@@ -49,7 +51,8 @@ public class ParsingReaderTest extends TestCase {
         assertEquals(-1, stream.read());
     }
 
-    public void testXML() throws Exception {
+         @Test
+     public void testXML() throws Exception {
         String data = "<p>test <span>content</span></p>";
         InputStream stream = new ByteArrayInputStream(data.getBytes("UTF-8"));
         Reader reader = new ParsingReader(stream, "test.xml");
@@ -78,7 +81,8 @@ public class ParsingReaderTest extends TestCase {
      *
      * @see <a href="https://issues.apache.org/jira/browse/TIKA-203">TIKA-203</a>
      */
-    public void testMetadata() throws Exception {
+         @Test
+     public void testMetadata() throws Exception {
         Metadata metadata = new Metadata();
         InputStream stream = ParsingReaderTest.class.getResourceAsStream(
                 "/test-documents/testEXCEL.xls");

@@ -364,8 +364,9 @@ public class ReportingMBean implements DynamicMBean {
                     dbService.back(readPool, connection);
                 }
             }
-            for (final Integer key : macMap.keySet()) {
-                final CompositeDataSupport value = new CompositeDataSupport(macsRow, macsNames, new Object[] { key, macMap.get(key), admMap.get(key), disabledMap.get(key) });
+            for (Map.Entry<Integer, Integer> entry : macMap.entrySet()) {
+                Integer key = entry.getKey();
+                final CompositeDataSupport value = new CompositeDataSupport(macsRow, macsNames, new Object[] { key, entry.getValue(), admMap.get(key), disabledMap.get(key) });
                 total.put(value);
             }
             return total;

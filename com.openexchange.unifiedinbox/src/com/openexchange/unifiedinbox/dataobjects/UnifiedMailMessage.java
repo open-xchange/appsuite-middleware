@@ -62,6 +62,8 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
+import com.openexchange.mail.dataobjects.SecurityResult;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -1024,6 +1026,51 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     public void setUnreadMessages(final int unreadMessages) {
         this.unreadCount = Integer.valueOf(unreadMessages);
         // delegatee.setUnreadMessages(unreadMessages);
+    }
+
+    @Override
+    public void setSecurityInfo(SecurityInfo securityInfo) {
+        delegatee.setSecurityInfo(securityInfo);
+    }
+
+    @Override
+    public SecurityInfo getSecurityInfo () {
+        return delegatee.getSecurityInfo();
+    }
+
+    @Override
+    public boolean containsSecurityInfo () {
+        return delegatee.containsSecurityInfo();
+    }
+
+    @Override
+    public void removeSecurityInfo () {
+        delegatee.removeSecurityInfo();
+    }
+
+    @Override
+    public void setSecurityResult(SecurityResult result) {
+        delegatee.setSecurityResult(result);
+    }
+
+    @Override
+    public SecurityResult getSecurityResult() {
+        return delegatee.getSecurityResult();
+    }
+
+    @Override
+    public boolean hasSecurityResult() {
+        return delegatee.hasSecurityResult();
+    }
+
+    @Override
+    public boolean containsSecurityResult() {
+        return delegatee.containsSecurityResult();
+    }
+
+    @Override
+    public void removeSecurityResult() {
+        delegatee.removeSecurityResult();
     }
 
     private static void closeSafe(MailAccess<?, ?> mailAccess) {

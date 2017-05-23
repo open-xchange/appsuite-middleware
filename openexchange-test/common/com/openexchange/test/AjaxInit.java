@@ -1,3 +1,4 @@
+
 package com.openexchange.test;
 
 import java.io.File;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class AjaxInit {
+
     private static boolean ajaxPropertiesLoaded = false;
     private static boolean isAjaxDirInitialized = false;
     private static String[] ajaxPropFiles;
@@ -18,8 +20,7 @@ public class AjaxInit {
         ajaxProps = new Properties();
         try {
             ajaxProps.load(new FileInputStream(getFileName()));
-        }
-        catch (final IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         ajaxPropertiesLoaded = true;
@@ -49,8 +50,7 @@ public class AjaxInit {
         String ajaxPropertiesDir = TestInit.getTestProperties().getProperty("ajaxPropertiesDir");
         // ist der Pfad mit abschliessendem "/" ? Wenn nicht, packe den dazu:
         if (!ajaxPropertiesDir.endsWith(System.getProperty("file.separator"))) {
-            ajaxPropertiesDir = new StringBuilder().append(ajaxPropertiesDir)
-                    .append(System.getProperty("file.separator")).toString();
+            ajaxPropertiesDir = new StringBuilder().append(ajaxPropertiesDir).append(System.getProperty("file.separator")).toString();
         }
         final File dir = new File(ajaxPropertiesDir);
         File myFile;
@@ -62,17 +62,14 @@ public class AjaxInit {
             final List<String> fileList = new ArrayList<String>();
             // Pruefe jeden im Verzeichnis vorhandenen Namen:
             for (final String fileName : dir.list()) {
-                myFile = new File(new StringBuilder().append(ajaxPropertiesDir)
-                        .append(fileName).toString());
-                if (!myFile.isDirectory() && myFile.canRead()
-                        && (myFile.getName().length() == 0 || myFile.getName().charAt(0) != '.')) {
+                myFile = new File(new StringBuilder().append(ajaxPropertiesDir).append(fileName).toString());
+                if (!myFile.isDirectory() && myFile.canRead() && (myFile.getName().length() == 0 || myFile.getName().charAt(0) != '.')) {
                     fileList.add(myFile.getAbsolutePath());
                 }
             }
             // Umladen:
             ajaxPropFiles = new String[fileList.size()];
-            System.arraycopy(fileList.toArray(), 0, ajaxPropFiles, 0, fileList
-                    .size());
+            System.arraycopy(fileList.toArray(), 0, ajaxPropFiles, 0, fileList.size());
         }
 
         isAjaxDirInitialized = true;
@@ -80,8 +77,7 @@ public class AjaxInit {
 
     public static Properties getAJAXProperties() {
 
-        if (!ajaxPropertiesLoaded
-                || TestInit.getTestProperties().getProperty("ajaxPropertiesDir") != null) {
+        if (!ajaxPropertiesLoaded || TestInit.getTestProperties().getProperty("ajaxPropertiesDir") != null) {
             loadAJAXProperties();
         }
         return ajaxProps;

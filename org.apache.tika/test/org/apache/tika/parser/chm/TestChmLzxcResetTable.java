@@ -17,9 +17,6 @@
 
 package org.apache.tika.parser.chm;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.tika.parser.chm.accessor.ChmDirectoryListingSet;
 import org.apache.tika.parser.chm.accessor.ChmItsfHeader;
 import org.apache.tika.parser.chm.accessor.ChmItspHeader;
@@ -28,9 +25,10 @@ import org.apache.tika.parser.chm.accessor.ChmLzxcResetTable;
 import org.apache.tika.parser.chm.assertion.ChmAssert;
 import org.apache.tika.parser.chm.core.ChmCommons;
 import org.apache.tika.parser.chm.core.ChmConstants;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class TestChmLzxcResetTable extends TestCase {
-    private ChmLzxcResetTable chmLzxcResetTable = null;
+public class TestChmLzxcResetTable {    private ChmLzxcResetTable chmLzxcResetTable = null;
 
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
@@ -95,53 +93,59 @@ public class TestChmLzxcResetTable extends TestCase {
         chmLzxcResetTable.parse(dir_chunk, chmLzxcResetTable);
     }
 
-    public void testGetBlockAddress() {
+         @Test
+     public void testGetBlockAddress() {
         Assert.assertEquals(TestParameters.VP_RESET_TABLE_BA,
                 chmLzxcResetTable.getBlockAddress().length);
     }
 
-    public void testGetBlockCount() {
+         @Test
+     public void testGetBlockCount() {
         Assert.assertEquals(TestParameters.VP_RESET_TABLE_BA,
                 chmLzxcResetTable.getBlockCount());
     }
 
-    public void testGetBlockLen() {
+         @Test
+     public void testGetBlockLen() {
         Assert.assertEquals(TestParameters.VP_RES_TBL_BLOCK_LENGTH,
                 chmLzxcResetTable.getBlockLen());
     }
 
-    public void testGetCompressedLen() {
+         @Test
+     public void testGetCompressedLen() {
         Assert.assertEquals(TestParameters.VP_RES_TBL_COMPR_LENGTH,
                 chmLzxcResetTable.getCompressedLen());
     }
 
-    public void testGetTableOffset() {
+         @Test
+     public void testGetTableOffset() {
         Assert.assertEquals(TestParameters.VP_TBL_OFFSET,
                 chmLzxcResetTable.getTableOffset());
     }
 
-    public void testGetUncompressedLen() {
+         @Test
+     public void testGetUncompressedLen() {
         Assert.assertEquals(TestParameters.VP_RES_TBL_UNCOMP_LENGTH,
                 chmLzxcResetTable.getUncompressedLen());
     }
 
-    public void testGetUnknown() {
+         @Test
+     public void testGetUnknown() {
         Assert.assertEquals(TestParameters.VP_RES_TBL_UNKNOWN,
                 chmLzxcResetTable.getUnknown());
     }
 
-    public void testGetVersion() {
+         @Test
+     public void testGetVersion() {
         Assert.assertEquals(TestParameters.VP_RES_TBL_VERSION,
                 chmLzxcResetTable.getVersion());
     }
 
-    public void testToString() {
+         @Test
+     public void testToString() {
         Assert.assertTrue(chmLzxcResetTable.toString().length() > 0);
     }
 
     // TODO: add setters to be tested
-
-    public void tearDown() throws Exception {
-    }
 
 }

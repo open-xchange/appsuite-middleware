@@ -2,7 +2,7 @@ Source: open-xchange-l10n
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk | java7-sdk
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
@@ -52,6 +52,12 @@ Package: open-xchange-l10n-es-mx
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: Package containing Open-Xchange backend localization for es_MX
+
+Package: open-xchange-l10n-et-ee
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for et_EE
+ This localization package are driven by the community.
 
 Package: open-xchange-l10n-eu-es
 Architecture: all

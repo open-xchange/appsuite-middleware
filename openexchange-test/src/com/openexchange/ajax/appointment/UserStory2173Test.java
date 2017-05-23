@@ -51,8 +51,12 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -62,7 +66,6 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.participant.ParticipantTools;
@@ -84,49 +87,27 @@ public class UserStory2173Test extends AbstractAJAXSession {
 
     private Appointment appointmentPrivate, appointmentPublic;
 
-    public UserStory2173Test(String name) {
-        super(name);
+    public UserStory2173Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User3);
+        clientB = getClient2();
 
         SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.ACCEPT));
         clientB.execute(setRequest);
         setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, I(Appointment.ACCEPT));
         clientB.execute(setRequest);
 
-        publicFolder = Create.folder(
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            "US2173TestFolder",
-            FolderObject.CALENDAR,
-            FolderObject.PUBLIC,
-            ocl(
-                clientA.getValues().getUserId(),
-                false,
-                true,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION),
-            ocl(
-                clientB.getValues().getUserId(),
-                false,
-                false,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION));
+        publicFolder = Create.folder(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "US2173TestFolder", FolderObject.CALENDAR, FolderObject.PUBLIC, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         CommonInsertResponse folderResponse = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, publicFolder));
         folderResponse.fillObject(publicFolder);
 
-        List<Participant> participants = ParticipantTools.createParticipants(
-            clientA.getValues().getUserId(),
-            clientB.getValues().getUserId());
+        List<Participant> participants = ParticipantTools.createParticipants(clientA.getValues().getUserId(), clientB.getValues().getUserId());
         appointmentPrivate = new Appointment();
         appointmentPrivate.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
         appointmentPrivate.setTitle("UserStory2173 Test in private folder");
@@ -145,27 +126,28 @@ public class UserStory2173Test extends AbstractAJAXSession {
         appointmentPublic.setIgnoreConflicts(true);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (appointmentPrivate.getObjectID() > 0) {
-            clientA.execute(new DeleteRequest(appointmentPrivate));
+        try {
+            if (null != appointmentPrivate && appointmentPrivate.getObjectID() > 0) {
+                clientA.execute(new DeleteRequest(appointmentPrivate));
+            }
+            if (null != appointmentPublic && appointmentPublic.getObjectID() > 0) {
+                clientA.execute(new DeleteRequest(appointmentPublic));
+            }
+            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, publicFolder.getObjectID(), publicFolder.getLastModified()));
+
+            SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.NONE));
+            clientB.execute(setRequest);
+
+            setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, I(Appointment.NONE));
+            clientB.execute(setRequest);
+        } finally {
+            super.tearDown();
         }
-
-        if (appointmentPublic.getObjectID() > 0) {
-            clientA.execute(new DeleteRequest(appointmentPublic));
-        }
-
-        clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, publicFolder.getObjectID(), publicFolder.getLastModified()));
-
-        SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.NONE));
-        clientB.execute(setRequest);
-
-        setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, I(Appointment.NONE));
-        clientB.execute(setRequest);
-
-        super.tearDown();
     }
 
+    @Test
     public void testPrivate() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPrivate, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPrivate);
@@ -180,6 +162,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         }
     }
 
+    @Test
     public void testPublic() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPublic, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPublic);

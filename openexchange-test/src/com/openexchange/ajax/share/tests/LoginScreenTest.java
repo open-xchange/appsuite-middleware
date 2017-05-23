@@ -49,7 +49,14 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collections;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -58,6 +65,7 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
+import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.RedeemRequest;
 import com.openexchange.ajax.share.actions.RedeemResponse;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
@@ -80,22 +88,23 @@ public class LoginScreenTest extends ShareTest {
 
     private FolderObject folder;
 
-    public LoginScreenTest(String name) {
-        super(name);
-    }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
+        folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        deleteFoldersSilently(client, Collections.singletonList(folder.getObjectID()));
-        super.tearDown();
+        try {
+            deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testGuestWithPassword() throws Exception {
         /*
          * Create guest and permission
@@ -106,7 +115,7 @@ public class LoginScreenTest extends ShareTest {
         folder = updateFolder(EnumAPI.OX_NEW, folder, Transport.MAIL);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
+            if (permission.getEntity() != getClient().getValues().getUserId()) {
                 matchingPermission = permission;
                 break;
             }
@@ -143,17 +152,20 @@ public class LoginScreenTest extends ShareTest {
         assertNotNull(resp.getMessage());
     }
 
+    @Test
     public void testLinkWithPassword() throws Exception {
         /*
          * Create link and set password
          */
         ShareTarget target = new ShareTarget(folder.getModule(), Integer.toString(folder.getObjectID()));
-        ShareLink shareLink = client.execute(new GetLinkRequest(target)).getShareLink();
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target);
+        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
+        ShareLink shareLink = getLinkResponse.getShareLink();
         assertTrue(shareLink.isNew());
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, System.currentTimeMillis());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, getLinkResponse.getTimestamp().getTime());
         String newPW = UUIDs.getUnformattedStringFromRandom();
         updateLinkRequest.setPassword(newPW);
-        client.execute(updateLinkRequest);
+        getClient().execute(updateLinkRequest);
         /*
          * Login and check params
          */

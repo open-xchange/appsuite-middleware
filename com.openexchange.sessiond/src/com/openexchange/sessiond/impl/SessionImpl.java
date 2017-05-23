@@ -153,11 +153,16 @@ public final class SessionImpl implements PutIfAbsent {
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
 
-        Object altId = s.getParameter(PARAM_ALTERNATIVE_ID);
-        if (null == altId) {
+        Object obj = s.getParameter(PARAM_ALTERNATIVE_ID);
+        if (null == obj) {
             parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
         } else {
-            parameters.put(PARAM_ALTERNATIVE_ID, altId);
+            parameters.put(PARAM_ALTERNATIVE_ID, obj);
+        }
+
+        obj = s.getParameter(PARAM_OAUTH_ACCESS_TOKEN);
+        if (null != obj) {
+            parameters.put(PARAM_OAUTH_ACCESS_TOKEN, obj);
         }
     }
 

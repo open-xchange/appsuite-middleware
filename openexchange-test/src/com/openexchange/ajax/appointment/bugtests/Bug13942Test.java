@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
@@ -63,7 +67,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.exception.OXException;
@@ -83,11 +86,7 @@ public class Bug13942Test extends AbstractAJAXSession {
 
     private AJAXClient clientB, clientC;
 
-    public Bug13942Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -118,15 +117,19 @@ public class Bug13942Test extends AbstractAJAXSession {
         updateAppointment.setAlarm(30);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        if (appointment != null && appointment.getObjectID() != 0) {
-            DeleteRequest delete = new DeleteRequest(appointment);
-            getClient().execute(delete);
+        try {
+            if (appointment != null && appointment.getObjectID() != 0) {
+                DeleteRequest delete = new DeleteRequest(appointment);
+                getClient().execute(delete);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testBug13942() throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(updateAppointment, getClientB().getValues().getTimeZone());
         UpdateResponse updateResponse = getClientB().execute(updateRequest);
@@ -144,14 +147,14 @@ public class Bug13942Test extends AbstractAJAXSession {
 
     private AJAXClient getClientB() throws OXException, OXException, IOException, SAXException, JSONException {
         if (clientB == null) {
-            clientB = new AJAXClient(User.User2);
+            clientB = new AJAXClient(testContext.acquireUser());
         }
         return clientB;
     }
 
     private AJAXClient getClientC() throws OXException, OXException, IOException, SAXException, JSONException {
         if (clientC == null) {
-            clientC = new AJAXClient(User.User3);
+            clientC = new AJAXClient(testContext.acquireUser());
         }
         return clientC;
     }

@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
+import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
@@ -108,7 +109,7 @@ public class ContactJSONDataHandler implements DataHandler {
     }
 
     @Override
-    public Object processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
+    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         InputStream inputStream = (InputStream) data.getData();
         int folderID = optIntProperty(data.getDataProperties(), DataProperties.PROPERTY_FOLDER_ID);
@@ -147,7 +148,9 @@ public class ContactJSONDataHandler implements DataHandler {
             /*
              * return JSON array of converted contacts
              */
-            return jsonArray;
+            ConversionResult result = new ConversionResult();
+            result.setData(jsonArray);
+            return result;
         } finally {
             SearchIterators.close(searchIterator);
             Streams.close(inputStream);
@@ -199,16 +202,14 @@ public class ContactJSONDataHandler implements DataHandler {
          */
         try {
             JSONObject json = ContactMapper.getInstance().serialize(contact, fields, session.getUser().getTimeZone(), session);
+            /*
+             * include contact image inline if available
+             */
             if (null != image1) {
-                /*
-                 * include contact image inline if available
-                 */
-                if (null != image1) {
-                    json.put(ContactMapper.getInstance().get(ContactField.IMAGE1).getAjaxName(), Base64.encodeBase64String(image1));
-                    json.put(ContactMapper.getInstance().get(ContactField.NUMBER_OF_IMAGES).getAjaxName(), 1);
-                    String contentType = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
-                    json.put(ContactMapper.getInstance().get(ContactField.IMAGE1_CONTENT_TYPE).getAjaxName(), contentType);
-                }
+                json.put(ContactMapper.getInstance().get(ContactField.IMAGE1).getAjaxName(), Base64.encodeBase64String(image1));
+                json.put(ContactMapper.getInstance().get(ContactField.NUMBER_OF_IMAGES).getAjaxName(), 1);
+                String contentType = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
+                json.put(ContactMapper.getInstance().get(ContactField.IMAGE1_CONTENT_TYPE).getAjaxName(), contentType);
             }
             return json;
         } catch (JSONException e) {

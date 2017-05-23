@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mail Authentication Handler
+Bundle-SymbolicName: com.openexchange.mail.authentication.handler
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.openexchange.mail.authentication.handler.osgi.Activator
+Import-Package: com.openexchange.exception,
+ com.openexchange.mail.api,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ org.osgi.framework

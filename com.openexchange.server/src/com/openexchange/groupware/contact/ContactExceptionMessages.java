@@ -140,6 +140,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String IGNORED_PATTERN_DISPLAY = "The pattern \"%1$s\" has been ignored during search.";
 
+    public final static String SET_DISTRIBUTION_LIST_ERROR_DISPLAY = "Invalid number of properties for distribution list.";
+
     private ContactExceptionMessages() {
         super();
     }

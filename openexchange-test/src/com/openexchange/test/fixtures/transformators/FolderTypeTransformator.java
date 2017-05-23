@@ -52,7 +52,6 @@ package com.openexchange.test.fixtures.transformators;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
-
 /**
  * {@link FolderTypeTransformator}
  *
@@ -61,13 +60,12 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderTypeTransformator implements Transformator {
 
-
     @Override
     public Object transform(String value) throws OXException {
-        if("public".equalsIgnoreCase(value)) {
+        if ("public".equalsIgnoreCase(value)) {
             return FolderObject.PUBLIC;
         }
-        if("private".equalsIgnoreCase(value)) {
+        if ("private".equalsIgnoreCase(value)) {
             return FolderObject.PRIVATE;
         }
         return Integer.valueOf(value);

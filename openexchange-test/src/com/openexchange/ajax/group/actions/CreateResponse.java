@@ -55,6 +55,7 @@ import com.openexchange.group.Group;
 
 /**
  * Server response when creating a group.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CreateResponse extends CommonInsertResponse {

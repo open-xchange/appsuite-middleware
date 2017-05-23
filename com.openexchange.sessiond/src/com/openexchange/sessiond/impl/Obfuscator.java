@@ -57,7 +57,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.crypto.CryptoService;
@@ -78,8 +77,6 @@ import com.openexchange.sessionstorage.StoredSession;
 public class Obfuscator implements ObfuscatorService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
-
-    private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID };
 
     private static boolean useDirectByteBuffer() {
         return false;
@@ -187,28 +184,16 @@ public class Obfuscator implements ObfuscatorService {
      * Wraps a session before putting it to the storage.
      *
      * @param session The session
-     * @param remoteParameterNames The names of such parameters that are supposed to be taken over from session to stored session representation
      * @return the wrapped session
      */
-    public Session wrap(SessionImpl session, List<String> remoteParameterNames) {
+    public Session wrap(SessionImpl session) {
         if (null == session) {
             return null;
         }
 
-        // Initialize its parameters
         Map<String, Object> parameters = new HashMap<String, Object>(2);
         for (String name : session.getParameterNames()) {
             parameters.put(name, session.getParameter(name));
-        }
-
-        // Maintain remote parameters
-        if (null != remoteParameterNames) {
-            for (String parameterName : remoteParameterNames) {
-                Object value = session.getParameter(parameterName);
-                if (null != value) {
-                    parameters.put(parameterName, value);
-                }
-            }
         }
 
         // Instantiate & return appropriate stored session
@@ -219,10 +204,9 @@ public class Obfuscator implements ObfuscatorService {
      * Unwraps a session after getting it from the storage.
      *
      * @param session The session
-     * @param remoteParameterNames The names of such parameters that are supposed to be taken over from session to stored session representation
      * @return The unwrapped session
      */
-    public SessionImpl unwrap(Session session, List<String> remoteParameterNames) {
+    public SessionImpl unwrap(Session session) {
         if (null == session) {
             return null;
         }

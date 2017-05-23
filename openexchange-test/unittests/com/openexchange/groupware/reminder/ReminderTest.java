@@ -1,8 +1,15 @@
+
 package com.openexchange.groupware.reminder;
 
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Properties;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
@@ -11,34 +18,32 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.iterator.SearchIterator;
-import junit.framework.TestCase;
 
-public class ReminderTest extends TestCase {
+public class ReminderTest {
 
 	private ReminderSQLInterface reminderSql = null;
 
-	protected Properties reminderProps = null;
+    protected Properties reminderProps = null;
 
-	private static boolean isInit = false;
+    private static boolean isInit = false;
 
-	private final int userId = -1;
+    private final int userId = -1;
 
-	private Context context = null;
+    private Context context = null;
 
-	public void init() throws Exception {
-		if (isInit) {
-			return ;
-		}
+    public void init() throws Exception {
+        if (isInit) {
+            return;
+        }
 
-		Init.startServer();
+        Init.startServer();
 
-		isInit = true;
-	}
+        isInit = true;
+    }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		init();
+    @Before
+    public void setUp() throws Exception {
+        init();
 
 		final TestConfig config = new TestConfig();
 		final int contextId = ContextStorage.getInstance().getContextId(config.getContextName());
@@ -46,17 +51,17 @@ public class ReminderTest extends TestCase {
 		reminderSql = ReminderHandler.getInstance();
 	}
 
-	/**
+    /**
      * {@inheritDoc}
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (isInit) {
             Init.stopServer();
         }
-        super.tearDown();
     }
 
+    @Test
     public void testInsert() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
@@ -64,6 +69,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.insertReminder(reminderObj, context);
 	}
 
+    @Test
 	public void testUpdate() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		ReminderObject reminderObj = createReminderObject(targetId, Types.TASK);
@@ -74,6 +80,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.updateReminder(reminderObj, context);
 	}
 
+    @Test
 	public void testDelete() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
@@ -83,6 +90,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.deleteReminder(targetId, userId, reminderObj.getModule(), context);
 	}
 
+    @Test
 	public void testDeleteAllReminders() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.TASK);
@@ -92,6 +100,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.deleteReminder(targetId, Types.TASK, context);
 	}
 
+    @Test
 	public void testLoad() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final Date alarm = new Date(System.currentTimeMillis()-3600000);
@@ -109,6 +118,7 @@ public class ReminderTest extends TestCase {
 		assertEquals("userId", userId, reminderObj.getUser());
 	}
 
+    @Test
 	public void testListReminderByTargetId() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
@@ -126,6 +136,7 @@ public class ReminderTest extends TestCase {
 		assertTrue("result > 0", counter >= 1);
 	}
 
+    @Test
 	public void testListReminderBetweenByUserId() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
@@ -143,6 +154,7 @@ public class ReminderTest extends TestCase {
 		assertTrue("result > 0", counter >= 1);
 	}
 
+    @Test
 	public void testListLastModifiedReminderUserId() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
@@ -160,6 +172,7 @@ public class ReminderTest extends TestCase {
 		assertTrue("result > 0", counter >= 1);
 	}
 
+    @Test
 	public void testExistsReminder() throws Exception {
 		final int targetId = IDGenerator.getId(context, Types.REMINDER);
 		final ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
@@ -179,4 +192,3 @@ public class ReminderTest extends TestCase {
 		return reminderObj;
 	}
 }
-

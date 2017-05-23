@@ -64,30 +64,30 @@ import com.openexchange.resource.json.ResourceParser;
  */
 public final class ResourceListResponse extends AbstractAJAXResponse {
 
-	/**
-	 * Initializes a new {@link ResourceListResponse}
-	 *
-	 * @param response
-	 *            The JSON response container
-	 */
-	ResourceListResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link ResourceListResponse}
+     *
+     * @param response
+     *            The JSON response container
+     */
+    ResourceListResponse(final Response response) {
+        super(response);
+    }
 
-	/**
-	 * Parses the resources out of this LIST response
-	 *
-	 * @return The IDs as an array of <code>int</code>
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public Resource[] getResources() throws JSONException {
-		final JSONArray jsonArray = (JSONArray) getResponse().getData();
-		final int len = jsonArray.length();
-		final Resource[] retval = new Resource[len];
-		for (int i = 0; i < len; i++) {
-			retval[i] = ResourceParser.parseResource(jsonArray.getJSONObject(i));
-		}
-		return retval;
-	}
+    /**
+     * Parses the resources out of this LIST response
+     *
+     * @return The IDs as an array of <code>int</code>
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public Resource[] getResources() throws JSONException {
+        final JSONArray jsonArray = (JSONArray) getResponse().getData();
+        final int len = jsonArray.length();
+        final Resource[] retval = new Resource[len];
+        for (int i = 0; i < len; i++) {
+            retval[i] = ResourceParser.parseResource(jsonArray.getJSONObject(i));
+        }
+        return retval;
+    }
 }

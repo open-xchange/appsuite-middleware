@@ -107,6 +107,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 import gnu.trove.iterator.TObjectIntIterator;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -346,8 +347,9 @@ public final class MemorizerWorker {
             }
 
             UserAliasStorage aliasStorage = services.getOptionalService(UserAliasStorage.class);
+            UserPermissionService userPermissions = services.getService(UserPermissionService.class);
             Set<InternetAddress> aliases;
-            if (ALL_ALIASES) {
+            if (userPermissions.getUserPermissionBits(session.getUserId(), ctx).isGlobalAddressBookEnabled()) {
                 // All context-known users' aliases
                 aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService, aliasStorage);
             } else {
@@ -468,8 +470,8 @@ public final class MemorizerWorker {
             }
 
             contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
-            int objectId = contact.getObjectID();
             if (null != useCounts) {
+                int objectId = contact.getObjectID();
                 BatchIncrementArguments.ObjectAndFolder key = new BatchIncrementArguments.ObjectAndFolder(objectId, folderId);
                 int count = useCounts.get(key);
                 useCounts.put(key, count + 1);

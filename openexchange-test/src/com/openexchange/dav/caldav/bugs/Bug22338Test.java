@@ -69,7 +69,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug22338Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testLastModified() throws Exception {
         /*
          * create appointment on client

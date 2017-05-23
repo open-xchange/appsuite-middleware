@@ -2101,6 +2101,10 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setUserfield20(tmp);
         }
 
+        tmp = soapUser.getPrimaryAccountName();
+        if (tmp != null) {
+            user.setPrimaryAccountName(tmp);
+        }
         
         Boolean bool_tmp = soapUser.isConvertDriveUserFolders();
         if (bool_tmp != null) {
@@ -2276,6 +2280,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setUserfield18(user.getUserfield18());
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
+        soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
         return soapUser;
     }
 

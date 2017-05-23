@@ -80,7 +80,6 @@ public class Create extends CreateCore {
         parseAndSetUserQuota(parser, usr);
         parseAndSetFilestoreId(parser, usr);
         parseAndSetFilestoreOwner(parser, usr);
-
         String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Create user with access rights combination name

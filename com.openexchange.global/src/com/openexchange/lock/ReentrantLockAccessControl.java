@@ -65,8 +65,21 @@ public class ReentrantLockAccessControl implements AccessControl {
      * Initializes a new {@link ReentrantLockAccessControl}.
      */
     public ReentrantLockAccessControl() {
+        this(new ReentrantLock());
+    }
+
+    /**
+     * Initializes a new {@link ReentrantLockAccessControl}.
+     *
+     * @param lock The reentrant lock to use
+     * @throws IllegalArgumentException If specified lock is <code>null</code>
+     */
+    public ReentrantLockAccessControl(ReentrantLock lock) {
         super();
-        lock = new ReentrantLock();
+        if (null == lock) {
+            throw new IllegalArgumentException("lock is null");
+        }
+        this.lock = lock;
     }
 
     @Override

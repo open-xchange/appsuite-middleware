@@ -52,7 +52,6 @@ package com.openexchange.server;
 import java.util.HashMap;
 import java.util.Map;
 import org.mockito.Mockito;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MockingServiceLookup}

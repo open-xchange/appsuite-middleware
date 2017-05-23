@@ -59,6 +59,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Stores parameters for the task delete request.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
@@ -66,7 +67,7 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
     private final int folderId;
 
     private final int taskId;
-    
+
     private final int[] taskIds;
 
     private final Date lastModified;
@@ -76,33 +77,30 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
     /**
      * Default constructor.
      */
-    public DeleteRequest(final int folderId, final int taskId,
-        final Date lastModified) {
+    public DeleteRequest(final int folderId, final int taskId, final Date lastModified) {
         this(folderId, taskId, lastModified, true);
     }
 
     /**
      * @param task Task object to delete. This object must contain the folder
-     * identifier, the object identifier and the last modification timestamp.
+     *            identifier, the object identifier and the last modification timestamp.
      */
     public DeleteRequest(final Task task) {
-        this(task.getParentFolderID(), task.getObjectID(),
-            task.getLastModified(), true);
+        this(task.getParentFolderID(), task.getObjectID(), task.getLastModified(), true);
     }
 
     /**
      * @param insert An insert response contains all necessary information for
-     * deleting the task.
+     *            deleting the task.
      */
     public DeleteRequest(final InsertResponse insert) {
         this(insert.getFolderId(), insert.getId(), insert.getTimestamp(), true);
     }
-    
+
     /**
      * Default constructor.
      */
-    public DeleteRequest(final int folderId, final int taskId,
-        final Date lastModified, boolean failOnError) {
+    public DeleteRequest(final int folderId, final int taskId, final Date lastModified, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.taskId = taskId;
@@ -111,8 +109,7 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
         this.failOnError = failOnError;
     }
 
-    public DeleteRequest(final int folderId, final int[] taskIds,
-        final Date lastModified, boolean failOnError) {
+    public DeleteRequest(final int folderId, final int[] taskIds, final Date lastModified, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.taskId = 0;
@@ -123,16 +120,15 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
 
     /**
      * @param task Task object to delete. This object must contain the folder
-     * identifier, the object identifier and the last modification timestamp.
+     *            identifier, the object identifier and the last modification timestamp.
      */
     public DeleteRequest(final Task task, boolean failOnError) {
-        this(task.getParentFolderID(), task.getObjectID(),
-            task.getLastModified(), failOnError);
+        this(task.getParentFolderID(), task.getObjectID(), task.getLastModified(), failOnError);
     }
 
     /**
      * @param insert An insert response contains all necessary information for
-     * deleting the task.
+     *            deleting the task.
      */
     public DeleteRequest(final InsertResponse insert, boolean failOnError) {
         this(insert.getFolderId(), insert.getId(), insert.getTimestamp(), failOnError);
@@ -173,11 +169,7 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
-                String.valueOf(lastModified.getTime()))
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(lastModified.getTime()))
         };
     }
 

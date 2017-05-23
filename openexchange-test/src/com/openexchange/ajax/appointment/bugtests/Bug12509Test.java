@@ -51,6 +51,10 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
+import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -59,7 +63,6 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.participant.ParticipantTools;
@@ -78,39 +81,31 @@ public class Bug12509Test extends AbstractAJAXSession {
 
     private Appointment appointment, exception;
 
-    public Bug12509Test(String name) {
-        super(name);
+    public Bug12509Test() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(User.User2);
+        clientB = getClient2();
 
         folder = new FolderObject();
-        folder.setFolderName("Bug 12509 Test Folder" + System.currentTimeMillis());
+        folder.setFolderName("Bug 12509 Test Folder" + UUID.randomUUID().toString());
         folder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         folder.setType(FolderObject.PRIVATE);
         folder.setModule(FolderObject.CALENDAR);
         ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(1);
         OCLPermission oclp = new OCLPermission();
         oclp.setEntity(clientA.getValues().getUserId());
-        oclp.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         permissions.add(oclp);
         OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(clientB.getValues().getUserId());
-        oclp2.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        oclp2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp2.setFolderAdmin(false);
         permissions.add(oclp2);
         folder.setPermissions(permissions);
@@ -146,6 +141,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         exception.setAlarm(15);
     }
 
+    @Test
     public void testBug12509() throws Exception {
         UpdateRequest appointmentUpdateRequest = new UpdateRequest(exception, clientB.getValues().getTimeZone());
         UpdateResponse appointmentUpdateResponse = clientB.execute(appointmentUpdateRequest);
@@ -157,14 +153,17 @@ public class Bug12509Test extends AbstractAJAXSession {
         clientA.execute(appointmentGetRequest);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-        clientA.execute(appointmentDeleteRequest);
-        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder);
-        clientA.execute(folderDeleteRequest);
+        try {
+            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
+            clientA.execute(appointmentDeleteRequest);
+            com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder);
+            clientA.execute(folderDeleteRequest);
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

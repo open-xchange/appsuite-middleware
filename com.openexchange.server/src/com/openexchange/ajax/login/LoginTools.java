@@ -275,7 +275,8 @@ public final class LoginTools {
         LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(login).password(password).clientIP(clientIP);
         b.userAgent(userAgent).authId(authId).client(client).version(version);
         b.hash(HashCalculator.getInstance().getHash(req, userAgent, client, additionalsForHash));
-        b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
+        b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
+        b.cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         b.language(parseLanguage(req)).storeLanguage(parseStoreLanguage(req)).tranzient(parseTransient(req));
         return b.build();

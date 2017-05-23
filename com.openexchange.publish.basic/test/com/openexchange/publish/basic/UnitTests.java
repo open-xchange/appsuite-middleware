@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.basic;
 
-import junit.framework.TestSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -76,5 +75,5 @@ import com.openexchange.publish.tools.PublicationTargetCollectorTest;
     IDBasedFolderAccessFolderLoaderTest.class,
     LoaderActivatorTest.class
 })
-public class UnitTests extends TestSuite {
+public class UnitTests  {
 }

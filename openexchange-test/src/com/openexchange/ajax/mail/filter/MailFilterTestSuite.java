@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail.filter;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
 import com.openexchange.ajax.mail.filter.tests.api.AuxiliaryAPITest;
 import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
@@ -62,8 +64,7 @@ import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug46589Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug46714Test;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link MailFilterTestSuite}
@@ -71,35 +72,25 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  *
  */
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    AdminListTest.class,
+    Bug11519Test.class,
+    Bug18490Test.class,
+    Bug31253Test.class,
+    Bug44363Test.class,
+    Bug46589Test.class,
+    Bug46714Test.class,
+    ConfigTest.class,
+    NewTest.class,
+    UpdateTest.class,
+    VacationTest.class,
+    // Deactivated the PGPTest because the email server of the test environment does not support the custom pgp plugin
+    // PGPTest.class,
+    ReorderTest.class,
+    AuxiliaryAPITest.class,
+
+})
 public final class MailFilterTestSuite {
 
-    /**
-     * Initialises a new {@link MailFilterTestSuite}
-     */
-    private MailFilterTestSuite() {
-        super();
-    }
-
-    /**
-     * @return a test suite containing smoke tests.
-     */
-    public static Test suite() {
-        TestSuite suite = new TestSuite("com.openexchange.ajax.mail.filter.MailFilterTestSuite");
-        suite.addTestSuite(AdminListTest.class);
-        suite.addTestSuite(Bug11519Test.class);
-        suite.addTestSuite(Bug18490Test.class);
-        suite.addTestSuite(Bug31253Test.class);
-        suite.addTestSuite(Bug44363Test.class);
-        suite.addTestSuite(Bug46589Test.class);
-        suite.addTestSuite(Bug46714Test.class);
-        suite.addTestSuite(ConfigTest.class);
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(UpdateTest.class);
-        suite.addTestSuite(VacationTest.class);
-        // Deactivated the PGPTest because the email server of the test environment does not support the custom pgp plugin
-        // suite.addTestSuite(PGPTest.class);
-        suite.addTestSuite(ReorderTest.class);
-        suite.addTestSuite(AuxiliaryAPITest.class);
-        return suite;
-    }
 }

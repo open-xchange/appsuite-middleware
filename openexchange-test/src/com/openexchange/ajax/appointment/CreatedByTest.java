@@ -50,13 +50,15 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 
@@ -71,49 +73,39 @@ public class CreatedByTest extends AbstractAJAXSession {
 
     private Appointment appointment;
 
-    private AJAXClient client2;
-
-    /**
-     * Initializes a new {@link CreatedByTest}.
-     *
-     * @param name
-     */
-    public CreatedByTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        client2 = new AJAXClient(User.User2);
+        super.setUp();        
 
         appointment = new Appointment();
         appointment.setTitle("Created by Test");
         appointment.setStartDate(D("07.12.2010 09:00"));
         appointment.setEndDate(D("07.12.2010 10:00"));
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        appointment.setCreatedBy(client2.getValues().getUserId());
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        appointment.setCreatedBy(getClient2().getValues().getUserId());
         appointment.setIgnoreConflicts(true);
     }
 
+    @Test
     public void testInjectedCreatedBy() throws Exception {
-        InsertRequest request = new InsertRequest(appointment, client.getValues().getTimeZone());
-        AppointmentInsertResponse insertResponse = client.execute(request);
+        InsertRequest request = new InsertRequest(appointment, getClient().getValues().getTimeZone());
+        AppointmentInsertResponse insertResponse = getClient().execute(request);
         insertResponse.fillObject(appointment);
 
         GetRequest getRequest = new GetRequest(appointment);
-        GetResponse getResponse = client.execute(getRequest);
-        Appointment loadAppointment = getResponse.getAppointment(client.getValues().getTimeZone());
+        GetResponse getResponse = getClient().execute(getRequest);
+        Appointment loadAppointment = getResponse.getAppointment(getClient().getValues().getTimeZone());
 
-        assertEquals("Wrong created by", client.getValues().getUserId(), loadAppointment.getCreatedBy());
+        assertEquals("Wrong created by", getClient().getValues().getUserId(), loadAppointment.getCreatedBy());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-
-        super.tearDown();
+        try {
+            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
+        } finally {
+            super.tearDown();
+        }
     }
 
 }

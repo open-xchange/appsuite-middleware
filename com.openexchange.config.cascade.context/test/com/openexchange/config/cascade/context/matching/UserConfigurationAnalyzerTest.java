@@ -51,10 +51,14 @@ package com.openexchange.config.cascade.context.matching;
 
 import java.util.Arrays;
 import java.util.Set;
+import org.junit.Test;
 import org.mockito.Mockito;
-import junit.framework.TestCase;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -62,8 +66,8 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserConfigurationAnalyzerTest extends TestCase {
-    public void testSample() {
+public class UserConfigurationAnalyzerTest {         @Test
+     public void testSample() {
         UserPermissionBits permissionBits = new UserPermissionBits(0, 0, Mockito.mock(Context.class));
         permissionBits.setActiveSync(true);
         permissionBits.setEditPassword(true);

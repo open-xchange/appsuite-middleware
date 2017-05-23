@@ -71,7 +71,8 @@ public class DefaultPushSubscription implements PushSubscription {
             .contextId(match.getContextId())
             .token(match.getToken())
             .transportId(match.getTransportId())
-            .userId(match.getUserId());
+            .userId(match.getUserId())
+            .client(match.getClient());
 
         return builder.build();
     }
@@ -209,7 +210,7 @@ public class DefaultPushSubscription implements PushSubscription {
      */
     DefaultPushSubscription(Builder builder) {
         super();
-        this.topics = ImmutableList.copyOf(builder.topics);
+        this.topics = null == builder.topics ? null : ImmutableList.copyOf(builder.topics);
         this.contextId = builder.contextId;
         this.token = builder.token;
         this.transportId = builder.transportId;

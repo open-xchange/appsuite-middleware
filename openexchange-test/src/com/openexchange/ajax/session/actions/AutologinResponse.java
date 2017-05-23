@@ -52,7 +52,6 @@ package com.openexchange.ajax.session.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link AutologinResponse}
  *
@@ -68,6 +67,7 @@ public class AutologinResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link AutologinResponse}.
+     * 
      * @param response
      */
     public AutologinResponse(Response response) {

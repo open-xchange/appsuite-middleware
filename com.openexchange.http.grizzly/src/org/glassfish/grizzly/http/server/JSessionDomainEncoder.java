@@ -51,19 +51,21 @@ package org.glassfish.grizzly.http.server;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.regex.Pattern;
 
 /**
- * {@link JSessionDomainEncoder} Generates an application/x-www-form-urlencoded versions of domain strings that additionally have the safe
+ * {@link JSessionDomainEncoder} - Generates an <code>application/x-www-form-urlencoded</code> versions of domain strings that additionally have the safe
  * character "." and "-" replaced by the according URL-Encoding.
  *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class JSessionDomainEncoder {
 
-    private static final Pattern P_DOT = Pattern.compile("\\.");
-
-    private static final Pattern P_MINUS = Pattern.compile("-");
+    /**
+     * Initializes a new {@link JSessionDomainEncoder}.
+     */
+    private JSessionDomainEncoder() {
+        super();
+    }
 
     /**
      * Generates an application/x-www-form-urlencoded version of specified domain string that additionally has the safe character "." and
@@ -75,9 +77,50 @@ public class JSessionDomainEncoder {
      */
     public static String urlEncode(final String domain) {
         try {
-            return P_MINUS.matcher(P_DOT.matcher(URLEncoder.encode(domain, "iso-8859-1")).replaceAll("%2E")).replaceAll("%2D");
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException("Every implementation of the Java platform is required to support the iso-8859-1 encoding");
+            return replaceDotsAndDashes(URLEncoder.encode(domain, "iso-8859-1"));
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("Every implementation of the Java platform is required to support the iso-8859-1 encoding", e);
         }
     }
+
+    private static String replaceDotsAndDashes(String str) {
+        if (null == str) {
+            return null;
+        }
+
+        int length = str.length();
+        if (length == 0) {
+            return str;
+        }
+
+        StringBuilder sb = null;
+        for (int i = 0, k = length; k-- > 0; i++) {
+            char ch = str.charAt(i);
+            if (ch == '.') {
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(str, 0, i);
+                    }
+                }
+                sb.append("%2E");
+            } else if (ch == '-') {
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(str, 0, i);
+                    }
+                }
+                sb.append("%2D");
+            } else {
+                // Allowed character
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+
+        return null == sb ? str : sb.toString();
+    }
+
 }

@@ -50,11 +50,14 @@
 package com.openexchange.messaging.json;
 
 import static com.openexchange.json.JSONAssertion.assertValidates;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collection;
-import junit.framework.TestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.ContentType;
@@ -67,9 +70,10 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContentTypeWriterTest extends TestCase{
+public class ContentTypeWriterTest {
 
-    public void testWriteContentType() throws OXException, JSONException {
+         @Test
+     public void testWriteContentType() throws OXException, JSONException {
         final ContentType contentType = new MimeContentType();
         contentType.setPrimaryType("text");
         contentType.setSubType("plain");
@@ -101,7 +105,8 @@ public class ContentTypeWriterTest extends TestCase{
 
     }
 
-    public void testWriteBasicHeader() throws OXException, JSONException {
+         @Test
+     public void testWriteBasicHeader() throws OXException, JSONException {
         final MessagingHeader contentType = new StringMessageHeader("Content-Type", "text/plain;charset=UTF-8;name=something.txt");
 
         final ContentTypeWriter writer = new ContentTypeWriter();

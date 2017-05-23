@@ -75,6 +75,8 @@ public class ShareServletStrings implements LocalizableStrings {
 
     public static final String SHARE_NOT_FOUND = "The share you are looking for does not exist.";
 
+    public static final String SHARE_NOT_ACCESSIBLE = "This share cannot be accessed with your Web Browser.";
+
     public static final String INVALID_REQUEST = "We were unable to process your request.";
 
     public static final String INVALID_TARGET_WITHOUT_PASSWORD = "The folder or item you are looking for is no longer available. Please click \"continue\" to view your other shares.";

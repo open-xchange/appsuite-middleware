@@ -50,16 +50,16 @@
 package com.openexchange.dav.carddav.bugs;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link CardDAVBugSuite}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
+@RunWith(ParallelSuite.class)
+@SuiteClasses({ // @formatter:off
     Bug20665Test.class,
     Bug21079Test.class,
     Bug21177Test.class,
@@ -79,7 +79,7 @@ import org.junit.runners.Suite.SuiteClasses;
     Bug48661Test.class,
     Bug48687Test.class,
     Bug48463Test.class
-})
+}) // @formatter:on
 public final class CardDAVBugSuite {
 
 }

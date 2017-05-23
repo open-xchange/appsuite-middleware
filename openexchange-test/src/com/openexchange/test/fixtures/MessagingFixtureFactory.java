@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import java.util.HashMap;
@@ -60,19 +61,20 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
 
     private final FixtureLoader fixtureLoader;
 
-	public MessagingFixtureFactory(FixtureLoader fixtureLoader) {
-		super();
-		this.fixtureLoader = fixtureLoader;
-	}
-
-	@Override
-    public Fixtures<Messaging> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-		return new MessagingFixtures(fixtureName, entries, fixtureLoader);
+    public MessagingFixtureFactory(FixtureLoader fixtureLoader) {
+        super();
+        this.fixtureLoader = fixtureLoader;
     }
 
-    private class MessagingFixtures  extends DefaultFixtures<Messaging> implements Fixtures<Messaging>{
+    @Override
+    public Fixtures<Messaging> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+        return new MessagingFixtures(fixtureName, entries, fixtureLoader);
+    }
+
+    private class MessagingFixtures extends DefaultFixtures<Messaging> implements Fixtures<Messaging> {
+
         private final Map<String, Map<String, String>> entries;
-        private final Map<String, Fixture<Messaging>>  messagings = new HashMap<String,Fixture<Messaging>>();
+        private final Map<String, Fixture<Messaging>> messagings = new HashMap<String, Fixture<Messaging>>();
 
         public MessagingFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(Messaging.class, entries, fixtureLoader);
@@ -116,13 +118,13 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
                 values.remove("password");
             }
             if (values.containsKey("message")) {
-                config.put("message", values.get("message")+ " - " + UUID.randomUUID().toString());
+                config.put("message", values.get("message") + " - " + UUID.randomUUID().toString());
                 values.remove("message");
             }
 
             messaging.setConfiguration(config);
 
-            apply(messaging,values);
+            apply(messaging, values);
 
             final Fixture<Messaging> fixture = new Fixture<Messaging>(messaging, values.keySet().toArray(new String[values.size()]), values);
 
@@ -131,9 +133,9 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
         }
 
         private void defaults(final Map<String, String> values) {
-        	if (false == values.containsKey("displayName")) {
-        	    values.put("displayName", values.get("login"));
-        	}
+            if (false == values.containsKey("displayName")) {
+                values.put("displayName", values.get("login"));
+            }
         }
     }
 }

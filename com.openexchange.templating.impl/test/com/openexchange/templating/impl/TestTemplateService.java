@@ -49,14 +49,17 @@
 
 package com.openexchange.templating.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import com.openexchange.config.SimConfigurationService;
@@ -77,10 +80,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
- * This test will not work if started from the MainTestSuite as the folder test-resources is not found
- * TODO fix this in the future
+ *         This test will not work if started from the MainTestSuite as the folder test-resources is not found
+ *         TODO fix this in the future
  */
-public class TestTemplateService extends TestCase {
+public class TestTemplateService {
 
     protected SimConfigurationService configService = null;
     protected TemplateServiceImpl templateService = null;
@@ -96,11 +99,8 @@ public class TestTemplateService extends TestCase {
     @Mock
     private User user;
 
-    @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         MockitoAnnotations.initMocks(this);
 
         configService = new SimConfigurationService();
@@ -126,7 +126,7 @@ public class TestTemplateService extends TestCase {
         final MutableUserConfiguration userConfig = new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null);
         userConfig.setInfostore(true);
 
-        final MutableUserConfiguration noInfostore = new MutableUserConfiguration(new HashSet<String>(),0,new int[0],null);
+        final MutableUserConfiguration noInfostore = new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null);
         noInfostore.setInfostore(false);
 
         SimSession simSession = new SimSession(1, 1);
@@ -134,21 +134,20 @@ public class TestTemplateService extends TestCase {
         sessionWithoutInfostore = new ServerSessionAdapter(simSession, context, user, noInfostore, new UserPermissionBits(0, 1, context));
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         configService = null;
         templateService = null;
-
-        super.tearDown();
     }
 
+    @Test
     public void testLoadTemplate() throws Exception {
         final OXTemplate template = templateService.loadTemplate("test-template.tmpl");
         assertNotNull("OX-Template should not be null", template);
         assertEquals(TemplateLevel.SERVER, template.getLevel());
     }
 
+    @Test
     public void testLoadTemplateFromPrivateTemplateFolder() throws Exception {
         final SimBuilder oxfolderHelperBuilder = new SimBuilder();
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
@@ -171,6 +170,7 @@ public class TestTemplateService extends TestCase {
         infostoreBuilder.assertAllWereCalled();
     }
 
+    @Test
     public void testLoadTemplateFromGlobalTemplateFolder() throws Exception {
         final SimBuilder oxfolderHelperBuilder = new SimBuilder();
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(null);
@@ -193,6 +193,7 @@ public class TestTemplateService extends TestCase {
         infostoreBuilder.assertAllWereCalled();
     }
 
+    @Test
     public void testCreateCopyOfDefaultTemplateInPrivateTemplateFolder() throws Exception {
         final SimBuilder oxfolderHelperBuilder = new SimBuilder();
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
@@ -217,6 +218,7 @@ public class TestTemplateService extends TestCase {
         infostoreBuilder.assertAllWereCalled();
     }
 
+    @Test
     public void testCreatePrivateTemplateFolderAndCopyDefaultTemplate() throws Exception {
         final SimBuilder oxfolderHelperBuilder = new SimBuilder();
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(null);
@@ -242,6 +244,7 @@ public class TestTemplateService extends TestCase {
         infostoreBuilder.assertAllWereCalled();
     }
 
+    @Test
     public void testGrabBasicTemplateAndDontRecreateIt() throws Exception {
         final SimBuilder oxfolderHelperBuilder = new SimBuilder();
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(null);
@@ -262,9 +265,11 @@ public class TestTemplateService extends TestCase {
         infostoreBuilder.assertAllWereCalled();
     }
 
+    @Test
     public void testFallbackToDefaultTemplate() throws Exception {
-        final boolean[] called = new boolean[]{false};
+        final boolean[] called = new boolean[] { false };
         templateService = new TemplateServiceImpl(configService) {
+
             @Override
             public OXTemplateImpl loadTemplate(final String templateName) {
                 called[0] = true;
@@ -277,11 +282,13 @@ public class TestTemplateService extends TestCase {
 
     }
 
+    @Test
     public void testDisableUserTemplatingPerConfiguration() throws Exception {
         configService.stringProperties.put("com.openexchange.templating.usertemplating", "false");
 
-        final boolean[] called = new boolean[]{false};
+        final boolean[] called = new boolean[] { false };
         templateService = new TemplateServiceImpl(configService) {
+
             @Override
             public OXTemplateImpl loadTemplate(final String templateName) {
                 called[0] = true;
@@ -294,10 +301,12 @@ public class TestTemplateService extends TestCase {
 
     }
 
+    @Test
     public void testDisableUserTemplatingWhenInfostoreIsDisabled() throws Exception {
 
-        final boolean[] called = new boolean[]{false};
+        final boolean[] called = new boolean[] { false };
         templateService = new TemplateServiceImpl(configService) {
+
             @Override
             public OXTemplateImpl loadTemplate(final String templateName) {
                 called[0] = true;
@@ -310,12 +319,14 @@ public class TestTemplateService extends TestCase {
 
     }
 
+    @Test
     public void testListBasicTemplates() {
         final List<String> names = templateService.getBasicTemplateNames();
         assertEquals(1, names.size());
         assertEquals("test-template.tmpl", names.get(0));
     }
 
+    @Test
     public void testListTemplates() throws OXException {
         final SimBuilder oxfolderHelperBuilder = new SimBuilder();
         oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(globalTemplateFolder);
@@ -323,8 +334,8 @@ public class TestTemplateService extends TestCase {
 
         final SimBuilder infostoreBuilder = new SimBuilder();
         final String[] filter = new String[0];
-        infostoreBuilder.expectCall("getNames", session, globalTemplateFolder, filter).andReturn(Arrays.asList("global1" , "global2"));
-        infostoreBuilder.expectCall("getNames", session, privateTemplateFolder, filter).andReturn(Arrays.asList("private1" , "private2"));
+        infostoreBuilder.expectCall("getNames", session, globalTemplateFolder, filter).andReturn(Arrays.asList("global1", "global2"));
+        infostoreBuilder.expectCall("getNames", session, privateTemplateFolder, filter).andReturn(Arrays.asList("private1", "private2"));
 
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));

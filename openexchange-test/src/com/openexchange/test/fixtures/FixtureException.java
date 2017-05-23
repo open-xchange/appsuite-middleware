@@ -46,25 +46,26 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.test.fixtures;
 
 import com.openexchange.exception.OXException;
+
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class FixtureException extends OXException{
+public class FixtureException extends OXException {
 
-	private static final long serialVersionUID = -8622938638508531195L;
+    private static final long serialVersionUID = -8622938638508531195L;
 
-	public FixtureException() {
-    }
+    public FixtureException() {}
 
     public FixtureException(final String message) {
-        super(OXException.CODE_DEFAULT,message);
+        super(OXException.CODE_DEFAULT, message);
     }
 
     public FixtureException(final String message, final Throwable cause) {
-    	super(OXException.CODE_DEFAULT, message, cause);
+        super(OXException.CODE_DEFAULT, message, cause);
     }
 
     public FixtureException(final Throwable cause) {

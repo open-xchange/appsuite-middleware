@@ -49,10 +49,10 @@
 
 package com.openexchange.report.internal;
 
-import java.util.HashSet;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -89,9 +89,9 @@ public final class LastLoginUpdater implements EventHandler {
         super();
         this.contextService = contextService;
         this.userService = userService;
-        final Set<String> set = new HashSet<String>(1);
+        ImmutableSet.Builder<String> set = ImmutableSet.builder();
         set.add("USM-EAS");
-        acceptedClients = set;
+        acceptedClients = set.build();
     }
 
     @Override
@@ -104,8 +104,7 @@ public final class LastLoginUpdater implements EventHandler {
                 try {
                     handleSessionTouched(session);
                 } catch (final Exception e) {
-                    final String message = "Couldn't check/update last-accessed time stamp for client \"" + session.getClient() + "\" of user " + session.getUserId() + " in context " + session.getContextId();
-                    LOG.warn(message, e);
+                    LOG.warn("Couldn''t check/update last-accessed time stamp for client \"{}\" of user {} in context {}", session.getClient(), session.getUserId(), session.getContextId(), e);
                 }
             } else {
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
@@ -115,8 +114,7 @@ public final class LastLoginUpdater implements EventHandler {
                         try {
                             handleSessionTouched(session);
                         } catch (final Exception e) {
-                            final String message = "Couldn't check/update last-accessed time stamp for client \"" + session.getClient() + "\" of user " + session.getUserId() + " in context " + session.getContextId();
-                            LOG.warn(message, e);
+                            LOG.warn("Couldn''t check/update last-accessed time stamp for client \"{}\" of user {} in context {}", session.getClient(), session.getUserId(), session.getContextId(), e);
                         }
                         return null;
                     }
@@ -130,13 +128,14 @@ public final class LastLoginUpdater implements EventHandler {
         // Determine client
         String client = session.getClient();
         if (!com.openexchange.java.Strings.isEmpty(client) && acceptedClients.contains(client)) {
-            final Context context = contextService.getContext(session.getContextId());
-            final User user = userService.getUser(session.getUserId(), context);
+            Context context = contextService.getContext(session.getContextId());
+            User user = userService.getUser(session.getUserId(), context);
+
             // Check last-accessed time stamp for client
-            final Set<String> values = user.getAttributes().get("client:" + client);
-            if (null != values && !values.isEmpty()) {
+            String value = user.getAttributes().get("client:" + client);
+            if (null != value) {
                 try {
-                    final long lastAccessed = Long.parseLong(values.iterator().next());
+                    final long lastAccessed = Long.parseLong(value);
                     final long now = System.currentTimeMillis();
                     if ((now - lastAccessed) >= MILLIS_DAY) {
                         // Need to update

@@ -2,15 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage Dropbox Bundle
 Bundle-SymbolicName: com.openexchange.oauth.dropbox
-Bundle-Version: 7.8.3
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core;version="2.6.2",
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.database,
  com.openexchange.dispatcher,
  com.openexchange.exception,
+ com.openexchange.groupware.ldap,
  com.openexchange.groupware.update,
+ com.openexchange.http.deferrer,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.net.ssl,
@@ -23,6 +26,7 @@ Import-Package: com.fasterxml.jackson.core;version="2.6.2",
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond.impl,
+ com.openexchange.tools.session,
  com.openexchange.tools.sql,
  javax.crypto,
  javax.crypto.interfaces,

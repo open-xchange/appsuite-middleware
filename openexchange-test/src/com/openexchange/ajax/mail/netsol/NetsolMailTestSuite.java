@@ -49,8 +49,9 @@
 
 package com.openexchange.ajax.mail.netsol;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link NetsolMailTestSuite}
@@ -58,26 +59,18 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class NetsolMailTestSuite extends TestSuite {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    com.openexchange.ajax.mail.netsol.NetsolTestMailMessageDelete.class,
+    com.openexchange.ajax.mail.netsol.NetsolTestMailMessageOpen.class,
+    com.openexchange.ajax.mail.netsol.NetsolTestMailInbox.class,
+    com.openexchange.ajax.mail.netsol.NetsolTestEmptyTrash.class,
+    com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSend.class,
+    com.openexchange.ajax.mail.netsol.NetsolTestMailInboxSort.class,
+    com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSendAttachment.class,
+    com.openexchange.ajax.mail.netsol.NetsolTestViewFolders.class,
 
-	/**
-	 * Initializes a new {@link NetsolMailTestSuite}
-	 */
-	public NetsolMailTestSuite() {
-		super();
-	}
+})
+public final class NetsolMailTestSuite  {
 
-	public static Test suite() {
-		final TestSuite mailSuite = new TestSuite();
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageDelete.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageOpen.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInbox.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestEmptyTrash.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSend.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInboxSort.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSendAttachment.class);
-		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestViewFolders.class);
-
-		return mailSuite;
-	}
 }

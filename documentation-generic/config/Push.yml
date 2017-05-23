@@ -1,0 +1,479 @@
+feature_name: Push
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/pns.html]] for more informations.
+properties:
+    - key: com.openexchange.pns.delayDuration
+      description: |
+        The time in milliseconds a notification is queued in buffer to possible aggregate
+        with similar notifications that arrive during that time.
+      defaultValue: 1000
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.timerFrequency
+      description: |
+        The frequency/delay in milliseconds when the buffering queue will be checked for due
+        notifications (the ones exceeding [[com.openexchange.pns.delayDuration]] in queue).
+      defaultValue: 500
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.pns.delayDuration
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.numProcessorThreads
+      description: |
+        Specifies the number of threads that concurrently handle due notifications that were transferred
+        from buffering queue to processing queue.
+      defaultValue: 500
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.maxProcessorTasks
+      description: |
+        Specifies the buffer size for due notifications that were transferred from buffering queue to
+        processing queue.
+      defaultValue: 65536
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push","Limit"]
+    - key: com.openexchange.pns.transport.apn.ios.enabled
+      description: |
+        Specifies whether the APNS transport is enabled.
+
+        Moreover, an even finer-grained decision is possible to be configured as a certain transport
+        is checked for availability providing user, context, client and topic.
+        Hence, it is possible to specify:
+        <pre>
+        com.openexchange.pns.transport.apn.ios.enabled + ("." + {client})? + ("." + {topic})?
+
+        com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:mail:new=true
+        com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:calendar:new=false
+        </pre>
+        That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
+        via APNS, but not for "new appointment".
+      defaultValue: false
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.transport.apn.ios.feedbackQueryInterval
+      description: |
+        Specifies the frequency in milliseconds when to query the Apple feedback service to check for expired
+        and/or invalid tokens.
+      defaultValue: 3600000
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.transport.gcm.enabled
+      description: |
+        Specifies whether the GCM transport is enabled.
+
+        Moreover, an even finer-grained decision is possible to be configured as a certain transport
+        is checked for availability providing user, context, client and topic.
+        Hence, it is possible to  specify:
+        <pre>
+        com.openexchange.pns.transport.gcm.enabled + ("." + {client})? + ("." + {topic})?
+
+        com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:mail:new=true
+        com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:calendar:new=false
+        </pre>
+        That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
+        via GCM, but not for "new appointment".
+      defaultValue: false
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.transport.wns.enabled
+      description: |
+        Specifies whether the WNS transport is enabled.
+
+        Moreover, an even finer-grained decision is possible to be configured as a certain transport
+        is checked for availability providing user, context, client and topic.
+        Hence, it is possible to  specify:
+        <pre>
+        com.openexchange.pns.transport.wns.enabled + ("." + {client})? + ("." + {topic})?
+
+        com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:mail:new=true
+        com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:calendar:new=false
+        </pre>
+        That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
+        via WNS, but not for "new appointment".
+      defaultValue: false
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.transport.websocket.enabled
+      description: |
+        Specifies whether the Web Socket transport is enabled.
+
+        Moreover, an even finer-grained decision is possible to be configured as a certain transport
+        is checked for availability providing user, context, client and topic.
+        Hence, it is possible to  specify:
+        <pre>
+        com.openexchange.pns.transport.websocket.enabled + ("." + {client})? + ("." + {topic})?
+
+        com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:mail:new=true
+        com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calendar:new=false
+        </pre>
+        That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
+        via Web Socket, but not for "new appointment".
+      defaultValue: true
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.websockets.enabled
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.push.ms.delayDuration
+      description: |
+        Time in milliseconds after which a queued object object is pushed to clients
+        unless it got delayed again due to modifications of the push object within the
+        delayDuration or modifications within the folder of the push object.
+      defaultValue: 120000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-ms.properties
+      packageName: open-xchange-core
+      tags: ["Push"]
+    - key: com.openexchange.push.ms.maxDelayDuration
+      description: |
+        The maximum time in milliseconds a push object may be delayed before finally pushing it to the clients.
+      defaultValue: 600000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-ms.properties
+      packageName: open-xchange-core
+      tags: ["Push", "Limit"]
+    - key: com.openexchange.push.udp.pushEnabled
+      description: |
+        Defines if server push port gets opened or not.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.remoteHost
+      description: |
+        List of open-xchange servers that should be connected when multicast is disabled.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push", "Host"]
+    - key: com.openexchange.push.udp.registerTimeout
+      description: |
+        Time in milliseconds a client registration is kept.
+      defaultValue: 3600000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push", "Timeout"]
+    - key: com.openexchange.push.udp.registerPort
+      description: |
+        Port where the clients send the push registration request to.
+      defaultValue: 44335
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push", "Port"]
+    - key: com.openexchange.push.udp.registerDistributionEnabled
+      description: |
+        Only one of registerDistribution or eventDistribution can be enabled at the same time.
+        If set to <code>true</code>, registrations are distributed to all ox servers.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.eventDistributionEnabled
+      description: |
+        If set to <code>true</code>, events will be distributed to all Open-Xchange servers.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push", "Event"]
+    - key: com.openexchange.push.udp.outputQueueDelay
+      description: |
+        Time in milliseconds after which queued "push" packages are sent to clients.
+      defaultValue: 120000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.hostname
+      description: |
+        If empty, then the output of the java function getHostName will be used. 
+        This name is used for internal communication.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push", "Host"]
+    - key: com.openexchange.push.udp.senderAddress
+      description: |
+        Address used as the sender address when UDP packages are sent to the clients 
+        (should be the IP address of the load balancer in front of the Open-Xchange server farm).
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastEnabled
+      description: |
+        Speciefies whether to send register information per multicast.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastAddress
+      description: |
+        Specifies the ip multicast address.
+      defaultValue: 224.0.0.1
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push"]
+    - key: com.openexchange.push.udp.multicastPort
+      description: |
+        Specifies the multicast port.
+      defaultValue: 9982
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push-udp.properties
+      packageName: open-xchange-core
+      tags: ["Push", "Port"]      
+      
+    - key: com.openexchange.push.imapidle.folder
+      description: |
+        Define the folder to look-up for new mails.
+      defaultValue: INBOX
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.delay
+      description: |
+        Waiting time in milliseconds before a reconnect is performed.
+      defaultValue: 5000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.clusterLock
+      description: |
+        Specifies what system to use to manage a cluster-lock.  
+        Possible values:
+          <ul>
+            <li><code>db</code> - for database-based locking.</li>
+            <li><code>hz</code> - for Hazelcast-based locking.</li>
+            <li><code>local</code> - for node-local locking; each node may spawn an IMAP-IDLE listener for a user.</li>
+            <li><code>none</code> - for no cluster lock mechanism.</li>
+      defaultValue: local
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.pushMode
+      description: |
+        Specifies when push events are fired.
+        Possible values: <code>newmail</code> or <code>always</code>.
+        
+        Explanation:
+        <ul>
+          <li><code>newmail</code> - Means to only send a push event in case of at least one
+                new mail has arrived.
+
+                Note:  
+                Using dovecot this does only work when only ONE concurrent session of the same user
+                is active.
+                </li>  
+          <li><code>always</code> - Send a push event for every changes to the users mailbox.</li>
+        </ul>
+      defaultValue: always
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
+      tags: ["Push"]
+    - key: com.openexchange.push.imapidle.supportsPermanentListeners
+      description: |
+        Controls whether IMAP IDLE based mail push implementation is supposed to also
+        support permanent listeners.
+        
+        Note:  
+        IMAP IDLE based mail push implementation is not recommended for operating
+        with permanent listeners due its nature to maintain a permanent IMAP connection
+        and its drawbacks to determine if a IDLE callback is due to a new message delivery.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: push_imapidle.properties
+      packageName: open-xchange-push-imapidle
+      tags: ["Push"]
+      
+    - key: com.openexchange.push.mail.notify.udp_listen_multicast
+      description: |
+        Define if the listener should receive multicast messages.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.udp_listen_host
+      description: |
+        Define the hostname or interface/multicast group where the udp server should listen.
+      defaultValue: localhost
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.udp_listen_port
+      description: |
+        Define the port where the udp server should listen.
+      defaultValue: 23420
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.use_ox_login
+      description: |
+        Whether to use the ox login name to check for a valid push event.
+        The default is to only check the users aliases.
+        If "mailboxname@example.com" is not contained in the list of aliases,
+        set this to <code>true</code>.
+
+        Warning:  
+        This won't work in multidomain setups where the same login
+        might exist in different contexts!
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.use_full_email_address
+      description: |
+        Whether to use the full email address from aliases or just use the
+        localpart.
+        When using a multidomain setup where the imap login is an email address,
+        this should be set to <code>true</code>.
+        If not, login might not be unique because 'foo@example.com' and 'foo@example.net'
+        might be different users.
+
+        Note:  
+        Do <b>not</b> set [[com.openexchange.push.mail.notify.imap_login_delimiter]] in this case!
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
+      tags: ["Push"]
+    - key: com.openexchange.push.mail.notify.delay_millis
+      description: |
+        Specifies the delay time frame in which incoming UDP events are collected
+        and send out as one push event to the OX cluster.
+      defaultValue: 5000
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: push_mailnotify.properties
+      packageName: open-xchange-push-mailnotify
+      tags: ["Push"]

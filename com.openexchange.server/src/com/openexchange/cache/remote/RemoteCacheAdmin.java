@@ -54,7 +54,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * RemoteCacheAdmin
@@ -69,36 +68,33 @@ public class RemoteCacheAdmin {
 	private static final int REGISTRY_PORT = 57462;
 
 	private static volatile RemoteCacheAdmin instance;
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private final Registry registry;
-
 	/**
 	 * Start the remote cache administration to handle incoming RMI calls
 	 */
 	public static void startRemoteCacheAdmin() {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (instance == null) {
-					try {
-						instance = new RemoteCacheAdmin();
-						initialized.set(true);
-					} catch (final RemoteException e) {
-						LOG.error("", e);
-					} catch (final AlreadyBoundException e) {
-						LOG.error("", e);
-					}
-				}
+	    RemoteCacheAdmin tmp = instance;
+	    if (null == tmp) {
+			synchronized (RemoteCacheAdmin.class) {
+			    tmp = instance;
+		        if (null == tmp) {
+		            try {
+                        tmp = new RemoteCacheAdmin();
+                        instance = tmp;
+                    } catch (final RemoteException e) {
+                        LOG.error("", e);
+                    } catch (final AlreadyBoundException e) {
+                        LOG.error("", e);
+                    }
+		        }
 			}
 		}
 	}
 
 	/**
-	 * @return <code>true</code> if intialized; <code>false</code> otherwise
+	 * @return <code>true</code> if initialized; <code>false</code> otherwise
 	 */
 	public static boolean isInitialized() {
-		return initialized.get();
+		return null != instance;
 	}
 
 	/**
@@ -107,6 +103,8 @@ public class RemoteCacheAdmin {
 	public static void main(final String[] args) {
 		startRemoteCacheAdmin();
 	}
+
+	private final Registry registry;
 
 	private RemoteCacheAdmin() throws RemoteException, AlreadyBoundException {
 		super();

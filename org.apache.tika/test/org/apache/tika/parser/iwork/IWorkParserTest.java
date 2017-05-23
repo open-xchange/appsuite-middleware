@@ -16,36 +16,37 @@
  */
 package org.apache.tika.parser.iwork;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-
-import junit.framework.TestCase;
-
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Before;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 
 /**
  * Tests if the IWork parser parses the content and metadata properly of the supported formats.
  */
-public class IWorkParserTest extends TestCase {
-
+public class IWorkParserTest {
     private IWorkPackageParser iWorkParser;
     private ParseContext parseContext;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         iWorkParser = new IWorkPackageParser();
         parseContext = new ParseContext();
         parseContext.set(Parser.class, new AutoDetectParser());
     }
 
-    public void testParseKeynote() throws Exception {
+         @Test
+     public void testParseKeynote() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testKeynote.key");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -90,7 +91,8 @@ public class IWorkParserTest extends TestCase {
     }
 
     // TIKA-910
-    public void testKeynoteTextBoxes() throws Exception {
+         @Test
+     public void testKeynoteTextBoxes() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testTextBoxes.key");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -101,7 +103,8 @@ public class IWorkParserTest extends TestCase {
     }
 
     // TIKA-910
-    public void testKeynoteBulletPoints() throws Exception {
+         @Test
+     public void testKeynoteBulletPoints() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testBulletPoints.key");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -112,7 +115,8 @@ public class IWorkParserTest extends TestCase {
     }
 
     // TIKA-923
-    public void testKeynoteTables() throws Exception {
+         @Test
+     public void testKeynoteTables() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testTables.key");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -124,7 +128,8 @@ public class IWorkParserTest extends TestCase {
     }
 
     // TIKA-923
-    public void testKeynoteMasterSlideTable() throws Exception {
+         @Test
+     public void testKeynoteMasterSlideTable() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testMasterSlideTable.key");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -137,7 +142,8 @@ public class IWorkParserTest extends TestCase {
         assertTrue(content.contains("master row 3"));
     }
 
-    public void testParsePages() throws Exception {
+         @Test
+     public void testParsePages() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testPages.pages");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -185,7 +191,8 @@ public class IWorkParserTest extends TestCase {
     }
 
     // TIKA-904
-    public void testPagesLayoutMode() throws Exception {
+         @Test
+     public void testPagesLayoutMode() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testPagesLayout.pages");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -200,7 +207,8 @@ public class IWorkParserTest extends TestCase {
         assertTrue(content.contains("text inside of a green circle"));
     }
 
-    public void testParseNumbers() throws Exception {
+         @Test
+     public void testParseNumbers() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testNumbers.numbers");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -239,7 +247,8 @@ public class IWorkParserTest extends TestCase {
     }
 
     // TIKA- 924
-    public void testParseNumbersTableNames() throws Exception {
+         @Test
+     public void testParseNumbersTableNames() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/tableNames.numbers");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -248,7 +257,8 @@ public class IWorkParserTest extends TestCase {
         assertTrue(content.contains("This is the main table"));
     }
         
-    public void testParseNumbersTableHeaders() throws Exception {
+         @Test
+     public void testParseNumbersTableHeaders() throws Exception {
         InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/tableHeaders.numbers");
         Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
@@ -268,7 +278,8 @@ public class IWorkParserTest extends TestCase {
      *  we don't know how the encryption works (it's not regular Zip
      *  Encryption). See TIKA-903 for details
      */
-    public void testParsePagesPasswordProtected() throws Exception {
+         @Test
+     public void testParsePagesPasswordProtected() throws Exception {
        // Document password is "tika", but we can't use that yet...
        InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testPagesPwdProtected.pages");
        Metadata metadata = new Metadata();
@@ -287,7 +298,8 @@ public class IWorkParserTest extends TestCase {
     /**
      * Check we get headers, footers and footnotes from Pages
      */
-    public void testParsePagesHeadersFootersFootnotes() throws Exception {
+         @Test
+     public void testParsePagesHeadersFootersFootnotes() throws Exception {
        String footnote = "Footnote: Do a lot of people really use iWork?!?!";
        String header = "THIS IS SOME HEADER TEXT";
        String footer = "THIS IS SOME FOOTER TEXT\t1";
@@ -315,7 +327,8 @@ public class IWorkParserTest extends TestCase {
     /**
      * Check we get upper-case Roman numerals within the footer for AutoPageNumber.
      */
-    public void testParsePagesHeadersFootersRomanUpper() throws Exception {
+         @Test
+     public void testParsePagesHeadersFootersRomanUpper() throws Exception {
        String header = "THIS IS SOME HEADER TEXT";
        String footer = "THIS IS SOME FOOTER TEXT\tI";
        String footer2 = "THIS IS SOME FOOTER TEXT\tII";
@@ -335,7 +348,8 @@ public class IWorkParserTest extends TestCase {
     /**
      * Check we get lower-case Roman numerals within the footer for AutoPageNumber.
      */
-    public void testParsePagesHeadersFootersRomanLower() throws Exception {
+         @Test
+     public void testParsePagesHeadersFootersRomanLower() throws Exception {
        String header = "THIS IS SOME HEADER TEXT";
        String footer = "THIS IS SOME FOOTER TEXT\ti";
        String footer2 = "THIS IS SOME FOOTER TEXT\tii";
@@ -355,7 +369,8 @@ public class IWorkParserTest extends TestCase {
     /**
      * Check we get upper-case alpha-numeric letters within the footer for AutoPageNumber.
      */
-    public void testParsePagesHeadersAlphaUpper() throws Exception {
+         @Test
+     public void testParsePagesHeadersAlphaUpper() throws Exception {
        String header = "THIS IS SOME HEADER TEXT\tA";
        String footer = "THIS IS SOME FOOTER TEXT\tA";
        String footer2 = "THIS IS SOME FOOTER TEXT\tB";
@@ -375,7 +390,8 @@ public class IWorkParserTest extends TestCase {
     /**
      * Check we get lower-case alpha-numeric letters within the footer for AutoPageNumber.
      */
-    public void testParsePagesHeadersAlphaLower() throws Exception {
+         @Test
+     public void testParsePagesHeadersAlphaLower() throws Exception {
        String header = "THIS IS SOME HEADER TEXT";
        String footer = "THIS IS SOME FOOTER TEXT\ta";
        String footer2 = "THIS IS SOME FOOTER TEXT\tb";
@@ -395,7 +411,8 @@ public class IWorkParserTest extends TestCase {
     /**
      * Check we get annotations (eg comments) from Pages
      */
-    public void testParsePagesAnnotations() throws Exception {
+         @Test
+     public void testParsePagesAnnotations() throws Exception {
        String commentA = "comment about the APXL file";
        String commentB = "comment about UIMA";
        
@@ -417,7 +434,8 @@ public class IWorkParserTest extends TestCase {
     }
     
     // TIKA-918
-    public void testNumbersExtractChartNames() throws Exception {
+         @Test
+     public void testNumbersExtractChartNames() throws Exception {
        InputStream input = IWorkParserTest.class.getResourceAsStream("/test-documents/testNumbersCharts.numbers");
        Metadata metadata = new Metadata();
        ContentHandler handler = new BodyContentHandler();

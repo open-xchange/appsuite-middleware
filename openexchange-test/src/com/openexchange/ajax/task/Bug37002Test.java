@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -56,7 +57,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInParametersRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -71,6 +71,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link Bug37002Test} verifies that changing some task state does not
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug37002Test extends AbstractAJAXSession {
@@ -79,19 +80,18 @@ public class Bug37002Test extends AbstractAJAXSession {
     private Task task;
     private TimeZone timeZone;
 
-    public Bug37002Test(String name) {
-        super(name);
+    public Bug37002Test() {
+        super();
     }
 
     @Before
-    @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(User.User2);
+        client2 = getClient2();
         Participant participant = new UserParticipant(client2.getValues().getUserId());
 
-        timeZone = client.getValues().getTimeZone();
+        timeZone = getClient().getValues().getTimeZone();
         task = Create.createWithDefaults(client1.getValues().getPrivateTaskFolder(), "Test for bug 37002");
         task.addParticipant(participant);
         client1.execute(new InsertRequest(task, timeZone, true)).fillTask(task);
@@ -107,10 +107,12 @@ public class Bug37002Test extends AbstractAJAXSession {
     }
 
     @After
-    @Override
-    protected void tearDown() throws Exception {
-        client1.execute(new DeleteRequest(task));
-        super.tearDown();
+    public void tearDown() throws Exception {
+        try {
+            client1.execute(new DeleteRequest(task));
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

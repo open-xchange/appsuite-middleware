@@ -84,8 +84,8 @@ public class ReplicationMonitorTest {
         monitor = null;
     }
 
-    @Test
-    public void testForBug32102() throws Exception {
+     @Test
+     public void testForBug32102() throws Exception {
         final Connection con = mock(java.sql.Connection.class);
         doAnswer(new Answer<Boolean>() {
             @Override

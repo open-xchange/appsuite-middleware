@@ -50,7 +50,7 @@
 package com.openexchange.push.dovecot.locking;
 
 import javax.annotation.concurrent.Immutable;
-import com.openexchange.session.Session;
+import com.openexchange.push.dovecot.registration.RegistrationContext;
 
 /**
  * {@link SessionInfo} - The session info.
@@ -63,20 +63,20 @@ public class SessionInfo {
 
     private final int contextId;
     private final int userId;
-    private final String sessionId;
+    private final String compositeId;
     private final boolean permanent;
 
     /**
      * Initializes a new {@link SessionInfo}.
      *
-     * @param session The associated session
+     * @param registrationContext The registration context
      * @param permanent Whether permanent or not
      */
-    public SessionInfo(Session session, boolean permanent) {
+    public SessionInfo(RegistrationContext registrationContext, boolean permanent) {
         super();
-        this.contextId = session.getContextId();
-        this.userId = session.getUserId();
-        this.sessionId = session.getSessionID();
+        this.contextId = registrationContext.getContextId();
+        this.userId = registrationContext.getUserId();
+        this.compositeId = registrationContext.getUserId() + "@" + registrationContext.getContextId();
         this.permanent = permanent;
     }
 
@@ -99,12 +99,12 @@ public class SessionInfo {
     }
 
     /**
-     * Gets the session identifier.
+     * Gets the composite identifier.
      *
-     * @return The session identifier
+     * @return The composite identifier
      */
-    public String getSessionId() {
-        return sessionId;
+    public String getCompositeId() {
+        return compositeId;
     }
 
     /**

@@ -1,0 +1,24 @@
+feature_name: Tokenlogin
+properties:
+    - key: com.openexchange.tokenlogin
+      description: |
+        Enable or disable token-login.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.tokenlogin.maxIdleTime
+      file: tokenlogin.properties
+      packageName: open-xchange-core
+      tags: ["Tokenlogin"]
+    - key: com.openexchange.tokenlogin.maxIdleTime
+      description: |
+        Specify the maximum time (in milliseconds) a token may be idle before it is evicted.
+      defaultValue: 300000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.tokenlogin
+      file: tokenlogin.properties
+      packageName: open-xchange-core
+      tags: ["Tokenlogin", "Limit"]

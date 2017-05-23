@@ -93,6 +93,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -101,7 +102,6 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -203,6 +203,22 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @throws OXException If reply mail cannot be composed
      */
     public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm, final boolean setFrom) throws OXException {
+        return getReplyMail(originalMail, replyAll, session, accountId, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
+     *
+     * @param originalMail The referenced original mail
+     * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
+     * @param session The session containing needed user data
+     * @param accountId The account ID
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param fromAddressProvider The provider for <code>"From"</code> address
+     * @return An instance of {@link MailMessage} representing an user-editable reply mail
+     * @throws OXException If reply mail cannot be composed
+     */
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm, final FromAddressProvider fromAddressProvider) throws OXException {
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
         MailPath msgref = null;
@@ -239,7 +255,7 @@ public final class MimeReply extends AbstractMimeProcessing {
             session,
             accountId,
             MimeDefaultSession.getDefaultSession(),
-            usm, setFrom);
+            usm, fromAddressProvider);
     }
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
@@ -270,11 +286,11 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @param accountId The account ID
      * @param mailSession The mail session
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
-     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @param fromAddressProvider The provider for <code>"From"</code> address
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom) throws OXException {
+    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final FromAddressProvider fromAddressProvider) throws OXException {
         try {
             originalMsg.setAccountId(accountId);
             MailMessage origMsg;
@@ -283,7 +299,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                 if (contentType.startsWith("multipart/related") && ("application/smil".equals(asciiLowerCase(contentType.getParameter("type"))))) {
                     origMsg = MimeSmilFixer.getInstance().process(originalMsg);
                 } else {
-                    origMsg = ManagedMimeMessage.clone(originalMsg);
+                    origMsg = originalMsg;
                 }
             }
             Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -318,13 +334,20 @@ public final class MimeReply extends AbstractMimeProcessing {
              * Set "From"
              */
             InternetAddress from = null;
-            if (setFrom) {
-                from = MimeProcessingUtility.determinePossibleFrom(false, origMsg, accountId, session, ctx);
-                /*
-                 * Set if a "From" candidate applies
-                 */
-                if (null != from) {
-                    replyMsg.setFrom(from);
+            if (null != fromAddressProvider) {
+                if (fromAddressProvider.isDetectBy()) {
+                    from = MimeProcessingUtility.determinePossibleFrom(false, origMsg, accountId, session, ctx);
+                    /*
+                     * Set if a "From" candidate applies
+                     */
+                    if (null != from) {
+                        replyMsg.setFrom(from);
+                    }
+                } else if (fromAddressProvider.isSpecified()) {
+                    from = fromAddressProvider.getFromAddress();
+                    if (null != from) {
+                        replyMsg.setFrom(from);
+                    }
                 }
             }
             /*
@@ -646,6 +669,9 @@ public final class MimeReply extends AbstractMimeProcessing {
             if (null != msgref) {
                 replyMail.setMsgref(msgref);
             }
+            // Copy security setting
+            replyMail.setSecurityResult(originalMsg.getSecurityResult());
+
             return replyMail;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);

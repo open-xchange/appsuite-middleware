@@ -1,0 +1,16 @@
+feature_name: Config Jump
+feature_description: |
+  Properties for the generic Config Jump implementation.
+properties:
+    - key: URL
+      description: |
+        URL to the config interface. %c is replaced with context login information.
+        %u is replaced with user login information. %p is replaced with user password.
+      defaultValue: http://localhost/?cid=%c&login=%u&pass=%p
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: configjump.properties
+      packageName: open-xchange-configjump-generic
+      tags: ["Configjump", "Host"]

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -61,8 +62,8 @@ import com.openexchange.test.TaskTestManager;
 
 public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession {
 
-    protected AbstractTaskTestForAJAXClient(String name) {
-        super(name);
+    protected AbstractTaskTestForAJAXClient() {
+        super();
     }
 
     public TestTask getNewTask() {
@@ -88,30 +89,25 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
      * Does an insert and compares data from both get and all request
      */
     public void runSimpleInsertTest(Task task) {
-        TaskTestManager testManager = null;
-        try {
-            testManager = new TaskTestManager(getClient());
-        } catch (Exception e) {
-            fail("Setup failed, TestManager could not be instantiated");
-        }
-        testManager.insertTaskOnServer(task);
-        Task resultingTask = testManager.getTaskFromServer(task);
+        ttm.insertTaskOnServer(task);
+        Task resultingTask = ttm.getTaskFromServer(task);
         Set<Integer> ignore = new HashSet<Integer>();
         ignore.add(I(Task.UID));
         ignore.add(I(Task.FULL_TIME)); // mimic legacy behavior
         TaskAsserts.assertAllTaskFieldsMatchExcept(task, resultingTask, ignore);
-        testManager.cleanUp();
+        ttm.cleanUp();
     }
 
     /**
      * Does an insert and an update and compares data from both get and all request
+     * 
      * @param insertTask Task to insert at first
      * @param updateTask Task used to update insertTask - this tasks gets changed to have the correct LAST_MODIFIED, PARENT_FOLDER and OBJECT_ID, otherwise the update wouldn't work at all
      * @param fieldsThatChange Fields that are expected to change. These are not checked for being equal but for being changed - they are not ignored. The following fields are always ignored: CREATION_DATE, LAST_MODIFIED
      */
     public void runInsertAndUpdateTest(Task insertTask, Task updateTask, int... fieldsThatChange) {
         Set<Integer> changingFields = new HashSet<Integer>();
-        for(int field: fieldsThatChange){
+        for (int field : fieldsThatChange) {
             changingFields.add(Integer.valueOf(field));
         }
         changingFields.add(I(Task.CREATION_DATE));

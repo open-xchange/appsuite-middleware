@@ -51,7 +51,6 @@ package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 
@@ -61,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug22304Test extends AbstractSanitizing {
-    @Test
-    public void testDropUnnecessaryEndifs() throws OXException {
+     @Test
+     public void testDropUnnecessaryEndifs() throws Exception{
         String content = "<![endif]--><!--[if gte mso 9]><xml>\n" +
             "<o:shapelayout v:ext=\"edit\">\n" +
             "<o:idmap v:ext=\"edit\" data=\"1\" />\n" +

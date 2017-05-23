@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -70,37 +72,23 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class NewTest extends CardDAVTest {
 
-	public NewTest() {
-		super();
-	}
+    public NewTest() {
+        super();
+    }
 
-	@Test
-	public void testCreateSimpleOnClient() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		final String syncToken = super.fetchSyncToken();
-		/*
-		 * create contact
-		 */
-    	final String uid = randomUID();
-    	final String firstName = "test";
-    	final String lastName = "horst";
-        final String vCard =
-        		"BEGIN:VCARD" + "\r\n" +
-   				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"ORG:test3;" + "\r\n" +
-				"EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" +
-				"TEL;type=WORK;type=pref:24235423" + "\r\n" +
-				"TEL;type=CELL:352-3534" + "\r\n" +
-				"TEL;type=HOME:346346" + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
+    @Test
+    public void testCreateSimpleOnClient() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        final String syncToken = super.fetchSyncToken();
+        /*
+         * create contact
+         */
+        final String uid = randomUID();
+        final String firstName = "test";
+        final String lastName = "horst";
+        final String vCard = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:test@example.com" + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
         /*
          * verify contact on server
@@ -120,26 +108,26 @@ public class NewTest extends CardDAVTest {
         assertEquals("N wrong", firstName, card.getGivenName());
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
-	}
+    }
 
-	@Test
-	public void testCreateSimpleOnServer() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		final String syncToken = super.fetchSyncToken();
-		/*
-		 * create contact
-		 */
-    	final String uid = randomUID();
-    	final String firstName = "test";
-    	final String lastName = "otto";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact));
+    @Test
+    public void testCreateSimpleOnServer() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        final String syncToken = super.fetchSyncToken();
+        /*
+         * create contact
+         */
+        final String uid = randomUID();
+        final String firstName = "test";
+        final String lastName = "otto";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact));
         /*
          * verify contact on client
          */
@@ -158,32 +146,31 @@ public class NewTest extends CardDAVTest {
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
-	}
+    }
 
-	@Test
-	public void testAddContactInSubfolderServer() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-		/*
-		 * create folder and contact on server
-		 */
-    	String folderName = "testfolder_" + randomUID();
-    	FolderObject folder = super.createFolder(folderName);
-		super.rememberForCleanUp(folder);
+    @Test
+    public void testAddContactInSubfolderServer() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create folder and contact on server
+         */
+        String folderName = "testfolder_" + randomUID();
+        super.createFolder(folderName);
         FolderObject createdFolder = super.getFolder(folderName);
         assertNotNull("folder not found on server", createdFolder);
         assertEquals("foldername wrong", folderName, createdFolder.getFolderName());
-    	String uid = randomUID();
-    	String firstName = "test";
-    	String lastName = "herbert";
-		Contact contact = new Contact();
-		contact.setSurName(lastName);
-		contact.setGivenName(firstName);
-		contact.setDisplayName(firstName + " " + lastName);
-		contact.setUid(uid);
-		super.rememberForCleanUp(super.create(contact, createdFolder.getObjectID()));
+        String uid = randomUID();
+        String firstName = "test";
+        String lastName = "herbert";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact, createdFolder.getObjectID()));
         /*
          * verify contact on client
          */
@@ -194,6 +181,6 @@ public class NewTest extends CardDAVTest {
         assertEquals("N wrong", firstName, card.getGivenName());
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
-	}
+    }
 
 }

@@ -118,7 +118,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
         }
 
         Scenario scenario = request.getScenario();
-        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+        if (!Device.getActionsFor(request.getClientDevice(), device, scenario.getType(), session).contains(request.getAction())) {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
@@ -139,7 +139,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
     }
 
     private Result linkResult(Session session) throws OXException {
-        return new LinkResult(new Link(getDownloadLink(session), LinkType.COMMON));
+        return new LinkResult(new Link(getDownloadLink(session), LinkType.COMMON, null));
     }
 
     private String getDownloadLink(Session session) throws OXException {

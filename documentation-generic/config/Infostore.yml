@@ -1,0 +1,54 @@
+feature_name: Infostore
+feature_description: |
+  Properties for infostore
+properties:
+    - key: MAX_UPLOAD_SIZE
+      description: |
+        If the sum of all uploaded files in one request is larger than this value, the upload will be rejected.  
+        If this value is not set or <code>-1</code>, the more general [[MAX_UPLOAD_SIZE]] configured in server.properties will be used.  
+        If that value is <code>0</code> uploads will be unrestricted. The size is in Bytes.
+      defaultValue: 10485760
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: MAX_UPLOAD_SIZE in server.properties
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore"]
+
+    - key: com.openexchange.infostore.zipDocumentsCompressionLevel
+      description: |
+        Configures the used compression level that is applied to .zip containers
+        when downloading multiple documents at once.  
+        Possible values are:
+        <ul>
+          <li><code>-1</code> - for the built-in default level</li>
+          <li><code>0</code> - for no compression</li>
+          <li>Any number between <code>1</code> (best speed) and <code>9</code> (best compression)</li>
+        </ul>
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore"]
+
+    - key: com.openexchange.infostore.trash.retentionDays
+      description: |
+        Specifies how many days items are kept in the trash folder until they are
+        finally deleted. Cleanup is triggered during user login. A value equal to or
+        smaller <code>0</code> disables automatic cleanup for items in the trash folder.
+        
+        Depending on the "protected" flag of the corresponding preference path,
+        users are able to change their configured value on their own. This can be
+        adjusted via "/meta/infostore.yml".
+      defaultValue: -1
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore"]

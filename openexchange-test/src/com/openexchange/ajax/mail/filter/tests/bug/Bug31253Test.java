@@ -49,14 +49,16 @@
 
 package com.openexchange.ajax.mail.filter.tests.bug;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Collections;
 import java.util.List;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
@@ -66,39 +68,40 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link Bug31253Test}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Bug31253Test extends AbstractMailFilterTest {
 
     private FolderObject folder;
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link Bug31253Test}.
-     * 
+     *
      * @param name
      */
-    public Bug31253Test(String name) {
-        super(name);
+    public Bug31253Test() {
+        super();
     }
 
     @Override
+    @After
     public void tearDown() throws Exception {
-        if (folder != null) {
-            client.execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
+        try {
+            if (folder != null) {
+                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
+            }
+        } finally {
+            super.tearDown();
         }
-
-        super.tearDown();
     }
 
+    @Test
     public void testBug31253() throws Exception {
-        client = getClient();
-        folder = Create.createPrivateFolder("Test for Bug31253", FolderObject.MAIL, client.getValues().getUserId());
-        folder.setFullName(client.getValues().getInboxFolder() + "/Test for Bug31253");
+        folder = Create.createPrivateFolder("Test for Bug31253", FolderObject.MAIL, getClient().getValues().getUserId());
+        folder.setFullName(getClient().getValues().getInboxFolder() + "/Test for Bug31253");
 
-        final InsertResponse folderInsertResponse = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+        final InsertResponse folderInsertResponse = getClient().execute(new InsertRequest(EnumAPI.OX_NEW, folder));
         folderInsertResponse.fillObject(folder);
 
         final Rule rule = new Rule();
@@ -110,6 +113,7 @@ public class Bug31253Test extends AbstractMailFilterTest {
         final ContainsComparison conComp = new ContainsComparison();
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "31253" }));
         final int id = mailFilterAPI.createRule(rule);
+        rememberRule(id);
         rule.setId(id);
         rule.setPosition(0);
 

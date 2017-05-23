@@ -103,10 +103,12 @@ public class ProgressStatusImpl implements ProgressState {
     }
 
     private void logState() {
-        long now = System.currentTimeMillis();
-        if (now > lastLogTime + logTimeDistance) {
-            lastLogTime = now;
-            LOG.info("Update task {} finished {}% on schema {}{}", taskName, (state * 100 / total), schema, '.');
+        if (total > 0) {
+            long now = System.currentTimeMillis();
+            if (now > lastLogTime + logTimeDistance) {
+                lastLogTime = now;
+                LOG.info("Update task {} finished {}% on schema {}{}", taskName, (state * 100 / total), schema, '.');
+            }
         }
     }
 }

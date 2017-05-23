@@ -538,6 +538,46 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     @Override
+    public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorageByContentType(realTreeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, contentType);
+        }
+        final boolean started = folderStorage.startTransaction(storageParameters, false);
+        try {
+            SortableId[] ret = folderStorage.getVisibleFolders(rootFolderId, treeId, contentType, type, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+
+            if (MailContentType.getInstance().toString().equals(contentType.toString())) {
+                // No primary account root folder for Outlook-style tree
+                List<SortableId> tmp = new ArrayList<SortableId>(ret.length);
+                String id = PREPARED_FULLNAME_DEFAULT;
+                int in = 0;
+                for (SortableId sortableId : ret) {
+                    if (!id.equals(sortableId.getId())) {
+                        tmp.add(new OutlookId(sortableId.getId(), in++, sortableId.getName()));
+                    }
+                }
+                ret = tmp.toArray(new SortableId[tmp.size()]);
+            }
+
+            return ret;
+        } catch (final OXException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final RuntimeException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final FolderStorage folderStorage = folderStorageRegistry.getFolderStorageByContentType(realTreeId, contentType);
         if (null == folderStorage) {

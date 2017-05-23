@@ -56,6 +56,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.SizePolicy;
 import com.openexchange.session.Session;
 
 /**
@@ -86,13 +87,14 @@ public class MessageWriterParams {
         private final Session session;
         private DisplayMode displayMode;
         private boolean embedded;
+        private boolean asMarkup;
         private UserSettingMail settings;
         private Collection<OXException> warnings;
         private boolean token;
         private int tokenTimeout;
         private MimeFilter mimeFilter;
         private TimeZone optTimeZone;
-        private boolean exactLength;
+        private SizePolicy sizePolicy;
         private int maxContentSize;
         private int maxNestedMessageLevels;
         private boolean includePlainText;
@@ -102,6 +104,8 @@ public class MessageWriterParams {
             this.accountId = accountId;
             this.mail = mail;
             this.session = session;
+            asMarkup = true;
+            sizePolicy = SizePolicy.NONE;
         }
 
         /**
@@ -121,6 +125,16 @@ public class MessageWriterParams {
          */
         public Builder setEmbedded(boolean embedded) {
             this.embedded = embedded;
+            return this;
+        }
+
+        /**
+         * Sets the as-markup flag
+         * @param asMarkup The flag to set
+         * @return This builder
+         */
+        public Builder setAsMarkup(boolean asMarkup) {
+            this.asMarkup = asMarkup;
             return this;
         }
 
@@ -185,12 +199,12 @@ public class MessageWriterParams {
         }
 
         /**
-         * Sets the exactLength
+         * Sets the size policy
          * @param exactLength The exactLength to set
          * @return This builder
          */
-        public Builder setExactLength(boolean exactLength) {
-            this.exactLength = exactLength;
+        public Builder setSizePolicy(SizePolicy sizePolicy) {
+            this.sizePolicy = sizePolicy;
             return this;
         }
 
@@ -230,7 +244,7 @@ public class MessageWriterParams {
          * @return The <code>MessageWriterParams</code> instance
          */
         public MessageWriterParams build() {
-            return new MessageWriterParams(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, exactLength, maxContentSize, maxNestedMessageLevels, includePlainText);
+            return new MessageWriterParams(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, sizePolicy, maxContentSize, maxNestedMessageLevels, includePlainText);
         }
     }
 
@@ -240,6 +254,7 @@ public class MessageWriterParams {
     private final MailMessage mail;
     private final DisplayMode displayMode;
     private final boolean embedded;
+    private final boolean asMarkup;
     private final Session session;
     private final UserSettingMail settings;
     private final Collection<OXException> warnings;
@@ -247,7 +262,7 @@ public class MessageWriterParams {
     private final int tokenTimeout;
     private final MimeFilter mimeFilter;
     private final TimeZone optTimeZone;
-    private final boolean exactLength;
+    private final SizePolicy sizePolicy;
     private final int maxContentSize;
     private final int maxNestedMessageLevels;
     private final boolean includePlaintext;
@@ -255,12 +270,13 @@ public class MessageWriterParams {
     /**
      * Initializes a new {@link MessageWriterParams}.
      */
-    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext) {
+    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext) {
         super();
         this.accountId = accountId;
         this.mail = mail;
         this.displayMode = displayMode;
         this.embedded = embedded;
+        this.asMarkup = asMarkup;
         this.session = session;
         this.settings = settings;
         this.warnings = warnings;
@@ -268,7 +284,7 @@ public class MessageWriterParams {
         this.tokenTimeout = tokenTimeout;
         this.mimeFilter = mimeFilter;
         this.optTimeZone = optTimeZone;
-        this.exactLength = exactLength;
+        this.sizePolicy = sizePolicy;
         this.maxContentSize = maxContentSize;
         this.maxNestedMessageLevels = maxNestedMessageLevels;
         this.includePlaintext = includePlaintext;
@@ -302,12 +318,21 @@ public class MessageWriterParams {
     }
 
     /**
-     * Gets the embedded
+     * Gets the embedded flag.
      *
-     * @return The embedded
+     * @return <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
      */
     public boolean isEmbedded() {
         return embedded;
+    }
+
+    /**
+     * Gets the as-markup flag.
+     *
+     * @return <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
+     */
+    public boolean isAsMarkup() {
+        return asMarkup;
     }
 
     /**
@@ -378,8 +403,8 @@ public class MessageWriterParams {
      *
      * @return The exactLength
      */
-    public boolean isExactLength() {
-        return exactLength;
+    public SizePolicy getSizePolicy() {
+        return sizePolicy;
     }
 
     /**

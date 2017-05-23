@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.SimContext;
@@ -59,6 +59,10 @@ import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -66,10 +70,10 @@ import com.openexchange.tools.session.SimServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DeleteTest extends TestCase {
-    // Success Case
+public class DeleteTest {    // Success Case
 
-    public void testDelete() throws OXException {
+         @Test
+     public void testDelete() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -95,7 +99,8 @@ public class DeleteTest extends TestCase {
 
     // Error Cases
 
-    public void testMissingParameterID() throws OXException {
+         @Test
+     public void testMissingParameterID() throws OXException {
 
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -112,7 +117,8 @@ public class DeleteTest extends TestCase {
         }
     }
 
-    public void testMissingParameterMessagingService() throws OXException {
+         @Test
+     public void testMissingParameterMessagingService() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
 
@@ -128,7 +134,8 @@ public class DeleteTest extends TestCase {
         }
     }
 
-    public void testNumberFormatExceptionInID() throws OXException {
+         @Test
+     public void testNumberFormatExceptionInID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -146,7 +153,8 @@ public class DeleteTest extends TestCase {
 
     }
 
-    public void testMessagingExceptionInRegistry() throws OXException {
+         @Test
+     public void testMessagingExceptionInRegistry() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException(-1));
 
@@ -173,7 +181,8 @@ public class DeleteTest extends TestCase {
 
     }
 
-    public void testMessagingExceptionInAccountManager() throws OXException {
+         @Test
+     public void testMessagingExceptionInAccountManager() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();

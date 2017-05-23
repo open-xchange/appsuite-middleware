@@ -49,10 +49,15 @@
 
 package com.openexchange.webdav.xml.appointment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
@@ -69,15 +74,11 @@ public class Bug13262Test extends AppointmentTest {
     private Appointment appointment;
     private Calendar thirdOccurrence;
 
-    public Bug13262Test(final String name) {
-        super(name);
-    }
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password, context);
+        FolderTest.clearFolder(webCon, new int[] { appointmentFolderId }, new String[] { "calendar" }, new Date(), getHostURI(), login, password);
 
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.setTime(startTime);
@@ -102,30 +103,29 @@ public class Bug13262Test extends AppointmentTest {
         thirdOccurrence = cal;
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (objectId != -1) {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         }
-
-        super.tearDown();
     }
 
+    @Test
     public void testBugAsWritten() throws Exception {
         // Create Appointment
-        objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        objectId = insertAppointment(getWebConversation(), appointment, getHostURI(), getLogin(), getPassword());
         assertTrue("No object Id returned after creation", objectId > 0);
 
         // Create Exception with update
         final Appointment exception = createException();
-        final int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+        final int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
         // Load Appointment
-        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         assertNotNull("Loaded Appointment is null", loadAppointment);
 
         // Load exception
-        final Appointment loadException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+        final Appointment loadException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         assertNotNull("Loaded Exception is null", loadException);
 
         // Checks

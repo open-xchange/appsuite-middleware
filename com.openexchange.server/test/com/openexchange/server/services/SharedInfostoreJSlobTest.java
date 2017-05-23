@@ -1,3 +1,4 @@
+
 package com.openexchange.server.services;
 
 import java.net.URI;
@@ -18,6 +19,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.contexts.Context;
@@ -32,7 +34,6 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-
 /**
  * Unit tests for {@link SharedInfostoreJSlobTest}
  *
@@ -40,8 +41,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since 7.4.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    InfostoreConfig.class, ServerConfig.class, AttachmentConfig.class, ContextStorage.class, UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class, FileStorages.class })
+@PrepareForTest({ InfostoreConfig.class, ServerConfig.class, AttachmentConfig.class, ContextStorage.class, UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class, FileStorages.class, ServerSessionAdapter.class })
 public class SharedInfostoreJSlobTest {
 
     @InjectMocks
@@ -50,31 +50,33 @@ public class SharedInfostoreJSlobTest {
     @Mock
     private ServerSession session;
 
-//    @Mock
-//    private QuotaFileStorage quotaFileStorage;
+    //    @Mock
+    //    private QuotaFileStorage quotaFileStorage;
     @Mock
     private com.openexchange.filestore.QuotaFileStorage quotaFileStorage;
 
     @Mock
     private UserPermissionBits permissionBits;
 
-    private Context context = new ContextImpl(999999);
+    private final Context context = new ContextImpl(999999);
 
-    private int maxBodySize = 11111;
+    private final int maxBodySize = 11111;
 
-    private Long infostoreMaxUploadSize = 22222L;
+    private final Long infostoreMaxUploadSize = 22222L;
 
-    private Long attachmentMaxUploadSize = 33333L;
+    private final Long attachmentMaxUploadSize = 33333L;
 
-    private Long quotaUsage = 44444L;
+    private final Long quotaUsage = 44444L;
 
-    private Long maxQuota = 55555L;
+    private final Long maxQuota = 55555L;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(ServerSessionAdapter.class);
+        PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) Matchers.any())).thenReturn(session);
+
         PowerMockito.when(session.getContext()).thenReturn(context);
         PowerMockito.when(session.getUserPermissionBits()).thenReturn(permissionBits);
 
@@ -93,13 +95,12 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.mockStatic(FilestoreStorage.class);
         PowerMockito.when(FilestoreStorage.createURI(Matchers.eq(context))).thenReturn(new URI(""));
 
-        
         QuotaFileStorageService qfsService = PowerMockito.mock(QuotaFileStorageService.class);
-        Mockito.when(qfsService.getQuotaFileStorage(Matchers.anyInt(), Matchers.anyInt())).thenReturn(quotaFileStorage);
-        
+        Mockito.when(qfsService.getQuotaFileStorage(Matchers.anyInt(), Matchers.anyInt(), Matchers.any(Info.class))).thenReturn(quotaFileStorage);
+
         PowerMockito.mockStatic(FileStorages.class);
         Mockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(qfsService);
-        
+
         PowerMockito.when(quotaFileStorage.getQuota()).thenReturn(maxQuota);
         PowerMockito.when(quotaFileStorage.getUsage()).thenReturn(quotaUsage);
 
@@ -108,8 +109,7 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.when(UserSettingMailStorage.getInstance()).thenReturn(userSettingMailStorage);
 
         UserSettingMail userSettingMail = Mockito.mock(UserSettingMail.class);
-        PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(
-            userSettingMail);
+        PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(userSettingMail);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class SharedInfostoreJSlobTest {
     public void testGetJSlob_fine_attachmentQuotaSet() throws OXException, JSONException {
         JSlob jSlob = sharedInfostoreJSlob.getJSlob(session);
 
-        Assert.assertEquals(0L, jSlob.getJsonObject().get("attachmentQuota"));
+        Assert.assertEquals(-1L, jSlob.getJsonObject().get("attachmentQuota"));
     }
 
     @Test

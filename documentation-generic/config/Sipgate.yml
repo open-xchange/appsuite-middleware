@@ -1,0 +1,35 @@
+feature_name: Sipgate
+properties:
+    - key: com.openexchange.sms.sipgate.username
+      description: |
+        The sipgate username.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: sipgate.properties
+      packageName: open-xchange-sms-sipgate
+      tags: ["Sipgate", "SMS", "Credential"]
+    - key: com.openexchange.sms.sipgate.password
+      description: |
+        The sipgate password.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: sipgate.properties
+      packageName: open-xchange-sms-sipgate
+      tags: ["Sipgate", "SMS", "Credential"]
+    - key: com.openexchange.sms.sipgate.maxlength
+      description: |
+        Max message length. 460 characters is sipgate's maximum.
+      defaultValue: 460
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: sipgate.properties
+      packageName: open-xchange-sms-sipgate
+      tags: ["Sipgate", "SMS", "Limit"]

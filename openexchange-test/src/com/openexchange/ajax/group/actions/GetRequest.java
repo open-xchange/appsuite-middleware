@@ -83,9 +83,7 @@ public final class GetRequest extends AbstractGroupRequest<GetResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new Parameter(AJAXServlet.PARAMETER_ID, groupId)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), new Parameter(AJAXServlet.PARAMETER_ID, groupId)
         };
     }
 

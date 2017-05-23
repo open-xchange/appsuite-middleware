@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol;
 
+import static org.junit.Assert.assertTrue;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -57,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
@@ -71,107 +73,104 @@ import com.openexchange.mail.MailJSONField;
  */
 public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTest {
 
-	/**
-	 * Initializes a new {@link NetsolTestMailMessageSendAttachment}
-	 *
-	 * @param name
-	 */
-	public NetsolTestMailMessageSendAttachment(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link NetsolTestMailMessageSendAttachment}
+     *
+     * @param name
+     */
+    public NetsolTestMailMessageSendAttachment() {
+        super();
+    }
 
-	private static final byte[] a200kbBytes;
+    private static final byte[] a200kbBytes;
 
-	static {
-		a200kbBytes = new byte[204800];
-		java.util.Arrays.fill(a200kbBytes, (byte) 0x32);
-	}
+    static {
+        a200kbBytes = new byte[204800];
+        java.util.Arrays.fill(a200kbBytes, (byte) 0x32);
+    }
 
-	private static final File create200kbTempFile() {
-		BufferedOutputStream out = null;
-		try {
-			final File tmpFile = File.createTempFile("file_", ".txt");
-			out = new BufferedOutputStream(new FileOutputStream(tmpFile));
-			out.write(a200kbBytes, 0, a200kbBytes.length);
-			out.flush();
-			out.close();
-			out = null;
-			tmpFile.deleteOnExit();
-			return tmpFile;
-		} catch (final IOException e) {
-			return null;
-		} finally {
-			if (null != out) {
-				try {
-					out.close();
-				} catch (final IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+    private static final File create200kbTempFile() {
+        BufferedOutputStream out = null;
+        try {
+            final File tmpFile = File.createTempFile("file_", ".txt");
+            out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+            out.write(a200kbBytes, 0, a200kbBytes.length);
+            out.flush();
+            out.close();
+            out = null;
+            tmpFile.deleteOnExit();
+            return tmpFile;
+        } catch (final IOException e) {
+            return null;
+        } finally {
+            if (null != out) {
+                try {
+                    out.close();
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
-	public void testMailSend() throws Throwable {
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final JSONObject mailObject_25kb = new JSONObject();
-		{
-			mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
-			mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
+    @Test
+    public void testMailSend() throws Throwable {
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
+        /*
+         * Create JSON mail object
+         */
+        final JSONObject mailObject_25kb = new JSONObject();
+        {
+            mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
+            mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
+            mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+            mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+            mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
+            mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
 
-			final JSONObject bodyObject = new JSONObject();
-			bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
-			bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />");
+            final JSONObject bodyObject = new JSONObject();
+            bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
+            bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />");
 
-			final JSONArray attachments = new JSONArray();
-			attachments.put(bodyObject);
+            final JSONArray attachments = new JSONArray();
+            attachments.put(bodyObject);
 
-			mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-		}
-		/*
-		 * Create 200kb attachment
-		 */
-		final File fileAttachment = create200kbTempFile();
+            mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+        }
+        /*
+         * Create 200kb attachment
+         */
+        final File fileAttachment = create200kbTempFile();
 
-		final int runs = NetsolTestConstants.RUNS;
-		final DurationTracker requestTracker = new DurationTracker(runs);
-		final DurationTracker parseTracker = new DurationTracker(runs);
-		for (int i = 0; i < runs; i++) {
-			BufferedInputStream in = null;
-			try {
-				in = new BufferedInputStream(new FileInputStream(fileAttachment));
-				/*
-				 * Perform send
-				 */
-				final NetsolSendResponse response = Executor.execute(getSession(),
-						new NetsolSendRequest(mailObject_25kb.toString(), in));
-				assertTrue("Send failed", response.getFolderAndID() != null);
-				assertTrue("Duration corrupt", response.getRequestDuration() > 0);
-				requestTracker.addDuration(response.getRequestDuration());
-				parseTracker.addDuration(response.getParseDuration());
-			} finally {
-				if (null != in) {
-					in.close();
-				}
-			}
-		}
-		/*
-		 * Clean everything
-		 */
-		netsolClearFolder(getInboxFolder());
-		netsolClearFolder(getSentFolder());
-		netsolClearFolder(getTrashFolder());
-	}
+        final int runs = NetsolTestConstants.RUNS;
+        final DurationTracker requestTracker = new DurationTracker(runs);
+        final DurationTracker parseTracker = new DurationTracker(runs);
+        for (int i = 0; i < runs; i++) {
+            BufferedInputStream in = null;
+            try {
+                in = new BufferedInputStream(new FileInputStream(fileAttachment));
+                /*
+                 * Perform send
+                 */
+                final NetsolSendResponse response = Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString(), in));
+                assertTrue("Send failed", response.getFolderAndID() != null);
+                assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+                requestTracker.addDuration(response.getRequestDuration());
+                parseTracker.addDuration(response.getParseDuration());
+            } finally {
+                if (null != in) {
+                    in.close();
+                }
+            }
+        }
+        /*
+         * Clean everything
+         */
+        netsolClearFolder(getInboxFolder());
+        netsolClearFolder(getSentFolder());
+        netsolClearFolder(getTrashFolder());
+    }
 
 }

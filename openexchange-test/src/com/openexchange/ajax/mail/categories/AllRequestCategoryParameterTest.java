@@ -49,14 +49,11 @@
 
 package com.openexchange.ajax.mail.categories;
 
-import static org.junit.Assert.*;
-import java.io.IOException;
-import org.json.JSONException;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -68,24 +65,10 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class AllRequestCategoryParameterTest extends AbstractMailCategoriesTest {
 
-    private static final int[] COLUMNS = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652 };
-
-    /**
-     * Initializes a new {@link AllRequestCategoryParameterTest}.
-     * 
-     * @param name
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
-     */
-    public AllRequestCategoryParameterTest() {
-    }
-
     @Test
     public void testAllRequest() throws Exception {
-
-        MailTestManager manager = new MailTestManager(client, false);
-        getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
+        MailTestManager manager = new MailTestManager(getAjaxClient(), false);
+        getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
         MailMessage[] messages = manager.listMails(origin, COLUMNS, 610, Order.DESCENDING, true, CAT_GENERAL);
         assertTrue("General category should contain the old mail.", messages.length == 1);

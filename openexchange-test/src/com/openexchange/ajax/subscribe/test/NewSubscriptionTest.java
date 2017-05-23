@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.subscribe.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.GetSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.GetSubscriptionResponse;
@@ -62,38 +66,34 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 
-
 /**
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class NewSubscriptionTest extends AbstractSubscriptionTest {
 
-    public NewSubscriptionTest(String name) {
-        super(name);
-    }
-
-    public void testShouldSurviveBasicOXMFSubscriptionCreation() throws OXException, IOException, SAXException, JSONException{
+    @Test
+    public void testShouldSurviveBasicOXMFSubscriptionCreation() throws OXException, IOException, SAXException, JSONException {
         //setup
-        FolderObject folder = getFolderManager().generatePublicFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        getFolderManager().insertFolderOnServer(folder);
+        FolderObject folder = ftm.generatePublicFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        ftm.insertFolderOnServer(folder);
 
         DynamicFormDescription form = generateFormDescription();
         Subscription expected = generateOXMFSubscription(form);
-        expected.setFolderId( String.valueOf( folder.getObjectID() ) );
+        expected.setFolderId(String.valueOf(folder.getObjectID()));
 
-       //new request
+        //new request
         NewSubscriptionRequest newReq = new NewSubscriptionRequest(expected, form);
         NewSubscriptionResponse newResp = getClient().execute(newReq);
 
-        assertFalse("Should succeed creating the subscription: "+newResp.getException(), newResp.hasError());
-        expected.setId( newResp.getId() );
+        assertFalse("Should succeed creating the subscription: " + newResp.getException(), newResp.hasError());
+        expected.setId(newResp.getId());
 
         //verify via get request
         SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
         discovery.addSource(expected.getSource());
 
-        GetSubscriptionRequest getReq = new GetSubscriptionRequest( newResp.getId() );
+        GetSubscriptionRequest getReq = new GetSubscriptionRequest(newResp.getId());
         GetSubscriptionResponse getResp = getClient().execute(getReq);
 
         Subscription actual = getResp.getSubscription(discovery);

@@ -347,9 +347,13 @@ public class TransformImageAction implements IFileResponseRendererAction {
                     cachingAdvised = true;
                 }
             } catch (final IOException ioe) {
-                if ("Unsupported Image Type".equals(ioe.getMessage())) {
-                    return handleFailure(file);
+                String message = ioe.getMessage();
+                if (null != message) {
+                    if ("Unsupported Image Type".equals(message) || message.indexOf("No image reader available for format") >= 0) {
+                        return handleFailure(file);
+                    }
                 }
+
                 // Rethrow...
                 throw ioe;
             }

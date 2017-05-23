@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.voipnow;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.voipnow.actions.CallReportRequest;
@@ -60,24 +60,15 @@ public class CallReportTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link CallReportTest}.
-     *
-     * @param name The test name
      */
-    public CallReportTest(final String name) {
-        super(name);
+    public CallReportTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        // TODO check context admin, too. Currently this user does not have aliases until bug 14646 is fixed.
-        final AJAXClient client2 = new AJAXClient(User.User2);
-        client2.logout();
-    }
-
+    @Test
     public void testCallReport() throws Exception {
         final CallReportRequest detailsRequest = new CallReportRequest(20, true, 11, 2009);
-        final CallReportResponse detailsResponse = Executor.execute(client, detailsRequest);
+        final CallReportResponse detailsResponse = Executor.execute(getClient(), detailsRequest);
 
         final Object body = detailsResponse.getData();
 

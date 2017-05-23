@@ -1,0 +1,17 @@
+type: object
+properties:
+  decrypted:
+    type: boolean
+    description: True if the mail has been decrypted.
+  type:
+    type: string
+    description: Type of encryption.  Currently only PGP supported
+  pgpInline:
+    type: boolean
+    description: True if the mail was encrypted using PGP Inline rather than PGP Mime
+  signatures:
+    type: array
+    description: Array of signatures, if any, and the verification status
+    items: {
+      $ref: "#/definitions/GuardSignatureResult"
+    }

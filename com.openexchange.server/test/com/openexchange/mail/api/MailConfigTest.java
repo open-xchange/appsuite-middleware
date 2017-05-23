@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.api;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.internal.CustomMailAccount;
@@ -59,14 +59,14 @@ import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
+import static org.junit.Assert.*;
 
 /**
  * {@link MailConfigTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailConfigTest extends TestCase {
-
+public final class MailConfigTest {
     /**
      * Initializes a new {@link MailConfigTest}.
      */
@@ -74,7 +74,8 @@ public final class MailConfigTest extends TestCase {
         super();
     }
 
-    public void testForBug32296() {
+         @Test
+     public void testForBug32296() {
         try {
             // If proxy auth is enabled, bare login should be used for external accounts though
             MailConfig mailConfig = new MailConfig() {
@@ -163,7 +164,7 @@ public final class MailConfigTest extends TestCase {
 
             MailProperties.getInstance().setAuthProxyDelimiter("#");
 
-            MailConfig.fillLoginAndPassword(mailConfig, session, "user#001", account);
+            MailConfig.fillLoginAndPassword(mailConfig, session, "user#001", account, true);
 
             assertEquals("Unexpected login", "login", mailConfig.getLogin());
             assertEquals("Unexpected password", "password", mailConfig.getPassword());

@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
@@ -69,13 +70,13 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug23078Test extends CardDAVTest {
 
-	public Bug23078Test() {
-		super();
-	}
+    public Bug23078Test() {
+        super();
+    }
 
-	@Test
-	public void testReportItemsFromDeletedFolder() throws Exception {
-	    /*
+    @Test
+    public void testReportItemsFromDeletedFolder() throws Exception {
+        /*
          * fetch sync token for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
@@ -84,7 +85,6 @@ public class Bug23078Test extends CardDAVTest {
          */
         String folderName = "testfolder_" + randomUID();
         FolderObject subFolder = super.createFolder(folderName);
-        super.rememberForCleanUp(subFolder);
         String uid = randomUID();
         String firstName = "doktor";
         String lastName = "horst";
@@ -121,6 +121,6 @@ public class Bug23078Test extends CardDAVTest {
             }
         }
         assertTrue("contact not reported as deleted", found);
-	}
+    }
 
 }

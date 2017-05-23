@@ -6,8 +6,8 @@ import liquibase.database.Database;
 
 public class UnsupportedDatabaseTest {
 
-    @Test
-    public void testGetDefaultDriver() {
+     @Test
+     public void testGetDefaultDriver() {
         Database database = new UnsupportedDatabase();
 
         assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));

@@ -50,11 +50,8 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.passwordmechs.IPasswordMech;
@@ -110,7 +107,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * User attributes
      */
-    private Map<String, UserAttribute> attributes;
+    private Map<String, String> attributes;
 
     /**
      * E-Mail domain.
@@ -566,19 +563,18 @@ public class UserImpl implements User, Cloneable {
     }
 
     @Override
-    public Map<String, Set<String>> getAttributes() {
-        if (null == attributes) {
-            return null;
-        }
-        Map<String, Set<String>> retval = new HashMap<String, Set<String>>();
-        for (Entry<String, UserAttribute> entry : attributes.entrySet()) {
-            retval.put(entry.getKey(), entry.getValue().getStringValues());
-        }
-        return Collections.unmodifiableMap(retval);
+    public Map<String, String> getAttributes() {
+        Map<String, String> attributes = this.attributes;
+        return null == attributes ? null : Collections.unmodifiableMap(attributes);
     }
 
-    Map<String, UserAttribute> getAttributesInternal() {
-        return Collections.unmodifiableMap(attributes);
+    /**
+     * Gets the map reference for attributes
+     *
+     * @return The attributes' map
+     */
+    public Map<String, String> getAttributesInternal() {
+        return attributes;
     }
 
     /**
@@ -586,19 +582,7 @@ public class UserImpl implements User, Cloneable {
      *
      * @param attributes The attributes to set as an unmodifiable map
      */
-    public void setAttributes(final Map<String, Set<String>> attributes) {
-        this.attributes = toInternal(attributes);
-    }
-
-    public static Map<String, UserAttribute> toInternal(Map<String, Set<String>> attributes) {
-        Map<String, UserAttribute> retval = new HashMap<String, UserAttribute>();
-        for (Entry<String, Set<String>> entry : attributes.entrySet()) {
-            retval.put(entry.getKey(), new UserAttribute(entry.getKey(), entry.getValue()));
-        }
-        return retval;
-    }
-
-    void setAttributesInternal(Map<String, UserAttribute> attributes) {
+    public void setAttributes(final Map<String, String> attributes) {
         this.attributes = attributes;
     }
 

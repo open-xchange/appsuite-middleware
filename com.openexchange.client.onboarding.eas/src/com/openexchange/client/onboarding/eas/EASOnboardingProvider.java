@@ -52,8 +52,10 @@ package com.openexchange.client.onboarding.eas;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
 import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
@@ -65,6 +67,7 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.eas.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.net.HostAndPort;
 import com.openexchange.client.onboarding.net.NetUtility;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
@@ -76,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -89,20 +93,29 @@ import com.openexchange.session.Session;
  */
 public class EASOnboardingProvider implements OnboardingPlistProvider {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(EASOnboardingProvider.class);
+
     private final ServiceLookup services;
     private final String identifier;
     private final Set<Device> supportedDevices;
     private final Set<OnboardingType> supportedTypes;
+    private final ServiceListing<CustomLoginSource> loginSources;
 
     /**
      * Initializes a new {@link EASOnboardingProvider}.
      */
-    public EASOnboardingProvider(ServiceLookup services) {
+    public EASOnboardingProvider(ServiceListing<CustomLoginSource> loginSources, ServiceLookup services) {
         super();
+        this.loginSources = loginSources;
         this.services = services;
         identifier = BuiltInProvider.EAS.getId();
         supportedDevices = EnumSet.complementOf(EnumSet.of(Device.WINDOWS_DESKTOP_8_10, Device.APPLE_MAC));
         supportedTypes = EnumSet.of(OnboardingType.PLIST, OnboardingType.MANUAL);
+    }
+
+    private CustomLoginSource getHighestRankedCustomLoginSource() {
+        List<CustomLoginSource> sources = loginSources.getServiceList();
+        return sources.isEmpty() ? null : sources.get(0);
     }
 
     @Override
@@ -150,7 +163,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         }
 
         Scenario scenario = request.getScenario();
-        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+        if (!Device.getActionsFor(request.getClientDevice(), device, scenario.getType(), session).contains(request.getAction())) {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
@@ -182,7 +195,22 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
-        configuration.put(EAS_LOGIN_FIELD, session.getLogin());
+        String login;
+        {
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.eas.login.customsource", Boolean.FALSE, session);
+            if (customSource.booleanValue()) {
+                CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
+                if (null == customLoginSource) {
+                    LOG.warn("Unable to find any CustomLoginSource services! Falling back to login name.");
+                    login = session.getLogin();
+                } else {
+                    login = customLoginSource.getEASLogin(session.getUserId(), session.getContextId());
+                }
+            } else {
+                login = session.getLogin();
+            }
+        }
+        configuration.put(EAS_LOGIN_FIELD, login);
         configuration.put(EAS_URL_FIELD, getEASUrl(request.getHostData(), false, session.getUserId(), session.getContextId()));
         return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
@@ -215,7 +243,22 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadType("com.apple.eas.account");
         payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, userId, contextId).toString());
         payloadContent.setPayloadIdentifier("com.open-xchange.eas");
-        payloadContent.addStringValue("UserName", OnboardingUtility.getUserLogin(userId, contextId));
+        String login;
+        {
+            Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.eas.login.customsource", Boolean.FALSE, userId, contextId);
+            if (customSource.booleanValue()) {
+                CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
+                if (null == customLoginSource) {
+                    LOG.warn("Unable to find any CustomLoginSource services! Falling back to login name.");
+                    login = OnboardingUtility.getUserLogin(userId, contextId);
+                } else {
+                    login = customLoginSource.getEASLogin(userId, contextId);
+                }
+            } else {
+                login = OnboardingUtility.getUserLogin(userId, contextId);
+            }
+        }
+        payloadContent.addStringValue("UserName", login);
         payloadContent.addStringValue("EmailAddress", OnboardingUtility.getUserMail(userId, contextId));
 
         {

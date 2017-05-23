@@ -72,10 +72,12 @@ public class I18nServices {
         super();
     }
 
-    public void addService(final I18nService service) {
+    public boolean addService(final I18nService service) {
         if (null != services.put(service.getLocale(), service)) {
             LOG.warn("Another i18n translation service found for {}", service.getLocale());
+            return false;
         }
+        return true;
     }
 
     public void removeService(final I18nService service) {

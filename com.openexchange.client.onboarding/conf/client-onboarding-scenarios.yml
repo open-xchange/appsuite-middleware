@@ -20,6 +20,9 @@
 #         type: <appstore|playstore>
 #         String: Optional. Denotes to what store the URL points to (if it is not a common download link not pointing to a commercial store. Supported values are "appstore", "macappstore" and "playstore"
 #
+#         image: <url>
+#         String: Optional. Denotes the URL to an image; e.g. "http://my.fine.host/image001.png" or "file:///opt/pictures/image001.png"
+#
 #     providers: <provider-identifiers>
 #       Array of strings. A list of providers that are supposed to "contribute" to this scenario.
 #

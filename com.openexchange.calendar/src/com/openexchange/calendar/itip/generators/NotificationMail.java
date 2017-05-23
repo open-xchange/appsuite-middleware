@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.notify.State.Type;
+import com.openexchange.mail.config.MailProperties;
 
 
 /**
@@ -331,8 +332,27 @@ public class NotificationMail {
         return attachmentUpdate;
     }
 
+    private boolean recipientIsOrganizerAndHasNoAccess() {
+        if (recipient.isExternal()) {
+            return true;
+        }
+        if (!recipient.hasRole(ITipRole.ORGANIZER)) {
+            return true;
+        }
+        if (recipient.getIdentifier() == recipient.getContext().getMailadmin()) {
+            if (MailProperties.getInstance().isAdminMailLoginEnabled() == false) {
+                // Context administrator is recipient but does not have permission to access mail
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean shouldBeSent() {
-        if (endsInPast(appointment)) {
+        if (appointment != null && endsInPast(appointment)) {
+            return false;
+        }
+        if (!recipientIsOrganizerAndHasNoAccess()) {
             return false;
         }
         if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {

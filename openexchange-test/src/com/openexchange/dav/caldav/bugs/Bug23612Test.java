@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -70,14 +72,14 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug23612Test extends CalDAVTest {
 
-	@Test
+    @Test
     public void testUpdateAppointment() throws Exception {
         for (int shownAs : new int[] { Appointment.FREE, Appointment.TEMPORARY, Appointment.RESERVED, Appointment.ABSENT }) {
             this.updateAppointment(shownAs);
         }
     }
 
-	private void updateAppointment(int appointmentShownAs) throws Exception {
+    private void updateAppointment(int appointmentShownAs) throws Exception {
         /*
          * fetch sync token for later synchronization
          */
@@ -104,8 +106,7 @@ public class Bug23612Test extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
         if (null != iCalResource.getVEvent().getTransp()) {
-            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE",
-                iCalResource.getVEvent().getTransp());
+            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE", iCalResource.getVEvent().getTransp());
         }
         /*
          * update appointment on client
@@ -118,6 +119,6 @@ public class Bug23612Test extends CalDAVTest {
         appointment = super.getAppointment(uid);
         assertNotNull("appointment not found on server", appointment);
         assertEquals("shown as wrong", appointmentShownAs, appointment.getShownAs());
-	}
+    }
 
 }

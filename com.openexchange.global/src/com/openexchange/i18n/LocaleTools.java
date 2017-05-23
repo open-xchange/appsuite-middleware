@@ -92,20 +92,21 @@ public final class LocaleTools {
      * pattern <code>&lt;language&gt; + &quot;_&quot; + &lt;country&gt; + &quot;_&quot; + &lt;variant&gt;</code>.
      *
      * @param fullIdentifier full locale identifier compliant to RFC 2798 and 2068.
-     * @return the locale or <code>null</code> if the pattern doesn't match.
+     * @return The locale or <code>null</code> if the pattern doesn't match.
      */
     public static Locale getLocale(final String fullIdentifier) {
         if (null == fullIdentifier) {
             return null;
         }
-        final Matcher match = identifierPattern.matcher(fullIdentifier);
-        Locale retval = null;
-        if (match.matches()) {
-            final String country = match.group(2);
-            final String variant = match.group(3);
-            retval = new Locale(toLowerCase(match.group(1)), country == null ? STR_EMPTY : toUpperCase(country), variant == null ? STR_EMPTY : variant);
+
+        Matcher match = identifierPattern.matcher(fullIdentifier);
+        if (!match.matches()) {
+            return null;
         }
-        return retval;
+
+        String country = match.group(2);
+        String variant = match.group(3);
+        return new Locale(toLowerCase(match.group(1)), country == null ? STR_EMPTY : toUpperCase(country), variant == null ? STR_EMPTY : variant);
     }
 
     /**

@@ -1,9 +1,14 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -16,7 +21,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -40,39 +44,25 @@ public class Bug15590Test extends AbstractAJAXSession {
 
     UserValues secondUserValues;
 
-    public Bug15590Test(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
         // Create 2. User
-        secondClient = new AJAXClient(User.User2);
+        secondClient = getClient2();
         secondUserValues = secondClient.getValues();
 
         // Create Folder and share it to 2. User
-        testFolder = Create.createPrivateFolder("bug15590folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getUserId());
-        testFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        testFolder = Create.createPrivateFolder("bug15590folder_" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getUserId());
+        testFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
 
-        com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(
-            EnumAPI.OX_NEW,
-            testFolder);
-        InsertResponse folderInsertResponse = client.execute(insFolder);
+        com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, testFolder);
+        InsertResponse folderInsertResponse = getClient().execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());
         // Only necessary because new folder API missed the time stamps.
-        testFolder.setLastModified(client.execute(new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID())).getTimestamp());
+        testFolder.setLastModified(getClient().execute(new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID())).getTimestamp());
 
-        FolderTools.shareFolder(
-            client,
-            EnumAPI.OX_NEW,
-            testFolder.getObjectID(),
-            secondUserValues.getUserId(),
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        FolderTools.shareFolder(getClient(), EnumAPI.OX_NEW, testFolder.getObjectID(), secondUserValues.getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 
         // Create an Appointment as User B
         testAppointment = new Appointment();
@@ -95,6 +85,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         insertR.fillAppointment(testAppointment);
     }
 
+    @Test
     public void testBug15590() throws Exception {
         Appointment moveAppointment = new Appointment();
         moveAppointment.setIgnoreConflicts(true);
@@ -113,30 +104,32 @@ public class Bug15590Test extends AbstractAJAXSession {
         assertEquals(movedAppointment.getParentFolderID(), moveAppointment.getParentFolderID());
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        // Delete testAppointment
-        if (movedAppointment != null) {
-            movedAppointment.setLastModified(new Date(Long.MAX_VALUE));
-            secondClient.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(movedAppointment));
-        } else if (testAppointment != null) {
-            testAppointment.setLastModified(new Date(Long.MAX_VALUE));
-            final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(
-                testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
-            secondClient.execute(delApp);
-        }
+        try {
+            // Delete testAppointment
+            if (movedAppointment != null) {
+                movedAppointment.setLastModified(new Date(Long.MAX_VALUE));
+                secondClient.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(movedAppointment));
+            } else if (testAppointment != null) {
+                testAppointment.setLastModified(new Date(Long.MAX_VALUE));
+                final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
+                secondClient.execute(delApp);
+            }
 
-        if (secondClient != null) {
-            secondClient.logout();
-        }
+            if (secondClient != null) {
+                secondClient.logout();
+            }
 
-        // Delete testFolder
-        if (testFolder != null) {
-            final DeleteRequest delFolder = new DeleteRequest(EnumAPI.OX_NEW, testFolder);
-            client.execute(delFolder);
-        }
+            // Delete testFolder
+            if (testFolder != null) {
+                final DeleteRequest delFolder = new DeleteRequest(EnumAPI.OX_NEW, testFolder);
+                getClient().execute(delFolder);
+            }
 
-        super.tearDown();
+        } finally {
+            super.tearDown();
+        }
 
     }
 }

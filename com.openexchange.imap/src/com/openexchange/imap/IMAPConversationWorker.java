@@ -68,6 +68,7 @@ import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.search.SearchException;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -108,6 +109,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.ProtocolException;
@@ -336,6 +338,9 @@ public final class IMAPConversationWorker {
                 fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             }
             conversations = Conversations.conversationsFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope);
+            if (conversations.isEmpty()) {
+                return Collections.emptyList();
+            }
             // Retrieve from sent folder
             int sentTotal = 0;
             long sentUidNext = 0L;
@@ -353,26 +358,43 @@ public final class IMAPConversationWorker {
                         for (final Conversation conversation : conversations) {
                             conversation.addMessageIdsTo(allMessageIds);
                         }
-                        List<MailMessage> tmp = null;
-                        for (MailMessage sentMessage : sentMessages) {
-                            if (false == allMessageIds.contains(sentMessage.getMessageId())) {
-                                if (null == tmp) {
-                                    tmp = new LinkedList<>();
-                                }
-                                tmp.add(sentMessage);
+                        for (Iterator<MailMessage> iter = sentMessages.iterator(); iter.hasNext();) {
+                            MailMessage sentMessage = iter.next();
+                            if (allMessageIds.contains(sentMessage.getMessageId())) {
+                                // Already contained
+                                iter.remove();
                             }
-                        }
-                        if (null != tmp) {
-                            sentMessages = tmp;
                         }
                     }
 
                     if (false == sentMessages.isEmpty()) {
                         // Add to conversation if references or referenced-by
-                        for (Conversation conversation : conversations) {
-                            for (MailMessage sentMessage : sentMessages) {
-                                if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                    conversation.addMessage(sentMessage);
+                        final List<MailMessage> toMergeWith = ImmutableList.copyOf(sentMessages);
+                        sentMessages = null;
+                        boolean hasNext = true;
+                        for (Iterator<Conversation> iter = conversations.iterator(); hasNext;) {
+                            final Conversation conversation = iter.next();
+                            hasNext = iter.hasNext();
+                            if (hasNext) {
+                                // Not the last one...
+                                AbstractTask<Void> merge = new AbstractTask<Void>() {
+
+                                    @Override
+                                    public Void call() throws Exception {
+                                        for (MailMessage sentMessage : toMergeWith) {
+                                            if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                                conversation.addMessage(sentMessage);
+                                            }
+                                        }
+                                        return null;
+                                    }
+                                };
+                                ThreadPools.getThreadPool().submit(merge, CallerRunsBehavior.<Void> getInstance());
+                            } else {
+                                for (MailMessage sentMessage : toMergeWith) {
+                                    if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                        conversation.addMessage(sentMessage);
+                                    }
                                 }
                             }
                         }
@@ -469,7 +491,13 @@ public final class IMAPConversationWorker {
                     try {
                         mailAccess = MailAccess.getInstance(ses, imapMessageStorage.getAccountId());
                         mailAccess.connect();
-                        IMAPStore imapStore = IMAPMessageStorage.getImapMessageStorageFrom(mailAccess).getImapStore();
+
+                        IMAPMessageStorage messageStorage = IMAPMessageStorage.getImapMessageStorageFrom(mailAccess);
+                        if (null == messageStorage) {
+                            // Eh...?
+                            throw new OXException(new IllegalStateException("Couldn't extract IMAP message storage out of " + mailAccess.getClass().getName()));
+                        }
+                        IMAPStore imapStore = messageStorage.getImapStore();
 
                         if (null != first) {
                             fillMessagesStatic(first, fullName, sentFullName, mergeWithSent, usedFields, headerNames, isRev1, imapStore, imapMessageStorage.getImapServerInfo(), mailAccount);
@@ -807,7 +835,7 @@ public final class IMAPConversationWorker {
     }
 
     private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String fullName, final Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1034,7 +1062,7 @@ public final class IMAPConversationWorker {
     }
 
     private Comparator<MailThread> getThreadComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
         Comparator<MailThread> threadComparator = new Comparator<MailThread>() {
 
             @Override
@@ -1079,7 +1107,7 @@ public final class IMAPConversationWorker {
                 /*
                  * Preselect message list according to given search pattern
                  */
-                filter = IMAPSearch.searchMessages(imapMessageStorage.getImapFolder(), searchTerm, imapMessageStorage.getImapConfig());
+                filter = IMAPSearch.searchMessages(imapMessageStorage.getImapFolder(), searchTerm, imapMessageStorage.getImapConfig(), imapMessageStorage.session);
                 if ((filter == null) || (filter.length == 0)) {
                     return IMAPMessageStorage.EMPTY_RETVAL;
                 }
@@ -1163,7 +1191,7 @@ public final class IMAPConversationWorker {
                 /*
                  * Sort according to order direction
                  */
-                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale()));
+                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
                 /*
                  * Output as flat list
                  */
@@ -1244,7 +1272,7 @@ public final class IMAPConversationWorker {
             /*
              * Sort according to order direction
              */
-            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale()));
+            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
             /*
              * Output as flat list
              */

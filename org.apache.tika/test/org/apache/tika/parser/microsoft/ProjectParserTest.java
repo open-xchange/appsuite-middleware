@@ -17,17 +17,18 @@
 package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
-
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.Office;
 import org.apache.tika.metadata.OfficeOpenXMLCore;
 import org.apache.tika.metadata.OfficeOpenXMLExtended;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
-
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Tests for Microsoft Project (MPP) Files.
@@ -35,8 +36,8 @@ import junit.framework.TestCase;
  * Note - we don't currently have a dedicated Project
  *  Parser, all we have is the common office metadata
  */
-public class ProjectParserTest extends TestCase {
-    public void testProject2003() throws Exception {
+public class ProjectParserTest {         @Test
+     public void testProject2003() throws Exception {
        InputStream input = ProjectParserTest.class.getResourceAsStream(
              "/test-documents/testPROJECT2003.mpp");
        try {
@@ -46,7 +47,8 @@ public class ProjectParserTest extends TestCase {
        }
     }
 
-    public void testProject2007() throws Exception {
+         @Test
+     public void testProject2007() throws Exception {
         InputStream input = ProjectParserTest.class.getResourceAsStream(
                 "/test-documents/testPROJECT2007.mpp");
         try {

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
-import javax.mail.MessagingException;
 import javax.mail.Store;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.settings.AbstractWarningAwareReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailStoreAware;
@@ -138,7 +136,7 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
     public boolean isAvailable(UserConfiguration userConfig) {
         return userConfig.hasWebMail();
     }
-    
+
     private int trySetReadTimeout(int readTimeout, Store messageStore) {
         try {
             return messageStore.setAndGetReadTimeout(readTimeout);
@@ -154,7 +152,7 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             getValue(setting, null);
             return;
         }
-        
+
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         Store messageStore = null;
         int prevReadTimeout = -1;
@@ -164,19 +162,17 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             mailAccess.connect();
 
             // Lower read timeout (if possible)
-            if (mailAccess instanceof IMailStoreAware) {
-                IMailStoreAware storeAware = (IMailStoreAware) mailAccess;
-                if (storeAware.isStoreSupported()) {
-                    Store store = storeAware.getStore();
-                    if (store.isSetAndGetReadTimeoutSupported() && (prevReadTimeout = trySetReadTimeout(3500, store)) >= 0) {
-                        messageStore = store;
-                    }
+            IMailStoreAware storeAware = mailAccess.supports(IMailStoreAware.class);
+            if (null != storeAware && storeAware.isStoreSupported()) {
+                Store store = storeAware.getStore();
+                if (store.isSetAndGetReadTimeoutSupported() && (prevReadTimeout = trySetReadTimeout(3500, store)) >= 0) {
+                    messageStore = store;
                 }
             }
-            
+
             // Get setting
             getValue(setting, mailAccess);
-            
+
             // Check for possible warnings
             addWarnings(mailAccess.getWarnings());
         } catch (OXException e) {
@@ -205,9 +201,9 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             if (null != messageStore) {
                 trySetReadTimeout(prevReadTimeout, messageStore);
             }
-            
+
             // Close mail access
-            if (null != mailAccess) {                
+            if (null != mailAccess) {
                 try {
                     mailAccess.close(true);
                 } catch (Exception e) {
@@ -230,9 +226,9 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
      * Determines the value and applies it to given setting.
      *
      * @param setting The setting to apply to
-     * @param mailAccess The connected mail access to use
+     * @param primaryMailAccess The connected mail access to use
      * @throws OXException If operation fails
      */
-    protected abstract void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException;
+    protected abstract void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException;
 
 }

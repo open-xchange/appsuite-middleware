@@ -73,7 +73,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -161,7 +160,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     return null;
                 }
             }
-            anonymizeAsNeeded(changeExceptions);
+            anonymizeAsNeeded(changeExceptions, factory.getUser().getId());
             if (applyPatches) {
                 for (int i = 0; i < changeExceptions.length; i++) {
                     changeExceptions[i] = patch(changeExceptions[i]);
@@ -183,7 +182,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             CalendarDataObject cdo = 0 < appointment.getParentFolderID() ?
                 factory.getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
                     factory.getAppointmentInterface().getObjectById(appointment.getObjectID());
-            anonymizeAsNeeded(cdo);
+            anonymizeAsNeeded(cdo, factory.getUser().getId());
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
             throw protocolException(getUrl(), e);
@@ -419,12 +418,13 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
      * neither creator nor participant.
      *
      * @param appointments The appointments to anonymize
+     * @param userID The identifier of the user requesting the appointmnets
      * @return The passed appointments, anonymized as needed
      */
-    private CalendarDataObject[] anonymizeAsNeeded(CalendarDataObject[] appointments) {
+    private CalendarDataObject[] anonymizeAsNeeded(CalendarDataObject[] appointments, int userID) {
         if (null != appointments && 0 < appointments.length) {
             for (CalendarDataObject appointment : appointments) {
-                anonymizeAsNeeded(appointment);
+                anonymizeAsNeeded(appointment, userID);
             }
         }
         return appointments;
@@ -435,20 +435,12 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
      * creator nor participant.
      *
      * @param appointment The appointment to anonymize
+     * @param userID The identifier of the user requesting the appointmnet
      * @return The passed appointment, anonymized as needed
      */
-    private CalendarDataObject anonymizeAsNeeded(CalendarDataObject appointment) {
+    private static CalendarDataObject anonymizeAsNeeded(CalendarDataObject appointment, int userID) {
         // taken from com.openexchange.calendar.json.actions.AppointmentAction.anonymize(Appointment)
-        if (appointment.getPrivateFlag()) {
-            int userID = factory.getUser().getId();
-            if (appointment.getCreatedBy() == userID) {
-                return appointment;
-            }
-            for (UserParticipant user : appointment.getUsers()) {
-                if (user.getIdentifier() == userID) {
-                    return appointment;
-                }
-            }
+        if (appointment.getPrivateFlag() && appointment.getCreatedBy() != userID && false == ParticipantTools.isParticipant(appointment, userID)) {
             appointment.setTitle("Private");
             appointment.removeAlarm();
             appointment.removeCategories();
@@ -530,7 +522,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             Appointment appointment = searchIterator.next();
             String uid = appointment.getUid();
             if (Strings.isEmpty(uid)) {
-                LOG.warn("Skipping appointment without UID: {}", appointment);
+                LOG.debug("Skipping appointment without UID: {}", appointment);
                 continue;
             }
             List<Appointment> appointments = appointmentsByUid.get(uid);

@@ -59,26 +59,16 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import javax.mail.Flags;
-import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.SharedByteArrayInputStream;
 import javax.mail.util.SharedFileInputStream;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -90,127 +80,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp {
-
-    private static volatile Boolean managedCloneEnabled;
-
-    private static boolean managedCloneEnabled() {
-        Boolean tmp = managedCloneEnabled;
-        if (null == tmp) {
-            synchronized (ManagedMimeMessage.class) {
-                tmp = managedCloneEnabled;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(service != null && service.getBoolProperty("com.openexchange.mail.mime.managedCloneEnabled", false));
-                    managedCloneEnabled = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                managedCloneEnabled = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.mail.mime.managedCloneEnabled");
-            }
-        });
-    }
-
-    /**
-     * Creates file-backed clones of passed <tt>MailMessage</tt> instances.
-     *
-     * @param originals The <tt>MailMessage</tt> instances to clone
-     * @return The file-backed clones of passed <tt>MailMessage</tt> instances
-     * @throws OXException If an error occurs
-     */
-    public static MailMessage[] clone(final MailMessage[] originals) throws OXException {
-        if (null == originals) {
-            return null;
-        }
-        if (!managedCloneEnabled()) {
-            return originals;
-        }
-        final int length = originals.length;
-        if (length <= 0) {
-            return new MailMessage[0];
-        }
-        final MailMessage[] ret = new MailMessage[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = clone(originals[i]);
-        }
-        return ret;
-    }
-
-    /**
-     * Creates a file-backed clone of passed <tt>MailMessage</tt> instance.
-     *
-     * @param original The <tt>MailMessage</tt> instance to clone
-     * @return The file-backed clone of passed <tt>MailMessage</tt> instance
-     * @throws OXException If an error occurs
-     */
-    public static MailMessage clone(final MailMessage original) throws OXException {
-        if (null == original) {
-            return null;
-        }
-        if (!managedCloneEnabled()) {
-            return original;
-        }
-        try {
-            final ManagedMimeMessage mimeMessage = new ManagedMimeMessage(original, original.getReceivedDateDirect());
-            // Apply flags to MIME message
-            {
-                MimeMessageConverter.parseMimeFlags(original.getFlags(), mimeMessage);
-                Flags flags = null;
-                if (original.containsColorLabel()) {
-                    flags = new Flags();
-                    flags.add(MailMessage.getColorLabelStringValue(original.getColorLabel()));
-                }
-                if (original.containsUserFlags()) {
-                    if (null == flags) {
-                        flags = new Flags();
-                    }
-                    final String[] userFlags = original.getUserFlags();
-                    for (final String userFlag : userFlags) {
-                        flags.add(userFlag);
-                    }
-                }
-                if (null != flags) {
-                    mimeMessage.setFlags(flags, true);
-                }
-            }
-            // Convert to MailMessage instance
-            final MailMessage retval = MimeMessageConverter.convertMessage(mimeMessage, false);
-            if (original.containsFolder()) {
-                retval.setFolder(original.getFolder());
-            }
-            final String mailId = original.getMailId();
-            if (mailId != null) {
-                retval.setMailId(mailId);
-            }
-            if (original.containsMsgref()) {
-                retval.setMsgref(original.getMsgref());
-            }
-            // Remember ManagedMimeMessage for clean-up
-            if (null != mimeMessage.file) {
-                MailAccess.rememberMimeCleanUp(mimeMessage);
-            }
-            return retval;
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
-    }
 
     private static final int DEFAULT_MAX_INMEMORY_SIZE = 1048576; // 1MB
 

@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link TestSessionStorageService}

@@ -93,10 +93,7 @@ public final class ChangeRequest extends AbstractGroupRequest<ChangeResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_ID, group.getIdentifier()),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, group.getLastModified())
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new Parameter(AJAXServlet.PARAMETER_ID, group.getIdentifier()), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, group.getLastModified())
         };
     }
 

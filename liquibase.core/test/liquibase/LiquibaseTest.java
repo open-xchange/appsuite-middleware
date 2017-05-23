@@ -1,5 +1,14 @@
 package liquibase;
 
+import static org.junit.Assert.assertTrue;
+import java.io.InputStream;
+import java.net.URL;
+import java.sql.DatabaseMetaData;
+import java.util.Enumeration;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -9,15 +18,6 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import java.io.InputStream;
-import java.net.URL;
-import java.sql.DatabaseMetaData;
-import java.util.Enumeration;
-import java.util.List;
 
 /**
  * Tests for {@link liquibase.Liquibase}
@@ -56,8 +56,8 @@ public class LiquibaseTest {
 //    }
 
 /*
-    @Test
-    public void testBlosDocumentation() throws Exception {
+     @Test
+     public void testBlosDocumentation() throws Exception {
     	testLiquibase.generateDocumentation(".");
     }
 */

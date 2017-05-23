@@ -144,7 +144,7 @@ public class SyncAppOnboardingProvider implements OnboardingProvider {
         }
 
         Scenario scenario = request.getScenario();
-        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+        if (!Device.getActionsFor(request.getClientDevice(), device, scenario.getType(), session).contains(request.getAction())) {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
@@ -196,7 +196,7 @@ public class SyncAppOnboardingProvider implements OnboardingProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return new Link(value, linkType);
+        return new Link(value, linkType, null);
     }
 
 }

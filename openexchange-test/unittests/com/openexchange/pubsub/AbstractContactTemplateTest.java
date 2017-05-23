@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -79,29 +78,13 @@ import freemarker.template.Configuration;
 
 /**
  * Tests a template for proper rendering of contacts by checking if they can be converted back after being rendered in a template. The tests
- * derived from this class usually depend on properly setting the path to the templates to be tested. This is set in
- * <code>pubsub.properties</code>. The tests are in the general test repository, because they depend both on the publish bundle (for the
+ * derived from this class usually depend on properly setting the path to the templates to be tested.
+ * The tests are in the general test repository, because they depend both on the publish bundle (for the
  * templates), the templating bundle (for templating) and the subscribe bundle (for parsing).
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractContactTemplateTest extends TestCase {
-
-    /**
-     * Initializes a new {@link AbstractContactTemplateTest}.
-     */
-    public AbstractContactTemplateTest() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link AbstractContactTemplateTest}.
-     *
-     * @param name
-     */
-    public AbstractContactTemplateTest(String name) {
-        super(name);
-    }
+public abstract class AbstractContactTemplateTest {
 
     public Contact generateContact(String identifier) {
         Contact contact = new Contact();
@@ -160,7 +143,7 @@ public abstract class AbstractContactTemplateTest extends TestCase {
         service.setSource(source);
     }
 
-    protected OXTemplate getTemplate(String templateName) throws Exception{
+    protected OXTemplate getTemplate(String templateName) throws Exception {
         Init.startServer();
         ConfigurationService conf = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         File path = new File(conf.getProperty("com.openexchange.templating.path"));

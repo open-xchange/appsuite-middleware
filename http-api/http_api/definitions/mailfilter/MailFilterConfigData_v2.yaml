@@ -1,0 +1,17 @@
+type: object
+properties:
+  tests:
+    type: array
+    description: Array of available test-objects.
+    items:
+      $ref: "#/definitions/MailFilterConfigTestv2"
+  actioncommands:
+    type: array
+    description: Array of available action-objects.
+    items:
+      $ref: "#/definitions/MailFilterConfigAction"
+  capabilities:
+    type: array
+    description: Array of supported imap capabilities
+    items:
+      type: string

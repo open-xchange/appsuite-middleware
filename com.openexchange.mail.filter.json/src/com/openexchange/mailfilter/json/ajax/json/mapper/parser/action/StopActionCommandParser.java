@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StopActionCommandParser}
@@ -74,17 +75,17 @@ public class StopActionCommandParser implements CommandParser<ActionCommand> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         return new ActionCommand(ActionCommand.Commands.STOP, new ArrayList<Object>());
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @Override

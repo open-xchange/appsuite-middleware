@@ -81,6 +81,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -670,8 +671,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
              * Check for IDLE capability
              */
             access.connect(false);
-            final IMAPCapabilities capabilities = (IMAPCapabilities) access.getMailConfig().getCapabilities();
-            if (!capabilities.hasIdle()) {
+            final MailCapabilities capabilities = access.getMailConfig().getCapabilities();
+            if (!(capabilities instanceof IMAPCapabilities) || !((IMAPCapabilities) capabilities).hasIdle()) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
             }
         } catch (OXException e) {

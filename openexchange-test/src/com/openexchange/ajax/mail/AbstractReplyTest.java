@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.mail;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.actions.ForwardRequest;
 import com.openexchange.ajax.mail.actions.ForwardResponse;
@@ -73,24 +76,27 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
 
     protected ContactTestManager contactManager;
 
-    public AbstractReplyTest(String name){
-        super(name);
+    public AbstractReplyTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
-        this.contactManager = new ContactTestManager(client);
+        this.contactManager = new ContactTestManager(getClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        contactManager.cleanUp();
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
+        try {
+            clearFolder(getInboxFolder());
+            clearFolder(getSentFolder());
+            contactManager.cleanUp();
+        } finally {
+            super.tearDown();
+        }
     }
 
     protected boolean contains(List<String> from, String string) {
@@ -105,33 +111,29 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
     protected JSONObject getReplyEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
-        client = getClient();
-        ReplyResponse response = client.execute(reply);
+        ReplyResponse response = getClient().execute(reply);
         return (JSONObject) response.getData();
     }
-
 
     protected JSONObject getReplyAllEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ReplyAllRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
-        client = getClient();
-        ReplyAllResponse response = (ReplyAllResponse) client.execute(reply);
+        ReplyAllResponse response = (ReplyAllResponse) getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 
     protected JSONObject getForwardMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
         ReplyRequest reply = new ForwardRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
-        client = getClient();
-        ForwardResponse response = (ForwardResponse) client.execute(reply);
+        ForwardResponse response = (ForwardResponse) getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 
-    public static void assertNullOrEmpty(String msg, Collection coll){
-        if(coll == null) {
+    public static void assertNullOrEmpty(String msg, Collection coll) {
+        if (coll == null) {
             return;
         }
-        if(coll.size() == 0) {
+        if (coll.size() == 0) {
             return;
         }
         fail(msg);

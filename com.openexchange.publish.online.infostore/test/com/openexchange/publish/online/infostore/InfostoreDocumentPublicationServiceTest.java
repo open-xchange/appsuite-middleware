@@ -49,7 +49,12 @@
 
 package com.openexchange.publish.online.infostore;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -67,20 +72,20 @@ import com.openexchange.publish.Publication;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @RunWith(PowerMockRunner.class)
-public class InfostoreDocumentPublicationServiceTest extends TestCase {
-
+public class InfostoreDocumentPublicationServiceTest {
     @InjectMocks
     private InfostoreDocumentPublicationService publicationService;
 
     @Mock
     private IDBasedFileAccessFactory fileAccessFactory = null;
 
-    @Override
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
-    public void testAddSecretBeforeCreate() throws OXException {
+         @Test
+     public void testAddSecretBeforeCreate() throws OXException {
         Publication publication = new Publication();
         publicationService.beforeCreate(publication);
 
@@ -96,7 +101,8 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase {
         assertFalse(secret1.equals(secret2));
     }
 
-    public void testAddURLToOutgoingPublications() throws OXException {
+         @Test
+     public void testAddURLToOutgoingPublications() throws OXException {
 
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
@@ -112,7 +118,8 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase {
 
     }
 
-    public void testRemoveSecretFromOutgoingPublications() throws OXException {
+         @Test
+     public void testRemoveSecretFromOutgoingPublications() throws OXException {
 
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
@@ -123,7 +130,8 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase {
 
     }
 
-    public void testGenerateURL() throws OXException {
+         @Test
+     public void testGenerateURL() throws OXException {
         final Publication publication = new Publication();
         final SimContext simContext = new SimContext(1337);
         publication.setContext(simContext);

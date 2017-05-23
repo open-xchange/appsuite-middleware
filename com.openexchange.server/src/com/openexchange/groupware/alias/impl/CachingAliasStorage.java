@@ -50,6 +50,8 @@
 package com.openexchange.groupware.alias.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +63,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.lock.LockService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CachingAliasStorage}
@@ -132,6 +138,50 @@ public class CachingAliasStorage implements UserAliasStorage {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public List<Set<String>> getAliases(int contextId, int... userIds) throws OXException {
+        if (null == userIds) {
+            return Collections.emptyList();
+        }
+
+        int length = userIds.length;
+        if (length == 0) {
+            return Collections.emptyList();
+        }
+
+        if (1 == length) {
+            return Collections.<Set<String>> singletonList(getAliases(contextId, userIds[0]));
+        }
+
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getAliases(contextId, userIds);
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        TIntObjectMap<Set<String>> map = new TIntObjectHashMap<>(length);
+        TIntList toLoad = new TIntArrayList(length);
+        for (int userId : userIds) {
+            CacheKey key = newCacheKey(cacheService, userId, contextId);
+            Object object = cache.get(key);
+            if (object instanceof Set) {
+                map.put(userId, (Set<String>) object);
+            } else {
+                toLoad.add(userId);
+            }
+        }
+
+        if (!toLoad.isEmpty()) {
+            map.putAll(delegate.getAliasesMapping(contextId, toLoad.toArray()));
+        }
+
+        List<Set<String>> list = new ArrayList<>(length);
+        for (int userId : userIds) {
+            list.add(map.get(userId));
+        }
+        return list;
     }
 
     @Override

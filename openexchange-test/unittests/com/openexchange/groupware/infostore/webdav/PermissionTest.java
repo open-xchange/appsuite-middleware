@@ -1,5 +1,10 @@
+
 package com.openexchange.groupware.infostore.webdav;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -10,7 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -45,8 +52,7 @@ import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
-
-public class PermissionTest extends TestCase implements SessionHolder {
+public class PermissionTest implements SessionHolder {
 
     private Context ctx;
     private Session session;
@@ -75,8 +81,8 @@ public class PermissionTest extends TestCase implements SessionHolder {
         return pos == -1 ? un : un.substring(0, pos);
     }
 
-    @Override
-	public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
 
@@ -89,32 +95,32 @@ public class PermissionTest extends TestCase implements SessionHolder {
         final UserPermissionBitsStorage userConfigStorage = UserPermissionBitsStorage.getInstance();
 
         session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN)), ctx), ctx, getClass().getName());
-		user1 = userStorage.getUser(session1.getUserId(), ctx);
-        permissionBits1 = userConfigStorage.getUserPermissionBits(user1.getId(),ctx);
+        user1 = userStorage.getUser(session1.getUserId(), ctx);
+        permissionBits1 = userConfigStorage.getUserPermissionBits(user1.getId(), ctx);
 
         session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER)), ctx), ctx, getClass().getName());
-		user2 = userStorage.getUser(session2.getUserId(), ctx);
+        user2 = userStorage.getUser(session2.getUserId(), ctx);
         permissionBits2 = userConfigStorage.getUserPermissionBits(user2.getId(), ctx);
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);
-		root = oxfa.getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        root = oxfa.getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
 
         cleanupUser = user1;
         switchUser(user1);
 
         TestWebdavFactoryBuilder.setUp();
-		factory = (InfostoreWebdavFactory) TestWebdavFactoryBuilder.buildFactory();
+        factory = (InfostoreWebdavFactory) TestWebdavFactoryBuilder.buildFactory();
         factory.setSessionHolder(this);
         factory.beginRequest();
     }
 
-    @Override
-	public void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         switchUser(cleanupUser);
         Collections.reverse(clean);
-        for(final FolderObject folderobject : clean) {
-			rm(folderobject.getObjectID());
-		}
+        for (final FolderObject folderobject : clean) {
+            rm(folderobject.getObjectID());
+        }
         clean.clear();
         factory.endRequest(200);
         Init.stopServer();
@@ -122,19 +128,16 @@ public class PermissionTest extends TestCase implements SessionHolder {
     }
 
     // Bug 10395
-    public void testListSubfolders() throws Exception{
+    @Test
+    public void testListSubfolders() throws Exception {
 
-        final FolderObject parentFolder =  createFolder(root, "parent",
-                adminPermission(user1),
-                permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
+        final FolderObject parentFolder = createFolder(root, "parent", adminPermission(user1), permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
 
-        createFolder(parentFolder, "sub",
-                adminPermission(user1),
-                permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
+        createFolder(parentFolder, "sub", adminPermission(user1), permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
 
         switchUser(user2);
 
-        final WebdavCollection collection = factory.resolveCollection(new WebdavPath("public_infostore","parent"));
+        final WebdavCollection collection = factory.resolveCollection(new WebdavPath("public_infostore", "parent"));
 
         final List<WebdavResource> children = collection.getChildren();
         assertEquals(1, children.size());
@@ -142,24 +145,23 @@ public class PermissionTest extends TestCase implements SessionHolder {
     }
 
     // Bug 10051
-    public void testProppatchDocumentWithoutWritePermissions() throws Exception{
-        final FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
-                    adminPermission(user1),
-                    permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
+    @Test
+    public void testProppatchDocumentWithoutWritePermissions() throws Exception {
+        final FolderObject testFolder = createFolder(root, "test" + System.currentTimeMillis(), adminPermission(user1), permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
 
         final DocumentMetadata document = touch(testFolder, "testDocument");
 
         final WebdavResource resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), document.getFileName()));
 
         switchUser(user2);
-        final WebdavProperty prop = new WebdavProperty("http://www.open-xchange.com/testProperties","test");
+        final WebdavProperty prop = new WebdavProperty("http://www.open-xchange.com/testProperties", "test");
         prop.setValue("foo");
         resource.putProperty(prop);
         try {
             resource.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch(final WebdavProtocolException x) {
-            if(x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
+        } catch (final WebdavProtocolException x) {
+            if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
             assertEquals("Expected Unauthorized Status", HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
@@ -167,21 +169,20 @@ public class PermissionTest extends TestCase implements SessionHolder {
     }
 
     // Bug 10051
+    @Test
     public void testProppatchFolderWithoutWritePermissions() throws Exception {
-        final FolderObject testFolder =  createFolder(root, "test"+ System.currentTimeMillis(),
-                adminPermission(user1),
-                permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
+        final FolderObject testFolder = createFolder(root, "test" + System.currentTimeMillis(), adminPermission(user1), permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
 
         final WebdavCollection collection = factory.resolveCollection(new WebdavPath("public_infostore", testFolder.getFolderName()));
 
         switchUser(user2);
-        final WebdavProperty prop = new WebdavProperty("http://www.open-xchange.com/testProperties","test");
+        final WebdavProperty prop = new WebdavProperty("http://www.open-xchange.com/testProperties", "test");
         prop.setValue("foo");
         collection.putProperty(prop);
         try {
             collection.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch(final WebdavProtocolException x) {
+        } catch (final WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                 x.printStackTrace();
             }
@@ -190,10 +191,9 @@ public class PermissionTest extends TestCase implements SessionHolder {
     }
 
     // Bug 10052
+    @Test
     public void testUpdateDocumentWithWritePermissionsOnly() throws Exception {
-        final FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
-                adminPermission(user1),
-                permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS));
+        final FolderObject testFolder = createFolder(root, "test" + System.currentTimeMillis(), adminPermission(user1), permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS));
 
         final DocumentMetadata document = touch(testFolder, "testDocument");
 
@@ -202,7 +202,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         switchUser(user2);
 
         try {
-            resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
+            resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             resource.save();
             assertTrue(true);
         } catch (final OXException e) {
@@ -213,10 +213,9 @@ public class PermissionTest extends TestCase implements SessionHolder {
     }
 
     // Bug 10052
+    @Test
     public void testUpdateFolderWithWritePermissionsOnly() throws Exception {
-        final FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
-                adminPermission(user1),
-                permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS));
+        final FolderObject testFolder = createFolder(root, "test" + System.currentTimeMillis(), adminPermission(user1), permission(user2, false, OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS));
 
         final WebdavCollection collection = factory.resolveCollection(new WebdavPath("public_infostore", testFolder.getFolderName()));
 
@@ -233,10 +232,9 @@ public class PermissionTest extends TestCase implements SessionHolder {
     }
 
     //Bug 10706
+    @Test
     public void testDontDulicateDocumentsWithCreateAndWritePermissions() throws Exception {
-        final FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
-                adminPermission(user1),
-                permission(user2, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS));
+        final FolderObject testFolder = createFolder(root, "test" + System.currentTimeMillis(), adminPermission(user1), permission(user2, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS));
 
         switchUser(user2);
 
@@ -250,7 +248,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), "test.bin"));
 
-        resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
+        resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
         assertTrue(resource.exists());
         resource.save();
 
@@ -259,62 +257,59 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         final TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(), factory.getSession());
 
-        final Map<String, Integer> counter =  new HashMap<String,Integer>();
-        for(final DocumentMetadata metadata : SearchIteratorAdapter.toIterable((SearchIterator<DocumentMetadata>)documents.results())) {
+        final Map<String, Integer> counter = new HashMap<String, Integer>();
+        for (final DocumentMetadata metadata : SearchIteratorAdapter.toIterable((SearchIterator<DocumentMetadata>) documents.results())) {
             final String name = metadata.getFileName();
             assertNotNull(name);
             assertEquals("test.bin", name);
             Integer value = 0;
-            if(null != counter.get(name)) {
+            if (null != counter.get(name)) {
                 value = counter.get(name);
             }
             value += 1;
             counter.put(name, value);
         }
         assertTrue(counter.values().size() > 0);
-        for(final Integer count : counter.values()) {
+        for (final Integer count : counter.values()) {
             assertEquals(new Integer(1), count);
         }
     }
 
-
     //Bug 10706
+    @Test
     public void testDontDulicateOtherPersonsDocumentWithCreateAndWritePermissions() throws Exception {
-        final FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
-                adminPermission(user1),
-                permission(user2, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS));
+        final FolderObject testFolder = createFolder(root, "test" + System.currentTimeMillis(), adminPermission(user1), permission(user2, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS));
 
         WebdavResource resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), "test.bin"));
 
         resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[0]));
         resource.create();
 
-
         switchUser(user2);
 
         resource = factory.resolveResource(new WebdavPath("public_infostore", testFolder.getFolderName(), "test.bin"));
 
         try {
-            resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
+            resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             resource.save();
             fail("Could update document even without write permissions to it");
         } catch (final WebdavProtocolException x) {
-            if(x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
+            if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
             assertEquals(HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
         }
     }
 
-
+    @Test
     public void testDisallowSavingInRootVirtualFolder() throws Exception {
         final WebdavResource res = factory.resolveResource("/test.txt");
         try {
-            res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[]{1,2,3}));
+            res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             res.save();
             fail("Shouldn't be able to save in root folder");
         } catch (final WebdavProtocolException x) {
-            if(x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
+            if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
             assertEquals(HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
@@ -328,46 +323,46 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
     public OCLPermission permission(final User user, final boolean fadmin, final int fp, final int rp, final int wp, final int dp) {
         final OCLPermission perm = new OCLPermission();
-        perm.setAllPermission(fp,rp,wp,dp);
+        perm.setAllPermission(fp, rp, wp, dp);
         perm.setEntity(user.getId());
         perm.setFolderAdmin(fadmin);
         perm.setGroupPermission(false);
         return perm;
     }
 
-    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission...permissions) throws OXException, OXException {
-        if(permissions.length == 0) {
-            permissions = new OCLPermission[] {adminPermission(cleanupUser)};
+    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission... permissions) throws OXException, OXException {
+        if (permissions.length == 0) {
+            permissions = new OCLPermission[] { adminPermission(cleanupUser) };
         }
         Connection writecon = null;
         try {
-        	writecon = DBPool.pickupWriteable(ctx);
-	        final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
-	        FolderObject fo = new FolderObject();
-	        fo.setFolderName(fname);
-	        fo.setParentFolderID(parent.getObjectID());
-	        fo.setModule(FolderObject.INFOSTORE);
-	        fo.setType(FolderObject.PUBLIC);
-	        fo.setPermissionsAsArray(permissions);
-	        fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            writecon = DBPool.pickupWriteable(ctx);
+            final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
+            FolderObject fo = new FolderObject();
+            fo.setFolderName(fname);
+            fo.setParentFolderID(parent.getObjectID());
+            fo.setModule(FolderObject.INFOSTORE);
+            fo.setType(FolderObject.PUBLIC);
+            fo.setPermissionsAsArray(permissions);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             clean.add(fo);
             return fo;
         } finally {
-        	if(writecon != null) {
-				DBPool.pushWrite(ctx, writecon);
-			}
+            if (writecon != null) {
+                DBPool.pushWrite(ctx, writecon);
+            }
         }
     }
 
-    private DocumentMetadata touch(final FolderObject testFolder, final String fileName) throws Exception{
+    private DocumentMetadata touch(final FolderObject testFolder, final String fileName) throws Exception {
         final InfostoreFacade infostore = new InfostoreFacadeImpl(new DBPoolProvider());
         infostore.startTransaction();
         try {
             final DocumentMetadata document = new DocumentMetadataImpl();
             document.setFileName(fileName);
             document.setFolderId(testFolder.getObjectID());
-            final InputStream data = new ByteArrayInputStream(new byte[] {1});
-            infostore.saveDocument(document,data,System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, getContext()));
+            final InputStream data = new ByteArrayInputStream(new byte[] { 1 });
+            infostore.saveDocument(document, data, System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, getContext()));
             return document;
         } catch (final Exception x) {
             infostore.rollback();
@@ -377,27 +372,26 @@ public class PermissionTest extends TestCase implements SessionHolder {
         }
     }
 
-
     public void switchUser(final User user) {
-        if(user.getId() == user1.getId()) {
-          session = session1;
-          this.user = user1;
-          permissionBits = permissionBits1;
+        if (user.getId() == user1.getId()) {
+            session = session1;
+            this.user = user1;
+            permissionBits = permissionBits1;
         } else if (user.getId() == user2.getId()) {
-          session = session2;
-          this.user = user2;
-          permissionBits = permissionBits2;
+            session = session2;
+            this.user = user2;
+            permissionBits = permissionBits2;
         } else {
-            throw new IllegalArgumentException("I don't know user "+user.getId());
+            throw new IllegalArgumentException("I don't know user " + user.getId());
         }
     }
 
     protected void rm(final int objectID) throws SQLException, OXException, OXException, Exception {
-		//OXFolderAction ofa = new OXFolderAction(session);
-		final OXFolderManager oxma = OXFolderManager.getInstance(session);
-		//ofa.deleteFolder(objectID, session, true, System.currentTimeMillis());
-		oxma.deleteFolder(new FolderObject(objectID), true, System.currentTimeMillis());
-	}
+        //OXFolderAction ofa = new OXFolderAction(session);
+        final OXFolderManager oxma = OXFolderManager.getInstance(session);
+        //ofa.deleteFolder(objectID, session, true, System.currentTimeMillis());
+        oxma.deleteFolder(new FolderObject(objectID), true, System.currentTimeMillis());
+    }
 
     @Override
     public Session getSessionObject() {
@@ -406,10 +400,12 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
     @Override
     public Context getContext() {
-    	return ctx;
+        return ctx;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.sessiond.impl.SessionHolder#getUser()
      */
     @Override

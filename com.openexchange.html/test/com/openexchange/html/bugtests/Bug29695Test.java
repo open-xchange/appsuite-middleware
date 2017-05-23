@@ -51,7 +51,6 @@ package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 
 
@@ -61,8 +60,8 @@ import com.openexchange.html.AbstractSanitizing;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Bug29695Test extends AbstractSanitizing {
-    @Test
-    public void testDontReplaceCopyRegEntities() throws OXException {
+     @Test
+     public void testDontReplaceCopyRegEntities() throws Exception {
         String content = getHtmlService().getConformHTML("<b>&copy; by &reg;</b>", "UTF-8");
         assertEquals("Unexpected return value ", "<!DOCTYPE html>\n" +
             "<html><head>\n" +

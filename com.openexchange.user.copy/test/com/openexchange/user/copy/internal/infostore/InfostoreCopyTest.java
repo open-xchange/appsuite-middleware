@@ -106,7 +106,8 @@ public class InfostoreCopyTest extends AbstractUserCopyTest {
         dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testCopyInfostore() throws Exception {
+         @Test
+     public void testCopyInfostore() throws Exception {
         final QuotaFileStorageFactory qfsf = new MockQuotaFileStorageFactory();
         final InfostoreCopyTask copyTask = new InfostoreCopyTask(qfsf);        
         
@@ -148,8 +149,9 @@ public class InfostoreCopyTest extends AbstractUserCopyTest {
     /**
      * @see com.openexchange.user.copy.internal.AbstractUserCopyTest#tearDown()
      */
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown()
+ throws Exception {
         DBUtils.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "infostore", "infostore_document");
         super.tearDown();

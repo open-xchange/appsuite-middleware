@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link UpdateMailResponse}
  *
@@ -66,12 +65,12 @@ public class UpdateMailResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public String getFolder() throws JSONException{
+    public String getFolder() throws JSONException {
         JSONObject data = (JSONObject) getData();
         return data.getString("folder_id");
     }
 
-    public String getID() throws JSONException{
+    public String getID() throws JSONException {
         JSONObject data = (JSONObject) getData();
         return data.getString("id");
     }

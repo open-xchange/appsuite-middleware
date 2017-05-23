@@ -76,8 +76,7 @@ public class Bug39819Test extends CalDAVTest {
         String uid = randomUID();
         Date start = TimeTools.D("next tuesday at 06:00");
         Date end = TimeTools.D("next tuesday at 07:00");
-        String summary = "Test \u00fc_\u00f6_\u00e4_\u00fa_\u00ec_\u00f4_\u20ac_\u0160_\u0161_\u017d_\u017e_\u0152_\u0153_\u0178_" +
-            "\u00a4_\u00a6_\u00a8_\u00b4_\u00b8_\u00bc_\u00bd_\u00be";
+        String summary = "Test \u00fc_\u00f6_\u00e4_\u00fa_\u00ec_\u00f4_\u20ac_\u0160_\u0161_\u017d_\u017e_\u0152_\u0153_\u0178_" + "\u00a4_\u00a6_\u00a8_\u00b4_\u00b8_\u00bc_\u00bd_\u00be";
         String iCal = generateICal(start, end, uid, summary, "test");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*

@@ -49,8 +49,11 @@
 
 package com.openexchange.net;
 
-import com.openexchange.net.HostList;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * {@link HostListTest}
@@ -58,8 +61,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class HostListTest extends TestCase {
-
+public class HostListTest {
     /**
      * Initializes a new {@link HostListTest}.
      */
@@ -67,19 +69,22 @@ public class HostListTest extends TestCase {
         super();
     }
 
-    public void testValueOf_hostlistEmpty_returnEmpty() {
+         @Test
+     public void testValueOf_hostlistEmpty_returnEmpty() {
         HostList hl = HostList.valueOf("");
 
         assertTrue(hl.equals(HostList.EMPTY));
     }
 
-    public void testValueOf_hostlistNull_returnEmpty() {
+         @Test
+     public void testValueOf_hostlistNull_returnEmpty() {
         HostList hl = HostList.valueOf(null);
 
         assertTrue(hl.equals(HostList.EMPTY));
     }
 
-    public void testContains_containsEmpty_returnFalse() {
+         @Test
+     public void testContains_containsEmpty_returnFalse() {
         HostList hl = HostList.valueOf("");
 
         boolean contains = hl.contains("");
@@ -87,7 +92,8 @@ public class HostListTest extends TestCase {
         assertFalse(contains);
     }
 
-    public void testContains_containsNull_returnEmpty() {
+         @Test
+     public void testContains_containsNull_returnEmpty() {
         HostList hl = HostList.valueOf(null);
 
         boolean contains = hl.contains(null);
@@ -95,7 +101,8 @@ public class HostListTest extends TestCase {
         assertFalse(contains);
     }
 
-    public void testHostListv4() {
+         @Test
+     public void testHostListv4() {
         try {
             HostList hl = HostList.valueOf("192.168.0.1, localhost, *.open-xchange.com");
 
@@ -115,7 +122,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv4_throwsException() {
+         @Test
+     public void testHostListv4_throwsException() {
         try {
             HostList.valueOf("**.open-xchange.com");
         } catch (Exception e) {
@@ -123,7 +131,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv4_throwsException2() {
+         @Test
+     public void testHostListv4_throwsException2() {
         try {
             HostList.valueOf("*");
         } catch (Exception e) {
@@ -131,7 +140,8 @@ public class HostListTest extends TestCase {
         }
     }
     
-    public void testHostListv4_throwsException3() {
+         @Test
+     public void testHostListv4_throwsException3() {
         try {
             HostList.valueOf("test.*.com");
         } catch (Exception e) {
@@ -139,7 +149,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv4Ranges() {
+         @Test
+     public void testHostListv4Ranges() {
         try {
             HostList hl = HostList.valueOf("127.0.0.1-127.255.255.255, 10.20.30.1-10.20.30.255");
 
@@ -160,7 +171,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv4CIDRRanges() {
+         @Test
+     public void testHostListv4CIDRRanges() {
         try {
             HostList hl = HostList.valueOf("192.168.0.1/16");
 
@@ -175,7 +187,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv6() {
+         @Test
+     public void testHostListv6() {
         try {
             HostList hl = HostList.valueOf("::1, FE80:0000:0000:0000:0202:B3FF:FE1E:8329, ");
 
@@ -192,7 +205,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv6SimilarityCheck() {
+         @Test
+     public void testHostListv6SimilarityCheck() {
         //        all the same
         //        2001:cdba:0000:0000:0000:0000:3257:9652
         //        2001:cdba:0:0:0:0:3257:9652
@@ -211,7 +225,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv6SimilarityCheck2() {
+         @Test
+     public void testHostListv6SimilarityCheck2() {
         //      all the same
         //      2001:cdba:0000:0000:0000:0000:3257:9652
         //      2001:cdba:0:0:0:0:3257:9652
@@ -230,7 +245,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv6Ranges() {
+         @Test
+     public void testHostListv6Ranges() {
         try {
             HostList hl = HostList.valueOf("2001:DB8::64-2001:DB8::C8");
 
@@ -247,7 +263,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListv6CIDRRanges() {
+         @Test
+     public void testHostListv6CIDRRanges() {
         try {
             HostList hl = HostList.valueOf("2001:DB1::0/120");
 
@@ -264,7 +281,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListFailToParse() {
+         @Test
+     public void testHostListFailToParse() {
         try {
             String hostList = "www.google.*";
             HostList.valueOf(hostList);
@@ -277,7 +295,8 @@ public class HostListTest extends TestCase {
         }
     }
 
-    public void testHostListFailToParse2() {
+         @Test
+     public void testHostListFailToParse2() {
         try {
             String hostList = "*.open-xchange.*";
             HostList.valueOf(hostList);

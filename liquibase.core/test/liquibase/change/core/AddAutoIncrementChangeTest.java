@@ -1,17 +1,20 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
@@ -21,8 +24,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         assertEquals("column", ChangeFactory.getInstance().getChangeMetaData(change).getAppliesTo().iterator().next());
     }
 
-    @Override
-    @Test
+     @Test
     public void generateStatement() throws Exception {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -54,14 +56,12 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         }, PostgresDatabase.class);
     }
 
-    @Override
-    @Test
+     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("addAutoIncrement", ChangeFactory.getInstance().getChangeMetaData(new AddAutoIncrementChange()).getName());
     }
 
-    @Override
-    @Test
+     @Test
     public void getConfirmationMessage() throws Exception {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
         change.setSchemaName("SCHEMA_NAME");

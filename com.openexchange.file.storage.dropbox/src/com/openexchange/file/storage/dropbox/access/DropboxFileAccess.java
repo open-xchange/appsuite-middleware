@@ -209,44 +209,48 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (file.getId() == FileStorageFileAccess.NEW) {
             // Create new, empty file ("touch")
+            UploadUploader upload = null;
             try {
                 String path = toPath(file.getFolderId(), file.getFileName());
-                UploadUploader upload = client.files().upload(path);
+                upload = client.files().upload(path);
                 FileMetadata metadata = upload.finish();
                 DropboxFile dbxFile = new DropboxFile(metadata, userId);
                 file.copyFrom(dbxFile, copyFields);
                 return dbxFile.getIDTuple();
             } catch (DbxException e) {
                 throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+            } finally {
+                Streams.close(upload);
             }
-        } else {
-            String path = toPath(file.getFolderId(), file.getId());
+        }
 
-            // Rename
-            if (modifiedFields != null && modifiedFields.contains(Field.FILENAME)) {
-                String toPath = toPath(file.getFolderId(), file.getFileName());
-                if (!path.equals(toPath)) {
-                    try {
-                        if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
-                            String filePath = toPath(file.getFolderId(), UUID.randomUUID().toString() + ' ' + file.getFileName());
-                            Metadata metadata = client.files().move(path, filePath);
-                            path = metadata.getPathDisplay();
-                        }
+        // Update an existing file
+        String path = toPath(file.getFolderId(), file.getId());
 
-                        Metadata metadata = client.files().move(path, toPath);
-                        DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
-                        file.copyFrom(dbxFile, copyFields);
-                        return dbxFile.getIDTuple();
-                    } catch (RelocationErrorException e) {
-                        throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
-                    } catch (DbxException e) {
-                        throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        // Rename
+        if (modifiedFields != null && modifiedFields.contains(Field.FILENAME)) {
+            String toPath = toPath(file.getFolderId(), file.getFileName());
+            if (!path.equals(toPath)) {
+                try {
+                    if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
+                        String filePath = toPath(file.getFolderId(), UUID.randomUUID().toString() + ' ' + file.getFileName());
+                        Metadata metadata = client.files().move(path, filePath);
+                        path = metadata.getPathDisplay();
                     }
+
+                    Metadata metadata = client.files().move(path, toPath);
+                    DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+                    file.copyFrom(dbxFile, copyFields);
+                    return dbxFile.getIDTuple();
+                } catch (RelocationErrorException e) {
+                    throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
+                } catch (DbxException e) {
+                    throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
                 }
             }
-
-            return new IDTuple(file.getFolderId(), file.getId());
         }
+
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     /*
@@ -352,7 +356,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveDocument(file, data);
+        return saveDocument(file, data, modifiedFields);
     }
 
     /*
@@ -747,16 +751,36 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If the file cannot be uploaded or any other error is occurred
      */
-    private IDTuple saveDocument(File file, InputStream data) throws OXException {
-        
+    private IDTuple saveDocument(File file, InputStream data, List<Field> modifiedFields) throws OXException {
+
         checkFolderExistence(file.getFolderId());
-        
+
+        if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && file.getId() != FileStorageFileAccess.NEW)
+        /*
+         * first check if there is already such a file
+         */
+        {
+            String path = toPath(file.getFolderId(), file.getId());
+            String toPath = toPath(file.getFolderId(), file.getFileName());
+            if (!path.equals(toPath)) {
+                Metadata metaData;
+                try {
+                    metaData = client.files().getMetadata(toPath);
+                    if (metaData != null) {
+                        throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
+                    }
+                } catch (DbxException e) {
+                    // ignore
+                }
+            }
+        }
+
         long fileSize = file.getFileSize();
         DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
         file.copyFrom(dbxFile, copyFields);
         return dbxFile.getIDTuple();
     }
-    
+
     private void checkFolderExistence(String folderId) throws OXException{
         try {
             if(Strings.isEmpty(folderId) || folderId.equals("/")){
@@ -771,7 +795,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             throw interpretedException;
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
-        } 
+        }
     }
 
     /**
@@ -807,7 +831,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Upload the remaining chunk
             long remaining = sink.getCount() - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.ADD, true, file.getLastModified(), false);
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
@@ -832,10 +856,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     private DropboxFile singleUpload(File file, InputStream data) throws OXException {
         String name = file.getFileName();
-        String fileName = name;
-        String path = new StringBuilder(file.getFolderId()).append('/').append(fileName).toString();
+        if(name==null){
+            name = file.getId();
+        }
+        String path = new StringBuilder(file.getFolderId()).append('/').append(name).toString();
         try {
-            UploadBuilder builder = client.files().uploadBuilder(path).withAutorename(true);
+            UploadBuilder builder = client.files().uploadBuilder(path).withMode(WriteMode.OVERWRITE).withAutorename(false);
             FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
@@ -879,7 +905,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             if (Strings.isEmpty(pattern) || pattern.equals("*")) {
                 // Return everything
-                return getAllFiles(folderId, true);
+                return getAllFiles(folderId, includeSubfolders);
             } else {
                 // Search
                 return fireSearch(folderId, pattern, includeSubfolders);

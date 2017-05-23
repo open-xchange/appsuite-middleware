@@ -271,7 +271,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         }
     }
 
-
     private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage, final TransactionManager transactionManager, final ComparedFolderPermissions comparedPermissions) throws OXException {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
         boolean supported = false;

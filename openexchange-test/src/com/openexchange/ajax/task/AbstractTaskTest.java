@@ -50,11 +50,13 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
+import org.junit.Before;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
  * Super class for task ajax tests.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractTaskTest extends AbstractAJAXSession {
@@ -63,12 +65,12 @@ public abstract class AbstractTaskTest extends AbstractAJAXSession {
     private int folderId;
     private TimeZone timeZone;
 
-    protected AbstractTaskTest(final String name) {
-        super(name);
+    protected AbstractTaskTest() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         folderId = client.getValues().getPrivateTaskFolder();

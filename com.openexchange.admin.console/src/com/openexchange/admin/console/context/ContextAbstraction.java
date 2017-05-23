@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.Strings;
 
 public abstract class ContextAbstraction extends UserAbstraction {
 
@@ -160,8 +161,8 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected String schema;
     protected String schemaStrategy;
 
-    protected final String SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR = "You can not specify \"schema\" and \"schema-strategy\" at the same time.";
-    protected final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available values: \"automatic\", \"in-memory\"";
+    protected static final String SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR = "You can not specify \"schema\" and \"schema-strategy\" at the same time.";
+    protected static final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available values: \"automatic\", \"in-memory\"";
 
     protected Integer filestoreid = null;
 
@@ -504,7 +505,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
             @Override
             public void callMethod(String value) throws ParseException, InvalidDataException {
-                context.addLoginMappings(null != value ? Arrays.asList(value.split(",")) : null);
+                context.addLoginMappings(null != value ? Arrays.asList(Strings.splitByComma(value)) : null);
             }
         });
         setValue(nextLine, idarray, ContextConstants.quota, new MethodStringClosure() {
@@ -514,7 +515,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 try {
                     context.setMaxQuota(Long.valueOf(value));
                 } catch (final NumberFormatException e) {
-                    throw new InvalidDataException("Value in field " + ContextConstants.quota.getString() + " is no integer");
+                    throw new InvalidDataException("Value in field " + ContextConstants.quota.getString() + " is no integer", e);
                 }
             }
         });
@@ -525,7 +526,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 try {
                     context.setWriteDatabase(new Database(Integer.parseInt(value)));
                 } catch (final NumberFormatException e) {
-                    throw new InvalidDataException("Value in field " + ContextConstants.destination_database_id.getString() + " is no integer");
+                    throw new InvalidDataException("Value in field " + ContextConstants.destination_database_id.getString() + " is no integer", e);
                 }
             }
         });
@@ -536,7 +537,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 try {
                     context.setFilestoreId(Integer.valueOf(value));
                 } catch (final NumberFormatException e) {
-                    throw new InvalidDataException("Value in field " + ContextConstants.destination_store_id.getString() + " is no integer");
+                    throw new InvalidDataException("Value in field " + ContextConstants.destination_store_id.getString() + " is no integer", e);
                 }
             }
         });

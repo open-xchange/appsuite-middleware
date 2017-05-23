@@ -66,6 +66,7 @@ public class TaskFixtureTransformer extends AbstractFixtureTransformer<Task> imp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.fixtures.FixtureTransformer#handles(java.lang.Class, java.lang.String,
      * com.openexchange.test.fixtures.Fixture)
      */
@@ -76,23 +77,18 @@ public class TaskFixtureTransformer extends AbstractFixtureTransformer<Task> imp
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.kata.fixtures.FixtureTransformer#transform(java.lang.Class, java.lang.String,
      * com.openexchange.test.fixtures.Fixture, java.lang.String)
      */
     @Override
     public Step transform(Class class1, String fixtureName, Fixture fixture, String displayName) {
         if (isUpdate(fixtureName)) {
-            return assign(fixtureName, new TaskUpdateStep(
-                (Task) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
+            return assign(fixtureName, new TaskUpdateStep((Task) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError")));
         } else if (isVerification(fixtureName)) {
             return assign(fixtureName, new TaskVerificationStep((Task) fixture.getEntry(), displayName));
         } else if (isDelete(fixtureName)) {
-            return assign(fixtureName, new TaskDeleteStep(
-                (Task) fixture.getEntry(),
-                displayName,
-                (String) fixture.getAttribute("expectedError")));
+            return assign(fixtureName, new TaskDeleteStep((Task) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError")));
         } else if (isCreate(fixtureName)) {
             TaskCreateStep step = new TaskCreateStep((Task) fixture.getEntry(), displayName, (String) fixture.getAttribute("expectedError"));
             remember(fixtureName, step);

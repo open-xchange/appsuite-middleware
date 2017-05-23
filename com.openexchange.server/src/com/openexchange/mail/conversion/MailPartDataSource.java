@@ -53,7 +53,11 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import java.io.InputStream;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.virtual.osgi.Services;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
 
@@ -87,6 +91,13 @@ public abstract class MailPartDataSource implements DataSource {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
+            CryptographicAwareMailAccessFactory cryptoMailAccessFactory = Services.getServiceLookup().getOptionalService(CryptographicAwareMailAccessFactory.class);
+            if(cryptoMailAccessFactory != null) {
+                mailAccess = cryptoMailAccessFactory.createAccess(
+                    (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
+                    session,
+                    null);
+            }
             mailAccess.connect();
             return loadPart(fullname, mailId, sequenceId, mailAccess);
         } catch (final OXException e) {

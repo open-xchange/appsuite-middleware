@@ -65,14 +65,27 @@ import com.openexchange.groupware.container.CommonObject;
  */
 public final class ListRequest extends AbstractAttachmentRequest<ListResponse> {
 
-    private CommonObject object;
     private int[] attachmentIds;
     private int[] columns;
     private TimeZone timezone;
+    private int objectId;
+    private int folderId;
+    private int module;
 
+    public ListRequest(int folderId, int objectId, int moduleId, int[] attachmentIds, int[] columns) {
+        super();
+        this.objectId = objectId;
+        this.folderId = folderId;
+        this.module = moduleId;
+        this.attachmentIds = attachmentIds;
+        this.columns = columns;
+    }
+    
     public ListRequest(CommonObject object, int[] attachmentIds, int[] columns, TimeZone timezone) {
         super();
-        this.object = object;
+        this.objectId = object.getObjectID();
+        this.folderId = object.getParentFolderID();
+        this.module = AttachmentTools.determineModule(object);
         this.attachmentIds = attachmentIds;
         this.columns = columns;
         this.timezone = timezone;
@@ -87,9 +100,9 @@ public final class ListRequest extends AbstractAttachmentRequest<ListResponse> {
     public Parameter[] getParameters() {
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, object.getObjectID()));
-        params.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, object.getParentFolderID()));
-        params.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, AttachmentTools.determineModule(object)));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, objectId));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, module));
         params.add(new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (null != timezone) {
             params.add(new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timezone.getID()));

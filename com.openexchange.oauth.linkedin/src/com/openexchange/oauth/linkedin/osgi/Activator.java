@@ -56,7 +56,9 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInOAuthScope;
@@ -65,15 +67,21 @@ import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
+/**
+ * Activator for LinkedIn OAuth bundle.
+ */
 public class Activator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
-    private OAuthService oauthService = null;
+    private LinkedInServiceImpl linkedInService;
 
+    /**
+     * Initializes a new {@link Activator}.
+     */
     public Activator() {
         super();
     }
@@ -83,28 +91,24 @@ public class Activator extends HousekeepingActivator {
         super.unregisterServices();
     }
 
-    public OAuthService getOauthService() {
-        if (oauthService != null) {
-            return oauthService;
-        }
-        return getService(OAuthService.class);
-    }
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, OAuthService.class, ConfigViewFactory.class, CapabilityService.class, OAuthScopeRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, DispatcherPrefixService.class, OAuthService.class, ConfigViewFactory.class, CapabilityService.class, OAuthScopeRegistry.class, EndpointManagerFactory.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
+
         final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
         registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
         registerService(Reloadable.class, linkedInMetaDataService);
-        LOG.info("OAuthServiceMetaData for LinkedIn was started");
+        logger.info("OAuthServiceMetaData for LinkedIn was started");
 
-        final LinkedInService linkedInService = new LinkedInServiceImpl(this);
+        final LinkedInServiceImpl linkedInService = new LinkedInServiceImpl(this);
+        this.linkedInService = linkedInService;
         registerService(LinkedInService.class, linkedInService, null);
-        LOG.info("LinkedInService was started.");
+        logger.info("LinkedInService was started.");
 
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "linkedin");
@@ -132,13 +136,14 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() {
-        closeTrackers();
-        cleanUp();
-    }
+    protected synchronized void stopBundle() throws Exception {
+        LinkedInServiceImpl linkedInService = this.linkedInService;
+        if (null != linkedInService) {
+            this.linkedInService = null;
+            linkedInService.shutDown();
+        }
 
-    public void setOauthService(OAuthService service) {
-        this.oauthService = service;
+        super.stopBundle();
     }
 
 }

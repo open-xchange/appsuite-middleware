@@ -64,19 +64,67 @@ import com.openexchange.java.Strings;
  */
 public class UUEncodedMultiPart {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(UUEncodedMultiPart.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UUEncodedMultiPart.class);
+
+    private static final Pattern PAT_UUENCODED = Pattern.compile(
+        "(^begin |\r?\nbegin )([0-7]{3} )(\\S[\\S\\p{Punct} \t]*\r?\n)(.+?)(\r?\n[ \t]*`?[ \t]*\r?\nend)",
+        Pattern.DOTALL);
+
+    /**
+     * Check if specified content might be UUEncoded.
+     *
+     * @param content The content
+     * @return <code>true</code> if UUEncoded; otherwise <code>false</code>
+     */
+    public static boolean isUUEncoded(final String content) {
+        return possiblyUUEncoded(content) && PAT_UUENCODED.matcher(content).find();
+    }
+
+    /**
+     * Gets the uuencoded instance for given content
+     *
+     * @param content The content to parse
+     * @return The uuencoded instance or <code>null</code>
+     */
+    public static UUEncodedMultiPart valueFor(String content) {
+        if (false == possiblyUUEncoded(content)) {
+            return null;
+        }
+
+        UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+        if (false == uuencodedMP.isUUEncoded()) {
+            return null;
+        }
+
+        return uuencodedMP;
+    }
+
+    private static boolean possiblyUUEncoded(String content) {
+        if (null == content) {
+            return false;
+        }
+
+        int i = content.indexOf("begin ", 0);
+        if (i < 0) {
+            return false;
+        }
+
+        // Example: "begin 665 myfile.exe..."
+        // So there are at least 10 characters between "begin" and "end" if uuencoded
+        i += 10;
+        return i < content.length() && content.indexOf("end", i) > 0;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
 
     private final List<UUEncodedPart> uuencodeParts;
-
     private StringBuilder text;
-
     private int count = -1;
 
     /**
      * Initializes a new {@link UUEncodedMultiPart}
      */
-    public UUEncodedMultiPart() {
+    UUEncodedMultiPart() {
         super();
         uuencodeParts = new ArrayList<>();
     }
@@ -86,7 +134,7 @@ public class UUEncodedMultiPart {
      *
      * @param content The text content which is possibly uuencoded
      */
-    public UUEncodedMultiPart(final String content) {
+    private UUEncodedMultiPart(final String content) {
         this();
         setContent(content);
     }
@@ -114,21 +162,7 @@ public class UUEncodedMultiPart {
      * @return <code>true</code> if content is uuencoded, <code>false</code> otherwise
      */
     public boolean isUUEncoded() {
-        return (count >= 1);
-    }
-
-    private static final Pattern PAT_UUENCODED = Pattern.compile(
-        "(^begin |\r?\nbegin )([0-7]{3} )(\\S[\\S\\p{Punct} \t]*\r?\n)(.+?)(\r?\n[ \t]*`?[ \t]*\r?\nend)",
-        Pattern.DOTALL);
-
-    /**
-     * Check if specified content might be UUEncoded.
-     *
-     * @param content The content
-     * @return <code>true</code> if UUEncoded; otherwise <code>false</code>
-     */
-    public static boolean isUUEncoded(final String content) {
-        return PAT_UUENCODED.matcher(content).find();
+        return (count > 0);
     }
 
     /**

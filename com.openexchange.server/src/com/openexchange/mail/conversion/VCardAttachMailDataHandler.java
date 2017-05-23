@@ -60,6 +60,7 @@ import javax.mail.internet.MimeUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -121,7 +122,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
     }
 
     @Override
-    public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
+    public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         final UserSettingMail usm;
         ctx = ContextStorage.getStorageContext(session);
@@ -211,10 +212,13 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 MimeMessageConverter.convertMessage(mimeMessage),
                 DisplayMode.MODIFYABLE,
                 false,
+                true,
                 session,
                 null);
             addFileInformation(mailObject, managedFile.getID());
-            return mailObject;
+            ConversionResult result = new ConversionResult();
+            result.setData(mailObject);
+            return result;
         } catch (final MessagingException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final IOException e) {

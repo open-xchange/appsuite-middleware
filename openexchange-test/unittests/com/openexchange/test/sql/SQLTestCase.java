@@ -49,7 +49,8 @@
 
 package com.openexchange.test.sql;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,22 +60,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+import org.junit.Before;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
-import junit.framework.TestCase;
 
 /**
  * {@link SQLTestCase} TODO remove due to duplicate class in com.openexchange.server
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class SQLTestCase extends TestCase {
+public abstract class SQLTestCase {
 
     private ConfigurableDBProvider dbProvider;
 
     protected Properties properties;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         loadProperties();
         dbProvider = new ConfigurableDBProvider();

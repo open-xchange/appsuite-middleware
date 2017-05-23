@@ -134,5 +134,5 @@ public class ImageServerConfig extends Properties {
 
     //- Members ----------------------------------------------------------------
 
-    private static AtomicReference<ImageServerConfig> m_instance = new AtomicReference<ImageServerConfig>(null);
+    private static AtomicReference<ImageServerConfig> m_instance = new AtomicReference<>(null);
 }

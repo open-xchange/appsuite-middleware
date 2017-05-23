@@ -1,7 +1,8 @@
 %define __jar_repack %{nil}
 
 Name:          open-xchange-munin-scripts
-BuildArch:	   noarch
+%define use_systemd (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >=1210)
+BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
@@ -11,10 +12,14 @@ BuildRequires: ant-nodeps
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
 %endif
-Version:	   @OXVERSION@
-%define        ox_release 24
+%endif
+Version:       @OXVERSION@
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -23,9 +28,9 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Autoreqprov:   no
-Requires:	   open-xchange-core >= @OXVERSION@
-Requires:      munin-node
-Conflicts:     open-xchange-munin-scripts-jolokia
+Requires:      munin-node, perl-JSON, perl-libwww-perl
+Provides:      open-xchange-munin-scripts-jolokia = %{version}
+Obsoletes:     open-xchange-munin-scripts-jolokia < %{version}
 
 %description
 Munin is a highly flexible and powerful solution used to create graphs of
@@ -53,6 +58,34 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
+GLOBIGNORE='*'
+
+function contains() { grep $@ >/dev/null 2>&1; return $?; }
+
+# only when updating
+if [ ${1:-0} -eq 2 ]; then
+  # SoftwareChange_request-3870
+  PFILE=/etc/munin/plugin-conf.d/ox
+  if test -f ${PFILE} && ! contains env.oxJolokiaUrl ${PFILE}; then
+    sed -i '$ a env.oxJolokiaUrl http://localhost:8009/monitoring/jolokia' ${PFILE}
+  fi
+
+  if test -f ${PFILE} && ! contains env.oxJolokiaUser ${PFILE}; then
+    sed -i '$ {
+      a ### oxJolokiaUser must be the same as com.openexchange.jolokia.user inside jolokia.properties
+      a env.oxJolokiaUser changeMe!Now
+    }' ${PFILE}
+  fi
+
+  if test -f ${PFILE} && ! contains env.oxJolokiaPassword ${PFILE}; then
+    sed -i '$ {  
+      a ### oxJolokiaPassword must be the same as com.openexchange.jolokia.password inside jolokia.properties
+      a env.oxJolokiaPassword s3cr3t!toBeChanged
+    }' ${PFILE}
+  fi
+fi
+
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`
 munin-node-configure --libdir /usr/share/munin/plugins/ --shell > $TMPFILE || :
 if [ -f $TMPFILE ] ; then
@@ -60,7 +93,21 @@ if [ -f $TMPFILE ] ; then
   rm -f $TMPFILE
 fi
 find -L /etc/munin/plugins -name 'ox_*' -type l -delete
+
+# The admin has to actively configure and start jolokia and munin
+PFILE=/opt/open-xchange/etc/jolokia.properties
+jolokia_enabled=$(ox_read_property com.openexchange.jolokia.start ${PFILE})
+if [[ ! ${jolokia_enabled//[[:space:]]/} = true ]]
+then
+  echo -e "\n\e[31mWARNING\e[0m: You have to properly configure and activate jolokia and munin for working monitoring! \n"
+fi
+
+#no common service wrapper dependency across rpm distros
+%if %{use_systemd}
+systemctl try-restart munin-node >/dev/null 2>&1 || :
+%else
 /etc/init.d/munin-node restart || :
+%endif
 exit 0
 
 
@@ -74,51 +121,21 @@ exit 0
 /usr/share/munin/plugins/
 %dir /etc/munin/
 %dir /etc/munin/plugin-conf.d/
-%config(noreplace) /etc/munin/plugin-conf.d/*
+%config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
 * Fri May 19 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-05-19 (4176)
-* Mon May 08 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-05-15 (4132)
-* Fri Apr 21 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-05-02 (4113)
-* Wed Apr 12 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-04-18 (4084)
-* Fri Mar 31 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-04-03 (4050)
-* Tue Mar 28 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-03-27 (4066)
-* Thu Mar 16 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-03-20 (4016)
-* Mon Mar 06 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-03-06 (3985)
-* Fri Feb 24 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-02-24 (3994)
-* Wed Feb 22 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-02-22 (3969)
-* Tue Feb 14 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-02-20 (3952)
-* Tue Jan 31 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-02-06 (3918)
-* Thu Jan 26 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-01-26 (3925)
-* Wed Jan 18 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-01-23 (3879)
-* Wed Jan 04 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-01-09 (3849)
-* Tue Dec 20 2016 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2016-12-23 (3857)
-* Wed Dec 14 2016 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2016-12-19 (3814)
-* Tue Dec 13 2016 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2016-12-14 (3806)
-* Tue Dec 06 2016 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2016-12-12 (3775)
+First candidate for 7.8.4 release
+* Thu May 04 2017 Carsten Hoeger <choeger@open-xchange.com>
+Second preview of 7.8.4 release
+* Mon Apr 03 2017 Carsten Hoeger <choeger@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Carsten Hoeger <choeger@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Carsten Hoeger <choeger@open-xchange.com>

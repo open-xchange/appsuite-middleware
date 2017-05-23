@@ -57,6 +57,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -122,7 +123,8 @@ public final class MailNotifyActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { MailService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
-            SessiondService.class, TimerService.class, PushListenerService.class, ContextService.class, UserService.class };
+            SessiondService.class, TimerService.class, PushListenerService.class, ContextService.class, UserService.class,
+            LockService.class };
     }
 
     @Override
@@ -163,7 +165,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
             stopUdpListener();
 
             // Unregister push manager
-            cleanUp();
+            super.stopBundle();
 
             // Shut down
             MailNotifyPushListenerRegistry registry = this.registry;

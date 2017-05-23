@@ -51,7 +51,6 @@ package com.openexchange.imap.storecache;
 
 import java.util.AbstractQueue;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
@@ -61,7 +60,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPClientParameters;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -141,7 +139,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         if (null != sessionInformation) {
             LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
             if (accountId == MailAccount.DEFAULT_ID) {
-                GreetingListener greetingListener = IMAPProperties.getInstance().getHostNameRegex();
+                GreetingListener greetingListener = IMAPProperties.getInstance().getHostNameRegex(session.getUserId(), session.getContextId());
                 if (null != greetingListener) {
                     String greeting = imapStore.getGreeting();
                     greetingListener.onGreetingProcessed(greeting, imapStore.getHost(), imapStore.getPort());

@@ -68,7 +68,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -80,13 +79,13 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -159,6 +158,23 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @throws OXException If forward mail cannot be composed
      */
     public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int accountID, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getFowardMail(originalMails, session, accountID, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
+     * <p>
+     * If multiple messages are given these messages are forwarded as attachments.
+     *
+     * @param originalMails The referenced original mails
+     * @param session The session containing needed user data
+     * @param accountID The account ID of the referenced original mails
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param fromAddressProvider The provider for <code>"From"</code> address
+     * @return An instance of {@link MailMessage} representing an user-editable forward mail
+     * @throws OXException If forward mail cannot be composed
+     */
+    public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int accountID, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         for (MailMessage cur : originalMails) {
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountID) {
                 cur.setAccountId(accountID);
@@ -167,7 +183,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         /*
          * Compose forward message
          */
-        return getFowardMail0(originalMails, new int[] {accountID}, session, usm, setFrom);
+        return getFowardMail0(originalMails, new int[] {accountID}, session, usm, fromAddressProvider);
     }
 
     /**
@@ -185,6 +201,24 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @throws OXException If forward mail cannot be composed
      */
     public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int[] accountIDs, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getFowardMail(originalMails, session, accountIDs, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Composes a forward message from specified original messages taken from possibly differing accounts based on MIME objects from
+     * <code>JavaMail</code> API.
+     * <p>
+     * If multiple messages are given these messages are forwarded as attachments.
+     *
+     * @param originalMails The referenced original mails
+     * @param session The session containing needed user data
+     * @param accountIDs The account IDs of the referenced original mails
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param fromAddressProvider The provider for <code>"From"</code> address
+     * @return An instance of {@link MailMessage} representing an user-editable forward mail
+     * @throws OXException If forward mail cannot be composed
+     */
+    public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int[] accountIDs, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         for (int i = 0; i < originalMails.length; i++) {
             MailMessage cur = originalMails[i];
             if (cur.getMailId() != null && cur.getFolder() != null && cur.getAccountId() != accountIDs[i]) {
@@ -194,7 +228,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         /*
          * Compose forward message
          */
-        return getFowardMail0(originalMails, accountIDs, session, usm, setFrom);
+        return getFowardMail0(originalMails, accountIDs, session, usm, fromAddressProvider);
     }
 
     /**
@@ -206,16 +240,16 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @param accountIds The account identifiers
      * @param session The session containing needed user data
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
-     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @param fromAddressProvider The provider for <code>"From"</code> address
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws OXException If forward mail cannot be composed
      */
-    private static MailMessage getFowardMail0(MailMessage[] originalMsgs, int[] accountIds, Session session, UserSettingMail userSettingMail, boolean setFrom) throws OXException {
+    private static MailMessage getFowardMail0(MailMessage[] originalMsgs, int[] accountIds, Session session, UserSettingMail userSettingMail, FromAddressProvider fromAddressProvider) throws OXException {
         try {
             /*
              * Clone them to ensure consistent data
              */
-            MailMessage[] origMsgs = ManagedMimeMessage.clone(originalMsgs);
+            MailMessage[] origMsgs = originalMsgs;
             /*
              * New MIME message with a dummy session
              */
@@ -243,11 +277,19 @@ public final class MimeForward extends AbstractMimeProcessing {
              */
             {
                 boolean fromSet = false;
-                if (setFrom) {
-                    InternetAddress from = MimeProcessingUtility.determinePossibleFrom(true, origMsgs[0], accountIds[0], session, ctx);
-                    if (null != from) {
-                        forwardMsg.setFrom(from);
-                        fromSet = true;
+                if (null != fromAddressProvider) {
+                    if (fromAddressProvider.isDetectBy()) {
+                        InternetAddress from = MimeProcessingUtility.determinePossibleFrom(true, origMsgs[0], accountIds[0], session, ctx);
+                        if (null != from) {
+                            forwardMsg.setFrom(from);
+                            fromSet = true;
+                        }
+                    } else if (fromAddressProvider.isSpecified()) {
+                        InternetAddress from = fromAddressProvider.getFromAddress();
+                        if (null != from) {
+                            forwardMsg.setFrom(from);
+                            fromSet = true;
+                        }
                     }
                 }
                 if (!fromSet) {
@@ -373,7 +415,7 @@ public final class MimeForward extends AbstractMimeProcessing {
                  * Add appropriate text part prefixed with forward text
                  */
                 MimeBodyPart textPart = new MimeBodyPart();
-                String txt = usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(firstSeenText, new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, isHtml);
+                String txt = usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(firstSeenText, new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, isHtml, session);
                 {
                     final String cs = contentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
@@ -435,7 +477,8 @@ public final class MimeForward extends AbstractMimeProcessing {
                 content == null ? "" : content,
                     new LocaleAndTimeZone(getUser(session, ctx)),
                     originalMsg,
-                    originalContentType.startsWith(TEXT_HTM));
+                    originalContentType.startsWith(TEXT_HTM),
+                    session);
             {
                 final String cs = originalContentType.getCharsetParameter();
                 if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
@@ -466,7 +509,7 @@ public final class MimeForward extends AbstractMimeProcessing {
                 contentType.setParameter("nature", "virtual");
 
                 MimeBodyPart textPart = new MimeBodyPart();
-                String txt = usm.isDropReplyForwardPrefix() ? "" : generateForwardText("", new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, false);
+                String txt = usm.isDropReplyForwardPrefix() ? "" : generateForwardText("", new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, false, session);
                 MessageUtility.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain", textPart);
                 // textPart.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -699,9 +742,10 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @param ltz The locale that determines format of date and time strings and time zone as well
      * @param msg The original message
      * @param html <code>true</code> if given text is html content; otherwise <code>false</code>
+     * @param session The user's session
      * @return The forward text
      */
-    private static String generateForwardText(final String firstSeenText, final LocaleAndTimeZone ltz, final MailMessage msg, final boolean html) {
+    private static String generateForwardText(String firstSeenText, LocaleAndTimeZone ltz, MailMessage msg, boolean html, Session session) {
         String forwardPrefix = generatePrefixText(MailStrings.FORWARD_PREFIX, ltz, msg);
         if (html) {
             forwardPrefix = HtmlProcessing.htmlFormat(forwardPrefix);
@@ -713,12 +757,7 @@ public final class MimeForward extends AbstractMimeProcessing {
          *
          * Check whether forward text shall be surrounded with quotes or not
          */
-        final boolean forwardUnquoted;
-        {
-            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            forwardUnquoted = null == service ? false : service.getBoolProperty("com.openexchange.mail.forwardUnquoted", false);
-        }
-
+        boolean forwardUnquoted = MailProperties.getInstance().isForwardUnquoted(session.getUserId(), session.getContextId());
         if (forwardUnquoted) {
             /*
              * Don't quote

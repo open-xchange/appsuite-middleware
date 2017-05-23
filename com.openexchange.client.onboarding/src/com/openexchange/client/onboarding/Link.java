@@ -61,17 +61,30 @@ public class Link {
 
     private final String url;
     private final LinkType type;
+    private final String imageUrl;
 
     /**
-     * Initializes a new {@link Link}.
+     * Initializes a new {@link Link} without an image.
      *
      * @param url The URL of the link
      * @param type The link type
      */
     public Link(String url, LinkType type) {
+        this(url, type, null);
+    }
+
+    /**
+     * Initializes a new {@link Link} with an image.
+     *
+     * @param url The URL of the link
+     * @param type The link type
+     * @param imageUrl The image URL for this link
+     */
+    public Link(String url, LinkType type, String imageUrl) {
         super();
         this.url = url;
         this.type = type;
+        this.imageUrl = imageUrl;
     }
 
     /**
@@ -90,6 +103,15 @@ public class Link {
      */
     public String getUrl() {
         return url;
+    }
+
+    /**
+     * Gets the image URL (if any)
+     *
+     * @return The image URL or <code>null</code>
+     */
+    public String getImageUrl() {
+        return imageUrl;
     }
 
 }

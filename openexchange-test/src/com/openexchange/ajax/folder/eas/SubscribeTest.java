@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.folder.eas;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -70,24 +74,10 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class SubscribeTest extends AbstractAJAXSession {
 
-    private AJAXClient client;
 
-    /**
-     * Initializes a new {@link SubscribeTest}.
-     *
-     * @param name The name of the test.
-     */
-    public SubscribeTest(final String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
+    @Test
     public void testSubscribePrivate() throws Throwable {
+        AJAXClient client = getClient();
         final String parent = FolderStorage.ROOT_ID;
         String newId = null;
         boolean unsubscribe = false;
@@ -101,11 +91,7 @@ public class SubscribeTest extends AbstractAJAXSession {
             oclP.setEntity(client.getValues().getUserId());
             oclP.setGroupPermission(false);
             oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            oclP.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
             final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
             final InsertResponse response = client.execute(request);

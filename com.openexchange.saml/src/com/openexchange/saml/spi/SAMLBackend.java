@@ -158,6 +158,15 @@ public interface SAMLBackend {
     AuthenticationInfo resolveAuthnResponse(Response response, Assertion bearerAssertion, AuthnRequestInfo requestInfo) throws OXException;
 
     /**
+     * Gets the possible available access token from given assertion.
+     *
+     * @param assertion The assertion to get the access token from
+     * @return The access token or <code>null</code>
+     * @throws OXException If determining the OAuth access token fails
+     */
+    String getAccessToken(Assertion assertion) throws OXException;
+
+    /**
      * Resolves a logout request and determines which sessions are to be terminated. This method is only
      * called if single logout is activated. Otherwise you can simply return <code>null</code>.
      *
@@ -208,7 +217,30 @@ public interface SAMLBackend {
      * @param response The SAML response
      * @param relayState The relayState set by the IDP
      * @return The AuthnRequestInfo
+     * @throws If parsing the relay state fails
      */
-    AuthnRequestInfo parseRelayState(Response response, String relayState);
+    AuthnRequestInfo parseRelayState(Response response, String relayState) throws OXException;
 
+    /**
+     * Method to retrieve the SAMLConfig
+     * When requesting config parameters, this method should always be used instead of saving the config parameters
+     * @return The SAMLConfig to be used
+     */
+    SAMLConfig getConfig();
+
+    /**
+     * Returns the samlPath part of the servlet path, can be left empty for default path <br>prefix/saml/</br>
+     * If set, the servlet path for this SAMLBackend will be changed to <br>prefix/saml/samlPath/</br>
+     * Allowed values are [a-zA-Z] or <code>null</code>
+     * @return samlPath or <code>null</code>
+     */
+    String getPath();
+
+    /**
+     * Returns a static redirect for login if present or <code>null</code>
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @return a static redirect for login situations or <code>null</code>
+     */
+    String getStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse);
 }

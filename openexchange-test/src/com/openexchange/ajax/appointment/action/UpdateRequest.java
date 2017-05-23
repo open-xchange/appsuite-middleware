@@ -88,6 +88,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     /**
      * Special constructor for moving appointment.
+     * 
      * @param originFolder folder where the appointment is located currently.
      * @param appointment destination appointment object.
      * @param timezone time zone for correctly shifting times.
@@ -113,11 +114,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(appointmentObj.getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(appointmentObj.getLastModified().getTime())) };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE), new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)), new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(appointmentObj.getObjectID())), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(appointmentObj.getLastModified().getTime())) };
     }
 
     @Override

@@ -52,7 +52,6 @@ package com.openexchange.user.json.filter;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.json.field.UserField;
 
@@ -87,7 +86,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
         }
 
         @Override
-        public Map<String, Set<String>> getAttributes() {
+        public Map<String, String> getAttributes() {
             return Collections.emptyMap();
         }
 

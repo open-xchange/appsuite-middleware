@@ -51,7 +51,8 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.yaml.snakeyaml.Yaml;
+import org.ho.yaml.Yaml;
+import org.junit.Test;
 import com.openexchange.subscribe.crawler.internal.Step;
 
 
@@ -62,7 +63,8 @@ import com.openexchange.subscribe.crawler.internal.Step;
  */
 public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testWKW() {
+         @Test
+     public void testWKW() {
         // insert valid credentials here
         final String username = "";
         final String password = "";
@@ -88,7 +90,7 @@ public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTe
 
         final Workflow workflow = new Workflow(steps);
 
-        final String yamlString = new Yaml().dump(workflow);
+        final String yamlString = Yaml.dump(workflow);
         crawler.setWorkflowString(yamlString);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);

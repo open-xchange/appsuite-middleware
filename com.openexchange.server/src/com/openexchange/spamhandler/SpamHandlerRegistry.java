@@ -51,13 +51,18 @@ package com.openexchange.spamhandler;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -102,21 +107,35 @@ public final class SpamHandlerRegistry {
     }
 
     /**
-     * Checks if a spam handler is present for the denoted mail account.
+     * Checks if a spam handler is enabled for specified user's primary account.
      *
-     * @param mailAccount The mail account
-     * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if a spam handler is defined for specified user's primary account; otherwise <code>false</code>
+     * @throws OXException If spam handler check fails
      */
-    public static boolean hasSpamHandler(final MailAccount mailAccount) {
-        final SpamHandler handler;
-        try {
-            final MailProvider provider = MailProviderRegistry.getRealMailProvider(mailAccount.getMailProtocol());
-            handler = getSpamHandler0(mailAccount, new StaticMailProviderGetter(provider));
-        } catch (final OXException e) {
-            // Cannot occur
-            LOG.error("", e);
-            return false;
+    public static boolean hasSpamHandler(int userId, int contextId) throws OXException {
+        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == factory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
+
+        ConfigView view = factory.getView(userId, contextId);
+        ComposedConfigProperty<String> property = view.property("com.openexchange.spamhandler.name", String.class);
+        if (null != property && property.isDefined()) {
+            String spamHandlerName = property.get();
+            return Strings.isNotEmpty(spamHandlerName) && !SpamHandler.SPAM_HANDLER_FALLBACK.equals(spamHandlerName) && null != getSpamHandler(spamHandlerName);
+        }
+
+        // Fall-back to old behavior to look-up spam handler by provider of the primary account
+        MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        if (null == storage) {
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+        }
+
+        MailAccount primaryAccount = storage.getDefaultMailAccount(userId, contextId);
+        MailProvider provider = MailProviderRegistry.getRealMailProvider(primaryAccount.getMailProtocol());
+        SpamHandler handler = getSpamHandlerByPrimaryProvider(provider);
         return handler == null ? false : !SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName());
     }
 
@@ -129,7 +148,7 @@ public final class SpamHandlerRegistry {
      * @param session The session which probably caches spam handler
      * @param accountId The account ID
      * @return The appropriate spam handler
-     * @throws OXException If no supporting spam handler can be found
+     * @throws OXException If no appropriate spam handler can be found
      */
     public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId) throws OXException {
         return getSpamHandlerBySession(session, accountId, null);
@@ -141,16 +160,40 @@ public final class SpamHandlerRegistry {
      * At first the mail account's spam handler is checked, if invalid the specified provider's spam handler is checked. For last instance
      * the fallback spam handler {@link NoSpamHandler} is returned to accomplish no spam handler support.
      *
-     * @param session The session which probably caches spam handler
-     * @param accountId The account ID
-     * @param mailProvider The mail provider whose spam handler is returned if account's one is empty (if <code>null</code> session's
-     *            provider is used as fallback)
-     * @return The appropriate spam handler
-     * @throws OXException If no supporting spam handler can be found
+     * @param session The session providing
+     * @param accountId The account identifier
+     * @param mailProvider The mail provider whose spam handler is returned if account's one is empty (if <code>null</code> session's provider is used as fallback)
+     * @return The appropriate spam handler or special {@link NoSpamHandler#getInstance() NoSpamHandler} if no spam handler is applicable
+     * @throws OXException If no appropriate spam handler can be found
      */
-    public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId, final MailProvider mailProvider) throws OXException {
-        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
-        final String key = MailSessionParameterNames.getParamSpamHandler();
+    public static SpamHandler getSpamHandlerBySession(Session session, int accountId, MailProvider mailProvider) throws OXException {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            // No spam handler for external accounts
+            LOG.debug("As per design no spam handler for the external account {} of user {} in context {}.", accountId, session.getUserId(), session.getContextId());
+            return NoSpamHandler.getInstance();
+        }
+
+        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == factory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+        ComposedConfigProperty<String> property = view.property("com.openexchange.spamhandler.name", String.class);
+        if (null != property && property.isDefined()) {
+            String spamHandlerName = property.get();
+            if (Strings.isNotEmpty(spamHandlerName)) {
+                return getSpamHandler(spamHandlerName);
+            }
+        }
+
+        /*-
+         * Fall-back to old behavior to look-up spam handler by provider of the primary account
+         *
+         * Check session-associated mail cache
+         */
+        MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        String key = MailSessionParameterNames.getParamSpamHandler();
         SpamHandler handler;
         try {
             handler = mailSessionCache.getParameter(accountId, key);
@@ -159,14 +202,21 @@ public final class SpamHandlerRegistry {
             }
         } catch (final ClassCastException e) {
             // Probably caused by bundle update(s)
-            LOG.debug("Failed to cast spam handler. Continuing with regaular look-up.", e);
+            LOG.debug("Failed to cast spam handler. Continuing with regular look-up.", e);
         }
-        /*
-         * Session does not hold spam handler
-         */
-        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-        handler = getSpamHandler0(mailAccount, null == mailProvider ? new SessionMailProviderGetter(mailAccount.getMailProtocol()) : new SimpleMailProviderGetter(mailProvider));
+
+        // Session-associated mail cache does not hold spam handler. Get it from primary account's provider
+        MailProvider provider = mailProvider;
+        if (null == provider) {
+            MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null == storage) {
+                throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+            }
+
+            MailAccount mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            provider = MailProviderRegistry.getRealMailProvider(mailAccount.getMailProtocol());
+        }
+        handler = getSpamHandlerByPrimaryProvider(provider);
         /*
          * Cache in session
          */
@@ -174,43 +224,8 @@ public final class SpamHandlerRegistry {
         return handler;
     }
 
-    private static SpamHandler getSpamHandler0(final MailAccount mailAccount, final MailProviderGetter mailProviderGetter) throws OXException {
-        /*
-         * At first, load account's spam handler
-         */
-        if (!mailAccount.isDefaultAccount()) {
-            /*
-             * No spam handler for external accounts
-             */
-            LOG.debug("No spam handler for the external account with login {} (user {}) available per design.", mailAccount.getLogin(), mailAccount.getUserId());
-            return NoSpamHandler.getInstance();
-        }
-
-        /*-
-         * By now the providers spam handler is returned to maintain backward compatibility.
-         * To retrieve account's spam handler type:
-         *
-         * spamHandlerName = mailAccount.getSpamHandler();
-         */
-        MailProvider mailProvider = mailProviderGetter.getMailProvider();
-        if (null == mailProvider) {
-            return NoSpamHandler.getInstance();
-        }
-
-        String spamHandlerName = mailProvider.getSpamHandler().getSpamHandlerName();
-        SpamHandler handler;
-        if (null != spamHandlerName && spamHandlerName.length() > 0) {
-            /*
-             * Account specifies a valid spam handler name
-             */
-            handler = getSpamHandler(spamHandlerName);
-        } else {
-            /*
-             * Account does not specify a valid spam handler name; take from mail provider
-             */
-            handler = mailProvider.getSpamHandler();
-        }
-        return handler;
+    private static SpamHandler getSpamHandlerByPrimaryProvider(MailProvider mailProvider) {
+        return null == mailProvider ? NoSpamHandler.getInstance() : mailProvider.getSpamHandler();
     }
 
     /**
@@ -220,16 +235,18 @@ public final class SpamHandlerRegistry {
      * {@link NoSpamHandler#getInstance()} is returned.
      *
      * @param registrationName The spam handler's registration name
-     * @return The appropriate spam handler or <code>null</code>
+     * @return The appropriate spam handler or special {@link NoSpamHandler#getInstance() NoSpamHandler} if such a registration name is unknown
      */
     public static SpamHandler getSpamHandler(final String registrationName) {
         if (null == registrationName) {
             LOG.warn("Given registration name is null. Using fallback spam handler '{}'", SpamHandler.SPAM_HANDLER_FALLBACK);
             return NoSpamHandler.getInstance();
-        } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || UNKNOWN_SPAM_HANDLERS.containsKey(registrationName)) {
+        }
+        if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || UNKNOWN_SPAM_HANDLERS.containsKey(registrationName)) {
             return NoSpamHandler.getInstance();
         }
-        final SpamHandler spamHandler = SPAM_HANDLERS.get(registrationName);
+
+        SpamHandler spamHandler = SPAM_HANDLERS.get(registrationName);
         if (null == spamHandler) {
             LOG.warn("No spam handler found for registration name '{}'. Using fallback '{}'", registrationName, SpamHandler.SPAM_HANDLER_FALLBACK);
             UNKNOWN_SPAM_HANDLERS.put(registrationName, PRESENT);
@@ -296,60 +313,4 @@ public final class SpamHandlerRegistry {
         return SPAM_HANDLERS.remove(registrationName);
     }
 
-    /*-
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * +++++++++++++++++++++++++++++++++++++++++++ HELPER CLASSES +++++++++++++++++++++++++++++++++++++++++++
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     */
-
-    private static interface MailProviderGetter {
-
-        public MailProvider getMailProvider() throws OXException;
-    }
-
-    private static final class SimpleMailProviderGetter implements MailProviderGetter {
-
-        private final MailProvider mailProvider;
-
-        public SimpleMailProviderGetter(final MailProvider mailProvider) {
-            super();
-            this.mailProvider = mailProvider;
-        }
-
-        @Override
-        public MailProvider getMailProvider() {
-            return mailProvider;
-        }
-    }
-
-    private static final class SessionMailProviderGetter implements MailProviderGetter {
-
-        private final String protocolName;
-
-        SessionMailProviderGetter(final String protocolName) {
-            super();
-            this.protocolName = protocolName;
-        }
-
-        @Override
-        public MailProvider getMailProvider() throws OXException {
-            return MailProviderRegistry.getRealMailProvider(protocolName);
-        }
-    }
-
-    private static final class StaticMailProviderGetter implements MailProviderGetter {
-
-        private final MailProvider mailProvider;
-
-        StaticMailProviderGetter(final MailProvider mailProvider) {
-            super();
-            this.mailProvider = mailProvider;
-        }
-
-        @Override
-        public MailProvider getMailProvider() {
-            return mailProvider;
-        }
-
-    }
 }

@@ -307,20 +307,36 @@ AcquireTokenResponse:
 # Module: mailfilter
 MailFilterConfigTest:
   $ref: ./mailfilter/MailFilterConfigTest.yaml
+MailFilterConfigTestv2:
+  $ref: ./mailfilter/MailFilterConfigTest_v2.yaml
+MailFilterConfigAction:
+  $ref: ./mailfilter/MailFilterConfigAction.yaml
 MailFilterConfigData:
   $ref: ./mailfilter/MailFilterConfigData.yaml
+MailFilterConfigDatav2:
+  $ref: ./mailfilter/MailFilterConfigData_v2.yaml
 MailFilterConfigResponse:
   $ref: ./mailfilter/MailFilterConfigResponse.yaml
+MailFilterConfigResponsev2:
+  $ref: ./mailfilter/MailFilterConfigResponse_v2.yaml
 MailFilterNotTest:
   $ref: ./mailfilter/MailFilterNotTest.yaml
+MailFilterNotTestv2:
+  $ref: ./mailfilter/MailFilterNotTest_v2.yaml
 MailFilterTest:
   $ref: ./mailfilter/MailFilterTest.yaml
+MailFilterTestv2:
+  $ref: ./mailfilter/MailFilterTest_v2.yaml
 MailFilterAction:
   $ref: ./mailfilter/MailFilterAction.yaml
 MailFilterRule:
   $ref: ./mailfilter/MailFilterRule.yaml
+MailFilterRulev2:
+  $ref: ./mailfilter/MailFilterRule_v2.yaml
 MailFilterRulesResponse:
   $ref: ./mailfilter/MailFilterRulesResponse.yaml
+MailFilterRulesResponsev2:
+  $ref: ./mailfilter/MailFilterRulesResponse_v2.yaml
 MailFilterCreationResponse:
   $ref: ./mailfilter/MailFilterCreationResponse.yaml
 MailFilterDeletionBody:
@@ -503,6 +519,8 @@ FindQueryBody:
   $ref: ./find/FindQueryBody.yaml
 FindQueryResponse:
   $ref: ./find/FindQueryResponse.yaml
+FindQueryResponseData:
+  $ref: ./find/FindQueryResponseData.yaml
 # Module: share/management
 ShareTargetData:
   $ref: ./sharemanagement/ShareTargetData.yaml
@@ -550,6 +568,9 @@ ClientOnboardingData:
   $ref: ./clientonboarding/ClientOnboardingData.yaml
 ClientOnboardingResponse:
   $ref: ./clientonboarding/ClientOnboardingResponse.yaml
+# Module: rss
+RssResponse:
+  $ref: ./rss/RssResponse.yaml
 # Module: pns
 PnsData:
   $ref: ./pns/PnsData.yaml
@@ -559,3 +580,25 @@ SubscriptionData:
   $ref: ./pns/SubscriptionData.yaml
 UnsubscriptionData:
   $ref: ./pns/UnsubscriptionData.yaml
+# Module: certificate
+CertificateExamineData:
+  $ref: ./certificate/CertificateExamineData.yaml
+CertificateStoreData:
+  $ref: ./certificate/CertificateStoreData.yaml
+CertificateExamineResponse:
+  $ref: ./certificate/CertificateExamineResponse.yaml
+CertificatesAllResponse:
+  $ref: ./certificate/CertificatesAllResponse.yaml
+# Module: Guard
+GuardSecurityInfo:
+  $ref: ./guard/GuardSecurityInfo.yaml
+GuardSecurityResult:
+  $ref: ./guard/GuardSecurityResult.yaml
+GuardSignatureResult:
+  $ref: ./guard/GuardSignatureResult.yaml
+GuardSendSecurity:
+  $ref: ./guard/GuardSendSecurity.yaml
+
+
+
+

@@ -55,6 +55,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.client.onboarding.ClientDevice;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Platform;
@@ -70,14 +71,23 @@ public class OnboardingViewImpl implements OnboardingView {
 
     private final EnumSet<Platform> platforms;
     private final EnumMap<Device, List<CompositeId>> devices;
+    private final ClientDevice clientDevice;
 
     /**
      * Initializes a new {@link OnboardingViewImpl}.
+     *
+     * @param clientDevice The target device
      */
-    public OnboardingViewImpl() {
+    public OnboardingViewImpl(ClientDevice clientDevice) {
         super();
+        this.clientDevice = clientDevice;
         platforms = EnumSet.noneOf(Platform.class);
         devices = new EnumMap<Device, List<CompositeId>>(Device.class);
+    }
+
+    @Override
+    public ClientDevice getClientDevice() {
+        return clientDevice;
     }
 
     /**

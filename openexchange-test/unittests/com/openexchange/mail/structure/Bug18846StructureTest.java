@@ -49,8 +49,13 @@
 
 package com.openexchange.mail.structure;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -63,60 +68,9 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
  */
 public class Bug18846StructureTest extends AbstractMailTest {
 
-    /**
-     * Initializes a new {@link Bug18846StructureTest}.
-     */
-    public Bug18846StructureTest() {
-        super();
-    }
+    private static final byte[] SOURCE = ("Date: Wed, 18 May 2011 12:05:12 +0200 (CEST)\n" + "From: me@somewhere.com\n" + "To: you@another.org\n" + "Message-ID: <1003957407.805.1305713112926>\n" + "Subject: Bug #18846 Test\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/mixed; \n" + "    boundary=\"----=_Part_803_1839345999.1305713112873\"\n" + "X-Priority: 3\n" + "Importance: Medium\n" + "\n" + "------=_Part_803_1839345999.1305713112873\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: quoted-printable\n" + "\n" + "Some mail text.\n" + "\n" + "------=_Part_803_1839345999.1305713112873\n" + "Content-Type: message/rfc822; name=part.eml\n" + "Content-Disposition: INLINE; filename=part.eml\n" + "\n" + "Content-Type: message/rfc822\n" + "\n" + "Date: Tue, 26 Apr 2011 09:29:24 +0200 (CEST)\n" + "From: jane@bar.com\n" + "To: christine@domain.com\n" + "Message-ID: <675680366.104.1303802964881>\n" + "Subject: blabla\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "X-Priority: 3\n" + "Importance: Medium\n" + "\n" + "lalalalalalala\n" + "\n" + "------=_Part_803_1839345999.1305713112873--\n").getBytes();
 
-    /**
-     * Initializes a new {@link Bug18846StructureTest}.
-     *
-     * @param name The test name
-     */
-    public Bug18846StructureTest(final String name) {
-        super(name);
-    }
-
-    private static final byte[] SOURCE = ("Date: Wed, 18 May 2011 12:05:12 +0200 (CEST)\n" +
-        "From: me@somewhere.com\n" +
-        "To: you@another.org\n" +
-        "Message-ID: <1003957407.805.1305713112926>\n" +
-        "Subject: Bug #18846 Test\n" +
-        "MIME-Version: 1.0\n" +
-        "Content-Type: multipart/mixed; \n" +
-        "    boundary=\"----=_Part_803_1839345999.1305713112873\"\n" +
-        "X-Priority: 3\n" +
-        "Importance: Medium\n" +
-        "\n" +
-        "------=_Part_803_1839345999.1305713112873\n" +
-        "MIME-Version: 1.0\n" +
-        "Content-Type: text/plain; charset=UTF-8\n" +
-        "Content-Transfer-Encoding: quoted-printable\n" +
-        "\n" +
-        "Some mail text.\n" +
-        "\n" +
-        "------=_Part_803_1839345999.1305713112873\n" +
-        "Content-Type: message/rfc822; name=part.eml\n" +
-        "Content-Disposition: INLINE; filename=part.eml\n" +
-        "\n" +
-        "Content-Type: message/rfc822\n" +
-        "\n" +
-        "Date: Tue, 26 Apr 2011 09:29:24 +0200 (CEST)\n" +
-        "From: jane@bar.com\n" +
-        "To: christine@domain.com\n" +
-        "Message-ID: <675680366.104.1303802964881>\n" +
-        "Subject: blabla\n" +
-        "MIME-Version: 1.0\n" +
-        "Content-Type: text/plain; charset=UTF-8\n" +
-        "X-Priority: 3\n" +
-        "Importance: Medium\n" +
-        "\n" +
-        "lalalalalalala\n" +
-        "\n" +
-        "------=_Part_803_1839345999.1305713112873--\n").getBytes();
-
+    @Test
     public void testMIMEStructure() {
         try {
             getSession();

@@ -94,6 +94,13 @@ public interface LoginRequest {
 
     Map<String, List<String>> getHeaders();
 
+    /**
+     * Gets the parameters associated with the HTTP login request (if any).
+     *
+     * @return The parameters or an empty map
+     */
+    Map<String, String[]> getRequestParameter();
+
     Cookie[] getCookies();
 
     /**

@@ -50,6 +50,7 @@
 package com.openexchange.calendar.itip.analyzers;
 
 import static com.openexchange.time.TimeTools.D;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Set;
 import com.openexchange.calendar.itip.ITipAction;
@@ -59,7 +60,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
-import static org.junit.Assert.*;
 
 /**
  * {@link AbstractITipAnalyzerTest}

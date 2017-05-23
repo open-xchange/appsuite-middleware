@@ -66,97 +66,92 @@ import com.openexchange.resource.json.ResourceWriter;
  */
 public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	private final JSONObject resourceJSON;
+    private final JSONObject resourceJSON;
 
-	private final long clientLastModified;
+    private final long clientLastModified;
 
     private final Resource resource;
 
-	/**
-	 * Initializes a new {@link ResourceUpdateRequest}
-	 *
-	 * @param resource
-	 *            The resource containing values to update
-	 * @param clientLastModified
-	 *            The client last-modified timestamp to verify request on server
-	 *            (possible concurrent modification)
-	 * @param failOnError
-	 *            <code>true</code> to fail on error; otherwise
-	 *            <code>false</code>
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public ResourceUpdateRequest(final Resource resource, final long clientLastModified, final boolean failOnError)
-			throws JSONException {
-		super();
-		this.failOnError = failOnError;
-		this.clientLastModified = clientLastModified;
-		this.resource = resource;
-		resourceJSON = ResourceWriter.writeResource(resource);
-	}
+    /**
+     * Initializes a new {@link ResourceUpdateRequest}
+     *
+     * @param resource
+     *            The resource containing values to update
+     * @param clientLastModified
+     *            The client last-modified timestamp to verify request on server
+     *            (possible concurrent modification)
+     * @param failOnError
+     *            <code>true</code> to fail on error; otherwise
+     *            <code>false</code>
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public ResourceUpdateRequest(final Resource resource, final long clientLastModified, final boolean failOnError) throws JSONException {
+        super();
+        this.failOnError = failOnError;
+        this.clientLastModified = clientLastModified;
+        this.resource = resource;
+        resourceJSON = ResourceWriter.writeResource(resource);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return resourceJSON;
-	}
+        return resourceJSON;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-	    return new Params(
-	        AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE,
-	        AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(clientLastModified),
-	        AJAXServlet.PARAMETER_ID, String.valueOf(resource.getIdentifier()))
-	    .toArray();
-	}
+        return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE, AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(clientLastModified), AJAXServlet.PARAMETER_ID, String.valueOf(resource.getIdentifier())).toArray();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
     public ResourceUpdateParser getParser() {
-		return new ResourceUpdateParser(failOnError);
-	}
+        return new ResourceUpdateParser(failOnError);
+    }
 
-	private static final class ResourceUpdateParser extends AbstractAJAXParser<ResourceUpdateResponse> {
+    private static final class ResourceUpdateParser extends AbstractAJAXParser<ResourceUpdateResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		ResourceUpdateParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        ResourceUpdateParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected ResourceUpdateResponse createResponse(final Response response) throws JSONException {
-			return new ResourceUpdateResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected ResourceUpdateResponse createResponse(final Response response) throws JSONException {
+            return new ResourceUpdateResponse(response);
+        }
+    }
 
 }

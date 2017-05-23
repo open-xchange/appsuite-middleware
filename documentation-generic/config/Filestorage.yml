@@ -1,0 +1,29 @@
+feature_name: Filestorage
+feature_description: |
+  Pre-Configured file storages
+  
+  Property:
+  "com.openexchange.file.storage.account." +  &lt;account-id&gt; + "." +   &lt;prop-name&gt; + "=" +  &lt;value&gt;
+  
+  Config option:
+  "com.openexchange.file.storage.account." +  &lt;account-id&gt; + ".config." +  &lt;config-option&gt; + "=" +  &lt;value&gt;
+  
+  Example WebDAV configuration:
+  <pre>
+  com.openexchange.file.storage.account.webdav.serviceId=com.openexchange.file.storage.webdav
+  com.openexchange.file.storage.account.webdav.displayName="WebDAV"
+  com.openexchange.file.storage.account.webdav.config.url=http://your-webdav-server
+  com.openexchange.file.storage.account.webdav.config.timeout=60000
+  </pre>
+properties:
+    - key: com.openexchange.file.storage.numberOfPregeneratedPreviews
+      description: |
+        Specifies the number of listed files in a Drive folder for which a preview/thumbnail is supposed to be pre-generated asynchronously.
+      defaultValue: 20
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-core
+      tags: ["Filestorage"]

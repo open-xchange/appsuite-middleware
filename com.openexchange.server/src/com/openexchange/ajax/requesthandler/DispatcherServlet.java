@@ -224,7 +224,13 @@ public class DispatcherServlet extends SessionServlet {
      * Clears all registered renderer.
      */
     public static void clearRenderer() {
-        RESPONSE_RENDERERS.set(Collections.<ResponseRenderer> emptyList());
+        List<ResponseRenderer> expect;
+        do {
+            expect = RESPONSE_RENDERERS.get();
+            if (expect.isEmpty()) {
+                return;
+            }
+        } while (!RESPONSE_RENDERERS.compareAndSet(expect, Collections.<ResponseRenderer> emptyList()));
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -390,6 +396,7 @@ public class DispatcherServlet extends SessionServlet {
             MailExceptionCode.REFERENCED_MAIL_NOT_FOUND,
             MailExceptionCode.FOLDER_NOT_FOUND,
             SessionExceptionCodes.SESSION_EXPIRED,
+            SessionExceptionCodes.WRONG_SESSION_SECRET,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED
         );
@@ -397,7 +404,7 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * A set of those {@link Category categories} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final Set<Category> CAT_IGNOREES = ImmutableSet.of(Category.CATEGORY_PERMISSION_DENIED);
+    private static final Set<Category> CAT_IGNOREES = ImmutableSet.of(Category.CATEGORY_PERMISSION_DENIED, Category.CATEGORY_USER_INPUT);
 
     /**
      * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
@@ -460,6 +467,10 @@ public class DispatcherServlet extends SessionServlet {
             if (null != session && false == session.isAnonymous()) {
                 // A non-anonymous session
                 enableRateLimitCheckFor(httpRequest);
+                String hostname = requestData.getHostname();
+                if (null != hostname) {
+                    session.setParameter(Session.PARAM_HOST_NAME, hostname);
+                }
             }
 
             // Start dispatcher processing
@@ -730,7 +741,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private ServerSession fakeSession() {
         UserImpl user = new UserImpl();
-        user.setAttributes(new HashMap<String, Set<String>>(1));
+        user.setAttributes(new HashMap<String, String>(1));
         return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
     }
 

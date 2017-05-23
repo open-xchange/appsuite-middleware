@@ -49,6 +49,10 @@
 
 package com.openexchange.contact.vcard;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.impl.internal.VCardParametersImpl;
 import com.openexchange.exception.OXException;
@@ -69,7 +73,8 @@ public class MaxSizeTest extends VCardTest {
         super();
     }
 
-    public void testImportTooLargeVCard() throws Exception {
+         @Test
+     public void testImportTooLargeVCard() throws Exception {
         String vCardString =
             "BEGIN:VCARD\r\n" +
             "VERSION:3.0\r\n" +
@@ -221,7 +226,8 @@ public class MaxSizeTest extends VCardTest {
         assertTrue("wrong exception thrown", VCardExceptionCodes.MAXIMUM_SIZE_EXCEEDED.equals(expectedException));
     }
 
-    public void testImportVCardWithTooLargePhoto() throws Exception {
+         @Test
+     public void testImportVCardWithTooLargePhoto() throws Exception {
         String vCardString =
             "BEGIN:VCARD\r\n" +
             "VERSION:3.0\r\n" +

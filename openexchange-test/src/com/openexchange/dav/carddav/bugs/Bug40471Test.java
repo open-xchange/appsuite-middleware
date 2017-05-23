@@ -69,13 +69,13 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug40471Test extends CardDAVTest {
 
-	public Bug40471Test() {
-		super();
-	}
+    public Bug40471Test() {
+        super();
+    }
 
-	@Test
-	public void testContentTypeInGet() throws Exception {
-	       /*
+    @Test
+    public void testContentTypeInGet() throws Exception {
+        /*
          * fetch sync token for later synchronization
          */
         String syncToken = super.fetchSyncToken();
@@ -116,5 +116,5 @@ public class Bug40471Test extends CardDAVTest {
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         assertEquals("Country wrong", country, card.getVCard().getAdrs().get(0).getCountryName());
-	}
+    }
 }

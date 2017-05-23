@@ -51,7 +51,6 @@ package com.openexchange.html.vulntests;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
 import com.openexchange.html.AbstractSanitizing;
 import com.openexchange.html.AssertionHelper;
 import com.openexchange.java.Strings;
@@ -67,8 +66,8 @@ public class Bug48230VulTest extends AbstractSanitizing {
         super();
     }
 
-    @Test
-    public void testDataUriSanitizing() throws OXException {
+     @Test
+     public void testDataUriSanitizing() throws Exception {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +

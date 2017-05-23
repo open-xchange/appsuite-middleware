@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.mail.filter.tests.bug;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.LinkedList;
+import org.junit.Test;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
@@ -66,16 +70,17 @@ public class Bug46714Test extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link Bug46714Test}.
-     * 
+     *
      * @param name the test's name
      */
-    public Bug46714Test(String name) {
-        super(name);
+    public Bug46714Test() {
+        super();
     }
 
     /**
      * Insert 5 rules and try to reorder with an array of 6
      */
+    @Test
     public void testBug46714() throws Exception {
         // Create 5 rules and insert them
         LinkedList<Rule> expectedRules = new LinkedList<>();
@@ -88,6 +93,7 @@ public class Bug46714Test extends AbstractMailFilterTest {
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
+            rememberRule(id);
             rule.setId(id);
             rule.setPosition(i);
             expectedRules.add(rule);
@@ -97,7 +103,7 @@ public class Bug46714Test extends AbstractMailFilterTest {
 
         // Reorder
         try {
-            // We are expecting an exception so we disable the failOnError 
+            // We are expecting an exception so we disable the failOnError
             mailFilterAPI.setFailOnError(false);
             mailFilterAPI.reorder(reorder);
             fail("Expected an exception");

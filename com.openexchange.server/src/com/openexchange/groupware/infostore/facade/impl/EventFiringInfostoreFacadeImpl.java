@@ -163,7 +163,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
     @Override
     protected void removeDocuments(List<DocumentMetadata> allDocuments, List<DocumentMetadata> allVersions, long date, ServerSession sessionObj, List<DocumentMetadata> rejected) throws OXException {
         super.removeDocuments(allDocuments, allVersions, date, sessionObj, rejected);
-        if (null != allDocuments && 0 < allDocuments.size()) {
+        if (!allDocuments.isEmpty()) {
             for (DocumentMetadata document : allDocuments) {
                 if (null != rejected && rejected.contains(document)) {
                     continue;
@@ -179,7 +179,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
         long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
         List<DocumentMetadata> rejectedDocuments = super.moveDocuments(
             session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
-        if (null != documents && 0 < documents.size()) {
+        if (!documents.isEmpty()) {
             for (DocumentMetadata document : documents) {
                 if (null != rejectedDocuments && rejectedDocuments.contains(document)) {
                     continue;

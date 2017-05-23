@@ -4,7 +4,6 @@ node {
     stage 'Checkout'
     dir('backend') {
         checkout scm
-        sh 'git submodule update --init'
     }
 
     def ant = tool 'ant'

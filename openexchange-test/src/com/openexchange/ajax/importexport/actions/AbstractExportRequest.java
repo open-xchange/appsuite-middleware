@@ -93,9 +93,7 @@ public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> impl
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()), new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId)
         };
     }
 

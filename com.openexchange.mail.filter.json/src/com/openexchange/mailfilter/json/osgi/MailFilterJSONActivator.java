@@ -57,6 +57,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
@@ -67,7 +68,9 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AllOfTestCo
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AnyOfTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.BodyTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.CurrentDateTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.DateTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.EnvelopeTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.ExistsTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HasFlagCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
@@ -93,7 +96,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class};
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, LeanConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class };
     }
 
     @Override
@@ -132,6 +135,8 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
         registry.register(Commands.ALLOF.getCommandName(), new AllOfTestCommandParser());
         registry.register(Commands.ANYOF.getCommandName(), new AnyOfTestCommandParser());
         registry.register(Commands.BODY.getCommandName(), new BodyTestCommandParser());
+        registry.register(Commands.DATE.getCommandName(), new DateTestCommandParser());
+        registry.register(Commands.EXISTS.getCommandName(), new ExistsTestCommandParser());
         registry.register(Commands.CURRENTDATE.getCommandName(), new CurrentDateTestCommandParser());
         registry.register(Commands.ENVELOPE.getCommandName(), new EnvelopeTestCommandParser());
         registry.register(Commands.HEADER.getCommandName(), new HeaderTestCommandParser());

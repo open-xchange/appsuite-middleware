@@ -53,17 +53,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Collection;
-
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -82,14 +77,10 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
  * @author cutmasta
  * @author d7
  */
-public class GroupTest extends AbstractTest {
+public class GroupTest extends UserTest {
 
     // list of chars that must be valid
-    private static final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
-
-    public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(GroupTest.class);
-    }
+    private final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
 
     @Test
     public void testCreateGroup() throws Exception {
@@ -106,7 +97,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        String grpname = VALID_CHAR_TESTGROUP+System.currentTimeMillis();
+        String grpname = VALID_CHAR_TESTGROUP + System.currentTimeMillis();
         createGroup(ctx, getTestGroupObject(grpname, ctx, cred), hosturl, cred);
         final Group[] grps = searchGroup(ctx, grpname, hosturl, cred);
         assertEquals("invalid search result", 1, grps.length);
@@ -118,7 +109,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred), hosturl, cred);
+        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred), hosturl, cred);
         deleteGroup(ctx, grp, hosturl, cred);
         // now load the group again, this MUST fail
         try {
@@ -138,8 +129,8 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        Group tmp =  getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
-        final Group grp = createGroup(ctx,tmp, hosturl, cred);
+        Group tmp = getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
+        final Group grp = createGroup(ctx, tmp, hosturl, cred);
         deleteGroup(ctx, grp, hosturl, cred);
         // now load the group again, this MUST fail
         try {
@@ -153,7 +144,7 @@ public class GroupTest extends AbstractTest {
         }
 
         // create same group again
-        createGroup(ctx,tmp, hosturl, cred);
+        createGroup(ctx, tmp, hosturl, cred);
     }
 
     @Test
@@ -165,7 +156,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred), hosturl, cred);
+        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred), hosturl, cred);
 
         final Group del_grp = new Group();
         del_grp.setName(grp.getName());
@@ -191,7 +182,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred), hosturl, cred);
+        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred), hosturl, cred);
 
         final Group del_grp = new Group(grp.getId());
         deleteGroup(ctx, del_grp, hosturl, cred);
@@ -224,7 +215,7 @@ public class GroupTest extends AbstractTest {
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
         assertEquals("id not equals", createdgroup.getId(), srv_group.getId());
-        assertEquals("identifier not equal",createdgroup.getName(), srv_group.getName());
+        assertEquals("identifier not equal", createdgroup.getName(), srv_group.getName());
     }
 
     @Test
@@ -246,7 +237,7 @@ public class GroupTest extends AbstractTest {
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
         assertEquals("id not equals", createdgroup.getId(), srv_group.getId());
-        assertEquals("identifier not equal",createdgroup.getName(), srv_group.getName());
+        assertEquals("identifier not equal", createdgroup.getName(), srv_group.getName());
     }
 
     @Test
@@ -267,7 +258,7 @@ public class GroupTest extends AbstractTest {
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
         assertEquals("id not equals", createdgroup.getId(), srv_group.getId());
-        assertEquals("identifier not equal",createdgroup.getName(), srv_group.getName());
+        assertEquals("identifier not equal", createdgroup.getName(), srv_group.getName());
     }
 
     @Test
@@ -276,17 +267,17 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -305,19 +296,19 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         Group tmp = new Group();
         tmp.setName(createdgroup.getName());
-        addMemberToGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, tmp, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -336,18 +327,18 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         Group tmp = new Group(createdgroup.getId());
-        addMemberToGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, tmp, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -366,7 +357,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -374,10 +365,10 @@ public class GroupTest extends AbstractTest {
 
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -390,7 +381,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("member not added to group", foundmember);
 
         // now remove user from group;
-        removeMemberFromGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        removeMemberFromGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
         // now get all members of group, and check if user is member
         remote_members = getMembers(ctx, createdgroup, hosturl, cred);
         foundmember = false;
@@ -409,7 +400,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -417,10 +408,10 @@ public class GroupTest extends AbstractTest {
 
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -435,7 +426,7 @@ public class GroupTest extends AbstractTest {
         // now remove user from group;
         Group tmp = new Group();
         tmp.setName(createdgroup.getName());
-        removeMemberFromGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
+        removeMemberFromGroup(ctx, tmp, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -455,7 +446,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -463,10 +454,10 @@ public class GroupTest extends AbstractTest {
 
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -480,7 +471,7 @@ public class GroupTest extends AbstractTest {
 
         // now remove user from group;
         Group tmp = new Group(createdgroup.getId());
-        removeMemberFromGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
+        removeMemberFromGroup(ctx, tmp, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -500,7 +491,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -527,7 +518,6 @@ public class GroupTest extends AbstractTest {
         assertEquals("identifier not equal", createdgroup.getName(), remote_grp.getName());
     }
 
-
     @Test
     public void testChangeGroupIdentifiedbyID() throws Exception {
 
@@ -535,7 +525,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -548,7 +538,7 @@ public class GroupTest extends AbstractTest {
         assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
 
         Group tmp_group = new Group(srv_response.getId());
-        tmp_group.setDisplayname(srv_response.getDisplayname()+"_changed");
+        tmp_group.setDisplayname(srv_response.getDisplayname() + "_changed");
 
         // do the changes on the remote server for the group
         changeGroup(ctx, tmp_group, hosturl, cred);
@@ -561,7 +551,7 @@ public class GroupTest extends AbstractTest {
 
     }
 
-    @Test(expected=InvalidDataException.class)
+    @Test(expected = InvalidDataException.class)
     public void testChangeNull() throws Exception {
 
         // change group displayname and name to null, this must fail
@@ -570,7 +560,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -598,7 +588,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -631,7 +621,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -644,7 +634,7 @@ public class GroupTest extends AbstractTest {
         assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
 
         Group tmp_group = new Group();
-        tmp_group.setDisplayname(srv_response.getDisplayname()+"_changed");
+        tmp_group.setDisplayname(srv_response.getDisplayname() + "_changed");
         tmp_group.setName(srv_response.getName());
         // do the changes on the remote server for the group
         changeGroup(ctx, tmp_group, hosturl, cred);
@@ -656,25 +646,23 @@ public class GroupTest extends AbstractTest {
         assertEquals("displayname id not equal", tmp_group.getDisplayname(), remote_grp.getDisplayname());
     }
 
-
-
     @Test
     public void testGetMembers() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -687,20 +675,20 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // We only want to resolve by name
         createdgroup.setId(null);
         createduser.setId(null);
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -713,19 +701,19 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // We only want to resolve by name
         createduser.setId(null);
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // We have to fetch the Group because the create on (createdgroup) doesn't contain
         // the members.
@@ -744,19 +732,19 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // We only want to resolve by name
         createduser.setId(null);
         // add user as groupmember
-        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+        addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
 
         // We have to fetch the Group because the create on (createdgroup) doesn't contain
         // the members.
@@ -816,7 +804,7 @@ public class GroupTest extends AbstractTest {
 
     private Group getTestGroupObject(final Credentials cred) throws Exception {
         final Context ctx = new Context(getContextID());
-        return getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        return getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
     }
 
     public static Group getTestGroupObject(final String ident, final Context ctx, final Credentials cred) throws Exception {
@@ -852,11 +840,11 @@ public class GroupTest extends AbstractTest {
         final Collection<OXCommonExtension> bexts = b.getAllExtensionsAsHash().values();
         if (aexts.size() == bexts.size()) {
             aexts.containsAll(bexts);
-//            for (int i = 0; i < aexts.size(); i++) {
-//                final OXCommonExtensionInterface aext = aexts.get(i);
-//                final OXCommonExtensionInterface bext = bexts.get(i);
-//                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-//            }
+            //            for (int i = 0; i < aexts.size(); i++) {
+            //                final OXCommonExtensionInterface aext = aexts.get(i);
+            //                final OXCommonExtensionInterface bext = bexts.get(i);
+            //                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+            //            }
         }
     }
 }

@@ -49,13 +49,16 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.tools.events.TestEventAdmin;
 
 public class Bug11453Test extends CalendarSqlTest {
 
+    @Test
     public void testShoulSupplyChangeExceptionInEventIfOneIsCreated() throws OXException {
         CalendarDataObject appointment = appointments.buildBasicAppointment(D("04/06/2007 10:00"), D("04/06/2007 12:00"));
         appointment.setRecurrenceType(CalendarDataObject.DAILY);

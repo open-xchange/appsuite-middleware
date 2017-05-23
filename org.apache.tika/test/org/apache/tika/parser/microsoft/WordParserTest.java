@@ -16,9 +16,10 @@
  */
 package org.apache.tika.parser.microsoft;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.Locale;
-
 import org.apache.tika.TikaTest;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Office;
@@ -27,11 +28,13 @@ import org.apache.tika.metadata.OfficeOpenXMLExtended;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Test;
 import org.xml.sax.ContentHandler;
 
 public class WordParserTest extends TikaTest {
 
-    public void testWordParser() throws Exception {
+         @Test
+     public void testWordParser() throws Exception {
         InputStream input = WordParserTest.class.getResourceAsStream(
                 "/test-documents/testWORD.doc");
         try {
@@ -51,7 +54,8 @@ public class WordParserTest extends TikaTest {
         }
     }
 
-    public void testWordWithWAV() throws Exception {
+         @Test
+     public void testWordWithWAV() throws Exception {
         InputStream input = WordParserTest.class.getResourceAsStream(
                 "/test-documents/Doc1_ole.doc");
         try {
@@ -69,7 +73,8 @@ public class WordParserTest extends TikaTest {
      * Test that the word converter is able to generate the
      *  correct HTML for the document
      */
-    public void testWordHTML() throws Exception {
+         @Test
+     public void testWordHTML() throws Exception {
 
         // Try with a document containing various tables and
         // formattings
@@ -132,7 +137,8 @@ public class WordParserTest extends TikaTest {
         assertTrue("Bold text wasn't contiguous: "+xml, xml.contains("F<b>oob</b>a<b>r</b>"));
     }
 
-    public void testEmbeddedNames() throws Exception {
+         @Test
+     public void testEmbeddedNames() throws Exception {
         String result = getXML("testWORD_embedded_pdf.doc").xml;
 
         // Make sure the embedded div comes out after "Here
@@ -149,20 +155,23 @@ public class WordParserTest extends TikaTest {
     }
 
     // TIKA-982
-    public void testEmbeddedRTF() throws Exception {
+         @Test
+     public void testEmbeddedRTF() throws Exception {
         String result = getXML("testWORD_embedded_rtf.doc").xml;
         assertTrue(result.indexOf("<div class=\"embedded\" id=\"_1404039792\"/>") != -1);
         assertTrue(result.indexOf("_1404039792.rtf") != -1);
     }
 
     // TIKA-1019
-    public void testDocumentLink() throws Exception {
+         @Test
+     public void testDocumentLink() throws Exception {
         String result = getXML("testDocumentLink.doc").xml;
         assertTrue(result.indexOf("<div class=\"embedded\" id=\"_1327495610\"/>") != -1);
         assertTrue(result.indexOf("_1327495610.unknown") != -1);
     }
 
-    public void testWord6Parser() throws Exception {
+         @Test
+     public void testWord6Parser() throws Exception {
         InputStream input = WordParserTest.class.getResourceAsStream(
                 "/test-documents/testWORD6.doc");
         try {
@@ -184,7 +193,8 @@ public class WordParserTest extends TikaTest {
         }
     }
 
-    public void testVarious() throws Exception {
+         @Test
+     public void testVarious() throws Exception {
         ContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
 
@@ -259,7 +269,8 @@ public class WordParserTest extends TikaTest {
      * TIKA-1044 - Handle documents where parts of the
      *  text have no formatting or styles applied to them
      */
-    public void testNoFormat() throws Exception {
+         @Test
+     public void testNoFormat() throws Exception {
        ContentHandler handler = new BodyContentHandler();
        Metadata metadata = new Metadata();
 
@@ -278,7 +289,8 @@ public class WordParserTest extends TikaTest {
     /**
      * Ensures that custom OLE2 (HPSF) properties are extracted
      */
-    public void testCustomProperties() throws Exception {
+         @Test
+     public void testCustomProperties() throws Exception {
        InputStream input = WordParserTest.class.getResourceAsStream(
              "/test-documents/testWORD_custom_props.doc");
        Metadata metadata = new Metadata();

@@ -70,7 +70,7 @@ public class CustomFutureTask<V> extends FutureTask<V> implements MdcProvider {
     private final RefusedExecutionBehavior<V> refusedExecutionBehavior;
     private final long number;
     private final boolean trackable;
-    private final Map<String, Object> mdcMap;
+    private final Map<String, String> mdcMap;
 
     /**
      * Initializes a new {@link CustomFutureTask}.
@@ -78,7 +78,7 @@ public class CustomFutureTask<V> extends FutureTask<V> implements MdcProvider {
      * @param task The task
      * @param mdcMap The MDC map
      */
-    public CustomFutureTask(final Task<V> task, final Map<String, Object> mdcMap) {
+    public CustomFutureTask(final Task<V> task, final Map<String, String> mdcMap) {
         this(task, null, mdcMap);
     }
 
@@ -89,7 +89,7 @@ public class CustomFutureTask<V> extends FutureTask<V> implements MdcProvider {
      * @param refusedExecutionBehavior The refused execution behavior
      * @param mdcMap The MDC map
      */
-    public CustomFutureTask(final Task<V> task, final RefusedExecutionBehavior<V> refusedExecutionBehavior, final Map<String, Object> mdcMap) {
+    public CustomFutureTask(final Task<V> task, final RefusedExecutionBehavior<V> refusedExecutionBehavior, final Map<String, String> mdcMap) {
         super(task);
         this.task = task;
         this.mdcMap = mdcMap;
@@ -100,7 +100,7 @@ public class CustomFutureTask<V> extends FutureTask<V> implements MdcProvider {
     }
 
     @Override
-    public Map<String, Object> getMdc() {
+    public Map<String, String> getMdc() {
         return mdcMap;
     }
 

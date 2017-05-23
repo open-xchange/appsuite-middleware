@@ -49,17 +49,14 @@
 
 package com.openexchange.mail.oauth.internal;
 
-import java.util.Iterator;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.oauth.MailOAuthProvider;
 import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -87,32 +84,8 @@ public class MailOAuthServiceImpl implements MailOAuthService {
     }
 
     private void checkOAuthAccount(OAuthAccount oAuthAccount, Session session) throws OXException {
-        OAuthServiceMetaData oAuthServiceMetaData = oAuthAccount.getMetaData();
-
         // Check if mail is supported
-        {
-            Set<OAuthScope> availableScopes = oAuthServiceMetaData.getAvailableScopes(session.getUserId(), session.getContextId());
-            OAuthScope mailScope = null;
-            for (Iterator<OAuthScope> it = availableScopes.iterator(); null == mailScope && it.hasNext();) {
-                OAuthScope scope = it.next();
-                if (OXScope.mail == scope.getOXScope()) {
-                    mailScope = scope;
-                }
-            }
-            if (null == mailScope) {
-                throw OAuthExceptionCodes.NO_SUCH_SCOPE_AVAILABLE.create(OXScope.mail.getDisplayName());
-            }
-
-            boolean supportsMail = false;
-            for (Iterator<OAuthScope> it = oAuthAccount.getEnabledScopes().iterator(); !supportsMail && it.hasNext();) {
-                if (OXScope.mail == it.next().getOXScope()) {
-                    supportsMail = true;
-                }
-            }
-            if (false == supportsMail) {
-                throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(oAuthServiceMetaData.getDisplayName(), OXScope.mail.getDisplayName());
-            }
-        }
+        OAuthUtil.checkScopesAvailableAndEnabled(oAuthAccount, session.getUserId(), session.getContextId(), OXScope.mail);
     }
 
     @Override
@@ -132,7 +105,7 @@ public class MailOAuthServiceImpl implements MailOAuthService {
     }
 
     @Override
-    public String getTokenFor(int oauthAccountId, Session session) throws OXException {
+    public TokenInfo getTokenFor(int oauthAccountId, Session session) throws OXException {
         OAuthService oAuthService = services.getOptionalService(OAuthService.class);
         if (null == oAuthService) {
             throw ServiceExceptionCode.absentService(OAuthService.class);
@@ -140,7 +113,7 @@ public class MailOAuthServiceImpl implements MailOAuthService {
 
         // Get the OAuth account
         OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-        //checkOAuthAccount(oAuthAccount, session);
+        checkOAuthAccount(oAuthAccount, session);
 
         MailOAuthProvider provider = registry.getProviderFor(oAuthAccount.getMetaData().getId());
         return null == provider ? null : provider.getTokenFor(oAuthAccount, session);

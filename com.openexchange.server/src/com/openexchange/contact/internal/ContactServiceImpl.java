@@ -341,6 +341,9 @@ public class ContactServiceImpl extends DefaultContactService {
             delta.setImageLastModified(now);
             if (null != delta.getImage1()) {
                 delta.setNumberOfImages(1);
+                if (null == delta.getImageContentType()) {
+                    delta.setImageContentType(storedContact.getImageContentType());
+                }
             } else {
                 delta.setNumberOfImages(0);
                 delta.setImageContentType(null);

@@ -168,7 +168,7 @@ public class EmojiRegistry {
                     unicode = "\\u" + hex;
                     codePoint = Integer.parseInt(hex, 16);
                 }
-                System.out.println("emojis.put(" + codePoint + ", \"" + unicode + "\"); // " + entry.getValue());
+                System.out.println("emojis.put(" + codePoint + ", \"" + unicode + "\"); // " + entry.getValue().replace((char) 96, '\'').replace((char) 180, '\''));
             }
         }
     }

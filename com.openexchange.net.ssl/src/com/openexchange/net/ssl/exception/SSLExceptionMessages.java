@@ -55,6 +55,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link SSLExceptionMessages}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class SSLExceptionMessages implements LocalizableStrings {
@@ -64,7 +65,23 @@ public class SSLExceptionMessages implements LocalizableStrings {
 
     // The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
     public final static String UNTRUSTED_CERT_USER_CONFIG_MSG = "The certificate for domain \"%1$s\" is untrusted. You can change your general trust level in the settings.";
+
+    // The certificate '%1$s' is not trusted by the user '%2$s' in context '%3$s'
+    public final static String USER_DOES_NOT_TRUST_CERTIFICATE = "The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in context '%3$s'";
+
+    // The root certificate issued by '%1$s' is not trusted
+    public final static String UNTRUSTED_ROOT_CERTIFICATE = "The root certificate issued by '%1$s' is not trusted";
+
+    // The certificate is self-signed
+    public final static String SELF_SIGNED_CERTIFICATE = "The certificate is self-signed";
+
+    // The certificate is expired
+    public final static String CERTIFICATE_IS_EXPIRED = "The certificate is expired";
     
+    // The common name for the certificate is invalid
+    public final static String INVALID_COMMON_NAME = "The common name for the certificate is invalid";
+
+
     private SSLExceptionMessages() {
         super();
     }

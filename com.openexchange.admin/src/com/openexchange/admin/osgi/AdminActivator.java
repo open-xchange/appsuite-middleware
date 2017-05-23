@@ -83,6 +83,7 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.admin.tools.filestore.osgi.FilestoreDataMoveListenerTracker;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
@@ -100,6 +101,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.pluginsloaded.PluginsLoadedService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -159,7 +161,7 @@ public class AdminActivator extends HousekeepingActivator {
         track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, AdminServiceRegistry.getInstance(), UserService.class));
         track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
         track(FileStorageUnregisterListenerRegistry.class, new RegistryServiceTrackerCustomizer<FileStorageUnregisterListenerRegistry>(context, AdminServiceRegistry.getInstance(), FileStorageUnregisterListenerRegistry.class));
-
+        track(PluginsLoadedService.class, new RegistryServiceTrackerCustomizer<PluginsLoadedService>(context, AdminServiceRegistry.getInstance(), PluginsLoadedService.class));
         // Plugin interfaces
         {
             final int defaultRanking = 100;
@@ -183,6 +185,11 @@ public class AdminActivator extends HousekeepingActivator {
 
             PluginInterfaces.setInstance(builder.build());
         }
+
+        // FilestoreDataMoveListener
+        FilestoreDataMoveListenerTracker dataMoveListenerTracker = new FilestoreDataMoveListenerTracker(context);
+        rememberTracker(dataMoveListenerTracker);
+        com.openexchange.admin.tools.filestore.FilestoreDataMover.setListeners(dataMoveListenerTracker);
 
         track(FileLocationHandler.class, new FilestoreLocationUpdaterCustomizer(context));
 
@@ -284,6 +291,7 @@ public class AdminActivator extends HousekeepingActivator {
             }
         }
 
+        com.openexchange.admin.tools.filestore.FilestoreDataMover.setListeners(null);
         PluginInterfaces.setInstance(null);
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         log.info("Stopping RMI...");

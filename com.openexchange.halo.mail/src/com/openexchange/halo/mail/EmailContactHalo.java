@@ -156,10 +156,10 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
         // Check for extended message storage
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        if (messageStorage instanceof IMailMessageStorageExt) {
-            IMailMessageStorageExt extMsgStorage = (IMailMessageStorageExt) messageStorage;
-            List<MailMessage> inboxMessages = Arrays.asList(extMsgStorage.searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, fields, headers));
-            List<MailMessage> sentMessages = Arrays.asList(extMsgStorage.searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, fields, headers));
+        IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+        if (null != ext) {
+            List<MailMessage> inboxMessages = Arrays.asList(ext.searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, fields, headers));
+            List<MailMessage> sentMessages = Arrays.asList(ext.searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, fields, headers));
             return new RetrievalResult(inboxMessages, sentMessages);
         }
 

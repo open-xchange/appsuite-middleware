@@ -1,0 +1,15 @@
+feature_name: I18N
+feature_description: |
+  Properties for i18n
+properties:
+    - key: i18n.language.path
+      description: |
+        Specifies the path to *.po files.
+      defaultValue: "@oxgroupwaresysconfdir@/../i18n/"
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: i18n.properties
+      packageName: open-xchange-core
+      tags: ["I18N"]

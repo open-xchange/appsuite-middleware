@@ -49,26 +49,20 @@
 
 package com.openexchange.i18n;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.i18n.parsing.BasicTests;
 import com.openexchange.i18n.parsing.Bug22803Test;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    TranslationToI18NAdapterTest.class,
+    Bug22803Test.class,
+    BasicTests.class,
+
+})
 public class UnitTests {
-
-    private UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(TranslationToI18NAdapterTest.class);
-        suite.addTest(new JUnit4TestAdapter(Bug22803Test.class));
-        suite.addTest(new JUnit4TestAdapter(BasicTests.class));
-        return suite;
-    }
 }

@@ -74,58 +74,22 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug22094Test extends CalDAVTest {
 
-	@Test
-	public void testMoveAppointment() throws Exception {
-		/*
-		 * create target folder for move on server
-		 */
-		FolderObject subfolder = super.createFolder("move test" + System.currentTimeMillis());
-		super.rememberForCleanUp(subfolder);
-		String subfolderID = Integer.toString(subfolder.getObjectID());
-		/*
-		 * create appointment in default folder on client
-		 */
-		String uid = randomUID();
-    	Date start = TimeTools.D("next thursday at 7:15");
-    	Date end = TimeTools.D("next thursday at 11:30");
-    	String title = "move test";
-		String iCal =
-				"BEGIN:VCALENDAR" + "\r\n" +
-				"VERSION:2.0" + "\r\n" +
-				"PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" +
-				"CALSCALE:GREGORIAN" + "\r\n" +
-				"BEGIN:VTIMEZONE" + "\r\n" +
-				"TZID:Europe/Berlin" + "\r\n" +
-				"BEGIN:DAYLIGHT" + "\r\n" +
-				"TZOFFSETFROM:+0100" + "\r\n" +
-				"RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" +
-				"DTSTART:19810329T020000" + "\r\n" +
-				"TZNAME:CEST" + "\r\n" +
-				"TZOFFSETTO:+0200" + "\r\n" +
-				"END:DAYLIGHT" + "\r\n" +
-				"BEGIN:STANDARD" + "\r\n" +
-				"TZOFFSETFROM:+0200" + "\r\n" +
-				"RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" +
-				"DTSTART:19961027T030000" + "\r\n" +
-				"TZNAME:CET" + "\r\n" +
-				"TZOFFSETTO:+0100" + "\r\n" +
-				"END:STANDARD" + "\r\n" +
-				"END:VTIMEZONE" + "\r\n" +
-				"BEGIN:VEVENT" + "\r\n" +
-				"CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
-				"TRANSP:OPAQUE" + "\r\n" +
-				"CLASS:PUBLIC" + "\r\n" +
-				"SUMMARY:" + title + "\r\n" +
-				"LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
-				"DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-				"DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
-				"SEQUENCE:1" + "\r\n" +
-				"END:VEVENT" + "\r\n" +
-				"END:VCALENDAR"
-		;
-		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
+    @Test
+    public void testMoveAppointment() throws Exception {
+        /*
+         * create target folder for move on server
+         */
+        FolderObject subfolder = super.createFolder("move test" + System.currentTimeMillis());
+        String subfolderID = Integer.toString(subfolder.getObjectID());
+        /*
+         * create appointment in default folder on client
+         */
+        String uid = randomUID();
+        Date start = TimeTools.D("next thursday at 7:15");
+        Date end = TimeTools.D("next thursday at 11:30");
+        String title = "move test";
+        String iCal = "BEGIN:VCALENDAR" + "\r\n" + "VERSION:2.0" + "\r\n" + "PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" + "CALSCALE:GREGORIAN" + "\r\n" + "BEGIN:VTIMEZONE" + "\r\n" + "TZID:Europe/Berlin" + "\r\n" + "BEGIN:DAYLIGHT" + "\r\n" + "TZOFFSETFROM:+0100" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU" + "\r\n" + "DTSTART:19810329T020000" + "\r\n" + "TZNAME:CEST" + "\r\n" + "TZOFFSETTO:+0200" + "\r\n" + "END:DAYLIGHT" + "\r\n" + "BEGIN:STANDARD" + "\r\n" + "TZOFFSETFROM:+0200" + "\r\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU" + "\r\n" + "DTSTART:19961027T030000" + "\r\n" + "TZNAME:CET" + "\r\n" + "TZOFFSETTO:+0100" + "\r\n" + "END:STANDARD" + "\r\n" + "END:VTIMEZONE" + "\r\n" + "BEGIN:VEVENT" + "\r\n" + "CREATED:" + formatAsUTC(new Date()) + "\r\n" + "UID:" + uid + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "TRANSP:OPAQUE" + "\r\n" + "CLASS:PUBLIC" + "\r\n" + "SUMMARY:" + title + "\r\n" + "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "SEQUENCE:1" + "\r\n" + "END:VEVENT" + "\r\n" + "END:VCALENDAR";
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
          * verify appointment on server
          */
@@ -145,16 +109,15 @@ public class Bug22094Test extends CalDAVTest {
         /*
          * update etag from moved appointment
          */
-		DavPropertyNameSet props = new DavPropertyNameSet();
+        DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() +  iCalResource.getHref(),
-        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + iCalResource.getHref(), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 1 == responses.length);
-    	String eTag = this.extractTextContent(PropertyNames.GETETAG, responses[0]);
-    	assertNotNull("got no ETag from response", eTag);
-    	iCalResource.setEtag(eTag);
+        String eTag = this.extractTextContent(PropertyNames.GETETAG, responses[0]);
+        assertNotNull("got no ETag from response", eTag);
+        iCalResource.setEtag(eTag);
         /*
          * update resource on target location again
          */
@@ -173,6 +136,6 @@ public class Bug22094Test extends CalDAVTest {
         super.rememberForCleanUp(appointment);
         assertNotNull("appointment not found in target folder on server", appointment);
         assertEquals("folder ID wrong", subfolder.getObjectID(), appointment.getParentFolderID());
-	}
+    }
 
 }

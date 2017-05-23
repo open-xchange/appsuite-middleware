@@ -49,28 +49,21 @@
 
 package com.openexchange.ajax.reminder;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    Bug4342Test.class,
+    Bug5128Test.class,
+    Bug6408Test.class,
+    Bug7590Test.class,
+    Bug15740Test.class,
+    Bug14111Test.class,
+    Bug15776Test.class,
+    Bug16492Test.class,
+
+})
 public class ReminderBugTestSuite {
-
-    /**
-     * Prevent instantiation.
-     */
-    private ReminderBugTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4342Test.class);
-        tests.addTestSuite(Bug5128Test.class);
-        tests.addTestSuite(Bug6408Test.class);
-        tests.addTestSuite(Bug7590Test.class);
-        tests.addTestSuite(Bug15740Test.class);
-        tests.addTestSuite(Bug14111Test.class);
-        tests.addTestSuite(Bug15776Test.class);
-        tests.addTestSuite(Bug16492Test.class);
-        return tests;
-    }
 }

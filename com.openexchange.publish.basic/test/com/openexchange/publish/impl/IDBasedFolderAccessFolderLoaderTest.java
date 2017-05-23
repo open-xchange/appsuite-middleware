@@ -134,15 +134,15 @@ public class IDBasedFolderAccessFolderLoaderTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
+     @Test
+     public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
         Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(null, null);
 
         Assert.assertEquals(0, load.size());
     }
 
-    @Test
-    public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
+     @Test
+     public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFolderAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFolderAccess);
         PowerMockito.when(this.idBasedFolderAccess.getFolder(Matchers.anyString())).thenReturn(this.fileStorageFolder);
@@ -152,8 +152,8 @@ public class IDBasedFolderAccessFolderLoaderTest {
         Assert.assertEquals(0, load.size());
     }
 
-    @Test
-    public void testLoad_SearchIteratorEmpty_ReturnEmptyCollection() throws OXException {
+     @Test
+     public void testLoad_SearchIteratorEmpty_ReturnEmptyCollection() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFolderAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFolderAccess);
         PowerMockito.when(this.idBasedFolderAccess.getFolder(Matchers.anyString())).thenReturn(this.fileStorageFolder);
@@ -169,8 +169,8 @@ public class IDBasedFolderAccessFolderLoaderTest {
         Assert.assertEquals(0, load.size());
     }
 
-    @Test
-    public void testLoad_FoundOne_ReturnOneFolder() throws OXException {
+     @Test
+     public void testLoad_FoundOne_ReturnOneFolder() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFolderAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFolderAccess);
         PowerMockito.when(this.idBasedFolderAccess.getFolder(Matchers.anyString())).thenReturn(this.fileStorageFolder);

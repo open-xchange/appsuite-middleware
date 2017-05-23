@@ -14,10 +14,14 @@ BuildRequires: open-xchange-xerces
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
 BuildRequires: java-devel >= 1.7.0
 %endif
+%endif
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -27,7 +31,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
-Requires:      open-xchange-xerces
+Requires:      open-xchange-xerces >= @OXVERSION@
 Requires:      open-xchange-system
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache < %{version}
@@ -39,6 +43,8 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-config-cascade = %{version}
 Obsoletes:     open-xchange-config-cascade < %{version}
+Provides:      open-xchange-config-lean = %{version}
+Obsoletes:     open-xchange-config-lean < %{version}
 Provides:      open-xchange-config-cascade-context = %{version}
 Obsoletes:     open-xchange-config-cascade-context < %{version}
 Provides:      open-xchange-config-cascade-user = %{version}
@@ -470,42 +476,45 @@ fi
 # SoftwareChange_Request-1498
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
-jopts=${jopts//\"/}
-nopts=$jopts
-# -----------------------------------------------------------------------
-permval=$(echo $nopts | sed 's;^.*MaxPermSize=\([0-9]*\).*$;\1;')
-if [ $permval -lt 256 ]; then
-    nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
-fi
-# -----------------------------------------------------------------------
-for opt in "-server" "-Djava.awt.headless=true" \
-    "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
-    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
-    "-XX:-OmitStackTraceInFastThrow"; do
-    if ! echo $nopts | grep -- $opt > /dev/null; then
-        if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
-            opt="-XX:CMSInitiatingOccupancyFraction=75"
-        elif [ "$opt" = "-XX:NewRatio=" ]; then
-            opt="-XX:NewRatio=3"
-        fi
-        if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
-            if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
+if grep -q '^JAVA_XTRAOPTS=".*"$' "${pfile}"
+then
+    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+    jopts=${jopts//\"/}
+    nopts=$jopts
+    # -----------------------------------------------------------------------
+    permval=$(echo $nopts | sed 's;^.*MaxPermSize=\([0-9]*\).*$;\1;')
+    if [ $permval -lt 256 ]; then
+        nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
+    fi
+    # -----------------------------------------------------------------------
+    for opt in "-server" "-Djava.awt.headless=true" \
+        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
+        "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
+        "-XX:-OmitStackTraceInFastThrow"; do
+        if ! echo $nopts | grep -- $opt > /dev/null; then
+            if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
+                opt="-XX:CMSInitiatingOccupancyFraction=75"
+            elif [ "$opt" = "-XX:NewRatio=" ]; then
+                opt="-XX:NewRatio=3"
+            fi
+            if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
+                if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
+                    nopts="$nopts $opt"
+                fi
+            else
                 nopts="$nopts $opt"
             fi
-        else
-            nopts="$nopts $opt"
         fi
+    done
+    # -----------------------------------------------------------------------
+    for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC" "-XX:+CMSClassUnloadingEnabled"; do
+        if echo $nopts | grep -- $opt > /dev/null; then
+            nopts=$(echo $nopts | sed "s;$opt;;")
+        fi
+    done
+    if [ "$jopts" != "$nopts" ]; then
+        ox_set_property JAVA_XTRAOPTS \""$nopts"\" $pfile
     fi
-done
-# -----------------------------------------------------------------------
-for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC" "-XX:+CMSClassUnloadingEnabled"; do
-    if echo $nopts | grep -- $opt > /dev/null; then
-        nopts=$(echo $nopts | sed "s;$opt;;")
-    fi
-done
-if [ "$jopts" != "$nopts" ]; then
-   ox_set_property JAVA_XTRAOPTS \""$nopts"\" $pfile
 fi
 
 # SoftwareChange_Request-1141
@@ -552,11 +561,14 @@ fi
 # obsoletes SoftwareChange_Request-1068
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
-jopts=${jopts//\"/}
-if echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
-    jopts=$(echo $jopts | sed 's;-Dosgi.compatibility.bootdelegation=true;-Dosgi.compatibility.bootdelegation=false;')
-    ox_set_property JAVA_XTRAOPTS \""$jopts"\" $pfile
+if grep -q '^JAVA_XTRAOPTS=".*"$' "${pfile}"
+then
+    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+    jopts=${jopts//\"/}
+    if echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
+        jopts=$(echo $jopts | sed 's;-Dosgi.compatibility.bootdelegation=true;-Dosgi.compatibility.bootdelegation=false;')
+        ox_set_property JAVA_XTRAOPTS \""$jopts"\" $pfile
+    fi
 fi
 
 # SoftwareChange_Request-1135
@@ -1044,9 +1056,6 @@ fi
 # SoftwareChagne_Request-2110
 ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
 
-# SoftwareChange_Request-2148
-ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
-
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
 VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
@@ -1132,11 +1141,14 @@ ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 # SoftwareChange_Request-2335
 PFILE=/opt/open-xchange/etc/ox-scriptconf.sh
-JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
-JOPTS=${JOPTS//\"/}
-if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
-    JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
-    ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
+if grep -q '^JAVA_XTRAOPTS=".*"$' "${PFILE}"
+then
+    JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
+    JOPTS=${JOPTS//\"/}
+    if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
+        JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
+        ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
+    fi
 fi
 
 # SoftwareChange_Request-2342
@@ -1414,6 +1426,12 @@ sed -i '/^# Maximum number of open Files for the groupware$/{i\
 d
 }' /opt/open-xchange/etc/ox-scriptconf.sh
 
+# SoftwareChange_Request-3784
+VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
+if [ "\"open-xchange-mailapp\"" = "$VALUE" ]; then
+    ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\", \"open-xchange-mobile-api-facade\"" /opt/open-xchange/etc/server.properties
+fi
+
 # SoftwareChange_Request-3859
 VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
 VALUE=${VALUE//\"/}
@@ -1431,11 +1449,110 @@ ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 # SoftwareChange_Request-3934
 ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-4033
+sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/' /opt/open-xchange/etc/logback.xml
+
+# SoftwareChange_Request-4059
+ox_remove_property com.openexchange.mail.enforceSecureConnection /opt/open-xchange/etc/mail.properties
+
 # SoftwareChange_Request-4094
 VALUE=$(ox_read_property com.openexchange.mail.autoconfig.ispdb /opt/open-xchange/etc/autoconfig.properties)
 if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
     ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
 fi
+
+# SoftwareChange_Request-4096
+# use subshell to not pollute current env when sourcing ox-scriptconf.sh
+(
+  . /opt/open-xchange/lib/oxfunctions.sh
+  to_migrate=/opt/open-xchange/etc/ox-scriptconf.sh
+
+  # Pitfall_1 JAVA_XTRAOPTS="${JAVA_XTRAOPTS} foo=bar"
+  # was added by some customers to ox-scriptconf.sh
+  unset JAVA_XTRAOPTS
+  . ${to_migrate}
+  opts_old=${JAVA_XTRAOPTS}
+
+  # only migrate if pre RM-177 style options are found
+  if [[ ! -z "${opts_old}" ]]
+  then
+    backup=${to_migrate}.$(date +%s)
+    cp -a --remove-destination ${to_migrate} ${backup}
+
+    gc_regx="-XX:\+UseConcMarkSweepGC|-XX:\+UseParNewGC|-XX:CMSInitiatingOccupancyFraction|-XX:\+UseCMSInitiatingOccupancyOnly|-XX:NewRatio|-XX:\+DisableExplicitGC"
+    log_regx="-Dlogback.threadlocal.put.duplicate|-XX:-OmitStackTraceInFastThrow"
+    mem_regx="-Xmx|-XX:MaxHeapSize|-XX:MaxPermSize|-XX:\+UseTLAB"
+    net_regx="-Dsun.net.inetaddr.ttl|-Dnetworkaddress.cache.ttl|-Dnetworkaddress.cache.negative.ttl"
+    osgi_regx="-Dosgi.compatibility.bootdelegation"
+    server_regx="-server|-Djava.awt.headless"
+
+    opts_gc=()
+    opts_log=()
+    opts_mem=()
+    opts_net=()
+    opts_osgi=()
+    opts_server=()
+    opts_other=()
+
+    ((debug)) && echo "The options are: ${opts_old}"
+
+    opt_arr=(${opts_old})
+    num_opts=${#opt_arr[@]}
+    ((debug)) && echo "There are ${num_opts} options to migrate"
+    for ((i=0; i < num_opts; i++))
+    do
+      #assign single options to appropriate array
+      ((debug)) && echo "Option ${i}: ${opt_arr[${i}]}"
+      curr_opt=${opt_arr[${i}]}
+      if [[ "${curr_opt}" =~ ${gc_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a gc opt"
+        opts_gc+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${log_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a log opt"
+        opts_log+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${mem_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a mem opt"
+        opts_mem+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${net_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a net opt"
+        opts_net+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${osgi_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is an osgi opt"
+        opts_osgi+=(${curr_opt})
+      elif [[ "${curr_opt}" =~ ${server_regx} ]]
+      then
+        ((debug)) && echo "${curr_opt} is a server opt"
+        opts_server+=(${curr_opt})
+      else
+        ((debug)) && echo "${curr_opt} is another opt"
+        opts_other+=(${curr_opt})
+      fi
+    done
+
+    ox_add_property JAVA_OPTS_GC     "\"${opts_gc[*]}\""     "${to_migrate}"
+    ox_add_property JAVA_OPTS_LOG    "\"${opts_log[*]}\""    "${to_migrate}"
+    ox_add_property JAVA_OPTS_MEM    "\"${opts_mem[*]}\""    "${to_migrate}"
+    ox_add_property JAVA_OPTS_NET    "\"${opts_net[*]}\""    "${to_migrate}"
+    ox_add_property JAVA_OPTS_OSGI   "\"${opts_osgi[*]}\""   "${to_migrate}"
+    ox_add_property JAVA_OPTS_SERVER "\"${opts_server[*]}\"" "${to_migrate}"
+    ox_add_property JAVA_OPTS_OTHER  "\"${opts_other[*]}\""  "${to_migrate}"
+    sed -i -e '${a\
+# Define options for debugging the groupware Java virtual machine, disabled by default.\
+#JAVA_OPTS_DEBUG="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/mnt/heapdump -Xloggc:/var/log/open-xchange/gc.log -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintHeapAtGC -XX:+PrintGCApplicationStoppedTime -XX:+PrintTenuringDistribution"
+    }' "${to_migrate}"
+
+    # Pitfall_1: removes all occurrences
+    ox_remove_property JAVA_XTRAOPTS "${to_migrate}"
+  fi
+)
+
+# SoftwareChange_Request-4098
+ox_remove_property com.openexchange.mail.attachmentDisplaySizeLimit /opt/open-xchange/etc/mail.properties
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
@@ -1479,47 +1596,17 @@ exit 0
 
 %changelog
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-05-19 (4176)
-* Mon May 08 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-05-15 (4132)
-* Fri Apr 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-05-02 (4113)
-* Wed Apr 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-04-18 (4084)
-* Fri Mar 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-04-03 (4050)
-* Tue Mar 28 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-03-27 (4066)
-* Thu Mar 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-03-20 (4016)
-* Mon Mar 06 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-03-06 (3985)
-* Fri Feb 24 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-24 (3994)
-* Wed Feb 22 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-22 (3969)
-* Tue Feb 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-20 (3952)
-* Tue Jan 31 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-02-06 (3918)
-* Thu Jan 26 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-01-26 (3925)
-* Wed Jan 18 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-01-23 (3879)
-* Wed Jan 04 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-01-09 (3849)
-* Tue Dec 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-23 (3857)
-* Wed Dec 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-19 (3814)
-* Tue Dec 13 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-14 (3806)
-* Tue Dec 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-12-12 (3775)
+First candidate for 7.8.4 release
+* Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview of 7.8.4 release
+* Mon Apr 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>

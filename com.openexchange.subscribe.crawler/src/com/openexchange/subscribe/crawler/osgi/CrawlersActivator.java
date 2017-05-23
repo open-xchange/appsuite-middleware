@@ -51,26 +51,24 @@ package com.openexchange.subscribe.crawler.osgi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-import org.yaml.snakeyaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.java.Streams;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
@@ -134,35 +132,34 @@ public class CrawlersActivator implements BundleActivator {
     }
 
     public synchronized List<CrawlerDescription> getCrawlersFromFilesystem(final ConfigurationService config) {
-        final List<CrawlerDescription> crawlers = new LinkedList<CrawlerDescription>();
         String dirName = config.getProperty(DIR_NAME_PROPERTY);
         File directory = config.getDirectory(dirName);
         if (directory == null) {
             LOG.warn(DIR_NAME_PROPERTY + " not set or crawler configuration directory not found. Skipping crawler initialisation");
-            return crawlers;
+            return Collections.emptyList();
         }
-        final File[] files = directory.listFiles();
+
+        File[] files = directory.listFiles();
         if (files == null) {
             LOG.warn("Could not find crawler descriptions in {}. Skipping crawler initialisation.", directory);
-            return crawlers;
+            return Collections.emptyList();
         }
+
         LOG.info("Loading crawler descriptions from directory : {}", directory.getName());
-        for (final File file : files) {
+        List<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>(files.length);
+        for (File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
-                    Reader reader = null;
-                    try {
-                        reader = new FileReader(file);
-                        Yaml yaml = new Yaml();
-                        final CrawlerDescription crawlerDescription = yaml.loadAs(reader, CrawlerDescription.class);
+                    CrawlerDescription crawlerDescription = Yaml.loadType(file, CrawlerDescription.class);
+                    if (null == crawlerDescription) {
+                        LOG.warn("Could not parse crawler description from file {}", file);
+                    } else {
                         // Only add if not explicitly disabled as per file 'crawler.properties'
                         if (config.getBoolProperty(crawlerDescription.getId(), true)) {
                             crawlers.add(crawlerDescription);
                         } else {
                             LOG.info("Ignoring crawler description \"{}\" as per 'crawler.properties' file.", crawlerDescription.getId());
                         }
-                    } finally {
-                        Streams.close(reader);
                     }
                 }
             } catch (final FileNotFoundException e) {
@@ -173,30 +170,35 @@ public class CrawlersActivator implements BundleActivator {
     }
 
     public synchronized boolean removeCrawlerFromFilesystem(final ConfigurationService config, final String crawlerIdToDelete) {
-        final String dirName = config.getProperty(DIR_NAME_PROPERTY);
-        if (dirName != null) {
-            final File directory = config.getDirectory(dirName);
-            final File[] files = directory.listFiles();
-            if (files != null) {
-                for (final File file : files) {
-                    try {
-                        if (file.isFile() && file.getPath().endsWith(".yml")) {
-                            Reader reader = null;
-                            try {
-                                reader = new FileReader(file);
-                                Yaml yaml = new Yaml();
-                                CrawlerDescription crawler = yaml.loadAs(reader, CrawlerDescription.class);
-                                if (crawler.getId().equals(crawlerIdToDelete)) {
-                                    return file.delete();
-                                }
-                            } finally {
-                                Streams.close(reader);
-                            }
+        String dirName = config.getProperty(DIR_NAME_PROPERTY);
+        if (dirName == null) {
+            return false;
+        }
+
+        File directory = config.getDirectory(dirName);
+        if (null == directory) {
+            return false;
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return false;
+        }
+
+        for (File file : files) {
+            try {
+                if (file.isFile() && file.getPath().endsWith(".yml")) {
+                    CrawlerDescription crawler = Yaml.loadType(file, CrawlerDescription.class);
+                    if (null == crawler) {
+                        LOG.warn("Could not parse crawler description from file {}", file);
+                    } else {
+                        if (crawler.getId().equals(crawlerIdToDelete)) {
+                            return file.delete();
                         }
-                    } catch (final FileNotFoundException e) {
-                        // Should not appear because file existence is checked before.
                     }
                 }
+            } catch (final FileNotFoundException e) {
+                // Should not appear because file existence is checked before.
             }
         }
         return false;

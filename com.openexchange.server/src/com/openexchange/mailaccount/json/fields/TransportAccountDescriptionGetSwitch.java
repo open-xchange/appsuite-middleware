@@ -325,4 +325,14 @@ public class TransportAccountDescriptionGetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object mailDisabled() {
+        return null;
+    }
+
+    @Override
+    public Object transportDisabled() {
+        return Boolean.valueOf(accountDescription.isTransportDisabled());
+    }
+
 }

@@ -49,26 +49,30 @@
 
 package com.openexchange.webdav.xml.contact;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
 
 public class Bug8182Test extends ContactTest {
 
-    public Bug8182Test(final String name) {
-        super(name);
+    public Bug8182Test() {
+        super();
     }
 
+    @Test
     public void testBug8182() throws Throwable {
         final Contact contactObj = createContactObject("testPropFindWithModified");
-        final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
-        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword(), context);
+        final int objectId = insertContact(webCon, contactObj, getHostURI(), login, password);
+        final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostURI(), getLogin(), getPassword());
         final Date modified = loadContact.getLastModified();
         assertTrue("Can't get last modified of contact.", modified.getTime() > 0);
-        deleteContact(getWebConversation(), objectId, contactFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteContact(getWebConversation(), objectId, contactFolderId, modified, getHostURI(), getLogin(), getPassword());
         // prevent master/slave problem
         Thread.sleep(1000);
-        final Contact[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password, context);
+        final Contact[] contactArray = listContact(webCon, contactFolderId, modified, true, false, getHostURI(), login, password);
         boolean found = true;
         if (contactArray.length == 0) {
             found = false;

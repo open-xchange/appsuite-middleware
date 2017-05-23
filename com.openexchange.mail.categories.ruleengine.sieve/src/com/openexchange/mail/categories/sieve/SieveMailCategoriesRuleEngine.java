@@ -59,7 +59,7 @@ import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.Token;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
@@ -76,8 +76,9 @@ import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExcep
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
 import com.openexchange.mail.categories.ruleengine.RuleType;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.properties.CredentialSource;
+import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import gnu.trove.list.TIntList;
@@ -181,12 +182,13 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
     private Credentials getCredentials(Session session) {
         String loginName;
         {
-            ConfigurationService config = services.getService(ConfigurationService.class);
-            String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-            loginName = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc) ? session.getLogin() : session.getLoginName();
+            LeanConfigurationService mailFilterConfig = services.getService(LeanConfigurationService.class);
+            String credsrc = mailFilterConfig.getProperty(session.getUserId(), session.getContextId(), MailFilterProperty.credentialSource);
+            loginName = CredentialSource.SESSION_FULL_LOGIN.name().equals(credsrc) ? session.getLogin() : session.getLoginName();
         }
         Subject subject = (Subject) session.getParameter("kerberosSubject");
-        return new Credentials(loginName, session.getPassword(), session.getUserId(), session.getContextId(), null, subject);
+        String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
+        return new Credentials(loginName, session.getPassword(), session.getUserId(), session.getContextId(), null, subject, oauthToken);
     }
 
     private Rule mailCategoryRule2SieveRule(MailCategoryRule rule, RuleType type) throws SieveException {
@@ -359,8 +361,9 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             if (removed) {
                 rules2update.add(rule);
             }
-            for (TestCommand parent : toDeleteMap.keySet()) {
-                for (TestCommand deleteEntry : toDeleteMap.get(parent)) {
+            for (Map.Entry<TestCommand, List<TestCommand>> entry : toDeleteMap.entrySet()) {
+                TestCommand parent = entry.getKey();
+                for (TestCommand deleteEntry : entry.getValue()) {
                     parent.removeTestCommand(deleteEntry);
                 }
             }

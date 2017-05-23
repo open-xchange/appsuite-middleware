@@ -77,6 +77,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
@@ -105,6 +106,7 @@ import com.openexchange.oauth.provider.impl.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.RevokeEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.TokenEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.TokenInfo;
+import com.openexchange.oauth.provider.impl.servlets.TokenIntrospection;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -157,6 +159,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(TemplateService.class);
         trackService(TranslatorFactory.class);
         trackService(HtmlService.class);
+        trackService(MailService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
 
         boolean isAuthorizationServer = configService.getBoolProperty(OAuthProviderProperties.IS_AUTHORIZATION_SERVER, true);
@@ -255,6 +258,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             String tokenInfoAlias = prefix + OAuthProviderConstants.TOKEN_INFO_SERVLET_ALIAS;
             httpService.registerServlet(tokenInfoAlias, tokenInfo, null, httpService.createDefaultHttpContext());
             registeredServlets.add(tokenInfoAlias);
+        }
+        {
+            TokenIntrospection tokenIntrospection = new TokenIntrospection(authorizationService, clientManagement, grantManagement, this);
+            String tokenIntrospectionAlias = prefix + OAuthProviderConstants.TOKEN_INTROSPECTION_SERVLET_ALIAS;
+            httpService.registerServlet(tokenIntrospectionAlias, tokenIntrospection, null, httpService.createDefaultHttpContext());
+            registeredServlets.add(tokenIntrospectionAlias);
         }
     }
 

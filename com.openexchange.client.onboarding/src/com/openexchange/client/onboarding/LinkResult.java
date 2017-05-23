@@ -52,6 +52,7 @@ package com.openexchange.client.onboarding;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -96,8 +97,19 @@ public class LinkResult implements Result {
         }
 
         try {
-            LinkType type = link.getType();
-            return new SimpleResultObject(new JSONObject(4).put("link", link.getUrl()).put("type", null == type ? LinkType.COMMON.getId() : type.getId()), "json");
+            JSONObject jLink = new JSONObject(4);
+            jLink.put("link", link.getUrl());
+            {
+                LinkType type = link.getType();
+                jLink.put("type", null == type ? LinkType.COMMON.getId() : type.getId());
+            }
+            {
+                String imageUrl = link.getImageUrl();
+                if (false == Strings.isEmpty(imageUrl)) {
+                    jLink.put("image", imageUrl);
+                }
+            }
+            return new SimpleResultObject(jLink, "json");
         } catch (JSONException e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

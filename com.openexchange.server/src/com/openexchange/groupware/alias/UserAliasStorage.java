@@ -85,6 +85,16 @@ public interface UserAliasStorage {
     Set<String> getAliases(int contextId, int userId) throws OXException;
 
     /**
+     * Gets all aliases of the specified users.
+     *
+     * @param contextId The context identifier
+     * @param userIds The user identifiers
+     * @return A <code>Set</code> of aliases belonging to given user
+     * @throws OXException If aliases cannot be returned
+     */
+    List<Set<String>> getAliases(int contextId, int... userIds) throws OXException;
+
+    /**
      * Gets the identifier of the user owning the alias.
      *
      * @param contextId The context identifier

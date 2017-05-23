@@ -151,12 +151,7 @@ public class SAMLLoginTools {
      */
     public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, LoginConfiguration loginConfiguration) throws OXException {
         // IP check
-        SessionUtility.checkIP(
-            loginConfiguration.isIpCheck(),
-            loginConfiguration.getRanges(),
-            session,
-            httpRequest.getRemoteAddr(),
-            loginConfiguration.getIpCheckWhitelist());
+        SessionUtility.checkIP(session, httpRequest.getRemoteAddr());
 
         // Check secret cookie
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);

@@ -50,11 +50,14 @@
 package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.L;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.TimeZone;
-import junit.framework.AssertionFailedError;
-import com.openexchange.ajax.framework.AJAXClient;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -72,9 +75,6 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskDurationAndCostsTest extends AbstractAJAXSession {
 
-    @SuppressWarnings("hiding")
-    private AJAXClient client;
-
     private Task task;
 
     private TimeZone tz;
@@ -82,33 +82,37 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link TaskDurationAndCostsTest}.
      */
-    public TaskDurationAndCostsTest(String name) {
-        super(name);
+    public TaskDurationAndCostsTest() {
+        super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        tz = client.getValues().getTimeZone();
+        tz = getClient().getValues().getTimeZone();
         task = new Task();
-        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
+        task.setParentFolderID(getClient().getValues().getPrivateTaskFolder());
         task.setTitle("Set task duration and costs test");
         task.setActualDuration(L(2));
         task.setActualCosts(new BigDecimal("2.0"));
         task.setTargetDuration(L(10));
         task.setTargetCosts(new BigDecimal("10.0"));
         InsertRequest request = new InsertRequest(task, tz);
-        InsertResponse response = client.execute(request);
+        InsertResponse response = getClient().execute(request);
         response.fillTask(task);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        DeleteRequest req = new DeleteRequest(task);
-        client.execute(req);
+        try {
+            DeleteRequest req = new DeleteRequest(task);
+            getClient().execute(req);
+        } finally {
+            super.tearDown();
+        }
     }
 
+    @Test
     public void testDurationAndCosts() throws Exception {
         task.setTargetCosts(new BigDecimal("11.5"));
         task.setActualCosts(new BigDecimal("4.728"));
@@ -116,13 +120,13 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         task.setTargetDuration(L(15));
         UpdateRequest req = new UpdateRequest(task, tz, false);
         try {
-            UpdateResponse response = client.execute(req);
+            UpdateResponse response = getClient().execute(req);
             task.setLastModified(response.getTimestamp());
-        } catch (AssertionFailedError e) {
+        } catch (Exception e) {
             fail("Setting costs and duration failed!");
         }
         GetRequest request = new GetRequest(task);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         task.setLastModified(response.getTimestamp());
         Task test = response.getTask(tz);
         // We have in the database NUMERIC(12,2). So round to 3 valid digits in this case. Rounding is necessary because JSON internally

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.kata;
 
-
-
 /**
  * {@link IdentitySource}
  *
@@ -60,8 +58,11 @@ package com.openexchange.ajax.kata;
 public interface IdentitySource<T> {
 
     public void assumeIdentity(T entry);
+
     public void rememberIdentityValues(T entry);
+
     public void forgetIdentity(T entry);
+
     public Class<T> getType();
 
 }

@@ -49,15 +49,16 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.results.Results;
-
-
 
 /**
  * {@link AllTest}
@@ -67,6 +68,7 @@ import com.openexchange.groupware.results.Results;
 
 public class AllTest extends FileActionTest {
 
+    @Test
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -76,12 +78,10 @@ public class AllTest extends FileActionTest {
         }
     }
 
+    @Test
     public void testAction() throws OXException {
-        request()
-            .param("folder", "12")
-            .param("columns", "1,700,702") // id, title and filename
-            .param("sort", "700")
-            .param("order", "desc");
+        request().param("folder", "12").param("columns", "1,700,702") // id, title and filename
+            .param("sort", "700").param("order", "desc");
 
         final List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
         fileAccess().expectCall("getDocuments", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult());

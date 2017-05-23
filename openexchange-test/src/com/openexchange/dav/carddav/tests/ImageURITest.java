@@ -165,8 +165,8 @@ public class ImageURITest extends CardDAVTest {
             "VERSION:3.0" + "\r\n" +
             "UID:" + uid + "\r\n" +
             "REV:" + formatAsUTC(new Date()) + "\r\n" +
-            "END:VCARD" + "\r\n"
-            , href, null);
+            "END:VCARD" + "\r\n", href, null)
+        ;
         PhotoType photo = new PhotoType();
         photo.setImageMediaType(ImageMediaType.PNG);
         photo.setEncodingType(EncodingType.BINARY);
@@ -223,9 +223,9 @@ public class ImageURITest extends CardDAVTest {
          */
         vCard.getVCard().removePhoto(vCard.getVCard().getPhotos().get(0));
         PhotoType photo = new PhotoType();
-        photo.setImageMediaType(ImageMediaType.SGIF);
+        photo.setImageMediaType(ImageMediaType.PNG);
         photo.setEncodingType(EncodingType.BINARY);
-        photo.setPhoto(Photos.GIF_100x100);
+        photo.setPhoto(Photos.PNG_200x200);
         vCard.getVCard().addPhoto(photo);
         putVCardUpdate(uid, vCard.toString(), vCard.getETag());
         /*
@@ -233,11 +233,11 @@ public class ImageURITest extends CardDAVTest {
          */
         contact = getContact(uid);
         assertNotNull(contact);
-        Assert.assertArrayEquals("image data wrong", Photos.GIF_100x100, contact.getImage1());
+        Assert.assertArrayEquals("image data wrong", Photos.PNG_200x200, contact.getImage1());
         /*
          * get & verify photo in vCard
          */
-        verifyPhoto(href, Photos.GIF_100x100, prefer);
+        verifyPhoto(href, Photos.PNG_200x200, prefer);
     }
 
     private void testRemoveOnClient(String prefer) throws Exception {
@@ -281,13 +281,13 @@ public class ImageURITest extends CardDAVTest {
         verifyPhoto(href, null, prefer);
     }
 
-	private void verifyPhoto(byte[] expectedPhoto, VCard vCard, String prefer) throws Exception {
+    private void verifyPhoto(byte[] expectedPhoto, VCard vCard, String prefer) throws Exception {
         if (null == expectedPhoto) {
             assertTrue("PHOTO wrong", null == vCard.getPhotos() || 0 == vCard.getPhotos().size());
         } else {
             assertTrue("PHOTO wrong", null != vCard.getPhotos() && 0 < vCard.getPhotos().size());
             PhotoType photoProperty = vCard.getPhotos().get(0);
-    	    if ("photo=uri".equals(prefer)) {
+            if ("photo=uri".equals(prefer)) {
                 URI photoURI = photoProperty.getPhotoURI();
                 assertNotNull("POHTO wrong", photoURI);
                 Assert.assertArrayEquals("image data wrong", expectedPhoto, downloadPhoto(photoURI));
@@ -297,9 +297,9 @@ public class ImageURITest extends CardDAVTest {
                 Assert.assertArrayEquals("image data wrong", expectedPhoto, vCardPhoto);
             }
         }
-	}
+    }
 
-	private byte[] downloadPhoto(URI uri) throws Exception {
+    private byte[] downloadPhoto(URI uri) throws Exception {
         GetMethod get = null;
         try {
             get = new GetMethod(uri.toString());
@@ -308,9 +308,9 @@ public class ImageURITest extends CardDAVTest {
         } finally {
             release(get);
         }
-	}
+    }
 
-	private VCardResource verifyPhoto(String href, byte[] expectedPhoto, String prefer) throws Exception {
+    private VCardResource verifyPhoto(String href, byte[] expectedPhoto, String prefer) throws Exception {
         /*
          * get & verify vCard via plain GET
          */
@@ -330,7 +330,7 @@ public class ImageURITest extends CardDAVTest {
         assertNotNull(card);
         verifyPhoto(expectedPhoto, card.getVCard(), prefer);
         return card;
-	}
+    }
 
     private VCardResource get(String href, String prefer) throws Exception {
         GetMethod get = null;

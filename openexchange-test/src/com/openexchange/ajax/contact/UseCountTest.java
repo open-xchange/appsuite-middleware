@@ -49,22 +49,22 @@
 
 package com.openexchange.ajax.contact;
 
-import java.util.Random;
+import static org.junit.Assert.*;
+import java.util.UUID;
 import org.json.JSONArray;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.jslob.actions.SetRequest;
-import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
-
+import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * {@link UseCountTest}
@@ -74,65 +74,76 @@ import com.openexchange.test.FolderTestManager;
  */
 public class UseCountTest extends ContactTest {
 
-    private AJAXClient client;
-    private ContactTestManager ctm;
-    private FolderTestManager ftm;
-    private MailTestManager mtm;
     private String address;
     private int folderId;
-
-    /**
-     * Initializes a new {@link UseCountTest}.
-     * @param name
-     */
-    public UseCountTest(String name) {
-        super(name);
-    }
+    private AJAXClient client;
 
     @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User1);
-        ftm = new FolderTestManager(client);
-        FolderObject folder = ftm.generatePrivateFolder("useCountTest", Module.CONTACTS.getFolderConstant(), client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
+
+        client = getClient();
+
+        FolderObject folder = ftm.generatePrivateFolder("useCountTest" + UUID.randomUUID().toString(), Module.CONTACTS.getFolderConstant(), client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderId = folder.getObjectID();
-        ctm = new ContactTestManager(client);
         Contact c1 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
-        c1.setEmail1("useCount1@ox.invalid");
-        c1 = ctm.newAction(c1);
+        c1.setEmail1(modifyMailAddress(client.getValues().getDefaultAddress()));
+        c1 = cotm.newAction(c1);
         Contact c2 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
-        c2.setEmail1("useCount2@ox.invalid");
-        c2 = ctm.newAction(c2);
+        c2.setEmail1(modifyMailAddress(client.getValues().getDefaultAddress()));
+        c2 = cotm.newAction(c2);
 
-        AJAXClient client = new AJAXClient(User.User1);
         SetRequest req = new SetRequest("io.ox/mail", "{\"contactCollectOnMailTransport\": true}", true);
         client.execute(req);
 
-        mtm = new MailTestManager(client);
         address = c2.getEmail1();
-        mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
+        // If an exception occurred while sending the mail might be null 
+        assertNotNull("Mail could not be send", mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test")));
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        mtm.cleanUp();
-        ctm.cleanUp();
-        ftm.cleanUp();
-        super.tearDown();
-    }
-
+    @Test
     public void testUseCount() throws Exception {
-        AJAXClient client = new AJAXClient(User.User1);
-        AutocompleteRequest req = new AutocompleteRequest("UseCount", false, String.valueOf(folderId), CONTACT_FIELDS, false);
-        CommonSearchResponse resp = client.execute(req);
-        assertFalse(resp.hasError());
-        JSONArray json = (JSONArray) resp.getData();
-        assertNotNull(json);
-        assertEquals(2, json.length());
-        Contact[] contacts = jsonArray2ContactArray(json, CONTACT_FIELDS);
-        assertEquals(address, contacts[0].getEmail1());
-        client.logout();
+        AutocompleteRequest request = new AutocompleteRequest("UseCount", false, String.valueOf(folderId), CONTACT_FIELDS, true);
+        long until = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+        Contact firstResult = null;
+        CommonSearchResponse response;
+        do {
+            response = client.execute(request);
+            assertFalse(response.getErrorMessage(), response.hasError());
+            JSONArray jsonArray = (JSONArray) response.getData();
+            assertNotNull(jsonArray);
+            Contact[] contacts = jsonArray2ContactArray(jsonArray, CONTACT_FIELDS);
+            assertTrue(0 < contacts.length);
+            firstResult = contacts[0];
+            if (address.equals(firstResult.getEmail1())) {
+                break;
+            }
+            Thread.sleep(500);
+        } while (System.currentTimeMillis() < until);
+        assertEquals(address, firstResult.getEmail1());
     }
+    
+    /**
+     * Modify given mail address to create new unique address
+     * 
+     * @param mailAdress The original mail address
+     * @return unique mail address
+     */
+    private String modifyMailAddress(String mailAddress) {
+        StringBuilder sb = new StringBuilder();
+        int at;
 
+        // Check if given mail address is 'valid'  
+        if ((at = mailAddress.indexOf("@")) < 0) {
+            return mailAddress;
+        }
+
+        // Generate random address
+        sb.append(UUID.randomUUID().toString().replaceAll("-", ""));
+        sb.append(mailAddress.substring(at));
+
+        return sb.toString();
+    }
 }

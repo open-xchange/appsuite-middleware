@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.action;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -57,6 +59,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.java.Charsets;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -71,7 +75,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class Bug49057Test extends ActionTestCase {
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -87,13 +91,13 @@ public class Bug49057Test extends ActionTestCase {
         }
     }
 
+    @Test
     public void testDateProperties() throws Exception {
         /*
          * prepare propfind request
          */
         MockWebdavRequest request = new MockWebdavRequest(factory, "http://localhost/");
-        request.setBodyAsString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
-            + "<D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop><D:prop><D:getlastmodified/></D:prop><D:prop><D:creationdate/></D:prop></D:propfind>");
+        request.setBodyAsString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + "<D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop><D:prop><D:getlastmodified/></D:prop><D:prop><D:creationdate/></D:prop></D:propfind>");
         request.setHeader("depth", "1");
         request.setUrl(testCollection);
         MockWebdavResponse response = new MockWebdavResponse();
@@ -111,7 +115,7 @@ public class Bug49057Test extends ActionTestCase {
         SimpleDateFormat expectedDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         expectedDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         while (matcher.find()) {
-            try  {
+            try {
                 expectedDateFormat.parse(matcher.group(1));
             } catch (ParseException e) {
                 fail(e.getMessage());

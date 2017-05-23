@@ -140,7 +140,6 @@ public class DefaultGuestServiceTest {
 
     private final List<GuestAssignment> assignments = new ArrayList<GuestAssignment>();
 
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -164,7 +163,7 @@ public class DefaultGuestServiceTest {
         Mockito.when(configView.opt(Matchers.anyString(), Matchers.<Class<String>> any(), Matchers.<String> any())).thenReturn("default");
 
         Mockito.when(userService.getUser(Matchers.anyInt(), Matchers.anyInt())).thenReturn(new UserImpl());
-        Mockito.when(userService.getUser(Matchers.anyInt(), (Context)Matchers.any())).thenReturn(new UserImpl());
+        Mockito.when(userService.getUser(Matchers.anyInt(), (Context) Matchers.any())).thenReturn(new UserImpl());
 
         PowerMockito.mockStatic(Databases.class);
         PowerMockito.doNothing().when(Databases.class, "startTransaction", (Connection) Matchers.any());
@@ -180,7 +179,6 @@ public class DefaultGuestServiceTest {
 
         assignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH));
         assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech"));
-
 
         this.defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory, passwordMechFactory);
     }
@@ -551,9 +549,9 @@ public class DefaultGuestServiceTest {
         Assert.assertTrue(existingAssignments.isEmpty());
     }
 
-    @Test (expected=OXException.class)
+    @Test(expected = OXException.class)
     public void testGetExistingAssignments_noGuestAssignmentFound_throwException() throws OXException {
-        Mockito.when(guestStorage.getGuestAssignments(Mockito.anyLong(), (Connection) Matchers.any())).thenReturn(Collections.<GuestAssignment>emptyList());
+        Mockito.when(guestStorage.getGuestAssignments(Mockito.anyLong(), (Connection) Matchers.any())).thenReturn(Collections.<GuestAssignment> emptyList());
 
         defaultGuestService.getExistingAssignments(GUEST_MAIL_ADDRESS, GROUP_ID);
     }

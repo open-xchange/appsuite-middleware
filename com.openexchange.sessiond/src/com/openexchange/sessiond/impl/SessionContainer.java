@@ -314,49 +314,57 @@ final class SessionContainer {
         if (null == sessionId) {
             return null;
         }
-        final SessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
-        if (sessionControl != null) {
-            final Session session = sessionControl.getSession();
-            final int contextId = session.getContextId();
-            ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
-            if (null == map) {
-                return sessionControl;
-            }
-            if (map.isEmpty()) {
-                final Lock l = userSessions.getReadWriteLock().writeLock();
-                l.lock();
-                try {
-                    map = userSessions.get(contextId);
-                    if (null == map) {
-                        return sessionControl;
-                    }
-                    if (map.isEmpty()) {
-                        userSessions.remove(contextId);
-                        return sessionControl;
-                    }
-                } finally {
-                    l.unlock();
+
+        SessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
+        if (sessionControl == null) {
+            return null;
+        }
+
+        Session session = sessionControl.getSession();
+
+        int contextId = session.getContextId();
+        ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        if (null == map) {
+            return sessionControl;
+        }
+
+        if (map.isEmpty()) {
+            final Lock l = userSessions.getReadWriteLock().writeLock();
+            l.lock();
+            try {
+                map = userSessions.get(contextId);
+                if (null == map) {
+                    return sessionControl;
                 }
-            }
-            final int userId = session.getUserId();
-            Map<String, Object> sessionIds = map.get(userId);
-            if (sessionIds == null) {
-                return sessionControl;
-            }
-            sessionIds.remove(sessionId);
-            if (sessionIds.isEmpty()) {
-                final Lock l = map.getReadWriteLock().writeLock();
-                l.lock();
-                try {
-                    sessionIds = map.get(userId);
-                    if (null != sessionIds && sessionIds.isEmpty()) {
-                        map.remove(userId);
-                    }
-                } finally {
-                    l.unlock();
+                if (map.isEmpty()) {
+                    userSessions.remove(contextId);
+                    return sessionControl;
                 }
+            } finally {
+                l.unlock();
             }
         }
+
+        int userId = session.getUserId();
+        Map<String, Object> sessionIds = map.get(userId);
+        if (sessionIds == null) {
+            return sessionControl;
+        }
+
+        sessionIds.remove(sessionId);
+        if (sessionIds.isEmpty()) {
+            final Lock l = map.getReadWriteLock().writeLock();
+            l.lock();
+            try {
+                sessionIds = map.get(userId);
+                if (null != sessionIds && sessionIds.isEmpty()) {
+                    map.remove(userId);
+                }
+            } finally {
+                l.unlock();
+            }
+        }
+
         return sessionControl;
     }
 
@@ -475,7 +483,7 @@ final class SessionContainer {
     }
 
     /**
-     * Returns a collection view of the session identifiers contained in this container. The collection is <b><small>not</small></b> 
+     * Returns a collection view of the session identifiers contained in this container. The collection is <b><small>not</small></b>
      * backed by the container, so changes to the map are not reflected in the container.
      *
      * @return A collection view of the session identifiers contained in this container.

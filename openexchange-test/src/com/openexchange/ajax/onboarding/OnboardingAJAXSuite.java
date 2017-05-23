@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.onboarding;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import com.openexchange.ajax.onboarding.tests.ConfigTest;
 import com.openexchange.ajax.onboarding.tests.DAVSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.EASSyncProfileTest;
@@ -57,10 +59,6 @@ import com.openexchange.ajax.onboarding.tests.MailSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSRateLimitTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSUserLimitTest;
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 
 /**
  * {@link OnboardingAJAXSuite}
@@ -68,19 +66,19 @@ import junit.framework.TestSuite;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    ConfigTest.class,
+    DAVSyncProfileTest.class,
+    EASSyncProfileTest.class,
+    EMClientURLTest.class,
+    PlistSMSTest.class,
+    PlistSMSUserLimitTest.class,
+    PlistSMSRateLimitTest.class,
+    MailSyncProfileTest.class,
+
+})
 public class OnboardingAJAXSuite {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite(OnboardingAJAXSuite.class.getName());
-        tests.addTestSuite(ConfigTest.class);
-        tests.addTestSuite(DAVSyncProfileTest.class);
-        tests.addTestSuite(EASSyncProfileTest.class);
-        tests.addTest(new JUnit4TestAdapter(EMClientURLTest.class));
-        tests.addTest(new JUnit4TestAdapter(PlistSMSTest.class));
-        tests.addTest(new JUnit4TestAdapter(PlistSMSUserLimitTest.class));
-        tests.addTest(new JUnit4TestAdapter(PlistSMSRateLimitTest.class));
-        tests.addTestSuite(MailSyncProfileTest.class);
-        return tests;
-    }
 
 }

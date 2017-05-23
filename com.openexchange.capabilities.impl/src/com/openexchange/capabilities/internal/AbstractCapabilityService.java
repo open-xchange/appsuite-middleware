@@ -98,9 +98,11 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.java.BoolReference;
 import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -302,7 +304,38 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
             }
         }
-        return tmp.booleanValue();
+
+        String hostname = LogProperties.getHostName();
+        if (Strings.isEmpty(hostname)) {
+            return tmp.booleanValue();
+        }
+
+        // Determine "autologin" capability by host name
+        return isAutologinEnabledForHost(hostname, tmp.booleanValue());
+    }
+
+    private boolean isAutologinEnabledForHost(String hostname, boolean defaultValue) {
+        boolean isEnabled = defaultValue;
+        ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
+        if (serverConfigService != null) {
+            try {
+                List<Map<String, Object>> applicableConfigs = serverConfigService.getCustomHostConfigurations(hostname, -1, -1);
+                isEnabled = getBooleanPropertyFromMaps(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+        return isEnabled;
+    }
+
+    private boolean getBooleanPropertyFromMaps(List<Map<String, Object>> applicableConfigs, String propertyName, boolean defaultValue) {
+        for (Map<String, Object> map : applicableConfigs) {
+            Object obj = map.get(propertyName);
+            if (obj instanceof Boolean) {
+                return ((Boolean) obj).booleanValue();
+            }
+        }
+        return defaultValue;
     }
 
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");

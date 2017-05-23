@@ -64,8 +64,8 @@ public class DatabasesTest {
 
     private SQLException mysqlException;
 
-    @Test
-    public void testIsPrimaryKeyConflictInMySQL_mySQL50Exception_returnTrue() {
+     @Test
+     public void testIsPrimaryKeyConflictInMySQL_mySQL50Exception_returnTrue() {
         this.mysqlException = new SQLException("Duplicate entry '57234' for key 1", "23000", 1586);
 
         boolean primaryKeyConflictInMySQL = Databases.isPrimaryKeyConflictInMySQL(this.mysqlException);
@@ -73,8 +73,8 @@ public class DatabasesTest {
         assertTrue(primaryKeyConflictInMySQL);
     }
     
-    @Test
-    public void testIsPrimaryKeyConflictInMySQL_mySQL50Exception_returnFalse() {
+     @Test
+     public void testIsPrimaryKeyConflictInMySQL_mySQL50Exception_returnFalse() {
         this.mysqlException = new SQLException("Duplicate entry '57234' for key 1", "23000", 1777);
 
         boolean primaryKeyConflictInMySQL = Databases.isPrimaryKeyConflictInMySQL(this.mysqlException);
@@ -82,8 +82,8 @@ public class DatabasesTest {
         assertFalse(primaryKeyConflictInMySQL);
     }
 
-    @Test
-    public void testIsPrimaryKeyConflictInMySQL_mySQL5xException_returnTrue() {
+     @Test
+     public void testIsPrimaryKeyConflictInMySQL_mySQL5xException_returnTrue() {
         this.mysqlException = new SQLException("Duplicate entry '57234' for key 'PRIMARY'", "23000", 1062);
 
         boolean primaryKeyConflictInMySQL = Databases.isPrimaryKeyConflictInMySQL(this.mysqlException);
@@ -91,8 +91,8 @@ public class DatabasesTest {
         assertTrue(primaryKeyConflictInMySQL);
     }
     
-    @Test
-    public void testIsPrimaryKeyConflictInMySQL_mySQL5xExceptionNoPrimary_returnFalse() {
+     @Test
+     public void testIsPrimaryKeyConflictInMySQL_mySQL5xExceptionNoPrimary_returnFalse() {
         this.mysqlException = new SQLException("Duplicate entry '57234' for key 'NOT_PRIMARY'", "23000", 1062);
 
         boolean primaryKeyConflictInMySQL = Databases.isPrimaryKeyConflictInMySQL(this.mysqlException);
@@ -100,8 +100,8 @@ public class DatabasesTest {
         assertFalse(primaryKeyConflictInMySQL);
     }
 
-    @Test
-    public void testIsKeyConflictInMySQL_mySQL5xExceptionNoPrimary_returnFalse() {
+     @Test
+     public void testIsKeyConflictInMySQL_mySQL5xExceptionNoPrimary_returnFalse() {
         this.mysqlException = new SQLException("Duplicate entry '57234' for key 'NOT_PRIMARY'", "23000", 1062);
 
         boolean primaryKeyConflictInMySQL = Databases.isKeyConflictInMySQL(this.mysqlException, "PRIMARY");
@@ -109,8 +109,8 @@ public class DatabasesTest {
         assertFalse(primaryKeyConflictInMySQL);
     }
     
-    @Test
-    public void testIsKeyConflictInMySQL_mySQL5xException_returnTrue() {
+     @Test
+     public void testIsKeyConflictInMySQL_mySQL5xException_returnTrue() {
         this.mysqlException = new SQLException("Duplicate entry '57234' for key 'PRIMARY'", "23000", 1062);
 
         boolean primaryKeyConflictInMySQL = Databases.isKeyConflictInMySQL(this.mysqlException, "PRIMARY");
@@ -118,8 +118,8 @@ public class DatabasesTest {
         assertTrue(primaryKeyConflictInMySQL);
     }
     
-    @Test
-    public void testIsKeyConflictInMySQL_mySQL5xExceptionWithNoPrimary_returnTrue() {
+     @Test
+     public void testIsKeyConflictInMySQL_mySQL5xExceptionWithNoPrimary_returnTrue() {
         this.mysqlException = new SQLException("Duplicate entry '57234' for key 'NOT_PRIMARY'", "23000", 1062);
 
         boolean primaryKeyConflictInMySQL = Databases.isKeyConflictInMySQL(this.mysqlException, "NOT_PRIMARY");

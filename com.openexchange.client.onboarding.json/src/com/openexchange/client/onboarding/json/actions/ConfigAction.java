@@ -52,6 +52,8 @@ package com.openexchange.client.onboarding.json.actions;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.client.onboarding.ClientDevice;
+import com.openexchange.client.onboarding.ClientDevices;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.client.onboarding.service.OnboardingView;
 import com.openexchange.exception.OXException;
@@ -78,7 +80,14 @@ public class ConfigAction extends AbstractOnboardingAction {
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         OnboardingService onboardingService = getOnboardingService();
-        OnboardingView view = onboardingService.getViewFor(session);
+
+        ClientDevice clientDevice;
+        {
+            String clientDeviceId = requestData.getParameter("client");
+            clientDevice = ClientDevices.getClientDeviceFor(clientDeviceId);
+        }
+
+        OnboardingView view = onboardingService.getViewFor(clientDevice, session);
         return new AJAXRequestResult(view, "onboardingView");
     }
 

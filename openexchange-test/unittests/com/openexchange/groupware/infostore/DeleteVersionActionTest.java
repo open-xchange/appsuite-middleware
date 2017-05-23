@@ -1,81 +1,81 @@
+
 package com.openexchange.groupware.infostore;
 
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.junit.After;
+import org.junit.Test;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.tx.UndoableAction;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-
 public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 
+    private final CreateDocumentAction create = new CreateDocumentAction(null);
+    private final CreateVersionAction create2 = new CreateVersionAction(null);
 
-	private final CreateDocumentAction create = new CreateDocumentAction(null);
-	private final CreateVersionAction create2 = new CreateVersionAction(null);
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        create.setProvider(getProvider());
+        create.setContext(getContext());
+        create.setDocuments(getDocuments());
+        create.setQueryCatalog(getQueryCatalog());
+        create.perform();
 
+        create2.setProvider(getProvider());
+        create2.setContext(getContext());
+        create2.setDocuments(getDocuments());
+        create2.setQueryCatalog(getQueryCatalog());
+        create2.perform();
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		create.setProvider(getProvider());
-		create.setContext(getContext());
-		create.setDocuments(getDocuments());
-		create.setQueryCatalog(getQueryCatalog());
-		create.perform();
+    }
 
-		create2.setProvider(getProvider());
-		create2.setContext(getContext());
-		create2.setDocuments(getDocuments());
-		create2.setQueryCatalog(getQueryCatalog());
-		create2.perform();
+    @After
+    public void tearDown() throws Exception {
+        create2.undo();
+        create.undo();
+        super.tearDown();
+    }
 
+    @Override
+    protected UndoableAction getAction() throws Exception {
+        final DeleteVersionAction deleteAction = new DeleteVersionAction(null);
+        deleteAction.setProvider(getProvider());
+        deleteAction.setContext(getContext());
+        deleteAction.setDocuments(getDocuments());
+        deleteAction.setQueryCatalog(getQueryCatalog());
+        return deleteAction;
+    }
 
-	}
+    @Override
+    protected void verifyPerformed() throws Exception {
+        for (final DocumentMetadata doc : getDocuments()) {
+            assertNoResult("SELECT 1 FROM infostore_document WHERE cid = ? and infostore_id = ? and version_number = ?", getContext().getContextId(), doc.getId(), doc.getVersion());
+        }
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		create2.undo();
-		create.undo();
-		super.tearDown();
-	}
+    @Override
+    protected void verifyUndone() throws Exception {
+        for (final DocumentMetadata doc : getDocuments()) {
+            assertResult("SELECT 1 FROM infostore_document WHERE cid = ? and infostore_id = ? and version_number = ?", getContext().getContextId(), doc.getId(), doc.getVersion());
+        }
+    }
 
-	@Override
-	protected UndoableAction getAction() throws Exception {
-		final DeleteVersionAction deleteAction = new DeleteVersionAction(null);
-		deleteAction.setProvider(getProvider());
-		deleteAction.setContext(getContext());
-		deleteAction.setDocuments(getDocuments());
-		deleteAction.setQueryCatalog(getQueryCatalog());
-		return deleteAction;
-	}
+    // Bug 9061
+    @Test
+    public void testPossibleToTryMoreThanOnce() throws Exception {
+        final UndoableAction action = getAction();
+        action.perform();
+        action.perform();
+    }
 
-	@Override
-	protected void verifyPerformed() throws Exception {
-		for(final DocumentMetadata doc : getDocuments()) {
-			assertNoResult("SELECT 1 FROM infostore_document WHERE cid = ? and infostore_id = ? and version_number = ?", getContext().getContextId(), doc.getId(), doc.getVersion());
-		}
-	}
-
-
-	@Override
-	protected void verifyUndone() throws Exception {
-		for(final DocumentMetadata doc : getDocuments()) {
-			assertResult("SELECT 1 FROM infostore_document WHERE cid = ? and infostore_id = ? and version_number = ?", getContext().getContextId(), doc.getId(), doc.getVersion());
-		}
-	}
-
-	// Bug 9061
-	public void testPossibleToTryMoreThanOnce() throws Exception {
-		final UndoableAction action = getAction();
-		action.perform();
-		action.perform();
-	}
-
-
+    @Test
     public void testBatching() throws Exception {
         final DeleteVersionAction action = (DeleteVersionAction) getAction();
         action.setBatchSize(3); // 2 batches one with 3 and one with 1 entry
@@ -85,9 +85,9 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
         // Bug 11305
 
         List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
-        for(int i = 0; i < 1001; i++) {
+        for (int i = 0; i < 1001; i++) {
             DocumentMetadataImpl document = new DocumentMetadataImpl();
-            document.setTitle("doc "+i);
+            document.setTitle("doc " + i);
             documents.add(document);
         }
 
@@ -113,6 +113,5 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
         }
         assertTrue(titles.isEmpty());
     }
-
 
 }
