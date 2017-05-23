@@ -65,6 +65,7 @@ import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketVector;
+import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.bouncycastle.openpgp.operator.PBESecretKeyEncryptor;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
@@ -235,6 +236,24 @@ public final class PGPKeysUtil {
     }
 
     /**
+     * Checks whether a key is meant to be an decryption key
+     *
+     * Note: This method checks if the key's public key preferred usage of is encrypting.
+     * Use {@link org.bouncycastle.openpgp.PGPPublicKey#isEncryptionKey} for checking if a key is technical able to encrypt
+     *
+     * @param key The key to check
+     * @return True, if the key is meant to be an decryption key, false otherwise
+     */
+    public static boolean isDecryptionKey(PGPSecretKey key) {
+        if(isEncryptionKey(key.getPublicKey())){
+           if(!key.isPrivateKeyEmpty()) {
+              return true;
+           }
+        }
+        return false;
+    }
+
+    /**
      * Returns the ring's singing key
      * @param keyRing The key ring
      * @return the ring's signing sub key or the master key, if no sub key is marked for singing
@@ -269,16 +288,20 @@ public final class PGPKeysUtil {
     }
 
     /**
-     * Gets the public key from the key ring which is suitable for encrypting data.
+     * Gets the first public key from the key ring which is meant to be an encrypting key.
      *
-     * @return The key which can be used for encrypting data
+     * Note: This method checks if the preferred usage of a key is encrypting.
+     * Use {@link org.bouncycastle.openpgp.PGPPublicKey#isEncryptionKey} for checking if a key is technical able to encrypt.
+     *
+     * @param keyRing The key ring used to search for a suitable encryption key.
+     * @return The first key found in the key ring which is meant to be an encryption key, or null if no such key was found in the ring.
      */
     public static PGPPublicKey getEncryptionKey(PGPPublicKeyRing keyRing) {
         PGPPublicKey found = null;
         if (keyRing != null) {
-            Iterator it = keyRing.getPublicKeys();
+            Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
             while (it.hasNext()) {
-                PGPPublicKey key = (PGPPublicKey) it.next();
+                PGPPublicKey key = it.next();
                 if (PGPKeysUtil.isEncryptionKey(key)) {
                     if (key.isMasterKey() && !isExpired(key) && !key.hasRevocation()) {  // If master key, we will use only if we don't have another encryption key
                         if (found == null) {
@@ -295,6 +318,32 @@ public final class PGPKeysUtil {
             }
         }
         return found;
+    }
+
+    /**
+     * Gets the first secret key from the key ring which is meant to be a decryption key.
+     * <br>
+     * A key is meant to be a decryption keyT if the corresponding public key is meant to be a encryption key and the private key's data is not empty.
+     * <br>
+     * <br>
+     * Use {@link org.bouncycastle.openpgp.PGPPublicKey#isEncryptionKey} with a private key's public counterpart for checking if a key is technical able to decrypt.
+     *
+     * @param keyRing The key ring to search for a decryption key.
+     * @return The fist key in the key ring which is meant to be a decryption key, or null if no such key was found.
+     */
+    public static PGPSecretKey getDecryptionKey(PGPSecretKeyRing keyRing) {
+        if (keyRing != null) {
+            Iterator<PGPSecretKey> it = keyRing.getSecretKeys();
+            while (it.hasNext()) {
+                PGPSecretKey secretKey = it.next();
+                if (!secretKey.isPrivateKeyEmpty() &&
+                     secretKey.getPublicKey() != null &&
+                     isEncryptionKey(secretKey.getPublicKey())) {
+                    return secretKey;
+                }
+            }
+        }
+        return null;
     }
 
     /**
