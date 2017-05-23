@@ -1,6 +1,6 @@
 /advertisement/v1/config/package:
   put:
-    operationId: put
+    operationId: putAdvertisementByResellerAndPackage
     tags:
       - Advertisement
     summary: Sets an advertisement configuration for a package of a reseller
@@ -34,7 +34,7 @@
         description: Not authorized
 
   delete:
-    operationId: delete
+    operationId: deleteAdvertisementByResellerAndPackage
     tags:
       - Advertisement
     summary: Remove the current configuration for a package of a reseller

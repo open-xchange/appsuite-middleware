@@ -1,7 +1,7 @@
 /userfeedback/v1/export/{context-group}/{type}:
   get:
     security:
-      - basic: []
+      - basicAuth: []
     operationId: exportCSV
     tags:
       - Userfeedback
