@@ -56,6 +56,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.osgi.annotation.Service;
 import com.openexchange.session.Session;
 
 /**
@@ -64,6 +65,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
+@Service
 public interface IDBasedFileAccessListener {
 
     /**
