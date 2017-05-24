@@ -67,6 +67,17 @@ public class ManagedSession {
     private final Type type;
     private String location;
 
+    public ManagedSession(String sessionId, String ipAddress, String client, int ctxId, int userId, Type type) {
+        super();
+        this.sessionId = sessionId;
+        this.ipAddress = ipAddress;
+        this.client = client;
+        this.ctxId = ctxId;
+        this.userId = userId;
+        this.type = type;
+        this.location = SessionManagementStrings.UNKNOWN_LOCATION;
+    }
+
     public ManagedSession(Session session, Type type) {
         super();
         this.sessionId = session.getSessionID();
