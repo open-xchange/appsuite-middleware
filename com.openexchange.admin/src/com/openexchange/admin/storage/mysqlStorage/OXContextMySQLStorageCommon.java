@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -378,48 +377,41 @@ public class OXContextMySQLStorageCommon {
     public final void deleteContextFromConfigDB(Connection con, int contextId) throws StorageException {
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
             // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
-            final int poolId = pool.getWritePool(contextId);
-            final String dbSchema = pool.getSchemaName(contextId);
+            int poolId = pool.getWritePool(contextId);
+            String dbSchema = pool.getSchemaName(contextId);
+            int filestoreId = getFilestoreIdFor(con, contextId);
+
             pool.lock(con, poolId, dbSchema);
-            stmt = con.prepareCall("SELECT filestore_id FROM context WHERE cid=?");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            int filestoreId = 0;
-            if ( rs.next() ) {
-                filestoreId = rs.getInt(1);
-            }
-            stmt.close();
-            if ( 0 != filestoreId ) {
+
+            if (0 != filestoreId) {
                 stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
                 stmt.setInt(1, filestoreId);
                 stmt.executeUpdate();
-                stmt.close();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
+
+            // Delete association from "context_server2db_pool" table
             pool.deleteAssignment(con, contextId);
-            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count-1 WHERE db_pool_id=?");
-            stmt.setInt(1, poolId);
-            stmt.executeUpdate();
-            stmt.close();
-            stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=count-1 WHERE db_pool_id=? AND schemaname=?");
-            stmt.setInt(1, poolId);
-            stmt.setString(2, dbSchema);
-            stmt.executeUpdate();
-            stmt.close();
+
             deleteEmptySchema(con, poolId, dbSchema);
+
             log.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
-            stmt.close();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
             log.debug("Deleting context entry for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
-            stmt.close();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
         } catch (PoolException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
@@ -427,7 +419,24 @@ public class OXContextMySQLStorageCommon {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
         } finally {
-            Databases.closeSQLStuff(rs,stmt);
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private int getFilestoreIdFor(Connection con, int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT filestore_id FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            int filestoreId = 0;
+            if (rs.next()) {
+                filestoreId = rs.getInt(1);
+            }
+            return filestoreId;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -468,21 +477,7 @@ public class OXContextMySQLStorageCommon {
             db.setRead_id(db.getId());
         }
         fillContextTable(ctx, con);
-        
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count+1 WHERE db_pool_id=?");
-            stmt.setInt(1, db.getId());
-            stmt.executeUpdate();
-            stmt.close();
-            stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
-            stmt.setInt(1, ctx.getFilestoreId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new StorageException(e.getMessage(), e);
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+        incrementContextsPerFilestoreTable(ctx, con);
 
         try {
             final int serverId = ClientAdminThread.cache.getServerId();
@@ -648,6 +643,26 @@ public class OXContextMySQLStorageCommon {
             if (Databases.isKeyConflictInMySQL(e, "context_name_unique")) {
                 throw new InvalidDataException("Context " + name + " already exists!");
             }
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * <code>INSERT</code>s the data row into the "context" table.
+     *
+     * @param ctx The context newly using a filestore
+     * @param configdbCon A connection to the configdb
+     * @throws StorageException If a general SQL error occurs
+     */
+    private final void incrementContextsPerFilestoreTable(final Context ctx, final Connection configdbCon) throws StorageException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = configdbCon.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
+            stmt.setInt(1, ctx.getFilestoreId().intValue());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);

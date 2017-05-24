@@ -93,9 +93,9 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -105,8 +105,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
-import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.schemacache.SchemaCacheFinalize;
+import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.schemacache.SchemaCacheResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
@@ -1158,13 +1158,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
 
-                // FIXME: rollback below
-                stmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=count+1 WHERE db_pool_id=? AND schemaname=?");
-                stmt.setInt(1, db.getId());
-                stmt.setString(2, db.getScheme());
-                stmt.executeUpdate();
-                stmt.close();
-
                 /*-
                  * Continue with context creation depending on utilized schema-select strategy:
                  *
@@ -1192,7 +1185,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     rollback = false;
                 }
 
-                
+
                 // Apparently, no error occurred
                 contextCreated = true;
 
@@ -1561,7 +1554,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private static void updateContextServer2DbPool(final Database db, Connection con, final int contextId) throws PoolException {
         final int serverId = ClientAdminThread.cache.getServerId();
-        ClientAdminThread.cache.getPool().deleteAssignment(con, contextId);
         ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
 
             @Override
