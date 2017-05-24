@@ -86,6 +86,7 @@ public class GetSessionsAction implements AJAXActionService {
         JSONArray result = new JSONArray(sessions.size());
         try {
             for (ManagedSession s : sessions) {
+                service.determineLocation(s);
                 JSONObject json = new JSONObject(5);
                 json.put("sessionId", s.getSessionId());
                 json.put("ipAddress", s.getIpAddress());
