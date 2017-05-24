@@ -122,7 +122,7 @@ CREATE TABLE contexts_per_dbschema (
     db_pool_id INT4 UNSIGNED NOT NULL,
     schemaname VARCHAR(32) NOT NULL,
     count INT4 UNSIGNED NOT NULL,
-    PRIMARY KEY (schemaname)
+    PRIMARY KEY (db_pool_id, schemaname)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `ctx_per_schema_sem` (

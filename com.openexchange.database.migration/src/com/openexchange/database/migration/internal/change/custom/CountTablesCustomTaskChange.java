@@ -144,6 +144,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             createFilestoreCountTable(configDbCon);
             createDBPoolCountTable(configDbCon);
             createDBPoolSchemaCountTable(configDbCon);
+            createSemaphoreTable(configDbCon);
 
             checkFilestoreCountConsistency(configDbCon);
             checkDBPoolCountConsistency(configDbCon);
@@ -208,6 +209,29 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         PreparedStatement stmt = null;
         try {
             stmt = configDbCon.prepareStatement(createStmt);
+            stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private void createSemaphoreTable(Connection configDbCon) throws SQLException {
+        if (tableExists(configDbCon, "ctx_per_schema_sem")) {
+            return;
+        }
+
+        String createStmt = "CREATE TABLE `ctx_per_schema_sem` (" +
+            "id BIGINT UNSIGNED NOT NULL, " +
+            "PRIMARY KEY (id)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = configDbCon.prepareStatement(createStmt);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+
+            stmt = configDbCon.prepareStatement("INSERT INTO ctx_per_schema_sem (id) VALUES (0)");
             stmt.executeUpdate();
         } finally {
             Databases.closeSQLStuff(stmt);
