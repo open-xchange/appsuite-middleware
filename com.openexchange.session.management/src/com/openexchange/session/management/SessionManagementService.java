@@ -61,8 +61,22 @@ import com.openexchange.session.Session;
  */
 public interface SessionManagementService {
 
+    /**
+     * Get all sessions (local and remote) for user identified by session
+     *
+     * @param session The user's session
+     * @return Collection containing user's sessions
+     * @throws OXException On error
+     */
     Collection<ManagedSession> getSessionsForUser(Session session) throws OXException;
 
+    /**
+     * Remove session identified by sessionIdToRemove for user identified by session
+     *
+     * @param session The user's session
+     * @param sessionIdToRemove The session ID to remove
+     * @throws OXException On error
+     */
     void removeSession(Session session, String sessionIdToRemove) throws OXException;
 
 }
