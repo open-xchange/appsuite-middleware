@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,99 +47,59 @@
  *
  */
 
-package com.openexchange.oauth;
+package com.openexchange.file.storage.composition.osgi;
+
+import org.osgi.framework.BundleContext;
+import com.openexchange.file.storage.composition.IDBasedFileAccessListener;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 
 /**
- * {@link DefaultAPI} - The default API implementation.
+ * {@link IDBasedFileAccessListenerRegistry}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class DefaultAPI implements API {
+public class IDBasedFileAccessListenerRegistry extends RankingAwareNearRegistryServiceTracker<IDBasedFileAccessListener> {
 
-    private final String serviceId;
-    private final String name;
-    private final int hash;
+    private static volatile IDBasedFileAccessListenerRegistry instance;
 
     /**
-     * Initializes a new {@link DefaultAPI}.
+     * Initializes the <code>IDBasedFileAccessListenerRegistry</code> instance
      *
-     * @param serviceId The service identifier
-     * @param name The API's name
+     * @param context The required bundle context
+     * @return The initialized instance
      */
-    public DefaultAPI(String serviceId, String name){
-        this.serviceId=serviceId;
-        this.name=name;
-        int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
-        hash = result;
+    public static synchronized IDBasedFileAccessListenerRegistry initInstance(BundleContext context) {
+        IDBasedFileAccessListenerRegistry inst = new IDBasedFileAccessListenerRegistry(context);
+        instance = inst;
+        return inst;
     }
 
-    @Override
-    public String getServiceId() {
-        return serviceId;
+    /**
+     * Drops the <code>IDBasedFileAccessListenerRegistry</code> instance
+     */
+    public static synchronized void dropInstance() {
+        instance = null;
     }
 
-    @Override
-    public String getName() {
-        return name;
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static IDBasedFileAccessListenerRegistry getInstance() {
+        return instance;
     }
 
-    @Override
-    public int hashCode() {
-        return hash;
-    }
+    // ------------------------------------------------------------------------------------------
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        DefaultAPI other = (DefaultAPI) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        if (serviceId == null) {
-            if (other.serviceId != null) {
-                return false;
-            }
-        } else if (!serviceId.equals(other.serviceId)) {
-            return false;
-        }
-        return true;
+    /**
+     * Initializes a new {@link IDBasedFileAccessListenerRegistry}.
+     *
+     * @param context The bundle context
+     */
+    private IDBasedFileAccessListenerRegistry(BundleContext context) {
+        super(context, IDBasedFileAccessListener.class);
     }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder(48);
-        builder.append("[");
-        if (serviceId != null) {
-            builder.append("serviceId=").append(serviceId).append(", ");
-        }
-        if (name != null) {
-            builder.append("name=").append(name);
-        }
-        builder.append("]");
-        return builder.toString();
-    }
-
-    @Override
-    public String getShortName() {
-        return name;
-    }
-
 }

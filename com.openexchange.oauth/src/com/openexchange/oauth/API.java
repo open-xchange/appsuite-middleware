@@ -71,4 +71,11 @@ public interface API {
      */
     String getName();
 
+    /**
+     * Gets the short name for displaying purposes.
+     *
+     * @return The short name
+     */
+    String getShortName();
+
 }

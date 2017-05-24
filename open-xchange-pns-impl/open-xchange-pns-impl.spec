@@ -65,7 +65,7 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Tue May 16 2017 Thorben Betten <thorben.betten@open-xchange.com>
+* Fri May 19 2017 Thorben Betten <thorben.betten@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Thorben Betten <thorben.betten@open-xchange.com>
 Second preview of 7.8.4 release
