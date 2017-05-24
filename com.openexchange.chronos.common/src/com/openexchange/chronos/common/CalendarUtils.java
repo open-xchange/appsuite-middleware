@@ -75,6 +75,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
@@ -913,6 +914,24 @@ public class CalendarUtils {
             });
         }
         return events;
+    }
+
+    /**
+     * Gets a value indicating whether event data is classified as confidential or private for a specific accessing user entity and
+     * therefore should be anonymized or not.
+     *
+     * @param event The event to check
+     * @param userID The identifier of the accessing user to check
+     * @return <code>true</code> if the event is classified for the supplied user, <code>false</code>, otherwise
+     */
+    public static boolean isClassifiedFor(Event event, int userID) {
+        if (null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification())) {
+            return false;
+        }
+        if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID)) {
+            return false;
+        }
+        return true;
     }
 
 }

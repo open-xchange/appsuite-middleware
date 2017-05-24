@@ -47,55 +47,45 @@
  *
  */
 
-package com.openexchange.chronos.compat.osgi;
+package com.openexchange.chronos.impl.performer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.caching.CacheService;
-import com.openexchange.chronos.compat.cache.CacheServiceListener;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.CalendarResultImpl;
+import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
 
 /**
- * {@link ChronosCompatActivator}
+ * {@link TouchPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ChronosCompatActivator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosCompatActivator.class);
+public class TouchPerformer extends AbstractUpdatePerformer {
 
     /**
-     * Initializes a new {@link ChronosCompatActivator}.
+     * Initializes a new {@link TouchPerformer}.
+     *
+     * @param storage The underlying calendar storage
+     * @param session The calendar session
+     * @param folder The calendar folder representing the current view on the events
      */
-    public ChronosCompatActivator() {
-        super();
+    public TouchPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+        super(storage, session, folder);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle {}", context.getBundle());
-            /*
-             * register calendar handler to invalidate legacy caches when upon changes
-             */
-            track(CacheService.class, new CacheServiceListener(context));
-            openTrackers();
-        } catch (Exception e) {
-            LOG.error("error starting {}", context.getBundle(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle {}", context.getBundle());
-        super.stopBundle();
+    /**
+     * Performs the touch operation.
+     *
+     * @param objectID The identifier of the event to touch
+     * @return The update result
+     */
+    public CalendarResultImpl perform(String objectID) throws OXException {
+        Event event = loadEventData(objectID);
+        touch(objectID);
+        return result.addUpdate(new UpdateResultImpl(event, loadEventData(event.getId())));
     }
 
 }

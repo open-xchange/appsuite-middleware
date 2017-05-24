@@ -57,6 +57,7 @@ import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -152,20 +153,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     @Override
     public UpdatesResult getUpdatedEventsInFolder(String folderId, Date updatedSince) throws OXException {
         checkFolderId(folderId);
-        return new UpdatesResult() {
-
-            @Override
-            public List<Event> getNewAndModifiedEvents() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public List<Event> getDeletedEvents() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-        };
+        return new DefaultUpdatesResult(Collections.<Event> emptyList(), Collections.<Event> emptyList());
     }
 
     protected Date getFrom() {

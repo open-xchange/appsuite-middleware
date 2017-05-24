@@ -69,6 +69,7 @@ import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
+import com.openexchange.chronos.impl.performer.TouchPerformer;
 import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
 import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
@@ -281,6 +282,21 @@ public class CalendarServiceImpl implements CalendarService {
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
                 return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), event, clientTimestamp);
+            }
+
+        }.executeUpdate());
+    }
+
+    @Override
+    public CalendarResult touchEvent(CalendarSession session, final EventID eventID) throws OXException {
+        /*
+         * touch event & notify handlers
+         */
+        return notifyHandlers(new StorageOperation<CalendarResult>(session) {
+
+            @Override
+            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new TouchPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID());
             }
 
         }.executeUpdate());

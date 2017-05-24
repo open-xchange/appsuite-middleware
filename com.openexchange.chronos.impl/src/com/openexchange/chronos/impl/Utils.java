@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
+import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
@@ -430,24 +430,6 @@ public class Utils {
      */
     public static boolean isIncludeClassifiedEvents(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class, Boolean.FALSE).booleanValue();
-    }
-
-    /**
-     * Gets a value indicating whether event data is classified as confidential or private for a specific accessing user entity and
-     * therefore should be anonymized or not.
-     *
-     * @param event The event to check
-     * @param userID The identifier of the accessing user to check
-     * @return <code>true</code> if the event is classified for the supplied user, <code>false</code>, otherwise
-     */
-    public static boolean isClassifiedFor(Event event, int userID) {
-        if (null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification())) {
-            return false;
-        }
-        if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID)) {
-            return false;
-        }
-        return true;
     }
 
     /**

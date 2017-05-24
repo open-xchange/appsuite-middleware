@@ -47,46 +47,58 @@
  *
  */
 
-package com.openexchange.chronos.compat.cache;
+package com.openexchange.chronos.compat.impl.cache;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.slf4j.LoggerFactory;
+import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.chronos.service.CalendarResult;
 
 /**
- * {@link CacheServiceListener}
+ * {@link CacheCalendarHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CacheServiceListener implements SimpleRegistryListener<CacheService> {
+public class CacheCalendarHandler implements CalendarHandler {
 
-    private final BundleContext context;
+    public static final String REGION = "CalendarVolatileCache";
 
-    private volatile ServiceRegistration<CalendarHandler> handlerRegistration;
+    private final CacheService cacheService;
 
     /**
-     * Initializes a new {@link CacheServiceListener}.
+     * Initializes a new {@link CacheCalendarHandler}.
      *
-     * @param context The bundle context
+     * @param cacheService A reference to the cache service
      */
-    public CacheServiceListener(BundleContext context) {
+    public CacheCalendarHandler(CacheService cacheService) {
         super();
-        this.context = context;
+        this.cacheService = cacheService;
     }
 
     @Override
-    public void added(ServiceReference<CacheService> ref, CacheService service) {
-        handlerRegistration = context.registerService(CalendarHandler.class, new CacheCalendarHandler(service), null);
+    public void handle(CalendarResult result) {
+        try {
+            if (needsInvalidation(result)) {
+                Cache cache = cacheService.getCache(REGION);
+                if (null != cache) {
+                    cache.invalidateGroup(String.valueOf(result.getSession().getContextId()));
+                }
+            }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(CacheCalendarHandler.class).error("Error invalidating legacy cache after calendar result: {} ", e.getMessage(), e);
+        }
     }
 
-    @Override
-    public void removed(ServiceReference<CacheService> ref, CacheService service) {
-        context.ungetService(ref);
-        handlerRegistration.unregister();
+    private static boolean needsInvalidation(CalendarResult result) {
+        if (null != result) {
+            return null != result.getCreations() && 0 < result.getCreations().size() ||
+                null != result.getUpdates() && 0 < result.getUpdates().size() ||
+                null != result.getDeletions() && 0 < result.getDeletions().size()
+            ;
+        }
+        return false;
     }
 
 }

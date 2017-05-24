@@ -313,6 +313,15 @@ public interface CalendarService {
     CalendarResult updateEvent(CalendarSession session, EventID eventID, Event event) throws OXException;
 
     /**
+     * <i>Touches</i> an existing event by setting a new, current last modification timestamp.
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to touch
+     * @return The update result
+     */
+    CalendarResult touchEvent(CalendarSession session, EventID eventID) throws OXException;
+
+    /**
      * Moves an existing event into another folder.
      * <p/>
      * The following calendar parameters are evaluated:

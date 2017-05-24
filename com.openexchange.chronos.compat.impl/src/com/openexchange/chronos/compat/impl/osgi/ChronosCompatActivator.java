@@ -52,10 +52,11 @@ package com.openexchange.chronos.compat.impl.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.caching.CacheService;
-import com.openexchange.chronos.compat.impl.attachments.CalendarAttachmentAuthorization;
+import com.openexchange.chronos.compat.impl.attachments.CalendarAttachmentHandler;
 import com.openexchange.chronos.compat.impl.cache.CacheServiceListener;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -69,7 +70,7 @@ public class ChronosCompatActivator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChronosCompatActivator.class);
 
-    private volatile AttachmentAuthorization attachmentAuthorization;
+    private volatile CalendarAttachmentHandler attachmentHandler;
 
     /**
      * Initializes a new {@link ChronosCompatActivator}.
@@ -80,7 +81,7 @@ public class ChronosCompatActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { CalendarService.class, FolderService.class };
     }
 
     @Override
@@ -88,11 +89,12 @@ public class ChronosCompatActivator extends HousekeepingActivator {
         try {
             LOG.info("starting bundle {}", context.getBundle());
             /*
-             * inject custom attachment authorization
+             * inject legacy calendar attachment authorization & listener
              */
-            CalendarAttachmentAuthorization calendarAttachmentAuthorization = new CalendarAttachmentAuthorization();
-            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).registerForEverything(calendarAttachmentAuthorization, 17);
-            this.attachmentAuthorization = attachmentAuthorization;
+            CalendarAttachmentHandler attachmentHandler = new CalendarAttachmentHandler(this);
+            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).registerForEverything(attachmentHandler, 18);
+            Attachments.getListenerChooserForModule(Types.APPOINTMENT).registerForEverything(attachmentHandler, 18);
+            this.attachmentHandler = attachmentHandler;
             /*
              * register calendar handler to invalidate legacy caches when upon changes
              */
@@ -107,10 +109,11 @@ public class ChronosCompatActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle {}", context.getBundle());
-        AttachmentAuthorization attachmentAuthorization = this.attachmentAuthorization;
-        if (null != attachmentAuthorization) {
-            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).removeForEverything(attachmentAuthorization);
-            this.attachmentAuthorization = null;
+        CalendarAttachmentHandler attachmentHandler = this.attachmentHandler;
+        if (null != attachmentHandler) {
+            Attachments.getListenerChooserForModule(Types.APPOINTMENT).removeForEverything(attachmentHandler);
+            Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).removeForEverything(attachmentHandler);
+            this.attachmentHandler = null;
         }
         super.stopBundle();
     }
