@@ -903,7 +903,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 Result result = listenerChain.onBeforeMessageTransport(messageToSend, recipients, securitySettings, session);
 
                 // If Guard installed, and mail marked to be encrypted, reply must contain change.  Check to make sure not sending encrypted email without Guard fully installed
-                if (securitySettings.isEncrypt() && result.getReply() == Reply.NEUTRAL) {
+                if ((securitySettings != null) && securitySettings.isEncrypt() && result.getReply() == Reply.NEUTRAL) {
                     throw SMTPExceptionCode.INTERNAL_ERROR.create("Bad repsonse from Guard backend, Guard-backend-plugin installed?");
                 }
 
