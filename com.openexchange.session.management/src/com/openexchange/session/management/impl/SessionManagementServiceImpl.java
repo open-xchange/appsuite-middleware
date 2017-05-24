@@ -50,6 +50,7 @@
 package com.openexchange.session.management.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -69,14 +70,17 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.session.management.ManagedSession;
+import com.openexchange.session.management.ManagedSession.Type;
 import com.openexchange.session.management.SessionManagementProperty;
 import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.exception.SessionManagementExceptionCodes;
 import com.openexchange.session.management.osgi.Services;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
-
 
 /**
  * {@link SessionManagementServiceImpl}
@@ -89,24 +93,44 @@ public class SessionManagementServiceImpl implements SessionManagementService {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionManagementServiceImpl.class);
 
     @Override
-    public Collection<Session> getSessionsForUser(Session session) throws OXException {
+    public Collection<ManagedSession> getSessionsForUser(Session session) throws OXException {
         SessiondService service = Services.getService(SessiondService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
-        Collection<Session> sessions = service.getSessions(session.getUserId(), session.getContextId());
-        sessions.addAll(getRemoteSessionsForUser(session));
-        // TODO Auto-generated method stub
-        return sessions;
+
+        Collection<Session> localSessions = service.getSessions(session.getUserId(), session.getContextId());
+        Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
+
+        ArrayList<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
+        for (Session s : localSessions) {
+            result.add(new ManagedSession(s, Type.LOCAL));
+        }
+        for (PortableSession s : remoteSessions) {
+            result.add(new ManagedSession(s.getSessionId(), s.getLocalIp(), s.getClient(), Type.REMOTE));
+        }
+        return result;
     }
 
     @Override
     public void removeSession(Session session, String sessionIdToRemove) throws OXException {
-        // TODO Auto-generated method stub
-
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        StringBuilder sb = new StringBuilder("(&");
+        sb.append("(").append(SessionFilter.SESSION_ID).append("=").append(sessionIdToRemove).append(")");
+        sb.append("(").append(SessionFilter.CONTEXT_ID).append("=").append(session.getContextId()).append(")");
+        sb.append("(").append(SessionFilter.USER_ID).append("=").append(session.getUserId()).append(")");
+        sb.append(")");
+        try {
+            Collection<String> removedSessions = sessiondService.removeSessionsGlobally(SessionFilter.create(sb.toString()));
+            if (removedSessions.isEmpty()) {
+                throw SessionManagementExceptionCodes.SESSION_NOT_FOUND.create();
+            }
+        } catch (OXException e) {
+            throw SessionManagementExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
-    private Collection<Session> getRemoteSessionsForUser(Session session) throws OXException {
+    private Collection<PortableSession> getRemoteSessionsForUser(Session session) throws OXException {
         LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
         if (null == configService) {
             throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
@@ -142,11 +166,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
                     PortableSession[] portableSessions = portableSessionCollection.getSessions();
                     if (null != portableSessions) {
-                        ArrayList<Session> result = new ArrayList<>(portableSessions.length);
-                        for (PortableSession s : portableSessions) {
-                            //result.add(s);
-                        }
-                        return result;
+                        return Arrays.asList(portableSessions);
                     }
                 } catch (InterruptedException e) {
                     // Interrupted - Keep interrupted state
@@ -195,7 +215,10 @@ public class SessionManagementServiceImpl implements SessionManagementService {
      */
     static <V> void cancelFutureSafe(Future<V> future) {
         if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+            try {
+                future.cancel(true);
+            } catch (Exception e) {
+                /* Ignore */}
         }
     }
 

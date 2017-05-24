@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
  */
 public interface SessionManagementService {
 
-    Collection<Session> getSessionsForUser(Session session) throws OXException;
+    Collection<ManagedSession> getSessionsForUser(Session session) throws OXException;
 
     void removeSession(Session session, String sessionIdToRemove) throws OXException;
 

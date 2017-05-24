@@ -51,6 +51,7 @@ package com.openexchange.session.management.osgi;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.impl.SessionManagementServiceImpl;
@@ -66,7 +67,7 @@ public class SessionManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, HazelcastInstance.class, LeanConfigurationService.class };
+        return new Class<?>[] { SessiondService.class, HazelcastInstance.class, LeanConfigurationService.class, GeoLocationService.class };
     }
 
     @Override
