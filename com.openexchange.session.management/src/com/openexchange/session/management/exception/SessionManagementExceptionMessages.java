@@ -60,6 +60,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class SessionManagementExceptionMessages implements LocalizableStrings {
 
+    // Session not found.
+    public static final String SESSION_NOT_FOUND_MSG = "Session not found.";
+
     private SessionManagementExceptionMessages() {
         super();
     }
