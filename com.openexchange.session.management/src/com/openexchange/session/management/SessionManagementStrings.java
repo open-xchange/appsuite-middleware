@@ -47,34 +47,22 @@
  *
  */
 
-package com.openexchange.session.management.osgi;
+package com.openexchange.session.management;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.impl.SessionManagementServiceImpl;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.user.UserService;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link SessionManagementActivator}
+ * {@link SessionManagementStrings}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class SessionManagementActivator extends HousekeepingActivator {
+public class SessionManagementStrings implements LocalizableStrings {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, HazelcastInstance.class, LeanConfigurationService.class, GeoLocationService.class, UserService.class };
-    }
+    // unknown location
+    public static final String UNKNOWN_LOCATION = "unknown location";
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(SessionManagementService.class, new SessionManagementServiceImpl());
-    }
+    private SessionManagementStrings() {}
 
 }

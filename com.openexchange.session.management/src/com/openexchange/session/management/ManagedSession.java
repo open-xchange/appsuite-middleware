@@ -62,19 +62,20 @@ public class ManagedSession {
     private final String sessionId;
     private final String ipAddress;
     private final String client;
+    private final int ctxId;
+    private final int userId;
     private final Type type;
     private String location;
 
-    public ManagedSession(String sessionId, String ipAddress, String client, Type type) {
-        super();
-        this.sessionId = sessionId;
-        this.ipAddress = ipAddress;
-        this.client = client;
-        this.type = type;
-    }
-
     public ManagedSession(Session session, Type type) {
-        this(session.getSessionID(), session.getLocalIp(), session.getClient(), type);
+        super();
+        this.sessionId = session.getSessionID();
+        this.ipAddress = session.getLocalIp();
+        this.client = session.getClient();
+        this.ctxId = session.getContextId();
+        this.userId = session.getUserId();
+        this.type = type;
+        this.location = SessionManagementStrings.UNKNOWN_LOCATION;
     }
 
     public String getSessionId() {
@@ -87,6 +88,14 @@ public class ManagedSession {
 
     public String getClient() {
         return client;
+    }
+
+    public int getCtxId() {
+        return ctxId;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 
     public String getType() {
