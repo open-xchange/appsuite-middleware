@@ -70,12 +70,14 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.ManagedSession.Type;
 import com.openexchange.session.management.SessionManagementProperty;
 import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.SessionManagementStrings;
 import com.openexchange.session.management.exception.SessionManagementExceptionCodes;
 import com.openexchange.session.management.osgi.Services;
 import com.openexchange.sessiond.SessionFilter;
@@ -83,6 +85,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SessionManagementServiceImpl}
@@ -106,21 +109,18 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
         ArrayList<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
-        String location = "unknown";
         for (Session s : localSessions) {
-            if (null != geoLocationService) {
-                location = getLocation(s.getLocalIp(), geoLocationService);
-            }
             ManagedSession managedSession = new ManagedSession(s, Type.LOCAL);
-            managedSession.setLocation(location);
+            if (null != geoLocationService) {
+                determineLocation(managedSession);
+            }
             result.add(managedSession);
         }
         for (PortableSession s : remoteSessions) {
+            ManagedSession managedSession = new ManagedSession(s, Type.REMOTE);
             if (null != geoLocationService) {
-                location = getLocation(s.getLocalIp(), geoLocationService);
+                determineLocation(managedSession);
             }
-            ManagedSession managedSession = new ManagedSession(s.getSessionId(), s.getLocalIp(), s.getClient(), Type.REMOTE);
-            managedSession.setLocation(location);
             result.add(managedSession);
         }
         return result;
@@ -147,7 +147,8 @@ public class SessionManagementServiceImpl implements SessionManagementService {
     @Override
     public void determineLocation(ManagedSession session) throws OXException {
         GeoLocationService service = Services.getService(GeoLocationService.class);
-        if (null == service) {
+        UserService userService = Services.getService(UserService.class);
+        if (null == service || null == userService) {
             return;
         }
         try {
@@ -161,7 +162,8 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             }
             session.setLocation(sb.toString());
         } catch (OXException e) {
-            return;
+            LOG.info(e.getMessage());
+            session.setLocation(StringHelper.valueOf(userService.getUser(session.getUserId(), session.getCtxId()).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION));
         }
     }
 
@@ -254,22 +256,6 @@ public class SessionManagementServiceImpl implements SessionManagementService {
                 future.cancel(true);
             } catch (Exception e) {
                 /* Ignore */}
-        }
-    }
-
-    private String getLocation(String ipAddress, GeoLocationService service) {
-        try {
-            GeoInformation geoInformation = service.getGeoInformation(ipAddress);
-            StringBuilder sb = new StringBuilder();
-            if (geoInformation.hasCity()) {
-                sb.append(geoInformation.getCity());
-            }
-            if (geoInformation.hasCountry()) {
-                sb.append(", ").append(geoInformation.getCountry());
-            }
-            return sb.toString();
-        } catch (OXException e) {
-            return "unknown";
         }
     }
 
