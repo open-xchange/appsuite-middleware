@@ -641,7 +641,10 @@ GuardSignatureResult:
   $ref: ./guard/GuardSignatureResult.yaml
 GuardSendSecurity:
   $ref: ./guard/GuardSendSecurity.yaml
-
+GetSessionsResponse:
+  $ref: ./sessionmanagement/GetSessionsResponse.yaml
+RemoveSessionBody:
+  $ref: ./sessionmanagement/RemoveSessionBody.yaml
 
 
 
