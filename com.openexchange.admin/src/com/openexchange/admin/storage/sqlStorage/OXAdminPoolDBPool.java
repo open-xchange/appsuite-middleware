@@ -134,8 +134,12 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
+        if (null == con) {
+            return false;
+        }
+
         try {
-            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+            if (!con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {
@@ -149,8 +153,12 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public boolean pushConnectionForContext(int contextId, Connection con) throws PoolException {
+        if (null == con) {
+            return false;
+        }
+
         try {
-            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+            if (!con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {
@@ -164,8 +172,12 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public boolean pushConnectionForContextAfterReading(int contextId, Connection con) throws PoolException {
+        if (null == con) {
+            return false;
+        }
+
         try {
-            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+            if (!con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {
@@ -179,8 +191,12 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
+        if (null == con) {
+            return false;
+        }
+
         try {
-            if (null != con && !con.getAutoCommit() && !con.isClosed()) {
+            if (!con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {
@@ -194,8 +210,12 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public boolean pushConnection(int poolId, Connection con) throws PoolException {
+        if (null == con) {
+            return false;
+        }
+
         try {
-            if (null != con && !con.getAutoCommit() && !con.isClosed()) {
+            if (!con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {

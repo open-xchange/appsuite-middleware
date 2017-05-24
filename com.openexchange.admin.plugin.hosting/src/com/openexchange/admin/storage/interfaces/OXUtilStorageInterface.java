@@ -53,12 +53,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Database;
-
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -324,10 +323,11 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Get the write pool identifier for the specified cluster
-     * 
+     *
      * @param clusterId The cluster identifier
      * @return The write pool identifier
      * @throws StorageException
      */
     public abstract int getWritePoolIdForCluster(final int clusterId) throws StorageException;
+
 }

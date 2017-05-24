@@ -400,8 +400,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             List<String> retval = new LinkedList<String>();
             while (result.next()) {
                 String schema = result.getString(1);
-                int count = result.getInt(2);
-                LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
+                LOG.debug("schema {} is filled with {} contexts.", schema, I(result.getInt(2)));
                 retval.add(schema);
             }
             return retval.toArray(new String[retval.size()]);
@@ -424,9 +423,9 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             Map<String, Integer> retval = new LinkedHashMap<String, Integer>(32, 0.9F);
             while (result.next()) {
                 String schema = result.getString(1);
-                int count = result.getInt(2);
-                LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
-                retval.put(schema, I(count));
+                Integer count = I(result.getInt(2));
+                LOG.debug("schema {} is filled with {} contexts.", schema, count);
+                retval.put(schema, count);
             }
             return retval;
         } catch (final SQLException e) {

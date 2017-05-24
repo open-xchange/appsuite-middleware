@@ -430,7 +430,7 @@ public interface OXContextInterface extends Remote {
      *
      * Change storage data informations - Change filestore infos for context. Normally NO need to change!
      *
-     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID 
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID
      * or name for identifying the context itself the object should only contain those field which need to be changed.
      * @param auth
      * @throws RemoteException
@@ -586,7 +586,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines the user ID of the admin user for a given context
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. This context will be used for determining the userId of the admin.
      * @param auth Credentials for authenticating against the server.
      * @return The userId of the admin user
@@ -599,7 +599,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
@@ -608,7 +608,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
@@ -616,4 +616,17 @@ public interface OXContextInterface extends Remote {
      */
     @Deprecated
     public boolean checkExists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @param auth Credentials for authenticating against server
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occurred
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid
+     * @throws RemoteException General RMI Exception
+     */
+    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
+
 }

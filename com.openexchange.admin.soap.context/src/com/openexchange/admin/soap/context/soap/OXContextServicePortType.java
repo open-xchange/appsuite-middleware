@@ -169,6 +169,14 @@ public interface OXContextServicePortType {
         EnableAll parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception;
 
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @Action(input = "urn:checkCountsConsistency", output = "urn:checkCountsConsistencyResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:checkCountsConsistencyStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:checkCountsConsistencyInvalidCredentialsException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:checkCountsConsistencyRemoteException")})
+    @WebMethod(action = "urn:checkCountsConsistency")
+    public void checkCountsConsistency(
+        @WebParam(partName = "parameters", name = "checkCountsConsistency", targetNamespace = "http://soap.admin.openexchange.com")
+        CheckCountsConsistency parameters
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception;
+
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:listByFilestore", output = "urn:listByFilestoreResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listByFilestoreStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listByFilestoreInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listByFilestoreInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listByFilestoreRemoteException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:listByFilestoreNoSuchFilestoreException")})
     @RequestWrapper(localName = "listByFilestore", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ListByFilestore")

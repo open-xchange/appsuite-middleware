@@ -346,7 +346,17 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    public static void deleteDatabase(Connection con, Database db, Connection configdbCon) throws StorageException, SQLException {
+    /**
+     * Deletes specified database (schema) and associated schema-count entry.
+     * <p>
+     * <b>Note</b>: Specified <code>con</code> argument is required to be not <code>null</code>!
+     *
+     * @param con The connection to the database, on which the schema resides that is supposed to be deleted
+     * @param db The database instance providing at least identifier and schema name
+     * @param configdbCon The connection to the ConfigD (optional)
+     * @throws StorageException If deleting database (schema) fails
+     */
+    public static void deleteDatabase(Connection con, Database db, Connection configdbCon) throws StorageException {
         deleteDatabaseSchema(con, db);
         deleteSchemaCountEntry(db, configdbCon);
     }
@@ -363,7 +373,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private static void deleteSchemaCountEntry(Database db) throws SQLException, StorageException {
+    private static void deleteSchemaCountEntry(Database db) throws StorageException {
         Connection configdbCon = null;
         boolean rollback = false;
         try {
@@ -378,6 +388,8 @@ public class OXUtilMySQLStorageCommon {
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e.toString(), e);
+        } catch (SQLException e) {
+            throw new StorageException(e.toString(), e);
         } finally {
             if (rollback) {
                 rollback(configdbCon);
@@ -387,7 +399,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private static void deleteSchemaCountEntry(Database db, Connection configdbCon) throws SQLException, StorageException {
+    private static void deleteSchemaCountEntry(Database db, Connection configdbCon) throws StorageException {
         if (null == configdbCon) {
             deleteSchemaCountEntry(db);
             return;
@@ -395,9 +407,12 @@ public class OXUtilMySQLStorageCommon {
 
         PreparedStatement pstmt = null;
         try {
-            pstmt = configdbCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE schemaname=?");
-            pstmt.setString(1, db.getScheme());
+            pstmt = configdbCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
+            pstmt.setInt(1, db.getId().intValue());
+            pstmt.setString(2, db.getScheme());
             pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new StorageException(e.toString(), e);
         } finally {
             closeSQLStuff(pstmt);
         }

@@ -92,6 +92,9 @@ case "${BNAME}" in
     "enableallcontext")
     ACTION="context.EnableAll"
     ;;
+    "checkcountsconsistency")
+    ACTION="context.CheckCountsConsistency"
+    ;;
     "deleteinvisible")
     ACTION="context.DeleteInvisible"
     ;;
