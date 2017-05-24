@@ -63,6 +63,10 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum SessionManagementExceptionCodes implements DisplayableOXExceptionCode {
 
+    UNEXPECTED_ERROR("", "", CATEGORY_ERROR, 1),
+
+    SESSION_NOT_FOUND("", "", CATEGORY_USER_INPUT, 2),
+
     ;
 
     /**

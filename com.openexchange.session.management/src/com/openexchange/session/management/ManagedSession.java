@@ -47,57 +47,96 @@
  *
  */
 
-package com.openexchange.session.management.json.actions;
+package com.openexchange.session.management;
 
-import java.util.Collection;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.geolocation.GeoInformation;
+import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.session.Session;
+import com.openexchange.session.management.osgi.Services;
 
 /**
- * {@link GetSessionsAction}
+ * {@link ManagedSession}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsAction implements AJAXActionService {
+public class ManagedSession {
 
+    private final String sessionId;
+    private final String ipAddress;
+    private final String client;
+    private final String location;
+    private final Type type;
 
-    public GetSessionsAction() {
+    public ManagedSession(String sessionId, String ipAddress, String client, Type type) {
         super();
+        this.sessionId = sessionId;
+        this.ipAddress = ipAddress;
+        this.client = client;
+        this.type = type;
+        this.location = getLocation(ipAddress);
     }
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        SessionManagementService service = Services.getService(SessionManagementService.class);
+    private String getLocation(String ipAddress) {
+        GeoLocationService service = Services.getService(GeoLocationService.class);
         if (null == service) {
-            throw ServiceExceptionCode.absentService(SessionManagementService.class);
+            return "unknown";
         }
-        Collection<ManagedSession> sessions = service.getSessionsForUser(session);
-        JSONArray result = new JSONArray(sessions.size());
         try {
-            for (ManagedSession s : sessions) {
-                JSONObject json = new JSONObject(5);
-                json.put("sessionId", s.getSessionId());
-                json.put("ipAddress", s.getIpAddress());
-                json.put("client", s.getClient());
-                json.put("location", s.getLocation());
-                json.put("type", s.getType());
-                result.add(0, json);
+//            GeoInformation geoInformation = service.getGeoInformation(ipAddress);
+            GeoInformation geoInformation = service.getGeoInformation("144.90.54.84");
+            StringBuilder sb = new StringBuilder();
+            if (geoInformation.hasCity()) {
+                sb.append(geoInformation.getCity());
             }
-        } catch (JSONException e) {
-            //
+            if (geoInformation.hasCountry()) {
+                sb.append(", ").append(geoInformation.getCountry());
+            }
+            return sb.toString();
+        } catch (OXException e) {
+            return "unknown";
         }
-        return new AJAXRequestResult(result, "json");
+    }
+
+    public ManagedSession(Session session, Type type) {
+        this(session.getSessionID(), session.getLocalIp(), session.getClient(), type);
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getType() {
+        return type.getType();
+    }
+
+    public static enum Type {
+        LOCAL("local"),
+        REMOTE("remote"),
+        ;
+
+        private final String type;
+
+        private Type(String type) {
+            this.type = type;
+        }
+
+        public String getType() {
+            return type;
+        }
     }
 
 }
