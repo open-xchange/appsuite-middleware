@@ -49,11 +49,7 @@
 
 package com.openexchange.session.management;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.session.Session;
-import com.openexchange.session.management.osgi.Services;
 
 /**
  * {@link ManagedSession}
@@ -66,8 +62,8 @@ public class ManagedSession {
     private final String sessionId;
     private final String ipAddress;
     private final String client;
-    private final String location;
     private final Type type;
+    private String location;
 
     public ManagedSession(String sessionId, String ipAddress, String client, Type type) {
         super();
@@ -75,28 +71,6 @@ public class ManagedSession {
         this.ipAddress = ipAddress;
         this.client = client;
         this.type = type;
-        this.location = getLocation(ipAddress);
-    }
-
-    private String getLocation(String ipAddress) {
-        GeoLocationService service = Services.getService(GeoLocationService.class);
-        if (null == service) {
-            return "unknown";
-        }
-        try {
-//            GeoInformation geoInformation = service.getGeoInformation(ipAddress);
-            GeoInformation geoInformation = service.getGeoInformation("144.90.54.84");
-            StringBuilder sb = new StringBuilder();
-            if (geoInformation.hasCity()) {
-                sb.append(geoInformation.getCity());
-            }
-            if (geoInformation.hasCountry()) {
-                sb.append(", ").append(geoInformation.getCountry());
-            }
-            return sb.toString();
-        } catch (OXException e) {
-            return "unknown";
-        }
     }
 
     public ManagedSession(Session session, Type type) {
@@ -115,12 +89,16 @@ public class ManagedSession {
         return client;
     }
 
+    public String getType() {
+        return type.getType();
+    }
+
     public String getLocation() {
         return location;
     }
 
-    public String getType() {
-        return type.getType();
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public static enum Type {

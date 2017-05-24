@@ -68,6 +68,8 @@ import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.geolocation.GeoInformation;
+import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
@@ -95,6 +97,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
     @Override
     public Collection<ManagedSession> getSessionsForUser(Session session) throws OXException {
         SessiondService service = Services.getService(SessiondService.class);
+        GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
@@ -103,11 +106,22 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
         ArrayList<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
+        String location = "unknown";
         for (Session s : localSessions) {
-            result.add(new ManagedSession(s, Type.LOCAL));
+            if (null != geoLocationService) {
+                location = getLocation(s.getLocalIp(), geoLocationService);
+            }
+            ManagedSession managedSession = new ManagedSession(s, Type.LOCAL);
+            managedSession.setLocation(location);
+            result.add(managedSession);
         }
         for (PortableSession s : remoteSessions) {
-            result.add(new ManagedSession(s.getSessionId(), s.getLocalIp(), s.getClient(), Type.REMOTE));
+            if (null != geoLocationService) {
+                location = getLocation(s.getLocalIp(), geoLocationService);
+            }
+            ManagedSession managedSession = new ManagedSession(s.getSessionId(), s.getLocalIp(), s.getClient(), Type.REMOTE);
+            managedSession.setLocation(location);
+            result.add(managedSession);
         }
         return result;
     }
@@ -127,6 +141,27 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             }
         } catch (OXException e) {
             throw SessionManagementExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void determineLocation(ManagedSession session) throws OXException {
+        GeoLocationService service = Services.getService(GeoLocationService.class);
+        if (null == service) {
+            return;
+        }
+        try {
+            GeoInformation geoInformation = service.getGeoInformation(session.getIpAddress());
+            StringBuilder sb = new StringBuilder();
+            if (geoInformation.hasCity()) {
+                sb.append(geoInformation.getCity());
+            }
+            if (geoInformation.hasCountry()) {
+                sb.append(", ").append(geoInformation.getCountry());
+            }
+            session.setLocation(sb.toString());
+        } catch (OXException e) {
+            return;
         }
     }
 
@@ -219,6 +254,22 @@ public class SessionManagementServiceImpl implements SessionManagementService {
                 future.cancel(true);
             } catch (Exception e) {
                 /* Ignore */}
+        }
+    }
+
+    private String getLocation(String ipAddress, GeoLocationService service) {
+        try {
+            GeoInformation geoInformation = service.getGeoInformation(ipAddress);
+            StringBuilder sb = new StringBuilder();
+            if (geoInformation.hasCity()) {
+                sb.append(geoInformation.getCity());
+            }
+            if (geoInformation.hasCountry()) {
+                sb.append(", ").append(geoInformation.getCountry());
+            }
+            return sb.toString();
+        } catch (OXException e) {
+            return "unknown";
         }
     }
 
