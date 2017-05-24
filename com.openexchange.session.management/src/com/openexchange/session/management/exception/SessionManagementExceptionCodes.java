@@ -53,6 +53,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -63,9 +64,15 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum SessionManagementExceptionCodes implements DisplayableOXExceptionCode {
 
-    UNEXPECTED_ERROR("", "", CATEGORY_ERROR, 1),
+    /**
+     * An unexpected error occurred: %1$s
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
 
-    SESSION_NOT_FOUND("", "", CATEGORY_USER_INPUT, 2),
+    /**
+     * Session not found.
+     */
+    SESSION_NOT_FOUND("Session not found.", SessionManagementExceptionMessages.SESSION_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 2),
 
     ;
 
