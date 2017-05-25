@@ -899,16 +899,16 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             MimeMessage messageToSend = smtpMessage;
             Exception exception = null;
             try {
+                // Check if security settings are given and if properly handled
+                if (securitySettings != null && securitySettings.anythingSet()) {
+                    if (false == listenerChain.checkSettings(securitySettings, session)) {
+                        // Security settings not considered
+                        throw SMTPExceptionCode.INTERNAL_ERROR.create("Security settings available, but not handled. Guard-backend-plugin installed?");
+                    }
+                }
+
                 // Check listener chain
                 Result result = listenerChain.onBeforeMessageTransport(messageToSend, recipients, securitySettings, session);
-
-                // If Guard installed, and mail marked to be encrypted, reply must contain change.  Check to make sure not sending encrypted email without Guard fully installed
-                /*-
-                 *
-                if ((securitySettings != null) && securitySettings.isEncrypt() && result.getReply() == Reply.NEUTRAL) {
-                    throw SMTPExceptionCode.INTERNAL_ERROR.create("Bad repsonse from Guard backend, Guard-backend-plugin installed?");
-                }
-                 */
 
                 // Examine reply of the listener chain
                 {

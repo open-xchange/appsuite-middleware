@@ -110,6 +110,23 @@ public class ListenerChain implements MailTransportListener {
     }
 
     @Override
+    public boolean checkSettings(SecuritySettings securitySettings, Session session) throws OXException {
+        Iterator<MailTransportListener> iterator = this.listeners.iterator();
+        if (false == iterator.hasNext()) {
+            return false;
+        }
+
+        do {
+            MailTransportListener listener = iterator.next();
+            if (listener.checkSettings(securitySettings, session)) {
+                return true;
+            }
+        } while (iterator.hasNext());
+
+        return false;
+    }
+
+    @Override
     public Result onBeforeMessageTransport(MimeMessage message, Address[] recipients, SecuritySettings securitySettings, Session session) throws OXException {
         Iterator<MailTransportListener> iterator = this.listeners.iterator();
         if (false == iterator.hasNext()) {
