@@ -703,4 +703,24 @@ public abstract class DelegatingEvent extends Event {
         return delegate.containsAlarms();
     }
 
+    @Override
+    public ExtendedProperties getExtendedProperties() {
+        return delegate.getExtendedProperties();
+    }
+
+    @Override
+    public void setExtendedProperties(ExtendedProperties value) {
+        delegate.setExtendedProperties(value);
+    }
+
+    @Override
+    public void removeExtendedProperties() {
+        delegate.removeExtendedProperties();
+    }
+
+    @Override
+    public boolean containsExtendedProperties() {
+        return delegate.containsExtendedProperties();
+    }
+
 }

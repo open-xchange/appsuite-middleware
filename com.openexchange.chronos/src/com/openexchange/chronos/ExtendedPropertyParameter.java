@@ -47,37 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.ical;
-
-import java.util.Map;
+package com.openexchange.chronos;
 
 /**
- * {@link ICalProperty}
+ * {@link ExtendedPropertyParameter}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ICalProperty {
+public class ExtendedPropertyParameter {
+
+    private final String name;
+    private final String value;
 
     /**
-     * Gets the property name.
+     * Initializes a new {@link ExtendedPropertyParameter}.
      *
-     * @return The property name
+     * @param name The parameter name, or <code>null</code> for a value-only parameter
+     * @param value The value
      */
-    String getName();
+    public ExtendedPropertyParameter(String name, String value) {
+        super();
+        this.name = name;
+        this.value = value;
+    }
 
     /**
-     * Gets the property value.
+     * Gets the parameter name.
      *
-     * @return The property value
+     * @return The parameter name
      */
-    String getValue();
+    public String getName() {
+        return name;
+    }
 
     /**
-     * Gets a map of additional property parameters.
+     * Gets the parameter value.
      *
-     * @return The property parameters, or <code>null</code> if not set
+     * @return The parameter value
      */
-    Map<String, String> getParameters();
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return "ExtendedPropertyParameter [name=" + name + ", value=" + value + "]";
+    }
 
 }

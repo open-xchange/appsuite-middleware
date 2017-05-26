@@ -54,6 +54,9 @@ import java.util.EnumMap;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.RelatedTo;
+import com.openexchange.chronos.Repeat;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
@@ -99,6 +102,72 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
     @Override
     protected EnumMap<AlarmField, ? extends Mapping<? extends Object, Alarm>> getMappings() {
         EnumMap<AlarmField, Mapping<? extends Object, Alarm>> mappings = new EnumMap<AlarmField, Mapping<? extends Object, Alarm>>(AlarmField.class);
+        mappings.put(AlarmField.UID, new DefaultMapping<String, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsUid();
+            }
+
+            @Override
+            public void set(Alarm object, String value) throws OXException {
+                object.setUid(value);
+            }
+
+            @Override
+            public String get(Alarm object) {
+                return object.getUid();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeUid();
+            }
+        });
+        mappings.put(AlarmField.RELATED_TO, new DefaultMapping<RelatedTo, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsRelatedTo();
+            }
+
+            @Override
+            public void set(Alarm object, RelatedTo value) throws OXException {
+                object.setRelatedTo(value);
+            }
+
+            @Override
+            public RelatedTo get(Alarm object) {
+                return object.getRelatedTo();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeRelatedTo();
+            }
+        });
+        mappings.put(AlarmField.REPEAT, new DefaultMapping<Repeat, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsRepeat();
+            }
+
+            @Override
+            public void set(Alarm object, Repeat value) throws OXException {
+                object.setRepeat(value);
+            }
+
+            @Override
+            public Repeat get(Alarm object) {
+                return object.getRepeat();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeRepeat();
+            }
+        });
         mappings.put(AlarmField.TRIGGER, new DefaultMapping<Trigger, Alarm>() {
 
             @Override
@@ -181,6 +250,28 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             @Override
             public void remove(Alarm object) {
                 object.setAcknowledged(null);
+            }
+        });
+        mappings.put(AlarmField.EXTENDED_PROPERTIES, new DefaultMapping<ExtendedProperties, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsExtendedProperties();
+            }
+
+            @Override
+            public void set(Alarm object, ExtendedProperties value) throws OXException {
+                object.setExtendedProperties(value);
+            }
+
+            @Override
+            public ExtendedProperties get(Alarm object) {
+                return object.getExtendedProperties();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeExtendedProperties();
             }
         });
         return mappings;

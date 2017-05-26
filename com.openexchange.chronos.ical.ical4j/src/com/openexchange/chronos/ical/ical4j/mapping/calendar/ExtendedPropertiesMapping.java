@@ -47,71 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.ical4j.mapping.calendar;
 
-import java.util.List;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.DelegatingAlarm;
+import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ical.ical4j.VCalendar;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalExtendedPropertiesMapping;
 
 /**
- * {@link AlarmComponent}
+ * {@link ExtendedPropertiesMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AlarmComponent extends DelegatingAlarm implements ComponentData {
-
-    private List<ICalProperty> properties;
+public class ExtendedPropertiesMapping extends ICalExtendedPropertiesMapping<VCalendar, Calendar> {
 
     /**
-     * Initializes a new {@link AlarmComponent}.
-     */
-    public AlarmComponent() {
-        this(new Alarm());
-    }
-
-    /**
-     * Initializes a new {@link AlarmComponent}.
+     * Initializes a new {@link ExtendedPropertiesMapping}.
      *
-     * @param delegate The underlying alarm delegate
-     * @param iCalHolder A file holder storing the original iCal component, or <code>null</code> if not available
+     * @param ignoredProperties The properties to ignore, i.e. the <i>known</i> properties covered in other mappings
      */
-    public AlarmComponent(Alarm delegate) {
-        super(delegate);
-    }
-
-    /**
-     * Gets the extended iCal properties matching the supplied name.
-     *
-     * @param propertyName The name of the properties to get
-     * @return The properties, or an empty list if not found
-     */
-    public List<ICalProperty> getProperties(String propertyName) {
-        return ComponentUtils.getProperties(this, propertyName);
-    }
-
-    /**
-     * Gets the first extended iCal property matching the supplied name.
-     *
-     * @param propertyName The name of the property to get
-     * @return The property, or <code>null</code> if not found
-     */
-    public ICalProperty getProperty(String propertyName) {
-        return ComponentUtils.getProperty(this, propertyName);
+    public ExtendedPropertiesMapping(String... ignoredProperties) {
+        super(ignoredProperties);
     }
 
     @Override
-    public List<ICalProperty> getProperties() {
-        return properties;
+    protected ExtendedProperties getValue(Calendar object) {
+        return object.getExtendedProperties();
     }
 
-    /**
-     * Sets the list of further arbitrary iCalendar properties associated with the component.
-     *
-     * @param properties The extra properties to set
-     */
-    public void setProperties(List<ICalProperty> properties) {
-        this.properties = properties;
+    @Override
+    protected void setValue(Calendar object, ExtendedProperties value) {
+        object.setExtendedProperties(value);
     }
-
 }

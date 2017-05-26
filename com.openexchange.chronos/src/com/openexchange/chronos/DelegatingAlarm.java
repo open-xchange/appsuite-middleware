@@ -112,13 +112,13 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public String getDescription() {
-        return delegate.getDescription();
+    public ExtendedProperties getExtendedProperties() {
+        return delegate.getExtendedProperties();
     }
 
     @Override
-    public boolean containsDescription() {
-        return delegate.containsDescription();
+    public boolean containsExtendedProperties() {
+        return delegate.containsExtendedProperties();
     }
 
     @Override
@@ -207,13 +207,13 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public void setDescription(String value) {
-        delegate.setDescription(value);
+    public void setExtendedProperties(ExtendedProperties value) {
+        delegate.setExtendedProperties(value);
     }
 
     @Override
-    public void removeDescription() {
-        delegate.removeDescription();
+    public void removeExtendedProperties() {
+        delegate.removeExtendedProperties();
     }
 
     @Override

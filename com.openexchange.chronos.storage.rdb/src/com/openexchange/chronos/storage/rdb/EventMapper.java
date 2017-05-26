@@ -52,6 +52,12 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -65,19 +71,23 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Enums;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -791,6 +801,84 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeColor();
+            }
+        });
+        mappings.put(EventField.FILENAME, new VarCharMapping<Event>("filename", "Filename") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setFilename(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsFilename();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getFilename();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeFilename();
+            }
+        });
+        mappings.put(EventField.EXTENDED_PROPERTIES, new DefaultDbMapping<ExtendedProperties, Event>("extendedProperties", "Extended Properties", Types.BLOB) {
+
+            @Override
+            public int set(PreparedStatement statement, int parameterIndex, Event object) throws SQLException {
+                ExtendedProperties value = get(object);
+                if (null == value) {
+                    statement.setNull(parameterIndex, getSqlType());
+                } else {
+                    byte[] data;
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = ExtendedPropertiesCodec.encode(value);
+                        data = Streams.stream2bytes(inputStream);
+                    } catch (IOException e) {
+                        throw new SQLException(e);
+                    } finally {
+                        Streams.close(inputStream);
+                    }
+                    statement.setBinaryStream(parameterIndex, Streams.newByteArrayInputStream(data), data.length);
+                }
+                return 1;
+            }
+
+            @Override
+            public ExtendedProperties get(ResultSet resultSet, String columnLabel) throws SQLException {
+                InputStream inputStream = null;
+                try {
+                    inputStream = resultSet.getBinaryStream(columnLabel);
+                    return ExtendedPropertiesCodec.decode(inputStream);
+                } catch (IOException e) {
+                    throw new SQLException(e);
+                } finally {
+                    Streams.close(inputStream);
+                }
+            }
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsExtendedProperties();
+            }
+
+            @Override
+            public void set(Event object, ExtendedProperties value) throws OXException {
+                object.setExtendedProperties(value);
+            }
+
+            @Override
+            public ExtendedProperties get(Event object) {
+                return object.getExtendedProperties();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeExtendedProperties();
             }
         });
         return mappings;

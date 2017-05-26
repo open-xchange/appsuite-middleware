@@ -56,8 +56,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.dav.DAVProtocol;
@@ -122,8 +123,8 @@ public class CalDAVImport {
             /*
              * skip any X-MOZ-FAKED-MASTER appointments
              */
-            ICalProperty iCalProperty = Tools.optICalProperty(importedEvent, "X-MOZ-FAKED-MASTER");
-            if (null != iCalProperty && "1".equals(iCalProperty.getValue())) {
+            ExtendedProperty extendedProperty = CalendarUtils.optExtendedProperty(importedEvent, "X-MOZ-FAKED-MASTER");
+            if (null != extendedProperty && "1".equals(extendedProperty.getValue())) {
                 LOG.debug("Skipping event marked with \"X-MOZ-FAKED-MASTER\": {}", importedEvent);
                 continue;
             }

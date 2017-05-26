@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ImportedComponent extends ComponentData {
+public interface ImportedComponent {
 
     /**
      * Gets the component's index in the parent iCalendar structure.

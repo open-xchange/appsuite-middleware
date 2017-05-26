@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.exception.OXException;
 
@@ -92,12 +93,12 @@ public interface CalendarExport {
     CalendarExport add(String timeZoneID);
 
     /**
-     * Adds an iCal property to the exported calendar component.
+     * Adds an extended property to the exported calendar component.
      *
-     * @param property The iCal property to add
+     * @param property The extended property to add
      * @return A self reference
      */
-    CalendarExport add(ICalProperty property);
+    CalendarExport add(ExtendedProperty property);
 
     /**
      * Sets the method to be declared in the <code>VCALENDAR</code> component.

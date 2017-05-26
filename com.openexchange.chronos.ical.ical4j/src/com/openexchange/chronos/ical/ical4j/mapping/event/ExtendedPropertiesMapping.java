@@ -47,23 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalExtendedPropertiesMapping;
+import net.fortuna.ical4j.model.component.VEvent;
 
 /**
- * {@link ComponentData}
+ * {@link ExtendedPropertiesMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ComponentData {
+public class ExtendedPropertiesMapping extends ICalExtendedPropertiesMapping<VEvent, Event> {
 
     /**
-     * Gets a list of further arbitrary iCalendar properties associated with the component.
+     * Initializes a new {@link ExtendedPropertiesMapping}.
      *
-     * @return The extra properties, or <code>null</code> if not set
+     * @param ignoredProperties The properties to ignore, i.e. the <i>known</i> properties covered in other mappings
      */
-    List<ICalProperty> getProperties();
+    public ExtendedPropertiesMapping(String... ignoredProperties) {
+        super(ignoredProperties);
+    }
 
+    @Override
+    protected ExtendedProperties getValue(Event object) {
+        return object.getExtendedProperties();
+    }
+
+    @Override
+    protected void setValue(Event object, ExtendedProperties value) {
+        object.setExtendedProperties(value);
+    }
 }

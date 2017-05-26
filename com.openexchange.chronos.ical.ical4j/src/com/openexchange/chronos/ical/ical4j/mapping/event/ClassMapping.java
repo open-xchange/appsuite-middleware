@@ -96,7 +96,6 @@ public class ClassMapping extends AbstractICalMapping<VEvent, Event> {
         } else if (false == isIgnoreUnsetProperties(parameters)) {
             object.setClassification(null);
         }
-
     }
 
 }

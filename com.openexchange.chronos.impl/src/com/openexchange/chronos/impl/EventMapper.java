@@ -69,6 +69,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -953,6 +954,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeAlarms();
+            }
+        });
+        mappings.put(EventField.EXTENDED_PROPERTIES, new DefaultMapping<ExtendedProperties, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsExtendedProperties();
+            }
+
+            @Override
+            public void set(Event object, ExtendedProperties value) throws OXException {
+                object.setExtendedProperties(value);
+            }
+
+            @Override
+            public ExtendedProperties get(Event object) {
+                return object.getExtendedProperties();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeStatus();
             }
         });
         return mappings;

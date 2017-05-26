@@ -56,6 +56,8 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.java.Streams;
 
 /**
@@ -103,19 +105,19 @@ public class PreserveOriginalTest extends ICalTest {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
         ICalParameters iCalParameters = iCalService.initParameters();
         iCalParameters.set(ICalParameters.EXTRA_PROPERTIES, new String[] { "*" });
-        EventComponent event = (EventComponent) iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
+        Event event = iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
 
         assertEquals("uid1@example.com", event.getUid());
 
-        ICalProperty xUnknownProperty = event.getProperty("X-UNKNOWN1");
+        ExtendedProperty xUnknownProperty = event.getExtendedProperties().get("X-UNKNOWN1");
         assertNotNull(xUnknownProperty);
         assertEquals("abc", xUnknownProperty.getValue());
 
         List<Alarm> alarms = event.getAlarms();
         assertEquals(2, alarms.size());
-        AlarmComponent alarm = (AlarmComponent) alarms.get(0);
+        Alarm alarm = alarms.get(0);
 
-        xUnknownProperty = alarm.getProperty("X-UNKNOWN1");
+        xUnknownProperty = alarm.getExtendedProperties().get("X-UNKNOWN1");
         assertNotNull(xUnknownProperty);
         assertEquals("abc", xUnknownProperty.getValue());
     }
@@ -147,14 +149,14 @@ public class PreserveOriginalTest extends ICalTest {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
         ICalParameters iCalParameters = iCalService.initParameters();
         iCalParameters.set(ICalParameters.EXTRA_PROPERTIES, new String[] { "*" });
-        EventComponent event = (EventComponent) iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
+        Event event = iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
 
         assertEquals("461092315540@example.com", event.getUid());
         assertEquals("Somewhere", event.getLocation());
 
-        ICalProperty attendeeProperty = event.getProperty("ATTENDEE");
+        ExtendedProperty attendeeProperty = event.getExtendedProperties().get("ATTENDEE");
         assertNotNull(attendeeProperty);
-        assertEquals("ldap://host.com:66/horst", attendeeProperty.getParameters().get("DIR"));
+        assertEquals("ldap://host.com:66/horst", attendeeProperty.getParameter("DIR"));
 
         event.setLocation("Somewhere else");
         String exportedICal = exportEvent(event);

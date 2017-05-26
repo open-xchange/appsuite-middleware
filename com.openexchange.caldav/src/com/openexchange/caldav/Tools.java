@@ -59,13 +59,10 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.slf4j.LoggerFactory;
 import com.openexchange.caldav.resources.EventResource;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.AlarmComponent;
-import com.openexchange.chronos.ical.ComponentData;
-import com.openexchange.chronos.ical.EventComponent;
-import com.openexchange.chronos.ical.ICalProperty;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -99,31 +96,17 @@ public class Tools {
     }
 
     /**
-     * Optionally gets an extended iCal property from a previously imported iCal component.
+     * Optionally gets an extended property date value from a previously imported iCal component.
      *
-     * @param component The component to get the extended property from
-     * @param propertyName The extended propery's name
-     * @return The extended iCal property, or <code>null</code> if not set
+     * @param extendedProperties The extended properties to get the extended date property value from
+     * @param propertyName The extended property's name
+     * @return The extended property's value parsed as UTC date, or <code>null</code> if not set
      */
-    public static ICalProperty optICalProperty(Object component, String propertyName) {
-        if (null != component && ComponentData.class.isInstance(component)) {
-            return optICalProperty((ComponentData) component, propertyName);
-        }
-        return null;
-    }
-
-    /**
-     * Optionally gets an extended iCal property date value from a previously imported iCal component.
-     *
-     * @param component The component to get the extended date property value from
-     * @param propertyName The extended propery's name
-     * @return The extended iCal property's value parsed as UTC date, or <code>null</code> if not set
-     */
-    public static Date optICalDateProperty(Object component, String propertyName) {
-        ICalProperty iCalProperty = optICalProperty(component, propertyName);
-        if (null != iCalProperty && Strings.isNotEmpty(iCalProperty.getValue())) {
+    public static Date optExtendedPropertyAsDate(ExtendedProperties extendedProperties, String propertyName) {
+        ExtendedProperty extendedProperty = optExtendedProperty(extendedProperties, propertyName);
+        if (null != extendedProperty && Strings.isNotEmpty(extendedProperty.getValue())) {
             try {
-                return parseUTC(iCalProperty.getValue());
+                return parseUTC(extendedProperty.getValue());
             } catch (ParseException e) {
                 LoggerFactory.getLogger(Tools.class).warn("Error parsing UTC date from iCal property", e);
             }
@@ -134,22 +117,21 @@ public class Tools {
     /**
      * Optionally gets an extended iCal property from a previously imported event component.
      *
-     * @param event The event to get the extended property from
-     * @param propertyName The extended propery's name
-     * @return The extended iCal property, or <code>null</code> if not set
+     * @param extendedProperties The extended properties to get the extended property from
+     * @param propertyName The extended property's name
+     * @return The extended property, or <code>null</code> if not set
      */
-    private static ICalProperty optICalProperty(ComponentData component, String propertyName) {
-        List<ICalProperty> extraProperties = component.getProperties();
-        if (null != extraProperties && 0 < extraProperties.size()) {
+    private static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String propertyName) {
+        if (null != extendedProperties && 0 < extendedProperties.size()) {
             if (-1 != propertyName.indexOf('*')) {
                 Pattern pattern = Pattern.compile(Strings.wildcardToRegex(propertyName));
-                for (ICalProperty extraProperty : extraProperties) {
+                for (ExtendedProperty extraProperty : extendedProperties) {
                     if (pattern.matcher(extraProperty.getName()).matches()) {
                         return extraProperty;
                     }
                 }
             } else {
-                for (ICalProperty extraProperty : extraProperties) {
+                for (ExtendedProperty extraProperty : extendedProperties) {
                     if (propertyName.equals(extraProperty.getName())) {
                         return extraProperty;
                     }
@@ -157,35 +139,6 @@ public class Tools {
             }
         }
         return null;
-    }
-
-    public static EventComponent asComponent(Event event) {
-        if (EventComponent.class.isInstance(event)) {
-            return (EventComponent) event;
-        }
-        return new EventComponent(event);
-    }
-
-    public static AlarmComponent addProperty(Alarm alarm, ICalProperty property) {
-        AlarmComponent component = AlarmComponent.class.isInstance(alarm) ? (AlarmComponent) alarm : new AlarmComponent(alarm);
-        List<ICalProperty> properties = component.getProperties();
-        if (null == properties) {
-            properties = new ArrayList<ICalProperty>();
-            component.setProperties(properties);
-        }
-        properties.add(property);
-        return component;
-    }
-
-    public static EventComponent addProperty(Event event, ICalProperty property) {
-        EventComponent component = asComponent(event);
-        List<ICalProperty> properties = component.getProperties();
-        if (null == properties) {
-            properties = new ArrayList<ICalProperty>();
-            component.setProperties(properties);
-        }
-        properties.add(property);
-        return component;
     }
 
     public static AttachmentMetadata getAttachmentMetadata(Attachment attachment, EventResource eventResource, Event event) throws OXException {

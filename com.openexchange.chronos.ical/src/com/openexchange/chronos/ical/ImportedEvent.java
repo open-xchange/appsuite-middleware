@@ -50,6 +50,7 @@
 package com.openexchange.chronos.ical;
 
 import java.util.List;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
@@ -59,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedEvent extends EventComponent implements ImportedComponent {
+public class ImportedEvent extends DelegatingEvent implements ImportedComponent {
 
     private final int index;
     private final List<OXException> warnings;

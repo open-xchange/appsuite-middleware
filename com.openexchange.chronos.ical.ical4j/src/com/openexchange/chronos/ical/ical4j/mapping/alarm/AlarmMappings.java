@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import net.fortuna.ical4j.extensions.caldav.property.Acknowledged;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAlarm;
 
 /**
@@ -70,10 +72,10 @@ public class AlarmMappings {
 	public static List<ICalMapping<VAlarm, Alarm>> ALL = Collections.<ICalMapping<VAlarm, Alarm>>unmodifiableList(Arrays.asList(
 		new TriggerMapping(),
 		new UidMapping(),
-		new DescriptionMapping(),
 		new ActionMapping(),
 		new AcknowledgedMapping(),
-		new RelatedToMapping()
+        new RelatedToMapping(),
+        new ExtendedPropertiesMapping(Property.TRIGGER, Property.UID, Property.ACTION, Acknowledged.PROPERTY_NAME, Property.RELATED_TO)
 	));
 
     /**

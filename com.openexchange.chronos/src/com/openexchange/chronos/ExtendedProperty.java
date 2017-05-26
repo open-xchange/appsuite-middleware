@@ -47,70 +47,101 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos;
 
 import java.util.List;
-import com.openexchange.chronos.Calendar;
-import com.openexchange.chronos.DelegatingCalendar;
 
 /**
- * {@link CalendarComponent}
+ * {@link ExtendedProperty}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarComponent extends DelegatingCalendar implements ComponentData {
+public class ExtendedProperty {
 
-    private List<ICalProperty> properties;
+    private final String name;
+    private final String value;
+    private final List<ExtendedPropertyParameter> parameters;
 
     /**
-     * Initializes a new {@link CalendarComponent}.
+     * Initializes a new {@link ExtendedProperty}.
+     *
+     * @param name The property name
+     * @param value The value
+     * @param parameters The parameters, or <code>null</code> if there are none
      */
-    public CalendarComponent() {
-        this(new Calendar());
+    public ExtendedProperty(String name, String value, List<ExtendedPropertyParameter> parameters) {
+        super();
+        this.name = name;
+        this.value = value;
+        this.parameters = parameters;
     }
 
     /**
-     * Initializes a new {@link CalendarComponent}.
+     * Initializes a new {@link ExtendedProperty}, without further parameters.
      *
-     * @param delegate The underlying delegate
+     * @param name The property name
+     * @param value The value
      */
-    public CalendarComponent(Calendar delegate) {
-        super(delegate);
+    public ExtendedProperty(String name, String value) {
+        this(name, value, null);
     }
 
     /**
-     * Gets the extended iCal properties matching the supplied name.
+     * Gets the property name.
      *
-     * @param propertyName The name of the properties to get
-     * @return The properties, or an empty list if not found
+     * @return The property name
      */
-    public List<ICalProperty> getProperties(String propertyName) {
-        return ComponentUtils.getProperties(this, propertyName);
+    public String getName() {
+        return name;
     }
 
     /**
-     * Gets the first extended iCal property matching the supplied name.
+     * Gets the property value.
      *
-     * @param propertyName The name of the property to get
-     * @return The property, or <code>null</code> if not found
+     * @return The property value
      */
-    public ICalProperty getProperty(String propertyName) {
-        return ComponentUtils.getProperty(this, propertyName);
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Gets a map of additional property parameters.
+     *
+     * @return The property parameters, or <code>null</code> if not set
+     */
+    public List<ExtendedPropertyParameter> getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Gets the (first) property parameter matching the supplied name.
+     *
+     * @param name The name of the parameter to get
+     * @return The parameter, or <code>null</code> if not found
+     */
+    public ExtendedPropertyParameter getParameter(String name) {
+        if (null != parameters) {
+            for (ExtendedPropertyParameter parameter : parameters) {
+                if (name.equals(parameter.getName())) {
+                    return parameter;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
-    public List<ICalProperty> getProperties() {
-        return properties;
-    }
-
-    /**
-     * Sets the list of further arbitrary iCalendar properties associated with the component.
-     *
-     * @param properties The extra properties to set
-     */
-    public void setProperties(List<ICalProperty> properties) {
-        this.properties = properties;
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(name);
+        if (null != parameters && 0 < parameters.size()) {
+            for (ExtendedPropertyParameter parameter : parameters) {
+                stringBuilder.append(';').append(parameter.getName()).append('=').append(parameter.getValue());
+            }
+        }
+        stringBuilder.append(':').append(value);
+        return stringBuilder.toString();
     }
 
 }

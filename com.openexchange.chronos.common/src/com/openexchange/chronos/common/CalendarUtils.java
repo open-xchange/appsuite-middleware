@@ -78,6 +78,8 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -917,6 +919,17 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific event can be considered as <i>public</i> or not, i.e. it is either explicitly marked
+     * with the default value of {@link Classification#PUBLIC}, or its classification is set to <code>null</code>.
+     *
+     * @param event The event ot check
+     * @return <code>true</code> if the event is considered as <i>public</i>, <code>false</code>, otherwise
+     */
+    public static boolean isPublicClassification(Event event) {
+        return null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification());
+    }
+
+    /**
      * Gets a value indicating whether event data is classified as confidential or private for a specific accessing user entity and
      * therefore should be anonymized or not.
      *
@@ -925,13 +938,80 @@ public class CalendarUtils {
      * @return <code>true</code> if the event is classified for the supplied user, <code>false</code>, otherwise
      */
     public static boolean isClassifiedFor(Event event, int userID) {
-        if (null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification())) {
+        if (isPublicClassification(event)) {
             return false;
         }
         if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID)) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Adds an extended property to an event, initializing the event's extended properties collection as needed.
+     *
+     * @param event The event to add the property to
+     * @param extendedProperty The extended property to add
+     */
+    public static void addExtendedProperty(Event event, ExtendedProperty extendedProperty) {
+        ExtendedProperties extendedProperties = event.getExtendedProperties();
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+            event.setExtendedProperties(extendedProperties);
+        }
+        extendedProperties.add(extendedProperty);
+    }
+
+    /**
+     * Adds an extended property to an alarm, initializing the alarm's extended properties collection as needed.
+     *
+     * @param alarm The alarm to add the property to
+     * @param extendedProperty The extended property to add
+     */
+    public static void addExtendedProperty(Alarm alarm, ExtendedProperty extendedProperty) {
+        ExtendedProperties extendedProperties = alarm.getExtendedProperties();
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+            alarm.setExtendedProperties(extendedProperties);
+        }
+        extendedProperties.add(extendedProperty);
+    }
+
+    /**
+     * Optionally gets (the first) extended property of specific name of a calendar.
+     *
+     * @param calendar The calendar to get the extended property from
+     * @param name The name of the extended property to get
+     * @return The extended property, or <code>null</code> if not set
+     */
+    public static ExtendedProperty optExtendedProperty(com.openexchange.chronos.Calendar calendar, String name) {
+        return optExtendedProperty(calendar.getExtendedProperties(), name);
+    }
+
+    /**
+     * Optionally gets (the first) extended property of specific name of an event.
+     *
+     * @param event The event to get the extended property from
+     * @param name The name of the extended property to get
+     * @return The extended property, or <code>null</code> if not set
+     */
+    public static ExtendedProperty optExtendedProperty(Event event, String name) {
+        return optExtendedProperty(event.getExtendedProperties(), name);
+    }
+
+    /**
+     * Optionally gets (the first) extended property of specific name of an alarm.
+     *
+     * @param alarm The alarm to get the extended property from
+     * @param name The name of the extended property to get
+     * @return The extended property, or <code>null</code> if not set
+     */
+    public static ExtendedProperty optExtendedProperty(Alarm alarm, String name) {
+        return optExtendedProperty(alarm.getExtendedProperties(), name);
+    }
+
+    private static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
+        return null != extendedProperties ? extendedProperties.get(name) : null;
     }
 
 }

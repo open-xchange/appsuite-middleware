@@ -58,21 +58,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.FreeBusyData;
-import com.openexchange.chronos.ical.ComponentData;
-import com.openexchange.chronos.ical.DefaultICalProperty;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.ical.ImportedAlarm;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ImportedEvent;
@@ -198,7 +196,6 @@ public class ICalUtils {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vCalendar, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
-        importedCalendar.setProperties(importProperties(vCalendar, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
         importedCalendar.setEvents(importEvents(vCalendar.getEvents(), mapper, parameters));
         importedCalendar.setFreeBusyDatas(importFreeBusys(vCalendar.getFreeBusys(), mapper, parameters));
         return importedCalendar;
@@ -220,7 +217,6 @@ public class ICalUtils {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedEvent importedEvent = new ImportedEvent(index, mapper.importVEvent(vEvent, parameters, warnings), warnings);
-        importedEvent.setProperties(importProperties(vEvent, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
         importedEvent.setAlarms(importAlarms(vEvent.getAlarms(), mapper, parameters));
         return importedEvent;
     }
@@ -241,7 +237,6 @@ public class ICalUtils {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedAlarm importedAlarm = new ImportedAlarm(index, mapper.importVAlarm(vAlarm, parameters, warnings), warnings);
-        importedAlarm.setProperties(importProperties(vAlarm, parameters.get(ICalParameters.EXTRA_PROPERTIES, String[].class)));
         return importedAlarm;
     }
 
@@ -309,40 +304,37 @@ public class ICalUtils {
     }
 
     /**
-     * Exports all arbitrary iCal properties from the supplied source object to the target calendar component, in case the source
-     * implements {@link ComponentData}.
+     * Exports a collection of extended properties to the target calendar component.
      *
-     * @param object The source object being exported, possibly implementing {@link ComponentData}
+     * @param extendedProperties The extended properties to export
      * @param component The component to export the properties to
      */
-    static void exportProperties(Object object, Component component) {
-        if (ComponentData.class.isInstance(object)) {
-            for (Property property : exportProperties(((ComponentData) object).getProperties())) {
-                component.getProperties().add(property);
-            }
+    private static void exportProperties(ExtendedProperties extendedProperties, Component component) {
+        for (Property property : exportProperties(extendedProperties)) {
+            component.getProperties().add(property);
         }
     }
 
-    static List<Property> exportProperties(List<ICalProperty> iCalProperties) {
-        if (null == iCalProperties || 0 == iCalProperties.size()) {
+    private static List<Property> exportProperties(List<ExtendedProperty> extendedProperties) {
+        if (null == extendedProperties || 0 == extendedProperties.size()) {
             return Collections.emptyList();
         }
-        List<Property> properties = new ArrayList<Property>(iCalProperties.size());
-        for (ICalProperty iCalProperty : iCalProperties) {
-            properties.add(exportProperty(iCalProperty));
+        List<Property> properties = new ArrayList<Property>(extendedProperties.size());
+        for (ExtendedProperty extendedProperty : extendedProperties) {
+            properties.add(exportProperty(extendedProperty));
         }
         return properties;
     }
 
-    static Property exportProperty(ICalProperty iCalProperty) {
-        return new XProperty(iCalProperty.getName(), exportParameters(iCalProperty.getParameters()), iCalProperty.getValue());
+    static Property exportProperty(ExtendedProperty extendedProperty) {
+        return new XProperty(extendedProperty.getName(), exportParameters(extendedProperty.getParameters()), extendedProperty.getValue());
     }
 
-    private static ParameterList exportParameters(Map<String, String> iCalParameters) {
+    private static ParameterList exportParameters(List<ExtendedPropertyParameter> propertyParameters) {
         ParameterList parameterList = new ParameterList();
-        if (null != iCalParameters && 0 < iCalParameters.size()) {
-            for (Map.Entry<String, String> entry : iCalParameters.entrySet()) {
-                parameterList.add(new XParameter(entry.getKey(), entry.getValue()));
+        if (null != propertyParameters && 0 < propertyParameters.size()) {
+            for (ExtendedPropertyParameter propertyParameter : propertyParameters) {
+                parameterList.add(new XParameter(propertyParameter.getName(), propertyParameter.getValue()));
             }
         }
         return parameterList;
@@ -361,15 +353,15 @@ public class ICalUtils {
         return component;
     }
 
-    static List<ICalProperty> importProperties(Component component, String[] propertyNames) {
+    private static List<ExtendedProperty> importProperties(Component component, String[] propertyNames) {
         if (null == propertyNames || 0 == propertyNames.length) {
             return Collections.emptyList();
         }
-        List<ICalProperty> iCalProperties = new ArrayList<ICalProperty>(propertyNames.length);
+        List<ExtendedProperty> extendedProperties = new ArrayList<ExtendedProperty>(propertyNames.length);
         for (String propertyName : propertyNames) {
-            iCalProperties.addAll(importProperties(getProperties(component, propertyName)));
+            extendedProperties.addAll(importProperties(getProperties(component, propertyName)));
         }
-        return iCalProperties;
+        return extendedProperties;
     }
 
     private static PropertyList getProperties(Component component, String propertyName) {
@@ -388,31 +380,31 @@ public class ICalUtils {
         return matchingProperties;
     }
 
-    static List<ICalProperty> importProperties(PropertyList propertyList) {
+    private static List<ExtendedProperty> importProperties(PropertyList propertyList) {
         if (null == propertyList || 0 == propertyList.size()) {
             return Collections.emptyList();
         }
-        List<ICalProperty> iCalProperties = new ArrayList<ICalProperty>(propertyList.size());
+        List<ExtendedProperty> extendedProperties = new ArrayList<ExtendedProperty>(propertyList.size());
         for (Iterator<?> iterator = propertyList.iterator(); iterator.hasNext();) {
             Property property = (Property) iterator.next();
-            iCalProperties.add(new DefaultICalProperty(property.getName(), property.getValue(), importParameters(property.getParameters())));
+            extendedProperties.add(new ExtendedProperty(property.getName(), property.getValue(), importParameters(property.getParameters())));
         }
-        return iCalProperties;
+        return extendedProperties;
     }
 
-    static Map<String, String> importParameters(ParameterList parameterList) {
+    private static List<ExtendedPropertyParameter> importParameters(ParameterList parameterList) {
         if (null == parameterList || 0 == parameterList.size()) {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
-        Map<String, String> iCalParameters = new HashMap<String, String>(parameterList.size());
+        List<ExtendedPropertyParameter> propertyParameters = new ArrayList<ExtendedPropertyParameter>(parameterList.size());
         for (Iterator<?> iterator = parameterList.iterator(); iterator.hasNext();) {
             Parameter parameter = (Parameter) iterator.next();
-            iCalParameters.put(parameter.getName(), parameter.getValue());
+            propertyParameters.add(new ExtendedPropertyParameter(parameter.getName(), parameter.getValue()));
         }
-        return iCalParameters;
+        return propertyParameters;
     }
 
-    static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {
+    private static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         CalendarParser calendarParser = CalendarParserFactory.getInstance().createParser();
         TimeZoneRegistry timeZoneRegistry = iCalParameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
@@ -423,7 +415,7 @@ public class ICalUtils {
         return new CalendarBuilder(calendarParser, PROPERTY_FACTORY, PARAMETER_FACTORY, timeZoneRegistry);
     }
 
-    static VEvent parseVEventComponent(IFileHolder fileHolder, ICalParameters parameters, List<OXException> warnings) throws OXException {
+    private static VEvent parseVEventComponent(IFileHolder fileHolder, ICalParameters parameters, List<OXException> warnings) throws OXException {
         try (InputStream inputStream = fileHolder.getStream()) {
             return parseVEventComponent(inputStream, parameters, warnings);
         } catch (IOException e) {
@@ -431,7 +423,7 @@ public class ICalUtils {
         }
     }
 
-    static VEvent parseVEventComponent(InputStream inputStream, ICalParameters parameters, List<OXException> warnings) throws OXException {
+    private static VEvent parseVEventComponent(InputStream inputStream, ICalParameters parameters, List<OXException> warnings) throws OXException {
         Enumeration<InputStream> streamSequence = Collections.enumeration(Arrays.asList(
             Streams.newByteArrayInputStream(VEVENT_PROLOGUE), inputStream, Streams.newByteArrayInputStream(VEVENT_EPILOGUE)));
         SequenceInputStream sequenceStream = null;

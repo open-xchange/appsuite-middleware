@@ -67,6 +67,7 @@ public class Calendar {
     private String name;
     private List<Event> events;
     private List<FreeBusyData> freeBusyDatas;
+    private ExtendedProperties extendedProperties;
 
     /**
      * Initializes a new {@link Calendar}.
@@ -199,6 +200,24 @@ public class Calendar {
      */
     public void setFreeBusyDatas(List<FreeBusyData> freeBusyDatas) {
         this.freeBusyDatas = freeBusyDatas;
+    }
+
+    /**
+     * Gets the extended properties of the calendar.
+     *
+     * @return The extended properties
+     */
+    public ExtendedProperties getExtendedProperties() {
+        return extendedProperties;
+    }
+
+    /**
+     * Sets the extended properties of the calendar.
+     *
+     * @param value The extended properties to set
+     */
+    public void setExtendedProperties(ExtendedProperties value) {
+        extendedProperties = value;
     }
 
 }

@@ -47,73 +47,78 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
- * {@link DefaultICalProperty}
+ * {@link ExtendedProperties}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultICalProperty implements ICalProperty {
+public class ExtendedProperties extends ArrayList<ExtendedProperty> {
 
-    private final String name;
-    private final String value;
-    private final Map<String, String> parameters;
+    private static final long serialVersionUID = 9200866341821558376L;
 
     /**
-     * Initializes a new {@link DefaultICalProperty}.
-     *
-     * @param name The property name
-     * @param value The value
-     * @param parameters The parameters, or <code>null</code> if there are none
+     * Initializes a new {@link ExtendedProperties}.
      */
-    public DefaultICalProperty(String name, String value, Map<String, String> parameters) {
+    public ExtendedProperties() {
         super();
-        this.name = name;
-        this.value = value;
-        this.parameters = parameters;
     }
 
     /**
-     * Initializes a new {@link DefaultICalProperty}, without further parameters.
+     * Initializes a new {@link ExtendedProperties} initially containing the properties of the specified collection, in the order they
+     * are returned by the collection's iterator.
      *
-     * @param name The property name
-     * @param value The value
+     * @param c The collection of extended properties
      */
-    public DefaultICalProperty(String name, String value) {
-        this(name, value, null);
+    public ExtendedProperties(Collection<? extends ExtendedProperty> c) {
+        super(c);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    /**
+     * Gets a value indicating whether a specific property is contained or not.
+     *
+     * @param name The name of the property to check
+     * @return <code>true</code> if at least one such property is contained, <code>false</code>, otherwise
+     */
+    public boolean contains(String name) {
+        return null != get(name);
     }
 
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public Map<String, String> getParameters() {
-        return parameters;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(name);
-        if (null != parameters && 0 < parameters.size()) {
-            for (Entry<String, String> parameter : parameters.entrySet()) {
-                stringBuilder.append(';').append(parameter.getKey()).append('=').append(parameter.getValue());
+    /**
+     * Gets the (first) extended property matching the supplied name.
+     *
+     * @param name The name of the property to get
+     * @return The property, or <code>null</code> if not found
+     */
+    public ExtendedProperty get(String name) {
+        for (ExtendedProperty property : this) {
+            if (name.equals(property.getName())) {
+                return property;
             }
         }
-        stringBuilder.append(':').append(value);
-        return stringBuilder.toString();
+        return null;
+    }
+
+    /**
+     * Gets all extended properties matching the supplied name.
+     *
+     * @param name The name of the properties to get
+     * @return The properties, or an empty list if there are none
+     */
+    public List<ExtendedProperty> getAll(String name) {
+        List<ExtendedProperty> properties = new ArrayList<ExtendedProperty>();
+        for (ExtendedProperty property : this) {
+            if (name.equals(property.getName())) {
+                properties.add(property);
+            }
+        }
+        return properties;
     }
 
 }

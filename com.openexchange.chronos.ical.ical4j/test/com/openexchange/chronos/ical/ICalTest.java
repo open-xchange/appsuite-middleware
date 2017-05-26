@@ -54,6 +54,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.impl.ICalParametersImpl;
 import com.openexchange.chronos.ical.impl.ICalServiceImpl;
 import com.openexchange.java.Charsets;
@@ -105,12 +106,12 @@ public abstract class ICalTest {
         return iCalService.importICal(inputStream, null);
     }
 
-    protected EventComponent importEvent(String iCal) throws Exception {
+    protected Event importEvent(String iCal) throws Exception {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
-        return (EventComponent) iCalService.importICal(inputStream, null).getEvents().get(0);
+        return iCalService.importICal(inputStream, null).getEvents().get(0);
     }
 
-    protected String exportEvent(EventComponent event) throws Exception {
+    protected String exportEvent(Event event) throws Exception {
         ICalParametersImpl parameters = new ICalParametersImpl();
         CalendarExport calendarExport = iCalService.exportICal(parameters);
         calendarExport.add(event);

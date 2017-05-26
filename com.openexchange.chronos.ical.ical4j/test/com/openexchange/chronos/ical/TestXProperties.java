@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import org.junit.Test;
+import com.openexchange.chronos.Event;
 import com.openexchange.java.Streams;
 
 /**
@@ -126,7 +127,7 @@ public class TestXProperties extends ICalTest {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
         ICalParameters iCalParameters = iCalService.initParameters();
         iCalParameters.set(ICalParameters.EXTRA_PROPERTIES, new String[] { "*" });
-        EventComponent event = (EventComponent) iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
+        Event event = iCalService.importICal(inputStream, iCalParameters).getEvents().get(0);
 
         assertEquals("040000008200E00074C5B7101A82E00800000000D0AA8057A561CC01000000000000000010000000B4762DB1A2E3C24BA17F2D09C0F0189F", event.getUid());
         assertEquals("mailto:otto@example.com", event.getOrganizer().getUri());
@@ -135,20 +136,20 @@ public class TestXProperties extends ICalTest {
         assertEquals("CET", event.getStartTimeZone());
         assertEquals("CET", event.getEndTimeZone());
 
-        assertNotNull(event.getProperty("X-MICROSOFT-CDO-APPT-SEQUENCE"));
-        assertEquals("1", event.getProperty("X-MICROSOFT-CDO-APPT-SEQUENCE").getValue());
-        assertNotNull(event.getProperty("X-MICROSOFT-CDO-OWNERAPPTID"));
-        assertEquals("1016563675", event.getProperty("X-MICROSOFT-CDO-OWNERAPPTID").getValue());
-        assertNotNull(event.getProperty("X-MICROSOFT-CDO-BUSYSTATUS"));
-        assertEquals("TENTATIVE", event.getProperty("X-MICROSOFT-CDO-BUSYSTATUS").getValue());
-        assertNotNull(event.getProperty("X-MICROSOFT-CDO-INTENDEDSTATUS"));
-        assertEquals("BUSY", event.getProperty("X-MICROSOFT-CDO-INTENDEDSTATUS").getValue());
-        assertNotNull(event.getProperty("X-MICROSOFT-CDO-ALLDAYEVENT"));
-        assertEquals("FALSE", event.getProperty("X-MICROSOFT-CDO-ALLDAYEVENT").getValue());
-        assertNotNull(event.getProperty("X-MICROSOFT-CDO-IMPORTANCE"));
-        assertEquals("1", event.getProperty("X-MICROSOFT-CDO-IMPORTANCE").getValue());
-        assertNotNull(event.getProperty("X-MICROSOFT-CDO-INSTTYPE"));
-        assertEquals("0", event.getProperty("X-MICROSOFT-CDO-INSTTYPE").getValue());
+        assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-APPT-SEQUENCE"));
+        assertEquals("1", event.getExtendedProperties().get("X-MICROSOFT-CDO-APPT-SEQUENCE").getValue());
+        assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-OWNERAPPTID"));
+        assertEquals("1016563675", event.getExtendedProperties().get("X-MICROSOFT-CDO-OWNERAPPTID").getValue());
+        assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-BUSYSTATUS"));
+        assertEquals("TENTATIVE", event.getExtendedProperties().get("X-MICROSOFT-CDO-BUSYSTATUS").getValue());
+        assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-INTENDEDSTATUS"));
+        assertEquals("BUSY", event.getExtendedProperties().get("X-MICROSOFT-CDO-INTENDEDSTATUS").getValue());
+        assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-ALLDAYEVENT"));
+        assertEquals("FALSE", event.getExtendedProperties().get("X-MICROSOFT-CDO-ALLDAYEVENT").getValue());
+        assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-IMPORTANCE"));
+        assertEquals("1", event.getExtendedProperties().get("X-MICROSOFT-CDO-IMPORTANCE").getValue());
+        assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-INSTTYPE"));
+        assertEquals("0", event.getExtendedProperties().get("X-MICROSOFT-CDO-INSTTYPE").getValue());
 
         String exportedICal = exportEvent(event);
         assertTrue(exportedICal.contains("X-MICROSOFT-CDO-APPT-SEQUENCE:1"));

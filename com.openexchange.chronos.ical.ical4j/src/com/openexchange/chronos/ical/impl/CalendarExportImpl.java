@@ -57,12 +57,12 @@ import java.util.Set;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
@@ -109,7 +109,7 @@ public class CalendarExportImpl implements CalendarExport {
     }
 
     @Override
-    public CalendarExport add(ICalProperty property) {
+    public CalendarExport add(ExtendedProperty property) {
         vCalendar.getProperties().add(ICalUtils.exportProperty(property));
         return this;
     }
@@ -216,10 +216,9 @@ public class CalendarExportImpl implements CalendarExport {
 
     private VEvent exportEvent(Event event) throws OXException {
         /*
-         * export event data & extended properties, track timezones
+         * export event data, track timezones
          */
         VEvent vEvent = mapper.exportEvent(event, parameters, warnings);
-        ICalUtils.exportProperties(event, vEvent);
         ICalUtils.removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         if (false == CalendarUtils.isFloating(event)) {
             trackTimezones(event.getStartTimeZone(), event.getEndTimeZone());
@@ -238,20 +237,18 @@ public class CalendarExportImpl implements CalendarExport {
 
     private VAlarm exportAlarm(Alarm alarm) throws OXException {
         /*
-         * export alarm data & extended properties
+         * export alarm data
          */
         VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
-        ICalUtils.exportProperties(alarm, vAlarm);
         ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return vAlarm;
     }
 
     private VFreeBusy exportFreeBusy(FreeBusyData freeBusyData) throws OXException {
         /*
-         * export free/busy data & extended properties, track timezones
+         * export free/busy data, track timezones
          */
         VFreeBusy vFreeBusy = mapper.exportFreeBusy(freeBusyData, parameters, warnings);
-        ICalUtils.exportProperties(freeBusyData, vFreeBusy);
         ICalUtils.removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         trackTimezones(freeBusyData.getStartTimeZone(), freeBusyData.getEndTimeZone());
         return vFreeBusy;

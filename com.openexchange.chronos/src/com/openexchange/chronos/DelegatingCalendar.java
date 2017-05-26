@@ -141,4 +141,14 @@ public abstract class DelegatingCalendar extends Calendar {
         delegate.setFreeBusyDatas(freeBusyDatas);
     }
 
+    @Override
+    public ExtendedProperties getExtendedProperties() {
+        return delegate.getExtendedProperties();
+    }
+
+    @Override
+    public void setExtendedProperties(ExtendedProperties value) {
+        delegate.setExtendedProperties(value);
+    }
+
 }

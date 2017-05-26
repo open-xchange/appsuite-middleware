@@ -50,7 +50,6 @@
 package com.openexchange.chronos.ical;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 
@@ -61,46 +60,6 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public class ComponentUtils {
-
-    /**
-     * Gets the extended iCal properties matching the supplied name.
-     *
-     * @param component The component to get the properties from
-     * @param propertyName The name of the properties to get
-     * @return The properties, or an empty list if not found
-     */
-    public static List<ICalProperty> getProperties(ComponentData component, String propertyName) {
-        List<ICalProperty> properties = component.getProperties();
-        if (null == properties || properties.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<ICalProperty> matchingProperties = new ArrayList<ICalProperty>();
-        for (ICalProperty property : properties) {
-            if (propertyName.equals(property.getName())) {
-                matchingProperties.add(property);
-            }
-        }
-        return matchingProperties;
-    }
-
-    /**
-     * Gets the first extended iCal property matching the supplied name.
-     *
-     * @param component The component to get the property from
-     * @param propertyName The name of the property to get
-     * @return The property, or <code>null</code> if not found
-     */
-    public static ICalProperty getProperty(ComponentData component, String propertyName) {
-        List<ICalProperty> properties = component.getProperties();
-        if (null != properties) {
-            for (ICalProperty property : properties) {
-                if (propertyName.equals(property.getName())) {
-                    return property;
-                }
-            }
-        }
-        return null;
-    }
 
     /**
      * Collects all warnings from multiple imported components.

@@ -51,6 +51,7 @@ package com.openexchange.chronos.ical;
 
 import java.util.List;
 import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.DelegatingCalendar;
 import com.openexchange.exception.OXException;
 
 /**
@@ -59,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedCalendar extends CalendarComponent implements ImportedComponent {
+public class ImportedCalendar extends DelegatingCalendar implements ImportedComponent {
 
     private final List<OXException> warnings;
 

@@ -59,6 +59,7 @@ import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -646,9 +647,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (0 < updatedItems.size()) {
             List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
             for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
-                Alarm alarm = AlarmMapper.getInstance().copy(itemUpdate.getOriginal(), null, AlarmField.ID, AlarmField.UID);
+                Alarm alarm = AlarmMapper.getInstance().copy(itemUpdate.getOriginal(), null, (AlarmField[]) null);
                 AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm,
-                    AlarmField.ACKNOWLEDGED, AlarmField.ACTION, AlarmField.DESCRIPTION, AlarmField.RELATED_TO, AlarmField.REPEAT, AlarmField.TRIGGER);
+                    AlarmField.ACKNOWLEDGED, AlarmField.ACTION, AlarmField.EXTENDED_PROPERTIES, AlarmField.RELATED_TO, AlarmField.REPEAT, AlarmField.TRIGGER);
+                alarm.setId(itemUpdate.getOriginal().getId());
+                alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarms.add(alarm);
             }
             storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), alarms);
@@ -720,10 +723,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     }
                     break;
                 case CLASSIFICATION:
-                    Check.mandatoryFields(eventUpdate, EventField.CLASSIFICATION);
+                    /*
+                     * check validity, treating PUBLIC as default value
+                     */
                     Check.classificationIsValid(eventUpdate.getClassification(), folder);
-                    if (isSeriesException(originalEvent)) {
-                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(String.valueOf(eventUpdate.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
+                    if (isSeriesException(originalEvent) && 
+                        (isPublicClassification(originalEvent) && false == isPublicClassification(eventUpdate)) ||
+                        (false == isPublicClassification(originalEvent) && isPublicClassification(eventUpdate))) {
+                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
+                            String.valueOf(eventUpdate.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
                     break;
                 case START_TIMEZONE:

@@ -102,6 +102,8 @@ public class Event {
     private List<Attachment> attachments;
     private List<Alarm> alarms;
 
+    private ExtendedProperties extendedProperties;
+
     private final EnumSet<EventField> setFields;
 
     /**
@@ -1281,6 +1283,42 @@ public class Event {
      */
     public boolean containsAlarms() {
         return setFields.contains(EventField.ALARMS);
+    }
+
+    /**
+     * Gets the extended properties of the event.
+     *
+     * @return The extended properties
+     */
+    public ExtendedProperties getExtendedProperties() {
+        return extendedProperties;
+    }
+
+    /**
+     * Sets the extended properties of the event.
+     *
+     * @param value The extended properties to set
+     */
+    public void setExtendedProperties(ExtendedProperties value) {
+        extendedProperties = value;
+        setFields.add(EventField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Removes the extended properties of the event.
+     */
+    public void removeExtendedProperties() {
+        extendedProperties = null;
+        setFields.remove(EventField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Gets a value indicating whether extended properties of the event have been set or not.
+     *
+     * @return <code>true</code> if extended properties are set, <code>false</code>, otherwise
+     */
+    public boolean containsExtendedProperties() {
+        return setFields.contains(EventField.EXTENDED_PROPERTIES);
     }
 
     @Override

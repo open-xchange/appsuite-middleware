@@ -49,14 +49,12 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VAlarm;
-import net.fortuna.ical4j.model.property.Action;
-
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
-import com.openexchange.java.Enums;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.property.Action;
 
 /**
  * {@link ActionMapping}
@@ -80,7 +78,7 @@ public class ActionMapping extends ICalTextMapping<VAlarm, Alarm> {
 
 	@Override
 	protected void setValue(Alarm object, String value) {
-		object.setAction(Enums.parse(AlarmAction.class, value, null));
+        object.setAction(new AlarmAction(value));
 	}
 
 	@Override

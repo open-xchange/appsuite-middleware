@@ -49,10 +49,12 @@
 
 package com.openexchange.caldav;
 
+import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -60,7 +62,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -72,15 +73,15 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.DefaultICalProperty;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalProperty;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventUpdate;
@@ -208,8 +209,8 @@ public class EventPatches {
             /*
              * evaluate imported extra properties
              */
-            ICalProperty iCalProperty = Tools.optICalProperty(importedEvent, "X-CALENDARSERVER-PRIVATE-COMMENT");
-            if (null != iCalProperty) {
+            ExtendedProperty extendedProperty = optExtendedProperty(importedEvent, "X-CALENDARSERVER-PRIVATE-COMMENT");
+            if (null != extendedProperty) {
                 /*
                  * take over the user's attendee comment if set
                  */
@@ -220,7 +221,7 @@ public class EventPatches {
                 }
                 Attendee attendee = find(importedEvent.getAttendees(), eventResource.getFactory().getUser().getId());
                 if (null != attendee && false == attendee.containsComment()) {
-                    attendee.setComment(iCalProperty.getValue());
+                    attendee.setComment(extendedProperty.getValue());
                 }
             }
         }
@@ -359,7 +360,7 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          */
         private static void adjustMozillaSnooze(Event importedEvent) {
-            Date mozSnoozeDate = Tools.optICalDateProperty(importedEvent, "X-MOZ-SNOOZE");
+            Date mozSnoozeDate = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-SNOOZE");
             if (null == mozSnoozeDate || null == importedEvent.getAlarms()) {
                 return;
             }
@@ -407,7 +408,7 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          */
         private static void adjustMozillaSnoozeTime(Event importedEvent) {
-            Date mozSnoozeTime = Tools.optICalDateProperty(importedEvent, "X-MOZ-SNOOZE-TIME*");
+            Date mozSnoozeTime = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-SNOOZE-TIME*");
             if (null == mozSnoozeTime || null == importedEvent.getAlarms()) {
                 return;
             }
@@ -415,7 +416,7 @@ public class EventPatches {
              * insert corresponding snooze alarm & establish snooze relationship
              */
             Alarm snoozeAlarm = new Alarm(new Trigger(mozSnoozeTime), AlarmAction.DISPLAY);
-            snoozeAlarm.setAcknowledged(Tools.optICalDateProperty(importedEvent, "X-MOZ-LASTACK"));
+            snoozeAlarm.setAcknowledged(Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-LASTACK"));
             importedEvent.getAlarms().add(snoozeAlarm);
             addSnoozeRelationship(snoozeAlarm, importedEvent.getAlarms());
         }
@@ -434,10 +435,12 @@ public class EventPatches {
             /*
              * take over latest "X-MOZ-LASTACK" from alarms and parent event component
              */
-            Date parentAcknowledged = Tools.optICalDateProperty(importedEvent, "X-MOZ-LASTACK");
-            parentAcknowledged = Tools.getLatestModified(parentAcknowledged, Tools.optICalDateProperty(importedSeriesMaster, "X-MOZ-LASTACK"));
+            Date parentAcknowledged = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-LASTACK");
+            if (null != importedSeriesMaster) {
+                parentAcknowledged = Tools.getLatestModified(parentAcknowledged, Tools.optExtendedPropertyAsDate(importedSeriesMaster.getExtendedProperties(), "X-MOZ-LASTACK"));
+            }
             for (Alarm alarm : importedEvent.getAlarms()) {
-                Date acknowledged = Tools.getLatestModified(Tools.optICalDateProperty(alarm, "X-MOZ-LASTACK"), alarm.getAcknowledged());
+                Date acknowledged = Tools.getLatestModified(Tools.optExtendedPropertyAsDate(alarm.getExtendedProperties(), "X-MOZ-LASTACK"), alarm.getAcknowledged());
                 acknowledged = Tools.getLatestModified(parentAcknowledged, acknowledged);
                 alarm.setAcknowledged(acknowledged);
             }
@@ -490,7 +493,7 @@ public class EventPatches {
          */
         private static void applyCalendarserverAccess(EventResource eventResource, CalDAVImport caldavImport) {
             if (DAVUserAgent.IOS.equals(eventResource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(eventResource.getUserAgent())) {
-                ICalProperty property = Tools.optICalProperty(caldavImport.getCalender(), "X-CALENDARSERVER-ACCESS");
+                ExtendedProperty property = optExtendedProperty(caldavImport.getCalender(), "X-CALENDARSERVER-ACCESS");
                 if (null == property || Strings.isEmpty(property.getValue())) {
                     return;
                 }
@@ -602,8 +605,9 @@ public class EventPatches {
                      */
                     for (Attendee attendee : exportedEvent.getAttendees()) {
                         if (Strings.isNotEmpty(attendee.getComment())) {
-                            Map<String, String> parameters = Collections.singletonMap("X-CALENDARSERVER-ATTENDEE-REF", attendee.getUri());
-                            exportedEvent = Tools.addProperty(exportedEvent, new DefaultICalProperty("X-CALENDARSERVER-ATTENDEE-COMMENT", attendee.getComment(), parameters));
+                            List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>();
+                            parameters.add(new ExtendedPropertyParameter("X-CALENDARSERVER-ATTENDEE-REF", attendee.getUri()));
+                            addExtendedProperty(exportedEvent, new ExtendedProperty("X-CALENDARSERVER-ATTENDEE-COMMENT", attendee.getComment(), parameters));
                         }
                     }
                 } else {
@@ -612,7 +616,7 @@ public class EventPatches {
                      */
                     Attendee attendee = find(exportedEvent.getAttendees(), eventResource.getFactory().getUser().getId());
                     if (null != attendee && Strings.isNotEmpty(attendee.getComment())) {
-                        exportedEvent = Tools.addProperty(exportedEvent, new DefaultICalProperty("X-CALENDARSERVER-PRIVATE-COMMENT", attendee.getComment()));
+                        addExtendedProperty(exportedEvent, new ExtendedProperty("X-CALENDARSERVER-PRIVATE-COMMENT", attendee.getComment()));
                     }
                 }
             }
@@ -622,9 +626,9 @@ public class EventPatches {
         private static Alarm getEmptyDefaultAlarm() {
             Alarm alarm = new Alarm(EMPTY_ALARM_TRIGGER, AlarmAction.NONE);
             alarm.setUid(UUID.randomUUID().toString().toUpperCase());
-            alarm = Tools.addProperty(alarm, new DefaultICalProperty("X-WR-ALARMUID", alarm.getUid()));
-            alarm = Tools.addProperty(alarm, new DefaultICalProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"));
-            alarm = Tools.addProperty(alarm, new DefaultICalProperty("X-APPLE-DEFAULT-ALARM", "TRUE"));
+            addExtendedProperty(alarm, new ExtendedProperty("X-WR-ALARMUID", alarm.getUid()));
+            addExtendedProperty(alarm, new ExtendedProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"));
+            addExtendedProperty(alarm, new ExtendedProperty("X-APPLE-DEFAULT-ALARM", "TRUE"));
             return alarm;
         }
 
@@ -655,13 +659,13 @@ public class EventPatches {
                      * also supply the acknowledged date via X-MOZ-LASTACK
                      */
                     if (null != exportedAlarm.getAcknowledged()) {
-                        DefaultICalProperty mozLastAckProperty = new DefaultICalProperty("X-MOZ-LASTACK", Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
-                        alarm = Tools.addProperty(exportedAlarm, mozLastAckProperty);
+                        ExtendedProperty mozLastAckProperty = new ExtendedProperty("X-MOZ-LASTACK", Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
+                        addExtendedProperty(exportedAlarm, mozLastAckProperty);
                         /*
                          * also store X-MOZ-LASTACK in parent component for recurring events
                          */
                         if (isSeriesMaster(exportedEvent)) {
-                            exportedEvent = Tools.addProperty(exportedEvent, mozLastAckProperty);
+                            addExtendedProperty(exportedEvent, mozLastAckProperty);
                         }
                     }
                     Alarm snoozedAlarm = AlarmUtils.getSnoozedAlarm(alarm, exportedAlarms);
@@ -700,13 +704,13 @@ public class EventPatches {
                                     if (iterator.hasNext()) {
                                         Date relatedDate = AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), iterator.next());
                                         String propertyName = "X-MOZ-SNOOZE-TIME-" + String.valueOf(relatedDate.getTime()) + "000";
-                                        exportedEvent = Tools.addProperty(exportedEvent, new DefaultICalProperty(propertyName, Tools.formatAsUTC(snoozeTime)));
+                                        addExtendedProperty(exportedEvent, new ExtendedProperty(propertyName, Tools.formatAsUTC(snoozeTime)));
                                     }
                                 } catch (OXException e) {
                                     LOG.warn("Error converting snoozed alarm trigger", e);
                                 }
                             } else {
-                                exportedEvent = Tools.addProperty(exportedEvent, new DefaultICalProperty("X-MOZ-SNOOZE-TIME", Tools.formatAsUTC(snoozeTime)));
+                                addExtendedProperty(exportedEvent, new ExtendedProperty("X-MOZ-SNOOZE-TIME", Tools.formatAsUTC(snoozeTime)));
                             }
                         }
                     }
@@ -786,8 +790,8 @@ public class EventPatches {
         public static CalendarExport applyExport(EventResource eventResource, CalendarExport calendarExport) {
             if (DAVUserAgent.IOS.equals(eventResource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(eventResource.getUserAgent())) {
                 Event event = eventResource.getEvent();
-                if (null != event && null != event.getClassification() && false == Classification.PUBLIC.equals(event.getClassification())) {
-                    calendarExport.add(new DefaultICalProperty("X-CALENDARSERVER-ACCESS", String.valueOf(event.getClassification())));
+                if (null != event && false == CalendarUtils.isPublicClassification(event)) {
+                    calendarExport.add(new ExtendedProperty("X-CALENDARSERVER-ACCESS", String.valueOf(event.getClassification())));
                 }
             }
             return calendarExport;

@@ -185,5 +185,9 @@ public enum EventField {
      * The alarms of the event.
      */
     ALARMS,
+    /**
+     * Extended properties of the event.
+     */
+    EXTENDED_PROPERTIES,
 
 }

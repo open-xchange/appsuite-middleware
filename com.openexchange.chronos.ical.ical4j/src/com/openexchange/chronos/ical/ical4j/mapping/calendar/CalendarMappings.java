@@ -55,6 +55,8 @@ import java.util.List;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import net.fortuna.ical4j.extensions.property.WrCalName;
+import net.fortuna.ical4j.model.Property;
 
 /**
  * {@link CalendarMappings}
@@ -71,7 +73,8 @@ public class CalendarMappings {
 		new MethodMapping(),
 		new NameMapping(),
 		new ProdIdMapping(),
-        new VersionMapping()
+        new VersionMapping(),
+        new ExtendedPropertiesMapping(Property.METHOD, WrCalName.PROPERTY_NAME, Property.PRODID, Property.VERSION)
 	));
 
     /**

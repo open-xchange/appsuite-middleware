@@ -74,10 +74,6 @@ public enum AlarmField {
      */
     ACKNOWLEDGED,
     /**
-     * The description of the event.
-     */
-    DESCRIPTION,
-    /**
      * The type of action invoked when the alarm is triggered.
      */
     ACTION,
@@ -89,6 +85,10 @@ public enum AlarmField {
      * The moment the alarm will trigger.
      */
     TRIGGER,
+    /**
+     * Extended properties of the alarm.
+     */
+    EXTENDED_PROPERTIES,
 
     ;
 }

@@ -64,12 +64,11 @@ public class Alarm {
     private int id;
     private String uid;
     private RelatedTo relatedTo;
-
     private Trigger trigger;
     private Date acknowledged;
-    private String description;
     private AlarmAction action;
     private Repeat repeat;
+    private ExtendedProperties extendedProperties;
 
     private final EnumSet<AlarmField> setFields;
 
@@ -248,42 +247,6 @@ public class Alarm {
     }
 
     /**
-     * Gets the description of the alarm.
-     *
-     * @return The description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Sets the description of the alarm.
-     *
-     * @param value The description to set
-     */
-    public void setDescription(String value) {
-        description = value;
-        setFields.add(AlarmField.DESCRIPTION);
-    }
-
-    /**
-     * Removes the description of the alarm.
-     */
-    public void removeDescription() {
-        description = null;
-        setFields.remove(AlarmField.DESCRIPTION);
-    }
-
-    /**
-     * Gets a value indicating whether the description of the alarm has been set or not.
-     *
-     * @return <code>true</code> if the description is set, <code>false</code>, otherwise
-     */
-    public boolean containsDescription() {
-        return setFields.contains(AlarmField.DESCRIPTION);
-    }
-
-    /**
      * Gets the action of the alarm.
      *
      * @return The action
@@ -389,6 +352,42 @@ public class Alarm {
      */
     public boolean containsTrigger() {
         return isSet(AlarmField.TRIGGER);
+    }
+
+    /**
+     * Gets the extended properties of the alarm.
+     *
+     * @return The extended properties
+     */
+    public ExtendedProperties getExtendedProperties() {
+        return extendedProperties;
+    }
+
+    /**
+     * Sets the extended properties of the alarm.
+     *
+     * @param value The extended properties to set
+     */
+    public void setExtendedProperties(ExtendedProperties value) {
+        extendedProperties = value;
+        setFields.add(AlarmField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Removes the extended properties of the alarm.
+     */
+    public void removeExtendedProperties() {
+        extendedProperties = null;
+        setFields.remove(AlarmField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Gets a value indicating whether extended properties of the alarm have been set or not.
+     *
+     * @return <code>true</code> if extended properties are set, <code>false</code>, otherwise
+     */
+    public boolean containsExtendedProperties() {
+        return setFields.contains(AlarmField.EXTENDED_PROPERTIES);
     }
 
     @Override

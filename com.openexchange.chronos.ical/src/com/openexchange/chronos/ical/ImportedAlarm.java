@@ -51,6 +51,7 @@ package com.openexchange.chronos.ical;
 
 import java.util.List;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.DelegatingAlarm;
 import com.openexchange.exception.OXException;
 
 /**
@@ -59,7 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ImportedAlarm extends AlarmComponent implements ImportedComponent {
+public class ImportedAlarm extends DelegatingAlarm implements ImportedComponent {
 
     private final int index;
     private final List<OXException> warnings;

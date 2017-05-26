@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import net.fortuna.ical4j.extensions.outlook.AllDayEvent;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 
 /**
@@ -89,7 +91,12 @@ public class EventMappings {
 		new SummaryMapping(),
 		new TranspMapping(),
 		new UidMapping(),
-        new XMicrosoftAllDayEventMapping()
+        new XMicrosoftAllDayEventMapping(),
+        new ExtendedPropertiesMapping(
+            Property.ATTACH, Property.ATTENDEE, Property.CATEGORIES, Property.CLASS, Property.CREATED, Property.DESCRIPTION, 
+            Property.DTEND, Property.DTSTAMP, Property.DTSTART, Property.DURATION, Property.EXDATE, Property.LAST_MODIFIED,
+            Property.LOCATION, Property.ORGANIZER, Property.RECURRENCE_ID, Property.RRULE, Property.SEQUENCE, Property.STATUS, 
+            Property.SUMMARY, Property.TRANSP, Property.UID, AllDayEvent.PROPERTY_NAME)
 	));
 
     /**
