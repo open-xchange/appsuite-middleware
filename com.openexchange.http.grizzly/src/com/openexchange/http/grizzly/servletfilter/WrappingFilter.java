@@ -74,6 +74,7 @@ import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.version.Version;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -105,6 +106,7 @@ public class WrappingFilter implements Filter {
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
+    private final String version;
     private final AtomicLong counter;
     private final int serverId;
     private final String forHeader;
@@ -124,6 +126,7 @@ public class WrappingFilter implements Filter {
      */
     public WrappingFilter(GrizzlyConfig config) {
         super();
+        version = Version.getInstance().getVersionString();
         serverId = Math.abs(OXException.getServerId());
         counter = new AtomicLong(serverId >> 1);
         this.forHeader = config.getForHeader();
@@ -197,6 +200,7 @@ public class WrappingFilter implements Filter {
             LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
             LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
             LogProperties.put(LogProperties.Name.LOCALHOST_IP_ADDRESS, LOCAL_HOST);
+            LogProperties.put(LogProperties.Name.LOCALHOST_VERSION, version);
             LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpRequest.getServerName());
             {
                 String userAgent = httpRequest.getHeader("User-Agent");

@@ -294,6 +294,10 @@ public final class LogProperties {
          * com.openexchange.localhost.ipAddress
          */
         LOCALHOST_IP_ADDRESS("com.openexchange.localhost.ipAddress"),
+        /**
+         * com.openexchange.localhost.version
+         */
+        LOCALHOST_VERSION("com.openexchange.localhost.version"),
 
         ;
 
