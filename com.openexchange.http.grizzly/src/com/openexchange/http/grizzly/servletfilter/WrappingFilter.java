@@ -52,6 +52,8 @@ package com.openexchange.http.grizzly.servletfilter;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -88,6 +90,17 @@ public class WrappingFilter implements Filter {
     private static String dropLinebreaks(String s) {
         // Strip possible "\r?\n" and/or "%0A?%0D"
         return PATTERN_CRLF.matcher(s).replaceAll("");
+    }
+
+    private static final String LOCAL_HOST;
+    static {
+        String fbHost;
+        try {
+            fbHost = InetAddress.getLocalHost().getHostAddress();
+        } catch (final UnknownHostException e) {
+            fbHost = "127.0.0.1";
+        }
+        LOCAL_HOST = fbHost;
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -183,6 +196,7 @@ public class WrappingFilter implements Filter {
             Thread currentThread = Thread.currentThread();
             LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
             LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
+            LogProperties.put(LogProperties.Name.LOCALHOST_IP_ADDRESS, LOCAL_HOST);
             LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpRequest.getServerName());
             {
                 String userAgent = httpRequest.getHeader("User-Agent");

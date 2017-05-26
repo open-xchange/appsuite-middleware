@@ -290,6 +290,10 @@ public final class LogProperties {
          * com.openexchange.hostname
          */
         HOSTNAME("com.openexchange.hostname"),
+        /**
+         * com.openexchange.localhost.ipAddress
+         */
+        LOCALHOST_IP_ADDRESS("com.openexchange.localhost.ipAddress"),
 
         ;
 
