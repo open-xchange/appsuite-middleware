@@ -49,24 +49,25 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DeflaterInputStream;
+import java.util.zip.Deflater;
 import java.util.zip.InflaterInputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONInputStream;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.java.AsciiReader;
-import com.openexchange.java.CombinedInputStream;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 /**
  * {@link CalendarStorage}
@@ -80,28 +81,76 @@ public class ExtendedPropertiesCodec {
 
     private static final byte TYPE_JSON_DEFLATE = 5;
 
-    public static InputStream encode(ExtendedProperties extendedProperties) throws IOException {
+    /**
+     * Encodes the supplied extended properties prior passing it to the storage.
+     *
+     * @param extendedProperties The extended properties to encode
+     * @return The encoded properties, or <code>null</code> if passed are <code>null</code> or empty
+     */
+    public static byte[] encode(ExtendedProperties extendedProperties) throws IOException {
         return encode(extendedProperties, TYPE_JSON_DEFLATE);
     }
 
-    private static InputStream encode(ExtendedProperties extendedProperties, byte type) throws IOException {
+    /**
+     * Decodes extended properties from the supplied input stream fetched from the storage.
+     *
+     * @param inputStream The input stream carrying the encoded extended properties
+     * @return The decoded properties, or <code>null</code> if passed no data was read
+     * @throws IOException
+     */
+    public static ExtendedProperties decode(InputStream inputStream) throws IOException {
+        if (null == inputStream) {
+            return null;
+        }
+        int type = inputStream.read();
+        if (-1 == type) {
+            return null; // eol
+        }
+        switch (type) {
+            case TYPE_JSON_DEFLATE:
+                return decodeDeflatedJson(inputStream);
+            default:
+                throw new IOException(new UnsupportedEncodingException(String.valueOf(type)));
+        }
+    }
+
+    private static byte[] encode(ExtendedProperties extendedProperties, byte type) throws IOException {
         if (null == extendedProperties || extendedProperties.isEmpty()) {
             return null;
         }
-        InputStream inputStream;
+        ByteArrayOutputStream outputStream = null;
+        try {
+            outputStream = Streams.newByteArrayOutputStream();
+            encode(extendedProperties, type, outputStream);
+            return outputStream.toByteArray();
+        } finally {
+            Streams.close(outputStream);
+        }
+    }
+
+    private static void encode(ExtendedProperties extendedProperties, byte type, ByteArrayOutputStream outputStream) throws IOException {
+        outputStream.write(type);
         switch (type) {
             case TYPE_JSON_DEFLATE:
-                inputStream = encodeDeflatedJson(extendedProperties);
+                encodeDeflatedJson(extendedProperties, outputStream);
                 break;
             default:
                 throw new IOException(new UnsupportedEncodingException(String.valueOf(type)));
         }
-        return new CombinedInputStream(new byte[] { type }, inputStream);
     }
 
-    private static InputStream encodeDeflatedJson(ExtendedProperties extendedProperties) throws IOException {
+    private static void encodeDeflatedJson(ExtendedProperties extendedProperties, ByteArrayOutputStream outputStream) throws IOException {
         try {
-            return new DeflaterInputStream(new JSONInputStream(encodeJsonProperties(extendedProperties), "US-ASCII"));
+            JSONArray jsonProperties = encodeJsonProperties(extendedProperties);
+            byte[] jsonBytes = jsonProperties.toString().getBytes(Charsets.US_ASCII);
+            Deflater deflater = new Deflater();
+            deflater.setInput(jsonBytes);
+            deflater.finish();
+            byte[] buffer = new byte[4096];
+            do {
+                deflater.deflate(buffer);
+            } while (false == deflater.finished());
+            //            return new DeflaterInputStream(new JSONInputStream(encodeJsonProperties(extendedProperties), "US-ASCII"));
         } catch (JSONException e) {
             throw new IOException(e);
         }
@@ -133,22 +182,6 @@ public class ExtendedPropertiesCodec {
         }
         jsonExtendedProperty.put("parameters", jsonParameters);
         return jsonExtendedProperty;
-    }
-
-    public static ExtendedProperties decode(InputStream inputStream) throws IOException {
-        if (null == inputStream) {
-            return null;
-        }
-        int type = inputStream.read();
-        if (-1 == type) {
-            return null; // eol
-        }
-        switch (type) {
-            case TYPE_JSON_DEFLATE:
-                return decodeDeflatedJson(inputStream);
-            default:
-                throw new IOException(new UnsupportedEncodingException(String.valueOf(type)));
-        }
     }
 
     private static ExtendedProperties decodeDeflatedJson(InputStream inputStream) throws IOException {

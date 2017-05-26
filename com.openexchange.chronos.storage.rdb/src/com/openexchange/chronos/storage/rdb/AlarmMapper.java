@@ -340,17 +340,12 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
                 if (null == value) {
                     statement.setNull(parameterIndex, getSqlType());
                 } else {
-                    byte[] data;
-                    InputStream inputStream = null;
                     try {
-                        inputStream = ExtendedPropertiesCodec.encode(value);
-                        data = Streams.stream2bytes(inputStream);
+                        byte[] data = ExtendedPropertiesCodec.encode(value);
+                        statement.setBinaryStream(parameterIndex, Streams.newByteArrayInputStream(data), data.length);
                     } catch (IOException e) {
                         throw new SQLException(e);
-                    } finally {
-                        Streams.close(inputStream);
                     }
-                    statement.setBinaryStream(parameterIndex, Streams.newByteArrayInputStream(data), data.length);
                 }
                 return 1;
             }
