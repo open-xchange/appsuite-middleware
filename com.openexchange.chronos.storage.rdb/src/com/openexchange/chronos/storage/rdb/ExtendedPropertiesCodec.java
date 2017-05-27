@@ -52,14 +52,25 @@ package com.openexchange.chronos.storage.rdb;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.zip.Deflater;
 import java.util.zip.InflaterInputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.github.mangstadt.vinnie.SyntaxStyle;
+import com.github.mangstadt.vinnie.VObjectParameters;
+import com.github.mangstadt.vinnie.VObjectProperty;
+import com.github.mangstadt.vinnie.io.Context;
+import com.github.mangstadt.vinnie.io.SyntaxRules;
+import com.github.mangstadt.vinnie.io.VObjectDataAdapter;
+import com.github.mangstadt.vinnie.io.VObjectReader;
+import com.github.mangstadt.vinnie.io.VObjectWriter;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
@@ -76,6 +87,7 @@ import com.openexchange.java.Streams;
 public class ExtendedPropertiesCodec {
 
     private static final byte TYPE_JSON_DEFLATE = 5;
+    private static final byte TYPE_VOBJECT = 12;
 
     /**
      * Encodes the supplied extended properties prior passing it to the storage.
@@ -84,7 +96,7 @@ public class ExtendedPropertiesCodec {
      * @return The encoded properties, or <code>null</code> if passed are <code>null</code> or empty
      */
     public static byte[] encode(ExtendedProperties extendedProperties) throws IOException {
-        return encode(extendedProperties, TYPE_JSON_DEFLATE);
+        return encode(extendedProperties, TYPE_VOBJECT);
     }
 
     /**
@@ -105,6 +117,8 @@ public class ExtendedPropertiesCodec {
         switch (type) {
             case TYPE_JSON_DEFLATE:
                 return decodeDeflatedJson(inputStream);
+            case TYPE_VOBJECT:
+                return decodeVObjectProperties(inputStream);
             default:
                 throw new IOException(new UnsupportedEncodingException(String.valueOf(type)));
         }
@@ -129,6 +143,8 @@ public class ExtendedPropertiesCodec {
         switch (type) {
             case TYPE_JSON_DEFLATE:
                 encodeDeflatedJson(extendedProperties, outputStream);
+            case TYPE_VOBJECT:
+                encodeVObjectProperties(extendedProperties, outputStream);
                 break;
             default:
                 throw new IOException(new UnsupportedEncodingException(String.valueOf(type)));
@@ -163,6 +179,29 @@ public class ExtendedPropertiesCodec {
         return jsonExtendedProperties;
     }
 
+    private static void encodeVObjectProperties(ExtendedProperties extendedProperties, ByteArrayOutputStream outputStream) throws IOException {
+        try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8);
+            VObjectWriter vObjectWriter = new VObjectWriter(writer, SyntaxStyle.NEW)) {
+            for (ExtendedProperty extendedProperty : extendedProperties) {
+                vObjectWriter.writeProperty(encodeVObjectProperty(extendedProperty));
+            }
+            vObjectWriter.flush();
+        }
+    }
+
+    private static VObjectProperty encodeVObjectProperty(ExtendedProperty extendedProperty) throws IOException {
+        VObjectProperty vObjectProperty = new VObjectProperty(extendedProperty.getName(), extendedProperty.getValue());
+        List<ExtendedPropertyParameter> parameters = extendedProperty.getParameters();
+        if (null != parameters) {
+            VObjectParameters vObjectParameters = new VObjectParameters();
+            for (ExtendedPropertyParameter parameter : parameters) {
+                vObjectParameters.put(parameter.getName(), parameter.getValue());
+            }
+            vObjectProperty.setParameters(vObjectParameters);
+        }
+        return vObjectProperty;
+    }
+
     private static JSONObject encodeJsonProperty(ExtendedProperty extendedProperty) throws JSONException {
         JSONObject jsonExtendedProperty = new JSONObject();
         jsonExtendedProperty.put("name", extendedProperty.getName());
@@ -181,7 +220,8 @@ public class ExtendedPropertiesCodec {
     }
 
     private static ExtendedProperties decodeDeflatedJson(InputStream inputStream) throws IOException {
-        try (InflaterInputStream inflaterStream = new InflaterInputStream(inputStream); AsciiReader reader = new AsciiReader(inflaterStream)) {
+        try (InflaterInputStream inflaterStream = new InflaterInputStream(inputStream);
+            AsciiReader reader = new AsciiReader(inflaterStream)) {
             return decodeJsonProperties(new JSONArray(reader));
         } catch (JSONException e) {
             throw new IOException(e);
@@ -210,6 +250,44 @@ public class ExtendedPropertiesCodec {
         for (int i = 0; i < jsonParameters.length(); i++) {
             JSONObject jsonParameter = jsonParameters.getJSONObject(i);
             parameters.add(new ExtendedPropertyParameter(jsonParameter.optString("name", null), jsonParameter.optString("value", null)));
+        }
+        return new ExtendedProperty(name, value, parameters);
+    }
+
+    private static ExtendedProperties decodeVObjectProperties(InputStream inputStream) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+            VObjectReader vObjectReader = new VObjectReader(reader, SyntaxRules.iCalendar())) {
+            return decodeVObjectProperties(vObjectReader);
+        }
+    }
+
+    private static ExtendedProperties decodeVObjectProperties(VObjectReader vObjectReader) throws IOException {
+        if (null == vObjectReader) {
+            return null;
+        }
+        final List<ExtendedProperty> extendedProperties = new ArrayList<ExtendedProperty>();
+        vObjectReader.parse(new VObjectDataAdapter() {
+
+            @Override
+            public void onProperty(VObjectProperty property, Context context) {
+                extendedProperties.add(decodeVObjectProperty(property));
+            }
+        });
+        return extendedProperties.isEmpty() ? null : new ExtendedProperties(extendedProperties);
+    }
+
+    private static ExtendedProperty decodeVObjectProperty(VObjectProperty vObjectProperty) {
+        String name = vObjectProperty.getName();
+        String value = vObjectProperty.getValue();
+        VObjectParameters vObjectParameters = vObjectProperty.getParameters();
+        if (null == vObjectParameters) {
+            return new ExtendedProperty(name, value);
+        }
+        List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>();
+        for (Entry<String, List<String>> entry : vObjectParameters) {
+            for (String parameterValue : entry.getValue()) {
+                parameters.add(new ExtendedPropertyParameter(entry.getKey(), parameterValue));
+            }
         }
         return new ExtendedProperty(name, value, parameters);
     }
