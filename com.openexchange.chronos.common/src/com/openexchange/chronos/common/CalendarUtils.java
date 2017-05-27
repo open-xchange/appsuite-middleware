@@ -978,7 +978,7 @@ public class CalendarUtils {
     }
 
     /**
-     * Optionally gets (the first) extended property of specific name of a calendar.
+     * Optionally gets (the first) extended property of a specific name of a calendar.
      *
      * @param calendar The calendar to get the extended property from
      * @param name The name of the extended property to get
@@ -989,7 +989,7 @@ public class CalendarUtils {
     }
 
     /**
-     * Optionally gets (the first) extended property of specific name of an event.
+     * Optionally gets (the first) extended property of a specific name of an event.
      *
      * @param event The event to get the extended property from
      * @param name The name of the extended property to get
@@ -1000,7 +1000,7 @@ public class CalendarUtils {
     }
 
     /**
-     * Optionally gets (the first) extended property of specific name of an alarm.
+     * Optionally gets (the first) extended property of a specific name of an alarm.
      *
      * @param alarm The alarm to get the extended property from
      * @param name The name of the extended property to get
@@ -1008,6 +1008,18 @@ public class CalendarUtils {
      */
     public static ExtendedProperty optExtendedProperty(Alarm alarm, String name) {
         return optExtendedProperty(alarm.getExtendedProperties(), name);
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property of specific name of an alarm.
+     *
+     * @param alarm The alarm to get the extended property value from
+     * @param name The name of the extended property to get
+     * @return The extended property value, or <code>null</code> if not set
+     */
+    public static String optExtendedPropertyValue(Alarm alarm, String name) {
+        ExtendedProperty extendedProperty = optExtendedProperty(alarm, name);
+        return null != extendedProperty ? extendedProperty.getValue() : null;
     }
 
     private static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {

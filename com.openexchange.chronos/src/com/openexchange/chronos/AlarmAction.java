@@ -61,30 +61,58 @@ public class AlarmAction {
     /**
      * Specifies an alarm that causes a text message to be displayed to the user.
      */
-    public static final AlarmAction DISPLAY = new AlarmAction("DISPLAY");
+    public static final String DISPLAY_VALUE = "DISPLAY";
 
     /**
      * Specifies an alarm that causes a sound to be played to alert the user.
      */
-    public static final AlarmAction AUDIO = new AlarmAction("AUDIO");
+    public static final String AUDIO_VALUE = "AUDIO";
 
     /**
      * Specifies an alarm that causes an electronic email message to be delivered to one or more email addresses.
      */
-    public static final AlarmAction EMAIL = new AlarmAction("EMAIL");
+    public static final String EMAIL_VALUE = "EMAIL";
 
     /**
      * Specifies an alarm that causes a procedure or program to be invoked.
-     * 
+     *
      * @deprecated with <a href="https://tools.ietf.org/html/rfc5545#appendix-A.3">RFC 5545, appendix A.3</a>
      */
     @Deprecated
-    public static final AlarmAction PROCEDURE = new AlarmAction("PROCEDURE");
+    public static final String PROCEDURE_VALUE = "PROCEDURE";
 
     /**
      * Sometime used to specify alarms with no action.
      */
-    public static final AlarmAction NONE = new AlarmAction("NONE");
+    public static final String NONE_VALUE = "NONE";
+
+    /**
+     * Specifies an alarm that causes a text message to be displayed to the user.
+     */
+    public static final AlarmAction DISPLAY = new AlarmAction(DISPLAY_VALUE);
+
+    /**
+     * Specifies an alarm that causes a sound to be played to alert the user.
+     */
+    public static final AlarmAction AUDIO = new AlarmAction(AUDIO_VALUE);
+
+    /**
+     * Specifies an alarm that causes an electronic email message to be delivered to one or more email addresses.
+     */
+    public static final AlarmAction EMAIL = new AlarmAction(EMAIL_VALUE);
+
+    /**
+     * Specifies an alarm that causes a procedure or program to be invoked.
+     *
+     * @deprecated with <a href="https://tools.ietf.org/html/rfc5545#appendix-A.3">RFC 5545, appendix A.3</a>
+     */
+    @Deprecated
+    public static final AlarmAction PROCEDURE = new AlarmAction(PROCEDURE_VALUE);
+
+    /**
+     * Sometime used to specify alarms with no action.
+     */
+    public static final AlarmAction NONE = new AlarmAction(NONE_VALUE);
 
     private final String value;
 

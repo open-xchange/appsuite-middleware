@@ -122,7 +122,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             newEvent.setFolderId(folder.getID());
-            insertAlarms(newEvent, calendarUser.getId(), event.getAlarms(), false);
+            insertAlarms(newEvent, calendarUser.getId(), Check.alarmsAreValid(event.getAlarms()), false);
         }
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());

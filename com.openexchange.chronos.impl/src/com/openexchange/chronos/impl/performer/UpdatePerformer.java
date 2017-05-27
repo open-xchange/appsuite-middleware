@@ -652,7 +652,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     AlarmField.ACKNOWLEDGED, AlarmField.ACTION, AlarmField.EXTENDED_PROPERTIES, AlarmField.RELATED_TO, AlarmField.REPEAT, AlarmField.TRIGGER);
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
-                alarms.add(alarm);
+                alarms.add(Check.alarmIsValid(alarm));
             }
             storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), alarms);
         }
@@ -727,7 +727,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                      * check validity, treating PUBLIC as default value
                      */
                     Check.classificationIsValid(eventUpdate.getClassification(), folder);
-                    if (isSeriesException(originalEvent) && 
+                    if (isSeriesException(originalEvent) &&
                         (isPublicClassification(originalEvent) && false == isPublicClassification(eventUpdate)) ||
                         (false == isPublicClassification(originalEvent) && isPublicClassification(eventUpdate))) {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(

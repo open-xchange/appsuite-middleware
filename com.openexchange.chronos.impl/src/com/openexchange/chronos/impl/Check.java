@@ -59,11 +59,16 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
@@ -236,6 +241,81 @@ public class Check {
     }
 
     /**
+     * Checks that a list of alarms are valid, i.e. they all contain all mandatory properties.
+     *
+     * @param alarms The alarms to check
+     * @return The passed alarms, after they were checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    public static List<Alarm> alarmsAreValid(List<Alarm> alarms) throws OXException {
+        if (null != alarms && 0 < alarms.size()) {
+            for (Alarm alarm : alarms) {
+                alarmIsValid(alarm);
+            }
+        }
+        return alarms;
+    }
+
+    /**
+     * Checks that the supplied alarm is valid, i.e. it contains all mandatory properties.
+     *
+     * @param alarm The alarm to check
+     * @return The passed alarm, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    public static Alarm alarmIsValid(Alarm alarm) throws OXException {
+        /*
+         * action and trigger are both required for any type of alarm
+         */
+        if (null == alarm.getAction()) {
+            throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ACTION.toString());
+        }
+        if (null == alarm.getTrigger() || null == alarm.getTrigger().getDateTime() && null == alarm.getTrigger().getDuration()) {
+            throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.TRIGGER.toString());
+        }
+        /*
+         * check further properties based on alarm type
+         */
+        switch (alarm.getAction().getValue()) {
+            case AlarmAction.DISPLAY_VALUE:
+                if (Strings.isEmpty(CalendarUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
+                }
+                break;
+            case AlarmAction.EMAIL_VALUE:
+                if (Strings.isEmpty(CalendarUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
+                }
+                if (Strings.isEmpty(CalendarUtils.optExtendedPropertyValue(alarm, "SUMMARY"))) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("SUMMARY");
+                }
+                ExtendedProperties extendedProperties = alarm.getExtendedProperties();
+                if (null == extendedProperties) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+                }
+                List<ExtendedProperty> attendeeProperties = extendedProperties.getAll("ATTENDEE");
+                if (attendeeProperties.isEmpty()) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+                }
+                for (ExtendedProperty attendeeProperty : attendeeProperties) {
+                    String address = attendeeProperty.getValue();
+                    if (null == address) {
+                        throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+                    }
+                    try {
+                        new QuotedInternetAddress(address);
+                    } catch (AddressException e) {
+                        throw CalendarExceptionCodes.MANDATORY_FIELD.create(e, "ATTENDEE");
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return alarm;
+    }
+
+    /**
      * Checks that the classification is supported based on the given folder's type, if it is not <code>null</code> and different from
      * {@link Classification#PUBLIC}.
      *
@@ -245,7 +325,7 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
      */
     public static Classification classificationIsValid(Classification classification, UserizedFolder folder) throws OXException {
-        if (false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
+        if (null != classification && false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
             throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), folder.getID(), PublicType.getInstance());
         }
         return classification;

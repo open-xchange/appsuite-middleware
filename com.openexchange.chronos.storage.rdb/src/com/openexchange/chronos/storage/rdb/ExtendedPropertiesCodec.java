@@ -53,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -64,20 +63,17 @@ import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
-import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
 /**
- * {@link CalendarStorage}
+ * {@link ExtendedPropertiesCodec}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
 public class ExtendedPropertiesCodec {
-
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendedPropertiesCodec.class);
 
     private static final byte TYPE_JSON_DEFLATE = 5;
 
@@ -217,81 +213,5 @@ public class ExtendedPropertiesCodec {
         }
         return new ExtendedProperty(name, value, parameters);
     }
-
-    /**
-     * Deserializes a an arbitrary map (as used in an account's configuration field) from the supplied input stream.
-     *
-     * @param data The input stream to deserialize
-     * @return The deserialized map
-     */
-    public static ExtendedProperties decode(String data) throws SQLException {
-        if (null == data) {
-            return null;
-        }
-
-        List<ExtendedProperty> extendedProperties = new ArrayList<ExtendedProperty>();
-        try {
-            JSONArray jsonArray = new JSONArray(data);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                String name = jsonObject.getString("name");
-                String value = jsonObject.getString("value");
-
-                JSONArray paramtersArray = jsonObject.optJSONArray("parameters");
-
-                if (null == paramtersArray || paramtersArray.isEmpty()) {
-                    extendedProperties.add(new ExtendedProperty(name, value));
-                } else {
-                    List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>();
-                    for (int j = 0; j < paramtersArray.length(); j++) {
-                        JSONObject jsonParameter = paramtersArray.getJSONObject(i);
-                        parameters.add(new ExtendedPropertyParameter(jsonParameter.getString("name"), jsonParameter.getString("value")));
-                    }
-                }
-
-            }
-        } catch (JSONException e) {
-            throw new SQLException(e);
-        }
-
-        return new ExtendedProperties(extendedProperties);
-    }
-
-    /**
-     * Serializes an arbitrary meta map (as used in an account's configuration field) to an input stream.
-     *
-     * @param extendedProperties The map to serialize, or <code>null</code>
-     * @return The serialized map data, or <code>null</code> if the map is empty
-     */
-    public static String serializeExtendedProperties(ExtendedProperties extendedProperties) throws SQLException {
-        if (null == extendedProperties || extendedProperties.isEmpty()) {
-            return null;
-        }
-        try {
-            JSONArray jsonArray = new JSONArray(extendedProperties.size());
-            for (ExtendedProperty extendedProperty : extendedProperties) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("name", extendedProperty.getName());
-                jsonObject.put("value", extendedProperty.getValue());
-                List<ExtendedPropertyParameter> parameters = extendedProperty.getParameters();
-                if (null != parameters && 0 < parameters.size()) {
-                    JSONArray parametersArray = new JSONArray(parameters.size());
-                    for (ExtendedPropertyParameter entry : parameters) {
-                        JSONObject jsonParamter = new JSONObject();
-                        jsonParamter.put("name", entry.getName());
-                        jsonParamter.put("value", entry.getValue());
-                        parametersArray.put(jsonParamter);
-                    }
-                    jsonObject.put("paramters", parametersArray);
-                }
-                jsonArray.put(jsonObject);
-            }
-            return jsonArray.toString();
-        } catch (JSONException e) {
-            throw new SQLException(e);
-        }
-    }
-
 
 }
