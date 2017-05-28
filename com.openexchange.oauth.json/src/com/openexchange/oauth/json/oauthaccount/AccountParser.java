@@ -49,8 +49,7 @@
 
 package com.openexchange.oauth.json.oauthaccount;
 
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,11 +57,11 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 
@@ -73,12 +72,25 @@ import com.openexchange.oauth.scope.OAuthScopeRegistry;
  */
 public class AccountParser {
 
+    /**
+     * Initializes a new {@link AccountParser}.
+     */
     private AccountParser() {
         super();
     }
 
-    public static OAuthAccount parse(final JSONObject accountJSON, int user, int contextId) throws OXException, JSONException {
-        final DefaultOAuthAccount account = new DefaultOAuthAccount();
+    /**
+     * Parses the OAuth account from specified JSON representation of an OAuth account.
+     *
+     * @param accountJSON The JSON representation of the OAuth account
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The parsed OAuth account
+     * @throws OXException If an OPen-Xchange error occurs
+     * @throws JSONException If an error occurs while parsing/reading JSON data
+     */
+    public static DefaultOAuthAccount parse(JSONObject accountJSON, int userId, int contextId) throws OXException, JSONException {
+        DefaultOAuthAccount account = new DefaultOAuthAccount();
 
         if (accountJSON.hasAndNotNull(AccountField.ID.getName())) {
             account.setId(accountJSON.getInt(AccountField.ID.getName()));
@@ -93,21 +105,26 @@ public class AccountParser {
             account.setSecret(accountJSON.getString(AccountField.SECRET.getName()));
         }
         if (accountJSON.hasAndNotNull(AccountField.SERVICE_ID.getName())) {
-            final String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
-            final OAuthServiceMetaDataRegistry registry = Services.getService(OAuthService.class).getMetaDataRegistry();
-            account.setMetaData(registry.getService(serviceId, user, contextId));
+            String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
+            OAuthServiceMetaDataRegistry registry = Services.getService(OAuthService.class).getMetaDataRegistry();
+            account.setMetaData(registry.getService(serviceId, userId, contextId));
         }
         if (accountJSON.hasAndNotNull(AccountField.ENABLED_SCOPES.getName()) && account.getMetaData() != null) {
-            OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
-            API api = account.getMetaData().getAPI();
-
-            Set<OAuthScope> enabledScopes = new HashSet<>();
-
             JSONArray enabledScopesArray = accountJSON.getJSONArray(AccountField.ENABLED_SCOPES.getName());
-            Iterator<Object> scopesIterator = enabledScopesArray.iterator();
-            while (scopesIterator.hasNext()) {
-                String scope = (String) scopesIterator.next();
-                enabledScopes.add(scopeRegistry.getScope(api, OXScope.valueOf(scope)));
+            int length = enabledScopesArray.length();
+            if (length > 0) {
+                OAuthScopeRegistry scopeRegistry = Services.optService(OAuthScopeRegistry.class);
+                if (null == scopeRegistry) {
+                    throw ServiceExceptionCode.absentService(OAuthScopeRegistry.class);
+                }
+
+                API api = account.getMetaData().getAPI();
+                Set<OAuthScope> enabledScopes = new LinkedHashSet<>(length);
+                for (int i = 0; i < length; i++) {
+                    String scope = enabledScopesArray.getString(i);
+                    enabledScopes.add(scopeRegistry.getScope(api, OXScope.valueOf(scope)));
+                }
+                account.setEnabledScopes(enabledScopes);
             }
         }
 
