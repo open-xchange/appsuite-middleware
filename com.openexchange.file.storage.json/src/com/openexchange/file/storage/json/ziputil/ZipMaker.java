@@ -71,6 +71,7 @@ import com.openexchange.file.storage.json.actions.files.IdVersionPair;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -198,6 +199,17 @@ public class ZipMaker {
                 }
             }
         } catch (IOException e) {
+            String msg = Strings.asciiLowerCase(e.getMessage());
+            if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                /*-
+                 * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+                 *
+                 * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+                 * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+                 * or the enduser's machine crashed, etc, etc.
+                 */
+                throw AjaxExceptionCodes.CONNECTION_RESET.create(e, e.getMessage());
+            }
             throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
         }
     }
