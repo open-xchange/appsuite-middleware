@@ -68,6 +68,7 @@ import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
+import com.openexchange.oauth.OAuthAccountReauthorizedListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -148,6 +149,7 @@ public final class OAuthActivator extends HousekeepingActivator {
              * Start other trackers
              */
             track(OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
+            track(OAuthAccountReauthorizedListener.class, new ReauthorizeListenerServiceTracker(context));
             track(OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context));
             trackService(HtmlService.class);
             trackService(DeferringURLService.class);
