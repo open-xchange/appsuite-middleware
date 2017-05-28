@@ -163,6 +163,7 @@ public interface OAuthService {
      * <ul>
      * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
      * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
+     * <li>enabled scopes; {@link OAuthConstants#ARGUMENT_SCOPES}</li>
      * <li>user password is <b>mandatory</b> if request token shall be updated; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
      *
@@ -173,7 +174,7 @@ public interface OAuthService {
      * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
      * @throws OXException If deletion fails
      */
-    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
+    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OXException;
 
     /**
      * Updates the specified account

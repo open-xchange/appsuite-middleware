@@ -74,13 +74,13 @@ public abstract class AbstractReauthorizeClusterTask {
     /**
      * Initialises a new {@link AbstractReauthorizeClusterTask} and generates the name of
      * the task.
-     * 
+     *
      * <p>The task name consists out of the following parts:</p>
-     * 
+     *
      * <pre>[USER_ID]@[CONTEXT_ID]:[ACCOUNT_ID]:[SERVICE_ID]</pre>
      * e.g.
      * <pre>SomeProviderReauthorizeClusterTask:1138@31145:34:tld.domain.provider.oauth</pre>
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param session The groupware {@link Session}
      * @param cachedAccount The cached {@link OAuthAccount}
@@ -102,7 +102,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
     /**
      * Returns the context identifier
-     * 
+     *
      * @return the context identifier
      */
     public int getContextId() {
@@ -111,7 +111,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
     /**
      * Returns the user identifier
-     * 
+     *
      * @return the user identifier
      */
     public int getUserId() {
@@ -120,7 +120,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
     /**
      * Gets the task name.
-     * 
+     *
      * @return The task name
      */
     public String getTaskName() {
@@ -147,7 +147,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
     /**
      * Returns the database {@link OAuthAccount}
-     * 
+     *
      * @return The database {@link OAuthAccount}
      * @throws OXException if the {@link OAuthAccount} cannot be retrieved
      */
@@ -160,7 +160,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
     /**
      * Returns the {@link OAuthService}
-     * 
+     *
      * @return the {@link OAuthService}
      */
     public OAuthService getOAuthService() {
@@ -172,7 +172,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
     /**
      * Common logic for the perform
-     * 
+     *
      * @return The re-authorised OAuthAccount
      * @throws OXException if an error is occurred
      */
@@ -198,7 +198,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
         // Update the account
         OAuthService oAuthService = getOAuthService();
-        oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), dbAccount.getEnabledScopes());
+        oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
 
         // Reload
         return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
@@ -206,7 +206,7 @@ public abstract class AbstractReauthorizeClusterTask {
 
     /**
      * Performs the actual re-authorise task
-     * 
+     *
      * @return The re-authorised OAuthAccount
      * @throws OXException if an error is occurred
      */
