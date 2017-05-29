@@ -66,6 +66,8 @@ import com.openexchange.exception.interception.internal.OXExceptionInterceptorRe
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.passwordmechs.PasswordMechFactory;
@@ -93,13 +95,15 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public final class GlobalActivator implements BundleActivator {
 
-    private volatile Initialization initialization;
-    private volatile ServiceTracker<StringParser,StringParser> parserTracker;
-    private volatile ServiceRegistration<StringParser> parserRegistration;
-    private volatile ServiceRegistration<SessionInspectorChain> inspectorChainRegistration;
-    private volatile ServiceRegistration<ThreadControlService> threadControlRegistration;
-    private volatile ServiceRegistration<CloseableControlService> closeableControlRegistration;
-    private volatile List<ServiceTracker<?,?>> trackers;
+    private Initialization initialization;
+    private ServiceTracker<StringParser,StringParser> parserTracker;
+    private ServiceRegistration<StringParser> parserRegistration;
+    private ServiceRegistration<SessionInspectorChain> inspectorChainRegistration;
+    private ServiceRegistration<ThreadControlService> threadControlRegistration;
+    private ServiceRegistration<CloseableControlService> closeableControlRegistration;
+    private ServiceRegistration<PasswordMechFactory> pwMechRegistration;
+    private ServiceRegistration<I18nServiceRegistry> i18nRegistryRegistration;
+    private List<ServiceTracker<?,?>> trackers;
 
 
     /**
@@ -110,7 +114,7 @@ public final class GlobalActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final Initialization initialization = new ServerInitialization();
@@ -134,12 +138,18 @@ public final class GlobalActivator implements BundleActivator {
                 inspectorChainRegistration = context.registerService(SessionInspectorChain.class, chainImpl, null);
             }
 
+            I18nServiceRegistryImpl i18nRegistry = new I18nServiceRegistryImpl();
+            trackers.add(new ServiceTracker<>(context, I18nService.class, new I18nServiceTracker(i18nRegistry, context)));
+
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
+
+            i18nRegistryRegistration = context.registerService(I18nServiceRegistry.class, i18nRegistry, null);
+
             PasswordMechFactoryImpl passwordMechFactoryImpl = new PasswordMechFactoryImpl();
             passwordMechFactoryImpl.register(PasswordMech.BCRYPT, PasswordMech.CRYPT, PasswordMech.SHA);
-            context.registerService(PasswordMechFactory.class, passwordMechFactoryImpl, null);
+            pwMechRegistration = context.registerService(PasswordMechFactory.class, passwordMechFactoryImpl, null);
 
             threadControlRegistration = context.registerService(ThreadControlService.class, ThreadControl.getInstance(), null);
             closeableControlRegistration = context.registerService(CloseableControlService.class, ThreadLocalCloseableControl.getInstance(), null);
@@ -230,7 +240,7 @@ public final class GlobalActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final List<ServiceTracker<?, ?>> trackers = this.trackers;
@@ -265,6 +275,18 @@ public final class GlobalActivator implements BundleActivator {
             if (null != inspectorChainRegistration) {
                 this.inspectorChainRegistration = null;
                 inspectorChainRegistration.unregister();
+            }
+
+            ServiceRegistration<PasswordMechFactory> pwMechRegistration = this.pwMechRegistration;
+            if (null != pwMechRegistration) {
+                this.pwMechRegistration = null;
+                pwMechRegistration.unregister();
+            }
+
+            ServiceRegistration<I18nServiceRegistry> i18nRegistryRegistration = this.i18nRegistryRegistration;
+            if (null != i18nRegistryRegistration) {
+                this.i18nRegistryRegistration = null;
+                i18nRegistryRegistration.unregister();
             }
 
             OXExceptionInterceptorRegistration.dropInstance();
