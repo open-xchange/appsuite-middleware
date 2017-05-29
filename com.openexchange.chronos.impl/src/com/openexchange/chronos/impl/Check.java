@@ -70,6 +70,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -278,15 +279,15 @@ public class Check {
          */
         switch (alarm.getAction().getValue()) {
             case AlarmAction.DISPLAY_VALUE:
-                if (Strings.isEmpty(CalendarUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
+                if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
                     throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
                 }
                 break;
             case AlarmAction.EMAIL_VALUE:
-                if (Strings.isEmpty(CalendarUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
+                if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
                     throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
                 }
-                if (Strings.isEmpty(CalendarUtils.optExtendedPropertyValue(alarm, "SUMMARY"))) {
+                if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "SUMMARY"))) {
                     throw CalendarExceptionCodes.MANDATORY_FIELD.create("SUMMARY");
                 }
                 ExtendedProperties extendedProperties = alarm.getExtendedProperties();

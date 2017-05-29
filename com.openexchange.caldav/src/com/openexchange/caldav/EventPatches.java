@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav;
 
+import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -73,6 +74,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.RecurrenceId;
@@ -626,9 +628,11 @@ public class EventPatches {
         private static Alarm getEmptyDefaultAlarm() {
             Alarm alarm = new Alarm(EMPTY_ALARM_TRIGGER, AlarmAction.NONE);
             alarm.setUid(UUID.randomUUID().toString().toUpperCase());
-            addExtendedProperty(alarm, new ExtendedProperty("X-WR-ALARMUID", alarm.getUid()));
-            addExtendedProperty(alarm, new ExtendedProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"));
-            addExtendedProperty(alarm, new ExtendedProperty("X-APPLE-DEFAULT-ALARM", "TRUE"));
+            List<ExtendedProperty> extendedProperties = new ArrayList<ExtendedProperty>(3);
+            extendedProperties.add(new ExtendedProperty("X-WR-ALARMUID", alarm.getUid()));
+            extendedProperties.add(new ExtendedProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"));
+            extendedProperties.add(new ExtendedProperty("X-APPLE-DEFAULT-ALARM", "TRUE"));
+            alarm.setExtendedProperties(new ExtendedProperties(extendedProperties));
             return alarm;
         }
 
@@ -660,7 +664,7 @@ public class EventPatches {
                      */
                     if (null != exportedAlarm.getAcknowledged()) {
                         ExtendedProperty mozLastAckProperty = new ExtendedProperty("X-MOZ-LASTACK", Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
-                        addExtendedProperty(exportedAlarm, mozLastAckProperty);
+                        addExtendedProperty(exportedAlarm, mozLastAckProperty, true);
                         /*
                          * also store X-MOZ-LASTACK in parent component for recurring events
                          */

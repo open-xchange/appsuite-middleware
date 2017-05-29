@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
@@ -83,7 +84,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link AbstractUpdatePerformer}
@@ -343,7 +343,7 @@ public abstract class AbstractUpdatePerformer {
             Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
             newAlarm.setId(storage.getAlarmStorage().nextId());
             if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
-                newAlarm.setUid(UUIDs.getUnformattedStringFromRandom());
+                newAlarm.setUid(UUID.randomUUID().toString());
             }
             newAlarms.add(newAlarm);
         }

@@ -556,7 +556,6 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         return rangeFrom.getTime();
     }
 
-
     /**
      * Calculates the end time of the effective range of an event, i.e. the end of the period the event spans. The range is always
      * the maximum, timezone-independent range for any possible occurrence of the event, i.e. the range for <i>floating</i> events is

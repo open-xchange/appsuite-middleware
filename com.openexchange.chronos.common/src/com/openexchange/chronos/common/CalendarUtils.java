@@ -963,21 +963,6 @@ public class CalendarUtils {
     }
 
     /**
-     * Adds an extended property to an alarm, initializing the alarm's extended properties collection as needed.
-     *
-     * @param alarm The alarm to add the property to
-     * @param extendedProperty The extended property to add
-     */
-    public static void addExtendedProperty(Alarm alarm, ExtendedProperty extendedProperty) {
-        ExtendedProperties extendedProperties = alarm.getExtendedProperties();
-        if (null == extendedProperties) {
-            extendedProperties = new ExtendedProperties();
-            alarm.setExtendedProperties(extendedProperties);
-        }
-        extendedProperties.add(extendedProperty);
-    }
-
-    /**
      * Optionally gets (the first) extended property of a specific name of a calendar.
      *
      * @param calendar The calendar to get the extended property from
@@ -999,30 +984,7 @@ public class CalendarUtils {
         return optExtendedProperty(event.getExtendedProperties(), name);
     }
 
-    /**
-     * Optionally gets (the first) extended property of a specific name of an alarm.
-     *
-     * @param alarm The alarm to get the extended property from
-     * @param name The name of the extended property to get
-     * @return The extended property, or <code>null</code> if not set
-     */
-    public static ExtendedProperty optExtendedProperty(Alarm alarm, String name) {
-        return optExtendedProperty(alarm.getExtendedProperties(), name);
-    }
-
-    /**
-     * Optionally gets the value of (the first) extended property of specific name of an alarm.
-     *
-     * @param alarm The alarm to get the extended property value from
-     * @param name The name of the extended property to get
-     * @return The extended property value, or <code>null</code> if not set
-     */
-    public static String optExtendedPropertyValue(Alarm alarm, String name) {
-        ExtendedProperty extendedProperty = optExtendedProperty(alarm, name);
-        return null != extendedProperty ? extendedProperty.getValue() : null;
-    }
-
-    private static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
+    protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
     }
 

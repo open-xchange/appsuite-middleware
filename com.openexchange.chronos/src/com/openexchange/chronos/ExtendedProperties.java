@@ -51,6 +51,7 @@ package com.openexchange.chronos;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -119,6 +120,23 @@ public class ExtendedProperties extends ArrayList<ExtendedProperty> {
             }
         }
         return properties;
+    }
+
+    /**
+     * Removes all extended properties matching the supplied name.
+     *
+     * @param name The name of the properties to remove
+     * @return <code>true</code> if this list changed as a result of the call
+     */
+    public boolean removeAll(String name) {
+        boolean removed = false;
+        for (Iterator<ExtendedProperty> iterator = iterator(); iterator.hasNext();) {
+            if (name.equals(iterator.next().getName())) {
+                iterator.remove();
+                removed |= true;
+            }
+        }
+        return removed;
     }
 
 }

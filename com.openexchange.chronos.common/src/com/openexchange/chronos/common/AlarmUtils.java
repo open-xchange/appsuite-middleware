@@ -60,7 +60,10 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -215,7 +218,7 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
-     * Filters a list of attendees based on their alarm action.
+     * Filters a list of alarms based on their alarm action.
      *
      * @param alarms The alarms to filter
      * @param actions The {@link AlarmAction}s to consider
@@ -228,6 +231,28 @@ public class AlarmUtils extends CalendarUtils {
         List<Alarm> filteredAlarms = new ArrayList<Alarm>(alarms.size());
         for (Alarm alarm : alarms) {
             if (null == actions || com.openexchange.tools.arrays.Arrays.contains(actions, alarm.getAction())) {
+                filteredAlarms.add(alarm);
+            }
+        }
+        return filteredAlarms;
+    }
+
+    /**
+     * Filters a list of alarms by removing all <i>acknowledged</i> alarms.
+     *
+     * @param alarms The alarms to filter
+     * @param event The event the alarms are associated with
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates, and to calculate a relative trigger in
+     * @return The filtered alarms
+     * @see AlarmUtils#isAcknowledged(Alarm, Event, TimeZone)
+     */
+    public static List<Alarm> removeAcknowledged(List<Alarm> alarms, Event event, TimeZone timeZone) {
+        if (null == alarms) {
+            return null;
+        }
+        List<Alarm> filteredAlarms = new ArrayList<Alarm>(alarms.size());
+        for (Alarm alarm : alarms) {
+            if (false == isAcknowledged(alarm, event, timeZone)) {
                 filteredAlarms.add(alarm);
             }
         }
@@ -453,6 +478,29 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific alarm is <i>acknowledged</i>, i.e. the alarm action has already been triggered and
+     * dismissed by the user/client.
+     * <p/>
+     * More formally, this method check if the {@link AlarmField#ACKNOWLEDGED} property is set, and its value is greater than or equal to
+     * the computed trigger time of the alarm.
+     *
+     * @param alarm The alarm to inspect
+     * @param event The event the alarm is associated with
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates, and to calculate a relative trigger in
+     * @return <code>true</code> if the alarm is acknowledged, <code>false</code>, otherwise
+     */
+    public static boolean isAcknowledged(Alarm alarm, Event event, TimeZone timeZone) {
+        Date acknowledged = alarm.getAcknowledged();
+        if (null != acknowledged) {
+            Date triggerTime = getTriggerTime(alarm.getTrigger(), event, timeZone);
+            if (null != triggerTime) {
+                return false == acknowledged.before(triggerTime);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets a value indicating whether a specific alarm represents a <i>snoozed</i> one, i.e. there exists another alarm with a matching
      * <code>SNOOZE</code> relationship in the supplied alarm collection that was 'overridden' by this alarm.
      *
@@ -477,6 +525,47 @@ public class AlarmUtils extends CalendarUtils {
             return find(allAlarms, alarm.getRelatedTo().getValue());
         }
         return null;
+    }
+
+    /**
+     * Adds an extended property to an alarm, initializing the alarm's extended properties collection as needed.
+     *
+     * @param alarm The alarm to add the property to
+     * @param extendedProperty The extended property to add
+     * @param removeExisting <code>true</code> to remove any existing extended property with the same name, <code>false</code>, otherwise
+     */
+    public static void addExtendedProperty(Alarm alarm, ExtendedProperty extendedProperty, boolean removeExisting) {
+        ExtendedProperties extendedProperties = alarm.getExtendedProperties();
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+            alarm.setExtendedProperties(extendedProperties);
+        } else if (removeExisting) {
+            extendedProperties.removeAll(extendedProperty.getName());
+        }
+        extendedProperties.add(extendedProperty);
+    }
+
+    /**
+     * Optionally gets (the first) extended property of a specific name of an alarm.
+     *
+     * @param alarm The alarm to get the extended property from
+     * @param name The name of the extended property to get
+     * @return The extended property, or <code>null</code> if not set
+     */
+    public static ExtendedProperty optExtendedProperty(Alarm alarm, String name) {
+        return optExtendedProperty(alarm.getExtendedProperties(), name);
+    }
+
+    /**
+     * Optionally gets the value of (the first) extended property of specific name of an alarm.
+     *
+     * @param alarm The alarm to get the extended property value from
+     * @param name The name of the extended property to get
+     * @return The extended property value, or <code>null</code> if not set
+     */
+    public static String optExtendedPropertyValue(Alarm alarm, String name) {
+        ExtendedProperty extendedProperty = optExtendedProperty(alarm, name);
+        return null != extendedProperty ? extendedProperty.getValue() : null;
     }
 
 }

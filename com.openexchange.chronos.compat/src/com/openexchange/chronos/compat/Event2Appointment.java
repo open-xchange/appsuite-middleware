@@ -282,7 +282,7 @@ public class Event2Appointment {
     public static Integer getReminder(List<Alarm> alarms) {
         if (null != alarms && 0 < alarms.size()) {
             for (Alarm alarm : alarms) {
-                if (AlarmAction.DISPLAY == alarm.getAction()) {
+                if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
                     Trigger trigger = alarm.getTrigger();
                     if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
                         if (Strings.isNotEmpty(trigger.getDuration())) {

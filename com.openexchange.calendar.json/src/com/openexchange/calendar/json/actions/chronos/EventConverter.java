@@ -563,6 +563,7 @@ public abstract class EventConverter {
         }
         if (event.containsAlarms()) {
             Integer reminder = Event2Appointment.getReminder(event.getAlarms());
+            //            Integer reminder = Event2Appointment.getReminder(AlarmUtils.removeAcknowledged(event.getAlarms(), event, getDefaultTimeZone()));
             if (null == reminder) {
                 // don't apply "-1" reminder minutes when converting to appointment
             } else {

@@ -736,26 +736,25 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     break;
                 case START_TIMEZONE:
                     /*
-                     * deny removal & check timezone validity
+                     * check timezone validity & ensure all necessary recurrence related data is present in passed event update & re-validate start- and end date
                      */
-                    if (null == updatedEvent.getStartTimeZone()) {
-                        throw CalendarExceptionCodes.INVALID_TIMEZONE.create("");
-                    }
-                    updatedEvent.setStartTimeZone(Check.timeZoneExists(updatedEvent.getStartTimeZone()));
+                    Check.timeZoneExists(updatedEvent.getStartTimeZone());
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    Check.startAndEndDate(eventUpdate);
                     break;
                 case END_TIMEZONE:
                     /*
-                     * check timezone validity
+                     * check timezone validity & ensure all necessary recurrence related data is present in passed event update & re-validate start- and end date
                      */
-                    if (null != updatedEvent.getEndTimeZone()) {
-                        updatedEvent.setEndTimeZone(Check.timeZoneExists(updatedEvent.getEndTimeZone()));
-                    }
+                    Check.timeZoneExists(updatedEvent.getEndTimeZone());
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    Check.startAndEndDate(eventUpdate);
                     break;
                 case ALL_DAY:
                     /*
-                     * adjust start- and enddate, too, if required
+                     * adjust start- and enddate, too, if required & ensure all necessary recurrence related data is present in passed event update
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
                     Consistency.adjustAllDayDates(eventUpdate);
                     break;
                 case RECURRENCE_RULE:
