@@ -380,4 +380,14 @@ public class UnmodifiableEvent extends DelegatingEvent {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void setExtendedProperties(ExtendedProperties value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeExtendedProperties() {
+        throw new UnsupportedOperationException();
+    }
+
 }
