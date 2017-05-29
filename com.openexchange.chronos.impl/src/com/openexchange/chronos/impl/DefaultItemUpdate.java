@@ -89,7 +89,7 @@ public class DefaultItemUpdate<O, E extends Enum<E>> implements ItemUpdate<O, E>
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences
      */
-    public DefaultItemUpdate(DefaultMapper<O, E> mapper, O originalItem, O updatedItem, boolean considerUnset, E... ignoredFields) throws OXException {
+    public DefaultItemUpdate(DefaultMapper<O, E> mapper, O originalItem, O updatedItem, boolean considerUnset, E[] ignoredFields) throws OXException {
         this(originalItem, updatedItem, getDifferentFields(mapper, originalItem, updatedItem, considerUnset, ignoredFields));
     }
 
@@ -139,7 +139,7 @@ public class DefaultItemUpdate<O, E extends Enum<E>> implements ItemUpdate<O, E>
         return "ItemUpdate [originalItem=" + originalItem + ", updatedItem=" + updatedItem + ", updatedFields=" + updatedFields + "]";
     }
 
-    protected static <O, E extends Enum<E>> Set<E> getDifferentFields(DefaultMapper<O, E> mapper, O original, O update, boolean considerUnset, E... ignoredFields) throws OXException {
+    protected static <O, E extends Enum<E>> Set<E> getDifferentFields(DefaultMapper<O, E> mapper, O original, O update, boolean considerUnset, E[] ignoredFields) throws OXException {
         if (null == original) {
             if (null == update) {
                 return Collections.emptySet();

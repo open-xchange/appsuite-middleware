@@ -118,7 +118,7 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> extends Abs
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences between updated items
      */
-    public AbstractCollectionUpdate(DefaultMapper<O, E> mapper, List<O> originalItems, List<O> newItems, boolean considerUnset, E... ignoredFields) throws OXException {
+    public AbstractCollectionUpdate(DefaultMapper<O, E> mapper, List<O> originalItems, List<O> newItems, boolean considerUnset, E[] ignoredFields) throws OXException {
         super(originalItems, newItems);
         if (null != originalItems && null != newItems) {
             updatedItems = new ArrayList<ItemUpdate<O, E>>();
