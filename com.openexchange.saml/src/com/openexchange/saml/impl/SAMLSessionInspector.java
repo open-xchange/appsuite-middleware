@@ -95,17 +95,17 @@ public class SAMLSessionInspector implements SessionInspectorService {
             }
         }
 
-        return Reply.CONTINUE;
+        return Reply.NEUTRAL;
     }
 
     @Override
     public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return Reply.CONTINUE;
+        return Reply.NEUTRAL;
     }
 
     @Override
     public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return Reply.CONTINUE;
+        return Reply.NEUTRAL;
     }
 
 }
