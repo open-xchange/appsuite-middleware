@@ -49,16 +49,10 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.compat.ShownAsTransparency;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import com.openexchange.java.Enums;
-import net.fortuna.ical4j.extensions.outlook.BusyStatus;
-import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Transp;
@@ -69,50 +63,29 @@ import net.fortuna.ical4j.model.property.Transp;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class TranspMapping extends AbstractICalMapping<VEvent, Event> {
+public class TranspMapping extends ICalTextMapping<VEvent, Event> {
 
     /**
      * Initializes a new {@link TranspMapping}.
      */
     public TranspMapping() {
-        super();
+        super(Property.TRANSP);
     }
 
     @Override
-    public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
+    protected String getValue(Event object) {
         com.openexchange.chronos.Transp value = object.getTransp();
-        removeProperties(component, Property.TRANSP);
-        removeProperties(component, BusyStatus.PROPERTY_NAME);
-        if (null != value) {
-            component.getProperties().add(new Transp(value.getValue()));
-            if (com.openexchange.chronos.Transp.TRANSPARENT.equals(value.getValue())) {
-                component.getProperties().add(new BusyStatus(new ParameterList(), BusyStatus.FACTORY, "FREE"));
-            } else if (ShownAsTransparency.class.isInstance(value) && ShownAsTransparency.ABSENT.equals(value)) {
-                component.getProperties().add(new BusyStatus(new ParameterList(), BusyStatus.FACTORY, "OOF"));
-            } else if (ShownAsTransparency.class.isInstance(value) && ShownAsTransparency.TEMPORARY.equals(value)) {
-                component.getProperties().add(new BusyStatus(new ParameterList(), BusyStatus.FACTORY, "TENTATIVE"));
-            } else {
-                component.getProperties().add(new BusyStatus(new ParameterList(), BusyStatus.FACTORY, "BUSY"));
-            }
-        }
+        return null != value ? value.getValue() : null;
     }
 
     @Override
-    public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
-        Transp transp = component.getTransparency();
-        if (null != transp) {
-            object.setTransp(Enums.parse(TimeTransparency.class, transp.getValue(), null));
-            Property busyStatus = component.getProperty(BusyStatus.PROPERTY_NAME);
-            if (null != busyStatus && null != busyStatus.getValue()) {
-                if ("OOF".equalsIgnoreCase(busyStatus.getValue())) {
-                    object.setTransp(ShownAsTransparency.ABSENT);
-                } else if ("TENTATIVE".equalsIgnoreCase(busyStatus.getValue())) {
-                    object.setTransp(ShownAsTransparency.TEMPORARY);
-                }
-            }
-        } else if (false == isIgnoreUnsetProperties(parameters)) {
-            object.setTransp(null);
-        }
+    protected void setValue(Event object, String value) {
+        object.setTransp(Enums.parse(TimeTransparency.class, value, null));
+    }
+
+    @Override
+    protected Property createProperty() {
+        return new Transp();
     }
 
 }

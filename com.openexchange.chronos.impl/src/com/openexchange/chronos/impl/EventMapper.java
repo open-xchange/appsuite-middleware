@@ -678,15 +678,6 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.TRANSP, new DefaultMapping<Transp, Event>() {
 
             @Override
-            public boolean equals(Event object1, Event object2) {
-                Transp transp1 = get(object1);
-                Transp transp2 = get(object2);
-                String value1 = null != transp1 ? transp1.getValue() : null;
-                String value2 = null != transp2 ? transp2.getValue() : null;
-                return null == value1 ? null == value2 : value1.equals(value2);
-            }
-
-            @Override
             public boolean isSet(Event object) {
                 return object.containsTransp();
             }

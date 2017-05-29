@@ -55,6 +55,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
@@ -79,7 +80,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -479,7 +479,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
      */
     private List<Attendee> getAttendeesToCheck(Event event, List<Attendee> attendees) throws OXException {
-        if (event.containsTransp() && TimeTransparency.TRANSPARENT.equals(event.getTransp())) {
+        if (false == isOpaqueTransparency(event)) {
             return Collections.emptyList();
         }
         boolean includeUserAttendees = false == isIgnoreConflicts(session);

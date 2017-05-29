@@ -65,6 +65,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.calendar.RecurrenceChecker;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -72,6 +73,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -562,13 +564,17 @@ public abstract class EventConverter {
             appointment.setNote(event.getDescription());
         }
         if (event.containsAlarms()) {
-            Integer reminder = Event2Appointment.getReminder(event.getAlarms());
-            //            Integer reminder = Event2Appointment.getReminder(AlarmUtils.removeAcknowledged(event.getAlarms(), event, getDefaultTimeZone()));
-            if (null == reminder) {
-                // don't apply "-1" reminder minutes when converting to appointment
+            List<Alarm> alarms = event.getAlarms();
+            if (false == isSeriesMaster(event) && null != alarms && 1 == alarms.size() && AlarmUtils.isAcknowledged(alarms.get(0), event, getDefaultTimeZone())) {
+                // don't apply single dismissed reminders
             } else {
-                appointment.setAlarmFlag(true);
-                appointment.setAlarm(reminder.intValue());
+                Integer reminder = Event2Appointment.getReminder(event.getAlarms());
+                if (null == reminder) {
+                    // don't apply "-1" reminder minutes when converting to appointment
+                } else {
+                    appointment.setAlarmFlag(true);
+                    appointment.setAlarm(reminder.intValue());
+                }
             }
         }
         if (event.containsSeriesId()) {

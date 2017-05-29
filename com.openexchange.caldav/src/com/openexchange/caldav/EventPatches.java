@@ -130,11 +130,12 @@ public class EventPatches {
      */
     public static ICalParameters applyIgnoredProperties(EventResource resource, ICalParameters parameters) {
         if (null != parameters) {
-            if (false == DAVUserAgent.EM_CLIENT.equals(resource.getUserAgent())) {
+            DAVUserAgent userAgent = resource.getUserAgent();
+            if (false == DAVUserAgent.EM_CLIENT.equals(userAgent)) {
                 /*
-                 * ignore X-MICROSOFT-CDO-ALLDAYEVENT for clients other than em client
+                 * forcibly ignore X-MICROSOFT-CDO-ALLDAYEVENT and X-MICROSOFT-CDO-BUSYSTATUS for clients other than em client
                  */
-                parameters.set(ICalParameters.IGNORED_PROPERTIES, new String[] { "X-MICROSOFT-CDO-ALLDAYEVENT" });
+                parameters.set(ICalParameters.IGNORED_PROPERTIES, new String[] { "X-MICROSOFT-CDO-ALLDAYEVENT", "X-MICROSOFT-CDO-BUSYSTATUS" });
             }
         }
         return parameters;

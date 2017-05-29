@@ -82,6 +82,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -919,10 +920,21 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific event can be considered as <i>opaque</i> during free/busy lookups or conflict checks,
+     * i.e. it is either explicitly marked different from {@link Transp#TRANSPARENT}, or its transparency is set to <code>null</code>.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is considered as <i>public</i>, <code>false</code>, otherwise
+     */
+    public static boolean isOpaqueTransparency(Event event) {
+        return null == event.getTransp() || false == Transp.TRANSPARENT.equals(event.getTransp().getValue());
+    }
+
+    /**
      * Gets a value indicating whether a specific event can be considered as <i>public</i> or not, i.e. it is either explicitly marked
      * with the default value of {@link Classification#PUBLIC}, or its classification is set to <code>null</code>.
      *
-     * @param event The event ot check
+     * @param event The event to check
      * @return <code>true</code> if the event is considered as <i>public</i>, <code>false</code>, otherwise
      */
     public static boolean isPublicClassification(Event event) {

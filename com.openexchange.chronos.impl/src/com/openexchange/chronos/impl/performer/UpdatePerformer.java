@@ -459,7 +459,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         })) {
             return true;
         }
-        if (eventUpdate.getUpdatedFields().contains(EventField.TRANSP) && Transp.TRANSPARENT.equals(eventUpdate.getOriginal().getTransp().getValue())) {
+        if (eventUpdate.getUpdatedFields().contains(EventField.TRANSP) && false == CalendarUtils.isOpaqueTransparency(eventUpdate.getOriginal())) {
             return true;
         }
         AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
