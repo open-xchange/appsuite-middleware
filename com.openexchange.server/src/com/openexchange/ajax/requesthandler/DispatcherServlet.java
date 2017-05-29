@@ -398,7 +398,8 @@ public class DispatcherServlet extends SessionServlet {
             SessionExceptionCodes.SESSION_EXPIRED,
             SessionExceptionCodes.WRONG_SESSION_SECRET,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
-            UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED
+            UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
+            AjaxExceptionCodes.CONNECTION_RESET
         );
 
     /**
