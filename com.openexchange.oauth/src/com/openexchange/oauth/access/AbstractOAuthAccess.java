@@ -57,6 +57,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthUtil;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
 
 /**
@@ -109,14 +111,17 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * </ul>
      *
      * @param account The {@link OAuthAccount} to check for validity
+     * @param scopes The scopes that are required to be available and enabled as well
      * @throws OXException if the account is not valid
      */
-    protected void verifyAccount(OAuthAccount account) throws OXException {
+    protected void verifyAccount(OAuthAccount account, OXScope... scopes) throws OXException {
         // Verify that the account has an access token
         if (Strings.isEmpty(account.getToken())) {
             API api = account.getAPI();
             throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), account.getId(), session.getUserId(), session.getContextId());
         }
+
+        OAuthUtil.checkScopesAvailableAndEnabled(account, session, scopes);
 
         // Other checks?
     }

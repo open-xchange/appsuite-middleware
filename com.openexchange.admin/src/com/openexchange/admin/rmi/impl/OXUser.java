@@ -114,6 +114,9 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -1759,6 +1762,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 folderCache.remove(cacheKey);
             } catch (final OXException e) {
                 LOGGER.error("", e);
+            }
+        }
+
+        // If com.openexchange.imap.initWithSpecialUse is set to true, add the com.openexchange.mail.specialuse.check to this user
+        final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (viewFactory != null) {
+            ConfigView view;
+            try {
+                view = viewFactory.getView(usr.getId().intValue(), ctx.getId().intValue());
+                Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, true);
+                if (check != null && check.booleanValue()) {
+                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                    prop.set(Boolean.TRUE);
+                }
+            } catch (OXException e) {
+                LOGGER.error("Unable to set special use check property!");
             }
         }
 

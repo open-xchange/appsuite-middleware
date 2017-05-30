@@ -1203,9 +1203,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (viewFactory != null) {
             ConfigView view;
             try {
-                view = viewFactory.getView(admin_user.getId(), ctx.getId());
-                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
-                if (check != null && check) {
+                view = viewFactory.getView(admin_user.getId().intValue(), ctx.getId().intValue());
+                Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, true);
+                if (check != null && check.booleanValue()) {
                     ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);
                 }

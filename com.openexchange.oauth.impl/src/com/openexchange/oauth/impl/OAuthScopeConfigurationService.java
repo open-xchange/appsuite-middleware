@@ -50,9 +50,13 @@
 package com.openexchange.oauth.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -95,10 +99,24 @@ public class OAuthScopeConfigurationService {
 
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(userId, ctxId);
-        String enabledModulesStr = view.opt(PROPERTY_PREFIX + oauthApiName, String.class, null);
-        if (enabledModulesStr == null) {
-            // Fallback to all enabled
+
+        ComposedConfigProperty<String> property = view.property(PROPERTY_PREFIX + oauthApiName, String.class);
+
+        if (false == property.isDefined()) {
+            // Fall-back to all enabled
             return availableScopes;
+        }
+
+        String enabledModulesStr = property.get();
+        if (Strings.isEmpty(enabledModulesStr)) {
+            // Defined, but none set
+            return Collections.emptySet();
+        }
+
+        String[] tokens = Strings.splitByComma(enabledModulesStr);
+        if (null == tokens || tokens.length <= 0) {
+            // Defined, but none set
+            return Collections.emptySet();
         }
         
         List<String> enabledScopes = Arrays.asList(Strings.splitByComma(enabledModulesStr));

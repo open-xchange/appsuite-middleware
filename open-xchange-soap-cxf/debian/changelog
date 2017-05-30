@@ -1,3 +1,9 @@
+open-xchange-soap-cxf (7.8.3-25) stable; urgency=medium
+
+  * Build for patch 2017-05-29 (4161)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 19 May 2017 17:33:33 +0200
+
 open-xchange-soap-cxf (7.8.3-24) stable; urgency=medium
 
   * Build for patch 2017-05-19 (4176)

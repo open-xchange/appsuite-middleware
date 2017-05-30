@@ -1052,5 +1052,10 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
         // TODO Auto-generated method stub
         return null;
     }
+    @Override
+    public boolean getReadPermission(int oid, int fid, Session so, Context ctx, boolean checkPrivate) throws OXException {
+        // Nothing to do
+        return false;
+    }
 
 }
