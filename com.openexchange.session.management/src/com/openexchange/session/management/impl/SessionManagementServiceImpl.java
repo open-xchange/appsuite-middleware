@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -71,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
@@ -104,12 +106,16 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
+        List<String> blackListedClients = getBlacklistedClients();
 
         Collection<Session> localSessions = service.getSessions(session.getUserId(), session.getContextId());
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
         ArrayList<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
         for (Session s : localSessions) {
+            if (blackListedClients.contains(s.getClient())) {
+                continue;
+            }
             ManagedSession managedSession = new ManagedSession(s, Type.LOCAL);
             if (null != geoLocationService) {
                 determineLocation(managedSession);
@@ -117,6 +123,9 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             result.add(managedSession);
         }
         for (PortableSession s : remoteSessions) {
+            if (blackListedClients.contains(s.getClient())) {
+                continue;
+            }
             ManagedSession managedSession = new ManagedSession(s, Type.REMOTE);
             if (null != geoLocationService) {
                 determineLocation(managedSession);
@@ -165,6 +174,22 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             LOG.info(e.getMessage());
             session.setLocation(StringHelper.valueOf(userService.getUser(session.getUserId(), session.getCtxId()).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION));
         }
+    }
+
+    private List<String> getBlacklistedClients() {
+        LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
+        if (null == configService) {
+            return Collections.emptyList();
+        }
+        String value = configService.getProperty(SessionManagementProperty.clientBlacklist);
+        if (Strings.isEmpty(value)) {
+            return Collections.emptyList();
+        }
+        String[] clients = Strings.splitByComma(value);
+        if (null == clients) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(clients);
     }
 
     private Collection<PortableSession> getRemoteSessionsForUser(Session session) throws OXException {

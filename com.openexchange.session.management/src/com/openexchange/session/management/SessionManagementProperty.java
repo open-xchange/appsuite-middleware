@@ -59,7 +59,8 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.0
  */
 public enum SessionManagementProperty implements Property {
-    globalLookup(SessionManagementProperty.PREFIX, Boolean.TRUE);
+    globalLookup(SessionManagementProperty.PREFIX, Boolean.TRUE),
+    clientBlacklist(SessionManagementProperty.PREFIX, ""),
     ;
 
     private static final String PREFIX = "com.openexchange.session.management.";
