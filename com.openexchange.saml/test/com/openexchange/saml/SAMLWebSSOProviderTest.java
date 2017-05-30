@@ -903,6 +903,11 @@ public class SAMLWebSSOProviderTest {
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
+            @Override
+            public String getUserAgent() {
+                return "User-Agent";
+            }
         };
     }
 

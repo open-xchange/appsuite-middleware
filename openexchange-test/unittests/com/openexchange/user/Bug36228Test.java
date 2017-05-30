@@ -212,6 +212,11 @@ public class Bug36228Test {
             public SessionEnhancement getEnhancement() {
                 return null;
             }
+
+            @Override
+            public String getUserAgent() {
+                return "User-Agent";
+            }
         });
     }
 

@@ -202,6 +202,11 @@ public class SessiondTest {
             public SessionEnhancement getEnhancement() {
                 return null;
             }
+
+            @Override
+            public String getUserAgent() {
+                return "User-Agent";
+            }
         });
     }
 
@@ -271,6 +276,11 @@ public class SessiondTest {
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
+            }
+
+            @Override
+            public String getUserAgent() {
+                return "User-Agent";
             }
         });
         sessiondCon.getSession(session.getSessionID());
@@ -343,6 +353,11 @@ public class SessiondTest {
             public SessionEnhancement getEnhancement() {
                 return null;
             }
+
+            @Override
+            public String getUserAgent() {
+                return "User-Agent";
+            }
         });
         sessiondCon.removeSession(session.getSessionID());
     }
@@ -413,6 +428,11 @@ public class SessiondTest {
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
+            }
+
+            @Override
+            public String getUserAgent() {
+                return "User-Agent";
             }
         });
         sessiondCon.getSession(session.getSessionID());

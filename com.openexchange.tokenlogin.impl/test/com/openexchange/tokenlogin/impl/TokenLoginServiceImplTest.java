@@ -208,7 +208,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
     }
 
     @Test(expected = OXException.class)
@@ -223,7 +223,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
     }
 
     @Test(expected = OXException.class)
@@ -239,7 +239,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
     }
 
     @Test(expected = OXException.class)
@@ -255,7 +255,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
     }
 
     @Test(expected = OXException.class)
@@ -273,7 +273,7 @@ public class TokenLoginServiceImplTest {
 
         MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
     }
 
     @Test
@@ -293,7 +293,7 @@ public class TokenLoginServiceImplTest {
 
         MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
 
-        Session returnedSession = this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
+        Session returnedSession = this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
 
         Assert.assertNotNull(returnedSession);
         Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());
@@ -477,7 +477,7 @@ public class TokenLoginServiceImplTest {
      * An exception is thrown if the file object exists but is a directory.
      * An exception is thrown if the file exists but cannot be written to.
      * An exception is thrown if the parent directory cannot be created.
-     * 
+     *
      * @param append
      */
     private static FileOutputStream openOutputStream(File file, boolean append) throws IOException {
