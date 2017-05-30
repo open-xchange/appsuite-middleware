@@ -102,19 +102,20 @@ import com.openexchange.test.PermissionTools;
 public abstract class CalDAVTest extends WebDAVTest {
 
     protected static final int TIMEOUT = 10000;
-    
+
     private int folderId;
-    
+
     @Parameters(name = "AuthMethod={0}")
     public static Iterable<Object[]> params() {
         return availableAuthMethods();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         folderId = this.getAJAXClient().getValues().getPrivateAppointmentFolder();
-        catm.setFailOnError(true);        
+        catm.setFailOnError(true);
     }
 
     /**
@@ -494,6 +495,19 @@ public abstract class CalDAVTest extends WebDAVTest {
         Assert.assertEquals("Expected dummy trigger.", "19760401T005545Z", vAlarm.getProperty("TRIGGER").getValue());
         Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-LOCAL-DEFAULT-ALARM").getValue());
         Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-DEFAULT-ALARM").getValue());
+    }
+
+    protected static void assertAcknowledgedOrDummyAlarm(Component component, String expectedAcknowledged) {
+        List<Component> vAlarms = component.getVAlarms();
+        Assert.assertEquals("Expected exactly one VAlarm.", 1, vAlarms.size());
+        Component vAlarm = vAlarms.get(0);
+        if ("19760401T005545Z".equals(vAlarm.getPropertyValue("TRIGGER"))) {
+            Assert.assertEquals("Expected dummy trigger", "19760401T005545Z", vAlarm.getProperty("TRIGGER").getValue());
+            Assert.assertEquals("Expected dummy property", "TRUE", vAlarm.getProperty("X-APPLE-LOCAL-DEFAULT-ALARM").getValue());
+            Assert.assertEquals("Expected dummy property", "TRUE", vAlarm.getProperty("X-APPLE-DEFAULT-ALARM").getValue());
+        } else {
+            Assert.assertEquals("ACKNOWLEDGED wrong", expectedAcknowledged, vAlarm.getPropertyValue("ACKNOWLEDGED"));
+        }
     }
 
 }

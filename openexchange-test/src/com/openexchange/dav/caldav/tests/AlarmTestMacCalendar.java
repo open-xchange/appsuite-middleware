@@ -49,7 +49,10 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -217,7 +220,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        assertDummyAlarm(iCalResource.getVEvent());
+        assertAcknowledgedOrDummyAlarm(iCalResource.getVEvent(), formatAsUTC(acknowledgedDate));
     }
 
     @Test
@@ -1381,7 +1384,7 @@ public class AlarmTestMacCalendar extends CalDAVTest {
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         assertEquals("SUMMARY wrong", "EXception", iCalResource.getVEvents().get(1).getSummary());
-        assertDummyAlarm(iCalResource.getVEvents().get(1));
+        assertAcknowledgedOrDummyAlarm(iCalResource.getVEvents().get(1), formatAsUTC(exceptionAcknowledged));
     }
 
     @Test
