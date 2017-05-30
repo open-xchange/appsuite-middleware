@@ -145,4 +145,9 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
     public void setEnhancement(SessionEnhancement enhancement) {
         this.enhancement = enhancement;
     }
+
+    @Override
+    public String getUserAgent() {
+        return request.getUserAgent();
+    }
 }
