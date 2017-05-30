@@ -69,6 +69,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -922,36 +923,27 @@ public abstract class EventConverter {
         if (null == attendee.getCuType()) {
             return;
         }
-        switch (attendee.getCuType()) {
-            case GROUP:
-                participants.add(new GroupParticipant(attendee.getEntity()));
-                break;
-            case INDIVIDUAL:
-                if (isInternal(attendee)) {
-                    UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
-                    userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
-                    userParticipant.setConfirmMessage(attendee.getComment());
-                    users.add(userParticipant);
-                    if (null == attendee.getMember()) {
-                        participants.add(new UserParticipant(attendee.getEntity()));
-                    }
-                } else {
-                    ExternalUserParticipant externalParticipant = new ExternalUserParticipant(Event2Appointment.getEMailAddress(attendee.getUri()));
-                    externalParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
-                    externalParticipant.setMessage(attendee.getComment());
-                    externalParticipant.setDisplayName(attendee.getCn());
-                    participants.add(externalParticipant);
-                    confirmations.add(externalParticipant);
+        if (CalendarUserType.GROUP.equals(attendee.getCuType())) {
+            participants.add(new GroupParticipant(attendee.getEntity()));
+        } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+            if (isInternal(attendee)) {
+                UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
+                userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
+                userParticipant.setConfirmMessage(attendee.getComment());
+                users.add(userParticipant);
+                if (null == attendee.getMember()) {
+                    participants.add(new UserParticipant(attendee.getEntity()));
                 }
-                break;
-            case RESOURCE:
-            case ROOM:
-                participants.add(new ResourceParticipant(attendee.getEntity()));
-                break;
-            case UNKNOWN:
-                break;
-            default:
-                break;
+            } else {
+                ExternalUserParticipant externalParticipant = new ExternalUserParticipant(Event2Appointment.getEMailAddress(attendee.getUri()));
+                externalParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
+                externalParticipant.setMessage(attendee.getComment());
+                externalParticipant.setDisplayName(attendee.getCn());
+                participants.add(externalParticipant);
+                confirmations.add(externalParticipant);
+            }
+        } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+            participants.add(new ResourceParticipant(attendee.getEntity()));
         }
     }
 

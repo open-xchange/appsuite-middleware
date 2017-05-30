@@ -56,32 +56,45 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.12">RFC 5545, section 3.2.12</a>
  */
-public enum ParticipationStatus {
+public class ParticipationStatus extends EnumeratedProperty {
 
     /**
      * Event needs action.
      */
-    NEEDS_ACTION,
+    public static final ParticipationStatus NEEDS_ACTION = new ParticipationStatus("NEEDS_ACTION");
 
     /**
      * Event accepted.
      */
-    ACCEPTED,
+    public static final ParticipationStatus ACCEPTED = new ParticipationStatus("ACCEPTED");
 
     /**
      * Event declined.
      */
-    DECLINED,
+    public static final ParticipationStatus DECLINED = new ParticipationStatus("DECLINED");
 
     /**
      * Event tentatively accepted.
      */
-    TENTATIVE,
+    public static final ParticipationStatus TENTATIVE = new ParticipationStatus("TENTATIVE");
 
     /**
      * Event delegated.
      */
-    DELEGATED,
+    public static final ParticipationStatus DELEGATED = new ParticipationStatus("DELEGATED");
 
-    ;
+    /**
+     * Initializes a new {@link ParticipationStatus}.
+     *
+     * @param value The property value
+     */
+    public ParticipationStatus(String value) {
+        super(value);
+    }
+
+    @Override
+    protected String[] getStandardValues() {
+        return getValues(NEEDS_ACTION, ACCEPTED, DECLINED, TENTATIVE, DELEGATED);
+    }
+
 }

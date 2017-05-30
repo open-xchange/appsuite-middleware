@@ -49,10 +49,6 @@
 
 package com.openexchange.find.basic.calendar;
 
-import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_ACCEPTED;
-import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_DECLINED;
-import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_NONE;
-import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_TENTATIVE;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -213,22 +209,9 @@ public class BasicEventDriver extends BasicCalendarDriver {
             List<String> preparedQueries = new ArrayList<String>(1 + queries.size());
             preparedQueries.add(String.valueOf(session.getUserId()));
             for (String query : queries) {
-                ParticipationStatus partStat;
-                switch (query) {
-                    case STATUS_ACCEPTED:
-                        partStat = ParticipationStatus.ACCEPTED;
-                        break;
-                    case STATUS_DECLINED:
-                        partStat = ParticipationStatus.DECLINED;
-                        break;
-                    case STATUS_NONE:
-                        partStat = ParticipationStatus.NEEDS_ACTION;
-                        break;
-                    case STATUS_TENTATIVE:
-                        partStat = ParticipationStatus.TENTATIVE;
-                        break;
-                    default:
-                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getId());
+                ParticipationStatus partStat = new ParticipationStatus(query);
+                if (false == partStat.isStandard()) {
+                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getId());
                 }
                 preparedQueries.add(String.valueOf(partStat));
             }

@@ -727,9 +727,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                      * check validity, treating PUBLIC as default value
                      */
                     Check.classificationIsValid(eventUpdate.getClassification(), folder);
-                    if (isSeriesException(originalEvent) &&
-                        (isPublicClassification(originalEvent) && false == isPublicClassification(eventUpdate)) ||
-                        (false == isPublicClassification(originalEvent) && isPublicClassification(eventUpdate))) {
+                    if (isSeriesException(originalEvent) && (
+                        isPublicClassification(originalEvent) && false == isPublicClassification(eventUpdate) ||
+                        false == isPublicClassification(originalEvent) && isPublicClassification(eventUpdate))) {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
                             String.valueOf(eventUpdate.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }

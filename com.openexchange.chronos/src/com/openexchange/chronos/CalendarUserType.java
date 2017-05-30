@@ -56,71 +56,45 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.3">RFC 5545, section 3.2.3</a>
  */
-public enum CalendarUserType {
+public class CalendarUserType extends EnumeratedProperty {
 
     /**
      * An individual.
      */
-    INDIVIDUAL(1), // com.openexchange.groupware.container.Participant.USER
+    public static final CalendarUserType INDIVIDUAL = new CalendarUserType("INDIVIDUAL");
 
     /**
      * A group of individuals.
      */
-    GROUP(2), // com.openexchange.groupware.container.Participant.GROUP
+    public static final CalendarUserType GROUP = new CalendarUserType("GROUP");
 
     /**
      * A physical resource.
      */
-    RESOURCE(3), // com.openexchange.groupware.container.Participant.RESOURCE
+    public static final CalendarUserType RESOURCE = new CalendarUserType("RESOURCE");
 
     /**
      * A room resource.
      */
-    ROOM(-1), // com.openexchange.groupware.container.Participant.NO_ID
+    public static final CalendarUserType ROOM = new CalendarUserType("ROOM");
 
     /**
      * Otherwise not known.
      */
-    UNKNOWN(-1) // com.openexchange.groupware.container.Participant.NO_ID
-
-    ;
-
-    private final int type;
+    public static final CalendarUserType UNKNOWN = new CalendarUserType("UNKNOWN");
 
     /**
-     * Initializes a new {@link CUType}.
+     * Initializes a new {@link CalendarUserType}.
      *
-     * @param type The type identifier
+     * @param value The property value
      */
-    private CalendarUserType(int type) {
-        this.type = type;
+    public CalendarUserType(String value) {
+        super(value);
     }
 
-    /**
-     * Gets the corresponding type identifier for this calendar user type.
-     *
-     * @return The type, or <code>-1</code> if no matching type exists
-     */
-    public int getType() {
-        return type;
-    }
-
-    /**
-     * Gets the calendar user type for a specific type identifier.
-     *
-     * @param type The type identifier
-     * @return The corresponding calendar user type, or {@link CalendarUserType#UNKNOWN} if no matching type found
-     */
-    public static CalendarUserType fromType(int type) {
-        if (UNKNOWN.getType() == type) {
-            return CalendarUserType.UNKNOWN;
-        }
-        for (CalendarUserType cuType : CalendarUserType.values()) {
-            if (type == cuType.getType()) {
-                return cuType;
-            }
-        }
-        return UNKNOWN;
+    @Override
+    protected String[] getStandardValues() {
+        return getValues(INDIVIDUAL, GROUP, RESOURCE, ROOM, UNKNOWN);
     }
 
 }

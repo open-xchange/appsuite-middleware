@@ -77,6 +77,23 @@ public abstract class EnumeratedProperty {
     protected abstract String[] getStandardValues();
 
     /**
+     * Gets a string array from the values of the supplied enumerated properties.
+     *
+     * @param properties The properties to get the values from
+     * @return The property values
+     */
+    protected static String[] getValues(EnumeratedProperty... properties) {
+        if (null == properties) {
+            return new String[0];
+        }
+        String[] values = new String[properties.length];
+        for (int i = 0; i < properties.length; i++) {
+            values[i] = properties[i].getValue();
+        }
+        return values;
+    }
+
+    /**
      * Gets the property value.
      *
      * @return The property value

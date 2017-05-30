@@ -132,19 +132,16 @@ public class Event2Appointment {
      * @return The legacy "confirm" constant
      */
     public static int getConfirm(ParticipationStatus status) {
-        if (null == status) {
-            return 0; // com.openexchange.groupware.container.participants.ConfirmStatus.NONE
+        if (ParticipationStatus.ACCEPTED.equals(status)) {
+            return 1; // com.openexchange.groupware.container.participants.ConfirmStatus.ACCEPT
         }
-        switch (status) {
-            case ACCEPTED:
-                return 1; // com.openexchange.groupware.container.participants.ConfirmStatus.ACCEPT
-            case DECLINED:
-                return 2; // com.openexchange.groupware.container.participants.ConfirmStatus.DECLINE
-            case TENTATIVE:
-                return 3; // com.openexchange.groupware.container.participants.ConfirmStatus.TENTATIVE
-            default:
-                return 0; // com.openexchange.groupware.container.participants.ConfirmStatus.NONE
+        if (ParticipationStatus.DECLINED.equals(status)) {
+            return 2; // com.openexchange.groupware.container.participants.ConfirmStatus.DECLINE
         }
+        if (ParticipationStatus.TENTATIVE.equals(status)) {
+            return 3; // com.openexchange.groupware.container.participants.ConfirmStatus.TENTATIVE
+        }
+        return 0; // com.openexchange.groupware.container.participants.ConfirmStatus.NONE
     }
 
     /**
@@ -155,28 +152,24 @@ public class Event2Appointment {
      * @return The legacy "participant type" constant
      */
     public static int getParticipantType(CalendarUserType cuType, boolean internal) {
-        if (null == cuType) {
-            return 5;
+        if (CalendarUserType.GROUP.equals(cuType)) {
+            if (internal) {
+                return 2; // com.openexchange.groupware.container.Participant.GROUP
+            } else {
+                return 6; // com.openexchange.groupware.container.Participant.EXTERNAL_GROUP
+            }
         }
-        switch (cuType) {
-            case GROUP:
-                if (internal) {
-                    return 2; // com.openexchange.groupware.container.Participant.GROUP
-                } else {
-                    return 6; // com.openexchange.groupware.container.Participant.EXTERNAL_GROUP
-                }
-            case INDIVIDUAL:
-                if (internal) {
-                    return 1; // com.openexchange.groupware.container.Participant.USER
-                } else {
-                    return 5; // com.openexchange.groupware.container.Participant.EXTERNAL_USER
-                }
-            case ROOM:
-            case RESOURCE:
-                return 3; // com.openexchange.groupware.container.Participant.RESOURCE
-            default:
+        if (CalendarUserType.INDIVIDUAL.equals(cuType)) {
+            if (internal) {
+                return 1; // com.openexchange.groupware.container.Participant.USER
+            } else {
                 return 5; // com.openexchange.groupware.container.Participant.EXTERNAL_USER
+            }
         }
+        if (CalendarUserType.ROOM.equals(cuType) || CalendarUserType.RESOURCE.equals(cuType)) {
+            return 3; // com.openexchange.groupware.container.Participant.RESOURCE
+        }
+        return 5; // com.openexchange.groupware.container.Participant.EXTERNAL_USER
     }
 
     /**

@@ -56,27 +56,40 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.16">RFC 5545, section 3.2.16</a>
  */
-public enum ParticipantRole {
+public class ParticipantRole extends EnumeratedProperty {
 
     /**
      * Indicates chair of the calendar entity.
      */
-    CHAIR,
+    public static final ParticipantRole CHAIR = new ParticipantRole("CHAIR");
 
     /**
      * Indicates a participant whose participation is required.
      */
-    REQ_PARTICIPANT,
+    public static final ParticipantRole REQ_PARTICIPANT = new ParticipantRole("REQ_PARTICIPANT");
 
     /**
      * Indicates a participant whose participation is optional.
      */
-    OPT_PARTICIPANT,
+    public static final ParticipantRole OPT_PARTICIPANT = new ParticipantRole("OPT_PARTICIPANT");
 
     /**
      * Indicates a participant who is copied for information purposes only.
      */
-    NONE_PARTICIPANT,
+    public static final ParticipantRole NONE_PARTICIPANT = new ParticipantRole("NONE_PARTICIPANT");
 
-    ;
+    /**
+     * Initializes a new {@link ParticipantRole}.
+     *
+     * @param value The property value
+     */
+    public ParticipantRole(String value) {
+        super(value);
+    }
+
+    @Override
+    protected String[] getStandardValues() {
+        return getValues(CHAIR, REQ_PARTICIPANT, OPT_PARTICIPANT, NONE_PARTICIPANT);
+    }
+
 }

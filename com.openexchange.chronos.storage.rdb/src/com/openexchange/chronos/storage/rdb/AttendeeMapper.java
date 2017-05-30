@@ -61,7 +61,6 @@ import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
-import com.openexchange.java.Enums;
 
 /**
  * {@link AttendeeMapper}
@@ -195,7 +194,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
             @Override
             public void set(Attendee attendee, String value) {
-                attendee.setCuType(Enums.parse(CalendarUserType.class, value));
+                attendee.setCuType(null == value ? null : new CalendarUserType(value));
             }
 
             @Override
@@ -206,7 +205,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public String get(Attendee attendee) {
                 CalendarUserType value = attendee.getCuType();
-                return null == value ? null : value.name();
+                return null == value ? null : value.getValue();
             }
 
             @Override
@@ -218,7 +217,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
             @Override
             public void set(Attendee attendee, String value) {
-                attendee.setRole(Enums.parse(ParticipantRole.class, value));
+                attendee.setRole(null == value ? null : new ParticipantRole(value));
             }
 
             @Override
@@ -229,7 +228,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public String get(Attendee attendee) {
                 ParticipantRole value = attendee.getRole();
-                return null == value ? null : value.name();
+                return null == value ? null : value.getValue();
             }
 
             @Override
@@ -241,7 +240,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
             @Override
             public void set(Attendee attendee, String value) {
-                attendee.setPartStat(Enums.parse(ParticipationStatus.class, value));
+                attendee.setPartStat(null == value ? null : new ParticipationStatus(value));
             }
 
             @Override
@@ -252,7 +251,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public String get(Attendee attendee) {
                 ParticipationStatus value = attendee.getPartStat();
-                return null == value ? null : value.name();
+                return null == value ? null : value.getValue();
             }
 
             @Override

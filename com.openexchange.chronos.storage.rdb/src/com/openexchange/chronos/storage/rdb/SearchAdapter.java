@@ -72,7 +72,6 @@ import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
-import com.openexchange.java.Enums;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -328,7 +327,7 @@ public class SearchAdapter {
         }
         List<Object> partStats = new ArrayList<Object>(queries.size() - 1);
         for (int i = 1; i < queries.size(); i++) {
-            partStats.add(Enums.parse(ParticipationStatus.class, queries.get(i)));
+            partStats.add(new ParticipationStatus(queries.get(i)));
         }
         DbMapping<? extends Object, Attendee> entityMapping = AttendeeMapper.getInstance().get(AttendeeField.ENTITY);
         DbMapping<? extends Object, Attendee> partStatMapping = AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT);
@@ -336,7 +335,7 @@ public class SearchAdapter {
         parameters.add(Integer.valueOf(entity));
         if (1 == partStats.size()) {
             stringBuilder.append(partStatMapping.getColumnLabel(prefixAttendees)).append(" = ?");
-            parameters.add(((ParticipationStatus) partStats.get(0)).name());
+            parameters.add(((ParticipationStatus) partStats.get(0)).getValue());
         } else {
             appendAsInClause(partStatMapping, prefixAttendees, partStats);
         }
@@ -522,7 +521,7 @@ public class SearchAdapter {
         } else if (Date.class.isInstance(value) && Types.BIGINT == sqlType) {
             parameters.add(Long.valueOf(((Date) value).getTime()));
         } else if (ParticipationStatus.class.isInstance(value) && Types.VARCHAR == sqlType) {
-            parameters.add(((ParticipationStatus) value).name());
+            parameters.add(((ParticipationStatus) value).getValue());
         } else if (Transp.class.isInstance(value) && Types.VARCHAR == sqlType) {
             parameters.add(((Transp) value).getValue());
         } else {

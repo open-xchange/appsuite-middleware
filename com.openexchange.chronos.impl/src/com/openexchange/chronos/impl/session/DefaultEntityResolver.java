@@ -233,35 +233,28 @@ public class DefaultEntityResolver implements EntityResolver {
             LOG.warn("Ignoring attempt to apply internal entity data for non-internal attendee {}", attendee);
             return attendee;
         }
-        switch (attendee.getCuType()) {
-            case GROUP:
-                return applyEntityData(attendee, getGroup(attendee.getEntity()), fields);
-            case RESOURCE:
-            case ROOM:
-                return applyEntityData(attendee, getResource(attendee.getEntity()), fields);
-            default:
-                return applyEntityData(attendee, getUser(attendee.getEntity()), fields);
+        if (CalendarUserType.GROUP.equals(attendee.getCuType())) {
+            return applyEntityData(attendee, getGroup(attendee.getEntity()), fields);
         }
+        if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+            return applyEntityData(attendee, getResource(attendee.getEntity()), fields);
+        }
+        return applyEntityData(attendee, getUser(attendee.getEntity()), fields);
     }
 
     private <T extends CalendarUser> T applyEntityData(T calendarUser, CalendarUserType cuType) throws OXException {
-        switch (cuType) {
-            case GROUP:
-                Group group = getGroup(calendarUser.getEntity());
-                calendarUser.setCn(group.getDisplayName());
-                calendarUser.setUri(ResourceId.forGroup(context.getContextId(), group.getIdentifier()));
-                break;
-            case RESOURCE:
-            case ROOM:
-                Resource resource = getResource(calendarUser.getEntity());
-                calendarUser.setCn(resource.getDisplayName());
-                calendarUser.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
-                break;
-            default:
-                User user = getUser(calendarUser.getEntity());
-                calendarUser.setCn(user.getDisplayName());
-                calendarUser.setUri(getCalAddress(user));
-                break;
+        if (CalendarUserType.GROUP.equals(cuType)) {
+            Group group = getGroup(calendarUser.getEntity());
+            calendarUser.setCn(group.getDisplayName());
+            calendarUser.setUri(ResourceId.forGroup(context.getContextId(), group.getIdentifier()));
+        } else if (CalendarUserType.RESOURCE.equals(cuType) || CalendarUserType.ROOM.equals(cuType)) {
+            Resource resource = getResource(calendarUser.getEntity());
+            calendarUser.setCn(resource.getDisplayName());
+            calendarUser.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
+        } else {
+            User user = getUser(calendarUser.getEntity());
+            calendarUser.setCn(user.getDisplayName());
+            calendarUser.setUri(getCalAddress(user));
         }
         return calendarUser;
     }
@@ -274,23 +267,18 @@ public class DefaultEntityResolver implements EntityResolver {
         for (Attendee attendee : attendees) {
             if (isInternal(attendee)) {
                 Integer id = I(attendee.getEntity());
-                switch (attendee.getCuType()) {
-                    case GROUP:
-                        if (false == knownGroups.containsKey(id)) {
-                            groupsToLoad.add(id);
-                        }
-                        break;
-                    case RESOURCE:
-                    case ROOM:
-                        if (false == knownResources.containsKey(id)) {
-                            resourcesToLoad.add(id);
-                        }
-                        break;
-                    default:
-                        if (false == knownUsers.containsKey(id)) {
-                            usersToLoad.add(id);
-                        }
-                        break;
+                if (CalendarUserType.GROUP.equals(attendee.getCuType())) {
+                    if (false == knownGroups.containsKey(id)) {
+                        groupsToLoad.add(id);
+                    }
+                } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+                    if (false == knownResources.containsKey(id)) {
+                        resourcesToLoad.add(id);
+                    }
+                } else {
+                    if (false == knownUsers.containsKey(id)) {
+                        usersToLoad.add(id);
+                    }
                 }
             }
         }
@@ -567,17 +555,12 @@ public class DefaultEntityResolver implements EntityResolver {
                 throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.UNKNOWN);
             }
         }
-        switch (type) {
-            case GROUP:
-                getGroup(entity);
-                break;
-            case RESOURCE:
-            case ROOM:
-                getResource(entity);
-                break;
-            default:
-                getUser(entity);
-                break;
+        if (CalendarUserType.GROUP.equals(type)) {
+            getGroup(entity);
+        } else if (CalendarUserType.RESOURCE.equals(type) || CalendarUserType.ROOM.equals(type)) {
+            getResource(entity);
+        } else {
+            getUser(entity);
         }
         return type;
     }

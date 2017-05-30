@@ -59,6 +59,18 @@ import java.util.UUID;
  */
 public class ResourceId {
 
+    /** Type identifier used for {@link CalendarUserType#INDIVIDUAL} */
+    private static final int TYPE_INDIVIDUAL = 1;
+
+    /** Type identifier used for {@link CalendarUserType#GROUP} */
+    private static final int TYPE_GROUP = 2;
+
+    /** Type identifier used for {@link CalendarUserType#RESOURCE} */
+    private static final int TYPE_RESOURCE = 3;
+
+    /** Type identifier used for {@link CalendarUserType#UNKNOWN} */
+    private static final int TYPE_UNKNOWN = -1;
+
     /** Static number encoded into resource identifiers */
     private static final Long MAGIC = 4240498974L << 24;
 
@@ -180,7 +192,7 @@ public class ResourceId {
 
     private static UUID encode(int contextID, int entity, CalendarUserType type) {
         long msb = (long) contextID << 32 | entity & 0xffffffffL;
-        long lsb = MAGIC | type.getType() & 0xffffffffL;
+        long lsb = MAGIC | getType(type) & 0xffffffffL;
         return new UUID(msb, lsb);
     }
 
@@ -190,11 +202,48 @@ public class ResourceId {
 
     private static CalendarUserType decodeType(UUID encoded) {
         int type = (int) (encoded.getLeastSignificantBits() - MAGIC);
-        return CalendarUserType.fromType(type);
+        return getCalendarUserType(type);
     }
 
     private static int decodeEntity(UUID encoded) {
         return (int) encoded.getMostSignificantBits();
+    }
+
+    /**
+     * Gets the corresponding type identifier for this calendar user type.
+     *
+     * @return The type, or {@link ResourceId#TYPE_UNKNOWN} if no matching type exists
+     */
+    private static int getType(CalendarUserType type) {
+        if (CalendarUserType.INDIVIDUAL.equals(type)) {
+            return TYPE_INDIVIDUAL;
+        }
+        if (CalendarUserType.GROUP.equals(type)) {
+            return TYPE_GROUP;
+        }
+        if (CalendarUserType.RESOURCE.equals(type)) {
+            return TYPE_RESOURCE;
+        }
+        return TYPE_UNKNOWN;
+    }
+
+    /**
+     * Gets the calendar user type for a specific type identifier.
+     *
+     * @param type The type identifier
+     * @return The corresponding calendar user type, or {@link CalendarUserType#UNKNOWN} if no matching type found
+     */
+    private static CalendarUserType getCalendarUserType(int type) {
+        switch (type) {
+            case TYPE_INDIVIDUAL:
+                return CalendarUserType.INDIVIDUAL;
+            case TYPE_GROUP:
+                return CalendarUserType.GROUP;
+            case TYPE_RESOURCE:
+                return CalendarUserType.RESOURCE;
+            default:
+                return CalendarUserType.UNKNOWN;
+        }
     }
 
 }

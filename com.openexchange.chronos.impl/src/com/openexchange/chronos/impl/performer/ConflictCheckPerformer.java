@@ -485,20 +485,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         boolean includeUserAttendees = false == isIgnoreConflicts(session);
         List<Attendee> checkedAttendees = new ArrayList<Attendee>();
         for (Attendee attendee : attendees) {
-            if (isInternal(attendee)) {
-                switch (attendee.getCuType()) {
-                    case RESOURCE:
-                    case ROOM:
-                        checkedAttendees.add(attendee);
-                        break;
-                    case INDIVIDUAL:
-                        if (includeUserAttendees) {
-                            checkedAttendees.add(attendee);
-                        }
-                        break;
-                    default:
-                        break;
-                }
+            if (isInternal(attendee) && (includeUserAttendees || CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType()))) {
+                checkedAttendees.add(attendee);
             }
         }
         return checkedAttendees;

@@ -62,7 +62,6 @@ import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import net.fortuna.ical4j.model.AddressList;
@@ -196,23 +195,7 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
     }
 
     private static PartStat getPartStat(ParticipationStatus participationStatus) {
-        if (null == participationStatus) {
-            return null;
-        }
-        switch (participationStatus) {
-            case ACCEPTED:
-                return PartStat.ACCEPTED;
-            case DECLINED:
-                return PartStat.DECLINED;
-            case DELEGATED:
-                return PartStat.DELEGATED;
-            case NEEDS_ACTION:
-                return PartStat.NEEDS_ACTION;
-            case TENTATIVE:
-                return PartStat.TENTATIVE;
-            default:
-                return null;
-        }
+        return null == participationStatus ? null : new PartStat(participationStatus.getValue());
     }
 
     private static Attendee importAttendee(net.fortuna.ical4j.model.property.Attendee property) {
@@ -236,17 +219,17 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
         if (null != cn) {
             attendee.setCn(cn);
         }
-        ParticipationStatus partStat = Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), null);
+        String partStat = optParameterValue(property, Parameter.PARTSTAT);
         if (null != partStat) {
-            attendee.setPartStat(partStat);
+            attendee.setPartStat(new ParticipationStatus(partStat));
         }
-        ParticipantRole role = Enums.parse(ParticipantRole.class, optParameterValue(property, Parameter.ROLE), null);
+        String role = optParameterValue(property, Parameter.ROLE);
         if (null != role) {
-            attendee.setRole(role);
+            attendee.setRole(new ParticipantRole(role));
         }
-        CalendarUserType cuType = Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), null);
+        String cuType = optParameterValue(property, Parameter.CUTYPE);
         if (null != cuType) {
-            attendee.setCuType(cuType);
+            attendee.setCuType(new CalendarUserType(cuType));
         }
         String rsvp = optParameterValue(property, Parameter.RSVP);
         if (null != rsvp) {

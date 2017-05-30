@@ -74,7 +74,6 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
-import com.openexchange.java.Enums;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -350,7 +349,7 @@ public class SearchAdapter {
         }
         List<Object> partStats = new ArrayList<Object>(queries.size() - 1);
         for (int i = 1; i < queries.size(); i++) {
-            partStats.add(Enums.parse(ParticipationStatus.class, queries.get(i)));
+            partStats.add(new ParticipationStatus(queries.get(i)));
         }
         DbMapping<? extends Object, Attendee> entityMapping = InternalAttendeeMapper.getInstance().get(AttendeeField.ENTITY);
         DbMapping<? extends Object, Attendee> partStatMapping = InternalAttendeeMapper.getInstance().get(AttendeeField.PARTSTAT);
