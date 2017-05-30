@@ -71,6 +71,7 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     private String clientToken;
     private boolean tranzient;
     private SessionEnhancement enhancement;
+    private String userAgent;
 
     /**
      * Initializes a new {@link DefaultAddSessionParameter}.
@@ -262,5 +263,14 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
 
     public void setEnhancement(SessionEnhancement enhancement) {
         this.enhancement = enhancement;
+    }
+
+    @Override
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 }

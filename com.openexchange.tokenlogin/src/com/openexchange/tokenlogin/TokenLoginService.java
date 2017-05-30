@@ -77,10 +77,11 @@ public interface TokenLoginService {
      * @param optAuthId The optional authentication identifier
      * @param optHash The optional hash value that applies to newly generated session
      * @param optClientIp The optional client IP address that applies to newly generated session
+     * @param optUserAgent The optional user agent that applies to newly generated session
      * @return The generated session
      * @throws OXException If token cannot be turned into a valid session
      */
-    Session redeemToken(String token, String appSecret, String optClientIdentifier, String optAuthId, String optHash, String optClientIp) throws OXException;
+    Session redeemToken(String token, String appSecret, String optClientIdentifier, String optAuthId, String optHash, String optClientIp, String optUserAgent) throws OXException;
 
     /**
      * Gets the token-login secret (and its parameters) for specified secret identifier.

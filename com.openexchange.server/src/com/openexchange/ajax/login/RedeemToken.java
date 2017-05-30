@@ -114,13 +114,14 @@ public class RedeemToken implements LoginRequestHandler {
         TokenLoginService service = ServerServiceRegistry.getInstance().getService(TokenLoginService.class);
         // Parse more request information
         String client = LoginTools.parseClient(req, true, "");
-        String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), client);
+        String userAgent = LoginTools.parseUserAgent(req);
+        String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
         // Redeem token for a session
         Session session;
         try {
             String authId = LoginTools.parseAuthId(req, true);
             String clientIp = LoginTools.parseClientIP(req);
-            session = service.redeemToken(token, appSecret, client, authId, hash, clientIp);
+            session = service.redeemToken(token, appSecret, client, authId, hash, clientIp, userAgent);
         } catch (OXException e) {
             LoginServlet.logAndSendException(resp, e);
             return;
