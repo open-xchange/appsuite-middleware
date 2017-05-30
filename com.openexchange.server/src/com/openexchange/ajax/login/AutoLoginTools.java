@@ -74,6 +74,8 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.services.SessionInspector;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -162,7 +164,7 @@ public class AutoLoginTools {
                 try {
                     if (null != sessionID && null != secret) {
                         LOG.debug("Successfully looked up session- & secret-cookie pair for hash {}, continuing auto-login procedure.", hash);
-                        return tryAutoLogin(loginConfig, request, sessionID, secret);
+                        return tryAutoLogin(loginConfig, request, response, sessionID, secret);
                     }
 
                     LOG.debug("No session- & secret-cookie pair for hash {} found, aborting auto-login procedure.", hash);
@@ -266,19 +268,35 @@ public class AutoLoginTools {
         }
     }
 
-    private static LoginResult tryAutoLogin(LoginConfiguration loginConfig, HttpServletRequest request, String sessionID, String secret) throws OXException {
+    private static LoginResult tryAutoLogin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response, String sessionID, String secret) throws OXException {
         /*
          * lookup matching session
          */
         Session session = getSession(sessionID);
-        if (null == session || false == secret.equals(session.getSecret())) {
+        if (null == session) {
             /*
-             * not found / not matching
+             * not found
              */
             LOG.debug("Session {} not found, aborting auto-login procedure.", sessionID);
             return null;
         }
         LOG.debug("Successfully looked up session {}, verifying if session is valid.", sessionID);
+        /*
+         * Session HIT -- Consult session inspector
+         */
+        if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionHit(session, request, response)) {
+            return null;
+        }
+        /*
+         * check secret
+         */
+        if (false == secret.equals(session.getSecret())) {
+            /*
+             * not matching
+             */
+            LOG.debug("Session {} not matching, aborting auto-login procedure.", sessionID);
+            return null;
+        }
         /*
          * check & take over remote IP
          */
