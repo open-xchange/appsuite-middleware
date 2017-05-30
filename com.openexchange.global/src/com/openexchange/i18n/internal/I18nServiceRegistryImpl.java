@@ -49,9 +49,9 @@
 
 package com.openexchange.i18n.internal;
 
+import static com.openexchange.i18n.LocaleTools.DEFAULT_LOCALE;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,7 +69,11 @@ import com.openexchange.i18n.I18nServiceRegistry;
  */
 public class I18nServiceRegistryImpl implements I18nServiceRegistry {
 
+    /** The concurrent map contain all currently tracked <code>I18nService</code> instances */
     private final ConcurrentMap<Locale, I18nService> services;
+
+    /** The special locale for <code>"en"</code> language */
+    private final Locale en_Locale;
 
     /**
      * Initializes a new {@link I18nServiceRegistryImpl}.
@@ -77,6 +81,7 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
     public I18nServiceRegistryImpl() {
         super();
         services = new ConcurrentHashMap<Locale, I18nService>(32, 0.9F, 1);
+        en_Locale = new Locale("en");
     }
 
     /**
@@ -116,18 +121,35 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
             return null;
         }
 
-        Map<Locale, I18nService> services = new HashMap<>(this.services);
+        // Direct look-up
         I18nService service = services.get(locale);
         if (null != service) {
             return service;
         }
 
+        // Grab language identifier
         String language = locale.getLanguage();
         if (null == language) {
             // Huh...?
             return null;
         }
 
+        /*-
+         * As per JavaDoc:
+         *
+         * Don't do:
+         *   if (locale.getLanguage().equals("he")) // BAD!
+         *     ...
+         *
+         * Instead, do:
+         *   if (locale.getLanguage().equals(new Locale("he").getLanguage()))
+         *     ...
+         */
+        if (en_Locale.getLanguage().equals(language)) {
+            return services.get(DEFAULT_LOCALE);
+        }
+
+        // Guess best fit...
         I18nService firstMatch = null;
         for (Map.Entry<Locale, I18nService> entry : services.entrySet()) {
             Locale loc = entry.getKey();
