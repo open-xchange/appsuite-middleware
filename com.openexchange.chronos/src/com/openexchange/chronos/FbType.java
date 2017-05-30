@@ -56,26 +56,49 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.9">RFC 5545, section 3.2.9</a>
  */
-public interface FbType {
-
-    /** Constant to indicate that the time interval is free for scheduling. */
-    static final String FREE = "FREE";
-
-    /** Constant to indicate that the time interval is busy because one or more events have been scheduled for that interval. */
-    static final String BUSY = "BUSY";
-
-    /** Constant to indicate that the time interval is busy and that the interval can not be scheduled. */
-    static final String BUSY_UNAVAILABLE = "BUSY-UNAVAILABLE";
-
-    /** Constant to indicate that the time interval is busy because one or more events have been tentatively scheduled for that interval. */
-    static final String BUSY_TENTATIVE = "BUSY-TENTATIVE";
+public class FbType extends EnumeratedProperty {
 
     /**
-     * Gets the value.
-     *
-     * @return The free or busy time type value
+     * Indicates that the time interval is free for scheduling.
      */
-    String getValue();
+    public static final FbType FREE = new FbType("FREE", 0);
+
+    /**
+     * Indicates that the time interval is busy because one or more events have been scheduled for that interval.
+     */
+    public static final FbType BUSY = new FbType("BUSY", 3);
+
+    /**
+     * Indicates that the time interval is busy and that the interval can not be scheduled.
+     */
+    public static final FbType BUSY_UNAVAILABLE = new FbType("BUSY-UNAVAILABLE", 4);
+
+    /**
+     * indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.
+     */
+    public static final FbType BUSY_TENTATIVE = new FbType("BUSY-TENTATIVE", 2);
+
+    private final int order;
+
+    /**
+     * Initializes a new {@link FbType}.
+     *
+     * @param value The property value
+     */
+    public FbType(String value) {
+        this(value, 1);
+    }
+
+    /**
+     * Initializes a new {@link FbType}.
+     *
+     * @param value The property value
+     * @param order The order of the type for sorting
+     */
+    public FbType(String value, int order) {
+        super(value);
+        this.order = order;
+    }
 
     /**
      * Compares this free/busy type with another one for ordering.
@@ -88,6 +111,16 @@ public interface FbType {
      *         conflicting</i> than the passed free/busy type, or a value <code>&gt; 0</code> if this type is <i>more conflicting</i> than
      *         the passed instance.
      */
-    int compareTo(FbType other);
+    public int compareTo(FbType other) {
+        if (null == other) {
+            return 1;
+        }
+        return Integer.compare(order, other.order);
+    }
+
+    @Override
+    protected String[] getStandardValues() {
+        return getValues(FREE, BUSY, BUSY_UNAVAILABLE, BUSY_TENTATIVE);
+    }
 
 }

@@ -72,7 +72,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
-import com.openexchange.chronos.FreeBusyType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -331,21 +330,21 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     private static FbType getFbType(Event event) {
         Transp transp = event.getTransp();
         if (null == transp) {
-            return FreeBusyType.BUSY;
+            return FbType.BUSY;
         }
         if (ShownAsTransparency.class.isInstance(transp)) {
             switch ((ShownAsTransparency) transp) {
                 case ABSENT:
-                    return FreeBusyType.BUSY_UNAVAILABLE;
+                    return FbType.BUSY_UNAVAILABLE;
                 case FREE:
-                    return FreeBusyType.FREE;
+                    return FbType.FREE;
                 case TEMPORARY:
-                    return FreeBusyType.BUSY_TENTATIVE;
+                    return FbType.BUSY_TENTATIVE;
                 default:
-                    return FreeBusyType.BUSY;
+                    return FbType.BUSY;
             }
         }
-        return Transp.TRANSPARENT.equals(transp.getValue()) ? FreeBusyType.FREE : FreeBusyType.BUSY;
+        return Transp.TRANSPARENT.equals(transp.getValue()) ? FbType.FREE : FbType.BUSY;
     }
 
     private static Date[] getTimes(List<FreeBusyTime> freeBusyTimes) {

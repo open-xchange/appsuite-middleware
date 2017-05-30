@@ -278,41 +278,37 @@ public class Check {
         /*
          * check further properties based on alarm type
          */
-        switch (alarm.getAction().getValue()) {
-            case AlarmAction.DISPLAY_VALUE:
-                if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
-                }
-                break;
-            case AlarmAction.EMAIL_VALUE:
-                if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
-                }
-                if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "SUMMARY"))) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("SUMMARY");
-                }
-                ExtendedProperties extendedProperties = alarm.getExtendedProperties();
-                if (null == extendedProperties) {
+        if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
+            if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
+            }
+            return alarm;
+        } else if (AlarmAction.EMAIL.equals(alarm.getAction())) {
+            if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
+            }
+            if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "SUMMARY"))) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create("SUMMARY");
+            }
+            ExtendedProperties extendedProperties = alarm.getExtendedProperties();
+            if (null == extendedProperties) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+            }
+            List<ExtendedProperty> attendeeProperties = extendedProperties.getAll("ATTENDEE");
+            if (attendeeProperties.isEmpty()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+            }
+            for (ExtendedProperty attendeeProperty : attendeeProperties) {
+                String address = attendeeProperty.getValue();
+                if (null == address) {
                     throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
                 }
-                List<ExtendedProperty> attendeeProperties = extendedProperties.getAll("ATTENDEE");
-                if (attendeeProperties.isEmpty()) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+                try {
+                    new QuotedInternetAddress(address);
+                } catch (AddressException e) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(e, "ATTENDEE");
                 }
-                for (ExtendedProperty attendeeProperty : attendeeProperties) {
-                    String address = attendeeProperty.getValue();
-                    if (null == address) {
-                        throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
-                    }
-                    try {
-                        new QuotedInternetAddress(address);
-                    } catch (AddressException e) {
-                        throw CalendarExceptionCodes.MANDATORY_FIELD.create(e, "ATTENDEE");
-                    }
-                }
-                break;
-            default:
-                break;
+            }
         }
         return alarm;
     }

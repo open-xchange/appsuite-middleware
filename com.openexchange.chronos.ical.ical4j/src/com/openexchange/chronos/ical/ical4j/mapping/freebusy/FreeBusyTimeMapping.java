@@ -54,11 +54,9 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.FreeBusyTime;
-import com.openexchange.chronos.FreeBusyType;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Enums;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Period;
@@ -118,7 +116,8 @@ public class FreeBusyTimeMapping extends AbstractICalMapping<VFreeBusy, FreeBusy
     }
 
     private static List<FreeBusyTime> importFreeBusy(FreeBusy freeBusy) {
-        FreeBusyType fbType = Enums.parse(FreeBusyType.class, optParameterValue(freeBusy, Parameter.FBTYPE), FreeBusyType.BUSY);
+        String value = optParameterValue(freeBusy, Parameter.FBTYPE);
+        com.openexchange.chronos.FbType fbType = null == value ? com.openexchange.chronos.FbType.BUSY : new com.openexchange.chronos.FbType(value);
         PeriodList periods = freeBusy.getPeriods();
         List<FreeBusyTime> freeBusyTimes = new ArrayList<FreeBusyTime>(periods.size());
         for (Iterator<?> iterator = periods.iterator(); iterator.hasNext();) {

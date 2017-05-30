@@ -56,22 +56,22 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.6.1">RFC 5545, section 3.8.6.1</a>
  */
-public class AlarmAction {
+public class AlarmAction extends EnumeratedProperty {
 
     /**
      * Specifies an alarm that causes a text message to be displayed to the user.
      */
-    public static final String DISPLAY_VALUE = "DISPLAY";
+    public static final AlarmAction DISPLAY = new AlarmAction("DISPLAY");
 
     /**
      * Specifies an alarm that causes a sound to be played to alert the user.
      */
-    public static final String AUDIO_VALUE = "AUDIO";
+    public static final AlarmAction AUDIO = new AlarmAction("AUDIO");
 
     /**
      * Specifies an alarm that causes an electronic email message to be delivered to one or more email addresses.
      */
-    public static final String EMAIL_VALUE = "EMAIL";
+    public static final AlarmAction EMAIL = new AlarmAction("EMAIL");
 
     /**
      * Specifies an alarm that causes a procedure or program to be invoked.
@@ -79,42 +79,12 @@ public class AlarmAction {
      * @deprecated with <a href="https://tools.ietf.org/html/rfc5545#appendix-A.3">RFC 5545, appendix A.3</a>
      */
     @Deprecated
-    public static final String PROCEDURE_VALUE = "PROCEDURE";
+    public static final AlarmAction PROCEDURE = new AlarmAction("PROCEDURE");
 
     /**
      * Sometime used to specify alarms with no action.
      */
-    public static final String NONE_VALUE = "NONE";
-
-    /**
-     * Specifies an alarm that causes a text message to be displayed to the user.
-     */
-    public static final AlarmAction DISPLAY = new AlarmAction(DISPLAY_VALUE);
-
-    /**
-     * Specifies an alarm that causes a sound to be played to alert the user.
-     */
-    public static final AlarmAction AUDIO = new AlarmAction(AUDIO_VALUE);
-
-    /**
-     * Specifies an alarm that causes an electronic email message to be delivered to one or more email addresses.
-     */
-    public static final AlarmAction EMAIL = new AlarmAction(EMAIL_VALUE);
-
-    /**
-     * Specifies an alarm that causes a procedure or program to be invoked.
-     *
-     * @deprecated with <a href="https://tools.ietf.org/html/rfc5545#appendix-A.3">RFC 5545, appendix A.3</a>
-     */
-    @Deprecated
-    public static final AlarmAction PROCEDURE = new AlarmAction(PROCEDURE_VALUE);
-
-    /**
-     * Sometime used to specify alarms with no action.
-     */
-    public static final AlarmAction NONE = new AlarmAction(NONE_VALUE);
-
-    private final String value;
+    public static final AlarmAction NONE = new AlarmAction("NONE");
 
     /**
      * Initializes a new {@link AlarmAction}.
@@ -122,42 +92,12 @@ public class AlarmAction {
      * @param value The action value
      */
     public AlarmAction(String value) {
-        super();
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
+        super(value);
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        AlarmAction other = (AlarmAction) obj;
-        if (value == null) {
-            if (other.value != null)
-                return false;
-        } else if (!value.equals(other.value))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return value;
+    protected String[] getStandardValues() {
+        return getValues(DISPLAY, AUDIO, EMAIL, PROCEDURE);
     }
 
 }
