@@ -83,7 +83,7 @@ public class SAMLSessionInspector implements SessionInspectorService {
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         Object parameter = session.getParameter(SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER);
-        if (parameter != null && parameter instanceof String) {
+        if (parameter instanceof String) {
             try {
                 long notOnOrAfter = Long.parseLong((String) parameter);
                 if (System.currentTimeMillis() >= notOnOrAfter) {
