@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
@@ -91,11 +91,10 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if the event should be considered, <code>false</code>, otherwise
      */
     protected boolean considerForFreeBusy(Event event) {
-        if (Classification.PRIVATE.equals(event.getClassification()) && event.getCreatedBy() != session.getUserId() &&
-            CalendarUtils.contains(event.getAttendees(), session.getUserId())) {
-            return false; // exclude foreign events classified as 'private' (but keep 'confidential' ones)
-        }
-        return true;
+        // exclude foreign events classified as 'private' (but keep 'confidential' ones)
+        int userId = session.getUserId();
+        return isPublicClassification(event) || Classification.CONFIDENTIAL.equals(event.getClassification()) ||
+            event.getCreatedBy() == userId || isOrganizer(event, userId) || isAttendee(event, userId);
     }
 
     /**

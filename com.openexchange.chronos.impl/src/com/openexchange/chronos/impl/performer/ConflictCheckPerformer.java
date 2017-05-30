@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Utils.asList;
@@ -75,7 +76,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
@@ -433,7 +433,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * no details for non-public events
          */
-        if (false == Classification.PUBLIC.equals(conflictingEvent.getClassification())) {
+        if (false == isPublicClassification(conflictingEvent)) {
             return false;
         }
         /*

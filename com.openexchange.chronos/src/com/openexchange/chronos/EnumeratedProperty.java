@@ -47,81 +47,97 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
-
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.compat.ShownAsTransparency;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
-import net.fortuna.ical4j.extensions.outlook.BusyStatus;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Transp;
+package com.openexchange.chronos;
 
 /**
- * {@link XMicrosoftBusyStatusMapping}
+ * {@link EnumeratedProperty}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class XMicrosoftBusyStatusMapping extends ICalTextMapping<VEvent, Event> {
+public abstract class EnumeratedProperty {
 
-    private static final String BUSY = BusyStatus.BUSY.getValue();
-    private static final String OOF = "OOF";
-    private static final String TENTATIVE = "TENTATIVE";
-    private static final String FREE = "FREE";
+    private final String value;
 
     /**
-     * Initializes a new {@link XMicrosoftBusyStatusMapping}.
+     * Initializes a new {@link EnumeratedProperty}.
+     *
+     * @param value The property value
      */
-    public XMicrosoftBusyStatusMapping() {
-        super(BusyStatus.PROPERTY_NAME);
+    protected EnumeratedProperty(String value) {
+        super();
+        this.value = value;
     }
 
-    @Override
-    protected String getValue(Event object) {
-        com.openexchange.chronos.Transp value = object.getTransp();
-        if (null == value) {
-            return null;
-        }
-        if (ShownAsTransparency.class.isInstance(value)) {
-            switch ((ShownAsTransparency) value) {
-                case ABSENT:
-                    return OOF;
-                case TEMPORARY:
-                    return TENTATIVE;
-                default:
-                    break;
+    /**
+     * Gets the known, standards-compliant values for the property.
+     *
+     * @return The standard values
+     */
+    protected abstract String[] getStandardValues();
+
+    /**
+     * Gets the property value.
+     *
+     * @return The property value
+     */
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Gets a value indicating whether this property's value represents a known, standards-compliant value or not (which is the case for
+     * custom <i>x-name</i> or unknown <i>iana-token</i> values).
+     *
+     * @return <code>true</code> if the property value is a <i>standard</i> value, <code>false</code>, otherwise
+     */
+    public boolean isStandard() {
+        String value = getValue();
+        String[] standardValues = getStandardValues();
+        if (null != standardValues && 0 < standardValues.length) {
+            for (String standardValue : standardValues) {
+                if (standardValue.equalsIgnoreCase(value)) {
+                    return true;
+                }
             }
         }
-        return Transp.TRANSPARENT.equals(value) ? FREE : BUSY;
+        return false;
     }
 
     @Override
-    protected void setValue(Event object, String value) {
-        if (null != value) {
-            object.setTransp(getTransp(value));
-        }
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((value == null) ? 0 : value.toUpperCase().hashCode());
+        return result;
+    }
+
+    /**
+     * Gets a value indicating whether this property is equal to another one by comparing their values, ignoring case.
+     *
+     * @param obj The reference object with which to compare
+     * @return <code>true</code> if the supplied object is equal to this one, <code>false</code>, otherwise
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EnumeratedProperty other = (EnumeratedProperty) obj;
+        if (value == null) {
+            if (other.value != null)
+                return false;
+        } else if (!value.equalsIgnoreCase(other.value))
+            return false;
+        return true;
     }
 
     @Override
-    protected Property createProperty() {
-        return new BusyStatus(BusyStatus.FACTORY);
-    }
-
-    private static com.openexchange.chronos.Transp getTransp(String value) {
-        if (null == value) {
-            return null;
-        }
-        switch (value) {
-            case FREE:
-                return ShownAsTransparency.FREE;
-            case OOF:
-                return ShownAsTransparency.ABSENT;
-            case TENTATIVE:
-                return ShownAsTransparency.TEMPORARY;
-            default:
-                return ShownAsTransparency.RESERVED;
-        }
+    public String toString() {
+        return value;
     }
 
 }

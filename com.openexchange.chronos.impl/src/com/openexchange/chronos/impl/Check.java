@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
@@ -363,11 +364,10 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
      */
     public static void classificationAllowsUpdate(UserizedFolder folder, Event originalEvent) throws OXException {
-        Classification classification = originalEvent.getClassification();
-        if (null != classification && false == Classification.PUBLIC.equals(classification)) {
+        if (false == isPublicClassification(originalEvent)) {
             int userID = folder.getUser().getId();
             if (originalEvent.getCreatedBy() != userID && false == contains(originalEvent.getAttendees(), userID)) {
-                throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(folder.getID(), originalEvent.getId(), String.valueOf(classification));
+                throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(folder.getID(), originalEvent.getId(), String.valueOf(originalEvent.getClassification()));
             }
         }
     }

@@ -89,12 +89,7 @@ public class Event2Appointment {
      * @return The legacy "private flag"
      */
     public static boolean getPrivateFlag(Classification classification) {
-        switch (classification) {
-            case PUBLIC:
-                return false;
-            default:
-                return true;
-        }
+        return false == Classification.PUBLIC.equals(classification);
     }
 
     /**

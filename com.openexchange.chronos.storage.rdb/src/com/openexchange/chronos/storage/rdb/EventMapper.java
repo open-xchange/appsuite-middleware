@@ -616,7 +616,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, String value) {
-                event.setClassification(Enums.parse(Classification.class, value));
+                event.setClassification(new Classification(value));
             }
 
             @Override
@@ -627,7 +627,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public String get(Event event) {
                 Classification value = event.getClassification();
-                return null == value ? null : value.name();
+                return null == value ? null : value.getValue();
             }
 
             @Override

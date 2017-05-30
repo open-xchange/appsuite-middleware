@@ -92,7 +92,6 @@ import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 
 /**
@@ -500,11 +499,11 @@ public class EventPatches {
                 if (null == property || Strings.isEmpty(property.getValue())) {
                     return;
                 }
-                Classification classification = Enums.parse(Classification.class, property.getValue(), null);
-                if (null == classification) {
+                if (null == property.getValue()) {
                     LOG.warn("Ignoring unknown X-CALENDARSERVER-ACCESS '{}'", property.getValue());
                     return;
                 }
+                Classification classification = new Classification(property.getValue());
                 if (null != caldavImport.getEvent()) {
                     caldavImport.getEvent().setClassification(classification);
                 }

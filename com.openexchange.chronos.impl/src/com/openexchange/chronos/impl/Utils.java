@@ -389,11 +389,9 @@ public class Utils {
          * excluded if "classified" for user (and such events are requested to be excluded)
          */
         if (isClassifiedFor(event, session.getUserId())) {
-            if (false == includeClassified || Classification.PRIVATE.equals(event.getClassification())) {
-                return true; // exclude foreign events classified as 'confidential' as requested
-            }
-            if (Classification.PRIVATE.equals(event.getClassification())) {
-                return true; // always exclude foreign events classified as 'private'
+            if (false == includeClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
+                // only include 'confidential' events if requested
+                return true;
             }
         }
         Date from = getFrom(session);

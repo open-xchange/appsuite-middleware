@@ -56,27 +56,35 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.1.3">RFC 5545, section 3.8.1.3</a>
  */
-public enum Classification {
+public class Classification extends EnumeratedProperty {
 
     /**
-     * All of the calendar data is visible.
+     * The <i>public</i> classification; all of the calendar data is visible.
      */
-    PUBLIC,
+    public static final Classification PUBLIC = new Classification("PUBLIC");
 
     /**
-     * None of the calendar data is visible.
+     * The <i>confidential</i> classification; only start and end time of each instance is visible.
      */
-    PRIVATE,
+    public static final Classification CONFIDENTIAL = new Classification("CONFIDENTIAL");
 
     /**
-     * Only start and end time of each instance is visible.
+     * The <i>private</i> classification; none of the calendar data is visible.
      */
-    CONFIDENTIAL,
+    public static final Classification PRIVATE = new Classification("PRIVATE");
 
     /**
-     * Only start and end time, summary and location of each instance is visible.
+     * Initializes a new {@link Classification}.
+     *
+     * @param value The property value
      */
-    //RESTRICTED,
+    public Classification(String value) {
+        super(value);
+    }
 
-    ;
+    @Override
+    protected String[] getStandardValues() {
+        return new String[] { PUBLIC.getValue(), CONFIDENTIAL.getValue(), PRIVATE.getValue() };
+    }
+
 }
