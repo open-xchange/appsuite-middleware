@@ -91,10 +91,11 @@ public class GetSessionsResponse extends AbstractAJAXResponse {
         String sessionId = obj.getString("sessionId");
         String ipAddress = obj.getString("ipAddress");
         String client = obj.getString("client");
+        String userAgent = obj.getString("userAgent");
         int ctxId = obj.getInt("ctxId");
         int userId = obj.getInt("userId");
         String type = obj.getString("type");
-        return new ManagedSession(sessionId, ipAddress, client, ctxId, userId, "local".equals(type) ? Type.LOCAL : Type.REMOTE);
+        return new ManagedSession(sessionId, ipAddress, client, userAgent, ctxId, userId, "local".equals(type) ? Type.LOCAL : Type.REMOTE);
     }
 
 }
