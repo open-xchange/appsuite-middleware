@@ -62,16 +62,18 @@ public class ManagedSession {
     private final String sessionId;
     private final String ipAddress;
     private final String client;
+    private final String userAgent;
     private final int ctxId;
     private final int userId;
     private final Type type;
     private String location;
 
-    public ManagedSession(String sessionId, String ipAddress, String client, int ctxId, int userId, Type type) {
+    public ManagedSession(String sessionId, String ipAddress, String client, String userAgent, int ctxId, int userId, Type type) {
         super();
         this.sessionId = sessionId;
         this.ipAddress = ipAddress;
         this.client = client;
+        this.userAgent = userAgent;
         this.ctxId = ctxId;
         this.userId = userId;
         this.type = type;
@@ -83,6 +85,7 @@ public class ManagedSession {
         this.sessionId = session.getSessionID();
         this.ipAddress = session.getLocalIp();
         this.client = session.getClient();
+        this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
         this.ctxId = session.getContextId();
         this.userId = session.getUserId();
         this.type = type;
@@ -99,6 +102,10 @@ public class ManagedSession {
 
     public String getClient() {
         return client;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
     }
 
     public int getCtxId() {
