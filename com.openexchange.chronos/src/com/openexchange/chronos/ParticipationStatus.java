@@ -61,7 +61,7 @@ public class ParticipationStatus extends EnumeratedProperty {
     /**
      * Event needs action.
      */
-    public static final ParticipationStatus NEEDS_ACTION = new ParticipationStatus("NEEDS_ACTION");
+    public static final ParticipationStatus NEEDS_ACTION = new ParticipationStatus("NEEDS-ACTION");
 
     /**
      * Event accepted.
