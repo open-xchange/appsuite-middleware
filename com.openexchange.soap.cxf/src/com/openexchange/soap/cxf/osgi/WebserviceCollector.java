@@ -136,10 +136,11 @@ public class WebserviceCollector implements ServiceListener {
 
     private void remove(final ServiceReference<?> ref) {
         final Object service = context.getService(ref);
-
         if (isWebservice(service)) {
             final String name = getName(ref, service);
             remove(name, service);
+        } else {
+            context.ungetService(ref);
         }
     }
 
@@ -148,6 +149,8 @@ public class WebserviceCollector implements ServiceListener {
         if (isWebservice(service)) {
             final String name = getName(ref, service);
             replace(name, service);
+        } else {
+            context.ungetService(ref);
         }
     }
 

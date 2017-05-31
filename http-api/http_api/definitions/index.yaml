@@ -152,6 +152,10 @@ MailConversationData:
   $ref: ./mail/MailConversationData.yaml
 MailConversationsResponse:
   $ref: ./mail/MailConversationsResponse.yaml
+MailThreadReferenceData:
+  $ref: ./mail/MailThreadReferenceData.yaml
+MailThreadReferencesResponse:
+  $ref: ./mail/MailThreadReferencesResponse.yaml
 MailListElement:
   $ref: ./mail/MailListElement.yaml
 MailDestinationBody:

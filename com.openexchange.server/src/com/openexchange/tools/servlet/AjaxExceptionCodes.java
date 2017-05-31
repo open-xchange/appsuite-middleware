@@ -192,6 +192,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * Client sent illegal data in request body.
      */
     ILLEGAL_REQUEST_BODY("Client sent illegal data in request body.", MESSAGE_DENIED, Category.CATEGORY_ERROR, 31),
+    /**
+     * Client abruptly aborted the connection: %1$s
+     */
+    CONNECTION_RESET("Client abruptly aborted the connection: %1$s", MESSAGE, Category.CATEGORY_CONNECTIVITY, 32),
 
     ;
 

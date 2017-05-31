@@ -131,7 +131,7 @@ public class ContactServiceImpl extends DefaultContactService {
         final FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
         Check.noPrivateInPublic(folder, contact, session);
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, null);
 
         /*
          * prepare create
@@ -319,7 +319,7 @@ public class ContactServiceImpl extends DefaultContactService {
         final FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
         Check.noPrivateInPublic(folder, contact, session);
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, storedContact);
         /*
          * check for not allowed changes
          */
@@ -421,7 +421,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * check special GAB permissions
          */
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, storedContact);
         /*
          * check for not allowed changes
          */

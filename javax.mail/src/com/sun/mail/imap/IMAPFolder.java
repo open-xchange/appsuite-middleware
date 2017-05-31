@@ -485,7 +485,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    	);
 	    else // Folder was closed "implicitly"
 		throw new FolderClosedException(this,
-		    "Lost folder connection to server"
+		    "Lost folder connection to server", byeConnectionException
 		);
 	}
     }

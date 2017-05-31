@@ -69,12 +69,12 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -265,7 +265,22 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
              */
             zipOutput.closeArchiveEntry();
         } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            String msg = Strings.asciiLowerCase(e.getMessage());
+            if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                /*-
+                 * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+                 *
+                 * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+                 * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+                 * or the enduser's machine crashed, etc, etc.
+                 */
+                oxe.markLightWeight();
+            }
+            throw oxe;
         } finally {
             Streams.close(in);
         }

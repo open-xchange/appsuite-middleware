@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,44 @@
  *
  */
 
-package com.openexchange.mail.transport.listener;
+package com.openexchange.i18n;
 
-import javax.mail.Address;
-import javax.mail.internet.MimeMessage;
+import java.util.Collection;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.SecuritySettings;
-import com.openexchange.session.Session;
-
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link MailTransportListener} - A listener for message transport.
+ * {@link I18nServiceRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public interface MailTransportListener {
+@SingletonService
+public interface I18nServiceRegistry {
 
     /**
-     * Checks if specified security settings are orderly handled.
+     * Gets the currently available i18n services.
      *
-     * @param securitySettings The security settings to consider
-     * @param session The associated session
-     * @return <code>true</code> if handled; otherwise <code>false</code>
-     * @throws OXException If check fails unexpectedly
+     * @return The currently available i18n services
+     * @throws OXException If i18n services cannot be returned
      */
-    boolean checkSettings(SecuritySettings securitySettings, Session session) throws OXException;
+    Collection<I18nService> getI18nServices() throws OXException;
 
     /**
-     * Called before a message transport takes place.
+     * Gets the i18n service for specified locale (exact match).
      *
-     * @param message The message about to send
-     * @param recipients An array of recipients
-     * @param securitySettings The optional security settings to consider or <code>null</code>
-     * @param session The associated session
-     * @return The processing result
-     * @throws OXException If processing the message fails
+     * @return The i18n service or <code>null</code> if no such service is currently available
+     * @throws OXException If i18n service cannot be returned
      */
-    Result onBeforeMessageTransport(MimeMessage message, Address[] recipients, SecuritySettings securitySettings, Session session) throws OXException;
+    I18nService getI18nService(Locale locale) throws OXException;
 
     /**
-     * Called after a message transport took place.
+     * Gets the i18n service, which fits at best the specified locale.
      *
-     * @param message The sent message
-     * @param exception The possible exception that occurred while attempting to transport the message; otherwise <code>null</code>
-     * @param session The associated session
-     * @return The processing result
-     * @throws OXException If processing the sent message fails
+     * @return The i18n service or <code>null</code> if no such service matches at all
+     * @throws OXException If i18n service cannot be returned
      */
-    void onAfterMessageTransport(MimeMessage message, Exception exception, Session session) throws OXException;
+    I18nService getBestFittingI18nService(Locale locale) throws OXException;
 
 }

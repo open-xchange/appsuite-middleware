@@ -46,15 +46,23 @@ public class AsciiArmoredKeyParser implements KeyParser {
             //Getting the data from the stream
             IOUtils.transfer(inputStream, out);
             String data = new String(out.toByteArray());
+            return parse (data);
 
-            if (data != null && !data.isEmpty()) {
-                //Parsing
-                return new KeyRingParserResult(getPublicKeysFromString(data), getPrivateKeysFromString(data));
-            }
-            return null;
         } finally {
             out.close();
             inputStream.close();
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.pgp.keys.parsing.impl.KeyParser#parse(java.lang.String)
+     */
+    @Override
+    public KeyRingParserResult parse(String data) throws IOException {
+        if (data != null && !data.isEmpty()) {
+            //Parsing
+            return new KeyRingParserResult(getPublicKeysFromString(data), getPrivateKeysFromString(data));
+        }
+        return null;
     }
 }

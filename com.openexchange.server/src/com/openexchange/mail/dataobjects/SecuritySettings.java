@@ -282,7 +282,7 @@ public class SecuritySettings {
     }
 
     public JSONObject getJSON() throws JSONException {
-        JSONObject settings = new JSONObject();
+        JSONObject settings = new JSONObject(10);
         settings.put("encrypt", this.isEncrypt());
         settings.put("sign", this.isSign());
         settings.put("inline", this.isPgpInline());

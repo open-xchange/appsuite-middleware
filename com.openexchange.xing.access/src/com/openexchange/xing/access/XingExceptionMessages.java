@@ -59,7 +59,7 @@ import com.openexchange.i18n.LocalizableStrings;
 public final class XingExceptionMessages implements LocalizableStrings {
 
     // A XING error occurred: %1$s
-    public static final String XING_ERROR_MSG = "A XING error occurred: %1$s";
+    public static final String XING_ERROR_MSG = "Unexpected error returned by XING service.";
 
     // The XING resource does not exist: %1$s
     public static final String NOT_FOUND_MSG = "The XING resource does not exist: %1$s";

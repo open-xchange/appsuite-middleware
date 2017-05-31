@@ -49,11 +49,7 @@
 
 package com.openexchange.dav.carddav;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -121,6 +117,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         return availableAuthMethods();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -138,7 +135,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     /**
      * Remembers the supplied contact for deletion after the test is finished in the <code>tearDown()</code> method.
-     * 
+     *
      * @param contact
      */
     protected void rememberForCleanUp(final Contact contact) {
@@ -147,7 +144,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     /**
      * Gets the personal contacts folder id
-     * 
+     *
      * @return
      */
     protected int getDefaultFolderID() {
@@ -156,7 +153,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     /**
      * Gets the folder id of the global address book
-     * 
+     *
      * @return
      */
     protected int getGABFolderID() {
@@ -236,9 +233,13 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws Exception {
+        return putVCardUpdate(uid, vCard, "Contacts", ifMatchEtag);
+    }
+
+    protected int putVCardUpdate(String uid, String vCard, String collection, String ifMatchEtag) throws Exception {
         PutMethod put = null;
         try {
-            final String href = "/carddav/Contacts/" + uid + ".vcf";
+            final String href = "/carddav/" + collection + "/" + uid + ".vcf";
             put = new PutMethod(getBaseUri() + href);
             if (null != ifMatchEtag) {
                 put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
@@ -532,7 +533,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     /**
      * Creates the given contact in the default folder.
-     * 
+     *
      * @param contact
      * @return
      */
@@ -550,7 +551,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     /**
      * Creates a contact in the given folder.
-     * 
+     *
      * @param contact
      * @return
      */

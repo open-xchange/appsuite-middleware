@@ -115,6 +115,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(MailStrings.CONFIRMED_HAM_ALT);
         identifiers.add(MailStrings.CONFIRMED_SPAM);
         identifiers.add(MailStrings.CONFIRMED_SPAM_ALT);
+        identifiers.add(MailStrings.ARCHIVE);
         identifiersPerModule.put(Integer.valueOf(Module.MAIL.getFolderConstant()), identifiers);
         /*
          * calendar

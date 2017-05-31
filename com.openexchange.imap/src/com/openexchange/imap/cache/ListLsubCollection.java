@@ -51,6 +51,7 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,6 +89,8 @@ import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.Namespaces;
+import com.sun.mail.imap.protocol.Namespaces.Namespace;
 
 /**
  * {@link ListLsubCollection}
@@ -106,6 +109,49 @@ final class ListLsubCollection implements Serializable {
 
     private static enum State {
         DEPRECATED, DEPRECATED_FORCE_NEW, INITIALIZED;
+    }
+
+    /**
+     * For testing.
+     */
+    public static ListLsubCollection craftListLsubCollectionFrom(String rootList, String allList, String allLsub, String namespace) throws IOException, ProtocolException {
+        Response[] rootResponse = responsesFor(rootList);
+        Response[] allListResponse = responsesFor(allList);
+        Response[] allLsubResponse = responsesFor(allLsub);
+
+        String[] shared = null;
+        String[] user = null;
+        if (null != namespace) {
+            Response[] namespaceResponse = responsesFor(namespace);
+            Namespaces namespaces = new Namespaces(namespaceResponse[0]);
+
+            Namespace[] sharedNs = namespaces.shared;
+            if (null != sharedNs) {
+                shared = new String[sharedNs.length];
+                for (int i = 0; i < sharedNs.length; i++) {
+                    shared[i] = sharedNs[i].prefix;
+                }
+            }
+
+            Namespace[] userNs = namespaces.otherUsers;
+            if (null != userNs) {
+                user = new String[userNs.length];
+                for (int i = 0; i < userNs.length; i++) {
+                    user[i] = userNs[i].prefix;
+                }
+            }
+        }
+
+        return new ListLsubCollection(rootResponse, allListResponse, allLsubResponse, shared, user, false);
+    }
+
+    private static Response[] responsesFor(String rootList) throws IOException, ProtocolException {
+        String[] lines = rootList.split("\r?\n");
+        List<Response> responses = new ArrayList<>(lines.length);
+        for (String line : lines) {
+            responses.add(new IMAPResponse(line));
+        }
+        return responses.toArray(new Response[responses.size()]);
     }
 
     // -----------------------------------------------------------------------------------------------------------
@@ -169,6 +215,44 @@ final class ListLsubCollection implements Serializable {
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
         init(false, imapStore, ignoreSubscriptions);
+    }
+
+    /**
+     * Initializes a new {@link ListLsubCollection}.
+     */
+    private ListLsubCollection(Response[] rootResponse, Response[] allListResponses, Response[] allLsubResponses, String[] shared, String[] user, boolean ignoreSubscriptions) throws ProtocolException {
+        super();
+        listMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
+        lsubMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
+        draftsEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        junkEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        sentEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        trashEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        archiveEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        deprecated = new AtomicReference<State>();
+        this.shared = shared == null ? new String[0] : shared;
+        this.user = user == null ? new String[0] : user;
+
+        // Perform LIST "" ""
+        doRootListCommand(null, rootResponse);
+
+        // Perform LSUB "" "*"
+        if (!ignoreSubscriptions) {
+            doListLsubCommand(null, true, allLsubResponses);
+        }
+
+        // Perform LIST "" "*"
+        doListLsubCommand(null, false, allListResponses);
+
+        if (!ignoreSubscriptions) {
+            // Consistency check
+            checkConsistency(null);
+        }
+        /*
+         * Set time stamp
+         */
+        stamp = System.currentTimeMillis();
+        deprecated.set(State.INITIALIZED);
     }
 
     @Override
@@ -463,15 +547,15 @@ final class ListLsubCollection implements Serializable {
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 // Perform LIST "" ""
-                doRootListCommand(protocol);
+                doRootListCommand(protocol, null);
 
                 // Perform LSUB "" "*"
                 if (!ignoreSubscriptions) {
-                    doListLsubCommand(protocol, true);
+                    doListLsubCommand(protocol, true, null);
                 }
 
                 // Perform LIST "" "*"
-                doListLsubCommand(protocol, false);
+                doListLsubCommand(protocol, false, null);
 
                 if (ignoreSubscriptions) {
                     lsubMap.putAll(listMap);
@@ -613,6 +697,9 @@ final class ListLsubCollection implements Serializable {
     }
 
     private static boolean existsSafe(final String fullName, final IMAPStore imapStore) {
+        if (null == imapStore) {
+            return false;
+        }
         try {
             return imapStore.getFolder(fullName).exists();
         } catch (final MessagingException e) {
@@ -785,14 +872,15 @@ final class ListLsubCollection implements Serializable {
      *
      * @param protocol The IMAP protocol
      * @param lsub <code>true</code> to perform a LSUB command; otherwise <code>false</code> for LIST
+     * @param responses Test responses
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
+    protected void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub, Response[] responses) throws ProtocolException {
         // Perform command
         String command = lsub ? "LSUB" : "LIST";
         String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
 
-        Response[] r = performCommand(protocol, sCmd);
+        Response[] r = null == responses ? performCommand(protocol, sCmd) : responses;
         LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
 
         Response response = r[r.length - 1];
@@ -880,7 +968,9 @@ final class ListLsubCollection implements Serializable {
             }
 
             // Dispatch remaining untagged responses
-            protocol.notifyResponseHandlers(r);
+            if (null != protocol) {
+                protocol.notifyResponseHandlers(r);
+            }
         } else {
             // Dispatch remaining untagged responses
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
@@ -1029,14 +1119,15 @@ final class ListLsubCollection implements Serializable {
      * Performs a LIST command for root folder with specified IMAP protocol.
      *
      * @param protocol The IMAP protocol
+     * @param responses Test responses
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doRootListCommand(final IMAPProtocol protocol) throws ProtocolException {
+    protected void doRootListCommand(final IMAPProtocol protocol, Response[] responses) throws ProtocolException {
         /*
          * Perform command: LIST "" ""
          */
         String command = "LIST \"\" \"\"";
-        Response[] r = performCommand(protocol, command);
+        Response[] r = null == responses ? performCommand(protocol, command) : responses;
 
         if (r.length == 1) {
             // No LIST response for root folder. Do dummy LSUB and retry...
@@ -1080,7 +1171,9 @@ final class ListLsubCollection implements Serializable {
         /*
          * Dispatch remaining untagged responses
          */
-        protocol.notifyResponseHandlers(r);
+        if (null != protocol) {
+            protocol.notifyResponseHandlers(r);
+        }
     }
 
     /**
