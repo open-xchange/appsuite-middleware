@@ -960,6 +960,51 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether an event is a so-called <i>group-scheduled</> event or not.
+     * <p/>
+     * Group-schedule events are <i>meetings</i> with a defined organizer and one or more attendees, while not group-scheduled ones are
+     * simple <i>published</i> events, or events in a single user's calendar only.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is group-scheduled, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.1">RFC 5545, section 3.8.4.1</a> and
+     *      <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.3">RFC 5545, section 3.8.4.3</a>
+     */
+    public static boolean isGroupScheduled(Event event) {
+        return null != event.getOrganizer() && null != event.getAttendees() && 0 < event.getAttendees().size();
+    }
+
+    /**
+     * Gets a value indicating whether an event represents an <i>attendee scheduling object resource</i> or not, i.e. a group-scheduled
+     * event the calendar user attends, organized by a different entity.
+     *
+     * @param event The event to check
+     * @param calendarUserId The identifier of the calendar user representing the view on the event
+     * @return <code>true</code> if the event is an attendee scheduling object resource, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
+     */
+    public static boolean isAttendeeSchedulingResource(Event event, int calendarUserId) {
+        if (isGroupScheduled(event)) {
+            Attendee matchingAttendee = find(event.getAttendees(), calendarUserId);
+            return null != matchingAttendee && false == matches(matchingAttendee, event.getOrganizer());
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether an event represents an <i>organizer scheduling object resource</i> or not, i.e. a group-scheduled
+     * event where the calendar user matches the organizer.
+     *
+     * @param event The event to check
+     * @param calendarUserId The identifier of the calendar user representing the view on the event
+     * @return <code>true</code> if the event is an organizer scheduling object resource, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
+     */
+    public static boolean isOrganizerSchedulingResource(Event event, int calendarUserId) {
+        return isGroupScheduled(event) && null != event.getOrganizer() && event.getOrganizer().getEntity() == calendarUserId;
+    }
+
+    /**
      * Adds an extended property to an event, initializing the event's extended properties collection as needed.
      *
      * @param event The event to add the property to
