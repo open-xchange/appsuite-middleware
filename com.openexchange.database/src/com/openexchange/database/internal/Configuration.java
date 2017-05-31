@@ -268,9 +268,11 @@ public final class Configuration {
         /** Allows to disable the replication monitor. */
         REPLICATION_MONITOR("com.openexchange.database.replicationMonitor"),
         /** Allows to write a warning into the logs if a connection to the master is only used to read data. */
-        CHECK_WRITE_CONS("com.openexchange.database.checkWriteCons");
+        CHECK_WRITE_CONS("com.openexchange.database.checkWriteCons"),
+        /** Specifies the lock mechanism to use. */
+        LOCK_MECH("com.openexchange.database.lockMech");
 
-        private String propertyName;
+        private final String propertyName;
 
         private Property(String propertyName) {
             this.propertyName = propertyName;

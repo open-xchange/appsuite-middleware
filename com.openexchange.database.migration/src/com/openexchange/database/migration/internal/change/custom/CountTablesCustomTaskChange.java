@@ -175,43 +175,70 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
     }
 
     private void createDBPoolCountTable(Connection configDbCon) throws SQLException {
-        if (tableExists(configDbCon, "contexts_per_dbpool")) {
-            return;
+        if (false == tableExists(configDbCon, "contexts_per_dbpool")) {
+            String createStmt = "CREATE TABLE contexts_per_dbpool (" +
+                "db_pool_id INT4 UNSIGNED NOT NULL, " +
+                "count INT4 UNSIGNED NOT NULL, " +
+                "PRIMARY KEY (db_pool_id)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+            PreparedStatement stmt = null;
+            try {
+                stmt = configDbCon.prepareStatement(createStmt);
+                stmt.executeUpdate();
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
         }
 
-        String createStmt = "CREATE TABLE contexts_per_dbpool (" +
-            "db_pool_id INT4 UNSIGNED NOT NULL, " +
-            "count INT4 UNSIGNED NOT NULL, " +
-            "PRIMARY KEY (db_pool_id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        if (false == tableExists(configDbCon, "dbpool_lock")) {
+            String createStmt = "CREATE TABLE dbpool_lock (" +
+                "db_pool_id INT4 UNSIGNED NOT NULL, " +
+                "PRIMARY KEY (db_pool_id)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-        PreparedStatement stmt = null;
-        try {
-            stmt = configDbCon.prepareStatement(createStmt);
-            stmt.executeUpdate();
-        } finally {
-            Databases.closeSQLStuff(stmt);
+            PreparedStatement stmt = null;
+            try {
+                stmt = configDbCon.prepareStatement(createStmt);
+                stmt.executeUpdate();
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
         }
     }
 
     private void createDBPoolSchemaCountTable(Connection configDbCon) throws SQLException {
-        if (tableExists(configDbCon, "contexts_per_dbschema")) {
-            return;
+        if (false == tableExists(configDbCon, "contexts_per_dbschema")) {
+            String createStmt = "CREATE TABLE contexts_per_dbschema (" +
+                "db_pool_id INT4 UNSIGNED NOT NULL, " +
+                "schemaname VARCHAR(32) NOT NULL, " +
+                "count INT4 UNSIGNED NOT NULL, " +
+                "PRIMARY KEY (db_pool_id, schemaname)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+            PreparedStatement stmt = null;
+            try {
+                stmt = configDbCon.prepareStatement(createStmt);
+                stmt.executeUpdate();
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
         }
 
-        String createStmt = "CREATE TABLE contexts_per_dbschema (" +
-            "db_pool_id INT4 UNSIGNED NOT NULL, " +
-            "schemaname VARCHAR(32) NOT NULL, " +
-            "count INT4 UNSIGNED NOT NULL, " +
-            "PRIMARY KEY (db_pool_id, schemaname)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        if (false == tableExists(configDbCon, "dbschema_lock")) {
+            String createStmt = "CREATE TABLE dbschema_lock (" +
+                "db_pool_id INT4 UNSIGNED NOT NULL, " +
+                "schemaname VARCHAR(32) NOT NULL, " +
+                "PRIMARY KEY (db_pool_id, schemaname)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-        PreparedStatement stmt = null;
-        try {
-            stmt = configDbCon.prepareStatement(createStmt);
-            stmt.executeUpdate();
-        } finally {
-            Databases.closeSQLStuff(stmt);
+            PreparedStatement stmt = null;
+            try {
+                stmt = configDbCon.prepareStatement(createStmt);
+                stmt.executeUpdate();
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
         }
     }
 
@@ -307,6 +334,15 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             stmt.executeBatch();
             Databases.closeSQLStuff(rs, stmt);
             stmt = null;
+
+            stmt = configCon.prepareStatement("INSERT IGNORE INTO dbpool_lock (db_pool_id) VALUES (?)");
+            for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+                stmt.setInt(1, entry.getKey().intValue());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -367,6 +403,20 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                     stmt.setString(2, schemaCount.schemaName);
                     stmt.setInt(3, schemaCount.count);
                     stmt.setInt(4, schemaCount.count);
+                    stmt.addBatch();
+                }
+            }
+            stmt.executeBatch();
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+
+            stmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
+            for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
+                int poolId = entry.getKey().intValue();
+                List<SchemaCount> schemaCounts = entry.getValue();
+                for (SchemaCount schemaCount : schemaCounts) {
+                    stmt.setInt(1, poolId);
+                    stmt.setString(2, schemaCount.schemaName);
                     stmt.addBatch();
                 }
             }

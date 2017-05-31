@@ -125,9 +125,14 @@ CREATE TABLE contexts_per_dbschema (
     PRIMARY KEY (db_pool_id, schemaname)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `ctx_per_schema_sem` (
-   `id` BIGINT UNSIGNED NOT NULL,
-   PRIMARY KEY (`id`)
+CREATE TABLE dbpool_lock (
+    db_pool_id INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (db_pool_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `ctx_per_schema_sem` VALUES (0);
+CREATE TABLE dbschema_lock (
+    db_pool_id INT4 UNSIGNED NOT NULL,
+    schemaname VARCHAR(32) NOT NULL,
+    PRIMARY KEY (db_pool_id, schemaname)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+

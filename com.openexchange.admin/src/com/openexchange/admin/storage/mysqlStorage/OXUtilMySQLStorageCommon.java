@@ -217,6 +217,15 @@ public class OXUtilMySQLStorageCommon {
             stmt.setInt(1, db.getId());
             stmt.setString(2, db.getScheme());
             stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            stmt = configdbCon.prepareStatement("INSERT INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
+            stmt.setInt(1, db.getId());
+            stmt.setString(2, db.getScheme());
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
         } catch (Exception e) {
             Databases.closeSQLStuff(stmt);
         }
@@ -411,6 +420,15 @@ public class OXUtilMySQLStorageCommon {
             pstmt.setInt(1, db.getId().intValue());
             pstmt.setString(2, db.getScheme());
             pstmt.executeUpdate();
+            closeSQLStuff(pstmt);
+            pstmt = null;
+
+            pstmt = configdbCon.prepareStatement("DELETE FROM dbschema_lock WHERE db_pool_id=? AND schemaname=?");
+            pstmt.setInt(1, db.getId().intValue());
+            pstmt.setString(2, db.getScheme());
+            pstmt.executeUpdate();
+            closeSQLStuff(pstmt);
+            pstmt = null;
         } catch (SQLException e) {
             throw new StorageException(e.toString(), e);
         } finally {

@@ -74,10 +74,10 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     private final ContextDatabaseAssignmentImpl contextAssignment;
     private final ReplicationMonitor monitor;
 
-    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor) {
+    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor, LockMech lockMech) {
         super();
         this.assignmentService = assignmentService;
-        contextAssignment = new ContextDatabaseAssignmentImpl(this);
+        contextAssignment = new ContextDatabaseAssignmentImpl(this, lockMech);
         this.pools = pools;
         this.monitor = monitor;
     }

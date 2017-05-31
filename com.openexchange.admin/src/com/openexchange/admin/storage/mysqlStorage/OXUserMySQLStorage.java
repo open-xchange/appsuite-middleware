@@ -65,6 +65,7 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -709,7 +710,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setString(4, elem);
                             stmt.executeUpdate();
                             stmt.close();
-                            
+
                             storedAliases.remove(elem);
                         }
                     }
@@ -1894,10 +1895,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         }
         try {
+            lockTable("updateTask", con);
             mass.insertMailAccount(account, userId, context, null, con);
         } catch (final OXException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
+        } catch (final SQLException e) {
+            log.error("Problem storing the primary mail account.", e);
+            throw new StorageException(e.toString());
+        }
+    }
+
+    private void lockTable(String table, Connection con) throws SQLException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute("SELECT 1 FROM " + table + " FOR UPDATE");
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 

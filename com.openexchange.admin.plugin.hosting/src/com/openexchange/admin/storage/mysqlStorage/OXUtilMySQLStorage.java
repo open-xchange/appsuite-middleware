@@ -809,6 +809,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.setInt(1, db_id);
                 prep.executeUpdate();
                 prep.close();
+
+                // update trigger lock table
+                prep = con.prepareStatement("INSERT INTO dbpool_lock (db_pool_id) VALUES(?);");
+                prep.setInt(1, db_id);
+                prep.executeUpdate();
+                prep.close();
             } else {
                 prep = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE db_pool_id = ?");
                 prep.setInt(1, db.getMasterId());
@@ -1261,6 +1267,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
                 try {
                     stmt = con.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
                     stmt.setInt(1, dbId);
                     stmt.executeUpdate();
                 } finally {

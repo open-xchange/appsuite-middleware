@@ -106,12 +106,15 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
      */
     private final Lock cacheLock = new ReentrantLock(true);
 
+    private final LockMech lockMech;
+
     /**
      * Default constructor.
      */
-    public ContextDatabaseAssignmentImpl(final ConfigDatabaseService configDatabaseService) {
+    public ContextDatabaseAssignmentImpl(final ConfigDatabaseService configDatabaseService, LockMech lockMech) {
         super();
         this.configDatabaseService = configDatabaseService;
+        this.lockMech = lockMech;
     }
 
     @Override
@@ -439,17 +442,25 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public void lock(Connection con, int writePoolId, String schemaName) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE ctx_per_schema_sem SET id=id+1");
-            stmt.executeUpdate();
-//            if (null != schemaName) {
-//                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=? FOR UPDATE");
-//                stmt.setInt(1, writePoolId);
-//                stmt.setString(2, schemaName);
-//            } else {
-//                stmt = con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=? FOR UPDATE");
-////                stmt.setInt(1, writePoolId);
-//            }
-//            stmt.execute();
+            switch (lockMech) {
+            case GLOBAL_LOCK: {
+                stmt = con.prepareStatement("UPDATE ctx_per_schema_sem SET id=id+1");
+                stmt.executeUpdate();
+                break;
+            }
+            case ROW_LOCK: {
+                if (null != schemaName) {
+                    stmt = con.prepareStatement("SELECT 1 FROM dbschema_lock WHERE db_pool_id=? AND schemaname=? FOR UPDATE");
+                    stmt.setInt(1, writePoolId);
+                    stmt.setString(2, schemaName);
+                } else {
+                    stmt = con.prepareStatement("SELECT 1 FROM dbpool_lock WHERE db_pool_id=? FOR UPDATE");
+                    stmt.setInt(1, writePoolId);
+                }
+                stmt.executeQuery();
+                break;
+            }
+            }
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
