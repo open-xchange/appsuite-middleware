@@ -66,10 +66,9 @@ public class ManagedSession {
     private final long loginTime;
     private final int ctxId;
     private final int userId;
-    private final Type type;
     private String location;
 
-    public ManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, int ctxId, int userId, Type type) {
+    public ManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, int ctxId, int userId) {
         super();
         this.sessionId = sessionId;
         this.ipAddress = ipAddress;
@@ -78,20 +77,18 @@ public class ManagedSession {
         this.loginTime = loginTime;
         this.ctxId = ctxId;
         this.userId = userId;
-        this.type = type;
         this.location = SessionManagementStrings.UNKNOWN_LOCATION;
     }
 
-    public ManagedSession(Session session, Type type) {
+    public ManagedSession(Session session) {
         super();
         this.sessionId = session.getSessionID();
         this.ipAddress = session.getLocalIp();
         this.client = session.getClient();
         this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
-        this.loginTime = Long.parseLong((String) session.getParameter(Session.PARAM_LOGIN_TIME));
+        this.loginTime = Long.parseLong(String.valueOf(session.getParameter(Session.PARAM_LOGIN_TIME)));
         this.ctxId = session.getContextId();
         this.userId = session.getUserId();
-        this.type = type;
         this.location = SessionManagementStrings.UNKNOWN_LOCATION;
     }
 
@@ -123,32 +120,12 @@ public class ManagedSession {
         return userId;
     }
 
-    public String getType() {
-        return type.getType();
-    }
-
     public String getLocation() {
         return location;
     }
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public static enum Type {
-        LOCAL("local"),
-        REMOTE("remote"),
-        ;
-
-        private final String type;
-
-        private Type(String type) {
-            this.type = type;
-        }
-
-        public String getType() {
-            return type;
-        }
     }
 
 }
