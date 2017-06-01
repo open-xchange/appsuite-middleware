@@ -51,9 +51,11 @@ package com.openexchange.server.services;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Strings;
 
 /**
  * Registry for all found {@link I18nService} instances.
@@ -90,15 +92,49 @@ public class I18nServices {
         return SINGLETON;
     }
 
+    /**
+     * Gets the i18n service for a specific locale.
+     *
+     * @param locale The locale to get the i18n service for, or <code>null</code> for the default locale
+     */
     public I18nService getService(final Locale locale) {
-        return getService(null == locale ? DEFAULT_LOCALE : locale, true);
+        return getService(locale, true);
     }
 
+    /**
+     * Gets the i18n service for a specific locale.
+     *
+     * @param locale The locale to get the i18n service for, or <code>null</code> for the default locale
+     * @param warn <code>true</code> to log a warning when no i18n service for the locale is available, <code>false</code>, otherwise
+     * @return The i18n service for the locale, or <code>null</code> if no suitable i18n service available
+     */
     public I18nService getService(final Locale locale, final boolean warn) {
+        return getService(locale, warn, true);
+    }
+
+    /**
+     * Gets the i18n service for a specific locale.
+     *
+     * @param locale The locale to get the i18n service for, or <code>null</code> for the default locale
+     * @param warn <code>true</code> to log a warning when no i18n service for the locale is available, <code>false</code>, otherwise
+     * @param tryLanguageAlternatives <code>true</code> to allow falling back to other locales with the same language when no i18n service
+     *        for requested locale is available, <code>false</code>, otherwise
+     * @return The i18n service for the locale, or <code>null</code> if no suitable i18n service available
+     */
+    public I18nService getService(final Locale locale, final boolean warn, boolean tryLanguageAlternatives) {
         final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
         final I18nService retval = services.get(loc);
-        if (warn && null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale {}.", loc);
+        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
+            if (tryLanguageAlternatives && Strings.isNotEmpty(loc.getLanguage())) {
+                I18nService altService = getService(loc.getLanguage());
+                if (null != altService) {
+                    LOG.debug("No i18n service for locale {} - falling back to {}.", loc, retval);
+                    return altService;
+                }
+            }
+            if (warn) {
+                LOG.warn("No i18n service for locale {}.", loc);
+            }
         }
         return retval;
     }
@@ -127,4 +163,14 @@ public class I18nServices {
     public void clear() {
         services.clear();
     }
+
+    private I18nService getService(String language) {
+        for (Entry<Locale, I18nService> entry : services.entrySet()) {
+            if (language.equalsIgnoreCase(entry.getKey().getLanguage())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
 }
