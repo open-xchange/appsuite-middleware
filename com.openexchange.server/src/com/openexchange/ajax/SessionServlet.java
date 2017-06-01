@@ -64,7 +64,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.ldap.User;
@@ -147,16 +146,6 @@ public abstract class SessionServlet extends AJAXServlet {
             // Get associated session (may be null)
             session = result.getSession();
             if (null != session) {
-                /*
-                 * Track DB schema
-                 */
-                String dbSchema = (String) session.getParameter(LogProperties.Name.DATABASE_SCHEMA.getName());
-                if (dbSchema == null) {
-                    DatabaseService dbService = ServerServiceRegistry.getServize(DatabaseService.class, true);
-                    dbSchema = dbService.getSchemaName(session.getContextId());
-                    session.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), dbSchema);
-                }
-                LogProperties.put(LogProperties.Name.DATABASE_SCHEMA, dbSchema);
                 LogProperties.putSessionProperties(session);
 
                 /*
@@ -196,7 +185,6 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             ThreadLocalSessionHolder.getInstance().clear();
             LogProperties.removeSessionProperties();
-            LogProperties.removeProperty(LogProperties.Name.DATABASE_SCHEMA);
             if (null != counter) {
                 counter.getAndDecrement();
             }
