@@ -76,7 +76,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.ManagedSession.Type;
 import com.openexchange.session.management.SessionManagementProperty;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
@@ -116,7 +115,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             if (blackListedClients.contains(s.getClient())) {
                 continue;
             }
-            ManagedSession managedSession = new ManagedSession(s, Type.LOCAL);
+            ManagedSession managedSession = new ManagedSession(s);
             if (null != geoLocationService) {
                 determineLocation(managedSession);
             }
@@ -126,7 +125,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             if (blackListedClients.contains(s.getClient())) {
                 continue;
             }
-            ManagedSession managedSession = new ManagedSession(s, Type.REMOTE);
+            ManagedSession managedSession = new ManagedSession(s);
             if (null != geoLocationService) {
                 determineLocation(managedSession);
             }
