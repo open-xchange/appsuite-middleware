@@ -55,6 +55,7 @@ import java.util.List;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
+import com.openexchange.pgp.keys.common.PGPSymmetricKey;
 
 /**
  * {@link PGPSymmetricDecrypter} decrypts PGP data with a known symmetric key (PGP session key).
@@ -69,9 +70,9 @@ public class PGPSymmetricDecrypter extends PGPDecrypter {
     /**
      * Initializes a new {@link PGPSymmetricDecrypter}.
      *
-     * @param keyRetrievalStrategy
+     * @param key The symmetric key data to use for decryption
      */
-    public PGPSymmetricDecrypter(final byte[] key) {
+    private PGPSymmetricDecrypter(final byte[] key) {
         //Not dealing with asymmetric keys, because this class knows the symmetric key for decrypting the PGP data.
         super(new PGPKeyRetrievalStrategy() {
 
@@ -86,6 +87,15 @@ public class PGPSymmetricDecrypter extends PGPDecrypter {
             }
         });
         this.key = key;
+    }
+
+    /**
+     * Initializes a new {@link PGPSymmetricDecrypter}.
+     *
+     * @param The symmetric key to use for decryption
+     */
+    public PGPSymmetricDecrypter(PGPSymmetricKey key) {
+        this(key.getKeyData());
     }
 
     /*

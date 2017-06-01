@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.pgp.keys.common,
  com.openexchange.tools.encoding,
  javax.crypto,
  javax.crypto.interfaces,
