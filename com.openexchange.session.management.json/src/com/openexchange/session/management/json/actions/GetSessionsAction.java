@@ -95,6 +95,7 @@ public class GetSessionsAction implements AJAXActionService {
                 json.put("ctxId", s.getCtxId());
                 json.put("userId", s.getUserId());
                 json.put("location", s.getLocation());
+                json.put("loginTime", s.getLoginTime());
                 json.put("type", s.getType());
                 result.add(0, json);
             }
