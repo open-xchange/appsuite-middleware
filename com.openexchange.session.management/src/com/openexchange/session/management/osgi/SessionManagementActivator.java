@@ -68,12 +68,15 @@ public class SessionManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, HazelcastInstance.class, LeanConfigurationService.class, GeoLocationService.class, UserService.class };
+        return new Class<?>[] { SessiondService.class, LeanConfigurationService.class, UserService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        trackService(GeoLocationService.class);
+        trackService(HazelcastInstance.class);
+        openTrackers();
         registerService(SessionManagementService.class, new SessionManagementServiceImpl());
     }
 
