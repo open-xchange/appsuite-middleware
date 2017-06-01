@@ -60,6 +60,7 @@ import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
+import org.glassfish.grizzly.websockets.Utf8Utils;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 import com.google.common.collect.ImmutableMap;
@@ -191,7 +192,7 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
     }
 
     private void blockingSend(String message) throws OXException {
-        GrizzlyFuture<DataFrame> grizzlyFuture = send(message);
+        GrizzlyFuture<DataFrame> grizzlyFuture = send(Utf8Utils.encode(DataFrame.STRICT_UTF8_CHARSET, message));
         try {
             grizzlyFuture.get();
         } catch (InterruptedException e) {
@@ -221,7 +222,7 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
             return new SendControlImpl<>(new GetFuture<Void>(null));
         }
 
-        GrizzlyFuture<DataFrame> f = send(message);
+        GrizzlyFuture<DataFrame> f = send(Utf8Utils.encode(DataFrame.STRICT_UTF8_CHARSET, transcoded));
         return new SendControlImpl<>(f);
     }
 
