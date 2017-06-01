@@ -199,9 +199,10 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         if (!configService.getBooleanProperty(SessionManagementProperty.globalLookup)) {
             return Collections.emptyList();
         }
-        HazelcastInstance hzInstance = Services.getService(HazelcastInstance.class);
+        HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
         if (null == hzInstance) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
+            LOG.warn("Missing hazelcast instance.", ServiceExceptionCode.absentService(HazelcastInstance.class));
+            return Collections.emptyList();
         }
 
         Cluster cluster = hzInstance.getCluster();

@@ -85,8 +85,8 @@ public class ManagedSession {
         this.sessionId = session.getSessionID();
         this.ipAddress = session.getLocalIp();
         this.client = session.getClient();
-        this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
-        this.loginTime = Long.parseLong(String.valueOf(session.getParameter(Session.PARAM_LOGIN_TIME)));
+        this.userAgent = session.getParameter(Session.PARAM_USER_AGENT) != null ? (String) session.getParameter(Session.PARAM_USER_AGENT) : "unknown user-agent";
+        this.loginTime = session.getParameter(Session.PARAM_LOGIN_TIME) != null ? Long.parseLong(String.valueOf(session.getParameter(Session.PARAM_LOGIN_TIME))) : -1;
         this.ctxId = session.getContextId();
         this.userId = session.getUserId();
         this.location = SessionManagementStrings.UNKNOWN_LOCATION;
