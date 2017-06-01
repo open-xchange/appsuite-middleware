@@ -9629,7 +9629,7 @@ msgstr ""
 
 #. A XING error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:62
-msgid "A XING error occurred: %1$s"
+msgid "Unexpected error returned by XING service."
 msgstr ""
 
 #. The XING resource does not exist: %1$s

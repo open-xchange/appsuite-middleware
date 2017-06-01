@@ -42,7 +42,7 @@
       - in: formData
         name: json
         type: string
-        description: Represents the normal request body as JSON string containing the contact data as described in the [ContactData](#/definitions/ContactData) model.
+        description: Represents the normal request body as JSON string containing the contact data as described in the ContactData (see [createContact](#/Contacts/createContact) model.
         required: true
       - in: formData
         name: file

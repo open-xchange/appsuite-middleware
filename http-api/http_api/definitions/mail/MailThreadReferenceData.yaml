@@ -1,0 +1,28 @@
+type: object
+properties:
+  rootMailId:
+    type: String
+    description: The unique id of the root mail.
+  rootOriginalMailId:
+    type: String
+    description: The original unique id of the root mail.
+  rootOriginalFolderId:
+    type: String
+    description: The original folder id of the root mail.
+  latestMailId:
+    type: String
+    description: The unique id of the latest mail.
+  latestOriginalMailId:
+    type: String
+    description: The original unique id of the latest mail.
+  latestOriginalFolderId:
+    type: String
+    description: The original folder id of the latest mail.
+  latestReceivedDate:
+    type: integer
+    description: Date and time as measured by the receiving server of the latest mail. 
+  thread:
+    type: array
+    description: JSON array consisting of JSON objects, each representing a message in the conversation.
+    items:
+      $ref: "#/definitions/MailData"

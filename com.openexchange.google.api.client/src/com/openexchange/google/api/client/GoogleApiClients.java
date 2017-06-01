@@ -321,7 +321,7 @@ public class GoogleApiClients {
         if (Strings.isEmpty(errorMsg)) {
             return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
         }
-        if (exMessage.contains("invalid_grant")) {
+        if (exMessage.contains("invalid_grant") || exMessage.contains("deleted_client")) {
             if (null != googleAccount) {
                 return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, googleAccount.getDisplayName(), googleAccount.getId(), session.getUserId(), session.getContextId());
             }

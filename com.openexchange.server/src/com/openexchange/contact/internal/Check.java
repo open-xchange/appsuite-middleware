@@ -195,9 +195,10 @@ public final class Check {
 	 * @param session The session
 	 * @param folderID The folder ID
 	 * @param update The contact to be written
+	 * @param original The original contact being updated, or <code>null</code> during contact creation
 	 * @throws OXException
 	 */
-	public static void canWriteInGAB(ContactStorage storage, Session session, String folderID, Contact update) throws OXException {
+	public static void canWriteInGAB(ContactStorage storage, Session session, String folderID, Contact update, Contact original) throws OXException {
 		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderID)) {
 		    /*
 		     * check legacy edit flag
@@ -212,24 +213,26 @@ public final class Check {
 				if (Tools.isEmpty(update.getDisplayName())) {
 					throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
 				}
-				/*
-				 * check if display name is already in use
-				 */
-		    	CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-				searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
-				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
-				    ContactField.DISPLAY_NAME, SingleOperation.EQUALS, update.getDisplayName()));
-				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
-				    ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
-				SearchIterator<Contact> searchIterator = null;
-				try {
-					searchIterator = storage.search(
-					    session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
-					if (searchIterator.hasNext()) {
-						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session.getContextId(), update.getObjectID());
-					}
-				} finally {
-				    Tools.close(searchIterator);
+				if (null == original || false == update.getDisplayName().equals(original.getDisplayName())) {
+    				/*
+    				 * check if display name is already in use
+    				 */
+    		    	CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
+    				    ContactField.DISPLAY_NAME, SingleOperation.EQUALS, update.getDisplayName()));
+    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
+    				    ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
+    				SearchIterator<Contact> searchIterator = null;
+    				try {
+    					searchIterator = storage.search(
+    					    session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
+    					if (searchIterator.hasNext()) {
+    						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session.getContextId(), update.getObjectID());
+    					}
+    				} finally {
+    				    Tools.close(searchIterator);
+    				}
 				}
 			}
 			/*
@@ -243,7 +246,7 @@ public final class Check {
 	        /*
 	         * check primary mail address
 	         */
-	        if (update.containsEmail1()) {
+	        if (update.containsEmail1() && (null == original || null == original.getEmail1() || false == original.getEmail1().equals(update.getEmail1()))) {
 	        	if (Tools.getContext(session).getMailadmin() != session.getUserId()) {
 	        		throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(
 	        		    session.getContextId(), update.getObjectID(), session.getUserId());

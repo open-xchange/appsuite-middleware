@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,55 @@
  *
  */
 
-package com.openexchange.imageserver.api;
+package com.openexchange.global.osgi;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 
 
 /**
- * {@link ImageServerDescriptor}
+ * {@link I18nServiceTracker}
  *
- * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.4
  */
-public class ImageServerDescriptor {
+public class I18nServiceTracker implements ServiceTrackerCustomizer<I18nService, I18nService> {
+
+    private final BundleContext context;
+    private final I18nServiceRegistryImpl registry;
 
     /**
-     * Initializes a new {@link ImageServerDescriptor}.
+     * Initializes a new {@link I18nServiceTracker}.
      */
-    public ImageServerDescriptor() {
+    public I18nServiceTracker(I18nServiceRegistryImpl registry, BundleContext context) {
         super();
-
+        this.registry = registry;
+        this.context = context;
     }
 
-    // -------------------------------------------------------------------------
+    @Override
+    public I18nService addingService(ServiceReference<I18nService> reference) {
+        I18nService service = context.getService(reference);
+        if (registry.addI18nService(service)) {
+            return service;
+        }
 
-    public String m_serviceName = null;
+        context.ungetService(reference);
+        return null;
+    }
 
-    public String m_dbType = null;
+    @Override
+    public void modifiedService(ServiceReference<I18nService> reference, I18nService service) {
+        // Ignore
+    }
 
-    public String m_dbHost = null;
+    @Override
+    public void removedService(ServiceReference<I18nService> reference, I18nService service) {
+        registry.removeI18nService(service);
+        context.ungetService(reference);
+    }
 
-    public String m_dbPort = null;
-
-    public String m_dbUserName = null;
-
-    public String m_dbPassword = null;
 }

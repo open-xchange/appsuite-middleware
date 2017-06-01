@@ -49,8 +49,10 @@
 
 package com.openexchange.oauth;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -65,13 +67,15 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
     private String displayName;
     private OAuthServiceMetaData metaData;
     private Set<OAuthScope> enabledScopes;
+    private boolean enabledScopesSet;
 
     /**
-     * Initialises a new {@link DefaultOAuthAccount}.
+     * Initializes a new {@link DefaultOAuthAccount}.
      */
     public DefaultOAuthAccount() {
         super();
-        enabledScopes = new HashSet<>();
+        enabledScopes = Collections.emptySet();
+        enabledScopesSet = false;
     }
 
     @Override
@@ -90,9 +94,9 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
     }
 
     /**
-     * Sets the id
+     * Sets the identifier
      *
-     * @param id The id to set
+     * @param id The identifier to set
      */
     public void setId(final int id) {
         this.id = id;
@@ -127,22 +131,41 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
         return metaData.getAPI();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccount#getEnabledScopes()
-     */
     @Override
     public Set<OAuthScope> getEnabledScopes() {
         return enabledScopes;
     }
 
     /**
-     * Sets the enabledScopes
+     * Adds specified scope to the set of enabled of enabled scopes for this OAuth account
      *
-     * @param enabledScopes The enabledScopes to set
+     * @param enabledScope The scope to add
+     */
+    public void addEnabledScope(OAuthScope enabledScope) {
+        if (null != enabledScope) {
+            Set<OAuthScope> enabledScopes = new LinkedHashSet<>(this.enabledScopes);
+            enabledScopes.add(enabledScope);
+            this.enabledScopes = ImmutableSet.copyOf(enabledScopes);
+            this.enabledScopesSet = true;
+        }
+    }
+
+    /**
+     * Sets the enabled scopes
+     *
+     * @param enabledScopes The enabled scopes to set
      */
     public void setEnabledScopes(Set<OAuthScope> enabledScopes) {
-        this.enabledScopes = enabledScopes;
+        this.enabledScopes = null == enabledScopes ? Collections.<OAuthScope> emptySet() : ImmutableSet.copyOf(enabledScopes);
+        this.enabledScopesSet = true;
+    }
+
+    /**
+     * Checks whether enabled scopes are set in this instance.
+     *
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean isEnabledScopesSet() {
+        return enabledScopesSet;
     }
 }

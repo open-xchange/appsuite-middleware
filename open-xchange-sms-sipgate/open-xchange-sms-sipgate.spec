@@ -64,7 +64,7 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
-* Tue May 16 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+* Fri May 19 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Second preview of 7.8.4 release
