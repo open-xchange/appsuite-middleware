@@ -54,6 +54,7 @@ import static com.openexchange.sessiond.impl.TimeoutTaskWrapper.submit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -817,6 +818,7 @@ public final class SessionHandler {
         if (Strings.isNotEmpty(userAgent)) {
             newSession.setParameter(Session.PARAM_USER_AGENT, userAgent);
         }
+        newSession.setParameter(Session.PARAM_LOGIN_TIME, String.valueOf(new Date().getTime()));
 
         // Either add session or yield short-time token for it
         SessionImpl addedSession;

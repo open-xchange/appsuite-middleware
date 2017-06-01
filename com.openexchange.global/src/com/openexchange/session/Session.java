@@ -231,6 +231,11 @@ public interface Session {
     public static final String PARAM_USER_AGENT = "__session.useragent".intern();
 
     /**
+     * The parameter for optional login time associated with a session
+     */
+    public static final String PARAM_LOGIN_TIME = "__session.logintime".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();
