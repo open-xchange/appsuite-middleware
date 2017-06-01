@@ -742,7 +742,10 @@ public class DefaultEntityResolver implements EntityResolver {
         }
         List<Attendee> attendees = new ArrayList<Attendee>();
         for (CreateResult createResult : result.getCreations()) {
-            attendees.addAll(createResult.getCreatedEvent().getAttendees());
+            List<Attendee> newAttendees = createResult.getCreatedEvent().getAttendees();
+            if (null != newAttendees) {
+                attendees.addAll(newAttendees);
+            }
         }
         for (UpdateResult updateResult : result.getUpdates()) {
             attendees.addAll(updateResult.getAttendeeUpdates().getAddedItems());
