@@ -242,36 +242,29 @@ public class Utils {
      * @return The search term
      */
     public static SearchTerm<?> getFolderIdTerm(UserizedFolder folder) {
-        if (PublicType.getInstance().equals(folder.getType())) {
-            if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
-                return new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folder.getID()))
-                    .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
-            }
-            return getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folder.getID());
+        /*
+         * match the event's common folder identifier
+         */
+        SearchTerm<?> searchTerm = getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folder.getID());
+        if (false == PublicType.getInstance().equals(folder.getType())) {
+            /*
+             * for personal folders, also match against the corresponding attendee's folder
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
+                    .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
+                    .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID())));
         }
-        if (PrivateType.getInstance().equals(folder.getType())) {
-            return new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.ISNULL))
-                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0))))
-                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
-                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
+        if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
+            /*
+             * if only access to "own" objects; restrict to events created by the current session's user
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
         }
-        if (SharedType.getInstance().equals(folder.getType())) {
-            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.ISNULL))
-                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0))))
-                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
-                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
-            if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
-            }
-            return searchTerm;
-        }
-        throw new UnsupportedOperationException("Unknown folder type: " + folder.getType());
-
+        return searchTerm;
     }
 
     /**

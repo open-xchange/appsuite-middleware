@@ -960,9 +960,9 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether an event is a so-called <i>group-scheduled</> event or not.
+     * Gets a value indicating whether an event is a so-called <i>group-scheduled</i> event or not.
      * <p/>
-     * Group-schedule events are <i>meetings</i> with a defined organizer and one or more attendees, while not group-scheduled ones are
+     * Group-scheduled events are <i>meetings</i> with a defined organizer and one or more attendees, while not group-scheduled ones are
      * simple <i>published</i> events, or events in a single user's calendar only.
      *
      * @param event The event to check
