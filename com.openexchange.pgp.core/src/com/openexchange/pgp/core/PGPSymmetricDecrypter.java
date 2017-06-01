@@ -72,7 +72,7 @@ public class PGPSymmetricDecrypter extends PGPDecrypter {
      *
      * @param key The symmetric key data to use for decryption
      */
-    private PGPSymmetricDecrypter(final byte[] key) {
+    PGPSymmetricDecrypter(final byte[] key) {
         //Not dealing with asymmetric keys, because this class knows the symmetric key for decrypting the PGP data.
         super(new PGPKeyRetrievalStrategy() {
 
