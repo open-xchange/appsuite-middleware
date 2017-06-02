@@ -15,7 +15,7 @@ Although designed to fit a general purpose approach, at first routing "new mail"
 2. Install the "open-xchange-pns-impl" as well as "open-xchange-pns-transport-websockets" package
 3. Enable the `com.openexchange.pns.transport.websocket.enabled` property.
    That property is responsive to [config-cascade](http://oxpedia.org/wiki/index.php?title=ConfigCascade). Hence it can be specified for user, context, context-set or server scope.
-   For instance, create file `pns.properties` in Open-Xchange configuration directory (`/opt/open-xchange/etc`) and add line `com.openexchange.pns.transport.websocket.enabled=true=true` to globally enable Push via Web Sockets
+   For instance, create file `pns.properties` in Open-Xchange configuration directory (`/opt/open-xchange/etc`) and add line `com.openexchange.pns.transport.websocket.enabled=true` to globally enable Push via Web Sockets
 
 ## Configuration
 
