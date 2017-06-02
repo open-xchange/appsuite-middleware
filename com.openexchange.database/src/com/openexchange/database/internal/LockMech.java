@@ -50,18 +50,18 @@
 package com.openexchange.database.internal;
 
 /**
- * {@link LockMech}
+ * {@link LockMech} - Specifies how a locking for a certain database pool (and possibly a given schema) is supposed to be performed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum LockMech {
 
     /**
-     * Performs a row lock.
+     * Performs row locking through a <code>"SELECT ... FOR UPDATE"</code> statement using pool identifier (and possibly schema name) for fine-grained lock scope.
      */
     ROW_LOCK("row"),
     /**
-     * Performs a global lock.
+     * Performs global locking through attempting to increment a counter in a "semaphore" table:<br><code>"UPDATE ctx_per_schema_sem SET id=id+1"</code>
      */
     GLOBAL_LOCK("global");
 
