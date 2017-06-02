@@ -110,7 +110,7 @@ public class SchemaResult {
      * @return The cacheRollback or <code>null</code>
      */
     public SchemaCacheFinalize getCacheFinalize() {
-        return cacheResult.getFinalize();
+        return null == cacheResult ? null : cacheResult.getFinalize();
     }
 
 }
