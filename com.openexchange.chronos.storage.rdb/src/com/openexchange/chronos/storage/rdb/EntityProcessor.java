@@ -49,15 +49,31 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Map.Entry;
+import com.github.mangstadt.vinnie.SyntaxStyle;
+import com.github.mangstadt.vinnie.VObjectParameters;
+import com.github.mangstadt.vinnie.VObjectProperty;
+import com.github.mangstadt.vinnie.io.Context;
+import com.github.mangstadt.vinnie.io.SyntaxRules;
+import com.github.mangstadt.vinnie.io.VObjectDataAdapter;
+import com.github.mangstadt.vinnie.io.VObjectReader;
+import com.github.mangstadt.vinnie.io.VObjectWriter;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Reference;
 
 /**
  * {@link EntityProcessor}
@@ -98,13 +114,12 @@ public class EntityProcessor {
         if (null == entityResolver) {
             return event;
         }
-        if (event.containsOrganizer() && null != event.getOrganizer() && 0 < event.getOrganizer().getEntity()) {
+        if (event.containsOrganizer() && null != event.getOrganizer()) {
             /*
-             * store internal static resource identifier for internal organizer
+             * encode organizer
              */
             final Organizer storedOrganizer = new Organizer();
-            storedOrganizer.setEntity(event.getOrganizer().getEntity());
-            storedOrganizer.setUri(ResourceId.forUser(entityResolver.getContextID(), event.getOrganizer().getEntity()));
+            storedOrganizer.setUri(encode(event.getOrganizer()));
             event = new DelegatingEvent(event) {
 
                 @Override
@@ -114,6 +129,89 @@ public class EntityProcessor {
             };
         }
         return event;
+    }
+
+
+    private String encode(Organizer organizer) throws OXException {
+        if (null == organizer) {
+            return null;
+        }
+        CalendarUser sentBy = organizer.getSentBy();
+        String uri;
+        String cn;
+        if (0 < organizer.getEntity()) {
+            uri = ResourceId.forUser(entityResolver.getContextID(), organizer.getEntity());
+            if (null == sentBy) {
+                /*
+                 * no parameters needed, use uri as-is
+                 */
+                return uri;
+            }
+            cn = null;
+        } else {
+            uri = organizer.getUri();
+            cn = organizer.getCn();
+        }
+        /*
+         * encode as vobject
+         */
+        VObjectParameters parameters = new VObjectParameters();
+        if (null != sentBy) {
+            if (0 < sentBy.getEntity()) {
+                parameters.put("SENT-BY", ResourceId.forUser(entityResolver.getContextID(), organizer.getSentBy().getEntity()));
+            } else {
+                parameters.put("SENT-BY", organizer.getSentBy().getUri());
+            }
+        }
+        if (null != cn) {
+            parameters.put("CN", organizer.getCn());
+        }
+        VObjectProperty property = new VObjectProperty(null, "X", parameters, uri);
+        return writeVObjectProperty(property);
+    }
+
+    private Organizer decode(String value) throws OXException {
+        /*
+         * attempt to parse internal organizer directly
+         */
+        ResourceId resourceId = ResourceId.parse(value);
+        if (null != resourceId && CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
+            return entityResolver.applyEntityData(new Organizer(), resourceId.getEntity());
+        }
+        /*
+         * parse as vobject, otherwise
+         */
+        VObjectProperty property = parseVObjectProperty(value);
+        if (null == property) {
+            return null;
+        }
+        Organizer organizer = new Organizer();
+        resourceId = ResourceId.parse(property.getValue());
+        if (null != resourceId && CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
+            organizer = entityResolver.applyEntityData(organizer, resourceId.getEntity());
+        } else {
+            organizer.setUri(property.getValue());
+        }
+        VObjectParameters parameters = property.getParameters();
+        if (null != parameters) {
+            for (Entry<String, List<String>> parameter : parameters) {
+                String firstValue = parameter.getValue().get(0);
+                if ("SENT-BY".equals(parameter.getKey())) {
+                    CalendarUser sentBy = new CalendarUser();
+                    ResourceId sentByResourceId = ResourceId.parse(firstValue);
+                    if (null != sentByResourceId && CalendarUserType.INDIVIDUAL.equals(sentByResourceId.getCalendarUserType())) {
+                        sentBy = entityResolver.applyEntityData(sentBy, sentByResourceId.getEntity());
+                    } else {
+                        sentBy.setUri(firstValue);
+                    }
+                    organizer.setSentBy(sentBy);
+                }
+                if ("CN".equals(parameter.getKey())) {
+                    organizer.setCn(firstValue);
+                }
+            }
+        }
+        return organizer;
     }
 
     /**
@@ -150,12 +248,9 @@ public class EntityProcessor {
         }
         if (null != event.getOrganizer()) {
             /*
-             * apply entity data for internal organizers
+             * decode organizer
              */
-            ResourceId resourceId = ResourceId.parse(event.getOrganizer().getUri());
-            if (null != resourceId && CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
-                event.setOrganizer(entityResolver.applyEntityData(new Organizer(), resourceId.getEntity()));
-            }
+            event.setOrganizer(decode(event.getOrganizer().getUri()));
         }
         return event;
     }
@@ -177,6 +272,34 @@ public class EntityProcessor {
             attendee = entityResolver.applyEntityData(attendee);
         }
         return attendee;
+    }
+
+    private static String writeVObjectProperty(VObjectProperty property) throws OXException {
+        try (StringWriter stringWriter = new StringWriter(256);
+            VObjectWriter vObjectWriter = new VObjectWriter(stringWriter, SyntaxStyle.NEW)) {
+            vObjectWriter.setCaretEncodingEnabled(true);
+            vObjectWriter.writeProperty(property);
+            return stringWriter.toString();
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static VObjectProperty parseVObjectProperty(String value) throws OXException {
+        try (StringReader stringReader = new StringReader("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n" + value.trim() + "\r\nEND:VCALENDAR\r\n");
+            VObjectReader vObjectReader = new VObjectReader(stringReader, SyntaxRules.iCalendar())) {
+            final Reference<VObjectProperty> vObjectReference = new Reference<VObjectProperty>();
+            vObjectReader.parse(new VObjectDataAdapter() {
+
+                @Override
+                public void onProperty(VObjectProperty property, Context context) {
+                    vObjectReference.setValue(property);
+                }
+            });
+            return vObjectReference.getValue();
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        }
     }
 
 }
