@@ -1420,11 +1420,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 return SchemaResult.SCHEMA_NAME;
             case IN_MEMORY:
                 // Get the schema name advertised by cache
-                SchemaCacheResult cacheResult = inMemoryLookupSchema(configCon, db);
-                if (null != cacheResult) {
-                    return SchemaResult.inMemoryWith(cacheResult);
-                }
-                //$FALL-THROUGH$
+                return inMemoryLookupSchema(configCon, db);
             default:
                 automaticLookupSchema(configCon, db);
                 return SchemaResult.AUTOMATIC;
@@ -1441,7 +1437,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         db.setScheme(schemaName);
     }
 
-    private SchemaCacheResult inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
+    private SchemaResult inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
         // Get cache instance
         SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
         ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
@@ -1449,13 +1445,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // Get next known suitable schema
         int poolId = db.getId().intValue();
         SchemaCacheResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
+        if (SchemaCacheResult.DATABASE_EMPTY == schemaResult) {
+            // No schema at all... Need to create one anyway
+            automaticLookupSchema(configCon, db);
+            return SchemaResult.AUTOMATIC;
+        }
         if (null != schemaResult) {
             db.setScheme(schemaResult.getSchemaName());
-            return schemaResult;
+            return SchemaResult.inMemoryWith(schemaResult);
         }
 
         // No suitable schema known to cache. Therefore return null to initiate regular schema look-up/creation
-        return null;
+        automaticLookupSchema(configCon, db);
+        return SchemaResult.AUTOMATIC;
     }
 
     private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
