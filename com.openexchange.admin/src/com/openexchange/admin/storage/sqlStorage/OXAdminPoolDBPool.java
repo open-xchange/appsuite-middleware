@@ -334,7 +334,11 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try {
             getService().lock(con, writePoolId, schemaName);
         } catch (OXException e) {
-            log.error("Error locking context_server2db_pool table", e);
+            if (null == schemaName) {
+                log.error("Error locking database pool {}", writePoolId, e);
+            } else {
+                log.error("Error locking schema {} in database pool {}", schemaName, writePoolId, e);
+            }
             throw new PoolException(e.getMessage());
         }
     }

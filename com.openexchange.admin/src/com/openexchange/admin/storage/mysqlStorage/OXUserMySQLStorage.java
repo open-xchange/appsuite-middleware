@@ -1777,7 +1777,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
             log.error("OX Error", e);
             throw new StorageException(e.toString());
@@ -1899,10 +1899,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             mass.insertMailAccount(account, userId, context, null, con);
         } catch (final OXException e) {
             log.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final SQLException e) {
             log.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         }
     }
 

@@ -126,7 +126,7 @@ public class InMemorySchemaCache implements SchemaCache {
             if (false == isAccessible(schemaInfo)) {
                 Map<String, Integer> contextCountPerSchema = closure.getContextCountPerSchema(poolId, maxContexts);
                 if (contextCountPerSchema.isEmpty()) {
-                    // No schemas at all
+                    // No schemas available
                     return SchemaCacheResult.DATABASE_EMPTY;
                 }
                 schemaInfo.initializeWith(contextCountPerSchema);

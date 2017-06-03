@@ -82,6 +82,8 @@ import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.ServiceException;
@@ -1183,104 +1185,133 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private Context writeContext(final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        Connection oxCon = null;
-        boolean rollback = false;
         try {
-            oxCon = cache.getConnectionForContext(contextId);
-            oxCon.setAutoCommit(false);
-            rollback = true;
-
-            contextCommon.initSequenceTables(contextId, oxCon);
-            contextCommon.initReplicationMonitor(oxCon, contextId);
-            contextCommon.initFilestoreUsage(oxCon, contextId);
-
-            updateDynamicAttributes(oxCon, ctx);
-
-            final int groupId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
-            final int adminId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
-            final int contactId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.CONTACT, oxCon);
-            int uidNumber = -1;
-            if (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
-                uidNumber = IDGenerator.getId(contextId, com.openexchange.groupware.Types.UID_NUMBER, oxCon);
-            }
-            int gidNumber = -1;
-            if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
-                gidNumber = IDGenerator.getId(contextId, com.openexchange.groupware.Types.GID_NUMBER, oxCon);
-            }
-
-            // create group users for context
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            adminUser.setContextadmin(true);
-            tool.checkCreateUserData(ctx, adminUser);
-            final String groupName = translateGroupName(adminUser);
-            contextCommon.createStandardGroupForContext(contextId, oxCon, groupName, groupId, gidNumber);
-            final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
-            oxs.create(ctx, adminUser, access, oxCon, adminId, contactId, uidNumber);
-
-            // create system folder for context
-            // get lang and displayname of admin
-            String display = String.valueOf(adminUser.getId());
-            final String displayName = adminUser.getDisplay_name();
-            if (null != displayName) {
-                display = displayName;
-            } else {
-                final String givenName = adminUser.getGiven_name();
-                final String surname = adminUser.getSur_name();
-                if (null != givenName) {
-                    // SET THE DISPLAYNAME AS NEEDED BY CUSTOMER, SHOULD BE
-                    // DEFINED ON SERVER SIDE
-                    display = givenName + " " + surname;
-                } else {
-                    display = surname;
-                }
-                adminUser.setDisplay_name(display);
-            }
-            final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-            oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
-
-            oxCon.commit();
-            rollback = false;
-
-            ctx.setEnabled(Boolean.TRUE);
-            adminUser.setId(I(adminId));
-            return ctx;
-        } catch (final DataTruncation e) {
-            LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
-            throw AdminCache.parseDataTruncation(e);
-        } catch (final OXException e) {
-            LOG.error("Error", e);
-            throw new StorageException(e.toString());
-        } catch (final StorageException e) {
-            LOG.error("Storage Error", e);
-            throw e;
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } catch (final InvalidDataException e) {
-            LOG.error("InvalidData Error", e);
-            throw new StorageException(e);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        } catch (final EnforceableDataObjectException e) {
-            LOG.error("Enforceable DataObject Error", e);
-            throw new StorageException(e);
-        } catch (final RuntimeException e) {
-            LOG.error("Internal Error", e);
-            throw new StorageException("Internal server error occured", e);
-        } finally {
-            if (rollback) {
-                rollback(oxCon);
-            }
-            autocommit(oxCon);
-            if (null != oxCon) {
+            DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                Connection oxCon;
                 try {
-                    cache.pushConnectionForContext(contextId, oxCon);
-                } catch (final PoolException ecp) {
-                    LOG.error("Error pushing ox write connection to pool!", ecp);
+                    oxCon = cache.getConnectionForContext(contextId);
+                } catch (PoolException e) {
+                    LOG.error("Pool Error", e);
+                    throw new StorageException(e);
                 }
-            }
+
+                condition.resetTransactionRollbackException();
+                boolean rollback = false;
+                try {
+                    DBUtils.startTransaction(oxCon);
+                    rollback = true;
+
+                    contextCommon.initSequenceTables(contextId, oxCon);
+                    contextCommon.initReplicationMonitor(oxCon, contextId);
+                    contextCommon.initFilestoreUsage(oxCon, contextId);
+
+                    updateDynamicAttributes(oxCon, ctx);
+
+                    final int groupId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
+                    final int adminId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
+                    final int contactId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.CONTACT, oxCon);
+                    int uidNumber = -1;
+                    if (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
+                        uidNumber = IDGenerator.getId(contextId, com.openexchange.groupware.Types.UID_NUMBER, oxCon);
+                    }
+                    int gidNumber = -1;
+                    if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
+                        gidNumber = IDGenerator.getId(contextId, com.openexchange.groupware.Types.GID_NUMBER, oxCon);
+                    }
+
+                    // create group users for context
+                    final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+                    adminUser.setContextadmin(true);
+                    tool.checkCreateUserData(ctx, adminUser);
+                    final String groupName = translateGroupName(adminUser);
+                    contextCommon.createStandardGroupForContext(contextId, oxCon, groupName, groupId, gidNumber);
+                    final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
+                    oxs.create(ctx, adminUser, access, oxCon, adminId, contactId, uidNumber);
+
+                    // create system folder for context
+                    // get lang and displayname of admin
+                    String display = String.valueOf(adminUser.getId());
+                    final String displayName = adminUser.getDisplay_name();
+                    if (null != displayName) {
+                        display = displayName;
+                    } else {
+                        final String givenName = adminUser.getGiven_name();
+                        final String surname = adminUser.getSur_name();
+                        if (null != givenName) {
+                            // SET THE DISPLAYNAME AS NEEDED BY CUSTOMER, SHOULD BE
+                            // DEFINED ON SERVER SIDE
+                            display = givenName + " " + surname;
+                        } else {
+                            display = surname;
+                        }
+                        adminUser.setDisplay_name(display);
+                    }
+                    final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
+                    oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
+
+                    oxCon.commit();
+                    rollback = false;
+
+                    ctx.setEnabled(Boolean.TRUE);
+                    adminUser.setId(I(adminId));
+                    return ctx;
+                } catch (final DataTruncation e) {
+                    LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
+                    throw AdminCache.parseDataTruncation(e);
+                } catch (final OXException e) {
+                    LOG.error("Error", e);
+                    throw new StorageException(e.toString());
+                } catch (final StorageException e) {
+                    SQLException sqle = DBUtils.extractSqlException(e);
+                    if (!condition.isFailedTransactionRollback(sqle)) {
+                        LOG.error("Storage Error", e);
+                        throw e;
+                    }
+                } catch (final SQLException e) {
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        LOG.error("SQL Error", e);
+                        throw new StorageException(e);
+                    }
+                } catch (final InvalidDataException e) {
+                    LOG.error("InvalidData Error", e);
+                    throw new StorageException(e);
+                } catch (final EnforceableDataObjectException e) {
+                    LOG.error("Enforceable DataObject Error", e);
+                    throw new StorageException(e);
+                } catch (final RuntimeException e) {
+                    LOG.error("Internal Error", e);
+                    throw new StorageException("Internal server error occured", e);
+                } finally {
+                    if (rollback) {
+                        rollback(oxCon);
+                    }
+                    autocommit(oxCon);
+                    if (null != oxCon) {
+                        try {
+                            cache.pushConnectionForContext(contextId, oxCon);
+                        } catch (final PoolException ecp) {
+                            LOG.error("Error pushing ox write connection to pool!", ecp);
+                        }
+                    }
+                }
+            } while (retry(condition));
+        } catch (final SQLException sql) {
+            throw new StorageException(sql.toString(), sql);
         }
+
+        // Cannot occur
+        return null;
+    }
+
+    private boolean retry(DBUtils.TransactionRollbackCondition condition) throws SQLException {
+        boolean retry = condition.checkRetry();
+        if (retry) {
+            int retryCount = condition.getCount();
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+        }
+        return retry;
     }
 
     private void updateDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException {
@@ -1447,7 +1478,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         SchemaCacheResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
         if (SchemaCacheResult.DATABASE_EMPTY == schemaResult) {
             // No schema at all... Need to create one anyway
-            automaticLookupSchema(configCon, db);
+            autoFindOrCreateSchema(configCon, db, true);
             return SchemaResult.AUTOMATIC;
         }
         if (null != schemaResult) {
@@ -1461,7 +1492,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
-        autoFindOrCreateSchema(configCon, db);
+        autoFindOrCreateSchema(configCon, db, false);
     }
 
     /**
@@ -1469,9 +1500,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      *
      * @param configCon The connection to configDb
      * @param db The database to get the schema for
+     * @param forceCreate <code>true</code> to enforce schema creation <b>w/o</b> checking if an unfilled one is available; otherwise <code>false</code> to check prior to creation
      * @throws StorageException If a suitable schema cannot be found
      */
-    private void autoFindOrCreateSchema(Connection configCon, Database db) throws StorageException {
+    private void autoFindOrCreateSchema(Connection configCon, Database db, boolean forceCreate) throws StorageException {
         // Clear schema cache once "live" schema information is requested
         {
             SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
@@ -1481,7 +1513,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // Freshly determine the next schema to use
-        String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
+        String schemaName = forceCreate ? null : getNextUnfilledSchemaFromDB(db.getId(), configCon);
         if (schemaName == null) {
             int schemaUnique;
             try {

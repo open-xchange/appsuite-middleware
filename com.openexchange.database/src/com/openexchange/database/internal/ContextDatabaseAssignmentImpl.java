@@ -453,11 +453,12 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                     stmt = con.prepareStatement("SELECT 1 FROM dbschema_lock WHERE db_pool_id=? AND schemaname=? FOR UPDATE");
                     stmt.setInt(1, writePoolId);
                     stmt.setString(2, schemaName);
+                    stmt.executeQuery();
                 } else {
                     stmt = con.prepareStatement("SELECT 1 FROM dbpool_lock WHERE db_pool_id=? FOR UPDATE");
                     stmt.setInt(1, writePoolId);
+                    stmt.executeQuery();
                 }
-                stmt.executeQuery();
                 break;
             }
             }
