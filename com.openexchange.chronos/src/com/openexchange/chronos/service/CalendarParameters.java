@@ -167,6 +167,17 @@ public interface CalendarParameters {
     static final String PARAMETER_IGNORE = "ignore";
 
     /**
+     * {@link Boolean}
+     * <p/>
+     * Indicates whether the current calendar user should be added as default attendee to events implicitly or not, independently of the
+     * event being <i>group-scheduled</i> or not.
+     * <p/>
+     * If set to <code>true</code>, an attendee representing the current calendar user as well as a corresponding organizer will be
+     * implicitly added by the service during event creation, and an attempt to remove this default attendee will be ignored silently.
+     */
+    static final String PARAMETER_DEFAULT_ATTENDEE = "default_attendee";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set

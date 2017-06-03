@@ -129,11 +129,11 @@ public class SearchPerformer extends AbstractQueryPerformer {
      */
     public List<Event> perform(String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException {
         List<UserizedFolder> folders = getFolders(folderIDs);
-        EventField[] fields = getFields(session);
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         SearchOptions sortOptions = new SearchOptions(session);
         List<Event> events = new ArrayList<Event>();
         List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
-        for (Event event : readAdditionalEventData(foundEvents, -1, Utils.getFields(session, EventField.ATTENDEES))) {
+        for (Event event : readAdditionalEventData(foundEvents, -1, fields)) {
             List<UserizedFolder> foldersForEvent = getFoldersForEvent(folders, event);
             if (1 == foldersForEvent.size()) {
                 events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false));

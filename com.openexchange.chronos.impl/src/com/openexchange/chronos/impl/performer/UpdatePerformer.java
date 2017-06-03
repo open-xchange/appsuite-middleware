@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
@@ -250,10 +251,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * update event data
          */
-        if (null != updatedEvent.getAttendees()) {
-            session.getEntityResolver().prepare(updatedEvent.getAttendees());
+        session.getEntityResolver().prepare(updatedEvent.getAttendees());
+        List<Attendee> newAttendees = updatedEvent.containsAttendees() ?
+            AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges() : originalEvent.getAttendees();
+        if (newAttendees.isEmpty()) {
+            /*
+             * no group-scheduled event (any longer), remove
+             */
+
         }
         ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, ignoredFields);
+
         if (null != eventUpdate && 0 < eventUpdate.getUpdatedFields().size()) {
             /*
              * check permissions & conflicts
@@ -262,13 +270,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (needsConflictCheck(eventUpdate)) {
                 Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
                 changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
-                List<Attendee> changedAttendees;
-                if (updatedEvent.containsAttendees()) {
-                    changedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
-                } else {
-                    changedAttendees = originalEvent.getAttendees();
-                }
-                Check.noConflicts(storage, session, changedEvent, changedAttendees);
+                Check.noConflicts(storage, session, changedEvent, newAttendees);
             }
             if (needsSequenceNumberIncrement(eventUpdate)) {
                 /*
@@ -317,11 +319,19 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null != alarmsByUserID && 0 < alarmsByUserID.size()) {
                 Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
                 changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
-                for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-                    List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
+                if (isGroupScheduled(originalEvent)) {
+                    for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                        List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
+                        if (null != alarms && 0 < alarms.size()) {
+                            changedEvent.setFolderId(AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID == attendee.getFolderID() ? changedEvent.getPublicFolderId() : attendee.getFolderID());
+                            storage.getAlarmStorage().updateAlarms(changedEvent, attendee.getEntity(), alarms);
+                        }
+                    }
+                } else {
+                    List<Alarm> alarms = alarmsByUserID.get(I(calendarUser.getId()));
                     if (null != alarms && 0 < alarms.size()) {
-                        changedEvent.setFolderId(AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID == attendee.getFolderID() ? changedEvent.getPublicFolderId() : attendee.getFolderID());
-                        storage.getAlarmStorage().updateAlarms(changedEvent, attendee.getEntity(), alarms);
+                        changedEvent.setFolderId(changedEvent.getPublicFolderId());
+                        storage.getAlarmStorage().updateAlarms(changedEvent, calendarUser.getId(), alarms);
                     }
                 }
             }

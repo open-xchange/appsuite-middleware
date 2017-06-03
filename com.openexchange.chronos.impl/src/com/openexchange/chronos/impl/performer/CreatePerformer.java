@@ -110,16 +110,33 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          */
         requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         /*
-         * prepare event & attendee data for insert, check for conflicts
+         * prepare event & attendee data for insert, assign parent folder
          */
         Event newEvent = prepareEvent(event);
         List<Attendee> newAttendees = prepareAttendees(event.getAttendees());
+        if (null == newAttendees || 0 == newAttendees.size()) {
+            /*
+             * not group-scheduled event (only on a single user's calendar), apply parent folder identifier
+             */
+            newEvent.setPublicFolderId(folder.getID());
+        } else {
+            /*
+             * group-scheduled event, assign organizer and dynamic parent-folder identifier (for non-public folders)
+             */
+            newEvent.setOrganizer(prepareOrganizer(event.getOrganizer()));
+            newEvent.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
+        }
+        /*
+         * check for conflicts
+         */
         Check.noConflicts(storage, session, newEvent, newAttendees);
         /*
          * insert event, attendees, attachments & alarms of user
          */
         storage.getEventStorage().insertEvent(newEvent);
-        storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
+        if (null != newAttendees && 0 < newAttendees.size()) {
+            storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
+        }
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             newEvent.setFolderId(folder.getID());
             insertAlarms(newEvent, calendarUser.getId(), Check.alarmsAreValid(event.getAlarms()), false);
@@ -141,7 +158,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * identifiers
          */
         event.setId(storage.getEventStorage().nextId());
-        event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
         event.setSequence(0);
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
             event.setUid(UUID.randomUUID().toString());
@@ -149,11 +165,10 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             event.setUid(Check.uidIsUnique(storage, eventData));
         }
         /*
-         * creation/modification metadata, organizer
+         * creation/modification metadata
          */
         Consistency.setCreated(timestamp, event, calendarUser.getId());
         Consistency.setModified(timestamp, event, calendarUser.getId());
-        event.setOrganizer(prepareOrganizer(eventData.getOrganizer()));
         /*
          * date/time related properties
          */
@@ -214,14 +229,14 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             }
         } else {
             /*
-             * prepare default organizer for calendar user
+             * prepare a default organizer for calendar user
              */
             organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getId());
         }
         /*
          * apply "sent-by" property if someone is acting on behalf of the calendar user
          */
-        if (calendarUser.getId() != session.getUserId()) {
+        if (null != organizer && calendarUser.getId() != session.getUserId()) {
             organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return organizer;

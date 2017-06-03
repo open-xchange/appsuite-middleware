@@ -463,7 +463,7 @@ public class Check {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param event The event being inserted/updated
-     * @param attendees The event's list of attendees
+     * @param attendees The event's list of attendees, or <code>null</code> in case of a not group-scheduled event
      * @throws OXException {@link CalendarExceptionCodes#EVENT_CONFLICTS}, {@link CalendarExceptionCodes#HARD_EVENT_CONFLICTS}
      */
     public static void noConflicts(CalendarStorage storage, CalendarSession session, Event event, List<Attendee> attendees) throws OXException {

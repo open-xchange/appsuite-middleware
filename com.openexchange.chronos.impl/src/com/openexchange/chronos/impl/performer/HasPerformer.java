@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
@@ -113,10 +114,10 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
         /*
          * search overlapping events
          */
-        EventField[] fields = Utils.getFields(Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]), EventField.ATTENDEES);
+        EventField[] fields = Utils.getFields(Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]), EventField.ORGANIZER, EventField.ATTENDEES);
         List<Attendee> attendees = Collections.singletonList(session.getEntityResolver().applyEntityData(new Attendee(), userID));
         List<Event> events = storage.getEventStorage().searchOverlappingEvents(attendees, true, new SearchOptions().setRange(rangeStart, rangeEnd), fields);
-        readAdditionalEventData(events, -1, new EventField[] { EventField.ATTENDEES });
+        readAdditionalEventData(events, -1, fields);
         /*
          * step through events day-wise & check for present events
          */
@@ -131,9 +132,13 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
             boolean hasEvents = false;
             for (int i = 0; i < events.size() && false == hasEvents; i++) {
                 Event event = events.get(i);
-                Attendee attendee = find(event.getAttendees(), userID);
-                if (null == attendee || ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
-                    continue; // skip
+                if (isGroupScheduled(event)) {
+                    Attendee attendee = find(event.getAttendees(), userID);
+                    if (null == attendee || ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
+                        continue; // skip if user does not attend
+                    }
+                } else if (userID != event.getCreatedBy()) {
+                    continue; // skip if user doesn't match event owner
                 }
                 if (isSeriesMaster(event)) {
                     long duration = event.getEndDate().getTime() - event.getStartDate().getTime();

@@ -95,7 +95,8 @@ public class GetPerformer extends AbstractQueryPerformer {
      * @return The loaded event
      */
     public Event perform(UserizedFolder folder, String objectID) throws OXException {
-        Event event = storage.getEventStorage().loadEvent(objectID, getFields(session));
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+        Event event = storage.getEventStorage().loadEvent(objectID, fields);
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(objectID);
         }
@@ -104,7 +105,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         }
-        readAdditionalEventData(Collections.singletonList(event), getCalendarUser(folder).getId(), getFields(session, EventField.ATTENDEES));
+        readAdditionalEventData(Collections.singletonList(event), getCalendarUser(folder).getId(), fields);
         Check.eventIsInFolder(event, folder);
         event.setFolderId(folder.getID());
         if (isSeriesMaster(event)) {

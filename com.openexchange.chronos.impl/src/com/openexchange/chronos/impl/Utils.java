@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
@@ -149,6 +150,19 @@ public class Utils {
      */
     public static EventField[] getFields(CalendarParameters parameters, EventField... requiredFields) {
         return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), requiredFields);
+    }
+
+    /**
+     * Gets a value indicating whether the current calendar user should be added as default attendee to events implicitly or not,
+     * independently of the event being group-scheduled or not, based on the value of {@link CalendarParameters#PARAMETER_DEFAULT_ATTENDEE}
+     * in the supplied parameters.
+     *
+     * @param parameters The calendar parameters to evaluate
+     * @return <code>true</code> the current calendar user should be added as default attendee to events implicitly, <code>false</code>, otherwise
+     * @see CalendarParameters#PARAMETER_DEFAULT_ATTENDEE
+     */
+    public static boolean isEnforceDefaultAttendee(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.TRUE).booleanValue();
     }
 
     /**
@@ -448,6 +462,17 @@ public class Utils {
     }
 
     /**
+     * Gets a user.
+     *
+     * @param session The calendar session
+     * @param userId The identifier of the user to get
+     * @return The user
+     */
+    public static User getUser(CalendarSession session, int userId) throws OXException {
+        return Services.getService(UserService.class).getUser(userId, session.getContextId());
+    }
+
+    /**
      * Finds a specific event identified by its object-identifier in a collection.
      *
      * @param events The events to search in
@@ -536,7 +561,7 @@ public class Utils {
      * @return <code>true</code> if the event <i>is</i> in the folder, <code>false</code>, otherwise
      */
     public static boolean isInFolder(Event event, UserizedFolder folder) throws OXException {
-        if (PublicType.getInstance().equals(folder.getType())) {
+        if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event)) {
             return folder.getID().equals(event.getPublicFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
@@ -788,11 +813,19 @@ public class Utils {
         };
     }
 
-    private static List<UserizedFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
+    /**
+     * Gets all calendar folders of certain types  accessible by the current sesssion's user.
+     *
+     * @param session The underlying calendar session
+     * @param types The folder types to include
+     * @return The folders, or an empty list if there are none
+     */
+    public static List<UserizedFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
         List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
         FolderService folderService = Services.getService(FolderService.class);
         for (Type type : types) {
-            FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), initDecorator(session));
+            FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(
+                FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), initDecorator(session));
             UserizedFolder[] folders = response.getResponse();
             if (null != folders && 0 < folders.length) {
                 visibleFolders.addAll(Arrays.asList(folders));

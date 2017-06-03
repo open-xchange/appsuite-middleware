@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.getFields;
@@ -144,7 +145,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             eventsPerAttendee.put(attendee, new ArrayList<Event>());
         }
         SearchOptions searchOptions = new SearchOptions(session).setRange(from, until);
-        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
+        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendees, true, searchOptions, fields);
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
@@ -158,11 +159,25 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 continue; // exclude events classified as 'private' (but keep 'confidential' ones)
             }
             for (Attendee attendee : attendees) {
-                Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);
-                if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
-                    continue;
+                String folderID;
+                if (isGroupScheduled(eventInPeriod)) {
+                    /*
+                     * include if attendee does attend
+                     */
+                    Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);
+                    if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
+                        continue;
+                    }
+                    folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod) : null;
+                } else {
+                    /*
+                     * include if attendee matches event owner
+                     */
+                    if (attendee.getEntity() != eventInPeriod.getCreatedBy()) {
+                        continue;
+                    }
+                    folderID = eventInPeriod.getPublicFolderId();
                 }
-                String folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod) : null;
                 if (isSeriesMaster(eventInPeriod)) {
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
                     while (iterator.hasNext()) {

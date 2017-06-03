@@ -53,7 +53,9 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -206,19 +208,22 @@ public class AttendeeHelper {
         session.getEntityResolver().prefetch(requestedAttendees);
         requestedAttendees = session.getEntityResolver().prepare(requestedAttendees);
         /*
-         * always add attendee for default calendar user in folder
+         * always start with attendee for default calendar user in folder
          */
         Attendee defaultAttendee = getDefaultAttendee(session, folder, requestedAttendees);
         attendeesToInsert.add(defaultAttendee);
-        if (null == requestedAttendees || 0 == requestedAttendees.size()) {
-            return;// no further attendees
+        if (null != requestedAttendees && 0 < requestedAttendees.size()) {
+            /*
+             * prepare & add all further attendees
+             */
+            List<Attendee> attendeeList = new ArrayList<Attendee>();
+            attendeeList.add(defaultAttendee);
+            attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
         }
         /*
-         * prepare & add all further attendees
+         * apply proper default attendee handling afterwards
          */
-        List<Attendee> attendeeList = new ArrayList<Attendee>();
-        attendeeList.add(defaultAttendee);
-        attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
+        handleDefaultAttendee(isEnforceDefaultAttendee(session));
     }
 
     private void processUpdatedEvent(List<Attendee> updatedAttendees) throws OXException {
@@ -231,8 +236,10 @@ public class AttendeeHelper {
          */
         List<Attendee> removedAttendees = attendeeDiff.getRemovedItems();
         for (Attendee removedAttendee : removedAttendees) {
-            if (false == PublicType.getInstance().equals(folder.getType()) && removedAttendee.getEntity() == folder.getCreatedBy()) {
-                // preserve calendar user in personal folders
+            if (isEnforceDefaultAttendee(session) && false == PublicType.getInstance().equals(folder.getType()) && removedAttendee.getEntity() == folder.getCreatedBy()) {
+                /*
+                 * preserve default calendar user in personal folders
+                 */
                 LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(removedAttendee.getEntity()), folder);
                 continue;
             }
@@ -271,6 +278,10 @@ public class AttendeeHelper {
          * prepare & add all new attendees
          */
         attendeesToInsert.addAll(prepareNewAttendees(attendeeList, attendeeDiff.getAddedItems()));
+        /*
+         * apply proper default attendee handling afterwards
+         */
+        handleDefaultAttendee(isEnforceDefaultAttendee(session));
     }
 
     private void processDeletedEvent() {
@@ -399,6 +410,53 @@ public class AttendeeHelper {
             return attendee;
         }
         return null;
+    }
+
+    /**
+     * Processes the lists of attendees to update/delete/insert in terms of the configured handling of the implicit attendee for the
+     * actual calendar user.
+     * <p/>
+     * If the default attendee is enforced, this method ensure that the calendar user attendee is always present in
+     * personal calendar folders. Otherwise, if the actual calendar user would be the last one in the resulting attendee list, this
+     * attendee is removed.
+     *
+     * @param enforceDefaultAttendee <code>true</code> the current calendar user should be added as default attendee to events implicitly,
+     *            <code>false</code>, otherwise
+     */
+    private void handleDefaultAttendee(boolean enforceDefaultAttendee) throws OXException {
+        /*
+         * check if resulting attendees would lead to a "group-scheduled" event or not
+         */
+        int calendarUserId = getCalendarUser(folder).getId();
+        List<Attendee> attendees = previewChanges();
+        if (enforceDefaultAttendee) {
+            /*
+             * ensure the calendar user is always present in personal calendar folders
+             */
+            if (false == PublicType.getInstance().equals(folder.getType()) && false == contains(attendees, calendarUserId)) {
+                Attendee defaultAttendee = find(attendeesToDelete, calendarUserId);
+                if (null != defaultAttendee) {
+                    LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(calendarUserId), folder);
+                    attendeesToDelete.remove(defaultAttendee);
+                } else {
+                    LOG.info("Implicitly adding default calendar user {} in personal folder {}.", I(calendarUserId), folder);
+                    attendeesToInsert.add(getDefaultAttendee(session, folder, null));
+                }
+            }
+        } else if (1 == attendees.size() && isLastUserAttendee(attendees, calendarUserId)) {
+            /*
+             * event is not (or no longer) a group-scheduled one, remove default attendee
+             */
+            Attendee defaultAttendee = find(attendeesToInsert, calendarUserId);
+            if (null != defaultAttendee) {
+                attendeesToInsert.remove(defaultAttendee);
+            }
+            defaultAttendee = find(attendeesToUpdate, calendarUserId);
+            if (null != defaultAttendee) {
+                attendeesToUpdate.remove(defaultAttendee);
+                attendeesToDelete.add(defaultAttendee);
+            }
+        }
     }
 
 }

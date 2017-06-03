@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -130,9 +131,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     private void deleteEvent(Event originalEvent) throws OXException {
-        if (isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
+        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
             /*
-             * deletion by organizer / last user attendee
+             * deletion of not group-scheduled event / by organizer / last user attendee
              */
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent);
@@ -166,9 +167,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     private void deleteRecurrence(Event originalEvent, RecurrenceId recurrenceID) throws OXException {
-        if (isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
+        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
             /*
-             * deletion as organizer / last user attendee
+             * deletion of not group-scheduled event / by organizer / last user attendee
              */
             if (isSeriesMaster(originalEvent)) {
                 if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {

@@ -122,11 +122,12 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
         /*
          * perform search & filter the results based on user's access permissions
          */
-        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
         if (null == changeExceptions || 0 == changeExceptions.size()) {
             return Collections.emptyList();
         }
-        readAdditionalEventData(changeExceptions, getCalendarUser(folder).getId(), getFields(session, EventField.ATTENDEES));
+        readAdditionalEventData(changeExceptions, getCalendarUser(folder).getId(), fields);
         for (Iterator<Event> iterator = changeExceptions.iterator(); iterator.hasNext();) {
             if (false == Utils.isInFolder(iterator.next(), folder)) {
                 iterator.remove();

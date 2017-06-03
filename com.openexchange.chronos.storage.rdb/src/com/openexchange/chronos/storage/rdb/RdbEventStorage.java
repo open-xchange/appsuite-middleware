@@ -455,9 +455,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         if (null != entities && 0 < entities.length) {
             if (1 == entities.length) {
-                stringBuilder.append(" AND a.entity=?");
+//                stringBuilder.append(" AND a.entity=?");
+                stringBuilder.append(" AND ((e.folder IS NULL AND a.entity=?) OR (e.folder IS NOT NULL AND e.createdBy=?))");
             } else {
-                stringBuilder.append(" AND a.entity IN (").append(EventMapper.getParameters(entities.length)).append(')');
+//                stringBuilder.append(" AND a.entity IN (").append(EventMapper.getParameters(entities.length)).append(')');
+                stringBuilder.append(" AND ((e.folder IS NULL AND a.entity IN (").append(EventMapper.getParameters(entities.length)).append(")) OR ")
+                    .append("(e.folder IS NOT NULL AND e.createdBy IN (").append(EventMapper.getParameters(entities.length)).append("))");
             }
         }
         stringBuilder.append(getSortOptions(searchOptions, "e.")).append(';');
@@ -474,6 +477,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             if (null != entities && 0 < entities.length) {
                 for (int entity : entities) {
+                    stmt.setInt(parameterIndex++, entity);
                     stmt.setInt(parameterIndex++, entity);
                 }
             }

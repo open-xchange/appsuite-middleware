@@ -315,7 +315,7 @@ public class CalendarUtils {
      */
     public static boolean isLastUserAttendee(List<Attendee> attendees, int userID) {
         List<Attendee> userAttendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
-        return 1 == userAttendees.size() && userID == userAttendees.get(0).getEntity();
+        return null != userAttendees && 1 == userAttendees.size() && userID == userAttendees.get(0).getEntity();
     }
 
     /**
@@ -635,11 +635,11 @@ public class CalendarUtils {
      * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
      *            or <code>null</code> to not filter by internal/external
      * @param cuTypes The {@link CalendarUserType}s to consider, or <code>null</code> to not filter by calendar user type
-     * @return The filtered attendees
+     * @return The filtered attendees, or an empty list if there were no matching attendees
      */
     public static List<Attendee> filter(List<Attendee> attendees, Boolean internal, CalendarUserType... cuTypes) {
         if (null == attendees) {
-            return null;
+            return Collections.emptyList();
         }
         List<Attendee> filteredAttendees = new ArrayList<Attendee>(attendees.size());
         for (Attendee attendee : attendees) {

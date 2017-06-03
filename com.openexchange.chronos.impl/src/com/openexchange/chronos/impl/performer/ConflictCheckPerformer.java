@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.add;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
@@ -126,7 +127,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * Performs the conflict check.
      *
      * @param event The event being inserted/updated
-     * @param attendees The event's list of attendees
+     * @param attendees The event's list of attendees, or <code>null</code> in case of a not group-scheduled event
      * @return The conflicts, or an empty list if there are none
      */
     public List<EventConflict> perform(Event event, List<Attendee> attendees) throws OXException {
@@ -404,9 +405,13 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                     conflictingAttendees.add(0, matchingAttendee);
                 }
             } else if (maxAttendeesPerConflict > conflictingAttendees.size()) {
-                Attendee matchingAttendee = find(allAttendees, checkedAttendee);
-                if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
-                    conflictingAttendees.add(matchingAttendee);
+                if (isGroupScheduled(conflictingEvent)) {
+                    Attendee matchingAttendee = find(allAttendees, checkedAttendee);
+                    if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
+                        conflictingAttendees.add(matchingAttendee);
+                    }
+                } else if (checkedAttendee.getEntity() == conflictingEvent.getCreatedBy()) {
+                    conflictingAttendees.add(session.getEntityResolver().prepareUserAttendee(checkedAttendee.getEntity()));
                 }
             }
         }
@@ -442,7 +447,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (null != conflictingEvent.getPublicFolderId()) {
             Permission permission = getFolderPermissions().get(conflictingEvent.getPublicFolderId());
             return null != permission && Permission.READ_ALL_OBJECTS <= permission.getReadPermission();
-        } else {
+        } else if (isGroupScheduled(conflictingEvent)) {
             for (Attendee attendee : conflictingEvent.getAttendees()) {
                 if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
                     Permission permission = getFolderPermissions().get(attendee.getFolderID());
@@ -451,8 +456,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                     }
                 }
             }
-            return false;
         }
+        return false;
     }
 
     private Map<String, Permission> getFolderPermissions() throws OXException {
@@ -475,7 +480,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * </ul>
      *
      * @param event The event being inserted/updated
-     * @param attendees The event's list of attendees
+     * @param attendees The event's list of attendees, or <code>null</code> in case of a not group-scheduled event
      * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
      */
     private List<Attendee> getAttendeesToCheck(Event event, List<Attendee> attendees) throws OXException {
@@ -484,6 +489,15 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         }
         boolean includeUserAttendees = false == isIgnoreConflicts(session);
         List<Attendee> checkedAttendees = new ArrayList<Attendee>();
+        if (null == attendees || attendees.isEmpty()) {
+            /*
+             * assume simple, not group-scheduled event
+             */
+            if (false == includeUserAttendees) {
+                return Collections.emptyList();
+            }
+            return Collections.singletonList(session.getEntityResolver().prepareUserAttendee(event.getCreatedBy()));
+        }
         for (Attendee attendee : attendees) {
             if (isInternal(attendee) && (includeUserAttendees || CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType()))) {
                 checkedAttendees.add(attendee);
