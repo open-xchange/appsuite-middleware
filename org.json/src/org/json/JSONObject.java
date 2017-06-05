@@ -221,62 +221,7 @@ public class JSONObject extends AbstractJSONValue {
      * @throws JSONException If there is a syntax error in the source string.
      */
     public JSONObject(final JSONTokener x) throws JSONException {
-        this();
-        parseJSONTokener(x);
-    }
-
-    /**
-     * Parses a JSONTokener and fills its values into this JSONObject
-     *
-     * @param tokener A JSONTokener object containing the source string
-     * @throws JSONException
-     */
-    private final void parseJSONTokener(final JSONTokener tokener) throws JSONException {
-        char c;
-        String key;
-        if (tokener.nextClean() != '{') {
-            throw tokener.syntaxError("A JSONObject text must begin with '{'");
-        }
-        for (;;) {
-            c = tokener.nextClean();
-            switch (c) {
-            case 0:
-                throw tokener.syntaxError("A JSONObject text must end with '}'");
-            case '}':
-                return;
-            default:
-                tokener.back();
-                key = tokener.nextValue().toString();
-            }
-            /*
-             * The key is followed by ':'. We will also tolerate '=' or '=>'.
-             */
-            c = tokener.nextClean();
-            if (c == '=') {
-                if (tokener.next() != '>') {
-                    tokener.back();
-                }
-            } else if (c != ':') {
-                throw tokener.syntaxError("Expected a ':' after a key");
-            }
-            put(key, tokener.nextValue());
-            /*
-             * Pairs are separated by ','. We will also tolerate ';'.
-             */
-            switch (tokener.nextClean()) {
-            case ';':
-            case ',':
-                if (tokener.nextClean() == '}') {
-                    return;
-                }
-                tokener.back();
-                break;
-            case '}':
-                return;
-            default:
-                throw tokener.syntaxError("Expected a ',' or '}'");
-            }
-        }
+        this(x.getSource());
     }
 
     /**
