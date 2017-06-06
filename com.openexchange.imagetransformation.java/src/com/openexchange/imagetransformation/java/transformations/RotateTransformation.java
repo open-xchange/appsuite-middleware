@@ -113,20 +113,15 @@ public class RotateTransformation implements ImageTransformation {
             LOG.debug("No image information available, unable to rotate image");
             return sourceImage;
         }
-        AffineTransform exifTransformation = getExifTransformation(imageInformation);
+        AffineTransform exifTransformation = getExifTransformation(new ImageInformation(imageInformation.orientation, sourceImage.getWidth(), sourceImage.getHeight()));
         if (null == exifTransformation) {
             LOG.debug("No EXIF transformation available, unable to rotate image");
             return sourceImage;
         }
-        int newWidth;
-        int newHeight;
-        if (imageInformation.orientation <= 4) {
-            newWidth = sourceImage.getWidth();
-            newHeight = sourceImage.getHeight();
-        } else {
-            newWidth = sourceImage.getHeight();
-            newHeight = sourceImage.getWidth();
-        }
+        // Draw rotated picture if its orientation is greater than 4
+        boolean rotate = imageInformation.orientation > 4;
+        int newWidth = rotate ? sourceImage.getHeight() : sourceImage.getWidth();
+        int newHeight = rotate ? sourceImage.getWidth() : sourceImage.getHeight();
         BufferedImage destinationImage = new BufferedImage(newWidth, newHeight, sourceImage.getType());
         Graphics2D g = destinationImage.createGraphics();
         g.setBackground(Color.WHITE);
