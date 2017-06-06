@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -89,8 +88,8 @@ public class Spam implements PreferencesItemService {
         return new AbstractStandardFolderItemValue() {
 
             @Override
-            protected void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-                setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, mailAccess.getFolderStorage().getSpamFolder()));
+            protected void getValue(Setting setting, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess) throws OXException {
+                setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, primaryMailAccess.getFolderStorage().getSpamFolder()));
             }
         };
     }

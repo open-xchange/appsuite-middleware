@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -561,14 +562,32 @@ public abstract class MailServletInterface implements Closeable {
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
      */
-    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException;
+    public MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getReplyMessageForDisplay(folder, replyMsgUID, replyToAll, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Creates an instance of <code>JSONMessageObject</code> which contains the initial reply content of the message identifed through
+     * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
+     * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
+     */
+    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through
      * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
      * the forward.
      */
-    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException;
+    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException {
+        return getForwardMessageForDisplay(folders, fowardMsgUIDs, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
+    }
+
+    /**
+     * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through
+     * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send
+     * the forward.
+     */
+    public abstract MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException;
 
     /**
      * Deletes the message located in given folder corresponding to given <code>msgUID</code>

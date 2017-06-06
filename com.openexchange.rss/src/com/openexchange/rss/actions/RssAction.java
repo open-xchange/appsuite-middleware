@@ -123,7 +123,7 @@ public class RssAction implements AJAXActionService {
     // ------------------------------------------------------------------------------------------------------------------------------
 
     private final TimoutHttpURLFeedFetcher fetcher;
-    private final HashMapFeedInfoCache feedCache;
+    private final HashMapFeedInfoCache     feedCache;
 
     /**
      * Initializes a new {@link RssAction}.
@@ -184,17 +184,25 @@ public class RssAction implements AJAXActionService {
                 results.add(result);
 
                 @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
-                boolean foundHtml = false;
-                for (SyndContent content : contents) {
-                    String type = content.getType();
-                    if (null != type && (type.startsWith("htm") || type.startsWith("xhtm"))) {
-                        foundHtml = true;
-                        String htmlContent = preprocessor.process(content.getValue(), result);
-                        result.setBody(htmlContent).setFormat("text/html");
-                        break;
+                if (contents.isEmpty()) {
+                    /* Change for bug 52689: If no content is available at least display description */
+                    SyndContent description = entry.getDescription();
+                    if (null != description) {
+                        result.setBody(sanitiseString(description.getValue())).setFormat("text/plain");
                     }
-                    if (!foundHtml) {
-                        result.setBody(content.getValue()).setFormat(type);
+                } else {
+                    boolean foundHtml = false;
+                    for (SyndContent content : contents) {
+                        String type = content.getType();
+                        if (null != type && (type.startsWith("htm") || type.startsWith("xhtm"))) {
+                            foundHtml = true;
+                            String htmlContent = preprocessor.process(content.getValue(), result);
+                            result.setBody(htmlContent).setFormat("text/html");
+                            break;
+                        }
+                        if (!foundHtml) {
+                            result.setBody(content.getValue()).setFormat(type);
+                        }
                     }
                 }
             }
@@ -210,6 +218,10 @@ public class RssAction implements AJAXActionService {
         }
         if (sort.equalsIgnoreCase("DATE")) {
             Collections.sort(results, "DESC".equalsIgnoreCase(order) ? DESC : ASC);
+        }
+        int limit = request.getIntParameter("limit");
+        if (limit > 0 && limit < results.size()) {
+            results = results.subList(0, limit);
         }
 
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);

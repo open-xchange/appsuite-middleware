@@ -85,12 +85,15 @@ public class ProvisioningSetup {
     private static final String ADMIN_IDENTIFIER = "oxadmin";
     private static final String MASTER_IDENTIFIER = "oxadminmaster";
     private static final String MASTER_PWD_IDENTIFIER = "oxadminmaster_password";
+    private static final String REST_IDENTIFIER = "restUser";
+    private static final String REST_PWD_IDENTIFIER = "restPwd";
 
     private static final String CONTEXT_IDENTIFIER = "context";
     private static final String USER1_IDENTIFIER = "user1";
     private static final String USER2_IDENTIFIER = "user2";
     private static final String USER3_IDENTIFIER = "user3";
     private static final String USER4_IDENTIFIER = "user4";
+    private static final String USER5_IDENTIFIER = "user5";
     private static final String NO_REPLY_IDENTIFIER = "noreply";
     private static final String PARTICIPANT1_IDENTIFIER = "participant1";
     private static final String PARTICIPANT2_IDENTIFIER = "participant2";
@@ -110,6 +113,7 @@ public class ProvisioningSetup {
 
                 createProvisionedContext(contextsAndUsers);
                 createOXAdminMaster(contextsAndUsers);
+                createRestUser(contextsAndUsers);
 
                 TestContextPool.startWatcher();
 
@@ -125,6 +129,14 @@ public class ProvisioningSetup {
         TestUser oxadminMaster = new TestUser(user, "", password);
 
         TestContextPool.setOxAdminMaster(oxadminMaster);
+    }
+
+    private static void createRestUser(Properties contextsAndUsers) {
+        String user = contextsAndUsers.get(REST_IDENTIFIER).toString();
+        String password = contextsAndUsers.get(REST_PWD_IDENTIFIER).toString();
+        TestUser restUser = new TestUser(user, "", password);
+
+        TestContextPool.setRestUser(restUser);
     }
 
     private static void createProvisionedContext(Properties contextsAndUsers) {
@@ -146,7 +158,7 @@ public class ProvisioningSetup {
 
             String contextName = filter.get(prefix + CONTEXT_IDENTIFIER).toString();
             try {
-                TestContext context = new TestContext(contextName, i);
+                TestContext context = new TestContext(contextName);
                 context.setAdmin(new TestUser(oxadmin, contextName, password));
 
                 String userId1 = filter.get(prefix + USER1_IDENTIFIER).toString();
@@ -164,6 +176,10 @@ public class ProvisioningSetup {
                 String userId4 = filter.get(prefix + USER4_IDENTIFIER).toString();
                 TestUser testUser4 = new TestUser(userId4, contextName, password);
                 context.addUser(testUser4);
+
+                String userId5 = filter.get(prefix + USER5_IDENTIFIER).toString();
+                TestUser testUser5 = new TestUser(userId5, contextName, password);
+                context.addUser(testUser5);
 
                 String noReply = filter.get(prefix + NO_REPLY_IDENTIFIER).toString();
                 TestUser noReplyUser = new TestUser(noReply, contextName, password);

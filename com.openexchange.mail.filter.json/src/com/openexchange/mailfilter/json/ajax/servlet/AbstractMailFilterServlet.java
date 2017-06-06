@@ -64,6 +64,7 @@ import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.Parameter;
@@ -285,7 +286,11 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
 
     private void checkMailfilterAvailable(Session session) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        if (false == serverSession.getUserConfiguration().hasWebMail()) {
+        UserConfiguration userConfig = serverSession.getUserConfiguration();
+        if (userConfig == null) {
+            throw new IllegalStateException("User configuration object could not be loaded for user " + session.getUserId() + " in context " + session.getContextId());
+        }
+        if (false == userConfig.hasWebMail()) {
             throw MailFilterExceptionCode.MAILFILTER_NOT_AVAILABLE.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
     }

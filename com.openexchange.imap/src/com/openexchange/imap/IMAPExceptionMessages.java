@@ -163,4 +163,6 @@ public final class IMAPExceptionMessages implements LocalizableStrings {
 
     public static final String CONNECTION_UNAVAILABLE_MSG = "Currently not possible to establish a new connection to server %1$s with login %2$s. Please try again.";
 
+    public static final String OWNER_MUST_BE_ADMIN_MSG = "Update of folder failed. Owner is required to keep administrative rights.";
+
 }

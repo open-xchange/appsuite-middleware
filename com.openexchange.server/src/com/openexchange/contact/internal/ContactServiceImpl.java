@@ -131,7 +131,7 @@ public class ContactServiceImpl extends DefaultContactService {
         final FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
         Check.noPrivateInPublic(folder, contact, session);
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, null);
 
         /*
          * prepare create
@@ -319,7 +319,7 @@ public class ContactServiceImpl extends DefaultContactService {
         final FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
         Check.noPrivateInPublic(folder, contact, session);
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, storedContact);
         /*
          * check for not allowed changes
          */
@@ -341,6 +341,9 @@ public class ContactServiceImpl extends DefaultContactService {
             delta.setImageLastModified(now);
             if (null != delta.getImage1()) {
                 delta.setNumberOfImages(1);
+                if (null == delta.getImageContentType()) {
+                    delta.setImageContentType(storedContact.getImageContentType());
+                }
             } else {
                 delta.setNumberOfImages(0);
                 delta.setImageContentType(null);
@@ -418,7 +421,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * check special GAB permissions
          */
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, storedContact);
         /*
          * check for not allowed changes
          */

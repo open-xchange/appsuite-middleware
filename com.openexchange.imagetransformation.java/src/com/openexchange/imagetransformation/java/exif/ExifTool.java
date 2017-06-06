@@ -50,10 +50,12 @@
 package com.openexchange.imagetransformation.java.exif;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageInputStream;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.openexchange.java.Charsets;
@@ -104,6 +106,7 @@ public class ExifTool  {
     }
 
     private static byte[] getExifData(IIOMetadata metadata) {
+        // dumpMetadata(metadata, System.out);
         IIOMetadataNode jpegRootNode;
         try {
             Node tree = metadata.getAsTree("javax_imageio_jpeg_image_1.0");
@@ -138,6 +141,78 @@ public class ExifTool  {
             }
         }
         return null;
+    }
+
+    private static void indent(int level, PrintStream out) {
+        for (int i = 0; i < level; i++) {
+            out.print("    ");
+        }
+    }
+
+    private static void displayAttributes(NamedNodeMap attributes, PrintStream out) {
+        if (attributes != null) {
+            int count = attributes.getLength();
+            for (int i = 0; i < count; i++) {
+                Node attribute = attributes.item(i);
+
+                out.print(" ");
+                out.print(attribute.getNodeName());
+                out.print("='");
+                out.print(attribute.getNodeValue());
+                out.print("'");
+            }
+        }
+    }
+
+    private static void displayMetadataNode(Node node, int level, PrintStream out) {
+        indent(level, out);
+        System.out.print("<");
+        System.out.print(node.getNodeName());
+
+        NamedNodeMap attributes = node.getAttributes();
+        displayAttributes(attributes, out);
+
+        Node child = node.getFirstChild();
+        if (child == null) {
+            String value = node.getNodeValue();
+            if (value == null || value.length() == 0) {
+                out.println("/>");
+            } else {
+                out.print(">");
+                out.print(value);
+                out.print("<");
+                out.print(node.getNodeName());
+                out.println(">");
+            }
+            return;
+        }
+
+        out.println(">");
+        while (child != null) {
+            displayMetadataNode(child, level + 1, out);
+            child = child.getNextSibling();
+        }
+
+        indent(level, out);
+        out.print("</");
+        out.print(node.getNodeName());
+        out.println(">");
+    }
+
+    /**
+     * Dumps given meta-data to given output.
+     *
+     * @param metadata The meta-data to dump
+     * @param out The print writer to write to
+     */
+    public static void dumpMetadata(IIOMetadata metadata, PrintStream out) {
+        String[] names = metadata.getMetadataFormatNames();
+        int length = names.length;
+        for (int i = 0; i < length; i++) {
+            indent(2, out);
+            out.println("Format name: " + names[i]);
+            displayMetadataNode(metadata.getAsTree(names[i]), 3, out);
+        }
     }
 
     /**

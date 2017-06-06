@@ -223,47 +223,30 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
-    public int getNotifyFrequencySeconds() {
-        String tmp = getAccountProperty("com.openexchange.imap.notifyFrequencySeconds");
+    public int getImapFailedAuthTimeout() {
+        String tmp = getAccountProperty("com.openexchange.imap.failedAuthTimeout");
         if (null != tmp) {
             try {
                 return Integer.parseInt(tmp.trim());
             } catch (final NumberFormatException e) {
-                LOG.error("Notify Frequency Seconds: Invalid value.", e);
-                return IMAPProperties.getInstance().getNotifyFrequencySeconds();
+                LOG.error("IMAP Failed Auth Timeout: Invalid value.", e);
+                return IMAPProperties.getInstance().getImapFailedAuthTimeout();
             }
         }
 
         if (mailAccountId == PRIMARY) {
-            tmp = lookUpProperty("com.openexchange.imap.primary.notifyFrequencySeconds");
+            tmp = lookUpProperty("com.openexchange.imap.primary.failedAuthTimeout");
             if (null != tmp) {
                 try {
                     return Integer.parseInt(tmp.trim());
                 } catch (final NumberFormatException e) {
-                    LOG.error("Notify Frequency Seconds: Invalid value.", e);
-                    return IMAPProperties.getInstance().getNotifyFrequencySeconds();
+                    LOG.error("IMAP Failed Auth Timeout: Invalid value.", e);
+                    return IMAPProperties.getInstance().getImapFailedAuthTimeout();
                 }
             }
         }
 
-        return lookUpIntProperty("com.openexchange.imap.notifyFrequencySeconds", IMAPProperties.getInstance().getNotifyFrequencySeconds());
-    }
-
-    @Override
-    public String getNotifyFullNames() {
-        String tmp = getAccountProperty("com.openexchange.imap.notifyFullNames");
-        if (null != tmp) {
-            return tmp.trim();
-        }
-
-        if (mailAccountId == PRIMARY) {
-            tmp = lookUpProperty("com.openexchange.imap.primary.notifyFullNames");
-            if (null != tmp) {
-                return tmp.trim();
-            }
-        }
-
-        return lookUpProperty("com.openexchange.imap.notifyFullNames", IMAPProperties.getInstance().getNotifyFullNames());
+        return lookUpIntProperty("com.openexchange.imap.failedAuthTimeout", IMAPProperties.getInstance().getImapFailedAuthTimeout());
     }
 
     @Override
@@ -334,23 +317,6 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
-    public boolean notifyRecent() {
-        String tmp = getAccountProperty("com.openexchange.imap.notifyRecent");
-        if (null != tmp) {
-            return Boolean.parseBoolean(tmp.trim());
-        }
-
-        if (mailAccountId == PRIMARY) {
-            tmp = lookUpProperty("com.openexchange.imap.primary.notifyRecent");
-            if (null != tmp) {
-                return Boolean.parseBoolean(tmp.trim());
-            }
-        }
-
-        return lookUpBoolProperty("com.openexchange.imap.notifyRecent", IMAPProperties.getInstance().notifyRecent());
-    }
-
-    @Override
     public boolean isPropagateClientIPAddress() {
         String tmp = getAccountProperty("com.openexchange.imap.propagateClientIPAddress");
         if (null != tmp) {
@@ -399,6 +365,23 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         return lookUpBoolProperty("com.openexchange.imap.auditLog.enabled", IMAPProperties.getInstance().isAuditLogEnabled());
+    }
+
+    @Override
+    public boolean isOverwritePreLoginCapabilities() {
+        String tmp = getAccountProperty("com.openexchange.imap.overwritePreLoginCapabilities");
+        if (null != tmp) {
+            return Boolean.parseBoolean(tmp.trim());
+        }
+
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.imap.primary.overwritePreLoginCapabilities");
+            if (null != tmp) {
+                return Boolean.parseBoolean(tmp.trim());
+            }
+        }
+
+        return lookUpBoolProperty("com.openexchange.imap.overwritePreLoginCapabilities", IMAPProperties.getInstance().isOverwritePreLoginCapabilities());
     }
 
     @Override

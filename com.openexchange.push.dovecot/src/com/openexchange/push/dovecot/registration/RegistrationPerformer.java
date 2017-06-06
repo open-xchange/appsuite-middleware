@@ -50,7 +50,6 @@
 package com.openexchange.push.dovecot.registration;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link RegistrationPerformer}
@@ -70,17 +69,17 @@ public interface RegistrationPerformer {
     /**
      * Initializes registration for this listener.
      *
-     * @param session The associated session
+     * @param context The context to use
      * @return A reason string in case registration failed; otherwise <code>null</code> on success
      * @throws OXException If registration fails unexpectedly
      */
-    RegistrationResult initateRegistration(Session session) throws OXException;
+    RegistrationResult initateRegistration(RegistrationContext context) throws OXException;
 
     /**
      * Unregisters this listeners.
      *
-     * @param session The associated session
+     * @param context The context to use
      * @throws OXException If unregistration fails
      */
-    void unregister(Session session) throws OXException;
+    void unregister(RegistrationContext context) throws OXException;
 }

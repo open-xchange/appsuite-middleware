@@ -1,0 +1,13 @@
+feature_name: Messaging
+properties:
+    - key: com.openexchange.messaging.enabled
+      description: |
+        Determines whether messaging is enabled for this server.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: messaging.properties
+      packageName: open-xchange-core
+      tags: ["Messaging", "Capability"]

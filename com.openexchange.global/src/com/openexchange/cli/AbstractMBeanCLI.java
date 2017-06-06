@@ -128,7 +128,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             }
 
             // Check for JMX host
-            final String host = cmd.getOptionValue('t', "localhost");
+            final String host = cmd.getOptionValue('H', "localhost");
 
             // Check for JMX port
             final int port = parsePort('p', 9999, cmd, options);

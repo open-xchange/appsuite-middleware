@@ -109,7 +109,6 @@ import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.UserGroupID;
-import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.FolderUtility;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
@@ -121,6 +120,7 @@ import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.api.IMailFolderStorageStatusSupport;
+import com.openexchange.mail.api.IMailFolderStorageTrashAware;
 import com.openexchange.mail.api.IMailSharedFolderPathResolver;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
@@ -154,7 +154,7 @@ import com.sun.mail.imap.protocol.ListInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageStatusSupport {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageStatusSupport, IMailFolderStorageTrashAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -843,7 +843,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             IMAPFolderWorker.checkFailFast(imapStore, parentFullName);
             if (DEFAULT_FOLDER_ID.equals(parentFullName)) {
                 final IMAPFolder parent = (IMAPFolder) imapStore.getDefaultFolder();
-                final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
+                final boolean subscribed = (!getImapConfig().getIMAPProperties().isIgnoreSubscription() && !all);
                 /*
                  * Request subfolders the usual way
                  */
@@ -1012,7 +1012,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException, OXException {
-        final boolean subscribed = !MailProperties.getInstance().isIgnoreSubscription() && !all;
+        final boolean subscribed = !getImapConfig().getIMAPProperties().isIgnoreSubscription() && !all;
         final List<ListLsubEntry> subfolders;
         {
             ListLsubEntry entry = subscribed ? getLSUBEntry(parent) : getLISTEntry(parent);
@@ -1330,7 +1330,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * Subscribe
                      */
-                    if (!MailProperties.getInstance().isSupportSubscription()) {
+                    if (!getImapConfig().getIMAPProperties().isSupportSubscription()) {
                         subscribed = true;
                     } else if (toCreate.containsSubscribed()) {
                         subscribed = toCreate.isSubscribed();
@@ -1973,7 +1973,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SPAM)) ) {
                     defaultFolder = true;
                 }
-                boolean performSubscription = MailProperties.getInstance().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMeEntry);
+                boolean performSubscription = getImapConfig().getIMAPProperties().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMeEntry);
                 if (performSubscription && defaultFolder && !toUpdate.isSubscribed()) {
                     OXException warning = IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
                     warning.setCategory(OXException.CATEGORY_WARNING);
@@ -2004,6 +2004,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             }
                             if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
                                 throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, updateMe.getFullName());
+                            }
+                            if (!NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName, imapStore, true, session, accountId) && !NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName, imapStore, true, session, accountId) && !stillHoldsAdministerRights(updateMe, newACLs, aclExtension)) {
+                                throw IMAPException.create(IMAPException.Code.OWNER_MUST_BE_ADMIN, imapConfig, session, updateMe.getFullName());
                             }
                             /*
                              * Check new ACLs
@@ -2203,6 +2206,87 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                 }
                 return fullName;
+            }
+        } catch (final MessagingException e) {
+            throw handleMessagingException(fullName, e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        } finally {
+            if (clearListLsubCache) {
+                ListLsubCache.clearCache(accountId, session);
+            }
+        }
+    }
+
+    @Override
+    public String trashFolder(final String fullName) throws OXException {
+        boolean clearListLsubCache = false;
+        try {
+            if (DEFAULT_FOLDER_ID.equals(fullName)) {
+                throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
+            }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
+            IMAPFolder deleteMe = getIMAPFolder(fullName);
+            char separator;
+            {
+                ListLsubEntry deleteMeEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+                if (null != deleteMeEntry) {
+                    if (!deleteMeEntry.exists()) {
+                        deleteMe = checkForNamespaceFolder(fullName);
+                        if (null == deleteMe) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
+                    }
+                    separator = deleteMeEntry.getSeparator();
+                } else {
+                    ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, deleteMe);
+                    if (null == listInfo) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                    separator = listInfo.separator;
+                }
+            }
+            clearListLsubCache = true;
+            synchronized (deleteMe) {
+                imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
+                String trashFullName = getTrashFolder();
+                if (isSubfolderOf(getParentFullName(fullName, separator), trashFullName, separator) || !inferiors(trashFullName, deleteMe)) {
+                    /*
+                     * Delete permanently
+                     */
+                    deleteFolder(deleteMe, separator);
+                    return null;
+                } else {
+                    /*
+                     * Just move this folder to trash
+                     */
+                    imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullName);
+                    final String name = getNameOf(deleteMe);
+                    int appendix = 1;
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(trashFullName).append(separator).append(name);
+                    while (ListLsubCache.getCachedLISTEntry(sb.toString(), accountId, deleteMe, session, ignoreSubscriptions).exists()) {
+                        /*
+                         * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
+                         */
+                        sb.setLength(0);
+                        sb.append(trashFullName).append(separator).append(name).append('_').append(++appendix);
+                    }
+                    IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(trashFullName);
+                    IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
+                    synchronized (newFolder) {
+                        try {
+                            moveFolder(deleteMe, trashFolder, newFolder, false);
+                        } catch (final OXException e) {
+                            deleteTemporaryCreatedFolder(newFolder);
+                            throw e;
+                        } catch (final MessagingException e) {
+                            deleteTemporaryCreatedFolder(newFolder);
+                            throw e;
+                        }
+                    }
+                    return newFolder.getFullName();
+                }
             }
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
@@ -2923,6 +3007,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return false;
     }
 
+    private boolean stillHoldsAdministerRights(final IMAPFolder imapFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws OXException {
+        /*
+         * Ensure that owner still holds full rights
+         */
+        String ownerACLName = getEntity2ACL().getACLName(session.getUserId(), ctx, IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig));
+        for (ACL newACL : newACLs) {
+            if (newACL.getName().equals(ownerACLName) && aclExtension.containsFolderAdminRights(newACL.getRights())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Map<String, Boolean> getSubscriptionStatus(IMAPFolder f, char separator, String oldFullName, String newFullName) throws MessagingException, OXException {
         final Map<String, Boolean> retval = new HashMap<String, Boolean>();
         getSubscriptionStatus(retval, f.getFullName(), separator, f, oldFullName, newFullName);
@@ -3512,11 +3609,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private IMAPFolder getIMAPFolderWithRecentListener(String fullName) throws MessagingException {
-        IMAPFolder ret = DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
-        if (MailAccount.DEFAULT_ID == accountId && imapConfig.getIMAPProperties().notifyRecent()) {
-            IMAPNotifierMessageRecentListener.addNotifierFor(ret, fullName, accountId, session, true);
-        }
-        return ret;
+        return DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
     }
 
     private boolean doesExist(IMAPFolder imapFolder, boolean mayCheckCache) throws OXException, MessagingException {

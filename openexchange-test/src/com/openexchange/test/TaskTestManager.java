@@ -96,8 +96,12 @@ import com.openexchange.java.ConcurrentLinkedList;
 public class TaskTestManager implements TestManager {
 
     protected List<Task> createdEntities;
+    
+    protected List<Task> createdEntities2;
 
     private AJAXClient client;
+    
+    private AJAXClient client2;    
 
     protected TimeZone timezone;
 
@@ -196,6 +200,9 @@ public class TaskTestManager implements TestManager {
         DeleteRequest request = new DeleteRequest(taskToDelete, failOnErrorOverride);
         try {
             setLastResponse(getClient().execute(request));
+            if(lastResponse.hasError() && null != getClient2()) {
+                setLastResponse(getClient2().execute(request));
+            }
         } catch (Exception e) {
             doHandleExeption(e, "DeleteRequest for " + taskToDelete.getObjectID());
         }
@@ -374,6 +381,7 @@ public class TaskTestManager implements TestManager {
             }
 
         }
+        createdEntities = new ConcurrentLinkedList<Task>();
     }
 
     /**
@@ -502,5 +510,21 @@ public class TaskTestManager implements TestManager {
     @Override
     public boolean hasLastException() {
         return this.lastException != null;
+    }
+    
+    public void addEntities(final Task task){
+        this.createdEntities.add(task);
+    }    
+    
+    public AJAXClient getClient2() {
+        return client2;
+    }
+
+    public void setClient2(AJAXClient client2) {
+        this.client2 = client2;
+    }    
+    
+    public void addEntities2(final Task task){
+        this.createdEntities2.add(task);
     }
 }

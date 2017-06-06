@@ -150,7 +150,7 @@ public class SocketFetcher {
         }
 
         AddressSelector selector = AddressSelector.getSelectorFor(host, addresses, props, prefix);
-        return new RoundRobinSocket(selector, host, port, props, prefix, useSSL);
+        return new FailoverSocket(selector, host, port, props, prefix, useSSL);
     }
 
     /**
@@ -394,6 +394,9 @@ public class SocketFetcher {
 	 * If we want an SSL connection and we didn't get an SSLSocket,
 	 * wrap our plain Socket with an SSLSocket.
 	 */
+	boolean error = true;
+	Socket closeMeOnError = socket;
+	try {
 	if ((useSSL || sf instanceof SSLSocketFactory) &&
 		!(socket instanceof SSLSocket)) {
 	    String trusted;
@@ -418,17 +421,8 @@ public class SocketFetcher {
         } else {
             ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
         }
-	    boolean error = true;
-	    try {
-	    Socket newSocket = ssf.createSocket(socket, host, port, true);
-	    error = false;
-	    socket = newSocket;
+	    socket = ssf.createSocket(socket, host, port, true);
 	    sf = ssf;
-	    } finally {
-	        if (error) {
-	            socket.close();
-	        }
-	    }
 	}
 
 	/*
@@ -437,7 +431,17 @@ public class SocketFetcher {
 	 */
 	configureSSLSocket(socket, host, props, prefix, sf);
 
+	/*
+	 * Apparently, everything went fine
+	 */
+	error = false;
 	return socket;
+	} finally {
+	    if (error) {
+	        closeMeOnError.close();
+            socket.close();
+        }
+	}
     }
 
     /**

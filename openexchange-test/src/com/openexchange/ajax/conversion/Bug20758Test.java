@@ -126,7 +126,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public class Bug20758Test extends AbstractConversionTest {
 
-    private String uuid;
     private String[] mailFolderAndMailID1;
     private String[] mailFolderAndMailID2;
     private AJAXClient client1;
@@ -141,11 +140,9 @@ public class Bug20758Test extends AbstractConversionTest {
         super.setUp();
 
         client1 = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
 
         client1.getValues().setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-
-        uuid = UUID.randomUUID().toString();
 
         ical1 = new StringBuilder().append("BEGIN:VCALENDAR\n").append("VERSION:2.0\n").append("METHOD:REQUEST\n").append("BEGIN:VEVENT\n").append("ORGANIZER:").append(client1.getValues().getSendAddress()).append('\n').append("ATTENDEE;PARTSTAT=ACCEPTED;CN=Da Organiza:Mailto:").append(client1.getValues().getSendAddress()).append('\n').append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=First User:Mailto:").append(client1.getValues().getSendAddress()).append('\n').append("ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=Second User:Mailto:").append(client2.getValues().getSendAddress()).append('\n').append("DTSTART:20111115T133000Z\n").append("DTEND:20111115T143000Z\n").append("SUMMARY:Weihnachtsferien\n").append("UID:ls0h48paommdkntd8ekdfquqbs@google.com\n").append("SEQUENCE:0\n").append("DTSTAMP:20111115T110530Z\n").append("END:VEVENT\n").append("END:VCALENDAR").toString();
 

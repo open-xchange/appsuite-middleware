@@ -81,7 +81,7 @@ public class Bug40527Test extends ShareTest {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);
             File file = insertSharedFile(folder.getObjectID(), randomUID(), sharePermission);
-            String invitationLink = discoverInvitationLink(getNoReplyClient(), shareClient.getValues().getDefaultAddress());
+            String invitationLink = discoverInvitationLink(getClient(), shareClient.getValues().getDefaultAddress());
             Assert.assertNotNull("Invitation link not found", invitationLink);
             String fragmentParams = new URI(invitationLink).getRawFragment();
             Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
@@ -106,7 +106,7 @@ public class Bug40527Test extends ShareTest {
             file.setObjectPermissions(Collections.singletonList(new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ)));
             updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
-            String invitationLink = discoverInvitationLink(getNoReplyClient(), shareClient.getValues().getDefaultAddress());
+            String invitationLink = discoverInvitationLink(getClient(), shareClient.getValues().getDefaultAddress());
             Assert.assertNotNull("Invitation link not found", invitationLink);
             String fragmentParams = new URI(invitationLink).getRawFragment();
             Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
@@ -121,5 +121,4 @@ public class Bug40527Test extends ShareTest {
             shareClient.logout();
         }
     }
-
 }

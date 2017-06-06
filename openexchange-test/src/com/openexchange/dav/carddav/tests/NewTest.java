@@ -158,8 +158,7 @@ public class NewTest extends CardDAVTest {
          * create folder and contact on server
          */
         String folderName = "testfolder_" + randomUID();
-        FolderObject folder = super.createFolder(folderName);
-        super.rememberForCleanUp(folder);
+        super.createFolder(folderName);
         FolderObject createdFolder = super.getFolder(folderName);
         assertNotNull("folder not found on server", createdFolder);
         assertEquals("foldername wrong", folderName, createdFolder.getFolderName());

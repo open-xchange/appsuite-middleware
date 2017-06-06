@@ -1,0 +1,39 @@
+feature_name: Default Spam Handler
+feature_description: |
+  Properties for "com.openexchange.spamhandler.defaultspamhandler" bundle.
+properties:
+    - key: com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam
+      description: |
+        Indicates whether to create the confirmed-spam folder during check for default mail folders
+        during login if spam is enabled for logged-in user.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: defaultspamhandler.properties
+      packageName: open-xchange-spamhandler-default
+      tags: ["Spam Handler", "Folder"]
+    - key: com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam
+      description: |
+        Indicates whether to create the confirmed-ham folder during check for default mail folders
+        during login if spam is enabled for logged-in user.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: defaultspamhandler.properties
+      packageName: open-xchange-spamhandler-default
+      tags: ["Spam Handler", "Folder"]
+    - key: com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders
+      description: |
+        Indicates whether the confirmed-spam/confirmed-ham folders shall automatically be unsubscribed during login.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: defaultspamhandler.properties
+      packageName: open-xchange-spamhandler-default
+      tags: ["Spam Handler", "Folder"]

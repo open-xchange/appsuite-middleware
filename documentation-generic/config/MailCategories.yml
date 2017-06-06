@@ -1,0 +1,239 @@
+feature_name: Mail Categories
+feature_description: |
+  This pages describes the properties of the mail categories feature aka tabbed inbox.
+
+  There are two types of categories: 'system' and 'user' categories.
+  
+  System categories are predefined categories which includes predefined rules. 
+  The hoster is able to force showing this categories.
+  In addition the user is unable to rename them.
+  
+  User categories are a finite set of categories which can be used by the user to create own categories.
+  Thats means that there are no predefined rules. This categories cannot be forced, but they can be renamed by the user. 
+  The hoster should nevertheless give them some meaningful names to help the users. E.g. "Friends".
+
+  For more informations about mail catgeories see [[https://documentation.open-xchange.com/{{version}}/middleware/components/mail_categories.html]].
+properties:
+    - key: com.openexchange.mail.categories
+      description: |
+        General capability to enable/disable mail categories for primary inbox.
+      defaultValue: false
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail", "Capability"]
+    - key: com.openexchange.mail.categories.enabled
+      description: |
+        Switch to show or hide mail categories feature during the first start. 
+        Notice that this property only influence the starting value. 
+        Changing this value will probably have no effect on users with already have [[com.openexchange.mail.categories]] set to <code>true</code>.
+      defaultValue: true
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.categories
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.forced
+      description: |
+        Switch to force showing the mail categories feature. 
+        If set to <code>true</code>, the [[com.openexchange.mail.categories.enabled]] property is always true and can't be changed.
+      defaultValue: false
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.categories.enabled
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.general.name.fallback
+      description: |
+        The fallback name of the default general category.
+      defaultValue: General
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.general.name.[locale]
+      description: |
+        For each language which should be supported a translated name for the general category should be defined.
+        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO-3166 country code (e.g. de_DE or en_US)
+
+        Note:  
+        Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.identifiers
+      description: |
+        Specifies a comma separated list of system category identifiers ([category]).
+
+        System categories can be forced but not renamed.  
+        Please note that the use of "general" is prohibited!
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.user.categories.identifiers
+      description: |
+        Specifies a comma separated list of user category identifiers ([category]). E.g.: 
+        <pre>
+        com.openexchange.mail.user.categories.identifiers=uc1,uc2,uc3
+        </pre>
+
+        User categories can be renamed but not be forced.  
+        Please note that the use of "general" is prohibited!
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.[category].flag
+      description: |
+        Specifies the category's flag name that is supposed to be used for filter/search expressions executed by mail back-end;e.g. 
+        <pre>
+        "com.openexchange.mail.categories.offers.flag=$offers"
+        </pre>
+        This property is required.  
+        [category] must be replaced with the actual category identifier.
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.[category].force
+      description: |
+        Specifies whether the category is forced; meaning a user is not allowed to disable the category.  
+        This property is required and only valid for system categories.  
+        [category] must be replaced with the actual category identifier.
+      defaultValue: false
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.[category].active
+      description: |
+        Specifies whether the category is activated/deactivate for a user. Only effective if [[com.openexchange.mail.categories.[category].force]] is set to <code>false</code>.
+        This setting can be set by a user.  
+        This property is required.  
+        [category] must be replaced with the actual category identifier.
+      defaultValue: true
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.[category].name.fallback
+      description: |
+        Specifies the category's fall-back name.  
+        This property is required.  
+        [category] must be replaced with the actual category identifier.
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.[category].name.[locale]
+      description: |
+        For each language which should be supported a translated name for the category should be defined.
+        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore 
+        followed by a ISO 3166 country code (e.g. de_DE or en_US).  
+        [category] must be replaced with the actual category identifier.
+        
+        Note:  
+        Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.[category].description
+      description: |
+        Specifies an optional system category description.
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.[category].description.[locale]
+      description: |
+        For each language which should be supported a translated description for the category should be defined.
+        For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore 
+        followed by a ISO 3166 country code (e.g. de_DE or en_US).  
+        [category] must be replaced with the actual category identifier.
+        
+        Note:  
+        Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe"
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.apply.ox.rules
+      description: |
+        It is possible to create some predefined rules for the system categories (see [[com.openexchange.mail.categories.rules.[category] ]]).
+        This rules will be added for each user which has the mail_categories capability and has the mail_categories feature enabled.
+        This property enables/disables this feature. Nevertheless it is strongly recommended to use system wide rules instead.
+
+        Note:  
+        These rules must only be used instead of system wide rules! Don't use this feature if there are already system wide rules defined!       
+      defaultValue: false
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.categories.rules.[category]
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]
+    - key: com.openexchange.mail.categories.rules.[category]
+      description: |
+        For each system category a comma separated list of mail addresses can be defined. 
+        This addresses will be used to create a starting rule for this category if [[com.openexchange.mail.categories.apply.ox.rules]] is set to <code>true</code>.  
+        It is also possible to use mail address parts here. For example "@amazon.com".
+      defaultValue:
+      version: 7.8.2
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.categories.apply.ox.rules
+      file: mail-categories.properties
+      packageName: open-xchange-mail-categories
+      tags: ["Mail Categories", "Mail"]

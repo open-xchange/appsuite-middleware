@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
@@ -73,13 +73,14 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest {
 
     /**
      * Initializes a new {@link ResourceUpdatesAJAXTest}.
-     * 
+     *
      * @param name
      */
     public ResourceUpdatesAJAXTest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -95,11 +96,13 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest {
         resource.setLastModified(newResponse.getTimestamp());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            if (resource != null) {
-                Executor.execute(getSession(), new ResourceDeleteRequest(resource));
+            AJAXSession session = getSession();
+            if (null != session && null != resource && 0 < resource.getIdentifier()) {
+                Executor.execute(session, new ResourceDeleteRequest(resource, Long.MAX_VALUE, false));
             }
         } finally {
             super.tearDown();

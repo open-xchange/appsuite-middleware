@@ -1,0 +1,38 @@
+feature_name: Manifests
+feature_description: |
+  Frontend properties of OX App Suite.
+  These properties configure the installation-specific settings of the web front-end.
+properties:
+    - key: com.openexchange.apps.path
+      description: |
+        Path to the installation directory of UI apps.
+      defaultValue: "@prefix@/appsuite"
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: manifests.properties
+      packageName: open-xchange-appsuite-backend
+      tags: ["Manifests"]
+    - key: com.openexchange.apps.tzdata
+      description: |
+        Path to the zoneinfo database.
+      defaultValue: /usr/share/zoneinfo
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: manifests.properties
+      packageName: open-xchange-appsuite-backend
+      tags: ["Manifests", "Database"]
+    - key: com.openexchange.apps.manifestPath
+      description: |
+        Paths to directories with UI manifest files.
+      defaultValue: "@prefix@/appsuite/manifests:<more paths>"
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: manifests.properties
+      packageName: open-xchange-appsuite-backend
+      tags: ["Manifests"]

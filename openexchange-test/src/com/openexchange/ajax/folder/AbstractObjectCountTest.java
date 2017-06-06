@@ -87,7 +87,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient2();
 
         ContentTypeRegistry ctr = ContentTypeRegistry.getInstance();
         ServiceRegistry.getInstance().addService(ContentTypeRegistry.class, ctr);

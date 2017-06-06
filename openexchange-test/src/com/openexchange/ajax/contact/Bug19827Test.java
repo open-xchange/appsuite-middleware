@@ -60,7 +60,6 @@ import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 
@@ -71,7 +70,6 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug19827Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private Contact contact;
 
     public Bug19827Test() {
@@ -81,7 +79,6 @@ public class Bug19827Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         contact = new Contact();
         contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setDisplayName("Test for bug 19827");

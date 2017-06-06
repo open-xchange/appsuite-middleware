@@ -177,10 +177,11 @@ public abstract class OXServlet extends WebDavServlet {
         public Map<String, List<String>> getHeaders() {
             return copyHeaders(req);
         }
-        
+
         @Override
         public Map<String, String[]> getRequestParameter() {
-            return req.getParameterMap();
+            Map<String, String[]> requestParameters = req.getParameterMap();
+            return null == requestParameters ? Collections.<String, String[]> emptyMap() : Collections.unmodifiableMap(requestParameters);
         }
 
         @Override

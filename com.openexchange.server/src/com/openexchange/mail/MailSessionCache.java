@@ -295,7 +295,6 @@ public final class MailSessionCache {
      *
      * @param accountId The account ID
      * @param parameterName The parameter name
-     * @param clazz The parameter value's class
      * @return The parameter or <code>null</code>
      */
     public <T extends Object> T getParameter(final int accountId, final String parameterName) {

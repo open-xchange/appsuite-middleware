@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -74,7 +75,6 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -89,12 +89,6 @@ import com.openexchange.webdav.xml.types.Response;
 public class TaskTest extends AbstractWebdavXMLTest {
 
     protected int taskFolderId = -1;
-
-    protected String userParticipant2 = null;
-
-    protected String userParticipant3 = null;
-
-    protected String groupParticipant = null;
 
     protected Date startTime = null;
 
@@ -126,12 +120,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         dateCompleted = new Date(c.getTimeInMillis() + d7);
 
-        userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
-        userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
-
-        groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
-
-        final FolderObject folderObj = FolderTest.getTaskDefaultFolder(webCon, PROTOCOL + hostName, login, password, context);
+        final FolderObject folderObj = FolderTest.getTaskDefaultFolder(webCon, getHostURI(), login, password);
         taskFolderId = folderObj.getObjectID();
         userId = folderObj.getCreatedBy();
     }
@@ -175,9 +164,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
         return taskObj;
     }
 
-    public static int insertTask(final WebConversation webCon, Task taskObj, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
+    public static int insertTask(final WebConversation webCon, Task taskObj, String host, final String login, final String password) throws Exception {
         int objectId = 0;
 
         taskObj.removeObjectID();
@@ -197,7 +184,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + TASK_URL, bais, "text/javascript");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -206,16 +193,14 @@ public class TaskTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
 
         assertEquals("check response", 1, response.length);
-
         if (response[0].hasError()) {
             throw new TestException(response[0].getErrorMessage());
-        } else {
-            taskObj = (Task) response[0].getDataObject();
-            objectId = taskObj.getObjectID();
-
-            assertNotNull("last modified is null", taskObj.getLastModified());
-            assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
         }
+        taskObj = (Task) response[0].getDataObject();
+        objectId = taskObj.getObjectID();
+
+        assertNotNull("last modified is null", taskObj.getLastModified());
+        assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 
         assertEquals("check response status", 200, response[0].getStatus());
 
@@ -224,8 +209,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
         return objectId;
     }
 
-    public static int[] insertTasks(final WebConversation webCon, String host, final String login, final String password, String context, final Task... tasks) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
+    public static int[] insertTasks(final WebConversation webCon, String host, final String login, final String password, final Task... tasks) throws Exception {
         final int[] objectIds = new int[tasks.length];
 
         final TaskWriter taskWriter = new TaskWriter();
@@ -252,7 +236,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + TASK_URL, bais, "text/javascript");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -261,29 +245,24 @@ public class TaskTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
 
         assertEquals("check response", tasks.length, response.length);
+        assertFalse("Request failed with error: " + response[0].getErrorMessage(), response[0].hasError());
 
         for (int i = 0; i < tasks.length; i++) {
-            if (response[i].hasError()) {
-                throw new TestException(response[i].getErrorMessage());
-            } else {
-                final Task taskObj = (Task) response[i].getDataObject();
-                objectIds[i] = taskObj.getObjectID();
+            final Task taskObj = (Task) response[i].getDataObject();
+            objectIds[i] = taskObj.getObjectID();
 
-                assertNotNull("last modified is null", taskObj.getLastModified());
-                assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
-            }
+            assertNotNull("last modified is null", taskObj.getLastModified());
+            assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
         }
 
         return objectIds;
     }
 
-    public static void updateTask(final WebConversation webCon, final Task taskObj, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws Exception {
-        updateTask(webCon, taskObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
+    public static void updateTask(final WebConversation webCon, final Task taskObj, final int objectId, final int inFolder, final String host, final String login, final String password) throws Exception {
+        updateTask(webCon, taskObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
     }
 
-    public static void updateTask(final WebConversation webCon, Task taskObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
+    public static void updateTask(final WebConversation webCon, Task taskObj, int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws Exception {
         taskObj.setObjectID(objectId);
         taskObj.setLastModified(lastModified);
 
@@ -302,7 +281,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + TASK_URL, bais, "text/javascript");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -314,32 +293,29 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         if (response[0].hasError()) {
             throw new TestException(response[0].getErrorMessage());
-        } else {
-            taskObj = (Task) response[0].getDataObject();
-            objectId = taskObj.getObjectID();
-
-            assertNotNull("last modified is null", taskObj.getLastModified());
-            assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
         }
+        taskObj = (Task) response[0].getDataObject();
+        objectId = taskObj.getObjectID();
+
+        assertNotNull("last modified is null", taskObj.getLastModified());
+        assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
-    public static int[] deleteTask(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password, String context) throws Exception {
+    public static int[] deleteTask(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password) throws Exception {
         for (int a = 0; a < objectIdAndFolderId.length; a++) {
-            deleteTask(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password, context);
+            deleteTask(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);
         }
 
         return new int[] {};
     }
 
-    public static void deleteTask(final WebConversation webCon, final int objectId, final int inFolder, final String host, final String login, final String password, String context) throws Exception {
-        deleteTask(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password, context);
+    public static void deleteTask(final WebConversation webCon, final int objectId, final int inFolder, final String host, final String login, final String password) throws Exception {
+        deleteTask(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
     }
 
-    public static void deleteTask(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
+    public static void deleteTask(final WebConversation webCon, final int objectId, final int inFolder, final Date lastModified, String host, final String login, final String password) throws Exception {
         final Element rootElement = new Element("multistatus", webdav);
         rootElement.addNamespaceDeclaration(XmlServlet.NS);
 
@@ -369,7 +345,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + TASK_URL, bais, "text/javascript");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
         final WebResponse resp = webCon.getResource(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -380,13 +356,10 @@ public class TaskTest extends AbstractWebdavXMLTest {
         if (response[0].hasError()) {
             throw new TestException(response[0].getErrorMessage());
         }
-
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
-    public static void confirmTask(final WebConversation webCon, final int objectId, final int confirm, final String confirmMessage, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
+    public static void confirmTask(final WebConversation webCon, final int objectId, final int confirm, final String confirmMessage, String host, final String login, final String password) throws Exception {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         final Element eProp = new Element("prop", webdav);
@@ -425,7 +398,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + TASK_URL, bais, "text/javascript");
-        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password, context));
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(207, resp.getResponseCode());
@@ -442,9 +415,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
         assertEquals("check response status", 200, response[0].getStatus());
     }
 
-    public static int[] listTask(final WebConversation webCon, final int inFolder, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
+    public static int[] listTask(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
         final Element ePropfind = new Element("propfind", webdav);
         final Element eProp = new Element("prop", webdav);
 
@@ -470,7 +441,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password));
         final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -489,14 +460,11 @@ public class TaskTest extends AbstractWebdavXMLTest {
         return (int[]) response[0].getDataObject();
     }
 
-    private static Credentials getCredentials(String login, String password, String context) {
-
-        return new UsernamePasswordCredentials((context == null || context.equals("")) ? login : login + "@" + context, password);
+    private static Credentials getCredentials(String login, String password) {
+        return new UsernamePasswordCredentials(login, password);
     }
 
-    public static Task[] listTask(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
+    public static Task[] listTask(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password) throws Exception {
         if (!changed && !deleted) {
             return new Task[] {};
         }
@@ -541,7 +509,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password));
         final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -568,9 +536,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
         return taskArray;
     }
 
-    public static Task loadTask(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password, String context) throws OXException, Exception {
-        host = AbstractWebdavXMLTest.appendPrefix(host);
-
+    public static Task loadTask(final WebConversation webCon, final int objectId, final int inFolder, String host, final String login, final String password) throws OXException, Exception {
         final Element ePropfind = new Element("propfind", webdav);
         final Element eProp = new Element("prop", webdav);
 
@@ -595,7 +561,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password));
         final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -610,11 +576,9 @@ public class TaskTest extends AbstractWebdavXMLTest {
         final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK);
 
         assertEquals("check response", 1, response.length);
-
         if (response[0].hasError()) {
             throw new TestException(response[0].getErrorMessage());
         }
-
         assertEquals("check response status", 200, response[0].getStatus());
 
         return (Task) response[0].getDataObject();

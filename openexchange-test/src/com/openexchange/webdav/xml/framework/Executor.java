@@ -55,10 +55,8 @@ import org.apache.commons.httpclient.auth.BasicScheme;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.jdom2.JDOMException;
-import com.openexchange.configuration.WebDAVConfig;
-import com.openexchange.configuration.WebDAVConfig.Property;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 
 /**
@@ -71,11 +69,11 @@ public final class Executor {
         super();
     }
 
-    public static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
-        return execute(client, WebDAVConfig.getProperty(Property.PROTOCOL) + "://" + WebDAVConfig.getProperty(Property.HOSTNAME), request);
+    public static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, WebDAVRequest<T> request) throws IOException, JDOMException, OXException {
+        return execute(client, AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL) + "://" + AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME), request);
     }
 
-    static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, String host, WebDAVRequest<T> request) throws IOException, JDOMException, OXException, OXException {
+    static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, String host, WebDAVRequest<T> request) throws IOException, JDOMException, OXException {
         String urlString = host + request.getServletPath();
         HttpMethodBase method;
         switch (request.getMethod()) {
@@ -90,7 +88,7 @@ public final class Executor {
                 method = put;
                 break;
             default:
-                throw new TestException("Unknown method.");
+                throw OXException.general("Unknown method.");
         }
         method.setDoAuthentication(true);
         method.getHostAuthState().setAuthScheme(new BasicScheme());

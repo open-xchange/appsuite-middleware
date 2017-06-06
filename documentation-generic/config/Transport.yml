@@ -1,0 +1,52 @@
+feature_name: Transport
+properties:
+    - key: com.openexchange.mail.transport.referencedPartLimit
+      description: |
+        Define the limit in bytes for keeping an internal copy of a referenced
+        MIME message's part when sending a mail. If a part exceeds this limit
+        a temporary file is created holding part's copy.
+      defaultValue: 1048576
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: transport.properties
+      packageName: open-xchange-core
+      tags: ["Transport","Mail", "Limit"]
+    - key: com.openexchange.mail.defaultTransportProvider
+      description: |
+        The transport provider fallback if an URL does not contain/define a protocol.
+      defaultValue: smtp
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: transport.properties
+      packageName: open-xchange-core
+      tags: ["Transport","Mail"]
+    - key: com.openexchange.mail.transport.publishingPublicInfostoreFolder
+      description: |
+        Specify the name of the publishing infostore folder which is created below public infostore folder.
+        The denoted folder is created if absent only if [[com.openexchange.mail.transport.enablePublishOnExceededQuota]] is enabled.
+        The special identifier <code>i18n-defined</code> indicates to use translation of text "E-Mail attachments".
+      defaultValue: i18n-defined
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.mail.transport.enablePublishOnExceededQuota
+      file: transport.properties
+      packageName: open-xchange-core
+      tags: ["Transport","Infostore", "Folder"]
+    - key: com.openexchange.mail.transport.removeMimeVersionInSubParts
+      description: |
+        Specify whether to strictly obey suggestion in RFC 2045.
+        The MIME-Version header field is required at the top level of a message, but is <b>not</b> required for each body part of a multipart entity.
+        If set to <code>true</code>, each message is processed to not contain a MIME-Version header in sub-parts.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: transport.properties
+      packageName: open-xchange-core
+      tags: ["Transport","Mail"]

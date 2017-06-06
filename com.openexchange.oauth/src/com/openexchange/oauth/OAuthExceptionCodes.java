@@ -253,15 +253,19 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Please provide at least one scope.
      */
-    MISSING_SCOPE("Please provide at least one scope.", CATEGORY_USER_INPUT, 40, OAuthExceptionMessages.MISSING_SCOPE_MSG),
+    MISSING_SCOPE("Please provide at least one scope.", CATEGORY_USER_INPUT, 41, OAuthExceptionMessages.MISSING_SCOPE_MSG),
     /**
      * The user needs to authorize the '%1$s' provider to gain access to '%2$s'
      */
-    NO_SCOPE_PERMISSION("The user needs to authorize the '%1$s' provider to gain access to '%2$s'", CATEGORY_PERMISSION_DENIED, 41, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
+    NO_SCOPE_PERMISSION("The user needs to authorize the '%1$s' provider to gain access to '%2$s'", CATEGORY_PERMISSION_DENIED, 42, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
     /**
-     * The provider does not support the demanded scope '%1$s'
+     * The provider does not support the demanded scope '%1$s' or it is not enabled (per configuration)
      */
-    NO_SUCH_SCOPE_AVAILABLE("The provider does not support the demanded scope '%1$s'", CATEGORY_PERMISSION_DENIED, 42, OAuthExceptionMessages.NO_SUCH_SCOPE_AVAILABLE),
+    NO_SUCH_SCOPE_AVAILABLE("The provider does not support the demanded scope '%1$s'", CATEGORY_PERMISSION_DENIED, 43, OAuthExceptionMessages.NO_SUCH_SCOPE_AVAILABLE),
+    /**
+     * '%1$s' OAuth service is not enabled for user '%2$s' in context '%3$s'.
+     */
+    DISABLED_OAUTH_SERVICE_META_DATA("'%1$s' OAuth service is not enabled for user '%2$s' in context '%3$s'.", CATEGORY_ERROR, 44, OAuthExceptionMessages.DISABLED_OAUTH_SERVICE_META_DATA),
 
     ;
 

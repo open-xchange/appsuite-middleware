@@ -115,19 +115,21 @@ public final class LoginPerformer {
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 
     /**
-     * Initializes a new {@link LoginPerformer}.
-     */
-    private LoginPerformer() {
-        super();
-    }
-
-    /**
      * Gets the {@link LoginPerformer} instance.
      *
      * @return The instance
      */
     public static LoginPerformer getInstance() {
         return SINGLETON;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link LoginPerformer}.
+     */
+    private LoginPerformer() {
+        super();
     }
 
     /**
@@ -459,28 +461,38 @@ public final class LoginPerformer {
                 throw ServiceExceptionCode.absentService(SessiondService.class);
             }
         }
-        final Session session = sessiondService.getSession(sessionId);
+
+        // Obtain session
+        Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             LOG.debug("No session found for ID: {}", sessionId);
             return null;
         }
+
         // Get context
-        final ContextStorage contextStor = ContextStorage.getInstance();
-        final Context context;
-        context = contextStor.getContext(session.getContextId());
-        if (null == context) {
-            throw ContextExceptionCodes.NOT_FOUND.create(Integer.valueOf(session.getContextId()));
+        Context context;
+        {
+            ContextStorage contextStor = ContextStorage.getInstance();
+            context = contextStor.getContext(session.getContextId());
+            if (null == context) {
+                throw ContextExceptionCodes.NOT_FOUND.create(Integer.valueOf(session.getContextId()));
+            }
         }
+
         // Get user
-        final User u;
+        User user;
         {
             final UserStorage us = UserStorage.getInstance();
-            u = us.getUser(session.getUserId(), context);
+            user = us.getUser(session.getUserId(), context);
         }
-        final LoginResultImpl logout = new LoginResultImpl(session, context, u);
+
         // Remove session
         sessiondService.removeSession(sessionId);
+
+        // Log logout performed
+        LoginResultImpl logout = new LoginResultImpl(session, context, user);
         logLogout(logout);
+
         // Trigger registered logout handlers
         triggerLogoutHandlers(logout);
         return session;
@@ -666,7 +678,8 @@ public final class LoginPerformer {
             String login = null == session ? request.getLogin() : session.getLoginName();
             if (null != login) {
                 String client = request.getClient();
-                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client));
+                String sessionId = null == session ? null : session.getSessionID();
+                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client), DefaultAttribute.valueFor(Name.SESSION_ID, null == sessionId ? "<none>" : sessionId));
             }
         }
     }

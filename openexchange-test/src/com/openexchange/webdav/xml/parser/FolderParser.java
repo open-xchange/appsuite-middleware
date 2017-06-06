@@ -51,7 +51,6 @@ import org.jdom2.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.FolderFields;
 
@@ -130,32 +129,28 @@ public class FolderParser extends FolderChildParser {
     protected void parseElementPermissions(final FolderObject folder, final Element ePermissions) throws OXException {
         final List<OCLPermission> permissions = new ArrayList<OCLPermission>();
 
-        try {
-            final List<?> elementPermissions = ePermissions.getChildren();
-            for (int a = 0; a < elementPermissions.size(); a++) {
-                final Element e = (Element) elementPermissions.get(a);
+        final List<?> elementPermissions = ePermissions.getChildren();
+        for (int a = 0; a < elementPermissions.size(); a++) {
+            final Element e = (Element) elementPermissions.get(a);
 
-                if (!e.getNamespace().equals(XmlServlet.NS)) {
-                    continue;
-                }
-
-                final OCLPermission oclp = new OCLPermission();
-
-                if (e.getName().equals("user")) {
-                    parseElementPermissionAttributes(oclp, e);
-                    parseEntity(oclp, e);
-                } else if (e.getName().equals("group")) {
-                    parseElementPermissionAttributes(oclp, e);
-                    parseEntity(oclp, e);
-                    oclp.setGroupPermission(true);
-                } else {
-                    throw OXException.general("unknown xml tag in permissions!");
-                }
-
-                permissions.add(oclp);
+            if (!e.getNamespace().equals(XmlServlet.NS)) {
+                continue;
             }
-        } catch (final OXException e) {
-            throw new TestException(e);
+
+            final OCLPermission oclp = new OCLPermission();
+
+            if (e.getName().equals("user")) {
+                parseElementPermissionAttributes(oclp, e);
+                parseEntity(oclp, e);
+            } else if (e.getName().equals("group")) {
+                parseElementPermissionAttributes(oclp, e);
+                parseEntity(oclp, e);
+                oclp.setGroupPermission(true);
+            } else {
+                throw OXException.general("unknown xml tag in permissions!");
+            }
+
+            permissions.add(oclp);
         }
 
         folder.setPermissions(permissions);

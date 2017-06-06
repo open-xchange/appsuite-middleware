@@ -49,6 +49,7 @@
 
 package com.openexchange.pns;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -137,5 +138,12 @@ public interface PushSubscription {
      * @return The nature
      */
     Nature getNature();
+
+    /**
+     * Gets this subscription's expiration date, i.e. the date after which this subscription automatically expires unless it is refreshed.
+     *
+     * @return The expiration date, or <code>null</code> if not set 
+     */
+    Date getExpires();
 
 }

@@ -1,0 +1,37 @@
+feature_name: Sms-tools
+properties:
+  - key: com.openexchange.sms.userlimit.enabled
+    description: |
+      Enables or disables the user sms limit.
+    defaultValue: true
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: sms-tools.properties
+    packageName: open-xchange-core
+    tags: ["Sms-tools"] 
+  - key: com.openexchange.sms.userlimit
+    description: |
+      Defines the maximum number of sms messages a user can send.
+    defaultValue: 5
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: sms-tools.properties
+    packageName: open-xchange-core
+    tags: ["Sms-tools"] 
+  - key: com.openexchange.sms.userlimit.refreshInterval
+    description: |
+      Defines the time in minutes after that the user sms limits are refreshed.
+      For this value to work it must always be lower than the hazelcast eviction time. 
+      Therefore if you change this value it is probably necessary to change the hazelcast eviction time too.
+    defaultValue: 1440
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: sms-tools.properties
+    packageName: open-xchange-core
+    tags: ["Sms-tools"] 

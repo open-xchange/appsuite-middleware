@@ -641,6 +641,11 @@ public final class InternalList {
         // Adds several columns to "user_mail_account" and "user_transport_account" tables for tracking/managing failed authentication attempts.
         list.add(new com.openexchange.groupware.update.tasks.AddFailedAuthColumnsToMailAccountTablesTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.10.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Extends uidl column of the pop3_storage_ids and pop3_storage_deleted tables
+        list.add(new com.openexchange.groupware.update.tasks.POP3ExtendUidlTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

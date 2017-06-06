@@ -67,7 +67,6 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountListResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
-import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -118,7 +117,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     private void updateMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription.setName("Other Name");
-        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN2));
+        mailAccountDescription.setLogin(testUser2.getLogin());
         getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL)));
         // *shrugs* don't need the response
     }

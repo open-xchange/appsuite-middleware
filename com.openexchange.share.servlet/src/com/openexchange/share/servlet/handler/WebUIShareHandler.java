@@ -141,6 +141,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                 LoginLocation location;
                 if (guestInfo.getAuthentication() == AuthenticationMode.GUEST) {
                     location = new LoginLocation()
+                        .status("not_found_continue")
                         .loginType(LoginType.MESSAGE_CONTINUE)
                         .share(guestInfo.getBaseToken())
                         .target(targetPath)
@@ -148,6 +149,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                         .loginName(guestInfo.getEmailAddress());
                 } else {
                     location = new LoginLocation()
+                        .status("not_found_continue")
                         .share(guestInfo.getBaseToken())
                         .loginType(guestInfo.getAuthentication())
                         .target(targetPath)

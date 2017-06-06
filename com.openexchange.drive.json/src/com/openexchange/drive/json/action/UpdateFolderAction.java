@@ -81,7 +81,7 @@ public class UpdateFolderAction extends AbstractDriveAction {
         if (Strings.isEmpty(checksum)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
         }
-
+        boolean cascadePermissions = Boolean.valueOf(requestData.getParameter("cascadePermissions"));
         JSONObject json = (JSONObject) requestData.requireData();
         NotificationParameters parameters = new NotificationParameters();
         JSONObject jsonFolder;
@@ -101,7 +101,7 @@ public class UpdateFolderAction extends AbstractDriveAction {
         /*
          * update the directory, return empty result in case of success
          */
-        getDriveService().getUtility().updateDirectory(session, new JsonDirectoryVersion(checksum, path), jsonFolder, parameters);
+        getDriveService().getUtility().updateDirectory(session, new JsonDirectoryVersion(checksum, path), jsonFolder, cascadePermissions, parameters);
         AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
         if (null != parameters.getWarnings()) {
             result.addWarnings(parameters.getWarnings());

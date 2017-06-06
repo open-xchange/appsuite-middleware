@@ -52,7 +52,11 @@ package com.openexchange.mail.conversion;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -65,11 +69,15 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -78,6 +86,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InlineImageDataSource implements ImageDataSource {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InlineImageDataSource.class);
 
     private static final InlineImageDataSource INSTANCE = new InlineImageDataSource();
 
@@ -101,9 +111,12 @@ public final class InlineImageDataSource implements ImageDataSource {
      * </ul>
      */
     private static final String[] ARGS = {
-        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid" };
+        "com.openexchange.mail.conversion.fullname", "com.openexchange.mail.conversion.mailid", "com.openexchange.mail.conversion.cid", "com.openexchange.mail.conversion.auth" };
 
     private static final Class<?>[] TYPES = { InputStream.class };
+
+    private ServiceLookup serviceLookup;
+
 
     /**
      * Initializes a new {@link InlineImageDataSource}
@@ -112,10 +125,17 @@ public final class InlineImageDataSource implements ImageDataSource {
         super();
     }
 
-    private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session) throws OXException {
-        MailAccess<?, ?> mailAccess = null;
+    private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session, final String auth) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
+            if(serviceLookup != null) {
+                CryptographicAwareMailAccessFactory cryptoMailAccessFactory = serviceLookup.getOptionalService(CryptographicAwareMailAccessFactory.class);
+                if(cryptoMailAccessFactory != null) {
+                    //Handling for encrypted mails if a cryptographic aware service is available.
+                    mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session, auth);
+                }
+            }
             mailAccess.connect();
             return loadImagePart(fullname, mailId, cid, mailAccess);
         } catch (final OXException e) {
@@ -146,13 +166,40 @@ public final class InlineImageDataSource implements ImageDataSource {
         return imagePart;
     }
 
+    /**
+     * Sets the ServiceLookup
+     *
+     * @param serviceLookup
+     */
+    public void setServiceLookup(ServiceLookup serviceLookup) {
+        this.serviceLookup = serviceLookup;
+
+    }
+
     @Override
     public String generateUrl(final ImageLocation imageLocation, final Session session) {
         final StringBuilder sb = new StringBuilder(64);
-        /*
-         * Nothing special...
-         */
+
+        // Nothing special...
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
+
+        // Append authentication token to StringBuilder here
+        CryptographicServiceAuthenticationFactory crypto = serviceLookup.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+        if (crypto != null) {  // Images may be encrypted within an Email
+            try {
+                String auth = null;
+                // Try to get authentication from Image URL, else from session
+                auth = imageLocation.getAuth() == null ? crypto.getAuthTokenFromSession(session) : crypto.getTokenValueFromString(imageLocation.getAuth());
+                if (auth != null) {
+                    sb.append("&cryptoAuth=");
+                    sb.append(URLEncoder.encode(auth, "UTF-8"));
+                }
+            } catch (OXException | UnsupportedEncodingException ex) {
+                // Don't care...
+                LOG.debug("", ex);
+            }
+        }
+
         return sb.toString();
     }
 
@@ -162,6 +209,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         dataArguments.put(ARGS[0], imageLocation.getFolder());
         dataArguments.put(ARGS[1], imageLocation.getId());
         dataArguments.put(ARGS[2], imageLocation.getImageId());
+        dataArguments.put(ARGS[3], imageLocation.getAuth());
         return dataArguments;
     }
 
@@ -232,7 +280,8 @@ public final class InlineImageDataSource implements ImageDataSource {
             if (null == cid) {
                 throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[2]);
             }
-            mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session);
+            String auth = dataArguments.get(ARGS[3]);
+            mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session, auth);
             if (null == mailPart) {
                 throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(cid, mailId, fullname);
             }
@@ -298,6 +347,5 @@ public final class InlineImageDataSource implements ImageDataSource {
     public String getAlias() {
         return ALIAS;
     }
-
 }
 

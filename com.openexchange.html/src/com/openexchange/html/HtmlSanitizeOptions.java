@@ -49,6 +49,8 @@
 
 package com.openexchange.html;
 
+import com.openexchange.session.Session;
+
 /**
  * {@link HtmlSanitizeOptions} - The options when sanitizing HTML content.
  *
@@ -75,6 +77,8 @@ public class HtmlSanitizeOptions {
         private String cssPrefix;
         private int maxContentSize;
         private boolean suppressLinks;
+        private boolean replaceBodyWithDiv;
+        private Session session;
 
         Builder() {
             super();
@@ -84,6 +88,14 @@ public class HtmlSanitizeOptions {
             cssPrefix = null;
             maxContentSize = 0;
             suppressLinks = false;
+            replaceBodyWithDiv = false;
+            session = null;
+        }
+
+        /** Sets the session */
+        public Builder setSession(Session session) {
+            this.session = session;
+            return this;
         }
 
         public Builder setOptConfigName(String optConfigName) {
@@ -121,9 +133,15 @@ public class HtmlSanitizeOptions {
             return this;
         }
 
+        /** Sets whether <code>&lt;body&gt;</code> is supposed to be replaced with a <code>&lt;div&gt;</code> tag for embedded display */
+        public Builder setReplaceBodyWithDiv(boolean replaceBodyWithDiv) {
+            this.replaceBodyWithDiv = replaceBodyWithDiv;
+            return this;
+        }
+
         /** Builds the instance from this builder's arguments */
         public HtmlSanitizeOptions build() {
-            return new HtmlSanitizeOptions(optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks);
+            return new HtmlSanitizeOptions(session, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv);
         }
     }
 
@@ -135,15 +153,28 @@ public class HtmlSanitizeOptions {
     private final String cssPrefix;
     private final int maxContentSize;
     private final boolean suppressLinks;
+    private final boolean replaceBodyWithDiv;
+    private final Session session;
 
-    HtmlSanitizeOptions(String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks) {
+    HtmlSanitizeOptions(Session session, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv) {
         super();
+        this.session = session;
         this.optConfigName = optConfigName;
         this.dropExternalImages = dropExternalImages;
         this.modified = modified;
         this.cssPrefix = cssPrefix;
         this.maxContentSize = maxContentSize;
         this.suppressLinks = suppressLinks;
+        this.replaceBodyWithDiv = replaceBodyWithDiv;
+    }
+
+    /**
+     * Gets the optional session
+     *
+     * @return The session or <code>null</code>
+     */
+    public Session optSession() {
+        return session;
     }
 
     /**
@@ -198,6 +229,15 @@ public class HtmlSanitizeOptions {
      */
     public boolean isSuppressLinks() {
         return suppressLinks;
+    }
+
+    /**
+     * Checks whether <code>&lt;body&gt;</code> is supposed to be replaced with a <code>&lt;div&gt;</code> tag for embedded display
+     *
+     * @return <code>true</code> to replace; otherwise <code>false</code>
+     */
+    public boolean isReplaceBodyWithDiv() {
+        return replaceBodyWithDiv;
     }
 
 }

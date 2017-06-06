@@ -160,7 +160,7 @@ public class CopyTest extends InfostoreAJAXTest {
 
     @Test
     public void testUploadCopy() throws Exception {
-        final File upload = new File(TestInit.getTestProperty("webdavPropertiesFile"));
+        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
         com.openexchange.file.storage.File org = itm.getAction(origId);

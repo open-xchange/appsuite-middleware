@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.oauth
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.exception,
+Import-Package: com.google.common.collect;version="19.0.0",
+ com.openexchange.exception,
  com.openexchange.framework.request,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.i18n,
@@ -15,8 +16,8 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
- org.scribe.model;version="1.3.7",
- org.osgi.framework
+ org.osgi.framework,
+ org.scribe.model;version="1.3.7"
 Export-Package: com.openexchange.oauth,
  com.openexchange.oauth.access,
  com.openexchange.oauth.association,

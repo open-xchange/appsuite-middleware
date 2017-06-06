@@ -95,7 +95,6 @@ public class ThrowableToJSONConverterTest {
         JSONArray jsonArray = throwableJSON.getJSONArray("stackTrace");
         JSONObject stackTraceElement = JSONObject.class.cast(jsonArray.get(0));
         assertEquals("ThrowableToJSONConverterTest.java", stackTraceElement.getString("fileName"));
-        assertEquals("82", stackTraceElement.getString("lineNumber"));
         assertEquals("com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverterTest", stackTraceElement.getString("className"));
         assertEquals("setUp", stackTraceElement.getString("methodName"));
     }

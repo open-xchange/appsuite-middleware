@@ -65,7 +65,22 @@ test -f $OXFUNCTIONS || {
 
 . $OXFUNCTIONS
 
+# Get existing variables that match our pattern
+get_jopts() {
+  echo $(compgen -A variable | grep JAVA_OPTS_)
+}
+
+# unset JAVA_XTRAOPTS and JAVA_OPTS_* to start with a clean environment
+for x in JAVA_XTRAOPTS $(get_jopts)
+do
+  unset $x
+done
+
 test -f $OXCONFIG && . $OXCONFIG
+
+# Use old JAVA_XTRAOPTS if declared otherwise build it from JAVA_OPTS_ fragments
+GATHERED_OPTS=$(eval echo "$(sed -e 's/\(\<\)/$\1/g' <<<$(get_jopts))")
+JAVA_XTRAOPTS=${JAVA_XTRAOPTS:=${GATHERED_OPTS}}
 
 ox_set_JAVA_BIN
 
@@ -90,12 +105,6 @@ JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Djava.awt.headless=true \
 -Dopenexchange.propdir=$PROPERTIESDIR"
 
-CLASSPATH=""
-
-if [ -n "$CLASSPATH" ]; then
-    CLASSPATH="-classpath $CLASSPATH"
-fi
-
 ox_save_backup $CONSOLELOG
 
 if [ -n "$UMASK" ]; then
@@ -107,7 +116,8 @@ fi
 # On distros without systemd we might get called via su which might have
 # applied limits from /etc/security/limits.* depending on the distro. Assure
 # that user configured limits are used
-if ! pidof systemd > /dev/null 2>&1
+read the_init < /proc/1/comm
+if [[ -n "${the_init}" && "${the_init}" != systemd ]]
 then
   NRFILES=${NRFILES:-65536}
   NPROC=${NPROC:-65536}
@@ -116,11 +126,11 @@ then
 fi
 
 # Bug 51074: wrong locale will break encoding of started processes
-LC_CTYPE=$(locale | sed -ne 's/^LC_CTYPE="\?\([^"]*\)"\?$/\1/p')
-if ! [[ "${LC_CTYPE}" =~ .*UTF-8 ]]
+charmap=$(locale charmap)
+if ! [[ "${charmap}" == "UTF-8" ]]
 then
-  echo "WARNING: Couldn't detect proper unicode locale for category LC_CTYPE!" >> ${CONSOLELOG}
-  echo "WARNING: Current LC_CTYPE: ${LC_CTYPE} will cause encoding problems!"  >> ${CONSOLELOG}
+  echo "WARNING: Couldn't detect proper unicode charmap in locale category LC_CTYPE." >> ${CONSOLELOG}
+  echo "WARNING: Current charmap: \"${charmap}\" might cause encoding problems."  >> ${CONSOLELOG}
 fi
 
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.11.0.v20160603-1336.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

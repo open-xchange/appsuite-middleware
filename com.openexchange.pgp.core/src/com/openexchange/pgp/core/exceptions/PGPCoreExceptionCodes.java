@@ -53,23 +53,43 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PGPCoreExceptionCodes}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public enum PGPCoreExceptionCodes implements DisplayableOXExceptionCode {
 
+    /**
+     * No encrypted items found.
+     */
     NO_PGP_DATA_FOUND("No encrypted items found.", CATEGORY_ERROR, 1),
+    /**
+     * The private key for the identity '%1$s' could not be found.
+     */
     PRIVATE_KEY_NOT_FOUND("The private key for the identity '%1$s' could not be found.", CATEGORY_ERROR, 2),
+    /**
+     * Bad password.
+     */
     BAD_PASSWORD("Bad password.", CATEGORY_USER_INPUT, 3),
+    /**
+     * No signature items found
+     */
     NO_PGP_SIGNATURE_FOUND("No signature items found", CATEGORY_ERROR,4),
-    IO_EXCEPTION("An IO error occured: '%1$s'", CATEGORY_ERROR, 5),
-    PGP_EXCEPTION("An PGP error occured: '%1$s'", CATEGORY_ERROR, 6),
+    /**
+     * An I/O error occurred: '%1$s
+     */
+    IO_EXCEPTION("An I/O error occurred: '%1$s'", CATEGORY_ERROR, 5),
+    /**
+     * A PGP error occurred: '%1$s'
+     */
+    PGP_EXCEPTION("A PGP error occurred: '%1$s'", CATEGORY_ERROR, 6),
     ;
 
+    /** The error code prefix for PGP-related errors */
     public static final String PREFIX = "PGP-CORE";
 
     private final String message;
@@ -93,13 +113,13 @@ public enum PGPCoreExceptionCodes implements DisplayableOXExceptionCode {
      * Initializes a new {@link PGPCoreExceptionCodes}.
      *
      * @param message The error message
-     * @param displayMessage The displayed error message
+     * @param displayMessage The displayed error message or <code>null</code>
      * @param category The category
      * @param number The error number
      */
     private PGPCoreExceptionCodes(String message, String displayMessage, Category category, int number) {
         this.message = message;
-        this.displayMessage = displayMessage;
+        this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.category = category;
         this.detailNumber = number;
     }

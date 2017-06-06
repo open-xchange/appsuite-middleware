@@ -83,7 +83,7 @@ public class NewTest extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link NewTest}.
-     * 
+     *
      * @param name The test case's name
      */
     public NewTest() {
@@ -104,6 +104,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setTest(new HeaderTest(new IsComparison(), new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -135,6 +136,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setTest(allOfTest);
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -159,6 +161,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setActive(true);
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }
@@ -190,6 +193,7 @@ public class NewTest extends AbstractMailFilterTest {
         try {
             mailFilterAPI.setFailOnError(false);
             id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             exceptionThrown = false;
             fail("Expected an exception");
         } catch (Exception e) {
@@ -219,6 +223,7 @@ public class NewTest extends AbstractMailFilterTest {
             rule1.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
 
             int id = mailFilterAPI.createRule(rule1);
+            rememberRule(id);
             rule1.setId(id);
             rule1.setPosition(0);
         }
@@ -234,6 +239,7 @@ public class NewTest extends AbstractMailFilterTest {
             rule2.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
 
             int id = mailFilterAPI.createRule(rule2);
+            rememberRule(id);
             rule2.setId(id);
             rule2.setPosition(1);
         }
@@ -259,6 +265,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setTest(new HeaderTest(new ContainsComparison(), new String[] { "X-Been-There", "X-MailingList" }, new String[] { "" }));
 
             int id = mailFilterAPI.createRule(expected);
+            rememberRule(id);
             expected.setId(id);
             expected.setPosition(0);
         }

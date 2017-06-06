@@ -60,8 +60,6 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public class MailAccountTransportProperties extends AbstractMailAccountProperties implements ITransportProperties {
 
-    protected Boolean enforceSecureConnection;
-
     /**
      * Initializes a new {@link MailAccountTransportProperties}.
      *
@@ -90,21 +88,6 @@ public class MailAccountTransportProperties extends AbstractMailAccountPropertie
     @Override
     public int getReferencedPartLimit() {
         return lookUpIntProperty("com.openexchange.mail.transport.referencedPartLimit", TransportProperties.getInstance().getReferencedPartLimit());
-    }
-
-    @Override
-    public boolean isEnforceSecureConnection() {
-        Boolean b = this.enforceSecureConnection;
-        if (null != b) {
-            return b.booleanValue();
-        }
-
-        return lookUpBoolProperty("com.openexchange.mail.enforceSecureConnection", TransportProperties.getInstance().isEnforceSecureConnection());
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        this.enforceSecureConnection = Boolean.valueOf(enforceSecureConnection);
     }
 
 }

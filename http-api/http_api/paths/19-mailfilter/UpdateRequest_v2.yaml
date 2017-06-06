@@ -18,7 +18,7 @@
         description: A JSON object describing the rule with the `id` set (which identifies the rule to change). Only modified fields are present.
         required: true
         schema:
-          $ref: "#/definitions/MailFilterRule_v2"
+          $ref: "#/definitions/MailFilterRulev2"
     responses:
       200:
         description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).

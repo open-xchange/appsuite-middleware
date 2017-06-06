@@ -210,7 +210,7 @@ public final class AllFetch {
                 // In-Reply-To and Message-Id
                 m.addHeader("In-Reply-To", envelope.inReplyTo);
                 m.addHeader("Message-Id", envelope.messageId);
-                m.setSubject(MimeMessageUtility.decodeEnvelopeSubject(envelope.subject));
+                m.setSubject(MimeMessageUtility.decodeEnvelopeSubject(envelope.subject), true);
             }
 
             private String addrs2String(final InternetAddress[] addrs) {

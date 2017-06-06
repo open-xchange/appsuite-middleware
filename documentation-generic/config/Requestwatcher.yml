@@ -1,0 +1,70 @@
+feature_name: Requestwatcher
+properties:
+  - key: com.openexchange.requestwatcher.isEnabled
+    description: |
+      Enable/disable the requestwatcher.
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: requestwatcher.properties
+    packageName: open-xchange-core
+    tags: ["Requestwatcher"] 
+  - key: com.openexchange.requestwatcher.frequency
+    description: |
+      Define the requestwatcher's frequency in milliseconds.
+    defaultValue: 30000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: requestwatcher.properties
+    packageName: open-xchange-core
+    tags: ["Requestwatcher"] 
+  - key: com.openexchange.requestwatcher.maxRequestAge
+    description: |
+      Define the maximum allowed age of requests in milliseconds.
+    defaultValue: 60000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: requestwatcher.properties
+    packageName: open-xchange-core
+    tags: ["Requestwatcher"] 
+  - key: com.openexchange.requestwatcher.restartPermission
+    description: |
+      Permission to stop & re-init system (works only for the ajp connector).
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: requestwatcher.properties
+    packageName: open-xchange-core
+    tags: ["Requestwatcher"] 
+  - key: com.openexchange.requestwatcher.eas.ignore.cmd
+    description: |
+      Define a comma separated list of EAS commands that will be ignored by the
+      request watcher.
+    defaultValue: sync,ping
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: requestwatcher.properties
+    packageName: open-xchange-core
+    tags: ["Requestwatcher"] 
+  - key: com.openexchange.requestwatcher.usm.ignore.path
+    description: |
+      Define a comma separated list of USM paths that will be ignored by the
+      request watcher. Hint: each path has to start with a '/'.
+    defaultValue: /syncUpdate
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: requestwatcher.properties
+    packageName: open-xchange-core
+    tags: ["Requestwatcher"] 

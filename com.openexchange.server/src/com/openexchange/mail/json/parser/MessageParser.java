@@ -112,7 +112,6 @@ import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -620,7 +619,7 @@ public final class MessageParser {
          * Subject, etc.
          */
         if (jsonObj.hasAndNotNull(MailJSONField.SUBJECT.getKey())) {
-            mail.setSubject(jsonObj.getString(MailJSONField.SUBJECT.getKey()));
+            mail.setSubject(jsonObj.getString(MailJSONField.SUBJECT.getKey()), true);
         }
         /*
          * Size
@@ -755,7 +754,6 @@ public final class MessageParser {
                             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(msgref.getMailID(), msgref.getFolder());
                         }
                         referencedMail.setAccountId(access.getAccountId());
-                        referencedMail = ManagedMimeMessage.clone(referencedMail);
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
                         referencedMailPart = null == seqId ? null : groupedReferencedParts.get(seqId);
@@ -831,7 +829,6 @@ public final class MessageParser {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(pMsgRef.getMailID(), pMsgRef.getFolder());
         }
         referencedMail.setAccountId(access.getAccountId());
-        referencedMail = ManagedMimeMessage.clone(referencedMail);
         // Get attachments out of referenced mail
         Set<String> remaining = new HashSet<String>(groupedSeqIDs.keySet());
         MultipleMailPartHandler handler = new MultipleMailPartHandler(groupedSeqIDs.keySet(), false);

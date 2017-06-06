@@ -62,6 +62,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.QueryLogger;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AuthenticationException;
+import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.mapping.MappingManager;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -97,7 +98,11 @@ public class CassandraServiceImpl implements CassandraService {
      * A multi-purpose global keyspace-less Cassandra {@link Session}. Used for
      * retrieving statistics for the {@link Cluster}
      */
-    private final Session globalSession;
+    private Session globalSession;
+
+    private final ServiceLookup services;
+
+    private final CassandraServiceInitializer initializer;
 
     /**
      * Initialises a new {@link CassandraServiceImpl}.
@@ -105,12 +110,25 @@ public class CassandraServiceImpl implements CassandraService {
      * @param services The {@link ServiceLookup} instance
      * @throws OXException
      */
-    public CassandraServiceImpl(ServiceLookup services) throws OXException {
+    public CassandraServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
 
         // Build the Cluster
-        CassandraServiceInitializer initializer = new CassandraServiceInitializer(services);
+        initializer = new CassandraServiceInitializer(services);
         cluster = Cluster.buildFrom(initializer);
+
+        // Initialise the sessions cache
+        synchronousSessions = new ConcurrentHashMap<>();
+        asynchronousSessions = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Initialises the cluster connection
+     * 
+     * @throws OXException if initialisation fails
+     */
+    public void init() throws OXException {
         try {
             // Initialise cluster
             cluster.init();
@@ -131,9 +149,6 @@ public class CassandraServiceImpl implements CassandraService {
         } catch (AuthenticationException e) {
             throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
         }
-        // Initialise the sessions cache
-        synchronousSessions = new ConcurrentHashMap<>();
-        asynchronousSessions = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -160,11 +175,19 @@ public class CassandraServiceImpl implements CassandraService {
                 return session;
             }
 
-            // If none exists, connect
-            Future<Session> newSession = cluster.connectAsync(keyspace);
-            // Cache the new session
-            asynchronousSessions.put(keyspace, newSession);
-            return newSession;
+            try {
+                // If none exists, connect
+                Future<Session> newSession = cluster.connectAsync(keyspace);
+                // Cache the new session
+                asynchronousSessions.put(keyspace, newSession);
+                return newSession;
+            } catch (NoHostAvailableException e) {
+                throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.create(e, initializer.getContactPoints());
+            } catch (IllegalStateException e) {
+                throw CassandraServiceExceptionCodes.CANNOT_INITIALISE_CLUSTER.create(e, e.getMessage());
+            } catch (RuntimeException e) {
+                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
     }
 
@@ -243,8 +266,10 @@ public class CassandraServiceImpl implements CassandraService {
      *
      * @param keyspace The keyspace
      * @return A {@link CassandraSession}
+     * @throws OXException if the cluster instance cannot be initialised, or if the specified keyspace does not exist,
+     *             or if any other error is occurred
      */
-    private CassandraSession getCassandraSession(String keyspace) {
+    private CassandraSession getCassandraSession(String keyspace) throws OXException {
         // Fetch a connection from cache
         CassandraSession session = synchronousSessions.get(keyspace);
         if (session != null) {
@@ -257,13 +282,25 @@ public class CassandraServiceImpl implements CassandraService {
                 return session;
             }
 
-            // If none exists, connect
-            Session newSession = cluster.connect(keyspace);
-            MappingManager mappingManager = new MappingManager(newSession);
-            CassandraSession newCassandraSession = new CassandraSession(newSession, mappingManager);
-            // Cache the new session
-            synchronousSessions.put(keyspace, newCassandraSession);
-            return newCassandraSession;
+            try {
+                // If none exists, connect
+                Session newSession = cluster.connect(keyspace);
+                MappingManager mappingManager = new MappingManager(newSession);
+                CassandraSession newCassandraSession = new CassandraSession(newSession, mappingManager);
+                // Cache the new session
+                synchronousSessions.put(keyspace, newCassandraSession);
+                return newCassandraSession;
+            } catch (NoHostAvailableException e) {
+                throw CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.create(e, initializer.getContactPoints());
+            } catch (AuthenticationException e) {
+                throw CassandraServiceExceptionCodes.AUTHENTICATION_ERROR.create(e, initializer.getContactPoints());
+            } catch (InvalidQueryException e) {
+                throw CassandraServiceExceptionCodes.KEYSPACE_DOES_NOT_EXIST.create(e, keyspace);
+            } catch (IllegalStateException e) {
+                throw CassandraServiceExceptionCodes.CANNOT_INITIALISE_CLUSTER.create(e, e.getMessage());
+            } catch (RuntimeException e) {
+                throw CassandraServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
     }
 }

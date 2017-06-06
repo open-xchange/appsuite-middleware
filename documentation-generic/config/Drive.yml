@@ -1,0 +1,494 @@
+feature_name: Drive
+feature_description: |
+  Properties for com.openexchange.drive
+properties:
+    - key: com.openexchange.capability.drive
+      description: |
+        Enables or disables the "drive" module capability globally. The capability
+        can also be set more fine-grained via config cascade. Per default it is only
+        enabled for users that have the "infostore" permission set. This is configured
+        in /opt/open-xchange/etc/contextSets/drive.yml.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Capability"]
+    - key: com.openexchange.drive.shortProductName
+      description: |
+        Short product name as used in the version comment string inserted for drive
+        uploads, e.g. "Uploaded with OX Drive (Ottos Laptop)".
+      defaultValue: OX Drive
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive"]
+    - key: com.openexchange.drive.useTempFolder
+      description: |
+        Specifies whether the synchronization logic will make use of a folder named
+        ".drive" below the root synchronization folder or not. If enabled, this
+        folder is used to store temporary uploads and removed files, which usually
+        leads to a better user experience since previously synchronized files can
+        be restored from there for example. If not, removed files are not kept, and
+        uploads are performed directly in the target folder.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Folder"]
+    - key: com.openexchange.drive.cleaner.interval
+      description: |
+        Configures the interval between runs of the cleaner process for the
+        temporary ".drive" folder. A cleaner run is only initiated if the
+        synchronization is idle, i.e. the last synchronization resulted in no
+        actions to be performed, and the last run was before the configured
+        interval. The value can be defined using units of measurement: "D" (=days),
+        "W" (=weeks) and "H" (=hours).
+      defaultValue: 1D
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Folder"]
+    - key: com.openexchange.drive.cleaner.maxAge
+      description: |
+        Defines the maximum age of files and directories to be kept inside the
+        temporary ".drive" folder. Files or directories that were last modified
+        before the configured age are deleted during the next run of the cleaner
+        process. The value can be defined using units of measurement: "D" (=days),
+        "W" (=weeks) and "H" (=hours).
+      defaultValue: 1D
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Folder", "Limit"]
+    - key: com.openexchange.drive.checksum.cleaner.interval
+      description: |
+        Defines the interval of a periodic background task that performs cleanup 
+        operations for cached checksums in the database. The task is executed only 
+        once per interval in the cluster, so this value should be equally defined 
+        on each node.
+        The value can be defined using units of measurement: "D" (=days), 
+        "W" (=weeks) and "H" (=hours) with a minimum of "1H" (one hour). 
+        A value of "0" disables the periodic background task.
+      defaultValue: 1D
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Database"]
+    - key: com.openexchange.drive.checksum.cleaner.maxAge
+      description: |
+        Defines the timespan after which an unused checksum should be removed from 
+        the database cache.
+        The value can be defined using units of measurement: "D" (=days), 
+        "W" (=weeks) and "H" (=hours) with a minimum of "1D" (one day). 
+      defaultValue: 4W
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Database", "Limit"]
+    - key: com.openexchange.drive.maxBandwidth
+      description: |
+        Allows to limit the maximum used bandwidth for all downloads. If
+        configured, downloads via the drive module handled by this backend node will
+        not exceed the configured bandwidth. The available bandwidth is defined as
+        the number of allowed bytes per second, where the byte value can be
+        specified with one of the units "B" (bytes), "kB" (kilobyte), "MB"
+        (Megabyte) or "GB" (Gigabyte), e.g. "10 MB". Must fit into the "Integer"
+        range, i.e. the configured number of bytes has to be be smaller than 2^31.
+        <code>-1</code> means no limitations.
+      defaultValue: -1
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit"]
+    - key: com.openexchange.drive.maxBandwidthPerClient
+      description: |
+        Allows to limit the maximum used bandwidth for client downloads within the
+        same session. If configured, downloads originating in the same session via
+        the drive module handled by this backend node will not exceed the
+        configured bandwidth. The available bandwidth is defined as the number of
+        allowed bytes per second, where the byte value can be specified with one of
+        the units "B" (bytes), "kB" (kilobyte), "MB" (Megabyte) or "GB" (Gigabyte),
+        e.g. "500 kB". Must fit into the "Integer" range, i.e. the configured
+        number of bytes has to be be smaller than 2^31. 
+        <code>-1</code> means no limitations.
+      defaultValue: -1
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit"]
+    - key: com.openexchange.drive.maxConcurrentSyncOperations
+      description: |
+        Specifies the maximum allowed number of synchronization operations, i.e.
+        all requests to the "drive" module apart from up- and downloads, that the
+        server accepts concurrently. While the limit is reached, further
+        synchronization requests are rejected in a HTTP 503 manner (service
+        unavailable), and the client is instructed to try again at a later time.
+        <code>-1</code> means no limitations.
+      defaultValue: -1
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit"]
+    - key: com.openexchange.drive.maxDirectories
+      description: |
+        Defines the maximum number of synchronizable directories per root folder. A
+        value of <code>-1</code> disables the limitation.
+      defaultValue: 65535
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit", "Folder"]
+    - key: com.openexchange.drive.maxFilesPerDirectory
+      description: |
+        Defines the maximum number of synchronizable files per root folder. A
+        value of <code>-1</code> disables the limitation.
+      defaultValue: 65535
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit", "Folder"]
+    - key: com.openexchange.drive.enabledServices
+      description: |
+        Configures a list of allowed file storage services where synchronization via OX Drive should be enabled. 
+        The services must be defined in a comma-separated list of their unique identifiers.
+      defaultValue: com.openexchange.infostore
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive"]
+    - key: com.openexchange.drive.excludedFolders
+      description: |
+        Allows to exclude specific root folders from OX Drive synchronization explicitly. 
+        Excluded folders may not be used as root folder for the synchronization, 
+        however, this does not apply to their subfolders automatically.
+        Excluded folders should be specified in a comma-separated list of their unique identifiers.
+        Typical candidates for the blacklist would be folder 15 (the "public folders" root) 
+        or folder 10 (the "shared folders" root) in large enterprise installations.      
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Folder", "Black List"]
+    - key: com.openexchange.drive.directLinkQuota
+      description: |
+        Configures the pattern for a direct link to manage a user's quota. 
+        Text in brackets is replaced dynamically during link generation in the backend,
+        however, it's still possible to overwrite them here with a static value, or
+        even define an arbitrary URL here.
+
+        [protocol] is replaced automatically with the protocol used by the client
+        (typically "http" or "https").  
+        [hostname] should be replaced with the server's canonical host name (if not,
+        the server tries to determine the hostname on it's own),  
+        [uiwebpath] is replaced with the value of [[com.openexchange.UIWebPath]], while [dispatcherPrefix] is replaced with the value of
+        [[com.openexchange.dispatcher.prefix]].  
+        [contextid], [userid] and [login] are replaced to reflect the values of the
+        current user.     
+      defaultValue: "[protocol]://[hostname]"
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.UIWebPath","com.openexchange.dispatcher.prefix"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Host"]
+    - key: com.openexchange.drive.directLinkHelp
+      description: |
+        Configures the pattern for a direct link to the online help. This serves as
+        target for the "Help" section in the client applications. Text in brackets
+        is replaced dynamically during link generation in the backend, however, it's
+        still possible to overwrite them here with a static value, or even define an
+        arbitrary URL here.
+
+        [protocol] is replaced automatically with the protocol used by the client
+        (typically "http" or "https").  
+        [hostname] should be replaced with the server's canonical host name (if not,
+        the server tries to determine the hostname on it's own),  
+        [uiwebpath] is replaced with the value of [[com.openexchange.UIWebPath]], while [dispatcherPrefix] is replaced with the value of
+        [[com.openexchange.dispatcher.prefix]].  
+        [contextid], [userid] and [login] are replaced to reflect the values of the
+        current user.   
+      defaultValue: "[protocol]://[hostname]/[uiwebpath]/help-drive/l10n/[locale]/index.html"
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.UIWebPath","com.openexchange.dispatcher.prefix"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Host"]
+    - key: com.openexchange.drive.events.apn.ios.enabled
+      description: |
+        Enables or disables push event notifications to clients using the Apple Push
+        Notification service (APNS) for iOS devices. This requires a valid
+        configuration for the APNS certificate and keys,
+        or install the restricted components packages for drive.  
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.drive.events.apn.ios.keystore", "com.openexchange.drive.events.apn.ios.password"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.ios.keystore
+      description: |
+        Specifies the path to the local keystore file (PKCS #12) containing the APNS
+        certificate and keys for the iOS application, e.g.
+        "/opt/open-xchange/etc/drive-apns.p12". Required if
+        [[com.openexchange.drive.events.apn.ios.enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.drive.events.apn.ios.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.ios.password
+      description: |
+        Specifies the password used when creating the referenced keystore containing
+        the certificate of the iOS application. Note that blank or null passwords
+        are in violation of the PKCS #12 specifications. Required if
+        [[com.openexchange.drive.events.apn.ios.enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.drive.events.apn.ios.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple", "Credential"]
+    - key: com.openexchange.drive.events.apn.ios.production
+      description: |
+        Indicates which APNS service is used when sending push notifications to iOS
+        devices. A value of <code>true</code> will use the production service, a value of
+        <code>false</code> the sandbox service.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.ios.feedbackQueryInterval
+      description: |
+        Configures the interval between queries to the APN feedback service for the
+        subscribed iOS devices. The value can be defined using units of measurement:
+        "D" (=days), "W" (=weeks) and "H" (=hours).
+        Leaving this parameter empty disables the feedback queries on this node.
+        Since each received feedback is processed cluster-wide, only one node in the
+        cluster should be enabled here.
+      defaultValue: 1D
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.macos.enabled
+      description: |
+        Enables or disables push event notifications to clients using the Apple Push
+        Notification service (APNS) for Mac OS devices. This requires a valid
+        configuration for the APNS certificate and keys,
+        or install the restricted components packages for drive.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.drive.events.apn.macos.keystore","com.openexchange.drive.events.apn.macos.password"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.macos.keystore
+      description: |
+        Specifies the path to the local keystore file (PKCS #12) containing the APNS
+        certificate and keys for the Mac OS application, e.g.
+        "/opt/open-xchange/etc/drive-apns.p12". Required if
+        [[com.openexchange.drive.events.apn.macos.enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.drive.events.apn.macos.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.macos.password
+      description: |
+        Specifies the password used when creating the referenced keystore containing
+        the certificate of the Mac OS application. Note that blank or null passwords
+        are in violation of the PKCS #12 specifications. Required if
+        [[com.openexchange.drive.events.apn.macos.enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.drive.events.apn.macos.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple", "Credential"]
+    - key: com.openexchange.drive.events.apn.macos.production
+      description: |
+        Indicates which APNS service is used when sending push notifications to Mac
+        OS devices. A value of <code>true</code> will use the production service, a value of
+        <code>false</code> the sandbox service.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.drive.events.apn.macos.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.macos.feedbackQueryInterval
+      description: |
+        Configures the interval between queries to the APN feedback service for the
+        subscribed Mac OS devices. The value can be defined using units of
+        measurement: "D" (=days), "W" (=weeks) and "H" (=hours). 
+        Leaving this parameter empty disables the feedback queries on
+        this node. Since each received feedback is processed cluster-wide, only one
+        node in the cluster should be enabled here.
+      defaultValue: 1D
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.drive.events.apn.macos.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.gcm.enabled
+      description: |
+        Enables or disables push event notifications to clients using the Google
+        Cloud Messaging (GCM) service. This requires a valid configuration for the
+        GCM API key.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.drive.events.gcm.key"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Android"]
+    - key: com.openexchange.drive.events.gcm.key
+      description: |
+        Specifies the API key of the server application. Required if
+        [[com.openexchange.drive.events.gcm.enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.drive.events.gcm.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Android"]
+    - key: com.openexchange.drive.events.blockingLongPolling.enabled
+      description: |
+        Configures whether blocking long polling for pushing synchronization events
+        to clients may be used as fallback when no other long polling handlers are
+        available due to missing support of the HTTP service. Handling long polling
+        in a blocking manner consumes a server thread, and should therefore only be
+        enabled for testing purposes.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push"]
+    - key: com.openexchange.drive.version.[client].softMinimum
+      description: |
+        This property allows the configuration of "soft" limit restrictions for
+        the supported clients. This limit has informational
+        character only, i.e. the client is just informed about an available update
+        when identifying with a lower version number. 
+        The property is disabled by default to always fall back to the
+        recommended setting, but can be overridden if needed.
+        
+        [client] must be replaced with one of the following:
+        <ul>
+          <li>windows</li>
+          <li>macos</li>
+          <li>ios</li>
+          <li>android</li>
+        </ul>
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Windows", "Android", "Apple"]
+    - key: com.openexchange.drive.version.[client].hardMinimum
+      description: |
+        This property allows the configuration of "hard" limit restrictions for
+        the supported clients. This limit will restrict further synchronization 
+        of clients that identify themselves with a lower version number.
+        The property is disabled by default to always fall back to the
+        recommended setting, but can be overridden if needed.
+
+        [client] must be replaced with one of the following:
+        <ul>
+          <li>windows</li>
+          <li>macos</li>
+          <li>ios</li>
+          <li>android</li>
+        </ul>
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Windows", "Android", "Apple"]

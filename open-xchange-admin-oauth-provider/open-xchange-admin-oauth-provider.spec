@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,12 +66,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.oauth.provider.rmi/javadoc
 
 %changelog
+* Fri May 19 2017 Steffen Templin <steffen.templin@open-xchange.com>
+First candidate for 7.8.4 release
+* Thu May 04 2017 Steffen Templin <steffen.templin@open-xchange.com>
+Second preview of 7.8.4 release
+* Mon Apr 03 2017 Steffen Templin <steffen.templin@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Steffen Templin <steffen.templin@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Steffen Templin <steffen.templin@open-xchange.com>
-prepare for 7.8.4 release
-* Thu Nov 24 2016 Steffen Templin <steffen.templin@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Steffen Templin <steffen.templin@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Steffen Templin <steffen.templin@open-xchange.com>

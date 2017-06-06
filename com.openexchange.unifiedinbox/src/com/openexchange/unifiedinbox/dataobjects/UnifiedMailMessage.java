@@ -752,6 +752,11 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     }
 
     @Override
+    public void setSubject(String subject, boolean decoded) {
+        delegatee.setSubject(subject, decoded);
+    }
+
+    @Override
     public void prepareForCaching() {
         delegatee.prepareForCaching();
     }

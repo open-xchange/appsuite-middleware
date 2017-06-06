@@ -96,7 +96,6 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -452,10 +451,11 @@ public final class IMAPCommandsCollection {
      *
      * @param imapFolder An IMAP folder
      * @param type The folder type to check
+     * @param defaultSeparator The default separator
      * @return <code>true</code> if IMAP server supports specified folder type; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public static boolean supportsFolderType(final IMAPFolder imapFolder, final int type, final String fullnamePrefix) throws MessagingException {
+    public static boolean supportsFolderType(final IMAPFolder imapFolder, final int type, final String fullnamePrefix, final char defaultSeparator) throws MessagingException {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -472,7 +472,7 @@ public final class IMAPCommandsCollection {
                     try {
                         if ((type & Folder.HOLDS_MESSAGES) == 0) {
                             // Only holds folders
-                            final char separator = getSeparator(p);
+                            final char separator = getSeparator(p, defaultSeparator);
                             p.create(fullName + separator);
                             delete = true;
                         } else {
@@ -513,20 +513,21 @@ public final class IMAPCommandsCollection {
      * Gets the separator character of the IMAP server associated with specified IMAP folder.
      *
      * @param imapFolder The IMAP folder to obtain IMAP protocol
+     * @param defaultSeparator The default separator
      * @return The separator character
      * @throws MessagingException If a messaging error occurs
      */
-    public static char getSeparator(final IMAPFolder imapFolder) throws MessagingException {
+    public static char getSeparator(final IMAPFolder imapFolder, final char defaultSeparator) throws MessagingException {
         return ((Character) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                return Character.valueOf(getSeparator(p));
+                return Character.valueOf(getSeparator(p, defaultSeparator));
             }
         }))).charValue();
     }
 
-    protected static char getSeparator(final IMAPProtocol p) throws ProtocolException {
+    protected static char getSeparator(IMAPProtocol p, char defaultSeparator) throws ProtocolException {
         final String dummyFullname = Long.toString(System.currentTimeMillis());
         final ListInfo[] li;
         if (p.isREV1()) {
@@ -537,7 +538,7 @@ public final class IMAPCommandsCollection {
         if (li != null) {
             return li[0].separator;
         }
-        return MailProperties.getInstance().getDefaultSeparator();
+        return defaultSeparator;
     }
 
     /**
@@ -3366,12 +3367,16 @@ public final class IMAPCommandsCollection {
              */
             final BODYSTRUCTURE[] bodies = bodystructure.bodies;
             if (null != bodies) {
-                final int count = bodies.length;
+                int count = bodies.length;
                 if (count > 0) {
-                    final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
-                    final String mpPrefix;
+                    String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                    String mpPrefix;
                     if (mpDetected[0]) {
                         mpPrefix = mpId;
+                        if (false == sectionId.startsWith(mpPrefix)) {
+                            // Different branch in MIME tree
+                            return candidate ? new BodyAndId(bodystructure, sequenceId) : null;
+                        }
                     } else {
                         mpPrefix = prefix;
                         mpDetected[0] = true;

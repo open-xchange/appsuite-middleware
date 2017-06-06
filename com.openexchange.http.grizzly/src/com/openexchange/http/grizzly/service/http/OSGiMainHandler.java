@@ -158,7 +158,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final Bundle bundle;
-    private final List<Filter> initialFilters;
+    private final List<FilterAndPath> initialFilters;
     private final OSGiCleanMapper mapper;
     private final HttpStatus shutDownStatus;
     private final ErrorPageGenerator errorPageGenerator;
@@ -169,7 +169,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @param initialFilters The initial Servlet filter to apply
      * @param bundle Bundle that we create if for, for local data reference.
      */
-    public OSGiMainHandler(List<Filter> initialFilters, Bundle bundle) {
+    public OSGiMainHandler(List<FilterAndPath> initialFilters, Bundle bundle) {
         super();
         this.initialFilters = initialFilters;
         this.bundle = bundle;
@@ -311,7 +311,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
              */
             if (context == null) {
                 LOG.debug("No HttpContext provided, creating default");
-                context = httpService.createDefaultHttpContext();
+                context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
 
             OSGiServletHandler servletHandler =
@@ -334,14 +334,49 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     /**
-     * Add our default set of Filters to the ServletHandler.
+     * Add our set of initial Filters to the ServletHandler.
      *
      * @param context The associated HTTP context
      * @throws ServletException
      */
     private void addInitialServletFilters(HttpContext context) throws ServletException {
-        for (Filter initialFilter : initialFilters) {
-            registerFilter(initialFilter, "/*", null, context, null);
+        for (FilterAndPath initialFilter : initialFilters) {
+            registerFilter(initialFilter.getFilter(), initialFilter.getPath(), null, context, null);
+        }
+    }
+
+    /**
+     * Adds specified filter to all local HTTP contexts.
+     *
+     * @param filter The filter to add
+     * @param path The filter path
+     * @throws ServletException If registering specified filter fails
+     */
+    public void addServletFilter(Filter filter, String path) throws ServletException {
+        ReentrantLock lock = OSGiCleanMapper.getLock();
+        lock.lock();
+        try {
+            for (HttpContext context : mapper.httpContextToServletContextMap.keySet()) {
+                registerFilter(filter, path, null, context, null);
+            }
+
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Removes specified filter from all local HTTP contexts.
+     *
+     * @param filter The filter to remove
+     */
+    public void removeServletFilter(Filter filter) {
+        ReentrantLock lock = OSGiCleanMapper.getLock();
+        lock.lock();
+        try {
+            unregisterFilter(filter);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -369,7 +404,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
             if (context == null) {
                 LOG.debug("No HttpContext provided, creating default");
-                context = httpService.createDefaultHttpContext();
+                context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
 
             OSGiServletContext servletContext =
@@ -412,8 +447,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
             if (context == null) {
                 LOG.debug("No HttpContext provided, creating default");
-                context = httpService.createDefaultHttpContext();
+                context = null == httpService ? new HttpContextImpl(bundle) : httpService.createDefaultHttpContext();
             }
+
             if (internalPrefix == null) {
                 internalPrefix = "";
             }
@@ -475,7 +511,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         ReentrantLock lock = OSGiCleanMapper.getLock();
         lock.lock();
         try {
-            for (String alias : mapper.getLocalAliases()) {
+            for (String alias : new LinkedHashSet<>(mapper.getLocalAliases())) {
                 LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);

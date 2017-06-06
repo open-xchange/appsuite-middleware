@@ -54,6 +54,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
@@ -95,7 +96,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        clientA = getClient();
+        clientA = new AJAXClient(testContext.acquireUser());
         clientB = new AJAXClient(testContext.acquireUser());
         clientC = new AJAXClient(testContext.acquireUser());
         userIdA = clientA.getValues().getUserId();
@@ -129,10 +130,25 @@ public class ConfirmOthers extends AbstractAJAXSession {
         response.fillObject(appointment);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
-        clientC.execute(new DeleteRequest(appointment.getObjectID(), clientC.getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
-        super.tearDown();
+        try {
+            clientC.execute(new DeleteRequest(appointment.getObjectID(), clientC.getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
+            if (null != clientA) {
+                clientA.logout();
+                clientA = null;
+            }
+            if (null != clientB) {
+                clientB.logout();
+                clientB = null;
+            }
+            if (null != clientC) {
+                clientC.logout();
+                clientC = null;
+            }
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

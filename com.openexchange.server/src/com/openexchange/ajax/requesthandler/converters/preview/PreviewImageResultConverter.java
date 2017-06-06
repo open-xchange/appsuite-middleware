@@ -290,7 +290,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     boolean useCurrentThread = true;
                     {
                         // Check if we deal with an instance of RemoteInternalPreviewService. In that case we need to limit the processing time...
-                        RemoteInternalPreviewService remoteInternalPreviewService = getRemoteInternalPreviewServiceWithMime(previewService, mimeType, getOutput());
+                        RemoteInternalPreviewService remoteInternalPreviewService = getRemoteInternalPreviewServiceWithMime(previewService, mimeType, getOutput(), session);
                         if (null != remoteInternalPreviewService) {
                             long timeToWaitMillis = remoteInternalPreviewService.getTimeToWaitMillis();
                             if (timeToWaitMillis > 0) {

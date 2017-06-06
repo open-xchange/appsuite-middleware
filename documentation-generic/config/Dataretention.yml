@@ -1,0 +1,85 @@
+feature_name: Data Retention
+properties:
+    - key: com.openexchange.dataretention.dir
+      description: |
+        The directory where the CSV file is held.
+      defaultValue: /var/log/open-xchange
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
+      tags: ["Data Retention"]
+    - key: com.openexchange.dataretention.versionNumber
+      description: |
+        The format version appended to each record type; e.g "H1" meaning "Header version 1".
+      defaultValue: 1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
+      tags: ["Data Retention"]
+    - key: com.openexchange.dataretention.clientID
+      description: |
+        The string identifying the tenant; e.g "Open-Xchange".
+      defaultValue: Open-Xchange
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
+      tags: ["Data Retention"]
+    - key: com.openexchange.dataretention.sourceID
+      description: |
+        The string identifying the data source; e.g. "OX_mail_01".
+      defaultValue: OX_mail_01
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
+      tags: ["Data Retention"]
+    - key: com.openexchange.dataretention.location
+      description: |
+        The location of the system generating the retention data.
+      defaultValue: DE/Olpe
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
+      tags: ["Data Retention"]
+    - key: com.openexchange.dataretention.timeZone
+      description: |
+        The time zone of the location.
+      defaultValue: GMT
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
+      tags: ["Data Retention"]
+    - key: com.openexchange.dataretention.rotateLength
+      description: |
+        Specifies the max. output resource's length (in bytes) before it gets rotated.
+        This option is only useful for implementations which output data to a file or
+        to any limited resource. This value should have a reasonable size since multiple
+        write accesses may occur at same time. Therefore small sizes (<= 200KB) cannot
+        be guaranteed being obeyed.
+        Moreover it is only an approximate limit which can vary about 8KB.
+        A value less than or equal to zero means no rotation.
+      defaultValue: 0
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataretention.properties
+      packageName: open-xchange-dataretention-csv
+      tags: ["Data Retention", "Limit"]

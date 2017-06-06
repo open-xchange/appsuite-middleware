@@ -49,9 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -60,8 +58,6 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
@@ -97,13 +93,16 @@ public class Bug44167Test extends CalDAVTest {
     private String sharedFolderID;
     private AJAXClient client3;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         client3 = new AJAXClient(testContext.acquireUser());
         manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
-        FolderObject calendarFolder = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, manager2.getPrivateFolder())).getFolder();
+        manager2.resetDefaultFolderPermissions();
+        ftm.setClient(getClient2());
+        FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder());
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);
@@ -117,22 +116,19 @@ public class Bug44167Test extends CalDAVTest {
         List<OCLPermission> permissions = calendarFolder.getPermissions();
         permissions.add(perm);
         folder.setPermissions(calendarFolder.getPermissions());
-        InsertResponse response = manager2.getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
-        folder.setObjectID(response.getId());
-        folder.setLastModified(response.getTimestamp());
-        subfolder = folder;
-        sharedFolderID = String.valueOf(folder.getObjectID());
+        subfolder = ftm.insertFolderOnServer(folder);
+        sharedFolderID = String.valueOf(subfolder.getObjectID());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            if (null != manager2) {
-                if (null != subfolder) {
-                    manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
-                }
-                manager2.cleanUp();
-                manager2.getClient().logout();
+            if (null != manager2) {                
+                manager2.cleanUp();                
+            }
+            if (null != client3) {
+                client3.logout();
             }
         } finally {
             super.tearDown();
@@ -185,8 +181,16 @@ public class Bug44167Test extends CalDAVTest {
         calendar.add(Calendar.SECOND, 17);
         Date acknowledgedDate = calendar.getTime();
         iCalResource.getVEvent().getComponents().clear();
-        String iCal = "BEGIN:VALARM\r\n" + "ACKNOWLEDGED:" + formatAsUTC(acknowledgedDate) + "\r\n" + "ACTION:DISPLAY\r\n" + "DESCRIPTION:Alarm\r\n" + "TRIGGER:-PT15M\r\n" + "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" + "END:VALARM\r\n";
-        ;
+        String iCal =  // @formatter:off
+            "BEGIN:VALARM\r\n" +
+            "ACKNOWLEDGED:" + formatAsUTC(acknowledgedDate) + "\r\n" +
+            "ACTION:DISPLAY\r\n" +
+            "DESCRIPTION:Alarm\r\n" +
+            "TRIGGER:-PT15M\r\n" +
+            "UID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
+            "X-WR-ALARMUID:F7FCDC9A-BA2A-4548-BC5A-815008F0FC6E\r\n" +
+            "END:VALARM\r\n";
+        ; // @formatter:on
         Component vAlarm = SimpleICal.parse(iCal, "VALARM");
         iCalResource.getVEvent().getComponents().add(vAlarm);
         assertEquals("response code wrong", StatusCodes.SC_FORBIDDEN, putICalUpdate(iCalResource));

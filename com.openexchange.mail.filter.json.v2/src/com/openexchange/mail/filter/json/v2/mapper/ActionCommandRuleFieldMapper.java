@@ -52,32 +52,20 @@ package com.openexchange.mail.filter.json.v2.mapper;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.RuleField;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.AddFlagActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.DiscardActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.EnotifyActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.FileIntoActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.KeepActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.PGPEncryptActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RedirectActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RejectActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RemoveFlagActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -85,31 +73,18 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ActionCommandRuleFieldMapper}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
-    private final Map<String, CommandParser<ActionCommand>> parsers;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ActionCommandRuleFieldMapper}.
      */
     public ActionCommandRuleFieldMapper(ServiceLookup services) {
         super();
-
-        ImmutableMap.Builder<String, CommandParser<ActionCommand>> p = ImmutableMap.builder();
-        p.put(Commands.KEEP.getJsonName(), new KeepActionCommandParser(services));
-        p.put(Commands.DISCARD.getJsonName(), new DiscardActionCommandParser(services));
-        p.put(Commands.REDIRECT.getJsonName(), new RedirectActionCommandParser(services));
-        p.put(Commands.REJECT.getJsonName(), new RejectActionCommandParser(services));
-        p.put(Commands.FILEINTO.getJsonName(), new FileIntoActionCommandParser(services));
-        p.put(Commands.STOP.getJsonName(), new StopActionCommandParser(services));
-        p.put(Commands.VACATION.getJsonName(), new VacationActionCommandParser(services));
-        p.put(Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser(services));
-        p.put(Commands.SETFLAG.getJsonName(), new SetFlagActionCommandParser(services));
-        p.put(Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser(services));
-        p.put(Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(services));
-        p.put(Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(services));
-        parsers = p.build();
+        this.services = services;
     }
 
     @Override
@@ -132,7 +107,8 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         List<ActionCommand> actionCommands = ifCommand.getActionCommands();
         for (ActionCommand actionCommand : actionCommands) {
             JSONObject object = new JSONObject();
-            CommandParser<ActionCommand> parser = parsers.get(actionCommand.getCommand().getJsonName());
+            CommandParserRegistry<ActionCommand, ActionCommandParser<ActionCommand>> parserRegistry = services.getService(ActionCommandParserRegistry.class);
+            CommandParser<ActionCommand> parser = parserRegistry.get(actionCommand.getCommand().getJsonName());
             if (parser != null) {
                 parser.parse(object, actionCommand);
             }
@@ -159,7 +135,8 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         for (int i = 0; i < length; i++) {
             JSONObject object = array.getJSONObject(i);
             String id = object.getString(GeneralField.id.name());
-            CommandParser<ActionCommand> parser = parsers.get(id);
+            CommandParserRegistry<ActionCommand, ActionCommandParser<ActionCommand>> parserRegistry = services.getService(ActionCommandParserRegistry.class);
+            CommandParser<ActionCommand> parser = parserRegistry.get(id);
             if (parser == null) {
                 throw new JSONException("Unknown action command while creating object: " + id);
             }

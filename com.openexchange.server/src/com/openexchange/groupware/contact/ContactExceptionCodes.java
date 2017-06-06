@@ -310,6 +310,9 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
     /** An unexpected error occurred: %1$s */
     UNEXPECTED_ERROR("An unexpected error occurred: %1$s", null, Category.CATEGORY_ERROR, 1001),
 
+    /** Invalid number of properties for distribution list. */
+    SET_DISTRIBUTION_LIST_ERROR("Invalid number of properties for distribution list.", ContactExceptionMessages.SET_DISTRIBUTION_LIST_ERROR_DISPLAY, Category.CATEGORY_ERROR, 1002),
+
     ;
 
     public static final String PREFIX = "CON".intern();

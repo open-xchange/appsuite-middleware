@@ -101,7 +101,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#calculateRecurring(com.openexchange.groupware.container.CalendarObject, long, long, int, int, boolean)
      */
     @Override
@@ -112,7 +112,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#calculateRecurring(com.openexchange.groupware.container.CalendarObject, long, long, int, int, boolean, boolean)
      */
     @Override
@@ -123,7 +123,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#calculateRecurringDate(long, long, int)
      */
     @Override
@@ -134,7 +134,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#calculateRecurringIgnoringExceptions(com.openexchange.groupware.container.CalendarObject, long, long, int)
      */
     @Override
@@ -145,7 +145,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#check(java.lang.Object, java.lang.Object)
      */
     @Override
@@ -156,7 +156,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndAlterCols(int[])
      */
     @Override
@@ -167,7 +167,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndAlterColsForDeleted(int[])
      */
     @Override
@@ -178,7 +178,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndConfirmIfUserUserIsParticipantInPublicFolder(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
     @Override
@@ -189,7 +189,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndFillIfUserIsParticipant(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
     @Override
@@ -200,7 +200,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndFillIfUserIsUser(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.Participant)
      */
     @Override
@@ -211,7 +211,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndModifyAlarm(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], int,
      * com.openexchange.groupware.container.UserParticipant[])
      */
@@ -223,7 +223,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndRemovePastReminders(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -234,7 +234,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkForInvalidCharacters(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -245,7 +245,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkForSoloReminderUpdate(com.openexchange.groupware.calendar.CalendarDataObject, int[], com.openexchange.groupware.calendar.MBoolean)
      */
     @Override
@@ -256,7 +256,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkIfArrayKeyExistInArray(java.lang.Object[], java.lang.Object[])
      */
     @Override
@@ -267,7 +267,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkIfDateOccursInRecurrence(java.util.Date, com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -278,7 +278,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkIfDatesOccurInRecurrence(java.util.Date[], com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -289,7 +289,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkIfUserIsParticipant(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
     @Override
@@ -300,7 +300,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkMillisInThePast(long)
      */
     @Override
@@ -311,7 +311,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkParticipants(com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
      */
     @Override
@@ -322,7 +322,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkPermissions(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context, java.sql.Connection,
      * int, int)
      */
@@ -334,7 +334,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkRecurring(com.openexchange.groupware.container.CalendarObject)
      */
     @Override
@@ -345,7 +345,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkRecurringCompleteness(com.openexchange.groupware.container.CalendarObject, boolean)
      */
     @Override
@@ -356,7 +356,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkUserParticipantObject(com.openexchange.groupware.container.UserParticipant, int)
      */
     @Override
@@ -367,7 +367,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#closePreparedStatement(java.sql.PreparedStatement)
      */
     @Override
@@ -378,7 +378,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#closeResultSet(java.sql.ResultSet)
      */
     @Override
@@ -389,7 +389,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#closeStatement(java.sql.Statement)
      */
     @Override
@@ -400,7 +400,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#convertDates2String(java.util.Date[])
      */
     @Override
@@ -411,7 +411,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#convertString2Dates(java.lang.String)
      */
     @Override
@@ -422,7 +422,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#createDSString(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -433,7 +433,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#debugActiveDates(long, long, boolean[])
      */
     @Override
@@ -444,7 +444,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#debugRecurringResult(com.openexchange.groupware.calendar.RecurringResultInterface)
      */
     @Override
@@ -455,7 +455,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#detectFolderMoveAction(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -466,7 +466,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#detectTimeChange(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -477,7 +477,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#enhanceCols(int[], int[], int)
      */
     @Override
@@ -488,7 +488,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#exceedsHourOfDay(long, java.lang.String)
      */
     @Override
@@ -499,7 +499,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#exceedsHourOfDay(long, java.util.TimeZone)
      */
     @Override
@@ -510,7 +510,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#existsReminder(com.openexchange.groupware.contexts.Context, int, int)
      */
     @Override
@@ -521,7 +521,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillDAO(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -532,7 +532,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillEventInformation(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject,
      * com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[],
      * com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
@@ -544,7 +544,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillMap(com.openexchange.groupware.calendar.RecurringResultsInterface, long, long, int, int)
      */
     @Override
@@ -555,7 +555,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillObject(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -566,7 +566,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAllVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration,
      * java.sql.Connection)
      */
@@ -578,7 +578,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAppointmentByID(int, com.openexchange.session.Session)
      */
     @Override
@@ -589,7 +589,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAppointmentFolder(int, int, com.openexchange.groupware.contexts.Context)
      */
     @Override
@@ -600,7 +600,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAppointmentTitle(int, com.openexchange.groupware.contexts.Context)
      */
     @Override
@@ -611,7 +611,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAppointmentsByID(int, int[], int[], com.openexchange.session.Session)
      */
     @Override
@@ -622,7 +622,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getChangeExceptionByDate(int, int, java.util.Date, int[], com.openexchange.session.Session)
      */
     @Override
@@ -633,7 +633,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getChangeExceptionDatesByRecurrence(int, com.openexchange.session.Session)
      */
     @Override
@@ -644,7 +644,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getChangeExceptionsByRecurrence(int, int[], com.openexchange.session.Session)
      */
     @Override
@@ -655,7 +655,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getContext(com.openexchange.session.Session)
      */
     @Override
@@ -666,7 +666,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getDAOFromList(java.util.List, int)
      */
     @Override
@@ -677,7 +677,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getDatesPositions(java.util.Date[], com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -688,7 +688,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getFieldId(java.lang.String)
      */
     @Override
@@ -699,7 +699,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getFieldName(int)
      */
     @Override
@@ -710,7 +710,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getFieldNames(int[])
      */
     @Override
@@ -721,7 +721,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getLongByPosition(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
@@ -732,7 +732,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getMAX_END_YEARS()
      */
     @Override
@@ -743,7 +743,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getMaxUntilDate(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -754,7 +754,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getNextReminderDate(int, int, com.openexchange.session.Session)
      */
     @Override
@@ -765,7 +765,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getNextReminderDate(int, int, com.openexchange.session.Session, long)
      */
     @Override
@@ -776,7 +776,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getOccurenceDate(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -787,7 +787,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getOccurenceDate(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
@@ -798,7 +798,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getReadPermission(int, int, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context)
      */
     @Override
@@ -807,9 +807,15 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
         return false;
     }
 
+    @Override
+    public boolean getReadPermission(int oid, int fid, Session so, Context ctx, boolean checkPrivate) throws OXException {
+        // Nothing to do
+        return false;
+    }
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getRecurringAppointmentDeleteAction(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -820,7 +826,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getRecurringAppoiontmentUpdateAction(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -831,7 +837,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getSQLInStringForParticipants(java.util.List)
      */
     @Override
@@ -842,7 +848,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getSQLInStringForParticipants(com.openexchange.groupware.container.Participant[])
      */
     @Override
@@ -853,7 +859,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getSQLInStringForResources(com.openexchange.groupware.container.Participant[])
      */
     @Override
@@ -864,7 +870,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getString(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
@@ -904,7 +910,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getUserConfiguration(com.openexchange.groupware.contexts.Context, int)
      */
     @Override
@@ -915,7 +921,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getUserTimeUTCDate(java.util.Date, java.lang.String)
      */
     @Override
@@ -926,7 +932,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
      */
     @Override
@@ -937,7 +943,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getVisibleFolderSQLInString(java.lang.StringBuilder, int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration,
      * java.sql.Connection)
      */
@@ -949,7 +955,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getWritePermission(int, int, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context)
      */
     @Override
@@ -960,7 +966,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#inBetween(long, long, long, long)
      */
     @Override
@@ -971,7 +977,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#isException(long, java.util.Set, java.util.Set)
      */
     @Override
@@ -982,7 +988,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#isInThePast(java.sql.Date)
      */
     public boolean isInThePast(java.sql.Date check) {
@@ -992,7 +998,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#isInThePast(java.util.Date)
      */
     @Override
@@ -1003,7 +1009,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#isOccurrenceDate(long, long, com.openexchange.groupware.calendar.CalendarDataObject, long[])
      */
     @Override
@@ -1014,7 +1020,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#isRecurringMaster(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1025,7 +1031,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#mergeExceptionDates(java.util.Date[], java.util.Date[])
      */
     @Override
@@ -1036,7 +1042,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#normalizeLong(long)
      */
     @Override
@@ -1047,7 +1053,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#purgeExceptionFieldsFromObject(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1058,7 +1064,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#recoverForInvalidPattern(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1069,7 +1075,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeException(java.util.Date[], java.util.Date)
      */
     @Override
@@ -1080,7 +1086,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeException(java.util.Date[], long)
      */
     @Override
@@ -1091,7 +1097,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeFieldsFromObject(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1102,7 +1108,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeParticipant(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
@@ -1113,7 +1119,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeRecurringType(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1124,7 +1130,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeUserParticipant(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
@@ -1135,7 +1141,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#replaceDatesWithFirstOccurence(com.openexchange.groupware.container.Appointment)
      */
     @Override
@@ -1146,7 +1152,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#resolveFolderIDForUser(int, int, com.openexchange.groupware.contexts.Context)
      */
     @Override
@@ -1157,7 +1163,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#safelySetStartAndEndDateForRecurringAppointment(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1168,7 +1174,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#setMAX_END_YEARS(int)
      */
     @Override
@@ -1179,7 +1185,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#setRecurrencePositionOrDateInDAO(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1190,7 +1196,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#simpleParticipantCheck(com.openexchange.groupware.calendar.CalendarDataObject)
      */
     @Override
@@ -1219,7 +1225,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillEventInformation(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject,
      * com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[],
      * com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
@@ -1244,7 +1250,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeConfirmations(com.openexchange.groupware.calendar.CalendarDataObject, int)
      */
     @Override
@@ -1255,7 +1261,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#cloneObjectForRecurringException(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject,
      * com.openexchange.groupware.contexts.Context, com.openexchange.session.Session, int)
      */

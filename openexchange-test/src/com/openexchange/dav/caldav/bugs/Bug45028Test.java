@@ -54,10 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -85,7 +82,7 @@ public class Bug45028Test extends CalDAVTest {
     private FolderObject publicFolder;
     private String publicFolderId;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         manager2 = new CalendarTestManager(getClient2());
@@ -95,25 +92,17 @@ public class Bug45028Test extends CalDAVTest {
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         folder.setPermissions(PermissionTools.P(Integer.valueOf(manager2.getClient().getValues().getUserId()), PermissionTools.ADMIN, Integer.valueOf(getClient().getValues().getUserId()), "vr"));
         folder.setFolderName(randomUID());
-        com.openexchange.ajax.folder.actions.InsertRequest request = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
-        com.openexchange.ajax.folder.actions.InsertResponse response = manager2.getClient().execute(request);
-        response.fillObject(folder);
-        publicFolder = folder;
-        publicFolderId = String.valueOf(folder.getObjectID());
+        ftm.setClient(getClient2());
+        publicFolder = ftm.insertFolderOnServer(folder);
+        publicFolderId = String.valueOf(publicFolder.getObjectID());
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (null != manager2) {
                 manager2.cleanUp();
-                if (null != manager2.getClient()) {
-                    if (null != publicFolder) {
-                        manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, false, publicFolder));
-                    }
-                    manager2.getClient().logout();
-                }
-            }
+            }           
         } finally {
             super.tearDown();
         }

@@ -65,6 +65,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
  * {@link ConversationResponse}
@@ -78,7 +79,7 @@ public class ConversationResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link ConversationResponse}.
-     * 
+     *
      * @param response
      */
     protected ConversationResponse(Response response) {
@@ -155,7 +156,7 @@ public class ConversationResponse extends AbstractAJAXResponse {
                         // ignore
                         break;
                     case ORIGINAL_FOLDER_ID:
-                        message.setOriginalFolder(strValue);
+                        message.setOriginalFolder(MailFolderUtility.prepareMailFolderParam(strValue));
                         break;
                     case ORIGINAL_ID:
                         message.setOriginalId(strValue);

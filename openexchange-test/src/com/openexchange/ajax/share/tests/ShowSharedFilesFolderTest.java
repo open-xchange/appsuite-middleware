@@ -53,8 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Iterator;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -79,11 +77,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
     private File file;
     private ExtendedPermissionEntity guest;
 
-    public ShowSharedFilesFolderTest() {
-        super();
-    }
-
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         perm = randomGuestObjectPermission();
@@ -103,7 +97,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
         checkGuestPermission(perm, guest);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             deleteFilesSilently(getClient(), Collections.singletonList(file));

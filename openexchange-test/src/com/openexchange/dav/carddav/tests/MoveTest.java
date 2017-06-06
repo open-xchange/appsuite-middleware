@@ -82,7 +82,6 @@ public class MoveTest extends CardDAVTest {
          */
         String subFolderName = "testfolder_" + randomUID();
         FolderObject subFolder = super.createFolder(subFolderName);
-        super.rememberForCleanUp(subFolder);
         String uid = randomUID();
         String firstName = "test";
         String lastName = "jaqueline";
@@ -130,7 +129,6 @@ public class MoveTest extends CardDAVTest {
          */
         String subFolderName = "testfolder_" + randomUID();
         FolderObject subFolder = super.createFolder(subFolderName);
-        super.rememberForCleanUp(subFolder);
         String uid = randomUID();
         String firstName = "test";
         String lastName = "jaqueline";

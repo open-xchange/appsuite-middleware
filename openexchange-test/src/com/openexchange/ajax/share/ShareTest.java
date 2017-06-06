@@ -49,11 +49,7 @@
 
 package com.openexchange.ajax.share;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +67,6 @@ import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -130,16 +125,27 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
-    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] { createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"), createNamedGuestPermission("horst@example.com", "Horst Example", "secret"), createAnonymousGuestPermission("secret"), createAnonymousGuestPermission()
+    // @formatter:off
+    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
+        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
+        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
+        createAnonymousGuestPermission("secret"),
+        createAnonymousGuestPermission()
     };
 
-    protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] { asObjectPermission(TESTED_PERMISSIONS[0]), asObjectPermission(TESTED_PERMISSIONS[1]), asObjectPermission(TESTED_PERMISSIONS[2]), asObjectPermission(TESTED_PERMISSIONS[3])
+    protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] {
+        asObjectPermission(TESTED_PERMISSIONS[0]),
+        asObjectPermission(TESTED_PERMISSIONS[1]),
+        asObjectPermission(TESTED_PERMISSIONS[2]),
+        asObjectPermission(TESTED_PERMISSIONS[3])
     };
 
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
 
-    protected static final int[] TESTED_MODULES = new int[] { FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
+    protected static final int[] TESTED_MODULES = new int[] {
+        FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
     };
+    // @formatter:on
 
     protected static final Random random = new Random();
     protected static final int CLEANUP_DELAY = 30000;
@@ -147,13 +153,14 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
     private Map<Integer, FolderObject> foldersToDelete;
     private Map<String, File> filesToDelete;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -190,6 +197,21 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
     /**
      * Inserts and remembers a new shared folder containing the supplied guest permissions.
      *
+     * @param client The client to use
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param parent The ID of the parent folder
+     * @param permission The permission to add
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertSharedFolder(AJAXClient client, EnumAPI api, int module, int parent, OCLPermission permission) throws Exception {
+        return insertSharedFolder(client, api, module, parent, randomUID(), permission);
+    }
+
+    /**
+     * Inserts and remembers a new shared folder containing the supplied guest permissions.
+     *
      * @param api The folder tree to use
      * @param module The module identifier
      * @param parent The ID of the parent folder
@@ -213,9 +235,25 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, String name, OCLPermission permission) throws Exception {
-        FolderObject sharedFolder = Create.createPrivateFolder(name, module, getClient().getValues().getUserId(), permission);
+        return insertSharedFolder(getClient(), api, module, parent, name, permission);
+    }
+
+    /**
+     * Inserts and remembers a new shared folder containing the supplied guest permissions.
+     *
+     * @param client The client to use
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param parent The ID of the parent folder
+     * @param name The folders name
+     * @param permission The permission to add
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertSharedFolder(AJAXClient client, EnumAPI api, int module, int parent, String name, OCLPermission permission) throws Exception {
+        FolderObject sharedFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId(), permission);
         sharedFolder.setParentFolderID(parent);
-        return insertFolder(api, sharedFolder);
+        return insertFolder(client, api, sharedFolder);
     }
 
     /**
@@ -500,7 +538,20 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @throws Exception
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder) throws Exception {
-        return updateFolder(api, folder, false);
+        return updateFolder(getClient(), api, folder, false);
+    }
+
+    /**
+     * Updates and remembers a folder without cascading permission.
+     *
+     * @param client The client to use
+     * @param api The folder tree to use
+     * @param folder The folder to update
+     * @return The updated folder
+     * @throws Exception
+     */
+    protected FolderObject updateFolder(AJAXClient client, EnumAPI api, FolderObject folder) throws Exception {
+        return updateFolder(client, api, folder, false);
     }
 
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder, final Transport transport) throws Exception {
@@ -523,7 +574,21 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @throws Exception
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder, final boolean cascadePermissions) throws Exception {
-        return updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+        return updateFolder(getClient(), api, folder, cascadePermissions);
+    }
+
+    /**
+     * Updates and remembers a folder.
+     *
+     * @param client The client to use
+     * @param api The folder tree to use
+     * @param folder The folder to update
+     * @param cascadePermissions If changed permissions shall be also applied to subfolders
+     * @return The updated folder
+     * @throws Exception
+     */
+    protected FolderObject updateFolder(AJAXClient client, EnumAPI api, FolderObject folder, final boolean cascadePermissions) throws Exception {
+        return updateFolder(client, api, folder, new RequestCustomizer<UpdateRequest>() {
 
             @Override
             public void customize(UpdateRequest request) {
@@ -542,15 +607,29 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @throws Exception
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder, RequestCustomizer<UpdateRequest> customizer) throws Exception {
+        return updateFolder(getClient(), api, folder, customizer);
+    }
+
+    /**
+     * Updates and remembers a folder without cascading permission.
+     *
+     * @param client The client to use
+     * @param api The folder tree to use
+     * @param folder The folder to update
+     * @param customizer The request customizer or <code>null</code>
+     * @return The updated folder
+     * @throws Exception
+     */
+    protected FolderObject updateFolder(AJAXClient client, EnumAPI api, FolderObject folder, RequestCustomizer<UpdateRequest> customizer) throws Exception {
         UpdateRequest request = new UpdateRequest(api, folder);
-        // request.setNotifyPermissionEntities(Transport.MAIL);
+        request.setNotifyPermissionEntities(Transport.MAIL);
         if (customizer != null) {
             customizer.customize(request);
         }
-        InsertResponse insertResponse = getClient().execute(request);
+        InsertResponse insertResponse = client.execute(request);
         insertResponse.fillObject(folder);
         remember(folder);
-        FolderObject updatedFolder = getFolder(api, folder.getObjectID());
+        FolderObject updatedFolder = getFolder(api, folder.getObjectID(), client);
         assertNotNull(updatedFolder);
         assertEquals("Folder name wrong", folder.getFolderName(), updatedFolder.getFolderName());
         return updatedFolder;
@@ -747,7 +826,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The share URL, or <code>null</code> if not found
      */
     protected String discoverShareURL(ExtendedPermissionEntity guestEntity) throws Exception {
-        return discoverShareURL(getNoReplyClient(), guestEntity);
+        return discoverShareURL(getClient(), guestEntity);
     }
 
     /**
@@ -783,11 +862,20 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The message, or <code>null</code> if not found
      */
     protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
-        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        return discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+    }
+
+    /**
+     * Discovers the invitation message sent to a specific recipient.
+     *
+     * @param messages The e-mail messages to check
+     * @param emailAddress The guest's e-mail address to search for
+     * @return The message, or <code>null</code> if not found
+     */
+    protected Message discoverInvitationMessage(List<Message> messages, String emailAddress) throws Exception {
         for (Message message : messages) {
-            Map<String, String> headers = message.getHeaders();
-            String toHeader = headers.get("To");
-            if (false == Strings.isEmpty(toHeader)) {
+            String toHeader = message.getHeaders().get("To");
+            if (Strings.isNotEmpty(toHeader)) {
                 InternetAddress[] addresses = null;
                 try {
                     addresses = InternetAddress.parseHeader(toHeader, false);
@@ -943,7 +1031,9 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return An authenticated guest client being able to access the share
      */
     protected GuestClient resolveShare(ExtendedPermissionEntity guestPermission, ShareRecipient recipient) throws Exception {
-        return new GuestClient(discoverShareURL(guestPermission), recipient);
+        String shareURL = discoverShareURL(guestPermission);
+        assertNotNull("Got no share URL for " + recipient, shareURL);
+        return new GuestClient(shareURL, recipient);
     }
 
     /**

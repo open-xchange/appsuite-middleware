@@ -302,20 +302,20 @@ All configurations are config cascade aware and can therefore be overwritten on 
 
 | Property                                                                                                        | Type / Values                   | Default   |
 |:----------------------------------------------------------------------------------------------------------------|:--------------------------------|:----------|
-| [com.openexchange.mail.categories](#comopenexchangemailcategories)                         | 'true', 'false'                 | 'false'   |
-| [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)                               | 'true', 'false'                 | 'true'    |
-| [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)                                 | 'true', 'false'                 | 'false'   |
-| [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)     | String                          | 'General' |
-| [com.openexchange.mail.categories.general.name.[locale]](#comopenexchangemailcategoriesgeneralnamelocale)       | String                          |           |
-| [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)                       | Comma separated list of strings |           |
-| [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)                       | Comma separated list of strings |           |
-| [com.openexchange.mail.categories.[category].flag](#comopenexchangemailcategoriescategoryflag)                  | String                          |           |
-| [com.openexchange.mail.categories.[category].active](#comopenexchangemailcategoriescategoryactive)              | 'true', 'false'                 | 'true'    |
-| [com.openexchange.mail.categories.[category].force](#comopenexchangemailcategoriescategoryforce)                | 'true', 'false'                 | 'false'   |
-| [com.openexchange.mail.categories.[category].name.fallback](#comopenexchangemailcategoriescategorynamefallback) | String                          |           |
-| [com.openexchange.mail.categories.[category].name.[locale]](#comopenexchangemailcategoriescategorynamelocale)   | String                          |           |
-| [com.openexchange.mail.categories.apply.ox.rules](#comopenexchangemailcategoriesapplyoxrules)                   | 'true', 'false'                 | 'false'   |
-| [com.openexchange.mail.categories.rules.[category]](#comopenexchangemailcategoriesrulescategory)                | Comma separated list of strings | |         |
+| [com.openexchange.mail.categories]  (http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories)                                                                                                                  | 'true', 'false'                 | 'false'   |
+| [com.openexchange.mail.categories.enabled](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.enabled)                                                                                                                  | 'true', 'false'                 | 'true'    |
+| [com.openexchange.mail.categories.forced](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.forced)                                                                                                                  | 'true', 'false'                 | 'false'   |
+| [com.openexchange.mail.categories.general.name.fallback](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.general.name.fallback)                                                | String                          | 'General' |
+| [com.openexchange.mail.categories.general.name.[locale]](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.general.name.[locale])                                                                                                          | String                          |           |
+| [com.openexchange.mail.categories.identifiers](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.identifiers)                                                                                                                  | Comma separated list of strings |           |
+| [com.openexchange.mail.user.categories.identifiers](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.user.categories.identifiers)                                                                                                                  | Comma separated list of strings |           |
+| [com.openexchange.mail.categories.[category].flag](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.[category].flag)                                                                                                                  | String                          |           |
+| [com.openexchange.mail.categories.[category].active](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.[category].active)                                                                                                                  | 'true', 'false'                 | 'true'    |
+| [com.openexchange.mail.categories.[category].force](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.[category].force)                                                                                                                  | 'true', 'false'                 | 'false'   |
+| [com.openexchange.mail.categories.[category].name.fallback](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.[category].name.fallback)                                                                                          | String                          |           |
+| [com.openexchange.mail.categories.[category].name.[locale]](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.[category].name.[locale])                                                                                                          | String                          |           |
+| [com.openexchange.mail.categories.apply.ox.rules](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.apply.ox.rules)                                                                                                                  | 'true', 'false'                 | 'false'   |
+| [com.openexchange.mail.categories.rules.[category]](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.mail.categories.rules.[category])                                                                                                                  | Comma separated list of strings | |         |
 
 
 #### com.openexchange.mail.categories
@@ -357,7 +357,7 @@ Specifies a comma separated list of system category identifiers. This identifier
 It is not necessary but recommended to use meaningful names like "promotion" or "social". Please also notice that the categories will be displayed in the same order they are listed here, whereby the system categories will be placed before the user categories.
 It is also possible to define only one type of categories, either system or user categories.
 
-#### com.openexchange.mail.categories.identifiers
+#### com.openexchange.mail.user.categories.identifiers
 
 Specifies a comma separated list of user category identifiers. This identifiers will be used to identify category specific configurations.
 Since the purpose of these categories can change over time it is not necessary to use meaningful names here. Please also notice that the categories will be displayed in the same order they are listed here, whereby the system categories will be placed before the user categories.

@@ -1,65 +1,72 @@
 feature_name: CalDAV
 properties:
-    - key: com.openexchange.caldav.push.apsd.enabled
+    - key: com.openexchange.caldav.enabled
       description: |
-        Enables or disables push event notifications using the Apple Push Notification service (APNS), targeting the Apple Calendar client on iOS and mac OS. This requires a valid configuration for the APNS certificate and keys, see options below.
-      defaultValue: false
-      version: 7.8.4
+        Whether CalDAV is enabled or not
+      defaultValue: true
+      version: 
       reloadable: true
+      configcascadeAware: true
+      related:
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV"]
+    - key: com.openexchange.caldav.tree
+      description: |
+        Configures the ID of the folder tree used by the CalDAV interface.
+      defaultValue: 0
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Folder"]
+    - key: com.openexchange.caldav.interval.start
+      description: |
+        Appointments and tasks are available via the CalDAV interface if they fall 
+        into a configurable timeframe. This value specifies the start time of this 
+        interval, i.e. how far past appointments should be considered. More formal, 
+        this value defines the negative offset relative to the current date 
+        representing the minimum end time of appointments to be synchronized.
+        Possible values are: <code>one_month</code>, <code>one_year</code> and <code>six_months</code>.
+      defaultValue: one_month
+      version: 
+      reloadable: false
       configcascadeAware: false
       related:
       file: caldav.properties
-      tags: ["CalDAV","Push"]
-    - key: com.openexchange.caldav.push.apsd.bundleId
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Limit", "Appointment"]
+    - key: com.openexchange.caldav.interval.end
       description: |
-        Defines the bundle identifier referring to the Apple Push "topic", which is extracted from the UID portion of the subject of the certificate acquired from Apple, e.g. "com.apple.calendar.XServer.934668ca-125e-4246-afee-8cf2df37aab8". 
-        Required if com.openexchange.caldav.push.apsd.enabled is "true".
-      defaultValue: 
-      version: 7.8.4
-      reloadable: true
+        Appointments and tasks are available via the CalDAV interface if they fall 
+        into a configurable timeframe. This value specifies the end time of this
+        interval, i.e. how far future appointments should be considered. More 
+        formal, this value defines the positive offset relative to the current date 
+        representing the maximum start time of appointments to be synchronized.
+        Possible values are: <code>one_year</code> and <code>two_years</code>.
+      defaultValue: one_year
+      version:
+      reloadable: false
       configcascadeAware: false
-      related: com.openexchange.caldav.push.apsd.enabled
+      related:
       file: caldav.properties
-      tags: ["CalDAV","Push"]
-    - key: com.openexchange.caldav.push.apsd.keystore
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Limit", "Appointment"]
+    - key: com.openexchange.caldav.url
       description: |
-        Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys to use, e.g. "/opt/open-xchange/etc/com.apple.servermgrd.apns.calendar.p12". 
-        Required if com.openexchange.caldav.push.apsd.enabled is "true".   
-      defaultValue: 
-      version: 7.8.4
-      reloadable: true
+        Tells users where to find a caldav folder. This can be displayed in frontends.
+        You can use the variables [hostname] and [folderId]. 
+        If you chose to deploy caldav as a virtual host (say 'dav.open-xchange.com') use
+        <code>https://dav.open-xchange.com/caldav/[folderId]</code> as the value
+        If you are using user-agent sniffing use
+        <code>https://[hostname]/caldav/[folderId]</code>
+      defaultValue: https://[hostname]/caldav/[folderId]
+      version:
+      reloadable: false
       configcascadeAware: false
-      related: com.openexchange.caldav.push.apsd.enabled
+      related:
       file: caldav.properties
-      tags: ["CalDAV","Push"]
-    - key: com.openexchange.caldav.push.apsd.password
-      description: |
-        Specifies the password used when creating the referenced keystore containing the APNS certificate.  
-        Required if com.openexchange.caldav.push.apsd.enabled is "true".   
-      defaultValue: 
-      version: 7.8.4
-      reloadable: true
-      configcascadeAware: false
-      related: com.openexchange.caldav.push.apsd.enabled
-      file: caldav.properties
-      tags: ["CalDAV","Push"]
-    - key: com.openexchange.caldav.push.apsd.production
-      description: |
-        Indicates which APNS service is used when sending push notifications. A value of "true" will use the production service, a value of "false" the sandbox service. 
-      defaultValue: true
-      version: 7.8.4
-      reloadable: true
-      configcascadeAware: false
-      related: 
-      file: caldav.properties
-      tags: ["CalDAV","Push"]
-    - key: com.openexchange.caldav.push.apsd.refreshInterval
-      description: |
-        Defines a timespan (in seconds) that is advertised to clients to indicate how often they should refresh their push subscriptions. 
-      defaultValue: 172800
-      version: 7.8.4
-      reloadable: true
-      configcascadeAware: false
-      related: 
-      file: caldav.properties
-      tags: ["CalDAV","Push"]
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Folder", "Host"]

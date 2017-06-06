@@ -51,6 +51,7 @@ package com.openexchange.osgi;
 
 import java.util.Collection;
 import java.util.Stack;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -149,6 +150,26 @@ public class Tools {
                 LOG.debug("Failed to unget service.", e);
             }
         }
+    }
+
+    /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle.
+     *
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle; else <code>false</code>
+     */
+    public static boolean isNoFragment(final Bundle bundle) {
+        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+    }
+
+    /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
+     *
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
+     */
+    public static boolean isNoFragmentAndActive(final Bundle bundle) {
+        return (isNoFragment(bundle) && (Bundle.ACTIVE == bundle.getState()));
     }
 
     private Tools() {

@@ -75,6 +75,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
     // ------------------------------------------------------------------------------------------------------------------------
 
+    private final ClientConfig clientConfig;
     private final ConfigViewFactory viewFactory;
 
     /**
@@ -82,14 +83,15 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
      *
      * @param viewFactory The service to use
      */
-    public MobileApiFacadeMessageGenerator(ConfigViewFactory viewFactory) {
+    public MobileApiFacadeMessageGenerator(ClientConfig clientConfig, ConfigViewFactory viewFactory) {
         super();
+        this.clientConfig = clientConfig;
         this.viewFactory = viewFactory;
     }
 
     @Override
     public String getClient() {
-        return "open-xchange-mobile-api-facade";
+        return clientConfig.getClientId();
     }
 
     @Override

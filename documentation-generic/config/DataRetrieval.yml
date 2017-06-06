@@ -1,0 +1,37 @@
+feature_name: Data Retrieval
+feature_description: |
+  Configuration of the data retrieval component allowing external applications getting data from OX.
+properties:
+    - key: com.openexchange.groupware.dataRetrieval.lifetime
+      description: |
+        Lifetime of a token in milliseconds. If this value is not set or negative the token only expires at the end of the session.
+      defaultValue: 60000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataRetrieval.properties
+      packageName: open-xchange-dataretrieval
+      tags: ["Data Retrieval", "Session"]
+    - key: com.openexchange.groupware.dataRetrieval.onetime
+      description: |
+        Whether the token expires after the first access or not.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataRetrieval.properties
+      packageName: open-xchange-dataretrieval
+      tags: ["Data Retrieval"]
+    - key: com.openexchange.groupware.dataRetrieval.forceProtocol
+      description: |
+        Force use of a certain protocol for the retrieval URLs. Protocol defaults to the one used to access the backend.
+      defaultValue:
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataRetrieval.properties
+      packageName: open-xchange-dataretrieval
+      tags: ["Data Retrieval"]

@@ -83,6 +83,12 @@ public interface ImageTransformations {
 
     /**
      * Adds a 'scale' transformation, leading to the image being scaled according to the supplied parameters.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: In case this transformation is supposed to be applied to properly auto-rotated image (according to possibly contained EXIF information),
+     * the {@link #rotate()} transformation is required to be added to transformation chain as well
+     * </div>
+     * <p>
      *
      * @param maxWidth The maximum width of the target image
      * @param maxHeight The maximum height of the target image
@@ -96,6 +102,12 @@ public interface ImageTransformations {
 
     /**
      * Adds a 'scale' transformation, leading to the image being scaled according to the supplied parameters.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: In case this transformation is supposed to be applied to properly auto-rotated image (according to possibly contained EXIF information),
+     * the {@link #rotate()} transformation is required to be added to transformation chain as well
+     * </div>
+     * <p>
      *
      * @param maxWidth The maximum width of the target image
      * @param maxHeight The maximum height of the target image
@@ -110,6 +122,12 @@ public interface ImageTransformations {
 
     /**
      * Adds a 'crop' transformation, leading to the image being cropped according to the supplied parameters.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: In case this transformation is supposed to be applied to properly auto-rotated image (according to possibly contained EXIF information),
+     * the {@link #rotate()} transformation is required to be added to transformation chain as well
+     * </div>
+     * <p>
      *
      * @param x The X coordinate of the upper-left corner of the specified rectangular region
      * @param y The Y coordinate of the upper-left corner of the specified rectangular region
@@ -121,6 +139,12 @@ public interface ImageTransformations {
 
     /**
      * Adds a compression transformation, leading to the image being written out compressed depending on the chosen output format.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Note: In case this transformation is supposed to be applied to properly auto-rotated image (according to possibly contained EXIF information),
+     * the {@link #rotate()} transformation is required to be added to transformation chain as well
+     * </div>
+     * <p>
      *
      * @return A self reference
      */

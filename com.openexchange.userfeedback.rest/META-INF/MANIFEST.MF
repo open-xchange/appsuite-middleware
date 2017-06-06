@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange user feedback REST bundle
+Bundle-SymbolicName: com.openexchange.userfeedback.rest
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.writer,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.mail.mime,
+ com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation,
+ com.openexchange.server,
+ com.openexchange.uadetector,
+ com.openexchange.userfeedback,
+ com.openexchange.userfeedback.exception,
+ com.openexchange.userfeedback.filter,
+ com.openexchange.userfeedback.mail,
+ com.openexchange.userfeedback.mail.filter,
+ javax.mail.internet,
+ javax.ws.rs,
+ javax.ws.rs.core,
+ net.sf.uadetector,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.userfeedback.rest.osgi.UserFeedbackRESTActivator
+Bundle-ClassPath: .

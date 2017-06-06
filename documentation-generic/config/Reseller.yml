@@ -1,0 +1,13 @@
+feature_name: Reseller
+properties:
+    - key: RESELLER_STORAGE
+      description: |
+        Specifies the reseller storage class.
+      defaultValue: com.openexchange.admin.reseller.storage.mysqlStorage.OXResellerMySQLStorage
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: reseller.properties
+      packageName: open-xchange-admin-reseller
+      tags: ["Reseller"]

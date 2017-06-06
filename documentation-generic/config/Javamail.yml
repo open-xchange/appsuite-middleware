@@ -1,0 +1,1147 @@
+feature_name: Javamail
+feature_description: |
+  This file contains all known JavaMail properties structured by sections\:
+  JavaMail, JavaMail API System Properties, SMTP, IMAP, POP3 & Internet
+  All configurations done in this file will overwrite the ones set and used before, so modify it with care!
+properties:
+    - key: mail.debug
+      description: |
+        The initial debug mode.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.from
+      description: |
+        The return email address of the current user, used by the InternetAddress method getLocalAddress.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.mime.address.strict
+      description: |
+        The MimeMessage class uses the InternetAddress method parseHeader to parse headers in messages.
+        This property controls the strict flag passed to the parseHeader method.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.host
+      description: |
+        The default host name of the mail server for both Stores and Transports. Used if the [[mail.[protocol].host]] property isn't set.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.[protocol].host
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Host"]
+
+    - key: mail.store.protocol
+      description: |
+        Specifies the default message access protocol. The Session method getStore() returns a Store object that implements this protocol.
+        By default the first Store provider in the configuration files is returned.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.transport.protocol
+      description: |
+        Specifies the default message access protocol. The Session method getTransport() returns a Transport object that implements this protocol.
+        By default the first Transport provider in the configuration files is returned.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.user
+      description: |
+        The default user name to use when connecting to the mail server. Used if the mail.protocol.user property isn't set.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.protocol.user
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.[protocol].class
+      description: |
+        Specifies the fully qualified class name of the provider for the specified protocol.
+        Used in cases where more than one provider for a given protocol exists; this property can be used to specify which provider to use by default.
+        The provider must still be listed in a configuration file.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.[protocol].host
+      description: |
+        The host name of the mail server for the specified protocol. Overrides the [[mail.host]] property.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.host
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Host"]
+
+    - key: mail.[protocol].port
+      description: |
+        The port number of the mail server for the specified protocol. If not specified the protocol's default port number is used.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP","Port"]
+
+    - key: mail.[protocol].user
+      description: |
+        The user name to use when connecting to mail servers using the specified protocol. Overrides the [[mail.user]] property.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.user
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Credential"]
+
+    - key: mail.mime.decodetext.strict
+      description: |
+        RFC 2047 requires that encoded text start at the beginning of a whitespace separated word.
+        Some mailers, especially Japanese mailers, improperly encode text and include encoded text in the middle of words.
+        This property controls whether JavaMail will attempt to decode such incorrectly encoded text.
+        If set to <code>true</code> JavaMail wil not attempt to decode such improperly decoded text.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Encoding"]
+
+    - key: mail.mime.encodeeol.strict
+      description: |
+        When choosing an encoding for the data of a message, JavaMail assumes that any of CR, LF, or CRLF are valid line
+        terminators in message parts that contain only printable ASCII characters, even if the part is not a MIME text type.
+        It's common, especially on UNIX systems, for data of MIME type application/octet-stream (for example) to really be
+        textual data that should be transmitted with the encoding rules for MIME text. In rare cases, such pure ASCII text
+        may in fact be binary data in which the CR and LF characters must be preserved exactly.
+        If this property is set to true, JavaMail will consider a lone CR or LF in a body part that's not a MIME text type to
+        indicate that the body part needs to be encoded.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Encoding"]
+
+    - key: mail.smtp.user
+      description: |
+        Default user name for SMTP.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.user
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Credential"]
+
+    - key: mail.smtp.host
+      description: |
+        The SMTP server to connect to.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Host"]
+
+    - key: mail.smtp.port
+      description: |
+        The SMTP server port to connect to, if the connect() method doesn't explicitly specify one.
+      defaultValue: 25
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP","Port"]
+
+    - key: mail.smtp.connectiontimeout
+      description: |
+        Socket connection timeout value in milliseconds.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Timeout"]
+
+    - key: mail.smtp.timeout
+      description: |
+        Socket I/O timeout value in milliseconds.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Timeout"]
+
+    - key: mail.smtp.from
+      description: |
+        Email address to use for SMTP MAIL command. This sets the envelope return address.
+         Defaults to msg.getFrom() or InternetAddress.getLocalAddress(). 
+
+         Note:  
+         [[mail.smtp.user]] was previously used for this. 
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.smtp.user
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.localhost
+      description: |
+        Local host name. Defaults to InetAddress.getLocalHost().getHostName().
+        Should not normally need to be set if your JDK and your name service are configured properly.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Host"]
+
+    - key: mail.smtp.ehlo
+      description: |
+        If <code>false</code>, do not attempt to sign on with the EHLO command. Normally failure of the EHLO command will
+        fallback to the HELO command; this property exists only for servers that don't fail EHLO properly or
+        don't implement EHLO properly.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.auth
+      description: |
+        If <code>true</code>, attempt to authenticate the user using the AUTH command.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Authentication"]
+
+    - key: mail.smtp.dsn.notify
+      description: |
+        The NOTIFY option to the RCPT command. Either <code>NEVER</code>, or some combination of <code>SUCCESS</code>, <code>FAILURE</code>, and <code>DELAY</code> (separated by commas).
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.dns.ret
+      description: |
+        The RET option to the MAIL command. Either <code>FULL</code> or <code>HDRS</code>.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.allow8bitmime
+      description: |
+        If set to <code>true</code>, and the server supports the 8BITMIME extension, text parts of messages that use the "quoted-printable" or "base64"
+        encodings are converted to use "8bit" encoding if they follow the RFC2045 rules for 8bit text. 
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Encoding"]
+
+    - key: mail.smtp.sendpartial
+      description: |
+        If set to <code>true</code>, and a message has some valid and some invalid addresses, send the message anyway, reporting the partial failure with
+        a SendFailedException. If set to <code>false</code>, the message is not sent to any of the recipients if there is an invalid recipient
+        address.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.saslrealm
+      description: |
+        The realm to use with DIGEST-MD5 authentication.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Authentication"]
+
+    - key: mail.smtp.quitwait
+      description: |
+        If set to <code>true</code>, causes the transport to wait for the response to the QUIT command.
+        If set to <code>false</code>, the QUIT command is sent and the connection is immediately closed.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.reportsuccess
+      description: |
+        If set to <code>true</code>, causes the transport to include an SMTPAddressSucceededException for each address that is successful.
+        Note also that this will cause a SendFailedException to be thrown from the sendMessage method of SMTPTransport even if all addresses were
+        correct and the message was sent successfully.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.mailextension
+      description: |
+        Extension string to append to the MAIL command. The extension string can be used to specify standard SMTP service extensions as well as vendor-specific extensions.
+        Typically the application should use the SMTPTransport method supportsExtension to verify that the server supports the desired service extension.
+        See RFC 1869 and other RFCs that define specific extensions.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.smtp.userset
+      description: |
+        If set to <code>true</code>, use the RSET command instead of the NOOP command in the isConnected method.
+        In some cases sendmail will respond slowly after many NOOP commands; use of RSET avoids this sendmail issue.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP"]
+
+    - key: mail.imap.user
+      description: |
+        Default user name for IMAP.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.user
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP"]
+
+    - key: mail.imap.host
+      description: |
+        The IMAP server to connect to.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.host
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Host"]
+
+    - key: mail.imap.port
+      description: |
+        The IMAP server port to connect to, if the connect() method doesn't explicitly specify one.
+      defaultValue: 143
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP","Port"]
+
+    - key: mail.imap.partialfetch
+      description: |
+        Controls whether the IMAP partial-fetch capability should be used.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP"]
+
+    - key: mail.imap.fetchsize
+      description: |
+        Partial fetch size in bytes.
+      defaultValue: 16K
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP"]
+
+    - key: mail.imap.connectiontimeout
+      description: |
+        Socket connection timeout value in milliseconds.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Timeout"]
+
+    - key: mail.imap.timeout
+      description: |
+        Socket I/O timeout value in milliseconds.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Timeout"]
+
+    - key: mail.imap.statuscachetimeout
+      description: |
+        Timeout value in milliseconds for cache of STATUS command response. <code>0</code> disables cache.
+      defaultValue: 1000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Caching", "Timeout"]
+
+    - key: mail.imap.appendbuffersize
+      description: |
+        Maximum size of a message to buffer in memory when appending to an IMAP folder.
+        If not set, or set to <code>-1</code>, there is no maximum and all messages are buffered. If set to <code>0</code>, no messages are buffered.
+        If set to (e.g.) <code>8192</code>, messages of 8K bytes or less are buffered, larger messages are not buffered.
+        Buffering saves cpu time at the expense of short term memory usage. If you commonly append very large messages to
+        IMAP mailboxes you might want to set this to a moderate value (1M or less).
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP"]
+
+    - key: mail.imap.connectionpoolsize
+      description: |
+        Maximum number of available connections in the connection pool.
+      defaultValue: 1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Limit"]
+
+    - key: mail.imap.connectionpooltimeout
+      description: |
+        Timeout value in milliseconds for connection pool connections.
+      defaultValue: 45000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Timeout"]
+
+    - key: mail.imap.seperatestoreconnection
+      description: |
+        Flag to indicate whether to use a dedicated store connection for store commands.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP"]
+
+    - key: mail.imap.allowreadonlyselect
+      description: |
+        If <code>false</code>, attempts to open a folder read/write will fail if the SELECT command succeeds but indicates that the folder is READ-ONLY.
+        This sometimes indicates that the folder contents can'tbe changed, but the flags are per-user and can be changed, such as might be
+        the case for public shared folders. If <code>true</code>, such open attempts will succeed, allowing the flags to be changed.
+        The getMode method on the Folder object will return Folder.READ_ONLY in this case even though the open method specified Folder.READ_WRITE.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.imap.auth.login.disable
+      description: |
+        If <code>true</code>, prevents use of the non-standard AUTHENTICATE LOGIN command, instead using the plain LOGIN command.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Authentication"]
+
+    - key: mail.imap.auth.plain.disable
+      description: |
+        If <code>true</code>, prevents use of the AUTHENTICATE PLAIN command.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Authentication"]
+
+    - key: mail.imap.localaddress
+      description: |
+        Local address (host name) to bind to when creating the IMAP socket. Defaults to the address picked by the Socket class.
+        Should not normally need to be set, but useful with multi-homed hosts where it's important to pick a particular local address to bind to.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Host"]
+
+    - key: mail.imap.localport
+      description: |
+        Local port number to bind to when creating the IMAP socket. Defaults to the port number picked by the Socket class.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP","Port"]
+
+    - key: mail.imap.sasl.enable
+      description: |
+        If set to <code>true</code>, attempt to use the javax.security.sasl package to choose an authentication mechanism for login.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Authentication"]
+
+    - key: mail.imap.sasl.mechanisms
+      description: |
+        A space or comma separated list of SASL mechanism names to try to use.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Authentication"]
+
+    - key: mail.imap.sasl.authorizationid
+      description: |
+        The authorization ID to use in the SASL authentication. If not set, the authentication ID (user name) is used.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Authentication"]
+
+    - key: mail.pop3.user
+      description: |
+        Default user name for POP3.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.user
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3", "Credential"]
+
+    - key: mail.pop3.host
+      description: |
+        The POP3 server to connect to.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: mail.host
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3", "Host"]
+
+    - key: mail.pop3.port
+      description: |
+        The POP3 server port to connect to, if the connect() method doesn't explicitly specify one.
+      defaultValue: 110
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3","Port"]
+
+    - key: mail.pop3.connectiontimeout
+      description: |
+        Socket connection timeout value in milliseconds.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3", "Timeout"]
+
+    - key: mail.pop3.timeout
+      description: |
+        Socket I/O timeout value in milliseconds.
+      defaultValue: -1
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3", "Timeout"]
+
+    - key: mail.pop3.rsetbeforequit
+      description: |
+        Send a POP3 RSET command when closing the folder, before sending the QUIT command. Useful with POP3 servers that implicitly mark all
+        messages that are read as "deleted"; this will prevent such messages from being deleted and expunged unless the client requests so.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3"]
+
+    - key: mail.pop3.message.class
+      description: |
+        Class name of a subclass of com.sun.mail.pop3.POP3Message. The subclass can be used to handle (for example) non-standard Content-Type headers.
+        The subclass must have a public constructor of the form: <pre>MyPOP3Message(Folder f, int msgno) throws MessagingException</pre>
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.pop3.localaddress
+      description: |
+        Local address (host name) to bind to when creating the POP3 socket. Defaults to the address picked by the Socket class.
+        Should not normally need to be set, but useful with multi-homed hosts where it's important to pick a particular local address to bind to.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3", "Host"]
+
+    - key: mail.pop3.localport
+      description: |
+        Local port number to bind to when creating the POP3 socket. Defaults to the port number picked by the Socket class.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3","Port"]
+
+    - key: mail.pop3.apop.enable
+      description: |
+        If set to <code>true</code>, use APOP instead of USER/PASS to login to the POP3 server, if the POP3 server supports APOP.
+        APOP sends a digest of the password rather than the clear text password.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3", "Authentication"]
+
+    - key: mail.pop3.disabletop
+      description: |
+        If set to <code>true</code>, the POP3 TOP command will not be used to fetch message headers. This is useful for POP3 servers that don't properly implement the TOP command,
+        or that provide incorrect information in the TOP command results.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3"]
+
+    - key: mail.pop3.forgettopheaders
+      description: |
+        If set to <code>true</code>, the headers that might have been retrieved using the POP3 TOP command will be forgotten and replaced by headers retrieved as part of the POP3 RETR command.
+        Some servers, such as some version of Microsft Exchange, will return slightly different headers each time the TOP or RETR command is used.
+        To allow the POP3 provider to properly parse the message content returned from the RETR command, the headers also returned by the RETR command must be used.
+        Setting this property to <code>true</code> will cause these headers to be used, even if they differ from the headers returned previously as a result of using the TOP command.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "POP3"]
+
+    - key: mail.store.maildir.autocreatedir
+      description: |
+        Whether to auto-create specified maildir directory on maildir store connect or not.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3"]
+
+    - key: mail.store.maildir.cachefolders
+      description: |
+        Whether to cache maildir folder objects or not.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Folder"]
+
+    - key: mail.store.maildir.checkmessagesizebeforeappend
+      description: |
+        Whether to check quota limitations or not.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3"]
+
+    - key: mail.store.maildir.quota.size
+      description: |
+        Define the quota limit on STORAGE resource.
+      defaultValue: 0
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3"]
+
+    - key: mail.store.maildir.quota.count
+      description: |
+        Define the quota limit on MESSAGE resource.
+      defaultValue: 0
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3"]
+
+    - key: mail.store.maildir.headerindex
+      description: |
+        Whether to use a header index or not.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3"]
+
+    - key: mail.store.maildir.inmemorysize
+      description: |
+        Define the maximum RFC822 message size (in bytes) for being kept in memory completely. If a message exceeds this size, its corresponding
+        file is accessed with random access instead of reading file with an input stream.
+      defaultValue: 131072
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3"]
+
+    - key: mail.store.maildir.headercachemaxsize
+      description: |
+        Define the maximum number of message headers that are kept in a maildir folder's header cache.
+      defaultValue: 1000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Folder", "Limit"]
+
+    - key: mail.store.maildir.maxnumofheadercaches
+      description: |
+        Define the maximum number of maildir folder header caches.
+      defaultValue: 10
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Folder", "Limit"]
+
+    - key: mail.store.maildir.headercacheexpire
+      description: |
+        Define the timeout for header caches (in milliseconds).
+      defaultValue: 3600000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "Caching", "Timeout"]
+
+    - key: mail.mime.address.strict
+      description: |
+        This property controls the parsing of address headers.
+        By default, strict parsing of address headers is done. If this property is set to <code>false</code>,
+        strict parsing is not done and many illegal addresses that sometimes occur in real messages are allowed.
+        See the InternetAddress class for details.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.mime.charset
+      description: |
+        This property can be used to specify the default MIME charset to use for encoded words and text parts that don't
+        otherwise specify a charset. Normally, the default MIME charset is derived from the default Java charset, as specified in the file.encoding
+        System property. Most applications will have no need to explicitly set the default MIME charset.
+        In cases where the default MIME charset to be used for mail messages is different than the charset used for files stored on the system,
+        this property should be set.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.decodetext.strict
+      description: |
+        This property controls decoding of MIME encoded words.
+        The MIME spec requires that encoded words start at the beginning of a whitespace separated word.
+        Some mailers incorrectly include encoded words in the middle of a word.
+        If set to <code>false</code>, an attempt will be made to decode these illegal encoded words.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.encodeeol.strict
+      description: |
+        This property controls the choice of Content-Transfer-Encoding for MIME parts that are not of type "text".
+        Often such parts will contain textual data for which an encoding that allows normal end of line conventions is appropriate.
+        In rare cases, such a part will appear to contain entirely textual data, but will require an encoding that preserves CR and LF characters
+        without change. If set to <code>true</code>, such an encoding will be used when necessary.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.decodefilename
+      description: |
+        If set to <code>true</code>, the getFileName method uses the MimeUtility method decodeText to decode any non-ASCII characters in the filename.
+        Note that this decoding violates the MIME specification, but is useful for interoperating with some mail clients that use this convention.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.encodefilename
+      description: |
+        If set to <code>true</code>, the setFileName method uses the MimeUtility method encodeText to encode any non-ASCII characters in the filename.
+        Note that this encoding violates the MIME specification, but is useful for interoperating with some mail clients that use this convention.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.decodeparameters
+      description: |
+        If set to <code>true</code>, non-ASCII parameters in a ParameterList, e.g., in a Content-Type header, will be encoded as specified by RFC 2231.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.encodeparameters
+      description: |
+        If set to <code>true</code>, non-ASCII parameters in a ParameterList, e.g., in a Content-Type header, will be decoded as specified by RFC 2231.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.ignoremissingendboundary
+      description: |
+        Normally, when parsing a multipart MIME message, a message that is missing the final end boundary line is not considered an error.
+        The data simply ends at the end of the input. Note that messages of this form violate the MIME specification.
+        If set to <code>false</code>, such messages are considered an error and a MesagingException
+        will be thrown when parsing such a message.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.mime.ignoremissingboundaryparameter
+      description: |
+        If the Content-Type header for a multipart content does not have a boundary parameter, the multipart parsing code will look for the first
+        line in the content that looks like a boundary line and extract the boundary parameter from the line.
+        If this property is set to <code>false</code>, a MessagingException will be thrown if the Content-Type header doesn't specify a boundary parameter.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.mime.base64.ignoreerrors
+      description: |
+        If set to <code>true</code>, the BASE64 decoder will ignore errors in the encoded data, returning EOF.
+        This may be useful when dealing with improperly encoded messages that contain extraneous data at the end of the encoded stream.
+        Note however that errors anywhere in the stream will cause the decoder to stop decoding so this should be used with extreme caution.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.mime.foldtext
+      description: |
+        If set to <code>true</code>, header fields containing just text such as the Subject and Content-Description header fields, and long parameter values
+        in structured headers such as Content-Type will be folded (broken into 76 character lines) when set and unfolded when read.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.mime.setcontenttypefilename
+      description: |
+        If set to <code>true</code> the setFileName method will also set the name parameter on the Content-Type header to the specified filename.
+        This supports interoperability with some old mail clients.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.mime.setdefaulttextcharset
+      description: |
+        When updating the headers of a message, a body part with a text content type but no charset parameter will have
+        a charset parameter added to it if this property is set to <code>true</code>.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP", "Encoding"]
+
+    - key: mail.alternates
+      description: |
+        A string containing other email addresses that the current user is known by. The MimeMessage reply method will eliminate any of
+        these addresses from the recipient list in the message it constructs, to avoid sending the reply back to the sender.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]
+
+    - key: mail.replyallcc
+      description: |
+        If set to <code>true</code> the MimeMessage reply method will put all recipients except the original sender in the Cc list of the newly constructed message.
+        Normally, recipients in the To header of the original message will also appear in the To list of the newly constructed message.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "POP3", "SMTP"]

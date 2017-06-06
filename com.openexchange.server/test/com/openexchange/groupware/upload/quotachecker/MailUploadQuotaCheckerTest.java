@@ -62,7 +62,7 @@ public class MailUploadQuotaCheckerTest {
 
         long quotaMax = this.mailUploadQuotaChecker.getQuotaMax();
 
-        Assert.assertEquals(this.unlimitedQuota, quotaMax);
+        Assert.assertEquals(this.unlimitedQuota2, quotaMax);
     }
 
      @Test

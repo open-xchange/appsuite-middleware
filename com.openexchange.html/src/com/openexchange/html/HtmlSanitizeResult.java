@@ -52,7 +52,7 @@ package com.openexchange.html;
 
 /**
  * Contains the result information (e. g. content, truncated) of sanitizing HTML emails based on the provided information.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -69,8 +69,13 @@ public class HtmlSanitizeResult {
     private boolean truncated;
 
     /**
+     * Marker if <code>&lt;body&gt;</code> has already been replaced with a <code>&lt;div&gt;</code> tag for embedded display
+     */
+    private boolean bodyReplacedWithDiv;
+
+    /**
      * Initializes a new {@link HtmlSanitizeResult}.
-     * 
+     *
      * @param content
      */
     public HtmlSanitizeResult(String content) {
@@ -79,18 +84,19 @@ public class HtmlSanitizeResult {
 
     /**
      * Initializes a new {@link HtmlSanitizeResult}.
-     * 
+     *
      * @param content
      * @param truncated
      */
     public HtmlSanitizeResult(String content, boolean truncated) {
         this.content = content;
         this.truncated = truncated;
+        this.bodyReplacedWithDiv = false;
     }
 
     /**
      * Gets the content
-     * 
+     *
      * @return The content
      */
     public String getContent() {
@@ -99,7 +105,7 @@ public class HtmlSanitizeResult {
 
     /**
      * Sets the content
-     * 
+     *
      * @param content The content to set
      */
     public void setContent(String content) {
@@ -108,7 +114,7 @@ public class HtmlSanitizeResult {
 
     /**
      * Gets the truncated
-     * 
+     *
      * @return The truncated
      */
     public boolean isTruncated() {
@@ -117,10 +123,29 @@ public class HtmlSanitizeResult {
 
     /**
      * Sets the truncated
-     * 
+     *
      * @param truncated The truncated to set
      */
     public void setTruncated(boolean truncated) {
         this.truncated = truncated;
     }
+
+    /**
+     * Checks if <code>&lt;body&gt;</code> has already been replaced with a <code>&lt;div&gt;</code> tag for embedded display.
+     *
+     * @return <code>true</code> if already replaced; otherwise <code>false</code>
+     */
+    public boolean isBodyReplacedWithDiv() {
+        return bodyReplacedWithDiv;
+    }
+
+    /**
+     * Sets whether <code>&lt;body&gt;</code> has already been replaced with a <code>&lt;div&gt;</code> tag for embedded display
+     *
+     * @param bodyReplacedWithDiv <code>true</code> if already replaced; otherwise <code>false</code>
+     */
+    public void setBodyReplacedWithDiv(boolean bodyReplacedWithDiv) {
+        this.bodyReplacedWithDiv = bodyReplacedWithDiv;
+    }
+
 }

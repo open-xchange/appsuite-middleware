@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-03-08 21:47+0800\n"
+"PO-Revision-Date: 2017-05-04 23:06+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.12\n"
+"X-Generator: Poedit 2.0.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -204,7 +204,7 @@ msgstr "%3$s 的第 %1$s 個 %2$s"
 #. E.g. "Every 2. February"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:76
 msgid "Every %1$s. %2$s"
-msgstr "每 %2$s %1$s "
+msgstr "每 %2$s %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:78
 msgid "Work day"
@@ -484,7 +484,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:82
 msgid "The appointment's attachments have been changed"
-msgstr "已修改約會註解。"
+msgstr "約會附件已變更"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:84
 msgid "One or more other fields have been updated"
@@ -599,7 +599,7 @@ msgstr "%1$s 已邀請您參加某個事件:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:162
 msgid "You have been invited to an event organized by %1$s on behalf of %2$s"
-msgstr "%1$s 已邀請您用 %2$s 的名義參加某個事件:"
+msgstr "%1$s 已邀請您用 %2$s 的名義參加某個事件"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:164
 msgid "%1$s is organizing an event on your behalf."
@@ -762,7 +762,7 @@ msgstr "將 %1$s 群組自約會移除。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:253
 msgid "The group %1$s has been removed from the appointment"
-msgstr "已自約會移除 %1$s 群組。"
+msgstr "已自約會移除 %1$s 群組"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:255
 msgid "Reserve the resource %1$s for the appointment"
@@ -778,7 +778,7 @@ msgstr "資源 %1$s 已被保留用來於約會當中"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:261
 msgid "Remove the resource %1$s from the appointment"
-msgstr "自約會移除 %1$s 資源。"
+msgstr "自約會移除 %1$s 資源"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:263
 msgid "Remove the resource %1$s from the appointment."
@@ -786,7 +786,7 @@ msgstr "自約會移除 %1$s 資源。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:265
 msgid "The resource %1$s is no longer reserved for the appointment"
-msgstr "已不再為約會保留資源 %1$s。"
+msgstr "已不再為約會保留資源 %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:267
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
@@ -1518,17 +1518,17 @@ msgstr "無法建立到配置資料庫的連接。"
 #. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
 msgid "Database for context %1$d and server %2$d can not be resolved"
-msgstr "無法為環境 %1$d 和伺服器 %2$d 解析資料庫！"
+msgstr "無法為環境 %1$d 和伺服器 %2$d 解析資料庫"
 
 #. The connection to the database could not be established.
 #. %1$d is replaced with the database pool identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:72
 msgid "No connection to database %1$d"
-msgstr "無法建立到資料庫 %1$d 的連接。"
+msgstr "無法建立到資料庫 %1$d 的連線"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
 msgid "Schema can not be set on database connection"
-msgstr "無法設置關於資料庫連接的架構。"
+msgstr "無法設置關於資料庫連線的 schema"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:76
 msgid "Null is returned to connection pool."
@@ -1678,7 +1678,7 @@ msgstr "DoveAdm 資源不存在"
 
 #. A temporary failure because a subsystem is down. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:83
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:247
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:249
 msgid ""
 "A temporary failure because a subsystem is down (maybe due to maintenance). "
 "Please try again later."
@@ -1997,8 +1997,8 @@ msgstr "您沒有在資料夾「%1$s」建立子資料夾的適當權限。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "要完成搜索，需要 %1$d 個或更多字元。"
@@ -2345,7 +2345,7 @@ msgstr "至少一個您指定的預先條件並未符合。"
 #. Temporary redirect.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:139
 msgid "Temporary redirect."
-msgstr "暫時重導"
+msgstr "暫時重導。"
 
 #. Object restore is already in progress.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:142
@@ -2818,7 +2818,7 @@ msgstr "沒有可用的空閒/忙碌提供者"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:64
 msgid "The participant \"%1$s\" is ambiguous."
-msgstr "參與者「%1$s」不明確"
+msgstr "參與者「%1$s」不明確。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:65
 msgid "The participant \"%1$s\" can't be found."
@@ -2842,7 +2842,7 @@ msgstr "找不到id為 %1$s的uwa部件"
 msgid ""
 "The widget with the id %1$s is protected and only positional information can "
 "be updated"
-msgstr "id為 %1$s的部件受到保護並且只能更新其位置信息"
+msgstr "id 為 %1$s 的小工具受到保護，只能更新其位置資訊。"
 
 #. The string cannot be parsed to a valid URL.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
@@ -3134,12 +3134,17 @@ msgstr "HTML 內容無效，無法顯示"
 msgid "The HTML content cannot be safely displayed"
 msgstr "無法安全地顯示 HTML 內容"
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr "此訊息僅能以純文字格式顯示"
+
 #. *
 #. * No connection available to access mailbox
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:150
 msgid "No connection available to access mailbox"
 msgstr "沒有可用於訪問郵箱的連接"
 
@@ -3206,7 +3211,7 @@ msgstr "對於資料夾沒有針對的管理權限"
 
 #. Denied to update a standard/default folder like Trash
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:189
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:191
 msgid "Default folder must not be updated"
 msgstr "不得更新預設資料夾"
 
@@ -3237,7 +3242,7 @@ msgstr "無法刪除預設資料夾 %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
 msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-msgstr "由於以下原因無法修改 %1$s 旗標: %2$s"
+msgstr "由於以下原因無法修改 %1$s 旗標:「%2$s」"
 
 #. *
 #. * Number of search fields (%d) do not match number of search patterns (%d)
@@ -3252,7 +3257,7 @@ msgstr "搜尋框數量 (%d) 與搜尋語法數量 (%d) 不同"
 msgid ""
 "IMAP search failed due to reason \"%1$s\". Switching to application-based "
 "search"
-msgstr "因為「%1$s」，無法進行 IMAP 搜尋。切換至應用程式搜尋。"
+msgstr "因為「%1$s」，無法進行 IMAP 搜尋。切換至應用程式搜尋"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
 msgid ""
@@ -3286,7 +3291,7 @@ msgstr "移動郵件操作中缺少資料夾"
 msgid ""
 "Message move aborted for user %1$s. Source and destination folder are equal "
 "to \"%2$s\""
-msgstr "使用者 %1$s 的移動操作中止。來源和目的文件夾都是 %2$s。"
+msgstr "使用者 %1$s 的移動操作中止。來源和目的文件夾都是「%2$s」。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
 msgid "IMAP folder read-only check failed"
@@ -3294,12 +3299,11 @@ msgstr "無法進行 IMAP 資料夾唯讀檢查"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
 msgid "Unknown folder open mode %1$s"
-msgstr "未知資料夾開啟模式 %1$s。"
+msgstr "未知資料夾開啟模式 %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
-msgid ""
-"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-msgstr "無法刪除資料夾 %2$s 當中的訊息 %1$s，因為發生錯誤 %3$s"
+msgid "One or more message in folder %2$s could not be deleted"
+msgstr "無法刪除 %2$s 信件匣當中的一或多封訊息"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
 msgid "Not allowed to open folder %1$s due to missing read access"
@@ -3361,7 +3365,7 @@ msgstr "將資料夾「%1$s」更名為「%2$s」的操作失敗，原因為「%
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
 msgid "No rename access to mail folder %1$s"
-msgstr "對信件匣 %1$s 沒有更名權限。"
+msgstr "對信件匣 %1$s 沒有更名權限"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
 msgid "Unable to parse IMAP server URI \"%1$s\"."
@@ -4044,21 +4048,21 @@ msgstr "因為用戶配置，用戶 %1$s 無權訪問郵件模組"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:79
 msgid ""
 "You do not have the appropriate permissions to access the mail folder %1$s"
-msgstr "您沒有適當的權限來存取郵件資料夾 %1$s。"
+msgstr "您沒有適當的權限來存取郵件資料夾 %1$s"
 
 #. *
 #. * No read access on mail folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:83
 msgid "You do not have the appropriate permissions to read mail folder %1$s"
-msgstr "您沒有適當的權限來讀取郵件資料夾 %1$s。"
+msgstr "您沒有適當的權限來讀取郵件資料夾 %1$s"
 
 #. *
 #. * No delete access on mail folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:87
 msgid "You do not have the appropriate permissions to delete mail folder %1$s"
-msgstr "您沒有適當的權限來刪除郵件資料夾 %1$s。"
+msgstr "您沒有適當的權限來刪除郵件資料夾 %1$s"
 
 #. *
 #. * No insert access on mail folder %1$s
@@ -4066,7 +4070,7 @@ msgstr "您沒有適當的權限來刪除郵件資料夾 %1$s。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:91
 msgid ""
 "You do not have the appropriate permissions to insert to mail folder %1$s"
-msgstr "您沒有適當的權限來插入郵件資料夾 %1$s。"
+msgstr "您沒有適當的權限來插入郵件資料夾 %1$s"
 
 #. *
 #. * No administer access on mail folder %1$s
@@ -4074,7 +4078,7 @@ msgstr "您沒有適當的權限來插入郵件資料夾 %1$s。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:95
 msgid ""
 "You do not have the appropriate permissions to administer mail folder %1$s"
-msgstr "您沒有適當的權限來管理郵件資料夾 %1$s。"
+msgstr "您沒有適當的權限來管理郵件資料夾 %1$s"
 
 #. *
 #. * No write access to POP3 folder %1$s
@@ -4082,7 +4086,7 @@ msgstr "您沒有適當的權限來管理郵件資料夾 %1$s。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:99
 msgid ""
 "You do not have the appropriate permissions to write to POP3 folder %1$s"
-msgstr "您沒有適當的權限來寫入 POP3 郵件資料夾 %1$s。"
+msgstr "您沒有適當的權限來寫入 POP3 郵件資料夾 %1$s"
 
 #. *
 #. * No keep-seen access on mail folder %1$s
@@ -4183,7 +4187,7 @@ msgstr "由於以下原因無法修改 %1$s 旗標: %2$s"
 msgid ""
 "POP3 search failed due to the following reason: %1$s. Switching to "
 "application-based search"
-msgstr "因為「%1$s」，無法進行 POP3 搜尋。切換至應用程式搜尋。"
+msgstr "因為「%1$s」，無法進行 POP3 搜尋。切換至應用程式搜尋"
 
 #. *
 #. * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
@@ -4192,7 +4196,7 @@ msgstr "因為「%1$s」，無法進行 POP3 搜尋。切換至應用程式搜�
 msgid ""
 "POP3 sort failed due to the following reason: %1$s Switching to application-"
 "based sorting"
-msgstr "因為「%1$s」，無法進行 POP3 排序。切換為應用程式排序。"
+msgstr "因為「%1$s」，無法進行 POP3 排序。切換為應用程式排序"
 
 #. *
 #. * Unknown search field: %1$s
@@ -4268,7 +4272,7 @@ msgstr "無法刪除資料夾 %2$s 當中的訊息 %1$s，因為發生 %3$s 錯�
 msgid ""
 "You do not have the appropriate permissions to open folder %1$s due to "
 "missing read access"
-msgstr "因為缺少閱讀權限，您沒有開啟 %1$s 資料夾的適當權限。"
+msgstr "因為缺少閱讀權限，您沒有開啟 %1$s 資料夾的適當權限"
 
 #. *
 #. * The raw content's input stream of message %1$s in folder %2$s cannot be read
@@ -4370,7 +4374,7 @@ msgstr "使用者  %1$S 缺少 POP3 儲存空間名稱，請指定一個並再�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:261
 msgid ""
 "The POP3 storage is missing for user %1$s. Please provide one and try again"
-msgstr "使用者  %1$S 缺少 POP3 儲存空間，請指定一個並再試一次。"
+msgstr "使用者 %1$s 缺少 POP3 儲存空間，請指定一個並再試一次"
 
 #. *
 #. * POP3 default folder %1$s must not be moved.
@@ -4459,7 +4463,7 @@ msgstr "無法匯入 POP3 訊息，因為以達目前的配額限制額度。請
 msgid ""
 "The following field(s) are too long: %1$s. Please shorten the values and try "
 "again"
-msgstr "下列欄位太長: %1$s。請縮短並重試。"
+msgstr "下列欄位太長: %1$s。請縮短並重試"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:64
 msgid "The data you provided (%1$s) cannot be changed."
@@ -4475,7 +4479,7 @@ msgstr "縮圖無法使用。"
 msgid ""
 "The preview service for MIME type %1$s is currently not available. Please "
 "try again later"
-msgstr "MIME 類型 %1$s 的預覽服務暫時不可用。請以後重試。"
+msgstr "MIME 類型 %1$s 的預覽服務暫時不可用。請稍候再試"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:70
 msgid "Could not load data via proxy."
@@ -4661,7 +4665,7 @@ msgstr "未知頻道 %1$s"
 #. * "Obligatory key \"%1$s\" is missing from the Stanza"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:63
 msgid "Obligatory key \"%1$s\" is missing from the Stanza"
-msgstr "Stanza 欠缺必要的 \"%1$s\" 碼。"
+msgstr "Stanza 欠缺必要的「%1$s」鍵"
 
 #. * Malformed IQ Data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:65
@@ -4677,7 +4681,7 @@ msgstr "畸形 IQ 元素：「%1$s」"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:63
 msgid ""
 "No appropriate channel found for recipient %1$s with payload namespace %2$s"
-msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻道。"
+msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻道"
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
@@ -4697,7 +4701,7 @@ msgstr "無效 ID。缺少資源 ID。"
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
-msgstr "無效的 RSS 網址或格式不正確的 XML 內容: %1$s "
+msgstr "無效的 RSS 網址或格式不正確的 XML 內容: %1$s"
 
 #. HTTP error %1$s while loading RSS feed from URL: %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:66
@@ -4707,7 +4711,7 @@ msgstr "自網址 %2$s 載入 RSS 資訊來源時發生 HTTP 錯誤 %1$s。"
 #. Timeout while reading the RSS feed from URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:69
 msgid "Timeout while reading the RSS feed from URL: %1$s"
-msgstr "自網址 %1$s 載入 RSS 資訊來源時逾時。"
+msgstr "自網址 %1$s 載入 RSS 資訊來源時逾時"
 
 #. Failed to read RSS feed from URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:72
@@ -4805,12 +4809,12 @@ msgstr "解析 ical 時出現解析錯誤: %s"
 #. Unknown Class: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:78
 msgid "Unknown Class: %1$s"
-msgstr "未知類: %1$"
+msgstr "未知類型: %1$s"
 
 #. Cowardly refusing to convert confidential classified objects.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:81
 msgid "Cowardly refusing to convert confidential classified objects."
-msgstr "謹慎地拒絕轉換機密物件"
+msgstr "謹慎地拒絕轉換機密物件。"
 
 #. Missing DTStart in appointment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:84
@@ -4847,6 +4851,18 @@ msgstr "元素被截斷: %s"
 msgid "Invalid mail address for external participant: %1$s"
 msgstr "外部參與者的電子郵件地址無效: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:102
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for appointments."
+msgstr "轉換造成缺少約會資料夾，無法儲存某些物件。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for tasks."
+msgstr "轉換造成缺少任務資料夾，無法儲存某些物件。"
+
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 msgid "You do not have a valid session. Please login again."
@@ -4870,7 +4886,7 @@ msgstr "您沒有適當的權限移動該資料夾。"
 
 #. A folder named "%1$s" already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
 msgid "A folder named \"%1$s\" already exists."
 msgstr "一個名為「%1$s」的資料夾已經存在。"
 
@@ -5061,13 +5077,13 @@ msgid "Appointments must have at least one participant."
 msgstr "不得從參與者中刪除約會的所有者。"
 
 #. *
-#. * You do not have the appropriate permissions to read appointments in folder %1$d.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments in folder "
-"%1$d."
-msgstr "您沒有讀取資料夾 %1$d 中約會的必要權限。"
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
+msgstr "您沒有可閱讀該資料夾中的約會的適當權限。"
 
 #. *
 #. * End date must not be before start date.
@@ -5108,7 +5124,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:103
 msgid "Unsupported \"shown as\" value %d."
-msgstr " 不支援的「顯示為」值 %d。"
+msgstr "不支援的「顯示為」值 %d。"
 
 #. *
 #. * Required value \"Start Date\" was not supplied.
@@ -5132,12 +5148,11 @@ msgid "Required value \"Title\" was not supplied."
 msgstr "未提供需要的值「標題」。"
 
 #. *
-#. * Move not supported: Cannot move an appointment from folder %d to folder %d.
+#. * Move not supported. You cannot move an appointment into that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:123
-msgid ""
-"Move not supported: Cannot move an appointment from folder %d to folder %d."
-msgstr "不支援移動: 無法將約會從文件夾 %d 移到文件夾 %d。"
+msgid "Move not supported. You cannot move an appointment into that folder."
+msgstr "不支援移動，您無法將約會移動至該資料夾。"
 
 #. *
 #. * Move not allowed from shared folders.
@@ -5278,22 +5293,22 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "不允許將重複發生的約會移到另一個文件夾。"
 
 #. *
-#. * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
+#. * Cannot create that appointment. An appointment having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
 msgid ""
-"Cannot insert appointment (%1$s). An appointment with the unique identifier "
-"(%2$s) already exists."
-msgstr "無法插入約會 (%1$s)。已存在相同 UID 的約會 (%2$s)。"
+"Cannot create that appointment. An appointment having the same unique "
+"identifier already exists."
+msgstr "無法建立約會，已有相同唯一識別符的約會存在。"
 
 #. *
-#. * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+#. * Cannot create that task. A task having the same unique identifier already exists.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:223
 msgid ""
-"Cannot insert task (%1$s). A task with the unique identifier (%2$s) already "
+"Cannot create that task. A task having the same unique identifier already "
 "exists."
-msgstr "無法插入任務（%1$s）。已存在相同 ID 的任務（%2$s）。"
+msgstr "無法建立任務，已有相同唯一識別符的任務存在。"
 
 #. Sequence number is outdated.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -5402,7 +5417,7 @@ msgstr "您沒有適當的權限在資料夾「%1$s」中刪除物件。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:105
 msgid "Mime type is not defined."
-msgstr "未定義 MIME 類型"
+msgstr "未定義 MIME 類型。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:107
 msgid "Storing a contact with private flag in a shared folder is not allowed."
@@ -5469,7 +5484,7 @@ msgid "Getting the value of %s requires at least a ContactObject"
 msgstr "至少要有一個 ContactObject 才能取得 %s 的值"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
 "problematic character and try again."
@@ -6949,7 +6964,7 @@ msgstr "每 %3$s 個月的第 %1$s 個%3$s"
 #. Each %1$s %2$s; e.g. "Each 10th October"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:832
 msgid "Each %1$s %2$s"
-msgstr "每 %2$s %1$s "
+msgstr "每 %2$s %1$s"
 
 #. ", ends after %1$s appointment(s)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:838
@@ -7272,7 +7287,7 @@ msgstr "密碼長度錯誤。密碼最短只能有 %1$d 個字。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:137
 msgid ""
 "Invalid password length. The password must have a maximum length of %1$d."
-msgstr " 密碼長度錯誤。密碼最長只能有 %1$d 個字。"
+msgstr "密碼長度錯誤。密碼最長只能有 %1$d 個字。"
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -7434,7 +7449,7 @@ msgstr "設定或變更約會與任務的提醒。"
 #. * Writing the setting %1$s is not permitted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/settings/SettingExceptionMessage.java:69
 msgid "Writing the setting %1$s is not permitted."
-msgstr "不允許寫設置 %1$s"
+msgstr "不允許寫入設定 %1$s。"
 
 #. * Invalid value %s written to setting %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/settings/SettingExceptionMessage.java:72
@@ -7486,8 +7501,8 @@ msgid "Error while inserting task."
 msgstr "插入任務時出錯。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "Folder \"%1$s\" is not a task folder."
-msgstr "資料夾「%1$s」不是一個任務資料夾。"
+msgid "This is not a task folder."
+msgstr "這不是任務資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
@@ -7524,19 +7539,18 @@ msgstr "搜索中的日期範圍包含 2 個值而不是 %d 個值。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:83
 msgid ""
-"You do not have the appropriate permissions to read the contents of the "
-"folder with id %1$d."
-msgstr "您沒有適當的權限來讀取 id 為 %1$d 的資料夾內容。"
+"You do not have the appropriate permissions to read the contents in that "
+"folder."
+msgstr "您沒有適當的權限來讀取該資料夾中的內容。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
-msgstr "為您禁用了任務。"
+msgstr "為您停用了任務。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid ""
-"You do not have the appropriate permissions to create tasks in folder \"%1$s"
-"\"."
-msgstr "您沒有在資料夾「%1$s」建立任務的適當權限。"
+"You do not have the appropriate permissions to create tasks in that folder."
+msgstr "您沒有適當的權限在該資料夾中建立任務。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
 msgid "You do not have the appropriate permission to delegate tasks."
@@ -7544,7 +7558,7 @@ msgstr "您沒有指派任務的適當權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:91
 msgid "Tasks with private flag cannot be delegated."
-msgstr "不能委託加有私人標誌的任務。"
+msgstr "不能指派加有私人旗標的任務。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:93
 msgid "Percent is %d but must be between 0 and 100."
@@ -7558,13 +7572,12 @@ msgstr "對於尚未開始的任務，完成百分比必須是 0 而不是 %d。
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
 msgid ""
-"You do not have the appropriate permissions to edit tasks in the folder with "
-"id %1$d."
-msgstr "您沒有適當的權限來編輯 id 為 %1$d 的資料夾中的任務。"
+"You do not have the appropriate permissions to edit tasks in that folder"
+msgstr "您沒有編輯該資料夾中的任務的適當權限"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
-msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
-msgstr "不允許將專案移出或移進共用資料夾「%1$s」。"
+msgid "Moving items from or into a shared folder is not allowed."
+msgstr "不允許將物件自該資料夾移出或移入。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
 msgid "Unknown recurrence type %d."
@@ -7591,8 +7604,8 @@ msgstr ""
 "「%2$s」字元。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
-msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
-msgstr "加有私人標誌的任務不能移到公共資料夾「%1$s」。"
+msgid "Tasks with private flag cannot be moved to a public folder."
+msgstr "含有私人旗標的任務無法被移動至公開資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -7603,34 +7616,28 @@ msgid "External participants without E-Mail address can not be added."
 msgstr "無法添加沒有電子郵件位址的外部參與者。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
-msgid ""
-"You do not have the appropriate permisson to see the task %1$d in folder "
-"%2$s."
-msgstr "您沒有在資料夾 %2$s 中檢視任務 %1$d 的適當權限。"
+msgid "You do not have the appropriate permisson to see the task."
+msgstr "您沒有可檢視任務的適當權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
 msgstr "任務包含無效資料:「%1$s」。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
-msgid "The task %1$d is not stored in folder %2$s."
-msgstr "任務 %1$d 未存儲在資料夾 %2$s 中。"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr "組 %1$d 是空的。您不能將空的組添加到任務。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr "屬性「%2$s」的值「%1$s」包含非數字。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
 msgid "Priority is %d but must be between 1 and 3."
 msgstr "優先權為 %d，但是必須在 1 和 3 之間。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:134
-msgid "This folder (%1$d) is not visible."
-msgstr "此資料夾（%1$d）不可見。"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
+msgid "You do not have the appropriate permisson to see the folder."
+msgstr "您沒有可檢視資料夾的適當權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
@@ -7916,159 +7923,163 @@ msgid "Unable to save draft, due to exceeded quota."
 msgstr "超出磁碟空間配額，無法儲存草稿。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:98
+msgid "Unable to save the mail, due to exceeded quota."
+msgstr "空間配額已滿，無法儲存郵件。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:100
 msgid ""
 "Message has been successfully sent. A copy could not be placed in your sent "
 "folder though."
 msgstr "已成功發送郵件，但無法將副本保存在您的已發送信件匣中。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:102
 msgid "Bad value \"%1$s\" in parameter \"%2$s\"."
 msgstr "參數「%2$s」中的值「%1$s」不正確。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:104
 msgid "No reply on multiple messages possible."
 msgstr "不可能回復多封郵件。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:106
 msgid ""
 "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"."
 msgstr "在郵件文件夾「%3$s」的郵件「%2$s」中找不到附件「%1$s」。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:108
 msgid "Folder \"%1$s\" does not hold messages and is therefore not selectable"
 msgstr "資料夾「%1$s」不包含郵件，因此不可選擇"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:110
 msgid "Root folder must not be modified or deleted."
 msgstr "不得修改或刪除根資料夾。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:112
 msgid ""
 "Image attachment with content id \"%1$s\" not found inside mail \"%2$s\" of "
 "mail folder \"%3$s\"."
 msgstr "在信件匣「%3$s」的郵件「%2$s」中找不到內容 ID 為「%1$s」的圖像附件。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:114
 msgid ""
 "The specified E-Mail address \"%1$s\" is not covered by allowed E-Mail "
 "address aliases."
 msgstr "指定的電子郵件位址「%1$s」未被允許的電子郵件位址別名所涵蓋。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:114
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:116
 msgid "Checking default folders failed for user %2$s."
 msgstr "檢查使用者 %2$s 的預設資料夾失敗。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:118
 msgid ""
 "Default folders cannot be created as mail system denies to create more "
 "folders. Consequently, the mail module is not usable at the moment. Please "
 "delete other folders first in order to re-use the mail module again"
 msgstr ""
 "由於郵件系統拒絕建立更多信件霞，無法建立預設信件匣。目前暫時無法使用郵件模"
-"組。請先刪除其他信件匣後再次使用郵件模組。"
+"組。請先刪除其他信件匣後再次使用郵件模組"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "The types of specified data source are not supported."
 msgstr "指定資料來源的類型不受支援。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
 msgid "Mail cannot be parsed. Invalid or incomplete mail data."
 msgstr "無法解析郵件。郵件資料無效或不完整。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
 msgid "Mail folder cannot be created/renamed. Empty folder name."
 msgstr "無法建立/重命名郵件文件夾。空的文件夾名。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:126
 msgid "Invalid folder name. Please avoid the following characters: %2$s"
 msgstr "資料夾名稱無效，請不要使用下列字元: %2$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:130
 msgid "No create access on mail folder \"%1$s\"."
 msgstr "沒有建立信件匣「%1$s」的權限。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
 msgid "Mail account \"%1$s\" with ID \"%2$s\" does not support mail transport."
 msgstr "ID 為「%2$s」的郵件帳戶「%1$s」不支援郵件傳輸。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:134
 msgid "Mail folder could not be found."
 msgstr "找不到郵件文件夾。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:134
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:136
 msgid "Referenced mail \"%1$s\" could not be found in folder \"%2$s\"."
 msgstr "在文件夾「%2$s」中找不到參照的郵件「%1$s」。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:140
 msgid "Mail folder must not be deleted."
 msgstr "不得刪除郵件文件夾。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:142
 msgid "No delete access on mail folder \"%1$s\"."
 msgstr "沒有刪除信件匣「%1$s」的權限。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:142
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:144
 msgid "Mail folder must not be moved."
 msgstr "不得移動郵件文件夾。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:146
 msgid "Mail folder must not be updated."
 msgstr "不得更新郵件文件夾。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:148
 msgid "No write access on mail folder \"%1$s\"."
 msgstr "沒有對信件匣的寫入權限:「%1$s」。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:152
 msgid "Mail could not be found in folder \"%1$s\" by message identifier."
 msgstr "在文件夾「%1$s」中找不到指定郵件指示符的郵件。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:154
 msgid ""
 "Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds."
 msgstr "發送超過配額，你只允許在 %1$s 秒內發送 1 封郵件。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:156
 msgid ""
 "Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
 "'Send' again."
 msgstr "請將您的收件人限制至%1$s（包括收件人/抄送/密送），並再次單擊“發送“。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:156
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
 msgid "Unable to parse mail server URI \"%1$s\"."
 msgstr "無法解析郵件服務器URI \"%1$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:160
 msgid "Mail attachment expired or absent."
 msgstr "附件已過期或不存在。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:160
-msgid "Account has been checked successfully but with a non-secure connection."
-msgstr "已成功在非加密連線當中檢查帳號"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:162
+msgid "Account has been checked successfully but with a non-secure connection."
+msgstr "已成功在非加密連線當中檢查帳號。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
 msgid ""
 "Cannot forward more than %1$s messages at once. Please divide the messages "
 "to forward in chunks of appropriate size."
-msgstr "無法一次轉寄超過 %1$s 封訊息。請將訊息分割為不同的適當大小數量"
+msgstr "無法一次轉寄超過 %1$s 封訊息。請將訊息分割為不同的適當大小數量。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
 msgid "Your account has been created but will not use a secure connection."
 msgstr "已建立您的帳號，但不會使用加密連線。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
 msgid ""
 "Your E-Mail has been successfully sent, but the original E-Mail could not be "
 "flagged as \"replied\" and/or \"forwarded\"."
 msgstr "已成功發送您郵件，但是無法將原始信件標示為「已回覆」或「已轉寄」。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:170
 msgid ""
 "Mail folder cannot be created/renamed. Folder name exceeds max length of "
 "%1$s."
 msgstr "無法建立/重命名郵件文件夾。文件夾名稱超過最大長度 %1$s 個字元。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:172
 msgid ""
 "The attachments to this E-Mail exceeded the size limit for attachments. "
 "Instead of sending the attachment with the E-Mail, the attachment was "
@@ -8078,92 +8089,92 @@ msgstr ""
 "此郵件的附件已超過大小限制，已發布附件，並將下載鏈結插入至郵件中，而不直接作"
 "為附件發出。收件者可以下載附件開啟。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:172
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:174
 msgid "Draft message could not be saved."
 msgstr "無法儲存草稿。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:176
 msgid "Maximum message size is exceeded. Max. is %1$s."
 msgstr "超過最大訊息大小。最大大小為 %1$s。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:176
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
 msgid ""
 "Re-sending message denied because message is not located in \"%1$s\" folder."
 msgstr "由於訊息並非位於「%1$s」 資料夾，拒絕重送郵件。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
 msgid "Validation of server %1$s failed with reason: %3$s"
 msgstr "伺服器 %1$s 驗證失敗，原因: %3$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
 msgid "Validation of server %1$s failed due to invalid credentials"
 msgstr "因為帳號密碼錯誤，伺服器 %1$s 驗證失敗"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:184
 msgid "Server %1$s does not support being accessed using a secure connection."
 msgstr "%1$s 伺服器不支援使用安全連線存取。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:184
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:186
 msgid "Mail access is disabled for context administrator."
 msgstr "環境管理員已停用郵件功能。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:186
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:188
 msgid ""
 "The maximum number of files that may be attached to an E-Mail is exceeded. "
 "Max. is %1$s."
 msgstr "超過可附加至郵件的附件數量。最大數量為 %1$s。"
 
 #. The client request is not permitted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:192
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:194
 msgid "The client request is not permitted."
 msgstr "不允許客戶端的請求。"
 
 #. Sending the message denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:195
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:197
 msgid "Sending the message denied."
 msgstr "訊息傳送被拒絕。"
 
 #. Denied to rename a standard/default folder like Trash
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:200
 msgid "Default folder must not be renamed"
 msgstr "無法更名預設資料夾"
 
 #. Denied to delete a standard/default folder like Trash
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:201
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
 msgid "Default folder must not be deleted"
 msgstr "無法刪除預設資料夾"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:205
 msgid "Archive folder does not allow subfolders."
 msgstr "封存資料夾不含子資料夾。"
 
 #. The user tries to import a file as a RFC822 message, that is not valid
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:206
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:208
 msgid "No valid file"
 msgstr "無有效檔案"
 
 #. A part's content could not be read from a message; e.g. an I/O error occurred
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:209
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:211
 msgid "The mail part could not be read"
 msgstr "無法讀取郵件部分"
 
 #. The content/body of the message is too big
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:212
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
 msgid "The content of the mail is too big."
 msgstr "郵件內容太大。"
 
 #. Invalid parameter value: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:215
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:217
 msgid "Invalid parameter value: %1$s"
 msgstr "無效參數值: %1$s"
 
 #. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:218
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:220
 msgid ""
 "The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
 msgstr "旗標名稱 %1$s 無效，名稱不能以「\\」開頭。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
 msgid ""
 "The attachments to this E-Mail exceeded the size limit for attachments. "
 "Instead of sending the attachments with the E-Mail, the attachments are "
@@ -8174,44 +8185,44 @@ msgstr ""
 "者可下載開啟。"
 
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:223
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "You are not allowed to compose a message containing share links"
 msgstr "您不被允許撰寫包含分享連結的訊息"
 
 #. User wants to compose a share message but does not specify an expiration date which is required
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:226
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
 msgid ""
 "Please specify an expiration date in order to compose a message containing "
 "share links"
 msgstr "請指定到期日以撰寫含有分享連結的訊息"
 
 #. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:229
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
 msgid "The selected authentication type is not supported by server %2$s"
 msgstr "伺服器 %2$s 不支援所選的驗證類型"
 
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:232
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
 msgid "Please check your mail account: %2$s"
 msgstr "請檢查郵件帳號: %2$s"
 
 #. Invalid name specified. Information from mail server: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:235
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
 msgid "Invalid name specified. Information from mail server: %1$s"
 msgstr "指定名稱無效。郵件伺服器提供下列資訊: %1$s"
 
 #. Insufficient permissions to perform the operation.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:238
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:240
 msgid "Insufficient permissions to perform the operation."
 msgstr "權限不足，無法處理該操作。"
 
 #. Such a folder already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:241
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
 msgid "Such a folder already exists."
-msgstr "該資料夾已存在"
+msgstr "該資料夾已存在。"
 
 #. A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:244
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:246
 msgid ""
 "Please change mail settings and configure a secure connection (if Transport "
 "Layer Security (TLS) is not in use, the client could try STARTTLS)"
@@ -8220,16 +8231,16 @@ msgstr ""
 "STARTTLS）"
 
 #. Thrown when a mail access has been disabled. That is it exceeded the limit for failed authentication count.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:250
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:252
 msgid ""
 "Your mail account %2$s was disabled due to invalid credentials. Please edit "
 "the account and enter correct credentials to enable it again"
 msgstr ""
 "因為帳號密碼無效，您的郵件帳號 %2$s 已被停用。請編輯帳號並輸入正確的帳號密碼"
-"以再次啟用。"
+"以再次啟用"
 
 #. Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:253
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:255
 msgid ""
 "Your mail account %2$s was disabled because of authorization issues. Please "
 "reauthorize the account %5$s to enable it again."
@@ -8237,22 +8248,22 @@ msgstr ""
 "因為授權問題，您的郵件帳號 %2$s 已被停用。請重新授權帳號 %5$s 以再次啟用。"
 
 #. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:256
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:258
 msgid ""
 "Your mail transport for  %2$s was disabled due to invalid credentials. "
 "Please edit the account and enter correct credentials to enable it again"
 msgstr ""
 "因為帳號密碼無效，您 %2$s 帳號的郵件傳輸功能已被停用。請編輯帳號並輸入正確的"
-"帳號密碼以再次啟用。"
+"帳號密碼以再次啟用"
 
 #. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:259
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
 msgid ""
-"Your mail transort for %2$s was disabled because of authorization issues. "
+"Your mail transport for %2$s was disabled because of authorization issues. "
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
-"因為授權問題，您的郵件帳號 %2$s 的傳輸功能已被停用。請重新授權帳號 %5$s 以再"
-"次啟用。"
+"因為授權問題，您 %2$s 的郵件傳輸已被停用。請重新授權 %5$s 帳號後即可重新啟"
+"用。"
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8330,17 +8341,17 @@ msgstr ""
 #. * The provided login information seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
-msgid "The provided login information seem to be wrong. Please try again."
-msgstr "提供的登入資訊看來有誤。請重試。"
+msgid "The provided login data seem to be wrong. Please correct them."
+msgstr "提供的登入資料看來有誤，請修正。"
 
 #. *
 #. * The provided login information to access mail server %1$s seem to be wrong. Please try again.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid ""
-"The provided login information to access mail server %1$s seem to be wrong. "
-"Please try again."
-msgstr "提供用來存取郵件伺服器 %1$s 的登入資訊看來不正確，請再試一次。"
+"The provided login data to access mail server %1$s seem to be wrong. Please "
+"correct them."
+msgstr "提供的 %1$s 郵件伺服器登入資料看來有誤，請修正。"
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -8445,7 +8456,7 @@ msgstr "無法將訊息發送給下列收件人: %1$s (%2$s)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
 msgid ""
 "Message could not be sent. Error message from mail transport server: %1$s"
-msgstr "無法傳送訊息。郵件傳輸伺服器的錯誤訊息為: %1$s。"
+msgstr "無法傳送訊息。郵件傳輸伺服器的錯誤訊息為: %1$s"
 
 #. *
 #. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
@@ -8572,8 +8583,8 @@ msgstr "帳號已停用。"
 
 #. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
-msgid "Account is current being set-up."
-msgstr "帳號正在設定中。"
+msgid "Account is currently being set-up."
+msgstr "帳號設立中。"
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -8999,7 +9010,7 @@ msgstr "不允許您分享資料夾給「%2$s」。"
 msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
-msgstr "您無法變更垃圾桶及其子資料夾的權限。"
+msgstr "您無法變更垃圾桶及其子資料夾的權限"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -9048,7 +9059,7 @@ msgstr "自客戶端收到無效的 JSON 資料"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:71
 msgid "Client sent not allowed request parameter \"%1$s\" within the URI."
-msgstr "客戶端傳送"
+msgstr "客戶端在傳送的 URI 當中包含不允許的請求參數「%1$s」。"
 
 #. *
 #. * The provided cookie is invalid. Please login.
@@ -9134,23 +9145,27 @@ msgid "The share you are looking for does not exist."
 msgstr "您正尋找地分享內容不存在。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+msgid "This share cannot be accessed with your Web Browser."
+msgstr "無法以網頁瀏覽器存取此分享。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
 msgid "We were unable to process your request."
 msgstr "我們無法處理您的請求。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
 msgstr "您尋找的資料夾或物件已不再可用，請點擊「繼續」以檢視其他的分享項目。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
 msgstr "您的訪客帳號目前並未以密碼保護，將中止密碼重設。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -9158,14 +9173,14 @@ msgstr ""
 "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -9174,7 +9189,7 @@ msgstr ""
 "者。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -9182,21 +9197,21 @@ msgstr ""
 "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
 msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡擁有者。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -9206,7 +9221,7 @@ msgstr ""
 "要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -9216,7 +9231,7 @@ msgstr ""
 "您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -9226,7 +9241,7 @@ msgstr ""
 "者。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -9236,7 +9251,7 @@ msgstr ""
 "視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -9246,7 +9261,7 @@ msgstr ""
 "他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -9256,7 +9271,7 @@ msgstr ""
 "分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:121
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -9266,7 +9281,7 @@ msgstr ""
 "要檢視您其他分享的檔案，請登入。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -9275,7 +9290,7 @@ msgstr ""
 "您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -9285,7 +9300,7 @@ msgstr ""
 "者。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -9295,7 +9310,7 @@ msgstr ""
 "視您其他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -9305,7 +9320,7 @@ msgstr ""
 "他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -9319,7 +9334,7 @@ msgstr "請求的分享內容不存在。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:66
 msgid "The token \"%1$s\" is invalid."
-msgstr "token「%1$s」無效。"
+msgstr "Token「%1$s」無效。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
 msgid "The link \"%1$s\" is invalid."
@@ -9594,7 +9609,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:163
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了檔案「%3$s」，並留下以下訊息。"
+msgstr "%1$s（%2$s）與您分享了檔案「%3$s」，並留下以下訊息:"
 
 #. * $username ($user_email) has shared $number_of_files files with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:166
@@ -9605,7 +9620,7 @@ msgstr "%1$s（%2$s）與您分享了 %3$s 個檔案，並留下以下訊息:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:169
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了圖片「%3$s」，並留下以下訊息。"
+msgstr "%1$s（%2$s）與您分享了圖片「%3$s」，並留下以下訊息:"
 
 #. * $username ($user_email) has shared $number_of_images images with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:172
@@ -9616,7 +9631,7 @@ msgstr "%1$s（%2$s）與您分享了 %3$s 張圖片，並留下以下訊息:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:175
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了資料夾「%3$s」，並留下以下訊息。"
+msgstr "%1$s（%2$s）與您分享了資料夾「%3$s」，並留下以下訊息:"
 
 #. * $username ($user_email) has shared item "$filename" with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:178
@@ -9645,8 +9660,7 @@ msgstr "%1$s (%2$s) 已與「%4$s」群組分享了檔案「%3$s」，並留了�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:190
 msgid ""
 "%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個檔案。請點擊下面的按鈕來檢視。"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個檔案，並留了下列訊息:"
 
 #. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:193
@@ -9660,8 +9674,7 @@ msgstr "%1$s (%2$s) 已與「%4$s」群組分享了圖片「%3$s」，並留了�
 msgid ""
 "%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
 "message:"
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 張圖片。請點擊下面的按鈕來檢視。"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 張圖片，並留了下列訊息:"
 
 #. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:199
@@ -9799,6 +9812,11 @@ msgstr "發生錯誤，無法傳送郵件給「%2$s」。"
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr "發生錯誤，無法傳送通知郵件。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:70
+msgid ""
+"You don't have sufficient permissions to send notifications for this share."
+msgstr "您沒有足夠的權限來傳送通知至此分享內容。"
+
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
 msgid ""
@@ -9810,7 +9828,7 @@ msgstr "您已達到可傳送簡訊的最大數量，請等 %1$s 小時候再試
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
 msgid ""
 "SMS limits apply. You can only send one more message in the next %1$s hours"
-msgstr "有簡訊傳送限制。您僅能在接下來的 %1$s 小時內再傳一封簡訊。"
+msgstr "有簡訊傳送限制。您僅能在接下來的 %1$s 小時內再傳一封簡訊"
 
 #. Could not parse phone number %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
@@ -9868,7 +9886,7 @@ msgstr "您不被允許修改簽名"
 #. The message displayed if the requested subscription cannot be found from the server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:69
 msgid "The subscription you requested is unkonwn!"
-msgstr "您請求的訂閱不存在。"
+msgstr "您請求的訂閱不存在！"
 
 #. The operation is forbidden
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
@@ -9954,7 +9972,7 @@ msgstr "此訂閱來源當前處於非活動狀態，無法提供資料。"
 #. The message displayed if the user would like to access the service but does not have an OAuth account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:83
 msgid "You need to create an OAuth-account first to access this service."
-msgstr "您必須先建立一個 OAuth 帳號才能存取此服務"
+msgstr "您必須先建立一個 OAuth 帳號才能存取此服務。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:85
 msgid "Your account needs to be verified: %1$s"
@@ -9996,7 +10014,7 @@ msgstr "檔案存取被拒絕。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
 msgid "This template was not whitelisted,"
-msgstr "此範本不在白名單中。"
+msgstr "此範本不在白名單中，"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:64
 msgid "Unable to change data. (%1$s)"
@@ -10113,6 +10131,26 @@ msgstr ""
 "使用者的檔案由來源環境 %2$s 的使用者 %1$s 擁有，請先設定各使用者或環境相關的"
 "檔案儲存空間。"
 
+#. The provided feedback score is invalid. Please choose a number > 0.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
+msgid "The provided feedback score is invalid. Please choose a number > 0."
+msgstr "提供的意見回饋評分無效，請選擇大於 0 的數字。"
+
+#. The provided feedback for key 'score' has an invalid type.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
+msgid "The provided feedback for key 'score' has an invalid type."
+msgstr "為鍵值「score」提供的意見回饋類型無效。"
+
+#. The provided feedback does not contain required key "score".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
+msgid "The provided feedback does not contain required key '%s'."
+msgstr "提供的意見回饋未包含必需的鍵值「%s」。"
+
+#. The provided feedback for key "score" cannot be parsed..
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
+msgid "The provided feedback for key '%s' cannot be parsed."
+msgstr "無法剖析提供的鍵值「%s」的意見回饋。"
+
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
 msgid "The value given in the property %1$s is no integer value."
@@ -10131,7 +10169,7 @@ msgstr "屬性 %1$s 宣稱有條件，但未設定條件。"
 #. Property %1$s must be set if %2$s is set to %3$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:72
 msgid "Property %1$s must be set if %2$s is set to %3$s"
-msgstr "若 %2$s 設為 %3$s 則必須設定屬性 %1$s。"
+msgstr "若 %2$s 設為 %3$s 則必須設定屬性 %1$s"
 
 #. The class %1$s cannot be used as a property type at the moment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:75
@@ -10230,7 +10268,7 @@ msgstr "電子郵件地址 %1$s 已請求了 XING 帳號。"
 msgid ""
 "The XING app that you are using does not hold the required permissions in "
 "order to perform the requested action"
-msgstr "您使用的 XING 應用程式並未取得足夠的權限以進行指定的操作。"
+msgstr "您使用的 XING 應用程式並未取得足夠的權限以進行指定的操作"
 
 #. No XING OAuth access available for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:122
@@ -12364,6 +12402,94 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments that "
+#~ "folder."
+#~ msgstr "您沒有可讀取該資料夾中約會的適當權限。"
+
+#~ msgid "The provided feedback does not contain required key \"%s\"."
+#~ msgstr "提供的意見回饋未包含必需的鍵值「%s」。"
+
+#~ msgid "The provided feedback for key \"%s\" cannot be parsed."
+#~ msgstr "無法剖析鍵值「%s」的意見回饋。"
+
+#~ msgid ""
+#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+#~ msgstr "無法刪除資料夾 %2$s 當中的訊息 %1$s，因為發生錯誤 %3$s"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read appointments in "
+#~ "folder %1$d."
+#~ msgstr "您沒有讀取資料夾 %1$d 中約會的必要權限。"
+
+#~ msgid ""
+#~ "Move not supported: Cannot move an appointment from folder %d to folder "
+#~ "%d."
+#~ msgstr "不支援移動: 無法將約會從文件夾 %d 移到文件夾 %d。"
+
+#~ msgid ""
+#~ "Cannot insert appointment (%1$s). An appointment with the unique "
+#~ "identifier (%2$s) already exists."
+#~ msgstr "無法插入約會 (%1$s)。已存在相同 UID 的約會 (%2$s)。"
+
+#~ msgid ""
+#~ "Cannot insert task (%1$s). A task with the unique identifier (%2$s) "
+#~ "already exists."
+#~ msgstr "無法插入任務（%1$s）。已存在相同 ID 的任務（%2$s）。"
+
+#~ msgid "Folder \"%1$s\" is not a task folder."
+#~ msgstr "資料夾「%1$s」不是一個任務資料夾。"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to read the contents of the "
+#~ "folder with id %1$d."
+#~ msgstr "您沒有適當的權限來讀取 id 為 %1$d 的資料夾內容。"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to create tasks in folder "
+#~ "\"%1$s\"."
+#~ msgstr "您沒有在資料夾「%1$s」建立任務的適當權限。"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to edit tasks in the folder "
+#~ "with id %1$d."
+#~ msgstr "您沒有適當的權限來編輯 id 為 %1$d 的資料夾中的任務。"
+
+#~ msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
+#~ msgstr "不允許將專案移出或移進共用資料夾「%1$s」。"
+
+#~ msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
+#~ msgstr "加有私人標誌的任務不能移到公共資料夾「%1$s」。"
+
+#~ msgid ""
+#~ "You do not have the appropriate permisson to see the task %1$d in folder "
+#~ "%2$s."
+#~ msgstr "您沒有在資料夾 %2$s 中檢視任務 %1$d 的適當權限。"
+
+#~ msgid "The task %1$d is not stored in folder %2$s."
+#~ msgstr "任務 %1$d 未存儲在資料夾 %2$s 中。"
+
+#~ msgid "This folder (%1$d) is not visible."
+#~ msgstr "此資料夾（%1$d）不可見。"
+
+#~ msgid ""
+#~ "Your mail transort for %2$s was disabled because of authorization issues. "
+#~ "Please reauthorize the account %5$s to enable it again."
+#~ msgstr ""
+#~ "因為授權問題，您的郵件帳號 %2$s 的傳輸功能已被停用。請重新授權帳號 %5$s 以"
+#~ "再次啟用。"
+
+#~ msgid "The provided login information seem to be wrong. Please try again."
+#~ msgstr "提供的登入資訊看來有誤。請重試。"
+
+#~ msgid ""
+#~ "The provided login information to access mail server %1$s seem to be "
+#~ "wrong. Please try again."
+#~ msgstr "提供用來存取郵件伺服器 %1$s 的登入資訊看來不正確，請再試一次。"
+
+#~ msgid "Account is current being set-up."
+#~ msgstr "帳號正在設定中。"
 
 #~ msgid "The associated %2$s account does no more exist"
 #~ msgstr "相關聯的 %2$s 帳號已不存在"

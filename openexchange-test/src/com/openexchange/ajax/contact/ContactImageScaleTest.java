@@ -55,7 +55,7 @@ import java.io.FileInputStream;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.configuration.MailConfig;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -71,7 +71,7 @@ public class ContactImageScaleTest extends AbstractContactTest {
         FileInputStream input = null;
         try {
             final Contact contactObj = createContactObject("testContactWithImage");
-            String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+            String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
             java.io.File file = new java.io.File(testDataDir, "oxlogo.png");
             input = new FileInputStream(file);
             final byte bigImage[] = new byte[input.available()];
@@ -102,7 +102,7 @@ public class ContactImageScaleTest extends AbstractContactTest {
         try {
             final Contact contactObj = createContactObject("testUpdateContactWithImageUpdate");
             final int objectId = insertContact(contactObj);
-            String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+            String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
             java.io.File file = new java.io.File(testDataDir, "oxlogo.png");
             input = new FileInputStream(file);
             final byte bigImage[] = new byte[input.available()];

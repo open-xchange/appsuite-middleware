@@ -50,18 +50,18 @@
 package com.openexchange.webdav;
 
 import static org.junit.Assert.assertTrue;
-import java.util.Properties;
-import javax.xml.parsers.SAXParserFactory;
 import org.jdom2.Namespace;
-import org.jdom2.input.SAXBuilder;
-import org.jdom2.input.sax.XMLReaders;
 import org.junit.Before;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.test.WebdavInit;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.framework.Constants;
 
@@ -70,15 +70,11 @@ import com.openexchange.webdav.xml.framework.Constants;
  */
 public abstract class AbstractWebdavTest {
 
-    protected static final String PROTOCOL = "http://";
-
-    protected static final String webdavPropertiesFile = "webdavPropertiesFile";
-
     protected static final String propertyHost = "hostname";
 
     protected static final Namespace webdav = Constants.NS_DAV;
 
-    protected String hostName = "localhost";
+    private String hostName = "localhost";
 
     protected String login = null;
 
@@ -89,8 +85,6 @@ public abstract class AbstractWebdavTest {
     protected String context;
 
     protected int userId = -1;
-
-    protected Properties webdavProps = null;
 
     protected String authData = null;
 
@@ -106,45 +100,51 @@ public abstract class AbstractWebdavTest {
 
     public static final String AUTHORIZATION = "authorization";
 
+    protected TestContext testContext;
+
+    protected String userParticipant2;
+
+    protected String userParticipant3;
+
+    protected String groupParticipant;
+
+    protected String resourceParticipant;
+
     /**
      * {@inheritDoc}
      */
     @Before
     public void setUp() throws Exception {
+        ProvisioningSetup.init();
+
         webCon = new WebConversation();
         secondWebCon = new WebConversation();
 
-        webdavProps = WebdavInit.getWebdavProperties();
+        testContext = TestContextPool.getAllTimeAvailableContexts().get(0);
+        TestUser testUser = testContext.acquireUser();
+        login = testUser.getLogin();
+        password = testUser.getPassword();
+        context = testContext.getName();
 
-        login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
-        password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
-        context = AbstractConfigWrapper.parseProperty(webdavProps, "contextName", "defaultcontext");
+        TestUser testUser2 = testContext.acquireUser();
+        secondlogin = testUser2.getLogin();
 
-        secondlogin = AbstractConfigWrapper.parseProperty(webdavProps, "secondlogin", "");
+        hostName = AJAXConfig.getProperty(Property.PROTOCOL) + "://" + AJAXConfig.getProperty(Property.HOSTNAME);
 
-        hostName = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");
+        userParticipant2 = testContext.getUserParticipants().get(1) + "@" + context;
+        userParticipant3 = testContext.getUserParticipants().get(2) + "@" + context;
+        groupParticipant = testContext.getGroupParticipants().get(0) + "@" + context;
+        resourceParticipant = testContext.getResourceParticipants().get(0) + "@" + context;
 
-        try {
-            SAXParserFactory fac = SAXParserFactory.newInstance();
-            fac.setNamespaceAware(true);
-            fac.setValidating(false);
-            XMLReaders nonvalidating = XMLReaders.NONVALIDATING;
-            new SAXBuilder();
-        } catch (Throwable t) {
-            throw new Exception(t);
-        }
-        userId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        userId = GroupUserTest.getUserId(getWebConversation(), getHostURI(), getLogin(), getPassword());
         assertTrue("user not found", userId != -1);
 
-        authData = getAuthData(login, password, context);
+        authData = getAuthData(login, password);
     }
 
-    protected static String getAuthData(String login, String password, String context) throws Exception {
+    protected static String getAuthData(String login, String password) throws Exception {
         if (password == null) {
             password = "";
-        }
-        if (context != null && context.length() > 0) {
-            login = login + "@" + context;
         }
         return new String(Base64.encode(login + ":" + password));
     }
@@ -161,7 +161,7 @@ public abstract class AbstractWebdavTest {
         return secondWebCon;
     }
 
-    protected String getHostName() {
+    protected String getHostURI() {
         return hostName;
     }
 

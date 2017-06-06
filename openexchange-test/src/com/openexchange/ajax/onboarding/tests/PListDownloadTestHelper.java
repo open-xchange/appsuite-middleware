@@ -143,7 +143,6 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
     @SuppressWarnings("unchecked")
     private Map<String, Object> testDownload(String host, String url) throws TransformerException, XmlParseException, ParserConfigurationException, SAXException, IOException {
         try {
-            host = AbstractWebdavXMLTest.appendPrefix(host);
             final WebRequest webRequest = new GetMethodWebRequest(host + url);
 
             final WebResponse webResponse = getNewWebConversation().getResponse(webRequest);

@@ -70,7 +70,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug30701Test}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Bug30701Test extends AbstractAJAXSession {
@@ -83,6 +83,7 @@ public class Bug30701Test extends AbstractAJAXSession {
 
     private TimeZone tz;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -102,6 +103,7 @@ public class Bug30701Test extends AbstractAJAXSession {
         contactA.getLastModifiedOfNewestAttachment().getTime();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -115,7 +117,7 @@ public class Bug30701Test extends AbstractAJAXSession {
     @Test
     public void testGetDocumentWithOffLenParameter() throws OXException, IOException, JSONException {
         final int length = 8;
-        GetDocumentRequest getDocReq = new GetDocumentRequest(folderID, contactA.getObjectID(), 7, attachmentID, "text/plain", 5, length, true);
+        GetDocumentRequest getDocReq = new GetDocumentRequest(folderID, attachmentID, 7, contactA.getObjectID(), "text/plain", 5, length, true);
         GetDocumentResponse getDocResp = getClient().execute(getDocReq);
         assertEquals("Wrong Content-Length in response", length, getDocResp.getContentLength());
     }

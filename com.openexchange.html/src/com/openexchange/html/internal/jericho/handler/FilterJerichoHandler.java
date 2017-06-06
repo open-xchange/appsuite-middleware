@@ -56,12 +56,8 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import static com.openexchange.java.Strings.toLowerCase;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -81,16 +77,13 @@ import net.htmlparser.jericho.HTMLElements;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.css.CSSMatcher;
+import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.html.internal.jericho.JerichoHandler;
-import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
-import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.AsciiReader;
 import com.openexchange.java.InterruptibleCharSequence;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
@@ -118,89 +111,18 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_', '/', ';', '=', ' ' };
 
-    private static final Set<String> NUM_ATTRIBS = new HashSet<>(0);
-
-    private static volatile Map<String, Map<String, Set<String>>> staticHTMLMap;
-
-    private static volatile Map<String, Set<String>> staticStyleMap;
-
-    private static volatile Map<String, Set<String>> staticHeightWidthStyleMap;
-
     // A decimal digit: [0-9]
     private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
 
-    private static final Map<String, Set<String>> IMAGE_STYLE_MAP;
-
     private static final Set<String> ALL;
 
-    private static final Set<String> SINGLE_TAGS;
-
     static {
-        IMAGE_STYLE_MAP = new HashMap<>();
-        Set<String> values = new HashSet<>();
-        /*
-         * background
-         */
-        values.add("iNc");
-        values.add("scroll");
-        values.add("fixed");
-        values.add("transparent");
-        values.add("top");
-        values.add("bottom");
-        values.add("center");
-        values.add("left");
-        values.add("right");
-        values.add("repeat");
-        values.add("repeat-x");
-        values.add("repeat-y");
-        values.add("no-repeat");
-        IMAGE_STYLE_MAP.put("background", values);
-        values = new HashSet<>();
-        /*
-         * background-image
-         */
-        values.add("i"); // Only "cid:" URLs
-        IMAGE_STYLE_MAP.put("background-image", values);
         /*
          * ALL tags
          */
         Set<String> s = new HashSet<>(HTMLElements.getElementNames());
         s.add("smarttagtype");
         ALL = Collections.unmodifiableSet(s);
-        /*
-         * Single tags
-         */
-        s = new HashSet<>();
-        s.add("wbr");
-        s.add("time");
-        SINGLE_TAGS = Collections.unmodifiableSet(s);
-    }
-
-    /**
-     * Gets the static HTML map.
-     *
-     * @return The HTML map
-     */
-    public static Map<String, Map<String, Set<String>>> getStaticHTMLMap() {
-        return staticHTMLMap;
-    }
-
-    /**
-     * Gets the static CSS map.
-     *
-     * @return The CSS map
-     */
-    public static Map<String, Set<String>> getStaticStyleMap() {
-        return staticStyleMap;
-    }
-
-    /**
-     * Gets the image CSS map.
-     *
-     * @return The image CSS map
-     */
-    public static Map<String, Set<String>> getImageStyleMap() {
-        return IMAGE_STYLE_MAP;
     }
 
     /*-
@@ -225,7 +147,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private int skipLevel;
 
     /**
-     * Used to track script tags
+     * Used to track script/svg tags
      */
     private boolean insideScriptTag = false;
 
@@ -264,11 +186,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
         this.cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         this.htmlBuilder = new StringBuilder(capacity);
         this.attrBuilder = new StringBuilder(128);
-        if (null == staticHTMLMap) {
-            loadWhitelist();
-        }
-        this.htmlMap = staticHTMLMap;
-        this.styleMap = staticStyleMap;
+        this.htmlMap = FilterMaps.getStaticHTMLMap();
+        this.styleMap = FilterMaps.getStaticStyleMap();
     }
 
     /**
@@ -284,7 +203,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         this.cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         this.htmlBuilder = new StringBuilder(capacity);
         this.attrBuilder = new StringBuilder(128);
-        final Map<String, Map<String, Set<String>>> map = parseHTMLMap(mapStr);
+        final Map<String, Map<String, Set<String>>> map = FilterMaps.parseHTMLMap(mapStr);
         if (!map.containsKey("html")) {
             map.put("html", null);
         }
@@ -294,13 +213,13 @@ public final class FilterJerichoHandler implements JerichoHandler {
         if (!map.containsKey("body")) {
             map.put("body", null);
         }
-        for (final String tagName : SINGLE_TAGS) {
+        for (final String tagName : FilterMaps.getSingleTags()) {
             if (!map.containsKey(tagName)) {
                 map.put(tagName, null);
             }
         }
         htmlMap = Collections.unmodifiableMap(map);
-        styleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
+        styleMap = Collections.unmodifiableMap(FilterMaps.parseStyleMap(mapStr));
     }
 
     /**
@@ -500,7 +419,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     String checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                     if (dropExternalImages) {
-                        imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                        imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), FilterMaps.getImageStyleMap(), null, false);
                         checkedCSS = cssBuffer.toString();
                         cssBuffer.setLength(0);
                     }
@@ -542,6 +461,20 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     @Override
+    public void markCssEnd(EndTag endTag) {
+        if (skipLevel == 0) {
+            isCss = false;
+            if (depth == 0) {
+                htmlBuilder.append("</").append(endTag.getName()).append('>');
+            } else if (!getAndUnmark()) {
+                htmlBuilder.append("</").append(endTag.getName()).append('>');
+            }
+        } else {
+            skipLevel--;
+        }
+    }
+
+    @Override
     public void handleEndTag(final EndTag endTag) {
         if (skipLevel == 0) {
             final String name = endTag.getName();
@@ -551,6 +484,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 isCss = false;
             } else if (HTMLElementName.TABLE == name) {
                 tablePaddings.poll();
+            }
+            if (isCss) {
+                // Ignore end tags in CSS content
+                return;
             }
             if (depth == 0) {
                 htmlBuilder.append("</").append(name).append('>');
@@ -564,17 +501,31 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     @Override
+    public void markCssStart(StartTag startTag) {
+        if (skipLevel > 0) {
+            skipLevel++;
+            return;
+        }
+        isCss = true;
+        addStartTag(startTag, false, htmlMap.get(startTag.getName()));
+    }
+
+    @Override
     public void handleStartTag(final StartTag startTag) {
         if (maxContentSizeExceeded) {
             // Do not append more elements
             return;
         }
         if (insideScriptTag) {
-            //ignore script tags completely
+            // Ignore script tags completely
+            return;
+        }
+        if (isCss) {
+            // Ignore tags in CSS content
             return;
         }
         final String tagName = startTag.getName();
-        if (startTag.isEndTagForbidden() || SINGLE_TAGS.contains(tagName)) {
+        if (startTag.isEndTagForbidden() || FilterMaps.getSingleTags().contains(tagName)) {
             // Simple tag
             if (skipLevel > 0) {
                 return;
@@ -646,7 +597,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static boolean isRemoveWholeTag(final Tag tag) {
         final String check = tag.getName();
-        return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
+        return (HTMLElementName.SCRIPT == check || "svg".equals(check) || check.startsWith("w:") || check.startsWith("o:"));
     }
 
     private static final Pattern PATTERN_STYLE_VALUE = Pattern.compile("([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}\\p{L}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);
@@ -715,33 +666,33 @@ public final class FilterJerichoHandler implements JerichoHandler {
         Set<String> uriAttributes = replaceUrls ? setFor(startTag.getURIAttributes()) : Collections.<String> emptySet();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
-            if (false == Strings.asciiLowerCase(attr).startsWith("on")) {
-                if ("style".equals(attr)) {
-                    /*
-                     * Handle style attribute
-                     */
-                    String css = attribute.getValue();
-                    if (!Strings.isEmpty(css)) {
-                        checkCSS(cssBuffer.append(css), styleMap, true);
+            if ("style".equals(attr)) {
+                /*
+                 * Handle style attribute
+                 */
+                String css = attribute.getValue();
+                if (!Strings.isEmpty(css)) {
+                    checkCSS(cssBuffer.append(css), styleMap, true);
+                    css = cssBuffer.toString();
+                    cssBuffer.setLength(0);
+                    if (dropExternalImages) {
+                        imageURLFound |= checkCSS(cssBuffer.append(css), FilterMaps.getImageStyleMap(), true, false);
                         css = cssBuffer.toString();
                         cssBuffer.setLength(0);
-                        if (dropExternalImages) {
-                            imageURLFound |= checkCSS(cssBuffer.append(css), IMAGE_STYLE_MAP, true, false);
-                            css = cssBuffer.toString();
-                            cssBuffer.setLength(0);
-                        }
                     }
-                    if (containsCSSElement(css)) {
-                        if (css.indexOf('"') == -1) {
-                            attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
-                        } else {
-                            attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
-                        }
+                }
+                if (containsCSSElement(css)) {
+                    if (css.indexOf('"') == -1) {
+                        attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
+                    } else {
+                        attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
                     }
-                } else if ("class".equals(attr) || "id".equals(attr)) {
-                    final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
-                    attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
-                } else {
+                }
+            } else if ("class".equals(attr) || "id".equals(attr)) {
+                final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
+                attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
+            } else {
+                if (false == HtmlServices.containsEventHandler(attr)) {
                     final String val = attribute.getValue();
                     if (null == allowedAttributes) { // No restrictions
                         if (isSafe(val, tagName)) {
@@ -793,7 +744,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                             }
                                         }
                                     }
-                                } else if (NUM_ATTRIBS == allowedValues) {
+                                } else if (FilterMaps.getNumAttribs() == allowedValues) {
                                     /*
                                      * Only numeric attribute value allowed
                                      */
@@ -915,7 +866,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             style = generateStyleString(styleNvps);
         } else {
             // Filter out all, but "width"/"height"
-            CSSMatcher.checkCSSElements(cssBuffer.append(style), staticHeightWidthStyleMap, true);
+            CSSMatcher.checkCSSElements(cssBuffer.append(style), FilterMaps.getHeightWidthStyleMap(), true);
             String toCheck = cssBuffer.toString();
             cssBuffer.setLength(0);
             if (Strings.isEmpty(toCheck)) {
@@ -1015,7 +966,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 builder.append('.').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
             } else if ('#' == first) {
                 if (word.indexOf('.') < 0) { // contains no dots
-                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                    builder.append('#').append(cssPrefix).append('-').append(word.substring(1)).append(' ');
                 } else {
                     builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
                 }
@@ -1084,7 +1035,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     String checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                     if (dropExternalImages) {
-                        imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                        imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), FilterMaps.getImageStyleMap(), null, false);
                         // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
                         checkedCSS = cssBuffer.toString();
                         cssBuffer.setLength(0);
@@ -1110,7 +1061,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 String checkedCSS = "\n<!--\n" + cssBuffer.toString() + "\n-->\n";
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
-                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), FilterMaps.getImageStyleMap(), null, false);
                     checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                 }
@@ -1119,13 +1070,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             }
         } else {
-            // No need to keep comments
-            /*-
-             *
             if (checkMaxContentSize(comment.length())) {
                 htmlBuilder.append(comment);
             }
-             */
         }
     }
 
@@ -1139,393 +1086,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
             retval = css.substring(4, css.length() - 3);
         }
         return retval;
-    }
-
-    private static final byte[] DEFAULT_WHITELIST = String
-        .valueOf(
-            "# HTML tags and attributes\n"
-                + "\n"
-                + "html.tag.a=\",href,name,tabindex,target,type,\"\n"
-                + "html.tag.area=\",alt,coords,href,nohref[nohref],shape[:rect:circle:poly:default:],tabindex,target,\"\n"
-                + "html.tag.b=\"\"\n"
-                + "html.tag.basefont=\",color,face,size,\"\n"
-                + "html.tag.bdo=\",dir[:ltr:rtl:]\"\n"
-                + "html.tag.blockquote=\",type,\"\n"
-                + "html.tag.body=\",alink,background,bgcolor,link,text,vlink,\"\n"
-                + "html.tag.br=\",clear[:left:right:all:none:]\"\n"
-                + "html.tag.button=\",disabled[disabled],name,tabindex,type[:button:submit:reset:],value,\"\n"
-                + "html.tag.caption=\",align[:top:bottom:left:right:]\"\n"
-                + "html.tag.col=\",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,\"\n"
-                + "html.tag.colgroup=\",align[:left:center:right:justify:char:],char,charoff,span[],valign[:top:middle:bottom:baseline:],width,\"\n"
-                + "html.tag.del=\",datetime,\"\n"
-                + "html.tag.dir=\",compact[compact]\"\n"
-                + "html.tag.div=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.dl=\",compact[compact]\"\n"
-                + "html.tag.em=\"\"\n"
-                + "html.tag.font=\",color,face,size,\"\n"
-                + "html.tag.h1=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.h2=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.h3=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.h4=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.h5=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.h6=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.hr=\",align[:left:center:right:],noshade[noshade],size,width,\"\n"
-                + "html.tag.html=\",version,xmlns,\"\n"
-                + "html.tag.img=\",align[:top:middle:bottom:left:right:],alt,border,height,hspace,ismap[ismap],name,src,usemap,vspace,width,\"\n"
-                + "html.tag.ins=\",datetime,\"\n"
-                + "html.tag.label=\",for,\"\n"
-                + "html.tag.legend=\",align[:left:top:right:bottom:]\"\n"
-                + "html.tag.li=\",type[:disc:square:circle:1:a:A:i:I:],value[],\"\n"
-                + "html.tag.map=\",name,\"\n"
-                + "html.tag.meta=\",http-equiv[:content-type:],\"\n"
-                + "html.tag.ol=\",compact[compact],start[],type[:1:a:A:i:I:],\"\n"
-                + "html.tag.optgroup=\",disabled[disabled],label,\"\n"
-                + "html.tag.option=\",disabled[disabled],label,selected[selected],value,\"\n"
-                + "html.tag.p=\",align[:left:center:right:justify:]\"\n"
-                + "html.tag.pre=\",width[],\"\n"
-                + "html.tag.select=\",disabled[disabled],multiple[multiple],name,size,tabindex[],\"\n"
-                + "html.tag.span=\"\"\n"
-                + "html.tag.strong=\"\"\n"
-                + "html.tag.style=\",media,type,\"\n"
-                + "html.tag.table=\",align[:left:center:right:],background,border,bgcolor,cellpadding,cellspacing,frame[:void:above:below:hsides:ihs:rhs:vsides:box:border:],rules[:none:groups:rows:cols:all:],summary,width,\"\n"
-                + "html.tag.tbody=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
-                + "html.tag.td=\",abbr,align[:left:center:right:justify:char:],axis,background,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,\"\n"
-                + "html.tag.textarea=\",cols[],disabled[disabled],name,readonly[readonly],rows[],tabindex[],\"\n"
-                + "html.tag.tfoot=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
-                + "html.tag.th=\",abbr,align[:left:center:right:justify:char:],axis,bgcolor,char,charoff,colspan[],headers,height,nowrap[nowrap],rowspan[],scope[:row:col:rowgroup:colgroup:],valign[:top:middle:bottom:baseline:],width,\"\n"
-                + "html.tag.thead=\",align[:left:center:right:justify:char:],char,charoff,valign[:top:middle:bottom:baseline:],\"\n"
-                + "html.tag.tr=\",align[:left:center:right:justify:char:],bgcolor,char,charoff,valign[:top:middle:bottom:baseline:],height,\"\n"
-                + "html.tag.u=\"\"\n"
-                + "html.tag.ul=\",compact[compact],type[:disc:square:circle:],\"\n"
-                + "\n"
-                + "\n"
-                + "# CSS key-value-pairs.\n"
-                + "# An empty value indicates a reference to style's combi-map.\n"
-                + "# Placeholders:\n"
-                + "# c: Any CSS color value\n"
-                + "# u: An URL; e.g. url(http://www.somewhere.com/myimage.jpg);\n"
-                + "# n: Any CSS number value without '%'\n"
-                + "# N: Any CSS number value\n"
-                + "# *: Any value allowed\n"
-                + "# d: delete\n"
-                + "# t: time\n"
-                + "\n"
-                + "html.style.azimuth=\",left-side,left-side behind,far-left,far-left behind,left,left behind,center-left,center-left behind,center,center behind,center-right,center-right behind,right,right behind,far-right,far-right behind,right-side,right behind,\"\n"
-                + "html.style.background=\"\"\n"
-                + "html.style.background-attachment=\",scroll,fixed,\"\n"
-                + "html.style.background-color=\"c,transparent,\"\n"
-                + "html.style.background-image=\"u\"\n"
-                + "html.style.background-position=\",N,top,bottom,center,left,right,\"\n"
-                + "html.style.background-repeat=\",repeat,repeat-x,repeat-y,no-repeat,\"\n"
-                + "html.style.border=\"\"\n"
-                + "html.style.border-bottom=\"\"\n"
-                + "html.style.border-bottom-color=\"c,transparent,\"\n"
-                + "html.style.border-bottom-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.border-bottom-width=\"n\"\n"
-                + "html.style.border-collapse=\",separate,collapse,\"\n"
-                + "html.style.border-color=\"c,transparent,\"\n"
-                + "html.style.border-left=\"\"\n"
-                + "html.style.border-left-color=\"c,transparent,\"\n"
-                + "html.style.border-left-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.border-left-width=\"n\"\n"
-                + "html.style.border-right=\"\"\n"
-                + "html.style.border-right-color=\"c,transparent,\"\n"
-                + "html.style.border-right-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.border-right-width=\"n\"\n"
-                + "html.style.border-spacing=\"N\"\n"
-                + "html.style.border-style=\"\"\n"
-                + "html.style.border-top=\"\"\n"
-                + "html.style.border-top-color=\"c,transparent,\"\n"
-                + "html.style.border-top-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.border-top-width=\"n\"\n"
-                + "html.style.border-width=\"\"\n"
-                + "html.style.bottom=\"N,auto,\"\n"
-                + "html.style.caption-side=\",top,bottom,left,right,\"\n"
-                + "html.style.centerline=\"d\"\n"
-                + "html.style.clear=\",left,right,both,none,\"\n"
-                + "html.style.clip=\"d\"\n"
-                + "html.style.color=\"c,transparent,\"\n"
-                + "html.style.content=\"d\"\n"
-                + "html.style.counter-increment=\"d\"\n"
-                + "html.style.counter-reset=\"d\"\n"
-                + "html.style.counter=\"d\"\n"
-                + "html.style.cue=\"u\"\n"
-                + "html.style.cue-after=\"u\"\n"
-                + "html.style.cue-before=\"u\"\n"
-                + "html.style.cursor=\",auto,default,crosshair,pointer,move,n-resize,ne-resize,e-resize,se-resize,s-resize,sw-resize,w-resize,nw-resize,text,wait,help,\"\n"
-                + "html.style.definition-src=\"d\"\n"
-                + "html.style.direction=\",ltr,rtl,\"\n"
-                + "html.style.display=\",block,inline,list-item,marker,run-in,compact,none,table,inline-table,table-row,table-cell,table-row-group,table-header-group,table-footer-group,table-column,table-column-group,table-caption,\"\n"
-                + "html.style.empty-cells=\",show,hide,\"\n"
-                + "html.style.elevation=\",below,level,above,higher,lower,\"\n"
-                + "html.style.filter=\"d\" \n"
-                + "html.style.float=\",left,right,none,\"\n"
-                + "html.style.font=\"\"\n"
-                + "html.style.font-family=\"*\"\n"
-                + "html.style.font-color=\"c,transparent,\"\n"
-                + "html.style.font-size=\"N,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,\"\n"
-                + "html.style.font-stretch=\",wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,\"\n"
-                + "html.style.font-style=\",italic,oblique,normal,\"\n"
-                + "html.style.font-variant=\",small-caps,normal,\"\n"
-                + "html.style.font-weight=\",bold,bolder,lighter,100,200,300,400,500,600,700,800,900,normal,\"\n"
-                + "html.style.height=\"N,auto,\"\n"
-                + "html.style.left=\"N,auto,\"\n"
-                + "html.style.letter-spacing=\"n\"\n"
-                + "html.style.line-height=\"N\"\n"
-                + "html.style.list-style=\"\"    \n"
-                + "html.style.list-style-image=\"u,none,\"\n"
-                + "html.style.list-style-position=\",inside,outside,\"\n"
-                + "html.style.list-style-type=\",decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,none,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,\"\n"
-                + "html.style.margin=\"\"\n"
-                + "html.style.margin-bottom=\"N,auto,inherit,\"\n"
-                + "html.style.margin-left=\"N,auto,inherit,\"\n"
-                + "html.style.margin-right=\"N,auto,inherit,\"\n"
-                + "html.style.margin-top=\"N,auto,inherit,\"\n"
-                + "html.style.max-height=\"N\"\n"
-                + "html.style.max-width=\"N\"\n"
-                + "html.style.min-height=\"N\"\n"
-                + "html.style.min-width=\"N\"\n"
-                + "html.style.orphans=\"0\"\n"
-                + "html.style.overflow=\",visible,hidden,scroll,auto,\"\n"
-                + "html.style.padding=\"\"\n"
-                + "html.style.padding-bottom=\"N\"\n"
-                + "html.style.padding-left=\"N\"\n"
-                + "html.style.padding-right=\"N\"\n"
-                + "html.style.padding-top=\"N\"\n"
-                + "html.style.page-break-after=\",always,avoid,left,right,inherit,auto,\"\n"
-                + "html.style.page-break-before=\",always,avoid,left,right,inherit,auto,\"\n"
-                + "html.style.page-break-inside=\",avoid,auto,\"\n"
-                + "html.style.pause=\"t\"\n"
-                + "html.style.pause-after=\"t\"\n"
-                + "html.style.pause-before=\"t\"\n"
-                + "html.style.pitch=\",x-low,low,medium,high,x-high,\"\n"
-                + "html.style.pitch-range=\"0\"\n"
-                + "html.style.play-during=\"u,mix,repeat,auto,\"\n"
-                + "html.style.position=\",absolute,fixed,relative,static,\"\n"
-                + "html.style.quotes=\"d\"\n"
-                + "html.style.richness=\"0\"\n"
-                + "html.style.right=\"N,auto,\"\n"
-                + "html.style.scrollbar-3dlight-color=\"c\"\n"
-                + "html.style.scrollbar-arrow-color=\"c\"\n"
-                + "html.style.scrollbar-base-color=\"c\"\n"
-                + "html.style.scrollbar-darkshadow-color=\"c\"\n"
-                + "html.style.scrollbar-face-color=\"c\"\n"
-                + "html.style.scrollbar-highlight-color=\"c\"\n"
-                + "html.style.scrollbar-shadow-color=\"c\"\n"
-                + "html.style.scrollbar-track-color=\"c\"\n"
-                + "html.style.speak=\",none,normal,spell-out,\"\n"
-                + "html.style.speak-header=\",always,once,\"\n"
-                + "html.style.speak-numeral=\",digits,continuous,\"\n"
-                + "html.style.speak-punctuation=\",code,none,\"\n"
-                + "html.style.speech-rate=\"0,x-slow,slow,slower,medium,faster,fast,x-fase,\"\n"
-                + "html.style.stress=\"0\"\n"
-                + "html.style.table-layout=\",auto,fixed,\"\n"
-                + "html.style.text-align=\",left,center,right,justify,\"\n"
-                + "html.style.text-decoration=\",underline,overline,line-through,blink,none,\"\n"
-                + "html.style.text-indent=\"N\"\n"
-                + "html.style.text-shadow=\"nc,none,\" or color\n"
-                + "html.style.text-transform=\",capitalize,uppercase,lowercase,none,\"\n"
-                + "html.style.top=\"N,auto,\"\n"
-                + "html.style.vertical-align=\",top,middle,bottom,baseline,sub,super,text-top,text-bottom,\"\n"
-                + "html.style.visibility=\",hidden,visible,\"\n"
-                + "html.style.voice-family=\",male,female,old,young,child,\"\n"
-                + "html.style.volume=\"0,silent,x-soft,soft,medium,loud,x-loud,\"\n"
-                + "html.style.white-space=\",normal,pre,nowrap,\"\n"
-                + "html.style.widows=\"0\"\n"
-                + "html.style.width=\"N,auto,\"\n"
-                + "html.style.word-spacing=\"n\"\n"
-                + "html.style.z-index=\"0\"\n"
-                + "\n"
-                + "\n"
-                + "# CSS combi-map\n"
-                + "\n"
-                + "html.style.combimap.background=\"uNc,scroll,fixed,transparent,top,bottom,center,left,right,repeat,repeat-x,repeat-y,no-repeat,radial-gradient,\"\n"
-                + "html.style.combimap.border=\"Nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,separate,collapse,\"\n"
-                + "html.style.combimap.border-bottom=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.combimap.border-left=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.combimap.border-right=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.combimap.border-style=\",none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.combimap.border-top=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
-                + "html.style.combimap.border-width=\"n\"\n"
-                + "html.style.combimap.font=\"N*,xx-small,x-small,small,medium,large,x-large,xx-large,smaller,larger,wider,narrower,condensed,semi-condensed,extra-condensed,ultra-condensed,expanded,semi-expanded,extra-expanded,ultra-expanded,normal,italic,oblique,small-caps,bold,bolder,lighter,100,200,300,400,500,600,700,800,900,\"\n"
-                + "html.style.combimap.list-style=\"u,none,inside,outside,decimal,lower-roman,upper-roman,lower-alpha,lower-latin,upper-alpha,upper-latin,disc,circle,square,lower-greek,hebrew,decimal-leading-zero,cjk-ideographic,hiragana,katakana,hiragana-iroha,katakana-iroha,\"\n"
-                + "html.style.combimap.margin=\"N,auto,inherit,\"\n" + "html.style.combimap.padding=\"N\"\n").getBytes();
-
-    private static final Pattern PATTERN_TAG_LINE = Pattern.compile("html\\.tag\\.(\\p{Alnum}+)\\s*(?:=\\s*\"(\\p{Print}*)\")?",
-        Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("([\\p{Alnum}-_]+)(?:\\[([\\p{Print}&&[^\\]]]*)\\])?");
-
-    /**
-     * Parses specified HTML map.
-     *
-     * @param htmlMapStr The HTML map string
-     * @return The parsed map
-     */
-    private static Map<String, Map<String, Set<String>>> parseHTMLMap(final String htmlMapStr) {
-        final Matcher m = PATTERN_TAG_LINE.matcher(htmlMapStr);
-        final Map<String, Map<String, Set<String>>> tagMap = new HashMap<>();
-        while (m.find()) {
-            final String attributes = m.group(2);
-            final String tagName = toLowerCase(m.group(1));
-            if (null == attributes) {
-                tagMap.put(tagName, null);
-            } else {
-                final Matcher attribMatcher = PATTERN_ATTRIBUTE.matcher(attributes);
-                final Map<String, Set<String>> attribMap = new HashMap<>();
-                while (attribMatcher.find()) {
-                    final String values = attribMatcher.group(2);
-                    final String attributeName = toLowerCase(attribMatcher.group(1));
-                    if (null == values) {
-                        attribMap.put(attributeName, null);
-                    } else if (values.length() == 0) {
-                        attribMap.put(attributeName, NUM_ATTRIBS);
-                    } else {
-                        final Set<String> valueSet = new HashSet<>();
-                        final String[] valArr = values.charAt(0) == ':' ? values.substring(1).split("\\s*:\\s*") : values
-                            .split("\\s*:\\s*");
-                        for (final String value : valArr) {
-                            valueSet.add(toLowerCase(value));
-                        }
-                        attribMap.put(attributeName, valueSet);
-                    }
-                }
-                tagMap.put(tagName, attribMap);
-            }
-        }
-        return tagMap;
-    }
-
-    private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
-        "html\\.style\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]*)\"", Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern PATTERN_VALUE = Pattern.compile("([\\p{Alnum}*-_ &&[^,]]+)");
-
-    private static Map<String, Set<String>> parseStyleMap(final String styleMapStr) {
-        /*
-         * Parse the combination map
-         */
-        final Map<String, Set<String>> combiMap = parseCombiMap(styleMapStr);
-        /*
-         * Parse style map
-         */
-        final Matcher m = PATTERN_STYLE_LINE.matcher(styleMapStr);
-        final Map<String, Set<String>> styleMap = new HashMap<>();
-        while (m.find()) {
-            final String values = m.group(2);
-            if (values.length() == 0) {
-                /*
-                 * Fetch from combination map
-                 */
-                final String cssElement = toLowerCase(m.group(1));
-                styleMap.put(cssElement, combiMap.get(cssElement));
-            } else {
-                /*
-                 * Parse values
-                 */
-                final Matcher valueMatcher = PATTERN_VALUE.matcher(m.group(2));
-                final Set<String> valueSet = new HashSet<>();
-                while (valueMatcher.find()) {
-                    valueSet.add(valueMatcher.group());
-                }
-                styleMap.put(toLowerCase(m.group(1)), valueSet);
-            }
-        }
-        return styleMap;
-    }
-
-    private static final Pattern PATTERN_COMBI_LINE = Pattern.compile(
-        "html\\.style\\.combimap\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]+)\"", Pattern.CASE_INSENSITIVE);
-
-    /**
-     * Parses specified combination map for CSS elements.
-     *
-     * @param combiMapStr The string representation for combination map
-     * @return The parsed map
-     */
-    private static Map<String, Set<String>> parseCombiMap(final String combiMapStr) {
-        final Matcher m = PATTERN_COMBI_LINE.matcher(combiMapStr);
-        final Map<String, Set<String>> combiMap = new HashMap<>();
-        while (m.find()) {
-            final Matcher valueMatcher = PATTERN_VALUE.matcher(m.group(2));
-            final Set<String> valueSet = new HashSet<>();
-            while (valueMatcher.find()) {
-                valueSet.add(valueMatcher.group());
-            }
-            combiMap.put(toLowerCase(m.group(1)), valueSet);
-        }
-        return combiMap;
-    }
-
-    /**
-     * Loads the white list.
-     */
-    public static void loadWhitelist() {
-        synchronized (HTMLFilterHandler.class) {
-            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FilterJerichoHandler.class);
-            if (null == staticHTMLMap) {
-                String mapStr = null;
-                {
-                    final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final File whitelist = null == service ? null : service.getFileByName("whitelist.properties");
-                    if (null == whitelist) {
-                        LOG.warn("Using default white list");
-                        mapStr = new String(DEFAULT_WHITELIST);
-                    } else {
-                        BufferedReader reader = null;
-                        try {
-                            reader = new BufferedReader(new AsciiReader(new FileInputStream(whitelist)));
-                            final StringBuilder sb = new StringBuilder();
-                            String line = null;
-                            while ((line = reader.readLine()) != null) {
-                                if (line.length() > 0 && '#' != line.charAt(0)) {
-                                    /*
-                                     * No comment line
-                                     */
-                                    sb.append(line).append("\r\n");
-                                }
-                            }
-                            mapStr = sb.toString();
-                        } catch (final Exception e) {
-                            LOG.warn("Using default white list", e);
-                            mapStr = new String(DEFAULT_WHITELIST);
-                        } finally {
-                            Streams.close(reader);
-                        }
-                    }
-                }
-                final Map<String, Map<String, Set<String>>> map = parseHTMLMap(mapStr);
-                if (!map.containsKey("html")) {
-                    map.put("html", null);
-                }
-                if (!map.containsKey("head")) {
-                    map.put("head", null);
-                }
-                if (!map.containsKey("body")) {
-                    map.put("body", null);
-                }
-                for (final String tagName : SINGLE_TAGS) {
-                    if (!map.containsKey(tagName)) {
-                        map.put(tagName, null);
-                    }
-                }
-                staticHTMLMap = Collections.unmodifiableMap(map);
-                staticStyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
-                String heightWidthStyle = "html.style.height=\"N,auto,\"\n" + "html.style.width=\"N,auto,\"\n";
-                staticHeightWidthStyleMap = Collections.unmodifiableMap(parseStyleMap(heightWidthStyle));
-            }
-        }
-    }
-
-    /**
-     * Resets the white list.
-     */
-    public static void resetWhitelist() {
-        synchronized (HTMLFilterHandler.class) {
-            staticHTMLMap = null;
-            staticStyleMap = null;
-            staticHeightWidthStyleMap = null;
-        }
     }
 
 }

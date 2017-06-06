@@ -93,8 +93,8 @@ public final class Bug10859Test extends AppointmentTest {
         appointment.setIgnoreConflicts(true);
         final int objectId;
         try {
-            objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+            objectId = insertAppointment(getWebConversation(), appointment, getHostURI(), getLogin(), getPassword());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
             fail("Invalid month value not detected.");
         } catch (final OXException e) {
         }

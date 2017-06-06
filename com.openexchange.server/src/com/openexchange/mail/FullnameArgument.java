@@ -115,6 +115,19 @@ public final class FullnameArgument {
         return fullName;
     }
 
+    /**
+     * Gets the prepared name<br>
+     * Example:
+     * <pre>
+     * &quot;INBOX&quot; -&gt; &quot;default2/INBOX&quot;
+     * </pre>
+     *
+     * @return The prepared name
+     */
+    public String getPreparedName() {
+        return com.openexchange.mail.utils.MailFolderUtility.prepareFullname(accountId, fullName);
+    }
+
     @Override
     public int hashCode() {
         return hash;

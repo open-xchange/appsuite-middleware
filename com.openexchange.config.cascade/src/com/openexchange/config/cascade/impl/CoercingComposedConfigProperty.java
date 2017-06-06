@@ -120,7 +120,7 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
 
     @Override
     public CoercingComposedConfigProperty<T> set(final T value) throws OXException {
-        delegate.set(value.toString()); // We assume good toString methods that allow reparsing
+        delegate.set(null == value ? null : value.toString()); // We assume good toString methods that allow reparsing
         return this;
     }
 

@@ -251,12 +251,67 @@ public class Strings {
     }
 
     /**
+     * High speed test for punctuation character!
+     *
+     * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
+     */
+    public static boolean isPunctuation(char ch) {
+        switch (ch) {
+            case '!':
+            case '"':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case '\'':
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '-':
+            case '.':
+            case '/':
+            case ':':
+            case ';':
+            case '<':
+            case '=':
+            case '>':
+            case '?':
+            case '@':
+            case '[':
+            case ']':
+            case '\\':
+            case '^':
+            case '_':
+            case 96:
+            case 180:
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * High speed test for ASCII letter!
      *
      * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
      */
     public static boolean isAsciiLetter(final char c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    /**
+     * High speed test for ASCII letter or digit!
+     *
+     * @return <code>true</code> if the indicated character is an ASCII letter or digit; otherwise <code>false</code>
+     */
+    public static boolean isAsciiLetterOrDigit(final char c) {
+        return isDigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 
     /**

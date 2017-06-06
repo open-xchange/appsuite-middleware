@@ -131,7 +131,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     {
                         final int messageCount = mailInterface.getMessageCount(folderId);
                         final int fetchLimit;
-                        if ((messageCount <= 0) || (messageCount <= (fetchLimit = getFetchLimit(mailInterface))) || ((max > 0) && (max <= fetchLimit))) {
+                        if ((messageCount <= 0) || (messageCount <= (fetchLimit = getFetchLimit(mailInterface, session))) || ((max > 0) && (max <= fetchLimit))) {
                             /*
                              * Mailbox considered small enough for direct hand-off
                              */
@@ -209,9 +209,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         return perform0(req, getMailInterface(req), cache);
     }
 
-    private int getFetchLimit(final MailServletInterface mailInterface) throws OXException {
+    private int getFetchLimit(final MailServletInterface mailInterface, ServerSession session) throws OXException {
         if (null == mailInterface) {
-            return MailProperties.getInstance().getMailFetchLimit();
+            return MailProperties.getInstance().getMailFetchLimit(session.getUserId(), session.getContextId());
         }
         try {
             return mailInterface.getMailConfig().getMailProperties().getMailFetchLimit();

@@ -18,7 +18,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -137,6 +137,20 @@ Summary:    Package containing Open-Xchange backend localization for es_ES
 
 %description es-es
 Package containing Open-Xchange backend localization for es_ES
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package et-ee
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for et_EE
+
+%description et-ee
+Package containing Open-Xchange backend localization for et_EE
+This localization package are driven by the community.
 
 Authors:
 --------
@@ -501,7 +515,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_GB en_US es_ES es_MX eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nb_NO nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_GB en_US es_ES es_MX et_EE eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nb_NO nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
 
@@ -551,6 +565,11 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*es_MX*
+
+%files et-ee
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*et_EE*
 
 %files eu-es
 %defattr(-,root,root)
@@ -668,12 +687,18 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.4 release
+* Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview of 7.8.4 release
+* Mon Apr 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 7.8.4 release
-* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
@@ -721,7 +746,7 @@ Sixth candidate for 7.8.0 release
 * Wed Sep 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1185,7 +1210,7 @@ First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.0
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Second build for patch  2013-07-18
+Second build for patch 2013-07-18
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -58,7 +58,6 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -76,9 +75,6 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskDurationAndCostsTest extends AbstractAJAXSession {
 
-    @SuppressWarnings("hiding")
-    private AJAXClient client;
-
     private Task task;
 
     private TimeZone tz;
@@ -93,17 +89,16 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        tz = client.getValues().getTimeZone();
+        tz = getClient().getValues().getTimeZone();
         task = new Task();
-        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
+        task.setParentFolderID(getClient().getValues().getPrivateTaskFolder());
         task.setTitle("Set task duration and costs test");
         task.setActualDuration(L(2));
         task.setActualCosts(new BigDecimal("2.0"));
         task.setTargetDuration(L(10));
         task.setTargetCosts(new BigDecimal("10.0"));
         InsertRequest request = new InsertRequest(task, tz);
-        InsertResponse response = client.execute(request);
+        InsertResponse response = getClient().execute(request);
         response.fillTask(task);
     }
 
@@ -111,7 +106,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         try {
             DeleteRequest req = new DeleteRequest(task);
-            client.execute(req);
+            getClient().execute(req);
         } finally {
             super.tearDown();
         }
@@ -125,13 +120,13 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         task.setTargetDuration(L(15));
         UpdateRequest req = new UpdateRequest(task, tz, false);
         try {
-            UpdateResponse response = client.execute(req);
+            UpdateResponse response = getClient().execute(req);
             task.setLastModified(response.getTimestamp());
         } catch (Exception e) {
             fail("Setting costs and duration failed!");
         }
         GetRequest request = new GetRequest(task);
-        GetResponse response = client.execute(request);
+        GetResponse response = getClient().execute(request);
         task.setLastModified(response.getTimestamp());
         Task test = response.getTask(tz);
         // We have in the database NUMERIC(12,2). So round to 3 valid digits in this case. Rounding is necessary because JSON internally

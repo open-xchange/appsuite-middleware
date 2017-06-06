@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.codec_1.6.0.v201305230611.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.codec.source_1.6.0.v201305230611.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-client-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-client.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-common-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-common.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.bundles.repackaged.jersey-guava-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.bundles.repackaged.jersey-guava.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.ws.rs-api-2.0.1.jar" sourcepath="/com.openexchange.bundles/source/javax.ws.rs-api-2.0.1-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.5.jar" sourcepath="/com.openexchange.bundles/source/httpcore-4.4.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.api-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.api.source-2.4.0-b10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.utils-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.utils.source-2.4.0-b10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.external.javax.inject-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external.javax.inject.source-2.4.0-b10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.locator-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external-hk2-locator.source-2.4.0-b10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.io.source_2.2.0.v201405211200.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-csv-1.4.jar" sourcepath="/com.openexchange.bundles/source/commons-csv-1.4-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.7.5.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.7.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-databind-2.7.5.jar" sourcepath="/com.openexchange.bundles/source/jackson-databind-2.7.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-annotations-2.7.5.jar" sourcepath="/com.openexchange.bundles/source/jackson-annotations-2.7.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-module-jaxb-annotations-2.7.5.jar" sourcepath="/com.openexchange.bundles/source/jackson-module-jaxb-annotations-2.7.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-base-2.7.5.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-base-2.7.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.media.multipart_2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.media.multipart.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-server-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-server.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-media-json-jackson-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-media-json-jackson-2.17-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-entity-filtering-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-entity-filtering-2.17-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.annotation-api-1.2.0.jar" sourcepath="/com.openexchange.bundles/source/javax.annotation-api.source_1.2.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

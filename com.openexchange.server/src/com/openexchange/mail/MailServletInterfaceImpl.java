@@ -120,6 +120,7 @@ import com.openexchange.java.Collators;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
@@ -602,36 +603,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
         try {
-            MailMessage[] flagInfo = null;
-            if (move) {
-                /*
-                 * Check for spam action; meaning a move/copy from/to spam folder
-                 */
-                int spamActionSource = SPAM_NOOP;
-                int spamActionDest = SPAM_NOOP;
-                if (usm.isSpamEnabled()) {
-                    if (sourceFullname.equals(mailAccess.getFolderStorage().getSpamFolder())) {
-                        spamActionSource = SPAM_HAM;
-                    }
-                    if (destFullname.equals(destAccess.getFolderStorage().getSpamFolder())) {
-                        spamActionDest = SPAM_SPAM;
-                    }
-                }
-                if (SPAM_HAM == spamActionSource) {
-                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
-                    /*
-                     * Handle ham.
-                     */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
-                }
-                if (SPAM_SPAM == spamActionDest) {
-                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
-                    /*
-                     * Handle spam
-                     */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
-                }
-            }
             // Chunk wise copy
             int chunkSize;
             {
@@ -641,6 +612,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             // Iterate chunks
             int length = msgUIDs.length;
             List<String> retval = new LinkedList<>();
+            Map<String, Integer> flagsMap = null;
             for (int start = 0; start < length;) {
                 int end = start + chunkSize;
                 String[] ids;
@@ -656,42 +628,71 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     System.arraycopy(msgUIDs, start, ids, 0, len);
                 }
                 // Fetch messages from source folder
-                MailMessage[] messages = mailAccess.getMessageStorage().getMessages(sourceFullname, ids, FIELDS_FULL);
+                MailMessage[] messages = new MailMessage[ids.length];
+                for (int j = 0; j < ids.length; j++) {
+                    String mailId = ids[j];
+                    messages[j] = null == mailId ? null : mailAccess.getMessageStorage().getMessage(sourceFullname, mailId, false);
+                }
+                // Create mapping for flags
+                if (null == flagsMap) {
+                    flagsMap = new HashMap<>(messages.length);
+                } else {
+                    flagsMap.clear();
+                }
+                for (int i = 0; i < messages.length; i++) {
+                    MailMessage message = messages[i];
+                    if (null != message) {
+                        int systemFlags = message.getFlags();
+                        flagsMap.put(message.getMailId(), Integer.valueOf(systemFlags));
+                    }
+                }
                 // Append them to destination folder
                 String[] destIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
-                if (null == destIds || 0 == destIds.length) {
-                    return new String[0];
-                }
-                // Delete source messages if a move shall be performed
-                if (move) {
-                    mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
-                    postEvent(sourceAccountId, sourceFullname, true, true);
-                }
-                // Restore \Seen flags
-                if (null != flagInfo) {
-                    List<String> list = new LinkedList<>();
-                    for (int i = 0; i < destIds.length; i++) {
-                        MailMessage mailMessage = flagInfo[i];
-                        if (null != mailMessage && !mailMessage.isSeen()) {
-                            list.add(destIds[i]);
+                if (null != destIds && destIds.length > 0) {
+                    // Create ID mapping
+                    Map<String, String> idMap = new HashMap<>(destIds.length);
+                    for (int i = 0; i < messages.length; i++) {
+                        MailMessage message = messages[i];
+                        if (null != message && null != destIds[i]) {
+                            idMap.put(destIds[i], message.getMailId());
                         }
                     }
-                    destAccess.getMessageStorage().updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
-                }
-                postEvent(destAccountId, destFullname, true, true);
-                try {
+                    // Delete source messages if a move shall be performed
                     if (move) {
-                        /*
-                         * Update message cache
-                         */
-                        MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                        mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
+                        postEvent(sourceAccountId, sourceFullname, true, true);
                     }
-                    MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
-                } catch (OXException e) {
-                    LOG.error("", e);
+                    // Restore flags
+                    {
+                        for (Map.Entry<String, String> entry : idMap.entrySet()) {
+                            String sourceId = entry.getValue();
+                            Integer iFlags = flagsMap.get(sourceId);
+                            if (null != iFlags) {
+                                String[] mailIds = new String[] {entry.getKey()};
+                                if (iFlags.intValue() > 0) {
+                                    destAccess.getMessageStorage().updateMessageFlags(destFullname, mailIds, iFlags.intValue(), true);
+                                }
+                                if ((iFlags.intValue() & MailMessage.FLAG_SEEN) == 0) {
+                                    destAccess.getMessageStorage().updateMessageFlags(destFullname, mailIds, MailMessage.FLAG_SEEN, false);
+                                }
+                            }
+                        }
+                    }
+                    postEvent(destAccountId, destFullname, true, true);
+                    try {
+                        if (move) {
+                            /*
+                             * Update message cache
+                             */
+                            MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                        }
+                        MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                    }
+                    // Prepare for next iteration
+                    retval.addAll(Arrays.asList(destIds));
                 }
-                // Prepare for next iteration
-                retval.addAll(Arrays.asList(destIds));
                 start = end;
             }
             // Return destination identifiers
@@ -1240,8 +1241,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
     }
 
-    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String folder, Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String folder, Locale locale) throws OXException {
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1460,7 +1461,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, boolean setFrom) throws OXException {
+    public MailMessage getForwardMessageForDisplay(String[] folders, String[] fowardMsgUIDs, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
@@ -1508,7 +1509,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     originalMails[i] = origMail;
                 }
             }
-            return mailAccess.getLogicTools().getFowardMessage(originalMails, usm, setFrom);
+            return mailAccess.getLogicTools().getFowardMessage(originalMails, usm, fromAddressProvider);
         }
         MailMessage[] originalMails = new MailMessage[folders.length];
         {
@@ -1546,7 +1547,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < accountIDs.length; i++) {
             accountIDs[i] = arguments[i].getAccountId();
         }
-        return MimeForward.getFowardMail(originalMails, session, accountIDs, usm, setFrom);
+        return MimeForward.getFowardMail(originalMails, session, accountIDs, usm, fromAddressProvider);
     }
 
     @Override
@@ -1794,7 +1795,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                String msg = Strings.asciiLowerCase(e.getMessage());
+                if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                    /*-
+                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+                     *
+                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+                     * or the enduser's machine crashed, etc, etc.
+                     */
+                    oxe.markLightWeight();
+                }
+                throw oxe;
             }
         } catch (OXException e) {
             throw e;
@@ -1918,7 +1931,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                String msg = Strings.asciiLowerCase(e.getMessage());
+                if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                    /*-
+                     * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+                     *
+                     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+                     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+                     * or the enduser's machine crashed, etc, etc.
+                     */
+                    oxe.markLightWeight();
+                }
+                throw oxe;
             }
         } finally {
             for (ManagedFile file : files) {
@@ -2703,7 +2728,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException {
+    public MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2712,7 +2737,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == originalMail) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(replyMsgUID, fullName);
         }
-        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm, setFrom);
+        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm, fromAddressProvider);
     }
 
     @Override
@@ -2864,6 +2889,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public void openFor(String folder) throws OXException {
+        if (null == folder) {
+            // Nothing to do
+            return;
+        }
+
         FullnameArgument argument = prepareMailFolderParam(folder);
         int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2955,7 +2985,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (composedMail.getSecuritySettings()!= null && composedMail.getSecuritySettings().anythingSet()) {
             EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
             if (encryptor != null) {
-                composedMail = encryptor.encryptDraftEmail(composedMail, session);
+                composedMail = encryptor.encryptDraftEmail(composedMail, session, cryptoAuthentication);
             }
         }
         return (composedMail);

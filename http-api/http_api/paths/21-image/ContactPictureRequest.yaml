@@ -17,6 +17,56 @@
         type: integer
         description: The object ID of the contact.
         required: true
+      - in: query
+        name: transformationNeeded
+        type: boolean
+        description: Indicate if the image needs to be transformed. 
+        required: false
+      - in: query
+        name: cropWidth
+        type: integer
+        description: The width a cropped image should have. Needs to be a bigger value than the images width.
+        required: false
+      - in: query
+        name: cropHeight
+        type: integer
+        description: The height a cropped image should have. Needs to be a bigger value than the images hight.
+        required: false
+      - in: query
+        name: rotate
+        type: boolean
+        description: Indicate if the image should get rotated
+        required: false
+      - in: query
+        name: compress
+        type: boolean
+        description: Indicate if the image should be compressed. Output format depends on scaleType.
+        required: false
+      - in: query
+        name: width
+        type: integer
+        description: The maximum width of the target image. Can not be greater than the value set in 'com.openexchange.tools.images.maxWidth'. Default is 4096.
+        required: false
+      - in: query
+        name: height
+        type: integer
+        description: The maximum height of the target image. Can not be greater than the value set in 'com.openexchange.tools.images.maxHeight'. Default is 4096.
+        required: false
+      - in: query
+        name: shrinkOnly
+        type: boolean
+        description: Set to 'true' to only scale images 'greater than' target size
+        required: false
+      - in: query
+        name: scaleType
+        type: string
+        description: The scale type to use. 
+        enum:
+          - contain
+          - containforcedimension
+          - cover
+          - coverandcrop
+        required: false  
     responses:
       200:
         description: The content of the requested image is directly written into output stream.

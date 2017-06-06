@@ -56,6 +56,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteRetrieval;
 
 /**
  * {@link SessiondServiceTracker}
@@ -74,6 +75,7 @@ class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService
     public void removedService(ServiceReference<SessiondService> reference, SessiondService service) {
         PortableSessionRemoteLookUp.setSessiondServiceReference(null);
         PortableSessionExistenceCheck.setSessiondServiceReference(null);
+        PortableSessionRemoteRetrieval.setSessiondServiceReference(null);
         PortableMultipleSessionRemoteLookUp.setSessiondServiceReference(null);
         context.ungetService(reference);
     }
@@ -88,6 +90,7 @@ class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService
         SessiondService service = context.getService(reference);
         PortableSessionExistenceCheck.setSessiondServiceReference(service);
         PortableSessionRemoteLookUp.setSessiondServiceReference(service);
+        PortableSessionRemoteRetrieval.setSessiondServiceReference(service);
         PortableMultipleSessionRemoteLookUp.setSessiondServiceReference(service);
         return service;
     }

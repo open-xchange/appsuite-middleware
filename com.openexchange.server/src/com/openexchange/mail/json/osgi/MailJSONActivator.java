@@ -91,6 +91,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.tree.modules.mail.AllMessagesFolder;
 import com.openexchange.groupware.settings.tree.modules.mail.DeleteDraftOnTransport;
 import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
@@ -246,7 +247,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(), properties);
+            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(this), properties);
         }
 
         {
@@ -325,6 +326,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         MaliciousListing maliciousListing = new MaliciousListing(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, maliciousListing);
+
+        AllMessagesFolder allMessagesFolder = new AllMessagesFolder(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, allMessagesFolder);
 
         DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);

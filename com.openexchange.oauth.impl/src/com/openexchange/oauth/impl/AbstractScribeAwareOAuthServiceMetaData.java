@@ -92,7 +92,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         this.api = api;
 
         setId(api.getServiceId());
-        setDisplayName(api.getName());
+        setDisplayName(api.getShortName());
 
         // Common properties for all OAuthServiceMetaData implementations.
         propertyNames = new ArrayList<>();
@@ -133,7 +133,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         // Basic URL encoding
         OAuthConfigurationProperty redirectUrl = getOAuthProperty(OAuthPropertyID.redirectUrl);
         if (redirectUrl != null) {
-            String r = redirectUrl.getValue().replaceAll(":", "%3A").replaceAll("/", "%2F");
+            String r = urlEncode(redirectUrl.getValue());
             addOAuthProperty(OAuthPropertyID.redirectUrl, new OAuthConfigurationProperty(redirectUrl.getName(), r));
         }
     }

@@ -49,17 +49,21 @@
 
 package com.openexchange.config.lean;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link LeanConfigurationService} - A service combining the ConfigView (config cascade) and ConfigurationService
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.4
  */
+@SingletonService
 public interface LeanConfigurationService {
 
     /**
      * Fetches the string value of the {@link Property}. If the property is not found, then the default value
      * of that property is returned.
-     * 
+     *
      * @param property The {@link Property} to fetch
      * @return The string value of the property
      */
@@ -68,7 +72,7 @@ public interface LeanConfigurationService {
     /**
      * Fetches the integer value of the {@link Property}. If the property is not found, then the default value
      * of that property is returned.
-     * 
+     *
      * @param property The {@link Property} to fetch
      * @return The integer value of the property
      */
@@ -77,7 +81,7 @@ public interface LeanConfigurationService {
     /**
      * Fetches the boolean value of the {@link Property}. If the property is not found, then the default value
      * of that property is returned.
-     * 
+     *
      * @param property The {@link Property} to fetch
      * @return The boolean value of the property
      */
@@ -86,7 +90,7 @@ public interface LeanConfigurationService {
     /**
      * Fetches the float value of the {@link Property}. If the property is not found, then the default value
      * of that property is returned.
-     * 
+     *
      * @param property The {@link Property} to fetch
      * @return The float value of the property
      */
@@ -95,7 +99,7 @@ public interface LeanConfigurationService {
     /**
      * Fetches the long value of the {@link Property}. If the property is not found, then the default value
      * of that property is returned.
-     * 
+     *
      * @param property The {@link Property} to fetch
      * @return The long value of the property
      */

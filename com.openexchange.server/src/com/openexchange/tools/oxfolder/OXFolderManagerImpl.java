@@ -195,6 +195,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private final User user;
     private final Session session;
     private final List<OXException> warnings;
+    private final Collection<UpdatedFolderHandler> handlers;
     private OXFolderAccess oxfolderAccess;
     private AppointmentSQLInterface cSql;
 
@@ -233,7 +234,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException If instantiation fails
      */
     OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) throws OXException {
-        this(session, oxfolderAccess, null, null);
+        this(session, oxfolderAccess, null, null, null);
     }
 
     /**
@@ -242,7 +243,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException If instantiation fails
      */
     OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) throws OXException {
-        this(session, null, readCon, writeCon);
+        this(session, null, null, readCon, writeCon);
+    }
+
+    /**
+     * Constructor which uses <code>Session</code> and also uses a readable and a writable <code>Connection</code>.
+     *
+     * @throws OXException If instantiation fails
+     */
+    OXFolderManagerImpl(Session session, Collection<UpdatedFolderHandler> handlers, Connection readCon, Connection writeCon) throws OXException {
+        this(session, null, handlers, readCon, writeCon);
     }
 
     /**
@@ -251,7 +261,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      *
      * @throws OXException If instantiation fails
      */
-    OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
+    OXFolderManagerImpl(Session session, final OXFolderAccess oxfolderAccess, Collection<UpdatedFolderHandler> handlers, Connection readCon, Connection writeCon) throws OXException {
         super();
         this.session = session;
         if (session instanceof ServerSession) {
@@ -267,6 +277,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         this.readCon = readCon;
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;
+        this.handlers = handlers;
         final AppointmentSqlFactoryService factory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
         if (factory != null) {
             this.cSql = factory.createAppointmentSql(session);
@@ -662,7 +673,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (FolderCacheManager.isEnabled()) {
                     final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
                     cacheManager.removeFolderObject(fo.getObjectID(), ctx);
-                    fo.fill(cacheManager.getFolderObject(fo.getObjectID(), false, ctx, wc));
+                    {
+                        FolderObject tmp = cacheManager.loadFolderObject(fo.getObjectID(), ctx, wc);
+                        fo.fill(tmp);
+                        if (null != handlers) {
+                            for (UpdatedFolderHandler handler : handlers) {
+                                handler.onFolderUpdated(tmp, wc);
+                            }
+                        }
+                    }
                     final int parentFolderID = fo.getParentFolderID();
                     if (parentFolderID > 0) {
                         /*
@@ -671,14 +690,24 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                          * event that it is not in the local cache
                          */
                         cacheManager.removeFolderObject(parentFolderID, ctx);
-                        cacheManager.loadFolderObject(parentFolderID, ctx, wc);
+                        FolderObject tmp = cacheManager.loadFolderObject(parentFolderID, ctx, wc);
+                        if (null != handlers) {
+                            for (UpdatedFolderHandler handler : handlers) {
+                                handler.onFolderUpdated(tmp, wc);
+                            }
+                        }
                     }
                     if (0 < oldParentId && oldParentId != parentFolderID) {
                         /*
                          * Update old parent, too
                          */
                         cacheManager.removeFolderObject(oldParentId, ctx);
-                        cacheManager.loadFolderObject(oldParentId, ctx, wc);
+                        FolderObject tmp = cacheManager.loadFolderObject(oldParentId, ctx, wc);
+                        if (null != handlers) {
+                            for (UpdatedFolderHandler handler : handlers) {
+                                handler.onFolderUpdated(tmp, wc);
+                            }
+                        }
                     }
                 } else {
                     fo.fill(FolderObject.loadFolderObjectFromDB(fo.getObjectID(), ctx, wc));

@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,6 +66,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.ContactTestManager;
 import com.openexchange.tools.arrays.Arrays;
 
 public class AllTest extends AbstractManagedContactTest {
@@ -123,6 +122,10 @@ public class AllTest extends AbstractManagedContactTest {
 
     @Test
     public void testAllVisibleFolders() throws Exception {
+        /*
+         * ensure there's at least one contact in another folder (besides the global addressbook)
+         */
+        cotm.newAction(ContactTestManager.generateContact(getClient().getValues().getPrivateContactFolder()));
         /*
          * prepare special all request without folder ID
          */

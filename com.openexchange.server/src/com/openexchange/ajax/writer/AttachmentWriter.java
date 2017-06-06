@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.GetSwitch;
+import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -92,6 +93,8 @@ public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {
             final long time = ((Date)o).getTime();
             final int offset = tz.getOffset(time);
             return Long.valueOf(time + offset);
+        } else if (column.getId() == AttachmentField.FILENAME) {
+            return FileNameTools.sanitizeFilename((String) o);
         }
         return o;
     }

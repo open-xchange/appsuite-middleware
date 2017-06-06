@@ -66,9 +66,10 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageListener;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.QuotaBackendService;
 import com.openexchange.filestore.StorageInfo;
+import com.openexchange.filestore.event.FileStorageListener;
 import com.openexchange.filestore.impl.osgi.Services;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.FileStorageInfo;
 import com.openexchange.groupware.filestore.Filestore;
@@ -87,21 +88,24 @@ import com.openexchange.user.UserService;
 public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
     private final FileStorageService fileStorageService;
-    private final ServiceListing<QuotaFileStorageListener> listeners;
-    private final ServiceListing<QuotaBackendService> backendServices;
+    private final ServiceListing<FileStorageListener> storageListeners;
+    private final ServiceListing<QuotaFileStorageListener> quotaListeners;
+    private final ServiceListing<UnifiedQuotaService> unifiedQuotaServices;
     private final String regionName = "QuotaFileStorages";
 
     /**
      * Initializes a new {@link DBQuotaFileStorageService}.
      *
-     * @param backendServices The tracked quota backend services
-     * @param listeners The listeners
+     * @param storageListeners The file storage listeners
+     * @param unifiedQuotaServices The tracked Unified Quota services
+     * @param quotaListeners The quota listeners
      * @param fileStorageService The file storage service
      */
-    public DBQuotaFileStorageService(ServiceListing<QuotaBackendService> backendServices, ServiceListing<QuotaFileStorageListener> listeners, FileStorageService fileStorageService) {
+    public DBQuotaFileStorageService(ServiceListing<FileStorageListener> storageListeners, ServiceListing<UnifiedQuotaService> unifiedQuotaServices, ServiceListing<QuotaFileStorageListener> quotaListeners, FileStorageService fileStorageService) {
         super();
-        this.backendServices = backendServices;
-        this.listeners = listeners;
+        this.storageListeners = storageListeners;
+        this.unifiedQuotaServices = unifiedQuotaServices;
+        this.quotaListeners = quotaListeners;
         this.fileStorageService = fileStorageService;
     }
 
@@ -179,7 +183,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         }
 
         // Return appropriate unlimited quota file storage
-        return new DBQuotaFileStorage(contextId, Info.administrative(), OwnerInfo.builder().setOwnerId(optOwner).build(), Long.MAX_VALUE, fileStorageService.getFileStorage(uri), uri, listeners, backendServices);
+        return new DBQuotaFileStorage(contextId, Info.administrative(), OwnerInfo.builder().setOwnerId(optOwner).build(), Long.MAX_VALUE, fileStorageService.getFileStorage(uri), uri, storageListeners, quotaListeners, unifiedQuotaServices);
     }
 
     @Override
@@ -256,7 +260,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
                 URI uri = new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + storageInfo.getName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
-                storage = new DBQuotaFileStorage(contextId, info, storageInfo.getOwnerInfo(), storageInfo.getQuota(), fileStorageService.getFileStorage(uri), uri, listeners, backendServices);
+                storage = new DBQuotaFileStorage(contextId, info, storageInfo.getOwnerInfo(), storageInfo.getQuota(), fileStorageService.getFileStorage(uri), uri, storageListeners, quotaListeners, unifiedQuotaServices);
 
                 // Put it into cache
                 putCachedFileStorage(userId, contextId, info, storage);

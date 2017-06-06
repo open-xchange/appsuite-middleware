@@ -1,0 +1,24 @@
+feature_name: RMI
+properties:
+    - key: com.openexchange.rmi.host
+      description: |
+        Specifies the rmi host. Set this to <code>0</code> to bind on all interfaces.
+      defaultValue: localhost
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: rmi.properties
+      packageName: open-xchange-core
+      tags: ["RMI", "Host"]
+    - key: com.openexchange.rmi.port
+      description: |
+        Specifies the rmi port.
+      defaultValue: 1099
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: rmi.properties
+      packageName: open-xchange-core
+      tags: ["RMI", "Port"]

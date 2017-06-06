@@ -1,0 +1,26 @@
+feature_name: Feedback 
+feature_description: |
+    See [[https://documentation.open-xchange.com/{{version}}/middleware/components/userfeedback.html]] for more informations.
+properties:
+  - key: com.openexchange.userfeedback.enabled
+    description: |
+      Enables the feedback feature for all users.
+    defaultValue: true
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: userfeedback.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback"]
+  - key: com.openexchange.userfeedback.mode
+    description: |
+      Determine which feedback mode should be used.
+    defaultValue: star-rating-v1
+    version: 7.8.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: userfeedback.properties
+    packageName: open-xchange-userfeedback
+    tags: ["Feedback"]

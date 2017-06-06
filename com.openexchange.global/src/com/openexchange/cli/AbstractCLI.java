@@ -208,7 +208,7 @@ public abstract class AbstractCLI<R, C> {
      */
     protected void printHelp(final Options options) {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, getName(), null, options, getFooter(), false);
+        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, getName(), getHeader(), options, getFooter(), false);
     }
 
     /**
@@ -224,6 +224,10 @@ public abstract class AbstractCLI<R, C> {
      * @return The syntax for this application
      */
     protected abstract String getName();
+    
+    protected String getHeader() {
+        return null;
+    }
 
     // -----------------------------------------------------------------------------------------------------------------------
 

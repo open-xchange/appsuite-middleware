@@ -92,6 +92,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HasFlagComma
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TrueTestCommandParser;
+import com.openexchange.mail.filter.json.v2.mapper.parser.action.simplified.SimplifiedActions;
 import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTest;
 import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
 import com.openexchange.mailfilter.MailFilterService;
@@ -182,6 +183,8 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(ActionCommand.Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser(this));
         registry.register(ActionCommand.Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(this));
         registry.register(ActionCommand.Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(this));
+
+        registry.register(SimplifiedActions.Copy.getCommandName(), new FileIntoActionCommandParser(this));
 
         addService(ActionCommandParserRegistry.class, registry);
     }

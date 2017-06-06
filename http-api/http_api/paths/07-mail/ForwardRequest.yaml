@@ -27,6 +27,8 @@
         minimum: 10000
         description: A positive integer number (greater than 10000) to specify how many characters of the message content will be returned. If the number is smaller than 10000 the value will be ignored and 10000 used.
         required: false
+      - $ref: "#/parameters/gblQueryParamsDecrypt"
+      - $ref: "#/parameters/glbQueryParamsCryptoAuth"
     responses:
       200:
         description: |
@@ -34,3 +36,4 @@
           response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailReplyResponse"
+

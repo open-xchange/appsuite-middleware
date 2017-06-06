@@ -1,5 +1,671 @@
 feature_name: Mail
 properties:
+    - key: com.openexchange.mail.loginSource
+      description: |
+        Set the login source for primary mail/transport account; meaning which source is taken to determine a user's
+        login for mailing system.  
+        If <code>login</code> is set, then user's individual mail login as defined in user storage is taken.  
+        If <code>mail</code> is set, then user's individual primary email address is taken.  
+        If <code>name</code> is set, then user's individual system's user name is taken.
+
+        Currently known values: 
+        <ul>
+          <li><code>login</code></li>
+          <li><code>mail</code></li>
+          <li><code>name</code></li>
+        </ul>
+      defaultValue: login
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.passwordSource
+      description: |
+        Set the password source for primary mail/transport account; meaning which source is taken to determine a user's
+        password to login into mailing system.  
+        If <code>session</code> is set, then user's individual system's password is taken.  
+        If <code>global</code> is set, then the value specified through property [[com.openexchange.mail.masterPassword]] is taken.
+
+        Currently known values: 
+        <ul>
+          <li><code>session</code></li>
+          <li><code>global</code></li>
+        </ul>
+      defaultValue: session
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.masterPassword
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.mailServerSource
+      description: |
+        Set the mail server source for primary mail account; meaning which source is taken to determine the mail
+        server into which the user wants to login to access mails.  
+        Set to <code>global</code> to take the value specified through property [[com.openexchange.mail.mailServer]].  
+        Set to <code>user</code> to take user's individual mail server settings as specified in storage.
+
+        Currently known values: 
+        <ul>
+          <li><code>user</code></li>
+          <li><code>global</code></li>
+        </ul>
+      defaultValue: user
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.mailServer
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.transportServerSource
+      description: |
+        Set the transport server source for primary mail account; meaning which source is taken to determine the transport
+        server into which the user wants to login to transport mails.  
+        Set to <code>global</code> to take the value specified through property [[com.openexchange.mail.transportServer]].  
+        Set to <code>user</code> to take user's individual transport server settings as specified in storage.
+
+        Currently known values: 
+        <ul>
+          <li><code>user</code></li>
+          <li><code>global</code></li>
+        </ul>
+      defaultValue: user
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.transportServer
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Transport"]
+    - key: com.openexchange.mail.masterPassword
+      description: |
+        The master password for primary mail/transport server. Only takes effect when property  
+        [[com.openexchange.mail.passwordSource]] is set to <code>global</code>.
+      defaultValue: secret
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.passwordSource
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Credential"]
+    - key: com.openexchange.mail.mailServer
+      description: |
+        Primary mail server: e.g. 192.168.178.32:8143 or imap://192.168.178.32:7143
+        Only takes effect when property [[com.openexchange.mail.mailServerSource]] is set to <code>global</code>.
+      defaultValue: imap://localhost
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.mailServerSource
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Host"]
+    - key: com.openexchange.mail.transportServer
+      description: |
+        Primary transport server: e.g. 192.168.178.32:125 or smtp://192.168.178.32:225
+        Only takes effect when property [[com.openexchange.mail.transportServerSource]] is set to <code>global</code>.
+      defaultValue: 127.0.0.1
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.transportServerSource
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Transport"]
+    - key: com.openexchange.mail.mailStartTls
+      description: |
+        Set if STARTTLS should be used when connecting to the primary mail server.
+        Only takes effect when property [[com.openexchange.mail.mailServerSource]] is set to <code>global</code>.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.mailServerSource
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.transportStartTls
+      description: |
+        Set if STARTTLS should be used when connecting to the primary transport server.
+        Only takes effect when property [[com.openexchange.mail.transportServerSource]] is set to <code>global</code>.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.transportServerSource
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Transport"]
+    - key: com.openexchange.mail.defaultMailProvider
+      description: |
+        The mail provider fallback if an URL does not contain/define a protocol.
+      defaultValue: imap
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: mail.mime.charset
+      description: |
+        Define the default MIME charset used for character encoding. This setting will then be
+        accessible through system property [[mail.mime.charset]]. This parameter takes
+        effect for the complete mail module where no charset is given.
+      defaultValue: UTF-8
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.saneLogin
+      description: |
+        Controls whether a login string is supposed to be converted to its ACE representation in case it is an E-Mail address;
+        e.g. <code>someone@m&uuml;ller.de</code> is converted to <code>someone@xn--mller-kva.de</code>
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.replaceWithComma
+      description: |
+        Controls a possibly semi-colon-separated address list should be converted to comma-separated one.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.mailFetchLimit
+      description: |
+        Define the max. fetch limit; meaning all mails whose count is less than or equal to
+        this value are going to be fetched with all attributes set. Thus these mails can be
+        put into message cache for subsequent list requests.
+      defaultValue: 1000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Limit"]
+    - key: com.openexchange.mail.bodyDisplaySizeLimit
+      description: |
+        Specifies the maximum size for message bodies that are allowed to be displayed.
+      defaultValue: 10485760
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Limit"]
+    - key: com.openexchange.mail.mailAccessCacheShrinkerSeconds
+      description: |
+        Define the interval seconds of the mail access cache's shrinker thread.
+      defaultValue: 3
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Thread"]
+    - key: com.openexchange.mail.mailAccessCacheIdleSeconds
+      description: |
+        Define the idle seconds a mail access may reside in mail access cache before it is removed by shrinker thread.
+      defaultValue: 4
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Thread"]
+    - key: com.openexchange.mail.quoteLineColors
+      description: |
+        Comma-separated hex values of colors for displaying quoted text emails.  
+        Only used by OX6 UI.
+      defaultValue: "#a14044,#917722,#599351,#516193,#666666"
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.forwardUnquoted
+      description: |
+        Define if forwarded text is supposed to be quoted.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.userFlagsEnabled
+      description: |
+        Enable/disable user defined flags.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace
+      description: |
+        This property defines if the default folders of an user (Draft, Sent, Spam
+        & Trash) are going to be placed right below folder "INBOX" even if
+        feature "altNamespace" is enabled. 
+
+        Note:  
+        This property requires that subfolders are still permitted below initial folder "INBOX" even though
+        "altNamespace" is enabled.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.ignoreSubscription
+      description: |
+        Defines if folder subscription is ignored when listing mail folders.
+        If set to <code>true</code>, all folders - regardless of their subscription status - are
+        going to be listed.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.supportSubscription
+      description: |
+        Define if underlying store should support subscription.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.defaultSeparator
+      description: |
+        Define the separator within folder full names if not available from mail server.
+      defaultValue: /
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.watcherEnabled
+      description: |
+        The watcher checks after watcherFrequency for mail connections used for
+        more than watcherTime milliseconds and logs this mail connection. If
+        watcherShallClose is set to <code>true</code> those connections will be closed.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.watcherFrequency
+      description: |
+        Define watcher's frequency in milliseconds.
+      defaultValue: 10000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.watcherTime
+      description: |
+        Define exceeding time in milliseconds for mail connections. If use time
+        of an mail connection exceeds this value it is logged. Thus unclosed
+        connections can be detected.
+      defaultValue: 60000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.watcherShallClose
+      description: |
+        Define if watcher is allowed to close exceeded mail connections.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.JavaMailProperties
+      description: |
+        JavaMail Properties.
+      defaultValue: javamail.properties
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.phishingHeader
+      description: |
+        A comma-separated list of headers which identifies phishing headers; e.g.  
+        X-Phishing1,X-Phishing2,etc.  
+        Leave empty for no phishing header.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.adminMailLoginEnabled
+      description: |
+        Define whether a context admin is allowed to login to mail system or not.
+        Note that a mail account is supposed to exist if set to <code>true</code>; if not an
+        authentication error will occur.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.addClientIPAddress
+      description: |
+        Set whether client's IP address should be added to mail headers on delivery
+        as custom header "X-Originating-IP".
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.clientIPAddressPattern
+      description: |
+        Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary
+        IMAP server. Only applicable for primary IMAP server!
+        
+        The regular expression is supposed to be specified in Java notation: [[http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html]]
+        
+        Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.
+        I.e. "Dovecot at ([0-9a-zA-Z._-]*) is ready", then the capturing group is supposed to extract the host name/IP address information
+      defaultValue:
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.rateLimitPrimaryOnly
+      description: |
+        Define if the [[com.openexchange.mail.rateLimit]] and [[com.openexchange.mail.maxToCcBcc]] settings will only affect
+        the primary account or all accounts.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.mail.rateLimit","com.openexchange.mail.maxToCcBcc"]
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.rateLimit
+      description: |
+        Define the time (in milliseconds) which must pass by before a new mail can be sent.
+        A value of <code>0</code> disables the limit.
+      defaultValue: 0
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.rateLimitDisabledRange
+      description: |
+        Define the comma-separated IP ranges for which a rate limit will not be applied.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.maxToCcBcc
+      description: |
+        Define the allowed maximum number of recipients in a mail.
+        A value of <code>0</code> disables the limit.
+      defaultValue: 0
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.hidePOP3StorageFolders
+      description: |
+        Whether folders which carry a POP3 account shall not be displayed.
+        This property affects primary account only.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.deleteDraftOnTransport
+      description: |
+        Whether to delete draft messages when sent out.
+
+        Note:  
+        Client MUST provide appropriate value in "sendtype" field;  
+        see [[http://oxpedia.org/wiki/index.php?title=HTTP_API#Send_a_mail]]
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.supportMsisdnAddresses
+      description: |
+        Define if MSISDN addresses are supported or not.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.translateDefaultFolders
+      description: |
+        If set to <code>false</code>, translation of names of the mail default folders is not performed,
+        if naming differs from pre-defined default values. Thus custom set names can be specified
+        for Trash, Drafts, Sent & Spam folder.  
+        Pre-defined names are:  
+        "Trash"  
+        "Drafts"  
+        "Sent objects"  
+        "Spam"
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.authProxyDelimiter
+      description: |
+        Define a delimiter to be used to seperate Proxy from Userlogin
+        If defined, a proxy user can login on behalf of a user using the form:
+        <pre>
+        &lt;PROXYACCOUNT&gt;&lt;DELIMITER&gt;&lt;USERACCOUNT&gt;
+        </pre>
+        Note:  
+        The underlying Mailserver must support <code>SASL AUTHPROXYING</code>.
+        The open-xchange mailfilterbundle does not support it, so it will raise errors.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.maxMailSize
+      description: |
+        Specifies the max. mail size allowed being transported.
+        A value of <code>0</code> or less means infinite.
+      defaultValue: -1
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Limit"]
+    - key: com.openexchange.mail.hideDetailsForDefaultAccount
+      description: |
+        Whether to hide rather technical data from JSON representation of the primary mail account
+        e.g. port, server name, secure flag, etc.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.maxForwardCount
+      description: |
+        Specifies the max. number of message attachments that are allowed to be forwarded as attachment.
+      defaultValue: 8
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Limit"]
+    - key: com.openexchange.mail.account.blacklist
+      description: |
+        Specifies a black-list for those hosts that are covered by denoted IP range; e.g.:
+        <pre>
+        com.openexchange.mail.account.blacklist=127.0.0.1-127.255.255.255, localhost, internal.domain.org
+        </pre>
+        Creation of mail accounts with this hosts will be prevented. Also the validation of those accounts will fail.
+        An empty value means no black-listing is active.
+      defaultValue: 127.0.0.1-127.255.255.255,localhost
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Mail Account", "Black List"]
+    - key: com.openexchange.mail.account.whitelist.ports
+      description: |
+        Specifies a white-list for such ports that are allowed to connect against when setting up/validating an external mail account.
+        An empty value means no white-listing is active.
+      defaultValue: 143,993, 25,465,587, 110,995
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Mail Account", "White List"]
+    - key: com.openexchange.mail.imageHost
+      description: |
+        Specifies the host/domain from which to load inlined images contained in message content.  
+        Example:  
+        <pre>com.openexchange.mail.imageHost=http://my.imagehost.org</pre>
+
+        In case no protocol/schema is specified, "http" is assumed by default.  
+        If empty the images are loaded from the originating host.
+
+        Exemplary setup:
+        <ol>
+          <li>Artificially add a host name to /etc/hosts:  
+            <pre>127.0.0.1     imageserver.open-xchange.com</pre></li>
+          <li>Enable the [[com.openexchange.mail.imageHost]] property:
+            <pre>com.openexchange.mail.imageHost=http://imageserver.open-xchange.com</pre></li>
+          <li>Check a mail with an inline image</li>
+        </ol>
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Host"]
+    - key: com.openexchange.mail.signature.maxImageSize
+      description: |
+        Specifies the maximum size (in MB) for one image contained in the HTML mail signature.
+      defaultValue: 1
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Signature"]
+    - key: com.openexchange.mail.signature.maxImageLimit
+      description: |
+        Specified the maximum amount of images that are allowed in a single HTML mail signature.
+      defaultValue: 3
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Signature"]
     - key: com.openexchange.mail.useStaticDefaultFolders
       description: |
         Defines whether standard folder names should be initialized with the default values or not. 
@@ -10,12 +676,13 @@ properties:
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "Folder"]
     - key: com.openexchange.imap.setSpecialUseFlags
       description: |
-        Defines whether the ox middleware is allowed to set special use flags.
-        If set to 'false' the ox middleware will never set any special use flags on folders on the imap server.
-        If set to 'true' the ox middleware will only set special use flags if no special use flag of that type exist yet.
+        Defines whether the ox middleware is allowed to set special use flags.  
+        If set to <code>false</code> the ox middleware will never set any special use flags on folders on the imap server.  
+        If set to <code>true</code> the ox middleware will only set special use flags if no special use flag of that type exist yet.
       defaultValue: false
       version: 7.8.3
       reloadable: true
@@ -33,85 +700,114 @@ properties:
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.maxDriveAttachments
       description: |
-        Specifies the max. number of Drive documents that are allowed to be sent via E-Mail
+        Specifies the max. number of Drive documents that are allowed to be sent via E-Mail.
       defaultValue: 20
       version: 7.6.2
       reloadable: false
       configcascadeAware: false
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","Drive"]
     - key: com.openexchange.mail.authType
       description: |
-        Specifies the authentication type which should be used for primary account's mail access. Known values: 'login', 'xoauth2', and "oauthbearer"
+        Specifies the authentication type which should be used for primary account's mail access.  
+        Known values: <code>login</code>, <code>xoauth2</code> and <code>oauthbearer</code>
       defaultValue: login
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail", "OAuth"]
     - key: com.openexchange.mail.transport.authType
       description: |
-        Specifies the authentication type which should be used for primary account's mail transport. Known values: 'login', 'xoauth2', and "oauthbearer"
+        Specifies the authentication type which should be used for primary account's mail transport.  
+        Known values: <code>login</code>, <code>xoauth2</code> and <code>oauthbearer</code>
       defaultValue: login
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related: 
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","OAuth"]
     - key: com.openexchange.mail.flagging.mode
       description: |
-        Specifies how color labels and special \Flagged system flag are connected (or not). Possible values:
-        -<code>colorOnly</code> Only color flags are available. The special \Flagged system flag is not touched.
-        -<code>flaggedOnly</code> Only special \Flagged system flag is used. Color labels are not published.
-        -<code>flaggedAndColor</code> Both - color flags and special \Flagged system flag - are available and set independently.
-        -<code>flaggedImplicit</code>Both - color flags and special \Flagged system flag - are available. A certain color label is linked with the \Flagged system flag. That is to add a color to colorless flagged mails and to add flagged to unflagged but colored mails.
+        Specifies how color labels and special \Flagged system flag are connected (or not).  
+        Possible values:
+        <ul>
+         <li><code>colorOnly</code> -  Only color flags are available. The special \Flagged system flag is not touched.</li>
+         <li><code>flaggedOnly</code> -  Only special \Flagged system flag is used. Color labels are not published.</li>
+         <li><code>flaggedAndColor</code> - Both - color flags and special \Flagged system flag - are available and set independently.</li>
+         <li><code>flaggedImplicit</code> - Both - color flags and special \Flagged system flag - are available. 
+          A certain color label is linked with the \Flagged system flag. That is to add a color to colorless flagged mails 
+          and to add flagged to unflagged but colored mails.</li>
       defaultValue: colorOnly
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mail.flagging.color
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail"]
     - key: com.openexchange.mail.flagging.color
       description: |
-        Specifies the color which should be added to colorless flagged mails in case the flagging mode is "flaggedImplicit". Only values from 1 to 10 are allowed.
+        Specifies the color which should be added to colorless flagged mails in case [[com.openexchange.mail.flagging.mode]] is set to 
+        <code>flaggedImplicit</code>. Only values from <code>1</code> to <code>10</code> are allowed.
       defaultValue: 1
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mail.flagging.mode
-      file: mail.properties 
+      file: mail.properties
+      packageName: open-xchange-core 
       tags: ["Mail"]     
     - key: com.openexchange.mail.maliciousFolders.enabled
       description: |
         Enables/disables support for malicious folders.
 
-        If enabled and a mail is fetched from a folder contained in listing configured through "com.openexchange.mail.maliciousFolders.listing" property, the mail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way to disable any hyper-links.
+        If enabled and a mail is fetched from a folder contained in listing configured through [[com.openexchange.mail.maliciousFolders.listing]] property, 
+        the mail's JSON representation contains an additional "malicious: true" field and possible HTML content is processed in the way to disable any hyper-links.
 
-        I.e.
-        "...&lt;a href="http://evil.com/click.me"&gt;Get something for free here&lt;/a&gt;..."
-        is turned to
-        "...&lt;a href="#" onclick"return false;" data-disabled="true"&gt;Get something for free here&lt;/a&gt;..."
+        I.e.  
+        <pre>...&lt;a href="http://evil.com/click.me"&gt;Get something for free here&lt;/a&gt;...</pre>
+        is turned to  
+        <pre>...&lt;a href="#" onclick"return false;" data-disabled="true"&gt;Get something for free here&lt;/a&gt;...</pre>
       defaultValue: true
       version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.mail.maliciousFolders.listing
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","Folder"]
     - key: com.openexchange.mail.maliciousFolders.listing
       description: |
-        Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious and therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.
+        Specifies the full paths for such mail folders in the primary account's folder tree that are supposed being considered as malicious and 
+        therefore a special treatment happens; e.g. hyper-links that occur in mail content are not displayed and/or are not clickable.
 
-        The value is supposed to be comma-separated list of folder paths. An entry in the CSV list is either a full path of a folder in the primary mail account (e.g. "INBOX/Malware") or a reserved identifier denoting the standard folder and its sub-folders of every mail account (incl. Unified Mail). Supported reserved identifiers are: "$Spam", "$Drafts", "$Sent", "$Trash", "$Confirmed-spam", "$Confirmed-ham".
-
-        Example: $Spam, INBOX/Malware
+        The value is supposed to be comma-separated list of folder paths. An entry in the CSV list is either a full path of a folder in the 
+        primary mail account (e.g. "INBOX/Malware") or a reserved identifier denoting the standard folder and its sub-folders of every 
+        mail account (incl. Unified Mail).  
+        Supported reserved identifiers are: 
+        <ul>
+          <li><code>$Spam</code></li>
+          <li><code>$Drafts</code></li>
+          <li><code>$Sent</code></li>
+          <li><code>$Trash</code></li>
+          <li><code>$Confirmed-spam</code></li>
+          <li><code>$Confirmed-ham</code></li>
+        </ul>
+        Example:
+        <pre>
+        com.openexchange.mail.maliciousFolders.listing=$Spam, INBOX/Malware
+        </pre>
         Special treatment happens for standard Spam folder and for the "INBOX/Malware" folder in primary account's folder tree hierarchy.
       defaultValue: $Spam, $Confirmed-spam
       version: 7.8.4
@@ -119,20 +815,47 @@ properties:
       configcascadeAware: true
       related: com.openexchange.mail.maliciousFolders.enabled
       file: mail.properties
+      packageName: open-xchange-core
       tags: ["Mail","Folder"]
-    - key: com.openexchange.imap.greeting.host.regex
+    - key: com.openexhange.mail.authType
       description: |
-        Specifies the regular expression to use to extract the host name/IP address information out of the greeting string advertised by primary
-        IMAP server. Only applicable for primary IMAP server! Default is empty.
-
-        The regular expression is supposed to be specified in Java notation: http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
-
-        Moreover, either the complete regex is considered or in case a capturing group is present that group will be preferred.
-        I.e. "Dovecot at ([0-9a-zA-Z._-]*) is ready", then the capturing group is supposed to extract the host name/IP addres information
-      defaultValue: 
+        Specifies the authentication type which should be used for mail access of the primary account.  
+        Known values: <code>login</code>, <code>xoauth2</code> and <code>oauthbearer</code>
+      defaultValue: login
       version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexhange.mail.transport.authType
+      description: |
+        Specifies the authentication type which should be used for mail transport of the primary account.  
+        Known values: <code>login</code>, <code>xoauth2</code> and <code>oauthbearer</code>
+      defaultValue: login
+      version: 7.8.4
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mailmapping.lookUpByDomain
+      description: |
+        This option specifies how look-up of mail addresses is performed.
+        
+        Setting this option to <code>true</code> means that the domain part of a mail address (the part after the "@" sign) is used to find a matching
+        context by checking the login mappings. That mechanism does only work if Open-Xchange setup strictly defines a dedicated and unique domain
+        per context. Otherwise that look-up mechanism will lead to wrong results.
+        
+        Setting this option to <code>false</code> means that the mail address is going to be looked-up on a per database schema basis. For each known schema
+        a query is performed to check whether there is such an internal user.
+      defaultValue: false
+      version: 
       reloadable: false
       configcascadeAware: false
-      related: 
-      file: imap.properties
-      tags: ["Mail","IMAP"]
+      related:
+      file: mailresolver.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]

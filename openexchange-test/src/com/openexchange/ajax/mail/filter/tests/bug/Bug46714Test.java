@@ -70,7 +70,7 @@ public class Bug46714Test extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link Bug46714Test}.
-     * 
+     *
      * @param name the test's name
      */
     public Bug46714Test() {
@@ -93,6 +93,7 @@ public class Bug46714Test extends AbstractMailFilterTest {
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
+            rememberRule(id);
             rule.setId(id);
             rule.setPosition(i);
             expectedRules.add(rule);
@@ -102,7 +103,7 @@ public class Bug46714Test extends AbstractMailFilterTest {
 
         // Reorder
         try {
-            // We are expecting an exception so we disable the failOnError 
+            // We are expecting an exception so we disable the failOnError
             mailFilterAPI.setFailOnError(false);
             mailFilterAPI.reorder(reorder);
             fail("Expected an exception");

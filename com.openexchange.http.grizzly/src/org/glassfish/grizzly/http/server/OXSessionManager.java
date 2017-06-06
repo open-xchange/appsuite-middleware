@@ -258,7 +258,8 @@ public class OXSessionManager implements SessionManager {
     public void configureSessionCookie(Request request, Cookie cookie) {
         cookie.setPath("/");
 
-        String domain = Cookies.getDomainValue(request.getServerName());
+        String serverName  = request.getServerName();
+        String domain = Cookies.getDomainValue(null == serverName ? determineServerNameByLogProperty() : serverName);
         if (domain != null) {
             cookie.setDomain(domain);
         }
@@ -280,6 +281,10 @@ public class OXSessionManager implements SessionManager {
         }
     }
 
+    private static String determineServerNameByLogProperty() {
+        return LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
+    }
+
     /**
      * Create a new JSessioID String that consists of a:
      * <pre>
@@ -294,15 +299,8 @@ public class OXSessionManager implements SessionManager {
      */
     private String createSessionID(Request request) {
         String backendRoute = grizzlyConfig.getBackendRoute();
-        String domain = Cookies.getDomainValue(request.getServerName());
         StringBuilder idBuilder = new StringBuilder(String.valueOf(generateRandomLong()));
-
-        if (null != domain) {
-            String encodedDomain = JSessionDomainEncoder.urlEncode(domain);
-            idBuilder.append(encodedDomain);
-        }
         idBuilder.append('.').append(backendRoute);
-
         return idBuilder.toString();
     }
 
@@ -357,10 +355,9 @@ public class OXSessionManager implements SessionManager {
             if (cookie.getName().startsWith(sessionCookieName)) {
                 if (cookie.getValue().equals(invalidSessionId)) {
                     response.addCookie(createinvalidationCookie(cookie));
-                    String domain = Cookies.extractDomainValue(cookie.getValue());
-                    if (domain != null) {
-                        response.addCookie(createinvalidationCookie(cookie, domain));
-                    }
+
+                    String domain = Cookies.getDomainValue(request.getServerName());
+                    response.addCookie(createinvalidationCookie(cookie, null == domain ? request.getServerName() : domain));
                     break;
                 }
             }

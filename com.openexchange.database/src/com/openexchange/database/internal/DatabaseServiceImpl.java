@@ -61,6 +61,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogProperties;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -88,11 +89,15 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = configDatabaseService.getAssignment(contextId);
-        return get(assign, write, noTimeout);
+        Connection connection = get(assign, write, noTimeout);
+        setSchemaLogProperty(assign.getSchema());
+        return connection;
     }
 
     private Connection get(final AssignmentImpl assign, final boolean write, final boolean noTimeout) throws OXException {
-        return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
+        Connection connection = monitor.checkActualAndFallback(pools, assign, noTimeout, write);
+        setSchemaLogProperty(assign.getSchema());
+        return connection;
     }
 
     private static void back(final Connection con) {
@@ -142,17 +147,23 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public Connection getReadOnly() throws OXException {
-        return configDatabaseService.getReadOnly();
+        Connection connection = configDatabaseService.getReadOnly();
+        setSchemaLogProperty(connection);
+        return connection;
     }
 
     @Override
     public Connection getWritable() throws OXException {
-        return configDatabaseService.getWritable();
+        Connection connection = configDatabaseService.getWritable();
+        setSchemaLogProperty(connection);
+        return connection;
     }
 
     @Override
     public Connection getForUpdateTask() throws OXException {
-        return configDatabaseService.getForUpdateTask();
+        Connection connection = configDatabaseService.getForUpdateTask();
+        setSchemaLogProperty(connection);
+        return connection;
     }
 
     @Override
@@ -250,7 +261,17 @@ public final class DatabaseServiceImpl implements DatabaseService {
         configDatabaseService.lock(con, writePoolId);
     }
 
+    @Override
+    public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
+        return configDatabaseService.getAllSchemata(con);
+    }
+
     // Delegate global database service methods.
+
+    @Override
+    public boolean isGlobalDatabaseAvailable() {
+        return globalDatabaseService.isGlobalDatabaseAvailable();
+    }
 
     @Override
     public boolean isGlobalDatabaseAvailable(String group) throws OXException {
@@ -264,12 +285,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public Connection getReadOnlyForGlobal(String group) throws OXException {
-        return globalDatabaseService.getReadOnlyForGlobal(group);
+        Connection connection = globalDatabaseService.getReadOnlyForGlobal(group);
+        setSchemaLogProperty(connection);
+        return connection;
     }
 
     @Override
     public Connection getReadOnlyForGlobal(int contextId) throws OXException {
-        return globalDatabaseService.getReadOnlyForGlobal(contextId);
+        Connection connection = globalDatabaseService.getReadOnlyForGlobal(contextId);
+        setSchemaLogProperty(connection);
+        return connection;
     }
 
     @Override
@@ -284,12 +309,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public Connection getWritableForGlobal(String group) throws OXException {
-        return globalDatabaseService.getWritableForGlobal(group);
+        Connection connection = globalDatabaseService.getWritableForGlobal(group);
+        setSchemaLogProperty(connection);
+        return connection;
     }
 
     @Override
     public Connection getWritableForGlobal(int contextId) throws OXException {
-        return globalDatabaseService.getWritableForGlobal(contextId);
+        Connection connection = globalDatabaseService.getWritableForGlobal(contextId);
+        setSchemaLogProperty(connection);
+        return connection;
     }
 
     @Override
@@ -340,6 +369,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
+                setSchemaLogProperty(schema);
             }
         } catch (final SQLException e) {
             try {
@@ -364,6 +394,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
+                setSchemaLogProperty(schema);
             }
         } catch (final SQLException e) {
             try {
@@ -549,4 +580,25 @@ public final class DatabaseServiceImpl implements DatabaseService {
         AssignmentImpl assignmentImpl = new AssignmentImpl(assignment);
         return get(assignmentImpl, true, noTimeout);
     }
+
+    private void setSchemaLogProperty(String schemaName) {
+        if (null != schemaName) {
+            LogProperties.put(LogProperties.Name.DATABASE_SCHEMA, schemaName);
+        }
+    }
+
+    private void setSchemaLogProperty(Connection connection) {
+        if (null != connection) {
+            try {
+                String schemaName = connection.getCatalog();
+                if (null != schemaName) {
+                    LogProperties.put(LogProperties.Name.DATABASE_SCHEMA, schemaName);
+                }
+            } catch (Exception e) {
+                // Ignore...
+                LOG.debug("Failed to obtain schema name from connection", e);
+            }
+        }
+    }
+
 }

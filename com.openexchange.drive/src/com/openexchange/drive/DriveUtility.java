@@ -166,9 +166,10 @@ public interface DriveUtility {
      * @param session The session
      * @param directoryVersion The directory version of the directory to update
      * @param jsonObject The updated metadata
+     * @param cascadePermissions <code>true</code> to apply permission changes to all subfolders, <code>false</code>, otherwise
      * @param parameters Additional notification parameters for the update
      */
-    void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException;
+    void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, JSONObject jsonObject, boolean cascadePermissions, NotificationParameters parameters) throws OXException;
 
     /**
      * Moves and/or renames a file version.

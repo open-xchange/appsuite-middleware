@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
@@ -100,26 +100,32 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
             if (id < 0) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", accountId);
             }
-            final OAuthAccount account = AccountParser.parse(data, session.getUserId(), session.getContextId());
+            final DefaultOAuthAccount account = AccountParser.parse(data, session.getUserId(), session.getContextId());
             /*
              * Update account
              */
             final OAuthService oAuthService = getOAuthService();
-            final Map<String, Object> arguments = new HashMap<>(1);
-
-            final String displayName = account.getDisplayName();
-            if (null != displayName) {
-                arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, displayName);
+            final Map<String, Object> arguments = new HashMap<>(4);
+            {
+                String displayName = account.getDisplayName();
+                if (null != displayName) {
+                    arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, displayName);
+                }
             }
-            final String token = account.getToken();
-            final String secret = account.getSecret();
-            if (null != token && null != secret) {
-                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, account);
+            {
+                String token = account.getToken();
+                String secret = account.getSecret();
+                if (null != token && null != secret) {
+                    arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, account);
+                }
+            }
+            if (account.isEnabledScopesSet()) {
+                arguments.put(OAuthConstants.ARGUMENT_SCOPES, account.getEnabledScopes());
             }
 
             if (!arguments.isEmpty()) {
                 arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId(), account.getEnabledScopes());
+                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId());
             }
 
             /*

@@ -49,13 +49,8 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
-import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
-import static com.openexchange.tools.sql.DBUtils.getIN;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.sql.grammar.Constant.*;
+import static com.openexchange.tools.sql.DBUtils.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -4734,19 +4729,17 @@ public class CalendarMySQL implements CalendarSqlImp {
                         /*
                          * A recurring appointment's reminder update whose recurrence pattern has not changed; verify that no already
                          * verified reminder appears again through comparing storage's reminder date with the one that shall be written to
-                         * storage. If storage's reminder date is greater than or equal to specified reminder, leave unchanged. Update: I
-                         * think this is inverted. Change it...
+                         * storage. If storage's reminder date is greater than or equal to specified reminder, leave unchanged.
                          */
                         Date storageReminder = rsql.loadReminder(oid, uid, Types.APPOINTMENT, con, c).getDate();
-                        if (storageReminder.getTime() > reminder_date.getTime()) {
+                        if (storageReminder.getTime() >= reminder_date.getTime()) {
+                            LOG.debug("No recurrence change! Leave corresponding reminder unchanged");
+                        } else {
                             if (con != null) {
                                 rsql.updateReminder(ro, con, c);
                             } else {
                                 rsql.updateReminder(ro, c);
                             }
-
-                        } else {
-                            LOG.debug("No recurrence change! Leave corresponding reminder unchanged");
                         }
                     } else {
                         if (con != null) {

@@ -1,32 +1,35 @@
 feature_name: Websockets
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/websockets.html]] for mor informations.
 properties:
     - key: com.openexchange.websockets.enabled
       description: |
-        The main switch to enable/disable Web Sockets. That property is responsive to config-cascade
-        and reloadable as well.
+        The main switch to enable/disable Web Sockets.
       defaultValue: true
       version: 7.8.3
       reloadable: true
       configcascadeAware: true
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets"]
     - key: com.openexchange.websockets.grizzly.remote.delayDuration
       description: |
         The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)
-        is queued in buffer to await & aggregate equal messages that arrive during that time
+        is queued in buffer to await and aggregate equal messages that arrive during that time.
       defaultValue: 1000
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets"]
     - key: com.openexchange.websockets.grizzly.remote.maxDelayDuration
       description: |
         The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)
-        is at max. queued in buffer to await & aggregate equal messages that arrive during that time.
-        So, even if there was an equal message recently, message is flushed from queue to avoid holding back
+        is at max. queued in buffer to await and aggregate equal messages that arrive during that time.
+        So, even if there was an equal message recently, the message is flushed from queue to avoid holding back
         a message forever in case there are frequent equal messages.
       defaultValue: 3000
       version: 7.8.3
@@ -34,15 +37,17 @@ properties:
       configcascadeAware: false
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets","Limit"]
     - key: com.openexchange.websockets.grizzly.remote.timerFrequency
       description: |
         The frequency/delay in milliseconds when the buffering queue will be checked for due
-        "remote" messages (the ones exceeding delayDuration in queue)
+        "remote" messages (the ones exceeding delayDuration in queue).
       defaultValue: 500
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
       related: 
       file: websockets.properties
+      packageName: open-xchange-core
       tags: ["Websockets"]

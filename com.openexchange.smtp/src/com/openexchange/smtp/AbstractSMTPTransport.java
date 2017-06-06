@@ -313,7 +313,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * @throws OXException If JavaMail SMTP session cannot be returned
      */
     protected javax.mail.Session getSMTPSession(SMTPConfig smtpConfig) throws OXException {
-        return getSMTPSession(smtpConfig, accountId > 0 && (smtpConfig.isRequireTls() || smtpConfig.getTransportProperties().isEnforceSecureConnection()));
+        return getSMTPSession(smtpConfig, accountId > 0 && smtpConfig.isRequireTls());
     }
 
     protected void processAddressHeader(final MimeMessage mimeMessage) throws OXException, MessagingException {
@@ -899,6 +899,14 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             MimeMessage messageToSend = smtpMessage;
             Exception exception = null;
             try {
+                // Check if security settings are given and if properly handled
+                if (securitySettings != null && securitySettings.anythingSet()) {
+                    if (false == listenerChain.checkSettings(securitySettings, session)) {
+                        // Security settings not considered
+                        throw SMTPExceptionCode.INTERNAL_ERROR.create("Security settings available, but not handled. Guard-backend-plugin installed?");
+                    }
+                }
+
                 // Check listener chain
                 Result result = listenerChain.onBeforeMessageTransport(messageToSend, recipients, securitySettings, session);
 
@@ -993,7 +1001,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     }
                 } else if (e.getNextException() instanceof IOException) {
                     if (e.getNextException().getMessage().equals("Maximum message size is exceeded.")) {
-                        throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 2, false, true));
+                        throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 0, false, true));
                     }
                 }
                 throw handleMessagingException(e, smtpConfig);
@@ -1072,7 +1080,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         Transport transport;
         try {
             SMTPConfig smtpConfig = getTransportConfig();
-            transport = getSMTPSession(smtpConfig, smtpConfig.isRequireTls() || smtpConfig.getTransportProperties().isEnforceSecureConnection()).getTransport(SMTP);
+            transport = getSMTPSession(smtpConfig, smtpConfig.isRequireTls()).getTransport(SMTP);
         } catch (final NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }

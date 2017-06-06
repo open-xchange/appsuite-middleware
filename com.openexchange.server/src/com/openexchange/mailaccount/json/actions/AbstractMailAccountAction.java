@@ -81,6 +81,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
+import com.openexchange.mail.config.ConfiguredServer;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -372,13 +373,25 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @throws OXException If appropriate {@link MailAccess} instance cannot be determined
      */
     protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings) throws OXException {
-        final String mailServerURL = accountDescription.generateMailServerURL();
+        String mailServerURL = accountDescription.generateMailServerURL();
+
         // Get the appropriate mail provider by mail server URL
-        final MailProvider mailProvider = getMailProviderByURL(mailServerURL);
-        if (null == mailProvider) {
-            LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
-            return null;
+        MailProvider mailProvider;
+        boolean isDefault;
+        {
+            isDefault = accountDescription.getId() == MailAccount.DEFAULT_ID;
+            if (isDefault && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
+                ConfiguredServer mailServer = MailProperties.getInstance().getMailServer(session.getUserId(), session.getContextId());
+                mailProvider = getMailProviderByURL(mailServer.getUrlString(false));
+            } else {
+                mailProvider = getMailProviderByURL(mailServerURL);
+            }
+            if (null == mailProvider) {
+                LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
+                return null;
+            }
         }
+
         // Set marker
         session.setParameter("mail-account.request", "validate");
         MailConfig mailConfig = null;
@@ -389,35 +402,31 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 int accountId = accountDescription.getId();
                 mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
             }
-            boolean isDefault = mailAccess.getAccountId() == MailAccount.DEFAULT_ID;
             mailConfig = mailAccess.getMailConfig();
+
             // Set auth-type, login and password
-            if(isDefault){
+            if (isDefault) {
                 mailConfig.setAuthType(MailConfig.getConfiguredAuthType(true, session));
             } else {
                 mailConfig.setAuthType(accountDescription.getAuthType());
             }
-            if ( !Strings.isEmpty(accountDescription.getLogin())) {
+            if (!Strings.isEmpty(accountDescription.getLogin())) {
                 mailConfig.setLogin(accountDescription.getLogin());
             }
-            if ( !isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId()))) {
+            if (!isDefault || !PasswordSource.GLOBAL.equals(MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId()))) {
                 mailConfig.setPassword(accountDescription.getPassword());
             }
+
             // Set server and port
-            final URI uri;
-            try {
-                uri = URIParser.parse(mailServerURL, URIDefaults.IMAP);
-            } catch (final URISyntaxException e) {
-                throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
-            }
             if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId()))) {
+                URI uri = parseUri(mailServerURL);
                 if (null != uri) {
                     mailConfig.setServer(uri.getHost());
                     mailConfig.setPort(uri.getPort());
                 }
+                mailConfig.setSecure(accountDescription.isMailSecure());
+                mailConfig.setRequireTls(accountDescription.isMailStartTls());
             }
-            mailConfig.setSecure(accountDescription.isMailSecure());
-            mailConfig.setRequireTls(accountDescription.isMailStartTls());
             mailAccess.setCacheable(false);
             return mailAccess;
         } catch (final OXException e) {
@@ -438,6 +447,14 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             session.setParameter("mail-account.request", null);
         }
         return null;
+    }
+
+    private static URI parseUri(String mailServerURL) throws OXException {
+        try {
+            return URIParser.parse(mailServerURL, URIDefaults.IMAP);
+        } catch (final URISyntaxException e) {
+            throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
+        }
     }
 
     private static MailProvider getMailProviderByURL(final String serverUrl) {

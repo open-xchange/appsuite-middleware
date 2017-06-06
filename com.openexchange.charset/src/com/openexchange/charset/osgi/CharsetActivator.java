@@ -83,11 +83,14 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
 
     @Override
     public CharsetProvider addingService(final ServiceReference<CharsetProvider> reference) {
-        final CharsetProvider addedService = context.getService(reference);
-        {
+        CharsetProvider addedService = context.getService(reference);
+
+        CollectionCharsetProvider collectionCharsetProvider = this.collectionCharsetProvider;
+        if (null != collectionCharsetProvider) {
             collectionCharsetProvider.addCharsetProvider(addedService);
             LOG.info("New charset provider detected and added: {}", addedService.getClass().getName());
         }
+
         return addedService;
     }
 
@@ -98,7 +101,8 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
 
     @Override
     public void removedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
-        {
+        CollectionCharsetProvider collectionCharsetProvider = this.collectionCharsetProvider;
+        if (null != collectionCharsetProvider) {
             collectionCharsetProvider.removeCharsetProvider(service);
             LOG.info("Charset provider removed: {}", service.getClass().getName());
         }

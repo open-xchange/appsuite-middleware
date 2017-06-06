@@ -96,7 +96,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = new AJAXClient(testContext.acquireUser());
+        clientB = getClient2();
 
         SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.ACCEPT));
         clientB.execute(setRequest);
@@ -129,14 +129,12 @@ public class UserStory2173Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            if (appointmentPrivate.getObjectID() > 0) {
+            if (null != appointmentPrivate && appointmentPrivate.getObjectID() > 0) {
                 clientA.execute(new DeleteRequest(appointmentPrivate));
             }
-
-            if (appointmentPublic.getObjectID() > 0) {
+            if (null != appointmentPublic && appointmentPublic.getObjectID() > 0) {
                 clientA.execute(new DeleteRequest(appointmentPublic));
             }
-
             clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, publicFolder.getObjectID(), publicFolder.getLastModified()));
 
             SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.NONE));

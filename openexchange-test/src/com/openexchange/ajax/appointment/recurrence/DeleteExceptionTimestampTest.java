@@ -54,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -63,7 +62,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link DeleteExceptionTimestampTest}
@@ -73,7 +71,6 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
 
-    private CalendarTestManager manager;
     private Appointment appointment;
 
     public DeleteExceptionTimestampTest() {
@@ -84,7 +81,6 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         // Create series
-        manager = new CalendarTestManager(getClient());
         appointment = new Appointment();
         appointment.setTitle(this.getClass().getCanonicalName());
         appointment.setStartDate(D("24/02/2007 10:00"));
@@ -93,16 +89,7 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         appointment.setInterval(1);
         appointment.setOccurrence(5);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        manager.insert(appointment);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
+        catm.insert(appointment);
     }
 
     @Test

@@ -60,13 +60,10 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.HasRequest;
 import com.openexchange.ajax.appointment.action.HasResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 
 public class HasTest extends AbstractAJAXSession {
-
-    private AJAXClient client;
 
     private int folderId;
 
@@ -79,9 +76,8 @@ public class HasTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        folderId = client.getValues().getPrivateAppointmentFolder();
-        tz = client.getValues().getTimeZone();
+        folderId = getClient().getValues().getPrivateAppointmentFolder();
+        tz = getClient().getValues().getTimeZone();
     }
 
     @Test
@@ -108,15 +104,15 @@ public class HasTest extends AbstractAJAXSession {
         appointment.setShownAs(Appointment.ABSENT);
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);
-        final AppointmentInsertResponse insertR = client.execute(new InsertRequest(appointment, tz));
+        final AppointmentInsertResponse insertR = getClient().execute(new InsertRequest(appointment, tz));
         insertR.fillAppointment(appointment);
         try {
-            final HasResponse hasR = client.execute(new HasRequest(start, end, tz));
+            final HasResponse hasR = getClient().execute(new HasRequest(start, end, tz));
             final boolean[] hasAppointments = hasR.getValues();
             assertEquals("Length of array of action has is wrong.", hasInterval, hasAppointments.length);
             assertEquals("Inserted appointment not found in action has response.", hasAppointments[posInArray], true);
         } finally {
-            client.execute(new DeleteRequest(appointment));
+            getClient().execute(new DeleteRequest(appointment));
         }
     }
 
@@ -145,15 +141,15 @@ public class HasTest extends AbstractAJAXSession {
         appointment.setFullTime(true);
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);
-        final AppointmentInsertResponse insertR = client.execute(new InsertRequest(appointment, tz));
+        final AppointmentInsertResponse insertR = getClient().execute(new InsertRequest(appointment, tz));
         insertR.fillAppointment(appointment);
         try {
-            final HasResponse hasR = client.execute(new HasRequest(start, end, tz));
+            final HasResponse hasR = getClient().execute(new HasRequest(start, end, tz));
             final boolean[] hasAppointments = hasR.getValues();
             assertEquals("Length of array of action has is wrong.", hasInterval, hasAppointments.length);
             assertEquals("Inserted appointment not found in action has response.", hasAppointments[posInArray], true);
         } finally {
-            client.execute(new DeleteRequest(appointment));
+            getClient().execute(new DeleteRequest(appointment));
         }
     }
 }

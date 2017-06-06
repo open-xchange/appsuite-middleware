@@ -51,9 +51,11 @@ package com.openexchange.client.onboarding.eas.osgi;
 
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.eas.EASOnboardingProvider;
+import com.openexchange.client.onboarding.eas.custom.CustomLoginSource;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link OnboardingEASActivator}
@@ -77,7 +79,11 @@ public class OnboardingEASActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(OnboardingProvider.class, new EASOnboardingProvider(this));
+        RankingAwareNearRegistryServiceTracker<CustomLoginSource> loginSources = new RankingAwareNearRegistryServiceTracker<>(context, CustomLoginSource.class);
+        rememberTracker(loginSources);
+        openTrackers();
+
+        registerService(OnboardingProvider.class, new EASOnboardingProvider(loginSources, this));
     }
 
     @Override

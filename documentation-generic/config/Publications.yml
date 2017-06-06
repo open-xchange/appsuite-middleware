@@ -1,0 +1,78 @@
+feature_name: Publications
+properties:
+    - key: com.openexchange.publish.microformats.usesWhitelisting
+      description: |
+        If set to true, the contents of a microformatted publication will
+        be processed through a whitelisting filter that removes elements
+        that are considered potentially unsafe. We recommend you use this
+        in case you do not have publications on a different subdomain.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: publications.properties
+      packageName: open-xchange-core
+      tags: ["Publication", "White List"]
+    - key: com.openexchange.publish.domain
+      description: |
+        If enabled, this allows you to have a different domain as
+        part of the URI for publications.
+
+        Note:  
+        If you enable both the domain and the subdomain option,
+        domain takes precedence.
+      defaultValue: 
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.publish.subdomain
+      file: publications.properties
+      packageName: open-xchange-core
+      tags: ["Publication"]  
+    - key: com.openexchange.publish.subdomain
+      description: |
+        If enabled, this allows you to use a different subdomain as
+        part of the URI for publications. This subdomain will be
+        prepended to the domain of the server you are currently using.
+        No need to end the subdomain name with a dot, btw.
+
+        Note:  
+        If you enable both the domain and the subdomain option,
+        domain takes precedence.
+      defaultValue:  
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.publish.domain
+      file: publications.properties
+      packageName: open-xchange-core
+      tags: ["Publication"]
+    - key: com.openexchange.publish.legalHosterName
+      description: |
+        The legal name of the company that will be displayed in the
+        disclaimer of the default publication template.
+
+        Note:  
+        If an empty value is set or the property isn't defined at all, the
+        default will be the generic wording 'the hoster'.
+      defaultValue:
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: publications.properties
+      packageName: open-xchange-core
+      tags: ["Publication"]  
+    - key: com.openexchange.publish.createModifyEnabled
+      description: |
+        Enabled/disables the possibility to create/modify publications.
+        This should be set to <code>false</code>, because the new sharing module is supposed to be used and this module is considered as deprecated.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: publications.properties
+      packageName: open-xchange-core
+      tags: ["Publication"]

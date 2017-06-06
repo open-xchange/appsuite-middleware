@@ -77,10 +77,10 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
  * @author cutmasta
  * @author d7
  */
-public class GroupTest extends AbstractTest {
+public class GroupTest extends UserTest {
 
     // list of chars that must be valid
-    private static final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
+    private final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
 
     @Test
     public void testCreateGroup() throws Exception {
@@ -274,7 +274,7 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
@@ -303,7 +303,7 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         Group tmp = new Group();
@@ -334,7 +334,7 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         Group tmp = new Group(createdgroup.getId());
@@ -365,7 +365,7 @@ public class GroupTest extends AbstractTest {
 
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
@@ -408,7 +408,7 @@ public class GroupTest extends AbstractTest {
 
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
@@ -454,7 +454,7 @@ public class GroupTest extends AbstractTest {
 
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
@@ -659,7 +659,7 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // add user as groupmember
         addMemberToGroup(ctx, createdgroup, new User[] { createduser }, hosturl, cred);
@@ -682,7 +682,7 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // We only want to resolve by name
         createdgroup.setId(null);
@@ -708,7 +708,7 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // We only want to resolve by name
         createduser.setId(null);
@@ -739,7 +739,7 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
-        final User createduser = UserTest.addUser(ctx, usr, access);
+        final User createduser = addUser(ctx, usr, access);
 
         // We only want to resolve by name
         createduser.setId(null);

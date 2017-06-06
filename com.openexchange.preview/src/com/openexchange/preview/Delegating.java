@@ -50,6 +50,7 @@
 package com.openexchange.preview;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
@@ -64,9 +65,10 @@ public interface Delegating extends PreviewService {
      *
      * @param mimeType The MIME type
      * @param output The output
+     * @param session The session to look-up for
      * @return The best fitting candidate or <code>null</code>
      * @throws OXException If best fitting candidate cannot be returned
      */
-    PreviewService getBestFitOrDelegate(String mimeType, PreviewOutput output) throws OXException;
+    PreviewService getBestFitOrDelegate(String mimeType, PreviewOutput output, Session session) throws OXException;
 
 }

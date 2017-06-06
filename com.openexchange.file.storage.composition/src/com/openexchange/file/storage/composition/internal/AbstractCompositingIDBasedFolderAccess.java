@@ -201,13 +201,26 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+        return updateFolder(identifier, toUpdate, false);
+    }
+
+    @Override
+    public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
         FolderID folderID = new FolderID(identifier);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         if (containsForeignPermissions(session.getUserId(), toUpdate) && false == PermissionAware.class.isInstance(folderAccess)) {
             throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, session.getContextId());
         }
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
-        String newID = folderAccess.updateFolder(folderID.getFolderId(), withRelativeID(toUpdate));
+        String newID;
+        if (cascadePermissions) {
+            if (false == PermissionAware.class.isInstance(folderAccess)) {
+                throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, session.getContextId());
+            }
+            newID = ((PermissionAware) folderAccess).updateFolder(folderID.getFolderId(), withRelativeID(toUpdate), cascadePermissions);
+        } else {
+            newID = folderAccess.updateFolder(folderID.getFolderId(), withRelativeID(toUpdate));
+        }
         FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), newID);
         fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();

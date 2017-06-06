@@ -201,7 +201,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     String timeZone = null != object.getTimezone() ? object.getTimezone() : factory.getUser().getTimeZone();
                     List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
                     if (null == appointments || 1 != appointments.size() || null == appointments.get(0).getRecurrenceDatePosition()) {
-                        throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+                        throw protocolException(getUrl(), OXException.notFound(recurrenceID), HttpServletResponse.SC_NOT_FOUND);
                     }
                     /*
                      * get matching change exception
@@ -210,7 +210,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(object, false);
                     CalendarDataObject targetedException = getMatchingException(originalExceptions, recurrenceDatePosition);
                     if (null == targetedException) {
-                        throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+                        throw protocolException(getUrl(), OXException.notFound(recurrenceID), HttpServletResponse.SC_NOT_FOUND);
                     }
                     objects.add(targetedException);
                 }
@@ -269,7 +269,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             Appointment originalAppointment = phantomMaster ? object : parent.load(object, false);
             Date clientLastModified = object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
-                throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
+                throw protocolException(getUrl(), OXException.conflict(), HttpServletResponse.SC_CONFLICT);
             }
             /*
              * check folder permissions beforehand
@@ -277,7 +277,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             int ownPermissions = parent.getFolder().getOwnPermission().getWritePermission();
             if (Permission.WRITE_OWN_OBJECTS > ownPermissions ||
                 Permission.WRITE_OWN_OBJECTS == ownPermissions && originalAppointment.getCreatedBy() != factory.getSession().getUserId()) {
-                throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                throw protocolException(getUrl(), OXException.noPermissionForFolder(), HttpServletResponse.SC_FORBIDDEN);
             }
             if (false == phantomMaster && null != appointmentToSave) {
                 /*
@@ -963,8 +963,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
      * @throws WebdavProtocolException If not handled
      */
     private void handleOnCreate(WebdavProtocolException e) throws WebdavProtocolException {
-        if (null != e && null != e.getCause() && OXException.class.isInstance(e.getCause()) &&
-            "APP-0100".equals(((OXException)e.getCause()).getErrorCode())) {
+        if (null == e) {
+            return;
+        }
+        if ("APP-0100".equals(e.getErrorCode()) ||
+            null != e.getCause() && OXException.class.isInstance(e.getCause()) && "APP-0100".equals(((OXException)e.getCause()).getErrorCode())) {
             /*
              * Cannot insert appointment (...). An appointment with the unique identifier (...) already exists.
              */
@@ -974,10 +977,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     CalendarDataObject existingAppointment = getAppointmentInterface().getObjectById(objectID);
                     if (isUpdate(appointmentToSave, existingAppointment) &&
                         PrivateType.getInstance().equals(parent.getFolder().getType())) {
-                        LOG.debug("Considering appointment with UID '{}', sequence {} as update for appointment with object ID {}, sequence {}.", appointmentToSave.getUid(), appointmentToSave.getSequence(), objectID, existingAppointment.getSequence());
+                        LOG.debug("Considering appointment with UID '{}', sequence {} as update for appointment with object ID {}, sequence {}.",
+                            appointmentToSave.getUid(), appointmentToSave.getSequence(), objectID, existingAppointment.getSequence());
                         this.object = existingAppointment;
                         appointmentToSave.setObjectID(objectID);
-                        appointmentToSave.removeParentFolderID();
+                        appointmentToSave.setParentFolderID(parentFolderID);
                         this.saveObject(false); // update instead of create
                         return; // handled
                     }

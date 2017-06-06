@@ -372,47 +372,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 rs = null;
                 stmt = null;
             }
-            MimeMessage mimeMessage;
-            {
-                InputStream in = null;
-                try {
-                    QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
-                    in = fileStorage.getFile(file);
-                    mimeMessage = new MimeMessage(getDefaultSession(), in);
-                } catch (OXException e) {
-                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                        throw e;
-                    }
-                    throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
-                } finally {
-                    Streams.close(in);
-                }
-            }
+            MimeMessage mimeMessage = createMimeMessage(identifier, file);
             com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(mimeMessage);
-            final DefaultSnippet snippet = new DefaultSnippet().setId(identifier).setCreatedBy(creator);
-            final String lcct;
-            {
-                final String tmp = mimeMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                if (!isEmpty(tmp)) {
-                    lcct = tmp.trim().toLowerCase(Locale.US);
-                } else {
-                    lcct = "text/plain; charset=us-ascii";
-                }
-            }
-            if (lcct.startsWith("multipart/", 0)) {
-                final Multipart multipart = MimeMessageUtility.getMultipartContentFrom(mimeMessage);
-                parseSnippet(mimeMessage, (MimePart) multipart.getBodyPart(0), snippet);
-                final int count = multipart.getCount();
-                if (count > 1) {
-                    for (int i = 1; i < count; i++) {
-                        parsePart((MimePart) multipart.getBodyPart(i), snippet);
-                    }
-                }
-            } else {
-                parseSnippet(mimeMessage, mimeMessage, snippet);
-            }
-            snippet.setDisplayName(displayName).setModule(module).setType(type).setShared(shared);
-            return snippet;
+            return createSnippet(identifier, creator, displayName, module, type, shared, mimeMessage);
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (MessagingException e) {
@@ -424,6 +386,55 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } finally {
             closeSQLStuff(rs, stmt);
         }
+    }
+
+    protected static DefaultSnippet createSnippet(String identifier, final int creator, final String displayName, final String module, final String type, final boolean shared, MimeMessage mimeMessage) throws MessagingException, IOException, OXException {
+        final DefaultSnippet snippet = new DefaultSnippet().setId(identifier).setCreatedBy(creator);
+        final String lcct;
+        {
+            final String tmp = mimeMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+            if (!isEmpty(tmp)) {
+                lcct = tmp.trim().toLowerCase(Locale.US);
+            } else {
+                lcct = "text/plain; charset=us-ascii";
+            }
+        }
+        if (lcct.startsWith("multipart/", 0)) {
+            final Multipart multipart = MimeMessageUtility.getMultipartContentFrom(mimeMessage);
+            if (multipart != null) {
+                parseSnippet(mimeMessage, (MimePart) multipart.getBodyPart(0), snippet);
+                final int count = multipart.getCount();
+                if (count > 1) {
+                    for (int i = 1; i < count; i++) {
+                        parsePart((MimePart) multipart.getBodyPart(i), snippet);
+                    }
+                }
+            }
+        } else {
+            parseSnippet(mimeMessage, mimeMessage, snippet);
+        }
+        snippet.setDisplayName(displayName).setModule(module).setType(type).setShared(shared).setCreatedBy(creator);
+        return snippet;
+    }
+
+    private MimeMessage createMimeMessage(String identifier, final String file) throws MessagingException, OXException {
+        MimeMessage mimeMessage;
+        {
+            InputStream in = null;
+            try {
+                QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+                in = fileStorage.getFile(file);
+                mimeMessage = new MimeMessage(getDefaultSession(), in);
+            } catch (OXException e) {
+                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+            } finally {
+                Streams.close(in);
+            }
+        }
+        return mimeMessage;
     }
 
     private static void parsePart(MimePart part, DefaultSnippet snippet) throws OXException, MessagingException, IOException {
@@ -456,7 +467,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    private static void parseSnippet(MimeMessage mimeMessage, MimePart part, DefaultSnippet snippet) throws OXException, MessagingException {
+    protected static void parseSnippet(MimeMessage mimeMessage, MimePart part, DefaultSnippet snippet) throws OXException, MessagingException {
         // Read content from part
         final String header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);

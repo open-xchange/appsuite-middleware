@@ -50,6 +50,7 @@
 package com.openexchange.dav.push.subscribe;
 
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.POSTAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -78,7 +79,7 @@ public class PushSubscribeAction extends POSTAction {
          * handle push subscribe action
          */
         if (false == requireResource(request, PushSubscribeResource.class).handle(request, response)) {
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw DAVProtocol.protocolException(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
 	}
 

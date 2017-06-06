@@ -51,7 +51,6 @@ package com.openexchange.ajax.onboarding.tests;
 
 import static org.junit.Assert.assertNotNull;
 import java.rmi.server.UID;
-import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.user.actions.SetAttributeRequest;
 import com.openexchange.ajax.user.actions.SetAttributeResponse;
@@ -68,19 +67,12 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
 
     protected static final String[] SCENARIOS = new String[] { "apple.iphone/mailsync", "apple.iphone/eassync", "apple.iphone/davsync" };
 
-    /**
-     * Initializes a new {@link AbstractPlistSMSTest}.
-     *
-     * @param name
-     */
-    protected AbstractPlistSMSTest() {}
-
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
-        setUpConfiguration(getClient(), false);
-        SetAttributeRequest req = new SetAttributeRequest(getClient().getValues().getUserId(), "user_sms_link_secret", UID, false);
-        SetAttributeResponse response = getClient().execute(req);
+        setUpConfiguration();
+        SetAttributeRequest req = new SetAttributeRequest(getAjaxClient().getValues().getUserId(), "user_sms_link_secret", UID, false);
+        SetAttributeResponse response = getAjaxClient().execute(req);
         assertNotNull(response);
     }
 

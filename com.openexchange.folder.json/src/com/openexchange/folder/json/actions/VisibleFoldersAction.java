@@ -72,6 +72,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -113,6 +114,10 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         if (isOAuthRequest(request) && !mayReadViaOAuthRequest(contentType, getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException();
         }
+        String rootFolderId = request.getParameter("root");
+        if (Strings.isEmpty(rootFolderId)) {
+            rootFolderId = null;
+        }
 
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;
@@ -137,6 +142,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         final Boolean suppressUnifiedMail = isSuppressUnifiedMail(request, session);
         final FolderResponse<UserizedFolder[]> privateResp =
             folderService.getVisibleFolders(
+                rootFolderId,
                 treeId,
                 contentType,
                 PrivateType.getInstance(),
@@ -149,6 +155,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
          */
         final FolderResponse<UserizedFolder[]> sharedResp =
             folderService.getVisibleFolders(
+                rootFolderId,
                 treeId,
                 contentType,
                 SharedType.getInstance(),
@@ -160,6 +167,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
          */
         final FolderResponse<UserizedFolder[]> publicResp =
             folderService.getVisibleFolders(
+                rootFolderId,
                 treeId,
                 contentType,
                 PublicType.getInstance(),

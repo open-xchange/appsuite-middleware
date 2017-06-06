@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 0
+%define        ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -80,12 +80,18 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Fri May 19 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First candidate for 7.8.4 release
+* Thu May 04 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second preview of 7.8.4 release
+* Mon Apr 03 2017 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First preview of 7.8.4 release
 * Fri Nov 25 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release candidate for 7.8.3 release
 * Thu Nov 24 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-prepare for 7.8.4 release
-* Thu Nov 24 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First release candidate for 7.8.3 release
+* Thu Nov 24 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.8.4 release
 * Tue Nov 15 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Third preview for 7.8.3 release
 * Sat Oct 29 2016 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -133,7 +139,7 @@ Sixth candidate for 7.8.0 release
 * Wed Sep 30 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Fri Sep 25 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -595,7 +601,7 @@ First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 prepare for 7.4.0
 * Mon Jul 15 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Second build for patch  2013-07-18
+Second build for patch 2013-07-18
 * Mon Jul 15 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>

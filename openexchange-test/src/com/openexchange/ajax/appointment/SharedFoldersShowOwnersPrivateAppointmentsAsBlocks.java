@@ -75,7 +75,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * US 1601 on server side (TA1698)
@@ -110,12 +109,11 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        TestUser user2 = testContext.acquireUser();
-        client2 = new AJAXClient(user2);
+        client2 = getClient2();
         UserValues values = client1.getValues();
         int module = Module.CALENDAR.getFolderConstant();
         sharedFolder = ftm.generateSharedFolder("us1601_shared_" + (new Date().getTime()), module, values.getPrivateAppointmentFolder(), new int[] { values.getUserId(), client2.getValues().getUserId() });
-        ftm.insertFolderOnServer(sharedFolder);
+        sharedFolder = ftm.insertFolderOnServer(sharedFolder);
 
         start = D("13.01.2010 07:00");
         end = D("13.01.2010 07:30");

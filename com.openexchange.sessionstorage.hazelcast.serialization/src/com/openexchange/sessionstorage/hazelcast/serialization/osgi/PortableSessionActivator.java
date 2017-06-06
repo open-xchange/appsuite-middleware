@@ -64,6 +64,7 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCo
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheckFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookupFactory;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteRetrievalFactory;
 
 
 /**
@@ -73,8 +74,8 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRe
  */
 public class PortableSessionActivator implements BundleActivator {
 
-    private volatile List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations;
-    private volatile List<ServiceTracker<?, ?>> trackers;
+    private List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations;
+    private List<ServiceTracker<?, ?>> trackers;
 
     /**
      * Initializes a new {@link PortableSessionActivator}.
@@ -84,7 +85,7 @@ public class PortableSessionActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSessionActivator.class);
         try {
             // Trackers
@@ -101,7 +102,7 @@ public class PortableSessionActivator implements BundleActivator {
                 tracker.open();
             }
 
-            List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations = new ArrayList<ServiceRegistration<CustomPortableFactory>>(6);
+            List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations = new ArrayList<ServiceRegistration<CustomPortableFactory>>(8);
             this.portablesRegistrations = portablesRegistrations;
 
             // Create & register portable session factory
@@ -112,6 +113,9 @@ public class PortableSessionActivator implements BundleActivator {
 
             // Create & register portable factory
             portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionRemoteLookupFactory(), null));
+
+            // Create & register portable factory
+            portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionRemoteRetrievalFactory(), null));
 
             // Create & register portable factory
             portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionCollectionFactory(), null));
@@ -126,7 +130,7 @@ public class PortableSessionActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSessionActivator.class);
         try {
             {

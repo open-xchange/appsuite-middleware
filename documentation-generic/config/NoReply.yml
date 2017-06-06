@@ -1,0 +1,83 @@
+feature_name: No-Reply
+feature_description: |
+  The properties for the special "no-reply" SMTP account used for system-initiated messages.
+properties:
+    - key: com.openexchange.noreply.address
+      description: |
+        Specifies the E-Mail address for the no-reply account that is used as "From" header for
+        system-initiated messages. Values must apply to the syntax defined in RFC 822, section 6.
+        Examples:
+        <pre>
+        com.openexchange.noreply.address=noreply@example.com
+        </pre>
+        <pre>
+        com.openexchange.noreply.address=OX App Suite &lt;noreply@example.com&gt;
+        </pre>
+        <pre>
+        com.openexchange.noreply.address="App Suite, OX" &lt;noreply@example.com&gt;
+        </pre>
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      packageName: open-xchange-smtp
+      tags: ["No-Reply", "Mail"]
+    - key: com.openexchange.noreply.login
+      description: |
+        Specifies the login for the no-reply account.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      packageName: open-xchange-smtp
+      tags: ["No-Reply", "Mail", "Credential"]
+    - key: com.openexchange.noreply.password
+      description: |
+        Specifies the password for the no-reply account.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      packageName: open-xchange-smtp
+      tags: ["No-Reply", "Mail", "Credential"]
+    - key: com.openexchange.noreply.server
+      description: |
+        Specifies the SMTP server address for the no-reply account. The value must be an IP address
+        or a full qualified domain name.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      packageName: open-xchange-smtp
+      tags: ["No-Reply", "Mail"]
+    - key: com.openexchange.noreply.port
+      description: |
+        Specifies the SMTP server port for the no-reply account.
+      defaultValue: 25
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      packageName: open-xchange-smtp
+      tags: ["No-Reply", "Mail", "Port"]
+    - key: com.openexchange.noreply.secureMode
+      description: |
+        Specifies the secure mode for the no-reply account;
+        supported values are either <code>SSL</code>, <code>TLS</code> or <code>plain</code>.
+      defaultValue: plain
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: noreply.properties
+      packageName: open-xchange-smtp
+      tags: ["No-Reply", "Mail"]

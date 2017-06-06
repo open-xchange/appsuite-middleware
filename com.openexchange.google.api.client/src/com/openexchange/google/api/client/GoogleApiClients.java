@@ -321,7 +321,7 @@ public class GoogleApiClients {
         if (Strings.isEmpty(errorMsg)) {
             return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
         }
-        if (exMessage.contains("invalid_grant")) {
+        if (exMessage.contains("invalid_grant") || exMessage.contains("deleted_client")) {
             if (null != googleAccount) {
                 return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, googleAccount.getDisplayName(), googleAccount.getId(), session.getUserId(), session.getContextId());
             }
@@ -351,7 +351,12 @@ public class GoogleApiClients {
     }
 
     /**
-     * Gets the Google credentials from default OAuth account.
+     * Gets the Google credentials from <b>default</b> OAuth account.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Please use {@link #getCredentials(OAuthAccount, Session)} if a concrete Google OAuth account is supposed to be used
+     * </div>
+     * <p>
      *
      * @param session The associated session
      * @return The Google credentials from default OAuth account
@@ -367,10 +372,16 @@ public class GoogleApiClients {
      *
      * @param googleOAuthAccount The Google OAuth account
      * @param session The associated session
-     * @return The Google credentials from given OAuth account
+     * @return The Google credentials from given OAuth account or <code>null</code> if either of arguments is <code>null</code>
      * @throws OXException If Google credentials cannot be returned
      */
     public static GoogleCredential getCredentials(OAuthAccount googleOAuthAccount, Session session) throws OXException {
+        if (null == googleOAuthAccount) {
+            return null;
+        }
+        if (null == session) {
+            return null;
+        }
         try {
             // Initialize transport
             NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();

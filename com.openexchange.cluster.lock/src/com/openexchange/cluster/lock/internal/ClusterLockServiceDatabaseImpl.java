@@ -59,6 +59,7 @@ import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.cluster.lock.policies.RetryPolicy;
 import com.openexchange.cluster.lock.policies.RunOnceRetryPolicy;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
@@ -233,7 +234,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
             return statement.executeUpdate() > 0;
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -259,7 +260,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
             return Long.parseLong(resultSet.getString(index));
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -287,7 +288,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
             return statement.executeUpdate() > 0;
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -316,7 +317,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
         } catch (SQLException e) {
             throw ClusterLockExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 }

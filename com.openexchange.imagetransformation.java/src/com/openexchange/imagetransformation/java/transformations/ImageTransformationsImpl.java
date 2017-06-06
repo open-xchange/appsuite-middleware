@@ -57,6 +57,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import javax.imageio.IIOImage;
@@ -68,22 +70,17 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.Constants;
 import com.openexchange.imagetransformation.ImageInformation;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
-import com.openexchange.imagetransformation.ImageTransformationReloadable;
 import com.openexchange.imagetransformation.ImageTransformationSignaler;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
-import com.openexchange.imagetransformation.java.osgi.Services;
+import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.DefaultTransformedImageCreator;
 import com.openexchange.tools.stream.CountingInputStream;
@@ -102,111 +99,20 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationsImpl.class);
 
-    private static volatile Integer waitTimeoutSeconds;
     static int waitTimeoutSeconds() {
-        Integer tmp = waitTimeoutSeconds;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = waitTimeoutSeconds;
-                if (null == tmp) {
-                    int defaultValue = 10;
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    tmp = Integer.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.waitTimeoutSeconds", defaultValue));
-                    waitTimeoutSeconds = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
+        return Utility.waitTimeoutSeconds();
     }
 
-    private static volatile Long maxSize;
     static long maxSize() {
-        Long tmp = maxSize;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = maxSize;
-                if (null == tmp) {
-                    int defaultValue = 10485760; // 10 MB
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxSize", defaultValue));
-                    maxSize = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
+        return Utility.maxSize();
     }
 
-    private static volatile Long maxResolution;
     static long maxResolution() {
-        Long tmp = maxResolution;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = maxResolution;
-                if (null == tmp) {
-                    int defaultValue = 26824090; // ~ 6048x4032 (24 megapixels) + 10%
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxResolution", defaultValue));
-                    maxResolution = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
+        return Utility.maxResolution();
     }
 
-    private static volatile Float preferThumbnailThreshold;
     static float preferThumbnailThreshold() {
-        Float tmp = preferThumbnailThreshold;
-        if (null == tmp) {
-            synchronized (ImageTransformationsTask.class) {
-                tmp = preferThumbnailThreshold;
-                if (null == tmp) {
-                    float defaultValue = 0.8f;
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    if (null == configService) {
-                        return defaultValue;
-                    }
-                    try {
-                        tmp = Float.valueOf(configService.getProperty("com.openexchange.tools.images.transformations.preferThumbnailThreshold", String.valueOf(defaultValue)));
-                        preferThumbnailThreshold = tmp;
-                    } catch (NumberFormatException e) {
-                        LOG.warn("error parsing \"com.openexchange.tools.images.transformations.preferThumbnailThreshold\", sticking to defaults.", e);
-                    }
-                }
-            }
-        }
-        return tmp.floatValue();
-    }
-
-    static {
-        ImageTransformationReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                waitTimeoutSeconds = null;
-                maxSize = null;
-                maxResolution = null;
-                preferThumbnailThreshold = null;
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties(
-                    "com.openexchange.tools.images.transformations.preferThumbnailThreshold",
-                    "com.openexchange.tools.images.transformations.maxResolution",
-                    "com.openexchange.tools.images.transformations.maxSize",
-                    "com.openexchange.tools.images.transformations.waitTimeoutSeconds"
-                    );
-            }
-        });
+        return Utility.preferThumbnailThreshold();
     }
 
     private static final IOExceptionCreator IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR = new IOExceptionCreator() {
@@ -223,6 +129,16 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private static IOException createResolutionExceededIOException(long maxResolution, int resolution) {
         return new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too high. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
     }
+
+    private static final Comparator<ImageTransformation> TRANSFORMATION_COMPARATOR = new Comparator<ImageTransformation>() {
+
+        @Override
+        public int compare(ImageTransformation t1, ImageTransformation t2) {
+            boolean isRotate1 = t1 == RotateTransformation.getInstance();
+            boolean isRotate2 = t2 == RotateTransformation.getInstance();
+            return isRotate1 ? (isRotate2 ? 0 : -1) : (isRotate2 ? 1 : 0);
+        }
+    };
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
@@ -262,6 +178,18 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     /**
+     * Adds specified transformation to the chain and re-orders that chain to ensure auto-rotation is at chain's head (as previously executed transformations loose EXIF data).
+     *
+     * @param transformation The transformation to add
+     */
+    private void addAndSort(ImageTransformation transformation) {
+        transformations.add(transformation);
+        if (transformations.size() > 1) {
+            Collections.sort(transformations, TRANSFORMATION_COMPARATOR);
+        }
+    }
+
+    /**
      * Initializes a new {@link ImageTransformationsImpl}.
      *
      * @param sourceImage The source image
@@ -293,7 +221,8 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     @Override
     public ImageTransformations rotate() {
-        transformations.add(RotateTransformation.getInstance());
+        // No need to sort
+        transformations.add(0, RotateTransformation.getInstance());
         return this;
     }
 
@@ -310,13 +239,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
         if (maxHeight > Constants.getMaxHeight()) {
             throw new IllegalArgumentException("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
         }
-        transformations.add(new ScaleTransformation(maxWidth, maxHeight, scaleType, shrinkOnly));
+        addAndSort(new ScaleTransformation(maxWidth, maxHeight, scaleType, shrinkOnly));
         return this;
     }
 
     @Override
     public ImageTransformations crop(int x, int y, int width, int height) {
-        transformations.add(new CropTransformation(x, y, width, height));
+        addAndSort(new CropTransformation(x, y, width, height));
         return this;
     }
 

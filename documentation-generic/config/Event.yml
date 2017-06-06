@@ -1,0 +1,32 @@
+feature_name: Event
+properties:
+    - key: com.openexchange.event.isEventQueueEnabled
+      description: |
+        This option enables or disable the complete event handling for OX
+        The event handling is a essential Open-Xchange component which needs
+        to always run. This should only be set to <code>false</code> for debugging purposes.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: event.properties
+      packageName: open-xchange-core
+      tags: ["Event"]
+    - key: com.openexchange.event.eventQueueDelay
+      description: |
+        This parameter set the delay in milliseconds when events are sent to 
+        the subscribed services. Events for example are triggered when deleting
+        an appointment with attachment. The event then is for deleting the attachment.
+        If this value is increased more events may be in the queue that must be
+        executed. This can cause longer runtime delivering all those events. Lowering
+        this value may cause too often look into the queue without finding events
+        there to process.
+      defaultValue: 60000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.event.isEventQueueEnabled
+      file: event.properties
+      packageName: open-xchange-core
+      tags: ["Event"]

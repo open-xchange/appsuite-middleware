@@ -1,0 +1,84 @@
+feature_name: Quota
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/quota.html]] for more informations.
+properties:
+    - key: com.openexchange.quota.calendar
+      description: |
+        Specifies the quota for the number of appointments that are allowed being created within a single context.
+
+        The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
+        Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
+        but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate
+        exception being thrown, denying to further create any appointment in affected context.
+      defaultValue: 250000
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: quota.properties
+      packageName: open-xchange-core
+      tags: ["Quota", "Appointment", "Limit"]
+    - key: com.openexchange.quota.task
+      description: |
+        Specifies the quota for the number of tasks that are allowed being created within a single context.
+        
+        The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
+        Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
+        but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate
+        exception being thrown, denying to further create any task in affected context.
+      defaultValue: 250000
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: quota.properties
+      packageName: open-xchange-core
+      tags: ["Quota", "Task", "Limit"]
+    - key: com.openexchange.quota.contact
+      description: |
+        Specifies the quota for the number of contacts that are allowed being created within a single context.
+        
+        The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
+        Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
+        but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate
+        exception being thrown, denying to further create any contact in affected context.
+      defaultValue: 250000
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: quota.properties
+      packageName: open-xchange-core
+      tags: ["Quota", "Contact", "Limit"]
+    - key: com.openexchange.quota.infostore
+      description: |
+        Specifies the quota for the number of documents that are allowed being created within a single context.
+        
+        The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
+        Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
+        but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate
+        exception being thrown, denying to further create any document in affected context.
+      defaultValue: 250000
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: quota.properties
+      packageName: open-xchange-core
+      tags: ["Quota", "Infostore", "Limit"]
+    - key: com.openexchange.quota.attachment
+      description: |
+        Specifies the quota for the number of attachments bound to PIM objects that are allowed being created within a single context.
+        
+        The purpose of this quota is to define a rough upper limit that is unlikely being reached during normal operation.
+        Therefore it is rather supposed to prevent from excessive item creation (e.g. a synchronizing client running mad),
+        but not intended to have a fine-grained quota setting. Thus exceeding that quota limitation will cause an appropriate
+        exception being thrown, denying to further create any attachment in affected context.
+      defaultValue: 250000
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: quota.properties
+      packageName: open-xchange-core
+      tags: ["Quota", "Attachment", "Limit"]

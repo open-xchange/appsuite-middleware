@@ -1,0 +1,81 @@
+feature_name: Autoconfig
+properties:
+    - key: com.openexchange.mail.autoconfig.path
+      description: |
+        Path to the local configuration files for mail domains.
+        See [[https://developer.mozilla.org/en/Thunderbird/Autoconfiguration]].
+      defaultValue: /opt/open-xchange/ispdb
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: autoconfig.properties
+      packageName: open-xchange-core
+      tags: ["Autoconfig", "Mail"]
+    - key: com.openexchange.mail.autoconfig.ispdb
+      description: |
+        The ISPDB is a central database, currently hosted by Mozilla Messaging, but free to use for any client.
+        It contains settings for the world's largest ISPs.
+        We hope that the database will soon have enough information to autoconfigure approximately 50% of our user's email accounts.
+      defaultValue: https://live.mozillamessaging.com/autoconfig/v1.1/
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: autoconfig.properties
+      packageName: open-xchange-core
+      tags: ["Autoconfig", "Mail", "Host"]
+    - key: com.openexchange.mail.autoconfig.http.proxy
+      description: |
+        Provides the possibility to specify a proxy that is used to access any HTTP end-points. If empty, no proxy is used.
+
+        Notation is: 
+        <pre>
+        &lt;optional-protocol&gt; + "://" + &lt;proxy-host&gt; + ":" + &lt;proxy-port&gt;  
+        </pre>
+        With "http" as fall-back protocol.
+        
+        E.g. <code>67.177.104.230:58720</code> (using HTTP protocol) or <code>https://78.0.25.45:8345</code> (using HTTPS protocol)
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: autoconfig.properties
+      packageName: open-xchange-core
+      tags: ["Autoconfig", "Mail", "Host", "Port"]
+    - key: com.openexchange.mail.autoconfig.http.proxy.login
+      description: |
+        Specifies the login/username to use in case specified proxy in property [[com.openexchange.mail.autoconfig.http.proxy]]
+        requires authentication.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.mail.autoconfig.http.proxy.password", "com.openexchange.mail.autoconfig.http.proxy"]
+      file: autoconfig.properties
+      packageName: open-xchange-core
+      tags: ["Autoconfig", "Mail", "Credential"]
+    - key: com.openexchange.mail.autoconfig.http.proxy.password
+      description: |
+        Specifies the password to use in case specified proxy in property [[com.openexchange.mail.autoconfig.http.proxy]]
+        requires authentication.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.mail.autoconfig.http.proxy.login", "com.openexchange.mail.autoconfig.http.proxy"]
+      file: autoconfig.properties
+      packageName: open-xchange-core
+      tags: ["Autoconfig", "Mail", "Credential"]
+    - key: com.openexchange.mail.autoconfig.allowGuess
+      description: |
+        Specifies whether it is allowed to "guess" the mail/transport settings.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: autoconfig.properties
+      packageName: open-xchange-core
+      tags: ["Autoconfig", "Mail"]

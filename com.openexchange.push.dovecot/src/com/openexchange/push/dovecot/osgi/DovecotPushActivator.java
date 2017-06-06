@@ -54,9 +54,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.lock.LockService;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushListenerService;
@@ -102,6 +104,8 @@ public class DovecotPushActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         trackService(PushNotificationService.class);
+        trackService(DoveAdmClient.class);
+        trackService(MailAccountStorageService.class);
 
         DovecotPushListener.setIfHigherRanked(new DefaultRegistrationPerformer(this));
 

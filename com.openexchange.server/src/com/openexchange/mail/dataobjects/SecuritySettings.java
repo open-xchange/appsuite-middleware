@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.dataobjects;
 
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -173,7 +174,7 @@ public class SecuritySettings {
     private final boolean decrypt;
     private final boolean sign;
     private final boolean pgpInline;
-    private final String authentication;
+    private final AtomicReference<String> authenticationRef;
     private final String guest_language;
     private final String guest_message;
     private final String pin;
@@ -184,7 +185,7 @@ public class SecuritySettings {
         this.decrypt = decrypt;
         this.pgpInline = pgpInline;
         this.sign = sign;
-        this.authentication = authentication;
+        this.authenticationRef = new AtomicReference<String>(authentication);
         this.guest_language = guest_language;
         this.guest_message = guest_message;
         this.pin = pin;
@@ -202,6 +203,7 @@ public class SecuritySettings {
         if (sign) {
             return true;
         }
+        String authentication = authenticationRef.get();
         if (null != authentication) {
             return true;
         }
@@ -248,7 +250,15 @@ public class SecuritySettings {
      * @return The authentication string
      */
     public String getAuthentication() {
-        return authentication;
+        return authenticationRef.get();
+    }
+
+    /**
+     * Sets the authentication string for the message
+     * @param authentication
+     */
+    public void setAuthentication(String authentication) {
+        this.authenticationRef.set(authentication);
     }
 
     /**
@@ -272,7 +282,7 @@ public class SecuritySettings {
     }
 
     public JSONObject getJSON() throws JSONException {
-        JSONObject settings = new JSONObject();
+        JSONObject settings = new JSONObject(10);
         settings.put("encrypt", this.isEncrypt());
         settings.put("sign", this.isSign());
         settings.put("inline", this.isPgpInline());

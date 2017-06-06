@@ -55,7 +55,7 @@ import org.bouncycastle.openpgp.PGPSignature;
  * {@link PGPSignatureVerificationResult}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class PGPSignatureVerificationResult {
 

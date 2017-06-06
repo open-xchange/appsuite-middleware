@@ -59,8 +59,28 @@ import com.openexchange.test.concurrent.ParallelSuite;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @RunWith(ParallelSuite.class)
-@SuiteClasses({ Bug20665Test.class, Bug21079Test.class, Bug21177Test.class, Bug21235Test.class, Bug21240Test.class, Bug21354Test.class, Bug21374Test.class, Bug23046Test.class, Bug23078Test.class, Bug28672Test.class, Bug30449Test.class, Bug36943Test.class, Bug38550Test.class, Bug40471Test.class, Bug46641Test.class, Bug47921Test.class, Bug48661Test.class, Bug48687Test.class, Bug48463Test.class
-})
+@SuiteClasses({ // @formatter:off
+    Bug20665Test.class,
+    Bug21079Test.class,
+    Bug21177Test.class,
+    Bug21235Test.class,
+    Bug21240Test.class,
+    Bug21354Test.class,
+    Bug21374Test.class,
+    Bug23046Test.class,
+    Bug23078Test.class,
+    Bug28672Test.class,
+    Bug30449Test.class,
+    Bug36943Test.class,
+    Bug38550Test.class,
+    Bug40471Test.class,
+    Bug46641Test.class,
+    Bug47921Test.class,
+    Bug48661Test.class,
+    Bug48687Test.class,
+    Bug48463Test.class,
+    Bug54026Test.class
+}) // @formatter:on
 public final class CardDAVBugSuite {
 
 }

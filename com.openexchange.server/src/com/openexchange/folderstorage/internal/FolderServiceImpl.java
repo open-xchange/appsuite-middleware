@@ -62,6 +62,8 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.TrashAwareFolderService;
+import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.performers.AllVisibleFoldersPerformer;
@@ -92,7 +94,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderServiceImpl implements FolderService {
+public final class FolderServiceImpl implements FolderService, TrashAwareFolderService {
 
     /**
      * Initializes a new {@link FolderServiceImpl}.
@@ -249,6 +251,12 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    public FolderResponse<UserizedFolder[]> getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, boolean all, Session session, FolderServiceDecorator decorator) throws OXException {
+        VisibleFoldersPerformer performer = new VisibleFoldersPerformer(ServerSessionAdapter.valueOf(session), decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(rootFolderId, treeId, contentType, type, all), performer.getWarnings());
+    }
+
+    @Override
     public FolderResponse<UserizedFolder[]> getUserSharedFolders(final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException {
         final UserSharedFoldersPerformer performer = new UserSharedFoldersPerformer(ServerSessionAdapter.valueOf(session), decorator);
         return FolderResponseImpl.newFolderResponse(performer.doSharedFolders(treeId, contentType), performer.getWarnings());
@@ -358,6 +366,13 @@ public final class FolderServiceImpl implements FolderService {
         } else {
             return ContentTypeRegistry.getInstance().getByString(value);
         }
+    }
+
+    @Override
+    public FolderResponse<TrashResult> trashFolder(String treeId, String folderId, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException {
+        final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session), decorator);
+        TrashResult result = performer.doTrash(treeId, folderId, timeStamp);
+        return FolderResponseImpl.newFolderResponse(result, performer.getWarnings());
     }
 
 }

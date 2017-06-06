@@ -658,10 +658,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public boolean ping() throws OXException {
         try {
             final MailConfig mailConfig = getMailConfig();
-            if (mailConfig.isRequireTls() || mailConfig.getMailProperties().isEnforceSecureConnection()) {
-                if (!mailConfig.isSecure()) {
-                    throw MailExceptionCode.NON_SECURE_DENIED.create(mailConfig.getServer());
-                }
+            if (mailConfig.isRequireTls() && false == mailConfig.isSecure()) {
+                throw MailExceptionCode.NON_SECURE_DENIED.create(mailConfig.getServer());
             }
             connect0(false);
             close(false);
@@ -822,7 +820,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     private AuthenticationFailureHandlerResult handleConnectFailure(OXException e, MailConfig mailConfig) {
-        if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
+        if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) && !OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
             return AuthenticationFailureHandlerResult.createErrorResult(e);
         }
 
@@ -835,6 +833,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     return AuthenticationFailureHandlerResult.createErrorResult(x);
                 }
             }
+        }
+
+        if (OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
+            return AuthenticationFailureHandlerResult.createErrorResult(e);
         }
 
         // Authentication failed... Check for OAuth-based authentication

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -503,7 +505,7 @@ public final class MimeProcessingUtility {
      */
     static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final boolean allowHTML) throws IOException, OXException {
         final String charset = getCharset(textPart, contentType);
-        if (contentType.isMimeType(MimeTypes.MIME_TEXT_HTM_ALL)) {
+        if (contentType.startsWith("text/") && Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
             if (allowHTML) {
                 return readContent(textPart, charset);
             }
@@ -511,10 +513,10 @@ public final class MimeProcessingUtility {
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
             return htmlService.html2text(readContent(textPart, charset), false);
             // return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
-        } else if (contentType.isMimeType(MimeTypes.MIME_TEXT_PLAIN)) {
+        } else if (contentType.startsWith(MimeTypes.MIME_TEXT_PLAIN)) {
             final String content = readContent(textPart, charset);
-            final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-            if (uuencodedMP.isUUEncoded()) {
+            UUEncodedMultiPart uuencodedMP = UUEncodedMultiPart.valueFor(content);
+            if (null != uuencodedMP && uuencodedMP.isUUEncoded()) {
                 /*
                  * UUEncoded content detected. Extract normal text.
                  */

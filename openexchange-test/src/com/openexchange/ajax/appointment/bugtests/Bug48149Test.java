@@ -72,14 +72,11 @@ import com.openexchange.test.FolderTestManager;
  */
 public class Bug48149Test extends AbstractAJAXSession {
 
-    private AJAXClient client2;
     private AJAXClient client3;
-    private CalendarTestManager ctm;
     private CalendarTestManager ctm2;
     private CalendarTestManager ctm3;
-    private FolderTestManager ftm1;
-    private FolderObject sharedFolder1;
     private FolderTestManager ftm2;
+    private FolderObject sharedFolder1;    
     private Appointment app1;
     private Appointment app2;
 
@@ -90,31 +87,28 @@ public class Bug48149Test extends AbstractAJAXSession {
     @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
+        super.setUp();        
         client3 = new AJAXClient(testContext.acquireUser());
-        ctm = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(client2);
+        ctm2 = new CalendarTestManager(getClient2());
         ctm3 = new CalendarTestManager(client3);
-        ftm1 = new FolderTestManager(getClient());
-        ftm2 = new FolderTestManager(client2);
+        ftm2 = new FolderTestManager(getClient2());
 
         // Remove all permissions
         FolderObject folderUpdate = new FolderObject(getClient().getValues().getPrivateAppointmentFolder());
         folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
             getClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
         folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
-        ftm1.updateFolderOnServer(folderUpdate);
+        ftm.updateFolderOnServer(folderUpdate);
 
-        folderUpdate = new FolderObject(client2.getValues().getPrivateAppointmentFolder());
+        folderUpdate = new FolderObject(getClient2().getValues().getPrivateAppointmentFolder());
         folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
-            client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            getClient2().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
         folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
         ftm2.updateFolderOnServer(folderUpdate);
 
         // Add new shared folder.
-        sharedFolder1 = ftm1.generateSharedFolder("Shared Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client3.getValues().getUserId());
-        ftm1.insertFolderOnServer(sharedFolder1);
+        sharedFolder1 = ftm.generateSharedFolder("Shared Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), client3.getValues().getUserId());
+        ftm.insertFolderOnServer(sharedFolder1);
 
         // Appointments not visible for user 3.
         app1 = new Appointment();
@@ -123,14 +117,14 @@ public class Bug48149Test extends AbstractAJAXSession {
         app1.setEndDate(TimeTools.D("07.08.2016 09:00"));
         app1.setIgnoreConflicts(true);
         app1.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        ctm.insert(app1);
+        catm.insert(app1);
 
         app2 = new Appointment();
         app2.setTitle("app1");
         app2.setStartDate(TimeTools.D("07.08.2016 08:00"));
         app2.setEndDate(TimeTools.D("07.08.2016 09:00"));
         app2.setIgnoreConflicts(true);
-        app2.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
+        app2.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
         ctm2.insert(app2);
     }
 
@@ -160,11 +154,13 @@ public class Bug48149Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm.cleanUp();
             ctm2.cleanUp();
             ctm3.cleanUp();
-            ftm1.cleanUp();
             ftm2.cleanUp();
+            if (null != client3) {
+                client3.logout();
+                client3 = null;
+            }
         } finally {
             super.tearDown();
         }

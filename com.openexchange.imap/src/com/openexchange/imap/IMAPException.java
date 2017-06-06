@@ -361,6 +361,10 @@ public final class IMAPException extends OXException {
          * Currently not possible to establish a new connection to server %1$s with login %2$s. Please try again.
          */
         CONNECTION_UNAVAILABLE(IMAPCode.CONNECTION_UNAVAILABLE),
+        /**
+         * Update of folder %1$s failed. Owner is required to keep administrative rights.
+         */
+        OWNER_MUST_BE_ADMIN(IMAPCode.OWNER_MUST_BE_ADMIN),
 
         ;
 
@@ -1077,6 +1081,10 @@ public final class IMAPException extends OXException {
          * Currently not possible to establish a new connection to server %1$s with login %2$s. Please try again.
          */
         CONNECTION_UNAVAILABLE(CONNECTION_UNAVAILABLE_MSG, Category.CATEGORY_TRY_AGAIN, 2058, IMAPExceptionMessages.CONNECTION_UNAVAILABLE_MSG),
+        /**
+         * Update of folder %1$s failed. Owner is required to keep administrative rights.
+         */
+        OWNER_MUST_BE_ADMIN("Update of folder %1$s failed. Owner is required to keep administrative rights.", Category.CATEGORY_USER_INPUT, 2059, IMAPExceptionMessages.OWNER_MUST_BE_ADMIN_MSG)
         ;
 
         private final String message;

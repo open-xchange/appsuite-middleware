@@ -54,8 +54,6 @@ import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -86,7 +84,7 @@ public class QuotaTest extends ShareTest {
     private AJAXClient client2;
     private Map<Integer, FolderObject> foldersToDelete;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
@@ -116,7 +114,7 @@ public class QuotaTest extends ShareTest {
         }
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (null != client2) {

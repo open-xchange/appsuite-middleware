@@ -35,7 +35,7 @@
 
     <target name="compileTests" depends="clean">
         <mkdir dir="${binDir}"/>
-        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.6" target="1.6" includeAntRuntime="false" debuglevel="lines,vars,source">
+        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.7" target="1.7" includeAntRuntime="false" debuglevel="lines,vars,source">
             <classpath>
                 <path refid="rmiClasspath"/>
             </classpath>
@@ -89,10 +89,7 @@
         <concat destfile="${test.basepath}/conf/test.properties" append="false">
 openexchange.propdir=${basedir}/etc/
 ajaxPropertiesFile=${test.basepath}/conf/ajax.properties
-webdavPropertiesFile=${test.basepath}/conf/webdav.properties
 sessiondPropertiesFile=${test.basepath}/conf/sessiond.properties
-reminderPropertiesFile=${test.basepath}/conf/reminder.properties
-mailPropertiesFile=${test.basepath}/conf/mail.properties
 templatePath=${test.basepath}/templates
 testServletConfigs=${test.basepath}/testData/servletConf
         </concat>
@@ -124,39 +121,10 @@ participant_url=/ajax/participant
 isSP3=false
 sleep=0
         </concat>
-        <concat destfile="${test.basepath}/conf/webdav.properties" append="false">
-hostname=${http-host}
-contextName=context1.oxoe.int
-login=caesar
-password=secret
-secondlogin=anton
-appointment_url=/servlet/webdav.calendar/foo.xml
-user_participant1=caesar
-user_participant2=emil
-user_participant3=anton
-group_participant=users
-resource_participant=*
-contact_url=/servlet/webdav.contacts/foo.xml
-task_url=/servlet/webdav.tasks/foo.xml
-folder_url=/servlet/webdav.folders/foo.xml
-infostore_subpath=userstore/caesar
-        </concat>
         <concat destfile="${test.basepath}/conf/sessiond.properties" append="false">
 com.openexchange.session.testUser1:test_1
 com.openexchange.session.testUser2:test_2
 com.openexchange.session.testUser3:test_3
-        </concat>
-        <concat destfile="${test.basepath}/conf/mail.properties" append="false">
-server=${imap-host}
-port=143
-login=anton@context1.oxoe.int
-login2=berta@context1.oxoe.int
-login3=caesar@context1.oxoe.int
-seconduser=4
-password=secret
-user=3
-cid=1
-testMailDir=${test.basepath}/testData/
         </concat>
     </target>
 

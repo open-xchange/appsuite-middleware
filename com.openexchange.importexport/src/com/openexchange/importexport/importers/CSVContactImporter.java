@@ -63,6 +63,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,6 +90,7 @@ import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.groupware.importexport.csv.CsvExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
@@ -115,6 +117,14 @@ import com.openexchange.tools.session.ServerSession;
 public class CSVContactImporter extends AbstractImporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactImporter.class);
+
+    /**
+     * A list of fields which should not be imported and dropped silently
+     */
+    protected static final EnumSet<ContactField> UNSUPPORTED_FIELDS = EnumSet.of(
+        ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY,
+        ContactField.FOLDER_ID
+    );
 
     private LinkedList<ContactFieldMapper> mappers;
 
@@ -320,11 +330,15 @@ public class CSVContactImporter extends AbstractImporter {
             }
         } catch (final OXException e) {
             if (e.getCategory() != Category.CATEGORY_TRUNCATED || (e.getCategory() == Category.CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)) {
-                result.setException(e);
+                result.setException(wrapException(e, lineNumber, session));
                 addErrorInformation(result, lineNumber, fields);
             }
         }
         return new ImportIntention(result);
+    }
+
+    private OXException wrapException(OXException ex, int lineNumber, ServerSession session){
+        return CsvExceptionCodes.NESTED_ERROR.create(lineNumber, ex.getDisplayMessage(session.getUser().getLocale()));
     }
 
     public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {
@@ -343,6 +357,17 @@ public class CSVContactImporter extends AbstractImporter {
                 markAsDistributionlist = true;
             }
 
+            // skip unsupported import fields
+            boolean skip = false;
+            for(ContactField field: UNSUPPORTED_FIELDS){
+                if(field.getReadableName().equals(fieldName)){
+                    skip=true;
+                    break;
+                }
+            }
+            if(skip){
+                continue;
+            }
             final ContactField currField = getRelevantField(fieldName);
             if (currField == null) {
                 final boolean worked = conSet._unknownfield(contactObj, fieldName, currEntry);

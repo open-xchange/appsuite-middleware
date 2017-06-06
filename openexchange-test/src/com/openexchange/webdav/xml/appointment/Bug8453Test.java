@@ -11,17 +11,12 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug8453Test extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6535Test.class);
-
-    public Bug8453Test() {
-        super();
-    }
-
     @Test
     public void testBug8453() throws Exception {
         final TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 
         final Calendar calendar = Calendar.getInstance(timeZoneUTC);
+        calendar.setTime(startTime);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -52,7 +47,7 @@ public class Bug8453Test extends AppointmentTest {
 
         appointmentObj.setUsers(users);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostURI(), getLogin(), getPassword());
 
         final Appointment recurrenceUpdate = new Appointment();
         recurrenceUpdate.setTitle("testBug8453 - exception");
@@ -65,17 +60,17 @@ public class Bug8453Test extends AppointmentTest {
         recurrenceUpdate.setUsers(users);
         recurrenceUpdate.setAlarm(60);
 
-        updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword(), context);
+        updateAppointment(getWebConversation(), recurrenceUpdate, objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
 
         appointmentObj.setObjectID(objectId);
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
         compareObject(appointmentObj, loadAppointment);
 
         final Date modified = loadAppointment.getLastModified();
 
-        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword(), context);
+        loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostURI(), getLogin(), getPassword());
         compareObject(appointmentObj, loadAppointment);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostURI(), getLogin(), getPassword());
     }
 }

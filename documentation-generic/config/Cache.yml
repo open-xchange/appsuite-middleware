@@ -1,0 +1,40 @@
+feature_name: Caching
+feature_description: |
+  Properties for com.openexchange.caching bundle
+properties:
+    - key: com.openexchange.caching.jcs.enabled
+      description: |
+        Specify whether JCS-based caching should be enabled.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: cache.properties
+      packageName: open-xchange-core
+      tags: ["Caching"]
+    - key: com.openexchange.caching.jcs.eventInvalidation
+      description: |
+        Configures how remote cache invalidation is done. Set to <code>true</code> for cache events via the cache event messaging service, or to <code>false</code>
+        to stick with the JCS-internal lateral auxiliary cache configuration.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: cache.properties
+      packageName: open-xchange-core
+      tags: ["Caching"]
+    - key: com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders
+      description: |
+        Specifies if changes to personal folders (personal in terms of non-global e.g. folders kept in database) are supposed to be propagated
+        to remote nodes. This option is only useful for installations that do offer collaboration features or do not support session stickyness.
+        For instance users are able to share mail folders or might be load-balanced to other nodes while active in a single session.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: cache.properties
+      packageName: open-xchange-core
+      tags: ["Caching", "Folder", "Session"]

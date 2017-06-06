@@ -129,3 +129,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax.ext,
  org.xml.sax.helpers
 Bundle-Activator: com.openexchange.client.onboarding.caldav.osgi.CalDAVOnboardingActivator
+Export-Package: com.openexchange.client.onboarding.caldav.custom

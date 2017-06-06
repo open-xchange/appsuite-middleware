@@ -70,12 +70,6 @@ import com.openexchange.test.FolderTestManager;
  */
 public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
 
-    private CalendarTestManager calendarMgr;
-
-    private ContactTestManager contactMgr;
-
-    private FolderTestManager folderMgr;
-
     /**
      * Initializes a new {@link AbstractGoogleSubscribeTest}.
      *
@@ -88,9 +82,6 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        calendarMgr = new CalendarTestManager(getClient());
-        contactMgr = new ContactTestManager(getClient());
-        folderMgr = new FolderTestManager(getClient());
     }
 
     /**
@@ -99,7 +90,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
      * @return
      */
     public CalendarTestManager getCalendarManager() {
-        return calendarMgr;
+        return catm;
     }
 
     /**
@@ -108,11 +99,11 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
      * @return
      */
     public ContactTestManager getContactManager() {
-        return contactMgr;
+        return cotm;
     }
 
     public FolderTestManager getFolderManager() {
-        return folderMgr;
+        return ftm;
     }
 
     public static void assertFieldIsNull(String fieldDesc, Object valueToCheck) {

@@ -67,7 +67,7 @@ public class PGPTest extends AbstractMailFilterTest {
 
     /**
      * Initialises a new {@link PGPTest}.
-     * 
+     *
      * @param name test case's name
      */
     public PGPTest() {
@@ -86,6 +86,7 @@ public class PGPTest extends AbstractMailFilterTest {
         expected.addAction(new PGP());
 
         int id = mailFilterAPI.createRule(expected);
+        rememberRule(id);
         expected.setId(id);
         expected.setPosition(0);
         getAndAssert(Collections.singletonList(expected));
@@ -105,6 +106,7 @@ public class PGPTest extends AbstractMailFilterTest {
         expected.addAction(new PGP(Collections.singletonList(key)));
 
         int id = mailFilterAPI.createRule(expected);
+        rememberRule(id);
         expected.setId(id);
         expected.setPosition(0);
         getAndAssert(Collections.singletonList(expected));
@@ -127,6 +129,7 @@ public class PGPTest extends AbstractMailFilterTest {
         expected.addAction(new PGP(keys));
 
         int id = mailFilterAPI.createRule(expected);
+        rememberRule(id);
         expected.setId(id);
         expected.setPosition(0);
         getAndAssert(Collections.singletonList(expected));

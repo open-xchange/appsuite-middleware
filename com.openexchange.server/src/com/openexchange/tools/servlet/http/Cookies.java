@@ -51,8 +51,6 @@ package com.openexchange.tools.servlet.http;
 
 import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
 import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -162,13 +160,36 @@ public final class Cookies {
             synchronized (LoginServlet.class) {
                 tmp = configuredDomain;
                 if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = null == service ? "null" : service.getProperty("com.openexchange.cookie.domain", "null");
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return null;
+                    }
+
+                    tmp = service.getProperty("com.openexchange.cookie.domain", "null").trim();
                     configuredDomain = tmp;
                 }
             }
         }
         return "null".equalsIgnoreCase(tmp) ? null : tmp;
+    }
+
+    /**
+     * Gets the (possible) domain argument to use when creating a cookie. That domain argument is either configured or is required being set since host sharding is enabled
+     *
+     * @param serverName The server name
+     * @return The domain parameter or <code>null</code>
+     * @see #getDomainValueFromConfiguration()
+     * @see Tools#validateDomainRegardingSharding(String)
+     */
+    public static String getDomainValue(final String serverName) {
+        String domain = getDomainValueFromConfiguration(serverName);
+        if (null != domain) {
+            return domain;
+        }
+        if (Tools.validateDomainRegardingSharding(serverName)) {
+            return serverName;
+        }
+        return null;
     }
 
     /**
@@ -180,7 +201,7 @@ public final class Cookies {
      * @see #prefixWithDot()
      * @see #configuredDomain()
      */
-    public static String getDomainValue(final String serverName) {
+    public static String getDomainValueFromConfiguration(final String serverName) {
         if (!domainEnabled()) {
             return null;
         }
@@ -236,7 +257,7 @@ public final class Cookies {
                 }
             }
         } else {
-            if (!"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName))) {
+            if (isValidDomainValue(serverName)) {
                 return serverName.toLowerCase(Locale.US).startsWith("www.") ? serverName.substring(4) : serverName;
             }
         }
@@ -244,31 +265,18 @@ public final class Cookies {
     }
 
     /**
-     * Extracts domain parameter out of specified (JSESSIONID) cookie value.
+     * Checks if specified server/host name is valid for being used as domain value.
+     * <ul>
+     * <li>Not <code>"localhost"</code></li>
+     * <li>Not an IPv4 identifier</li>
+     * <li>Not an IPv6 identifier</li>
+     * </ul>
      *
-     * @param id The cookie value
-     * @return The domain parameter or <code>null</code>
+     * @param serverName The server name
+     * @return <code>true</code> if server/host name is valid for being used as domain value; otherwise <code>false</code>
      */
-    public static String extractDomainValue(final String id) {
-        if (null == id) {
-            return null;
-        }
-        final int start = id.indexOf('-');
-        if (start > 0) {
-            final int end = id.lastIndexOf('.');
-            if (end > start) {
-                return urlDecode(id.substring(start + 1, end));
-            }
-        }
-        return null;
-    }
-
-    private static String urlDecode(final String text) {
-        try {
-            return URLDecoder.decode(text, "iso-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return text;
-        }
+    public static boolean isValidDomainValue(String serverName) {
+        return (null != serverName && !"localhost".equalsIgnoreCase(serverName) && (null == textToNumericFormatV4(serverName)) && (null == textToNumericFormatV6(serverName)));
     }
 
     /**

@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Pluginsloaded
+Bundle-SymbolicName: com.openexchange.pluginsloaded
+Bundle-Version: 7.8.4
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.exception,
+ com.openexchange.osgi.annotation
+Export-Package: com.openexchange.pluginsloaded

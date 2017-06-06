@@ -86,7 +86,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     private final String uuid;
     private String reportType;
     private List<Integer> contextIds;
-    private Report report;
+    private final Report report;
 
     /**
      *
@@ -129,11 +129,11 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
                     reportService.finishContext(contextReport);
                 } catch (OXException oxException) {
-                    if (oxException.similarTo(ContextExceptionCodes.UPDATE)) {
+                    if (ContextExceptionCodes.UPDATE.equals(oxException)) {
                         reportService.abortGeneration(uuid, reportType, "Not all schemas are up to date! Please ensure schema up-to-dateness (e. g. by calling 'runupdate' CLT).");
                         break;
                     }
-                    if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
+                    if (ReportExceptionCodes.REPORT_GENERATION_CANCELED.equals(oxException)) {
                         LOG.info("Stop execution of report generation due to an user instruction!" , oxException);
                         contextIds = Collections.emptyList();
                         reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
@@ -156,7 +156,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
     /**
      * Run the report for the given context, to get/set all relevant data.
-     * 
+     *
      * @param contextReport
      * @throws OXException
      */
@@ -179,7 +179,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     private void handleUsersGuestsLinks(Context ctx, ContextReport contextReport) throws OXException {
         // Next, let's look at all the users in this context
         User[] loadUsers = loadUsers(ctx);
-        
+
         for (User user : loadUsers) {
             boolean skip = false;
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);

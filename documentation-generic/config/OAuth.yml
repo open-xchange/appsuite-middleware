@@ -1,23 +1,162 @@
 feature_name: OAuth
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth.html]] and
+  [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth_provider.html]] for mor informations.
 properties:
     - key: com.openexchange.oauth.modules.enabled.[oauth_provider]
       description: |
         A comma seperated list of enabled oauth modules. 
         This list can be configured for each individual oauth provider. 
-        To identify the oauth provider replace [oauth_provider] with the last part of the provider id.
-        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google
+        To identify the oauth provider replace [oauth_provider] with the last part of the provider id.  
+        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google  
         Available modules are:
-         -mail
-         -calendar_ro
-         -contacts_ro
-         -calendar
-         -contacts
-         -drive
-         -generic 
+          <table>
+            <tr>
+              <th>Module identifier</th>
+              <th>Description</th>
+              <th>Supported by</th>
+            </tr>
+            <tr>
+              <td>mail</td>
+              <td>Allows access to mail data of the OAuth provider</td>
+              <td>google</td>
+            </tr>
+            <tr>
+              <td>calendar_ro</td>
+              <td>Allows read-only access to calendar data of the OAuth provider</td>
+              <td>google, msliveconnect</td>
+            </tr>
+            <tr>
+              <td>contacts_ro</td>
+              <td>Allows read-only access to contact data of the OAuth provider</td>
+              <td>google, linkedin, msliveconnect, xing, yahoo</td>
+            </tr>
+            <tr>
+              <td>calendar</td>
+              <td>Allows read-write access to calendar data of the OAuth provider</td>
+              <td>google, msliveconnect</td>
+            </tr>
+            <tr>
+              <td>contacts</td>
+              <td>Allows read-write access to contact data of the OAuth provider</td>
+              <td>google, msliveconnect, yahoo</td>
+            </tr>
+            <tr>
+              <td>drive</td>
+              <td>Allows access to files/documents API of the OAuth provider</td>
+              <td>boxcom, dropbox, google, msliveconnect, </td>
+            </tr>
+            <tr>
+              <td>feeds</td>
+              <td>Allows access to feeds API of the OAuth provider</td>
+              <td>twitter</td>
+            </tr>
+          </table>
       defaultValue: null
       version: 7.8.3
       reloadable: true
       configcascadeAware: true
       related: 
       file: oauth.properties
+      packageName: open-xchange-oauth
       tags: ["OAuth"]
+    - key: com.openexchange.oauth.[serviceId]
+      description: |
+        Enables or disables the oauth service with the service id [serviceId]. 
+
+        Currently known service ids:
+          <ul>
+           <li>boxcom</li>
+           <li>dropbox</li>
+           <li>google</li>
+           <li>linkedin</li>
+           <li>msliveconnect</li>
+           <li>twitter</li>
+           <li>xing</li>
+           <li>yahoo</li>
+          </ul>
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      packageName: open-xchange-oauth
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
+    - key: com.openexchange.oauth.[serviceId].apiKey
+      description: |
+        The api key of your [serviceId] application.
+
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      packageName: open-xchange-oauth
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
+    - key: com.openexchange.oauth.[serviceId].apiSecret
+      description: |
+        The api secret of your [serviceId] application.
+
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      packageName: open-xchange-oauth
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
+    - key: com.openexchange.oauth.[serviceId].redirectUrl
+      description: |
+        The redirect url of your [serviceId] application. E.g.:
+        <pre>
+        com.openexchange.oauth.[serviceId].redirectUrl=https://myappsuite.mydomain.invalid/ajax/defer
+        </pre>
+
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      packageName: open-xchange-oauth
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MS Live Connect", "Yahoo"]
+    - key: com.openexchange.oauth.[serviceId].productName
+      description: |
+        The product name of your [serviceId] application.
+
+        See [[com.openexchange.oauth.[serviceId] ]] for a list of currently known service ids.
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: 
+      packageName: open-xchange-oauth
+      tags: ["OAuth", "Dropbox", "Google", "Yahoo"]
+    - key: com.openexchange.oauth.xing.consumerKey
+      description: |
+        The consumer key (for upsell).
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: xingoauth.properties
+      packageName: open-xchange-oauth
+      tags: ["OAuth", "Xing", "Credential"]
+    - key: com.openexchange.oauth.xing.consumerSecret
+      description: |
+        The consumer secret (for upsell).
+      defaultValue: 
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: xingoauth.properties
+      packageName: open-xchange-oauth
+      tags: ["OAuth", "Xing", "Credential"]

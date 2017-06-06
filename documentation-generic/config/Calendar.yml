@@ -1,0 +1,108 @@
+feature_name: Calendar
+properties:
+    - key: CACHED_ITERATOR_FAST_FETCH
+      description: |
+        By enabling this option you can define the numbers of 
+        pre fetched results with the parameter [[MAX_PRE_FETCH]].
+
+        This means that MAX_PRE_FETCH results are gathered in one
+        SQL query instead of MAX_PRE_FETCH single SQL queries.
+        Normally higher values result in more performance if this
+        option is enabled.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: MAX_PRE_FETCH
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Cache"]
+    - key: MAX_PRE_FETCH
+      description: |
+        By enabling the option [[CACHED_ITERATOR_FAST_FETCH]] you
+        can define the numbers of pre fetched results with
+        this parameter.
+          
+        This means that MAX_PRE_FETCH results are gathered in one
+        SQL query instead of MAX_PRE_FETCH single SQL queries.
+        Normally higher values result in more performance if this
+        option is enabled.
+      defaultValue: 20
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: CACHED_ITERATOR_FAST_FETCH
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit", "Cache"]
+    - key: CHECK_AND_REMOVE_PAST_REMINDERS
+      description: |
+        If this option is enabled no event is triggered
+        and no mail will be sent if the reminder is in
+        the past relative to the start date.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Mail", "Event"]
+    - key: CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS
+      description: |
+        This option prevents the trigger and mail sending
+        if only a reminder has been changed. If the application
+        should inform about each change no matter what has been
+        changed in the object this option should be disabled.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Mail", "Event"]
+    - key: MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS
+      description: |
+        This options specifies a maximum count of loop iterations
+        for a given recurrence pattern. When this limit is reached
+        the server stops processing the recurrence pattern and spews
+        out lots of error information. A value equal to or less than
+        zero omits this property; meaning no limit on processing the
+        recurrence pattern.
+      defaultValue: 49950
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.seriesconflictlimit
+      description: |
+        This boolean option switches on/off the limitation for the
+        conflict search for a series to 1 year in the future. This
+        means, that a new/changed series will not conflict with
+        appointments which are later than one year after the
+        creation/change of the appointment.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit", "Appointment"]
+    - key: com.openexchange.calendar.undefinedstatusconflict
+      description: |
+        This boolean option switches on/off, if an appointment
+        should conflict for a user if he/she has not yet accepted
+        or denied the appointment.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]

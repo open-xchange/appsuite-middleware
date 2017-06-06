@@ -49,11 +49,34 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link PermissionAware} - Implementor is aware of permissions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PermissionAware {
+public interface PermissionAware extends FileStorageFolderAccess {
+
+    /**
+     * Updates an existing file storage folder identified through given identifier. All attributes set in given file storage folder instance are
+     * applied.
+     * <p>
+     * The currently known attributes that make sense being updated are:
+     * <ul>
+     * <li>permissions</li>
+     * <li>subscription</li>
+     * </ul>
+     * Of course more folder attributes may be checked by implementation to enhance update operations.
+     * <p>
+     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update is treated as a no-op.
+     *
+     * @param identifier The identifier of the file storage folder to update
+     * @param toUpdate The file storage folder to update containing only the modified fields
+     * @param cascadePermissions <code>true</code> to apply permission changes to all subfolders, <code>false</code>, otherwise
+     * @return The identifier of the updated file storage folder
+     * @throws OXException If either folder does not exist or cannot be updated
+     */
+    String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException;
 
 }

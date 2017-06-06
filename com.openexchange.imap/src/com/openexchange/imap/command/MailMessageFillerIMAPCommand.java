@@ -84,6 +84,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
     private final TLongObjectMap<MailMessage> messages;
+    private final int accountId;
     private final int length;
     private final long[] uids;
     private final String command;
@@ -101,6 +102,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
+        accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         index = 0;
         length = messages.size();
         // Fill collection
@@ -176,7 +178,9 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
             MailMessage message = messages.get(uid.uid);
             if (null != message) {
                 try {
-                    MailMessageFetchIMAPCommand.handleFetchRespone((IDMailMessage) message, fetchResponse, fullname);
+                    IDMailMessage idm = (IDMailMessage) message;
+                    idm.setAccountId(accountId);
+                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname);
                 } catch (OXException e) {
                     /*
                      * Discard corrupt message

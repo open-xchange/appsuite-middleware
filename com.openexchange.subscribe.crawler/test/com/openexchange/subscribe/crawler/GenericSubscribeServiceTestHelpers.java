@@ -54,13 +54,12 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import org.ho.yaml.Yaml;
 import org.junit.Before;
-import org.yaml.snakeyaml.Yaml;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -89,7 +88,7 @@ public abstract class GenericSubscribeServiceTestHelpers {
     public void setUp() {
         try {
             // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)
-            map = (HashMap<String, String>) new Yaml().load(new FileReader(getSecretsFile()));
+            map = (HashMap<String, String>) Yaml.load(new FileReader(getSecretsFile()));
             // map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/open-xchange/crawler/crawlerCredentials.yml"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -259,8 +258,8 @@ public abstract class GenericSubscribeServiceTestHelpers {
      */
     protected void dumpThis(final CrawlerDescription crawler, final String filename) {
         try {
-            new Yaml().dump(crawler, new FileWriter(new File("../open-xchange-development/crawlers/" + filename + ".yml")));
-            new Yaml().dump(crawler, new FileWriter(new File("conf/crawlers/" + filename + ".yml")));
+            Yaml.dump(crawler, new File("../open-xchange-development/crawlers/" + filename + ".yml"));
+            Yaml.dump(crawler, new File("conf/crawlers/" + filename + ".yml"));
         } catch (final IOException e) {
             e.printStackTrace();
         }

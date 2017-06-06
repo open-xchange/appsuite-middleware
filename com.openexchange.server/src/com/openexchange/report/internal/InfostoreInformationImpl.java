@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.report.internal;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -75,17 +76,17 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * The {@link InfostoreInformationImpl} class is an implementations of {@link InfostoreInformationService} class.
+ * 
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.2
  */
 public class InfostoreInformationImpl implements InfostoreInformationService {
 
-
-    /**
-     * nececarryConnections, stores all schema connections, that are needed for executing all
-     * functions with the same set of contextIds/userIds
-     */
-    private ArrayList<Connection> nececarryConnections;
+    /*
+     * cidsForConnection stores one context id per schema on the current database. This information
+     * is later needed to open database connections to the correct schemas.
+    */
+    private List<Integer> cidsForConnection;
     private DatabaseService dbService;
 
     /**
@@ -93,7 +94,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      */
     public InfostoreInformationImpl() {
         super();
-        this.nececarryConnections = new ArrayList<>();
+        this.cidsForConnection = new ArrayList<>();
         this.dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
     }
 
@@ -109,18 +110,19 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
 
         // DB Connection
-        if (this.nececarryConnections.size() == 0) {
+        if (this.cidsForConnection.size() == 0) {
             this.loadAllNecessaryDBConnections(usersInContext);
         }
 
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;
-        for (Connection currentConnection : this.nececarryConnections) {
+        for (Integer cid : this.cidsForConnection) {
+            Connection connection = dbService.getReadOnly(cid);
             try {
 
                 LinkedHashMap<String, Integer> queryMap = new LinkedHashMap<>();
-                stmt = currentConnection.prepareStatement("SELECT file_mimetype, count(file_mimetype) FROM infostore_document" + whereQuery + " AND version_number > 0 GROUP BY file_mimetype;");
+                stmt = connection.prepareStatement("SELECT file_mimetype, count(file_mimetype) FROM infostore_document" + whereQuery + " AND version_number > 0 GROUP BY file_mimetype;");
                 sqlResult = stmt.executeQuery();
                 while (sqlResult.next()) {
                     queryMap.put(sqlResult.getString(1), sqlResult.getInt(2));
@@ -131,6 +133,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(sqlResult, stmt);
+                dbService.backReadOnly(connection);
             }
         }
         return resultMap;
@@ -169,17 +172,18 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
 
         // DB Connection
-        if (this.nececarryConnections.size() == 0) {
+        if (this.cidsForConnection.size() == 0) {
             this.loadAllNecessaryDBConnections(usersInContext);
         }
 
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;
-        for (Connection currentConnection : this.nececarryConnections) {
+        for (Integer cid : this.cidsForConnection) {
+            Connection connection = dbService.getReadOnly(cid);
             try {
                 LinkedHashMap<String, Integer> queryMap = new LinkedHashMap<>();
-                stmt = currentConnection.prepareStatement("SELECT count(version_number) FROM infostore_document" + whereQuery + " AND version_number = 0;");
+                stmt = connection.prepareStatement("SELECT count(version_number) FROM infostore_document" + whereQuery + " AND version_number = 0;");
                 sqlResult = stmt.executeQuery();
                 while (sqlResult.next()) {
                     queryMap.put("total", sqlResult.getInt(1));
@@ -189,6 +193,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(sqlResult, stmt);
+                dbService.backReadOnly(connection);
             }
         }
         return resultMap;
@@ -226,21 +231,6 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         resultMap.put("total", filestoreMap.size());
 
         return resultMap;
-    }
-
-    @Override
-    public void closeAllDBConnections() {
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        for (Connection currentConnection : this.nececarryConnections) {
-            try {
-                if (!currentConnection.isClosed()) {
-                    dbService.backReadOnly(currentConnection);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        this.nececarryConnections = new ArrayList<>();
     }
 
     //--------------------Private helper functions--------------------
@@ -310,22 +300,44 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
         Set<Integer> alreadyProcessed = new HashSet<Integer>();
 
+        if (this.dbService == null) {
+            this.dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        }
+
         for (Entry<Integer, List<Integer>> current : contextUserMap.entrySet()) {
 
-            if (alreadyProcessed.contains(current.getKey())) {
+            Integer currentCid = current.getKey();
+            if (alreadyProcessed.contains(currentCid)) {
                 continue;
             }
 
-            if (this.dbService == null) {
-                this.dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-            }
+            cidsForConnection.add(currentCid);
 
-            Connection currentConnection = this.dbService.getReadOnly(current.getKey());
-            this.nececarryConnections.add(currentConnection);
             for (int iContextId : dbService.getContextsInSameSchema(current.getKey())) {
                 alreadyProcessed.add(Integer.valueOf(iContextId));
             }
         }
+    }
+
+    private List<Integer> getAllContextIdsInSameDB(int cid) throws SQLException, OXException {
+        List<Integer> result = new ArrayList<>();
+        PreparedStatement stmt = null;
+        ResultSet sqlResult = null;
+        Connection currentConnection = this.dbService.getReadOnly();
+        try {
+            stmt = currentConnection.prepareStatement("SELECT cid FROM context_server2db_pool WHERE read_db_pool_id = (SELECT read_db_pool_id FROM context_server2db_pool where cid =?)");
+            stmt.setInt(1, cid);
+            sqlResult = stmt.executeQuery();
+            while (sqlResult.next()) {
+                result.add(sqlResult.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(sqlResult, stmt);
+            dbService.backReadOnly(currentConnection);
+        }
+        return result;
     }
 
     /**
@@ -348,7 +360,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 oldValues.put("max", newValue.getValue());
                 continue;
             }
-            if (!newValue.getKey().equals("avg")) {
+            if (!newValue.getKey().equals("avg") && !newValue.getKey().equals("min") && !newValue.getKey().equals("max")) {
                 oldValues.put(newValue.getKey(), oldValues.get(newValue.getKey()) + newValue.getValue());
                 continue;
             }
@@ -380,16 +392,17 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
     private Map<String, Integer> getDataFromDB(Map<Integer, List<Integer>> usersInContext, String query, String counter, boolean deleteCounter, boolean hasTimerange, Date start, Date end) throws SQLException, OXException {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
         // DB Connection
-        if (this.nececarryConnections.size() == 0) {
+        if (this.cidsForConnection.size() == 0) {
             this.loadAllNecessaryDBConnections(usersInContext);
         }
 
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;
-        for (Connection currentConnection : this.nececarryConnections) {
+        for (Integer cid : this.cidsForConnection) {
+            Connection connection = dbService.getReadOnly(cid);
             try {
                 LinkedHashMap<String, Integer> queryMap = new LinkedHashMap<>();
-                stmt = currentConnection.prepareStatement(query);
+                stmt = connection.prepareStatement(query);
                 if (hasTimerange) {
                     stmt.setLong(1, start.getTime());
                     stmt.setLong(2, end.getTime());
@@ -407,6 +420,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(sqlResult, stmt);
+                dbService.backReadOnly(connection);
             }
         }
         if (resultMap.get(counter) != 0) {

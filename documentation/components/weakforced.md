@@ -96,7 +96,8 @@ This section describes available properties that specify how the hash for login 
 - The `com.openexchange.weakforced.hash.truncate` option specifies whether the HEX string for the computed digest bytes is generated considering only the first 12 bits padded by 4 0 (zero) bits) or if the whole digest is taken. Default is `true`
 
 ## Basic authentication
-The `com.openexchange.weakforced.basic-auth.login` and `com.openexchange.weakforced.basic-auth.password` allow setting the user-name and password to use to perform HTTP basic authentication against Weakforced end-points. All end-points are expected to have the same HTTP basic authentication.
+The `com.openexchange.weakforced.basic-auth.login` and 
+`com.openexchange.weakforced.basic-auth.password` properties allow setting the user-name and password to use to perform HTTP basic authentication against Weakforced end-points. All end-points are expected to have the same HTTP basic authentication.
 
 ## Attributes
 The `com.openexchange.weakforced.attributes` specifies a comma-separated list of arbitrary attributes that are supposed to read from session on successful authentication. Those attributes are then communicated to Weakforced using post-auth `allow` hook.

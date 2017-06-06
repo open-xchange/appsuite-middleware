@@ -273,6 +273,18 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     }
 
     @Override
+    public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        Folder parsedFolder = FolderParser.parseFolder(toUpdate);
+        parsedFolder.setID(identifier);
+        FolderServiceDecorator decorator = initDecorator();
+        if (cascadePermissions) {
+            decorator.put("cascadePermissions", Boolean.TRUE);
+        }
+        getFolderService().updateFolder(parsedFolder, null, session, decorator);
+        return null != parsedFolder.getNewID() ? parsedFolder.getNewID() : identifier;
+    }
+
+    @Override
     public long getNumFiles(String folderId) throws OXException {
         return infostore.countDocuments(Long.parseLong(folderId), session);
     }

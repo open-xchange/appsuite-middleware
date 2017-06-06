@@ -1,0 +1,89 @@
+feature_name: Permission
+feature_description: |
+  The properties for permissions.
+properties:
+    - key: permissions
+      description: |
+        Default permissions for all users.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Capability"]
+
+    - key: com.openexchange.capability.boring
+      description: |
+        Mark this installation as boring, i.e. disable an easter egg.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Capability"]
+
+    - key: com.openexchange.capability.alone
+      description: |
+        This property signals that the user is the only user in associated context/tenant.
+        It disables certain collaborative features and that would therefore be useless in such a context/tenant.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Capability"]
+
+    - key: com.openexchange.capability.mobile_mail_app
+      description: |
+        Mobile App general permission.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission"]
+
+    - key: com.openexchange.capability.share_links
+      description: |
+        Allows users to create share links to share files or folders.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Share", "Capability"]
+
+    - key: com.openexchange.capability.invite_guests
+      description: |
+        Allows users to share files or folder with guest users.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Share", "Capability"]
+
+    - key: com.openexchange.capability.archive_emails
+      description: |
+        Enables/disables the archive functionalities that is to move on demand older mails from any selected folder to a special archive folder.
+        If disabled the server will reject to perform archive requests.
+      defaultValue: true
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Mail", "Capability"]

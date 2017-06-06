@@ -68,8 +68,6 @@ import com.openexchange.groupware.container.Appointment;
 public class ChangeTimeZoneTest extends AbstractAJAXSession {
 
     private final TimeZone UTC = TimeZone.getTimeZone("UTC");
-    private final TimeZone BERLIN = TimeZone.getTimeZone("Europe/Berlin");
-    private final TimeZone US = TimeZone.getTimeZone("US/Eastern");
     private Appointment app;
 
     @Before

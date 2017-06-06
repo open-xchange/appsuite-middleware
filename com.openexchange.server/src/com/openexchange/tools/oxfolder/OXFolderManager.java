@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
@@ -115,6 +116,20 @@ public abstract class OXFolderManager {
     }
 
     /**
+     * Gets an appropriate instance of {@link OXFolderManager}.
+     *
+     * @param session The session
+     * @param handlers Possible handlers to invoke on update
+     * @param readCon A connection with read capability; pass <code>null</code> to fetch from pool
+     * @param writeCon A connection with write capability; pass <code>null</code> to fetch from pool
+     * @return An appropriate instance of {@link OXFolderManager}
+     * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
+     */
+    public static final OXFolderManager getInstance(Session session, Collection<UpdatedFolderHandler> handlers, Connection readCon, Connection writeCon) throws OXException {
+        return new OXFolderManagerImpl(session, handlers, readCon, writeCon);
+    }
+
+    /**
      * Gets an appropriate instance of {@link OXFolderManager} with AppointmentSQLInterface for testing purposes.
      *
      * @param session The session
@@ -140,7 +155,7 @@ public abstract class OXFolderManager {
      * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
      */
     public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
-        return new OXFolderManagerImpl(session, oxfolderAccess, readCon, writeCon);
+        return new OXFolderManagerImpl(session, oxfolderAccess, null, readCon, writeCon);
     }
 
     /**

@@ -59,6 +59,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.google.common.io.BaseEncoding;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -82,7 +83,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         for (String id : SCENARIOS) {
             ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-            OnboardingTestResponse response = getClient().execute(req);
+            OnboardingTestResponse response = getAjaxClient().execute(req);
             assertNotNull("Response is empty!", response);
             // Expecting an sipgate authorization exception
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -103,7 +104,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         String id = SCENARIOS[0];
         ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = getClient().execute(req);
+        OnboardingTestResponse response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -117,7 +118,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
         String id = SCENARIOS[0];
         ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = getClient().execute(req);
+        OnboardingTestResponse response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -126,7 +127,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         jsonString = "{\"sms\":\"abcde\"}";
         body = new JSONObject(jsonString);
         req = new ExecuteRequest(id, "sms", body, false);
-        response = getClient().execute(req);
+        response = getAjaxClient().execute(req);
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
@@ -136,15 +137,15 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     @Test
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
+        AJAXClient client = getAjaxClient();
+        String url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "mailsync", "apple.iphone");
+        helper.testMailDownload(url, client.getProtocol()+"://"+client.getHostname());
 
-        String url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "mailsync", "apple.iphone");
-        helper.testMailDownload(url, getClient().getHostname());
+        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "eassync", "apple.iphone");
+        helper.testEASDownload(url, client.getProtocol()+"://"+client.getHostname());
 
-        url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "eassync", "apple.iphone");
-        helper.testEASDownload(url, getClient().getHostname());
-
-        url = getURL(getClient().getValues().getUserId(), getClient().getValues().getContextId(), "davsync", "apple.iphone");
-        helper.testDavDownload(url, getClient().getHostname());
+        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "davsync", "apple.iphone");
+        helper.testDavDownload(url, client.getProtocol()+"://"+client.getHostname());
     }
 
     public String getURL(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException, UnsupportedEncodingException {

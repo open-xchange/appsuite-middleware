@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -56,12 +57,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -122,12 +127,27 @@ public final class GetForwardAction extends AbstractMailAction {
             if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("attachOriginalMessage"))) {
                 usmNoSave.setAttachOriginalMessage(true);
             }
-            boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
+            FromAddressProvider fromAddressProvider = FromAddressProvider.none();
+            {
+                boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
+                if (setFrom) {
+                    Dispatcher ox = getService(Dispatcher.class);
+                    AJAXRequestData requestData = request().session(session).module(com.openexchange.mailaccount.Constants.getModule()).action(com.openexchange.mailaccount.json.actions.ResolveFolderAction.ACTION).params(AJAXServlet.PARAMETER_FOLDERID, folderPath).format("json").build(req.getRequest());
+                    AJAXRequestResult requestResult = perform(requestData, ox, session);
+                    JSONObject jResult = ((JSONObject) requestResult.getResultObject());
+                    if (null != jResult && jResult.hasAndNotNull("from")) {
+                        String address = jResult.optString("from");
+                        fromAddressProvider = FromAddressProvider.providerFor(address);
+                    } else {
+                        fromAddressProvider = FromAddressProvider.byAccountId();
+                    }
+                }
+            }
             /*
              * Get mail interface
              */
             MailServletInterface mailInterface = getMailInterface(req);
-            MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave, setFrom);
+            MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave, fromAddressProvider);
             if (!mailMessage.containsAccountId()) {
                 mailMessage.setAccountId(mailInterface.getAccountID());
             }
@@ -214,6 +234,23 @@ public final class GetForwardAction extends AbstractMailAction {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private AJAXRequestResult perform(AJAXRequestData requestData, Dispatcher ox, ServerSession session) throws OXException {
+        AJAXRequestResult requestResult = null;
+        Exception exc = null;
+        try {
+            requestResult = ox.perform(requestData, null, session);
+            return requestResult;
+        } catch (OXException x) {
+            exc = x;
+            throw x;
+        } catch (RuntimeException x) {
+            exc = x;
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(x, x.getMessage());
+        } finally {
+            Dispatchers.signalDone(requestResult, exc);
         }
     }
 

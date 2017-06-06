@@ -55,9 +55,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
@@ -87,7 +85,7 @@ public final class ConvertAction extends AbstractConversionAction {
 
     /**
      * Initializes a new {@link ConvertAction}.
-     * 
+     *
      * @param services
      */
     public ConvertAction(final ServiceLookup services) {
@@ -141,13 +139,14 @@ public final class ConvertAction extends AbstractConversionAction {
     }
 
     private AJAXRequestResult getResultFromConversion(final Object result) throws JSONException {
-        Response response = new Response();
         ConversionResult conversionResult = (ConversionResult) result;
-        response.setData(conversionResult.getData());
+        AJAXRequestResult requestResult = new AJAXRequestResult(conversionResult.getData(), "json");
+
         if (conversionResult.getWarnings() != null) {
-            response.addWarnings(conversionResult.getWarnings());
+            requestResult.addWarnings(conversionResult.getWarnings());
         }
-        return new AJAXRequestResult(ResponseWriter.getJSON(response), "json");
+
+        return requestResult;
     }
 
     private static void checkDataSourceOrHandler(final JSONObject json) throws OXException {

@@ -41,7 +41,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since 7.4.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ InfostoreConfig.class, ServerConfig.class, AttachmentConfig.class, ContextStorage.class, UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class, FileStorages.class })
+@PrepareForTest({ InfostoreConfig.class, ServerConfig.class, AttachmentConfig.class, ContextStorage.class, UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class, FileStorages.class, ServerSessionAdapter.class })
 public class SharedInfostoreJSlobTest {
 
     @InjectMocks
@@ -75,6 +75,8 @@ public class SharedInfostoreJSlobTest {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(ServerSessionAdapter.class);
+        PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) Matchers.any())).thenReturn(session);
+
         PowerMockito.when(session.getContext()).thenReturn(context);
         PowerMockito.when(session.getUserPermissionBits()).thenReturn(permissionBits);
 
@@ -149,7 +151,7 @@ public class SharedInfostoreJSlobTest {
     public void testGetJSlob_fine_attachmentQuotaSet() throws OXException, JSONException {
         JSlob jSlob = sharedInfostoreJSlob.getJSlob(session);
 
-        Assert.assertEquals(0L, jSlob.getJsonObject().get("attachmentQuota"));
+        Assert.assertEquals(-1L, jSlob.getJsonObject().get("attachmentQuota"));
     }
 
     @Test

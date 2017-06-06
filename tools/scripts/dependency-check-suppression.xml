@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
    <!-- False positive. Finds the mysql library instead of the connector library -->
    <suppress>
       <notes><![CDATA[
@@ -8,6 +8,7 @@
       <sha1>50aa5073896609b6b8c5e484c7671449daccf94c</sha1>
       <cpe>cpe:/a:mysql:mysql:5.1.30</cpe>
    </suppress>
+
    <!-- False positive. Finds the mysql library instead of the connector library -->
    <suppress>
       <notes><![CDATA[
@@ -16,6 +17,7 @@
       <sha1>8b9def1f464b690257582c2dd423ed62b5300b1b</sha1>
       <cpe>cpe:/a:mysql:mysql:5.1.30</cpe>
    </suppress>
+
    <!-- Not used. -->
    <suppress>
       <notes><![CDATA[
@@ -24,6 +26,7 @@
       <sha1>4e118cb81049a9f3b48b63679f9423b6404c099a</sha1>
       <cpe>cpe:/a:apache:cassandra:1.2.0</cpe>
    </suppress>
+
    <!-- False positive. Matches with some oracle client library. -->
    <suppress>
      <notes><![CDATA[
@@ -32,6 +35,7 @@
       <sha1>e6f4d0ce184a497d56ba07adfca6a118d4e34be5</sha1>
       <cpe>cpe:/a:oracle:oracle_client:2.17</cpe>
    </suppress>
+
    <!-- False positive. Matches Safari related vuls but seems to be sorted incorrectly in vul library -->
    <suppress>
       <notes><![CDATA[
@@ -41,4 +45,150 @@
       <sha1>07cac950b5752e22fd266f5eb2365bf75c7ef22b</sha1>
       <cpe>cpe:/a:apple:imageio:3.2.1</cpe>
    </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: imageio-icns-3.3.1.jar
+      ]]></notes>
+      <sha1>f2a9061c059a03c429188905b39a102bfada9abf</sha1>
+      <cpe>cpe:/a:apple:imageio</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: imageio-pict-3.3.1.jar
+      ]]></notes>
+      <gav regex="true">^com\.twelvemonkeys\.imageio:imageio-pict:.*$</gav>
+      <cpe>cpe:/a:apple:imageio</cpe>
+   </suppress>
+
+   <!-- Only used for open api generation -->
+   <suppress>
+      <notes><![CDATA[
+         file name: jackson-core-2.6.4.jar
+      ]]></notes>
+      <sha1>27d3a9f7bbdcf72d93c9b2da7017e39551bfa9fb</sha1>
+      <cpe>cpe:/a:fasterxml:jackson</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: jackson-datatype-joda-2.6.4.jar
+      ]]></notes>
+      <sha1>b1d7763ef59811d06b90e0530fcf7004f22bfc82</sha1>
+      <cpe>cpe:/a:fasterxml:jackson</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: jackson-databind-2.6.4.jar
+      ]]></notes>
+      <sha1>f2abadd10891512268b16a1a1a6f81890f3e2976</sha1>
+      <cpe>cpe:/a:fasterxml:jackson</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: jackson-jaxrs-base-2.6.4.jar
+      ]]></notes>
+      <sha1>26ba91883f9963698e5b839c397f75e3db9e1d97</sha1>
+      <cpe>cpe:/a:fasterxml:jackson</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: jackson-jaxrs-json-provider-2.6.4.jar
+      ]]></notes>
+      <sha1>af58422baf7aff5502436e34e7418c56b1153ba6</sha1>
+      <cpe>cpe:/a:fasterxml:jackson</cpe>
+   </suppress>
+
+   <!-- False positive. Matches openpgp library from 2001-->
+   <suppress>
+      <notes><![CDATA[
+         file name: bcpg-jdk15on-156.jar
+      ]]></notes>
+      <sha1>61ebc6d567522cf7054152a7f6a64831e237d4d8</sha1>
+      <cpe>cpe:/a:openpgp:openpgp</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: bcpg-jdk15on-156.jar
+      ]]></notes>
+      <sha1>61ebc6d567522cf7054152a7f6a64831e237d4d8</sha1>
+      <cpe>cpe:/a:pgp:openpgp</cpe>
+   </suppress>
+
+   <!-- False positive. Matches jCore -->
+   <suppress>
+      <notes><![CDATA[
+         file name: apache-mime4j-core-0.7.2.jar
+      ]]></notes>
+      <sha1>a81264fe0265ebe8fd1d8128aad06dc320de6eef</sha1>
+      <cpe>cpe:/a:jcore:jcore</cpe>
+   </suppress>
+
+   <!-- Using custom SSLConnectionSocketFactory -->
+   <suppress>
+      <notes><![CDATA[
+         file name: commons-httpclient-3.1.jar
+      ]]></notes>
+      <sha1>1c7888692e577d3abbb8b4967a4a8984e8461105</sha1>
+      <cpe>cpe:/a:apache:commons-httpclient</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: commons-httpclient-3.1.tar.gz: commons-httpclient-3.1.tar: commons-httpclient-3.1.jar
+      ]]></notes>
+      <sha1>964cd74171f427720480efdec40a7c7f6e58426a</sha1>
+      <cpe>cpe:/a:apache:httpclient</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: org.apache.httpcomponents.httpclient.source_4.2.1.jar
+      ]]></notes>
+      <sha1>6b27312b9c28b59aaeb6c21f3490045690c703d3</sha1>
+      <cpe>cpe:/a:apache:httpclient</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: commons-httpclient-3.1.jar
+      ]]></notes>
+      <sha1>1c7888692e577d3abbb8b4967a4a8984e8461105</sha1>
+      <cpe>cpe:/a:apache:httpclient</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: commons-httpclient-3.1.tar.gz: commons-httpclient-3.1.tar: commons-httpclient-3.1.jar
+      ]]></notes>
+      <gav regex="true">^commons-httpclient:commons-httpclient:.*$</gav>
+      <cpe>cpe:/a:apache:commons-httpclient</cpe>
+   </suppress>
+
+   <!-- False positive. Matches OpenOffice -->
+   <suppress>
+      <notes><![CDATA[
+         file name: jOpenDocument-1.2.jar
+      ]]></notes>
+      <sha1>2fd22511bc82d834bf523fc60912074bf4db494e</sha1>
+      <cpe>cpe:/a:openoffice:openoffice.org</cpe>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: ridl-3.2.1.jar
+      ]]></notes>
+      <gav regex="true">^org\.openoffice:ridl:.*$</gav>
+      <cpe>cpe:/a:openoffice:openoffice</cpe>
+   </suppress>
+
+   <!-- False positive. Matches vul in cisco products -->
+   <suppress>
+      <notes><![CDATA[
+         file name: jOpenDocument-src-1.2.zip: commons-collections-3.1.jar
+      ]]></notes>
+      <gav regex="true">^commons-collections:commons-collections:.*$</gav>
+      <cve>CVE-2015-6420</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+         file name: jOpenDocument-src-1.2.zip: commons-collections-3.1.jar
+      ]]></notes>
+      <sha1>40fb048097caeacdb11dbb33b5755854d89efdeb</sha1>
+      <cve>CVE-2015-6420</cve>
+   </suppress>
+
 </suppressions>

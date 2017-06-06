@@ -137,7 +137,7 @@ public class QuotaFileStorageTest {
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
         public TestQuotaFileStorage(final Context ctx, final com.openexchange.filestore.FileStorage fs) throws OXException {
-            super(ctx.getContextId(), Info.administrative(), OwnerInfo.builder().setOwnerId(0).build(), 0L, fs, null, null, null);
+            super(ctx.getContextId(), Info.administrative(), OwnerInfo.builder().setOwnerId(0).build(), 0L, fs, null, null, null, null);
         }
 
         private long usage;
@@ -473,6 +473,17 @@ public class QuotaFileStorageTest {
 
         @Override
         public Connection getReadOnly(Assignment assignment, boolean noTimeout) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public boolean isGlobalDatabaseAvailable() {
+            return false;
+        }
+
+        @Override
+        public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }

@@ -124,7 +124,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
                 stringBuilder.append(" for [").append(request.getRequestLine()).append(']');
             }
             stringBuilder.append(": ").append(resp.getStatusLine()).append(". ");
-            if (null != entity) {
+            if (null != entity && !entity.isEmpty()) {
                 stringBuilder.append("Server response: ").append(entity);
             }
             fail(stringBuilder.toString());

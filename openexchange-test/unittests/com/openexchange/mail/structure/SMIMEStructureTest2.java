@@ -59,8 +59,7 @@ import java.io.InputStream;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.configuration.MailConfig;
-import com.openexchange.configuration.MailConfig.Property;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -79,7 +78,7 @@ public class SMIMEStructureTest2 extends AbstractMailTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        final String testMailDir = MailConfig.getProperty(Property.TEST_MAIL_DIR);
+        final String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         final InputStream is = new FileInputStream(new File(testMailDir, "smimeStructureTest2.eml"));
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.transfer(is, baos);

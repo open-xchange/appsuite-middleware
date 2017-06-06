@@ -1,0 +1,196 @@
+feature_name: Filestore SWIFT
+feature_description: |
+  This properties configure file storages based on the
+  OpenStack Swift API. Each connected storage is identified by a "filestore ID",
+  which refers to the authority part of the URI configured  in the "uri" column
+  in the "filestore" table of the config database.  
+  Previously registered using:
+  <pre>./registerfilestore -t [filestoreID]</pre>
+  For each configured filestore, an own set of the properties may be defined, 
+  replacing [filestoreID] with the actual identifier.
+
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/filestore.html]] for more informations
+  about filestores.
+properties:
+    - key: com.openexchange.filestore.swift.[filestoreID].protocol
+      description: |
+        Specifies the protocol to be used for network communication (http or https)
+        This property is required.
+      defaultValue: https
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].hosts
+      description: |
+        Specifies the API end-point pairs to be used. At least one host must be provided.
+        Multiple hosts can be specified as comma-separated list; e.g. "my1.clouddrive.invalid, my2.clouddrive.invalid"
+        This property is required.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Host"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].path
+      description: |
+        The path consisting of API version and tenant identifier; e.g. "/v1/MyFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        This property is required.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].userName
+      description: |
+        Specifies the user name to use for authentication.
+        This property is required.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Credential"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].tenantName
+      description: |
+        Specifies the tenant name to use for authentication.
+        This property is required.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Credential"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].authType
+      description: |
+        Specifies the authentication type to use for authentication against Identity API v2.0;
+        see [[http://developer.openstack.org/api-ref-identity-v2.html]].
+        This property is required.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].authValue
+      description: |
+        Specifies the authentication value to use for authentication against Identity API v2.0;
+        see [[http://developer.openstack.org/api-ref-identity-v2.html]].
+        This property is required.
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Credential"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].identityUrl
+      description: |
+        The URL for the Identity API v2.0 end-point; e.g. "https://identity.api.mycloud.invalid/v2.0/tokens".
+        Not needed in case [[com.openexchange.filestore.swift.[filestoreID].authValue]] is set to <code>raxkey</code> (implicitly set to "https://identity.api.rackspacecloud.com/v2.0/tokens").
+        This property is required (for [[com.openexchange.filestore.swift.[filestoreID].authValue]] different from <code>raxkey</code>).
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].maxConnections
+      description: |
+        The max. number of concurrent HTTP connections that may be established with the swift
+        endpoints. If you have specified more than one hosts, this setting should be configured
+        so that maxConnectionsPerHost < maxConnections <= n * maxConnectionsPerHost.
+      defaultValue: 100
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Limit"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].maxConnectionsPerHost
+      description: |
+        The max. number of concurrent HTTP connections that may be established with a certain
+        swift endpoint.
+      defaultValue: 100
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Limit"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].connectionTimeout
+      description: |
+        The connection timeout in milliseconds. If establishing a new HTTP connection to a certain
+        host, it is blacklisted until it is considered available again. A periodic heartbeat task
+        that tries to read the namespace configuration (&lt;protocol&gt;://&lt;host&gt;/&lt;path&gt;/.conf) decides
+        whether an endpoint is considered available again.
+      defaultValue: 5000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Black List", "Timeout"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].socketReadTimeout
+      description: |
+        The socket read timeout in milliseconds. If waiting for the next expected TCP packet exceeds
+        this value, the host is blacklisted until it is considered available again. A periodic heartbeat
+        task that tries to read the namespace configuration (&lt;protocol&gt;://&lt;host&gt;/&lt;path&gt;/.conf) decides
+        whether an endpoint is considered available again.
+      defaultValue: 15000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Black List", "Timeout"]
+
+    - key: com.openexchange.filestore.swift.[filestoreID].heartbeatInterval
+      description: |
+        Hosts can get blacklisted if the client considers them to be unavailable. All hosts on the
+        blacklist are checked periodically if they are available again and are then removed from the
+        blacklist if so. A host is considered available again if the namespace configuration file
+        (&lt;protocol&gt;://&lt;host&gt;/&lt;path&gt;/.conf) can be requested without any error. This setting specifies
+        the interval in milliseconds between two heartbeat runs. The above specified timeouts must be
+        taken into account for specifying a decent value, as every heartbeat run might block until a
+        timeout happens for every still unavailable host.
+      defaultValue: 60000
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-swift.properties
+      packageName: open-xchange-filestore-swift
+      tags: ["Filestore", "Black List"]

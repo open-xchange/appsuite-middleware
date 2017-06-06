@@ -192,19 +192,19 @@ public class UpdateTest extends InfostoreAJAXTest {
         final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(id);
 
-        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V1
-        assertFalse(itm.getLastResponse().hasError());
-
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V2
         assertFalse(itm.getLastResponse().hasError());
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V3
         assertFalse(itm.getLastResponse().hasError());
 
+        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V4
+        assertFalse(itm.getLastResponse().hasError());
+
         com.openexchange.file.storage.File org2 = itm.getAction(id);
         org2.setVersion("2");
 
-        itm.updateAction(org2, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, org2.getLastModified());
+        itm.updateAction(org2, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, org2.getLastModified());
         assertFalse(itm.getLastResponse().hasError());
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
@@ -213,7 +213,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         List<com.openexchange.file.storage.File> versions = itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
         assertFalse(itm.getLastResponse().hasError());
 
-        VersionsTest.assureVersions(new Integer[] { 1, 2, 3 }, itm.getLastResponse(), 2);
+        VersionsTest.assureVersions(new Integer[] { 1, 2, 3, 4 }, itm.getLastResponse(), 2);
     }
 
     @Test

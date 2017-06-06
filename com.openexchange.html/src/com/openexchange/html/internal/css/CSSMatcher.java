@@ -51,6 +51,7 @@ package com.openexchange.html.internal.css;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
+import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -63,6 +64,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.Result;
@@ -109,6 +111,37 @@ public final class CSSMatcher {
         }
         return tmp.intValue();
     }
+
+    private static final class AllowsAllStyleMap extends AbstractMap<String, Set<String>> implements Map<String, Set<String>> {
+
+        private final Set<String> allowsAllValue;
+
+        /**
+         * Initializes a new {@link CSSMatcher.AllowsAllStyleMap}.
+         */
+        AllowsAllStyleMap() {
+            super();
+            allowsAllValue = ImmutableSet.of("*");
+        }
+
+        @Override
+        public Set<String> get(Object key) {
+            return allowsAllValue;
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return true;
+        }
+
+        @Override
+        public Set<java.util.Map.Entry<String, Set<String>>> entrySet() {
+            return null;
+        }
+    }
+
+    /** The special style map allowing all CSS */
+    public static final Map<String, Set<String>> ALLOWS_ALL_STYLE_MAP = new AllowsAllStyleMap();
 
     /**
      * Initializes a new {@link CSSMatcher}
@@ -419,7 +452,7 @@ public final class CSSMatcher {
 
         // Check for internal invocation and thread pool availability
         ThreadPoolService threadPool = ThreadPools.getThreadPool();
-        if (internallyInvoked || (threadPool == null) || (Thread.currentThread().getName().startsWith("JerichoParser"))) {
+        if (internallyInvoked || (threadPool == null) || isAsyncParserThread()) {
             boolean retval = doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent);
             cssBuilder.append(cssBld);
             return retval;
@@ -460,6 +493,11 @@ public final class CSSMatcher {
             f.cancel(true);
             return false;
         }
+    }
+
+    private static boolean isAsyncParserThread() {
+        String threadName = Thread.currentThread().getName();
+        return threadName.startsWith("JerichoParser") || threadName.startsWith("JsoupParser");
     }
 
     /**

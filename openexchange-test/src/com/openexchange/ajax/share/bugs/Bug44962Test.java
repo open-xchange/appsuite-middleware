@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,8 +57,6 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -83,21 +79,12 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class Bug44962Test extends ShareTest {
 
     private AJAXClient client2;
     private Map<Integer, FolderObject> foldersToDelete;
 
-    /**
-     * Initializes a new {@link Bug44962Test}.
-     *
-     * @param name The test name
-     */
-    public Bug44962Test() {
-        super();
-    }
-
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -105,6 +92,7 @@ public class Bug44962Test extends ShareTest {
         client2 = new AJAXClient(testContext.acquireUser());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -208,7 +196,7 @@ public class Bug44962Test extends ShareTest {
 
     @Test
     public void testDontInviteGuestToPublicPimFolderWithInviteGuests() throws Exception {
-        inviteGuestToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
+        inviteGuestToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0005");
     }
 
     @Test
@@ -223,12 +211,12 @@ public class Bug44962Test extends ShareTest {
 
     @Test
     public void testDontInviteUserToPublicPimFolder() throws Exception {
-        inviteUserToPublicFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0010");
+        inviteUserToPublicFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0005");
     }
 
     @Test
     public void testDontInviteUserToPublicPimFolderWithInviteGuests() throws Exception {
-        inviteUserToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
+        inviteUserToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0005");
     }
 
     private void setReadCreateSharedFoldersAndEditPublicFolders(boolean readCreateSharedFolders, boolean editPublicFolders) throws Exception {

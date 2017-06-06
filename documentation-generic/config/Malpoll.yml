@@ -1,0 +1,52 @@
+feature_name: MAL Poll
+properties:
+    - key: com.openexchange.push.malpoll.period
+      description: |
+        Define the amount of time in milliseconds when to periodically check for new mails.
+      defaultValue: 300000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: malpoll.properties
+      packageName: open-xchange-push-malpoll
+      tags: ["MAL Poll", "Mail", "Push"]
+    - key: com.openexchange.push.malpoll.global
+      description: |
+        Whether a global timer is set or a timer per user.
+        Or in other words: Do you want a global heartbeat or a heartbeat per user?
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: malpoll.properties
+      packageName: open-xchange-push-malpoll
+      tags: ["MAL Poll", "Mail", "Push"]
+    - key: com.openexchange.push.malpoll.concurrentglobal
+      description: |
+        Whether the tasks executed by global timer are executed concurrently
+        or by calling timer's thread.
+
+        Note:  
+        This property only has effect if [[com.openexchange.push.malpoll.global]]
+        is set to <code>true</code>.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.push.malpoll.global
+      file: malpoll.properties
+      packageName: open-xchange-push-malpoll
+      tags: ["MAL Poll", "Mail", "Push", "Thread"]
+    - key: com.openexchange.push.malpoll.folder
+      description: |
+        Define the folder to look-up for new mails in each mailbox.
+      defaultValue: INBOX
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: malpoll.properties
+      packageName: open-xchange-push-malpoll
+      tags: ["MAL Poll", "Mail", "Push", "Folder"]

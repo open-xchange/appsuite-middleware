@@ -50,11 +50,12 @@
 package com.openexchange.imap.config;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -62,7 +63,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import org.apache.commons.io.output.StringBuilderWriter;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -75,6 +75,7 @@ import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
@@ -121,6 +122,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean allowSORTDISPLAY;
             boolean fallbackOnFailedSORT;
             boolean useMultipleAddresses;
+            boolean useMultipleAddressesUserHash;
 
             Params() {
                 super();
@@ -139,6 +141,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean allowSORTDISPLAY;
         final boolean fallbackOnFailedSORT;
         final boolean useMultipleAddresses;
+        final boolean useMultipleAddressesUserHash;
 
         PrimaryIMAPProperties(Params params) {
             super();
@@ -152,6 +155,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.allowSORTDISPLAY = params.allowSORTDISPLAY;
             this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
             this.useMultipleAddresses = params.useMultipleAddresses;
+            this.useMultipleAddressesUserHash = params.useMultipleAddressesUserHash;
         }
     }
 
@@ -198,12 +202,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         PrimaryIMAPProperties.Params params = new PrimaryIMAPProperties.Params();
 
         StringBuilder logMessageBuilder = new StringBuilder(1024);
-        PrintWriter writer = new PrintWriter(new StringBuilderWriter(logMessageBuilder));
-        writer.print("Primary IMAP properties successfully loaded for user ");
-        writer.print(userId);
-        writer.print(" in context ");
-        writer.print(contextId);
-        writer.println();
+        List<Object> args = new ArrayList<>(16);
+
+        logMessageBuilder.append("Primary IMAP properties successfully loaded for user {} in context {}{}");
+        args.add(Integer.valueOf(userId));
+        args.add(Integer.valueOf(contextId));
+        args.add(Strings.getLineSeparator());
 
         {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.greeting.host.regex", view);
@@ -213,12 +217,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     Pattern pattern = Pattern.compile(tmp);
                     params.hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
 
-                    writer.print("  Host name regular expression: ");
-                    writer.println(tmp);
+                    logMessageBuilder.append("  Host name regular expression: {}{}");
+                    args.add(tmp);
+                    args.add(Strings.getLineSeparator());
                 } catch (PatternSyntaxException e) {
                     LOG.warn("Invalid expression for host name", e);
-                    writer.print("  Host name regular expression");
-                    writer.println("<none>");
+                    logMessageBuilder.append("  Host name regular expression: {}{}");
+                    args.add("<none>");
+                    args.add(Strings.getLineSeparator());
                 }
             }
         }
@@ -226,78 +232,103 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         {
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.rootSubfoldersAllowed", view);
             if (null == tmp) {
-                params.rootSubfoldersAllowed = Boolean.FALSE;
+                params.rootSubfoldersAllowed = null;
             } else {
                 params.rootSubfoldersAllowed = Boolean.valueOf(tmp);
-                writer.print("  Root sub-folders allowed: ");
-                writer.println(params.rootSubfoldersAllowed);
+
+                logMessageBuilder.append("  Root sub-folders allowed: {}{}");
+                args.add(params.rootSubfoldersAllowed);
+                args.add(Strings.getLineSeparator());
             }
         }
 
         {
             params.namespacePerUser = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.namespacePerUser", false, view);
-            writer.print("  Namespace per User: ");
-            writer.println(params.namespacePerUser);
+
+            logMessageBuilder.append("  Namespace per User: {}{}");
+            args.add(Autoboxing.valueOf(params.namespacePerUser));
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.umlautFilterThreshold = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.umlautFilterThreshold", 50, view);
-            writer.print("  Umlaut filter threhold: ");
-            writer.println(params.umlautFilterThreshold);
+
+            logMessageBuilder.append("  Umlaut filter threshold: {}{}");
+            args.add(Autoboxing.valueOf(params.umlautFilterThreshold));
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.maxMailboxNameLength = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.maxMailboxNameLength", 60, view);
-            writer.print("  Max. Mailbox Name Length: ");
-            writer.println(params.maxMailboxNameLength);
+
+            logMessageBuilder.append("  Max. Mailbox Name Length: {}{}");
+            args.add(Autoboxing.valueOf(params.maxMailboxNameLength));
+            args.add(Strings.getLineSeparator());
         }
 
         {
-            TIntSet invalidChars;
             String invalids = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.imap.invalidMailboxNameCharacters", view);
             if (Strings.isEmpty(invalids)) {
-                invalidChars = new TIntHashSet(0);
+                params.invalidChars = new TIntHashSet(0);
             } else {
                 final String[] sa = Strings.splitByWhitespaces(Strings.unquote(invalids));
                 final int length = sa.length;
-                invalidChars = new TIntHashSet(length);
+                TIntSet invalidChars = new TIntHashSet(length);
                 for (int i = 0; i < length; i++) {
                     invalidChars.add(sa[i].charAt(0));
                 }
 
                 params.invalidChars = invalidChars;
-                writer.print("  Invalid Mailbox Characters: ");
-                writer.println(invalids);
+
+                logMessageBuilder.append("  Invalid Mailbox Characters: {}{}");
+                args.add(invalids);
+                args.add(Strings.getLineSeparator());
             }
 
         }
 
         {
             params.allowESORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowESORT", true, view);
-            writer.print("  Allow ESORT: ");
-            writer.println(Boolean.toString(params.allowESORT));
+
+            logMessageBuilder.append("  Allow ESORT: {}{}");
+            args.add(Autoboxing.valueOf(params.allowESORT));
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.allowSORTDISPLAY = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.allowSORTDISPLAY", false, view);
-            writer.print("  Allow SORT-DSIPLAY: ");
-            writer.println(Boolean.toString(params.allowSORTDISPLAY));
+
+            logMessageBuilder.append("  Allow SORT-DSIPLAY: {}{}");
+            args.add(Autoboxing.valueOf(params.allowSORTDISPLAY));
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.fallbackOnFailedSORT = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.fallbackOnFailedSORT", false, view);
-            writer.print("  Fallback On Failed SORT: ");
-            writer.println(Boolean.toString(params.fallbackOnFailedSORT));
+
+            logMessageBuilder.append("  Fallback On Failed SORT: {}{}");
+            args.add(Autoboxing.valueOf(params.fallbackOnFailedSORT));
+            args.add(Strings.getLineSeparator());
         }
 
         {
             params.useMultipleAddresses = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddresses", false, view);
-            writer.print("  Use Multiple IP addresses: ");
-            writer.println(Boolean.toString(params.useMultipleAddresses));
+
+            logMessageBuilder.append("  Use Multiple IP addresses: {}{}");
+            args.add(Autoboxing.valueOf(params.useMultipleAddresses));
+            args.add(Strings.getLineSeparator());
+        }
+
+        if (params.useMultipleAddresses) {
+            params.useMultipleAddressesUserHash = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.useMultipleAddressesUserHash", false, view);
+
+            logMessageBuilder.append("  Use User Hash for Multiple IP addresses: {}{}");
+            args.add(Autoboxing.valueOf(params.useMultipleAddressesUserHash));
+            args.add(Strings.getLineSeparator());
         }
 
         PrimaryIMAPProperties primaryIMAPProps = new PrimaryIMAPProperties(params);
-        LOG.info(logMessageBuilder.toString());
+        LOG.debug(logMessageBuilder.toString(), args.toArray(new Object[args.size()]));
         return primaryIMAPProps;
     }
 
@@ -317,12 +348,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean fastFetch;
 
-    private boolean notifyRecent;
-
-    private int notifyFrequencySeconds;
-
-    private String notifyFullNames;
-
     private BoolCapVal supportsACLs;
 
     private int imapTimeout;
@@ -330,6 +355,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     private int imapConnectionTimeout;
 
     private int imapTemporaryDown;
+
+    private int imapFailedAuthTimeout;
 
     private String imapAuthEnc;
 
@@ -348,6 +375,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     private boolean enableTls;
 
     private boolean auditLogEnabled;
+
+    private boolean overwritePreLoginCapabilities;
 
     private Set<String> propagateHostNames;
 
@@ -371,6 +400,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         sContainerType = "boundary-aware";
         enableTls = true;
         auditLogEnabled = false;
+        overwritePreLoginCapabilities = false;
         maxNumConnection = -1;
         newACLExtMap = new NonBlockingHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
@@ -386,29 +416,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         logBuilder.append("\nLoading global IMAP properties...\n");
 
         final ConfigurationService configuration = Services.getService(ConfigurationService.class);
-        {
-            final String tmp = configuration.getProperty("com.openexchange.imap.notifyRecent", STR_FALSE).trim();
-            notifyRecent = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tNotify Recent: ").append(notifyRecent).append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.imap.notifyFrequencySeconds", "300").trim();
-            try {
-                notifyFrequencySeconds = Integer.parseInt(tmp);
-                logBuilder.append("\tNotify Frequency Seconds: ").append(notifyFrequencySeconds).append('\n');
-            } catch (final NumberFormatException e) {
-                notifyFrequencySeconds = 300;
-                logBuilder.append("\tNotify Frequency Seconds: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
-                    notifyFrequencySeconds).append('\n');
-            }
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.imap.notifyFullNames", "INBOX").trim();
-            notifyFullNames = tmp;
-        }
-
         {
             final String allowFolderCachesStr = configuration.getProperty("com.openexchange.imap.allowFolderCaches", "true").trim();
             allowFolderCaches = "true".equalsIgnoreCase(allowFolderCachesStr);
@@ -456,6 +463,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             String tmp = configuration.getProperty("com.openexchange.imap.auditLog.enabled", STR_FALSE).trim();
             auditLogEnabled = Boolean.parseBoolean(tmp);
             logBuilder.append("\tAudit Log Enabled: ").append(auditLogEnabled).append('\n');
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.overwritePreLoginCapabilities", STR_FALSE).trim();
+            overwritePreLoginCapabilities = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tOverwrite Pre-Login Capabilities: ").append(overwritePreLoginCapabilities).append('\n');
         }
 
         {
@@ -520,6 +533,18 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 imapTemporaryDown = 0;
                 logBuilder.append("\tIMAP Temporary Down: Invalid value \"").append(imapTempDownStr).append("\". Setting to fallback: ").append(
                     imapTemporaryDown).append('\n');
+            }
+        }
+
+        {
+            final String imapFailedAuthTimeoutStr = configuration.getProperty("com.openexchange.imap.failedAuthTimeout", "10000").trim();
+            try {
+                imapFailedAuthTimeout = Integer.parseInt(imapFailedAuthTimeoutStr);
+                logBuilder.append("\tIMAP Failed Auth Timeout: ").append(imapFailedAuthTimeout).append('\n');
+            } catch (final NumberFormatException e) {
+                imapFailedAuthTimeout = 10000;
+                logBuilder.append("\tIMAP Failed Auth Timeout: Invalid value \"").append(imapFailedAuthTimeoutStr).append("\". Setting to fallback: ").append(
+                    imapFailedAuthTimeout).append('\n');
             }
         }
 
@@ -655,7 +680,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     hostExtractingGreetingListener = new HostExtractingGreetingListener(pattern);
                     logBuilder.append("\tHost name regular expression: ").append(tmp).append("\n");
                 } catch (PatternSyntaxException e) {
-                    logBuilder.append("\tHost name regular expression: Invalid value \"").append(null == tmp ? "<none>" : tmp).append("\". Using no host name extraction\n");
+                    logBuilder.append("\tHost name regular expression: Invalid value \"").append(tmp).append("\". Using no host name extraction\n");
                 }
             }
         }
@@ -674,20 +699,19 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         propagateClientIPAddress = false;
         enableTls = true;
         auditLogEnabled = false;
+        overwritePreLoginCapabilities = false;
         propagateHostNames = Collections.emptySet();
         supportsACLs = null;
         imapTimeout = 0;
         imapConnectionTimeout = 0;
         imapTemporaryDown = 0;
+        imapFailedAuthTimeout = 10000;
         imapAuthEnc = null;
         entity2AclImpl = null;
         blockSize = 0;
         maxNumConnection = -1;
         sContainerType = "boundary-aware";
         spamHandlerName = null;
-        notifyRecent = false;
-        notifyFrequencySeconds = 300;
-        notifyFullNames = "INBOX";
         sslProtocols = "SSLv3 TLSv1";
         cipherSuites = null;
         hostExtractingGreetingListener = null;
@@ -748,6 +772,27 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         try {
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddresses;
+        } catch (Exception e) {
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether a user hash should be used for selecting one of possible multiple IP addresses for a host name.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Only effective if {@link #isUseMultipleAddresses(int, int)} returns <code>true</code>!
+     * </div>
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to use multiple IP addresses; otherwise <code>false</code>
+     */
+    public boolean isUseMultipleAddressesUserHash(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.useMultipleAddressesUserHash;
         } catch (Exception e) {
             LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
             return false;
@@ -898,21 +943,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public boolean notifyRecent() {
-        return notifyRecent;
-    }
-
-    @Override
-    public int getNotifyFrequencySeconds() {
-        return notifyFrequencySeconds;
-    }
-
-    @Override
-    public String getNotifyFullNames() {
-        return notifyFullNames;
-    }
-
-    @Override
     public boolean isPropagateClientIPAddress() {
         return propagateClientIPAddress;
     }
@@ -925,6 +955,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isAuditLogEnabled() {
         return auditLogEnabled;
+    }
+
+    @Override
+    public boolean isOverwritePreLoginCapabilities() {
+        return overwritePreLoginCapabilities;
     }
 
     @Override
@@ -945,6 +980,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public int getImapTemporaryDown() {
         return imapTemporaryDown;
+    }
+
+    @Override
+    public int getImapFailedAuthTimeout() {
+        return imapFailedAuthTimeout;
     }
 
     @Override
@@ -988,53 +1028,13 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public int getAttachDisplaySize() {
-        return mailProperties.getAttachDisplaySize();
-    }
-
-    @Override
-    public char getDefaultSeparator() {
-        return mailProperties.getDefaultSeparator();
-    }
-
-    @Override
-    public int getMailAccessCacheIdleSeconds() {
-        return mailProperties.getMailAccessCacheIdleSeconds();
-    }
-
-    @Override
-    public int getMailAccessCacheShrinkerSeconds() {
-        return mailProperties.getMailAccessCacheShrinkerSeconds();
-    }
-
-    @Override
     public int getMailFetchLimit() {
         return mailProperties.getMailFetchLimit();
     }
 
     @Override
-    public int getWatcherFrequency() {
-        return mailProperties.getWatcherFrequency();
-    }
-
-    @Override
-    public int getWatcherTime() {
-        return mailProperties.getWatcherTime();
-    }
-
-    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
-    }
-
-    @Override
-    public boolean isEnforceSecureConnection() {
-        return mailProperties.isEnforceSecureConnection();
-    }
-
-    @Override
-    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
-        mailProperties.setEnforceSecureConnection(enforceSecureConnection);
     }
 
     @Override
@@ -1050,16 +1050,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isUserFlagsEnabled() {
         return mailProperties.isUserFlagsEnabled();
-    }
-
-    @Override
-    public boolean isWatcherEnabled() {
-        return mailProperties.isWatcherEnabled();
-    }
-
-    @Override
-    public boolean isWatcherShallClose() {
-        return mailProperties.isWatcherShallClose();
     }
 
     @Override

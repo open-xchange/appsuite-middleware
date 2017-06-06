@@ -8,7 +8,7 @@ timezone > io.ox/core//timezone
 serverVersion > io.ox/core//serverVersion
 folder > io.ox/core//folder
 validate_contact_email > io.ox/core//features/validateMailAddresses
-identifier > identifier
+identifier > io.ox/core//identifier
 modules/com.openexchange.user.personaldata/internal_user_edit > io.ox/core//user/internalUserEdit
 
 # Timezones
@@ -47,7 +47,6 @@ modules/mail/unifiedinboxidentifier > io.ox/mail//unifiedInboxIdentifier
 modules/mail/msgformat > io.ox/mail//messageFormat
 modules/mail/namespace > io.ox/mail//namespace
 modules/mail/displayReceiptNotification > io.ox/mail//sendDispositionNotification
-modules/mail/enforcesecureconnection > io.ox/mail//enforcesecureconnection
 modules/mail/defaultarchivedays > io.ox/mail//archive/days
 modules/mail/savenocopy > io.ox/mail//saveNoCopyInSentFolder
 modules/mail/uploadquota_total > io.ox/mail//uploadQuotaTotal

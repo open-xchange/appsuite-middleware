@@ -65,7 +65,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.databaseold.Database;
@@ -114,7 +113,6 @@ public final class Bug11865Test extends AbstractAJAXSession {
      */
     @Test
     public void testAppointmentException() throws Throwable {
-        final AJAXClient client = getClient();
         final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = getClient().getValues().getTimeZone();
         final Appointment series = new Appointment();
@@ -192,11 +190,9 @@ public final class Bug11865Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteBadData() throws Throwable {
-        AJAXClient client = null;
         int objectId = 0;
         int folderId = 0;
 
-        client = getClient();
         final TimeZone tz = getClient().getValues().getTimeZone();
         folderId = getClient().getValues().getPrivateAppointmentFolder();
 

@@ -1,0 +1,148 @@
+feature_name: Spamexperts
+properties:
+  - key: com.openexchange.custom.spamexperts.panel_servlet
+    description: |
+      Specifies the mount point of the panel servlet.
+    defaultValue: /ajax/spamexperts/panel
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts"] 
+  - key: com.openexchange.custom.spamexperts.panel.api_interface_url
+    description: |
+      Specifies the URL of spamexperts interface to generate new sessions.
+    defaultValue: http://demo1.spambrand.com/api/authticket/create/username/
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts"] 
+  - key: com.openexchange.custom.spamexperts.panel.admin_user
+    description: |
+      This property defines the username which should be used as basic auth.
+    defaultValue: admin
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts", "Credential"] 
+  - key: com.openexchange.custom.spamexperts.panel.admin_password
+    description: |
+      This property defines the password which should be used as basic auth.
+    defaultValue: demo
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts", "Credential"] 
+  - key: com.openexchange.custom.spamexperts.panel.api_auth_attribute
+    description: |
+      Specifies the user attribute which should be used for authentication against panel API.
+      
+      Possible values:
+      <ul>
+       <li><code>imaplogin</code> - Users IMAP login.</li>
+       <li><code>mail</code> - Users mail address.</li>
+       <li><code>login</code> - String which user entered at login mask.</li>
+       <li><code>username</code> - Users "username" attribute.</li>
+      </ul>
+    defaultValue: mail
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts"] 
+  - key: com.openexchange.custom.spamexperts.panel.web_ui_url
+    description: |
+      Defines the URL where the panel is available.
+    defaultValue: http://demo1.spambrand.com/?authticket=
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts"] 
+  - key: com.openexchange.custom.spamexperts.imapurl
+    description: |
+      The imap url to the spamexperts imap server.
+      
+      Example 1:
+      <pre>
+      com.openexchange.custom.spamexperts.imapurl=imap://myserver.example.com  
+      # If the imap server offers STARTTLS, communication will be encrypted.
+      </pre>
+      Example 2:
+      <pre>
+      com.openexchange.custom.spamexperts.imapurl=imaps:myserver.example.com:993  
+      # Connect to port 993 using a secure connection directly.
+      </pre>
+    defaultValue:
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts", "Host", "Port"] 
+  - key: com.openexchange.custom.spamexperts.imapuser
+    description: |
+      Username to authenticate against the imap server.
+    defaultValue:
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts", "Credential"] 
+  - key: com.openexchange.custom.spamexperts.imappassword
+    description: |
+      Password to authenticate against the imap server.
+    defaultValue:
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts", "Credential"] 
+  - key: com.openexchange.custom.spamexperts.trainspamfolder
+    description: |
+      Foldername of folder to place spam mails in order to train the system.
+    defaultValue: Spam
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts"] 
+  - key: com.openexchange.custom.spamexperts.trainhamfolder
+    description: |
+      Foldername of folder to place ham mails in order to train the system.
+    defaultValue: Not Spam
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamexperts.properties
+    packageName: open-xchange-spamhandler-spamexperts
+    tags: ["Spamexperts"]
+    
+    
+    
+    
+    
+    

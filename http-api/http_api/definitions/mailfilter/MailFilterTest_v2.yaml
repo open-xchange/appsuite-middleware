@@ -4,4 +4,4 @@ type: object
 properties:
   $ref: ./RawMailFilterTest_v2.yaml
   test:
-    $ref: "#/definitions/MailFilterNotTest_v2"
+    $ref: "#/definitions/MailFilterNotTestv2"

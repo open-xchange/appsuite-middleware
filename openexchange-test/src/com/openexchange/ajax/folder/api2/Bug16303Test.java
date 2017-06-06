@@ -50,8 +50,7 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.Iterator;
 import org.junit.Before;
@@ -78,9 +77,11 @@ public class Bug16303Test extends AbstractAJAXSession {
     private AJAXClient clientB;
     private FolderObject createdFolder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        clientA = getClient();
         clientB = getClient2();
         createdFolder = new FolderObject();
         createdFolder.setModule(FolderObject.CALENDAR);
@@ -105,7 +106,7 @@ public class Bug16303Test extends AbstractAJAXSession {
         }
         assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
-        @SuppressWarnings("null") ListRequest listRequest2 = new ListRequest(EnumAPI.OUTLOOK, foundUserShared.getFullName());
+        ListRequest listRequest2 = new ListRequest(EnumAPI.OUTLOOK, foundUserShared.getFullName());
         listResponse = clientB.execute(listRequest2);
         iter = listResponse.getFolder();
         FolderObject foundShared = null;

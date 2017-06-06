@@ -91,20 +91,6 @@ public final class MailFolderTest extends AbstractMailTest {
 
     private static final String INBOX = "INBOX";
 
-    /**
-     *
-     */
-    public MailFolderTest() {
-        super();
-    }
-
-    /**
-     * @param name
-     */
-    public MailFolderTest(final String name) {
-        super();
-    }
-
     @Test
     public void testStandardFolders() {
         try {

@@ -7,12 +7,16 @@ Bundle-Activator: com.openexchange.pgp.core.osgi.PGPCoreActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.pgp.keys.common,
+ com.openexchange.tools.encoding,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
  org.apache.commons.io;version="2.2.0",
  org.bouncycastle.bcpg;version="1.56.0",
+ org.bouncycastle.crypto;version="1.56.0",
  org.bouncycastle.jce.provider;version="1.56.0",
  org.bouncycastle.openpgp;version="1.56.0",
  org.bouncycastle.openpgp.operator;version="1.56.0",
@@ -20,4 +24,6 @@ Import-Package: com.openexchange.exception,
  org.bouncycastle.openpgp.operator.jcajce;version="1.56.0",
  org.osgi.framework;version="1.3.0",
  org.slf4j;version="1.7.5"
-Export-Package: com.openexchange.pgp.core
+Export-Package: com.openexchange.pgp.core,
+ com.openexchange.pgp.core.exceptions,
+ com.openexchange.pgp.core.packethandling

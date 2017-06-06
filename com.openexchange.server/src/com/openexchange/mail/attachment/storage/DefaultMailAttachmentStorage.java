@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -74,6 +75,8 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.crypto.CryptographyMode;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -99,6 +102,7 @@ import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -134,13 +138,16 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
     }
 
+    private final ServiceLookup serviceLookup;
+
     // ------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Initializes a new {@link DefaultMailAttachmentStorage}.
      */
-    public DefaultMailAttachmentStorage() {
+    public DefaultMailAttachmentStorage(ServiceLookup serviceLookup) {
         super();
+        this.serviceLookup = serviceLookup;
     }
 
     private PublicationRefs getPublicationRefs() throws OXException {
@@ -313,7 +320,20 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         /*
          * Put attachment's document to dedicated infostore folder
          */
-        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        //Check for encryption
+        final boolean encrypt = null == storeProps ? false : storeProps.containsKey("encrypt") && (boolean) storeProps.get("encrypt");
+        if(encrypt) {
+            CryptographicAwareIDBasedFileAccessFactory cryptoFileAccessFactory = this.serviceLookup.getOptionalService(CryptographicAwareIDBasedFileAccessFactory.class);
+            if(cryptoFileAccessFactory != null) {
+                //encrypt the mail attachment
+                EnumSet<CryptographyMode> encryptMode = EnumSet.of(CryptographyMode.ENCRYPT);
+                fileAccess = cryptoFileAccessFactory.createAccess(fileAccess, encryptMode, session);
+            }
+            else {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptographicAwareIDBasedFileAccessFactory.class.getSimpleName());
+            }
+        }
         boolean retry = true;
         int count = 1;
         final StringBuilder hlp = new StringBuilder(16);

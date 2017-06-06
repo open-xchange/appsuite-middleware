@@ -91,11 +91,12 @@ public class StrictIPChecker implements IPChecker {
 
     @Override
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
-        if (!IPCheckers.isWhiteListed(current, previous, session, configuration)) {
+        boolean whiteListedClient = IPCheckers.isWhitelistedClient(session, configuration);
+        if (!whiteListedClient && !IPCheckers.isWhiteListedAddress(current, previous, configuration)) {
             IPCheckers.kick(current, session);
         }
 
-        IPCheckers.updateIPAddress(current, session, true);
+        IPCheckers.updateIPAddress(current, session, true, whiteListedClient);
     }
 
 }

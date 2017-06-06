@@ -84,6 +84,13 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean isAuditLogEnabled();
 
     /**
+     * Whether the pre-login capabilities are supposed to be overwritten (completely replaced with the ones advertised after login)
+     *
+     * @return <code>true</code> to overwrite; otherwise <code>false</code> to extend
+     */
+    public boolean isOverwritePreLoginCapabilities();
+
+    /**
      * Gets the host names to propagate to.
      *
      * @return The host names to propagate to
@@ -119,6 +126,13 @@ public interface IIMAPProperties extends IMailProperties {
     public int getImapTemporaryDown();
 
     /**
+     * Gets the timeout for failed authentication attempts.
+     *
+     * @return The timeout for failed authentication attempts
+     */
+    public int getImapFailedAuthTimeout();
+
+    /**
      * Checks if IMAP search is enabled.
      *
      * @return <code>true</code> if IMAP search is enabled; otherwise <code>false</code>
@@ -138,27 +152,6 @@ public interface IIMAPProperties extends IMailProperties {
      * @return <code>true</code> if IMAP sort is enabled; otherwise <code>false</code>
      */
     public boolean isImapSort();
-
-    /**
-     * Whether to notify about recent messages.
-     *
-     * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
-     */
-    public boolean notifyRecent();
-
-    /**
-     * Gets the frequency (in seconds) when to check for recent mails.
-     *
-     * @return The frequency (in seconds)
-     */
-    public int getNotifyFrequencySeconds();
-
-    /**
-     * Gets the comma-separated full names of the folders to check for recent mails.
-     *
-     * @return The comma-separated full names
-     */
-    public String getNotifyFullNames();
 
     /**
      * Gets the IMAP timeout.

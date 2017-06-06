@@ -154,7 +154,7 @@ public abstract class DAVProtocol extends Protocol {
             default:
                 break;
         }
-        return WebdavProtocolException.class.isInstance(e) ? (WebdavProtocolException) e : WebdavProtocolException.generalError(e, url, statusCode);
+        return WebdavProtocolException.class.isInstance(e) ? (WebdavProtocolException) e : new WebdavProtocolException(url, statusCode, e);
     }
 
     /**

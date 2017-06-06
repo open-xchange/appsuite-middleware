@@ -1,0 +1,144 @@
+feature_name: POP3
+properties:
+    - key: com.openexchange.pop3.pop3Timeout
+      description: |
+        Define the socket read timeout value in milliseconds. A value less than
+        or equal to zero is infinite timeout. See also [[mail.smtp.timeout]].
+      defaultValue: 50000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3", "Timeout"]
+    - key: com.openexchange.pop3.pop3ConnectionTimeout
+      description: |
+        Define the socket connect timeout value in milliseconds. A value less
+        or equal to zero is infinite timeout. See also [[mail.smtp.connectiontimeout]].
+      defaultValue: 20000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3", "Timeout"]
+    - key: com.openexchange.pop3.pop3TemporaryDown
+      description: |
+        Define the amount of time in milliseconds a POP3 server is treated as being temporary down.
+        A POP3 server is treated as being temporary down if a socket connect fails. Further requests to
+        the affected POP3 server are going to be denied for the specified amount of time.
+        A value less or equal to zero disables this setting.
+      defaultValue: 10000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.pop3AuthEnc
+      description: |
+        Define the encoding for POP3 authentication
+      defaultValue: UTF-8
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.spamHandler
+      description: |
+        Define the registration name of the appropriate spam handler to use.
+
+        Note:  
+        This value gets overwritten by [[com.openexchange.spamhandler.name]].
+      defaultValue: DefaultSpamHandler
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.spamhandler.name
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.pop3ConnectionIdleTime
+      description: |
+        Define the amount of time in milliseconds an established POP3 connection is kept
+        open although being idle. Since some POP3 servers limit the time period in which
+        connections may be opened/closed, this property allows to keep the connection open
+        to avoid an error on a subsequent login.
+        This property overwrites default connection idle time specified through property
+        [[com.openexchange.mail.mailAccessCacheIdleSeconds]].
+      defaultValue: 300000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.mailAccessCacheIdleSeconds
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.pop3BlockSize
+      description: |
+        Specify the number of messages (positive integer) which are allowed to be processed at once.
+        Zero or negative value defaults to <code>100</code>.
+      defaultValue: 100
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.allowPing
+      description: |
+        Whether ping operation is allowed for POP3 account.
+        Many POP3 account limit number of allowed login attempts in a certain time interval.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.logDeniedPing
+      description: |
+        Whether denied ping operation shall be indicated as a warning to client.
+        Only effective if [[com.openexchange.pop3.allowPing]] is set to <code>false</code>.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.ssl.protocols
+      description: |
+        Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+    - key: com.openexchange.pop3.ssl.ciphersuites
+      description: |
+        Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens
+        
+        Check "http://<ox-grizzly-hostname>:<ox-grizzly-port>/stats/diagnostic?param=ciphersuites" to check available cipher suites.
+        
+        An empty value means, that the current JVM's default SSL cipher suite is used.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: pop3.properties
+      packageName: open-xchange-pop3
+      tags: ["Mail","POP3"]
+      

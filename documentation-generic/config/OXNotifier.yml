@@ -1,0 +1,41 @@
+feature_name: OX Notifier
+feature_description: |
+  Properties for OX Notifier
+properties:
+    - key: com.openexchange.oxnotifier.baseName
+      description: |
+        The basic file name of the OXNotifier binaries. Without locale information.
+      defaultValue: OXNotifier
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
+      tags: ["OXNotifier"]
+
+    - key: com.openexchange.oxnotifier.productName
+      description: |
+        Branded product name of the OXNotifier.
+        This defines the name of the installable or updatable OXNotifier that will be shown within the updater.
+      defaultValue: OXNotifier
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
+      tags: ["OXNotifier"]
+
+    - key: com.openexchange.oxnotifier.icon
+      description: |
+        Bytecode of an icon that can be displayed in the updater for this product next to the update entry.
+      defaultValue: 
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: oxnotifier.properties
+      packageName: open-xchange-oxnotifier
+      tags: ["OXNotifier"]
+      

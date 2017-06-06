@@ -89,19 +89,13 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
      * Does an insert and compares data from both get and all request
      */
     public void runSimpleInsertTest(Task task) {
-        TaskTestManager testManager = null;
-        try {
-            testManager = new TaskTestManager(getClient());
-        } catch (Exception e) {
-            fail("Setup failed, TestManager could not be instantiated");
-        }
-        testManager.insertTaskOnServer(task);
-        Task resultingTask = testManager.getTaskFromServer(task);
+        ttm.insertTaskOnServer(task);
+        Task resultingTask = ttm.getTaskFromServer(task);
         Set<Integer> ignore = new HashSet<Integer>();
         ignore.add(I(Task.UID));
         ignore.add(I(Task.FULL_TIME)); // mimic legacy behavior
         TaskAsserts.assertAllTaskFieldsMatchExcept(task, resultingTask, ignore);
-        testManager.cleanUp();
+        ttm.cleanUp();
     }
 
     /**

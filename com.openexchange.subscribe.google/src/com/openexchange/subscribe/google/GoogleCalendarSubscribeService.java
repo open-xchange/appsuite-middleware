@@ -72,9 +72,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceExceptionCode;
@@ -94,10 +97,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarSubscribeService.class);
+    /** The logger */
+    static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarSubscribeService.class);
 
     final Integer pageSize;
-
     private final SubscriptionSource source;
 
     public GoogleCalendarSubscribeService(final OAuthServiceMetaData googleMetaData, ServiceLookup services) {
@@ -134,12 +137,28 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         }
 
         final ServerSession session = subscription.getSession();
-        final GoogleCredential googleCreds = GoogleApiClients.getCredentials(session);
+
+        OAuthAccount oauthAccount = null;
+        {
+            Object accountId = subscription.getConfiguration().get("account");
+            if (null != accountId) {
+                int iAccountId;
+                if (accountId instanceof Integer) {
+                    iAccountId = ((Integer) accountId).intValue();
+                } else {
+                    iAccountId = Integer.parseInt(accountId.toString());
+                }
+                OAuthService service = services.getService(OAuthService.class);
+                oauthAccount = service.getAccount(iAccountId, session, session.getUserId(), session.getContextId());
+            }
+        }
+
+        final GoogleCredential googleCreds = null == oauthAccount ? GoogleApiClients.getCredentials(session) : GoogleApiClients.getCredentials(oauthAccount, session);
         final Calendar googleCalendarService = new Calendar.Builder(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
 
         // Check if we have permissions
         try {
-            googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(1).execute();
+            googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(Integer.valueOf(1)).execute();
         } catch (IOException e) {
             if (e instanceof GoogleJsonResponseException) {
                 GoogleJsonResponseException ex = (GoogleJsonResponseException) e;
@@ -196,9 +215,16 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                         cdo.setParentFolderID(subscription.getFolderIdAsInt());
                         try {
                             appointmentsql.insertAppointmentObject(cdo);
-                        } catch (Exception e) {
-                            // Just log the exception
-                            LOG.error("Couldn't import appointment {}.", cdo, e);
+                        } catch (OXException e) {
+                            if (OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS.equals(e)) {
+                                // Such an appointment already exists
+                                LOG.debug("An appointment with the same UID already exists: {}.", cdo, e);
+                            } else {
+                                // Just log the exception
+                                LOG.error("Couldn't import appointment {}.", cdo, e);
+                            }
+                        } catch (RuntimeException e) {
+                            LOG.error("Unexpected exception while importing appointment {}.", cdo, e);
                         }
                     }
 
@@ -213,7 +239,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         return new LinkedList<CalendarDataObject>();
     }
 
-    private void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException, IOException {
+    void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException, IOException {
         for (Event event : events.getItems()) {
             // Consider only events with an organizer; the rest are only updates on status, e.g. delete exceptions (handle below)
             final CalendarDataObject calendarObject = new CalendarDataObject();
@@ -234,7 +260,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         }
     }
 
-    private void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
+    void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
         final Map<String, CalendarDataObject> masterMap = new HashMap<String, CalendarDataObject>(series.size());
 
         handleSeries(subscription, series, appointmentsql, masterMap);
@@ -249,8 +275,16 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 cdo.setParentFolderID(subscription.getFolderIdAsInt());
                 appointmentsql.insertAppointmentObject(cdo);
                 masterMap.put(cdo.getUid(), cdo);
-            } catch (Exception e) {
-                LOG.error("Couldn't import series appointment {}.", cdo, e);
+            } catch (OXException e) {
+                if (OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS.equals(e)) {
+                    // Such an appointment already exists
+                    LOG.debug("A series appointment with the same UID already exists: {}.", cdo, e);
+                } else {
+                    // Just log the exception
+                    LOG.error("Couldn't import series appointment {}.", cdo, e);
+                }
+            } catch (RuntimeException e) {
+                LOG.error("Unexpected exception while importing series appointment {}.", cdo, e);
             }
         }
         return masterMap;

@@ -49,10 +49,7 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.net.URI;
 import java.util.Date;
 import java.util.Map;
@@ -162,7 +159,14 @@ public class ImageURITest extends CardDAVTest {
          */
         String uid = randomUID();
         String href = "/carddav/Contacts/" + uid + ".vcf";
-        VCardResource vCard = new VCardResource("BEGIN:VCARD" + "\r\n" + "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" + "VERSION:3.0" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + formatAsUTC(new Date()) + "\r\n" + "END:VCARD" + "\r\n", href, null);
+        VCardResource vCard = new VCardResource(
+            "BEGIN:VCARD" + "\r\n" +
+            "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" +
+            "VERSION:3.0" + "\r\n" +
+            "UID:" + uid + "\r\n" +
+            "REV:" + formatAsUTC(new Date()) + "\r\n" +
+            "END:VCARD" + "\r\n", href, null)
+        ;
         PhotoType photo = new PhotoType();
         photo.setImageMediaType(ImageMediaType.PNG);
         photo.setEncodingType(EncodingType.BINARY);
@@ -219,9 +223,9 @@ public class ImageURITest extends CardDAVTest {
          */
         vCard.getVCard().removePhoto(vCard.getVCard().getPhotos().get(0));
         PhotoType photo = new PhotoType();
-        photo.setImageMediaType(ImageMediaType.SGIF);
+        photo.setImageMediaType(ImageMediaType.PNG);
         photo.setEncodingType(EncodingType.BINARY);
-        photo.setPhoto(Photos.GIF_100x100);
+        photo.setPhoto(Photos.PNG_200x200);
         vCard.getVCard().addPhoto(photo);
         putVCardUpdate(uid, vCard.toString(), vCard.getETag());
         /*
@@ -229,11 +233,11 @@ public class ImageURITest extends CardDAVTest {
          */
         contact = getContact(uid);
         assertNotNull(contact);
-        Assert.assertArrayEquals("image data wrong", Photos.GIF_100x100, contact.getImage1());
+        Assert.assertArrayEquals("image data wrong", Photos.PNG_200x200, contact.getImage1());
         /*
          * get & verify photo in vCard
          */
-        verifyPhoto(href, Photos.GIF_100x100, prefer);
+        verifyPhoto(href, Photos.PNG_200x200, prefer);
     }
 
     private void testRemoveOnClient(String prefer) throws Exception {

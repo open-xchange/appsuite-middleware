@@ -1,0 +1,63 @@
+feature_name: Mail Drive
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/virtual_mail_attachments.html]] for more informations.
+properties:
+    - key: com.openexchange.file.storage.mail.enabled
+      description: |
+        The general switch to enable/disable Mail Drive.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
+      tags: ["Mail Drive", "Filestorage"]
+    - key: com.openexchange.file.storage.mail.fullNameAll
+      description: |
+        Specifies the full name for the virtual folder, which provides the attachments from all messages.
+        Required.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
+      tags: ["Mail Drive", "Filestorage"]
+    - key: com.openexchange.file.storage.mail.fullNameReceived
+      description: |
+        Specifies the full name for the virtual folder, which provides the attachments from received messages.
+        Required.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
+      tags: ["Mail Drive", "Filestorage"]
+    - key: com.openexchange.file.storage.mail.fullNameSent
+      description: |
+        Specifies the full name for the virtual folder, which provides the attachments from sent messages.
+        Required.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
+      tags: ["Mail Drive", "Filestorage"]
+    - key: com.openexchange.file.storage.mail.maxAccessesPerUser
+      description: |
+        Specifies how many concurrent connections/accesses to IMAP store are allowed to be established for a single user.
+        A request exceeding that limitation will be paused until an acquired connection is released.
+      defaultValue: 4
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage-maildrive.properties
+      packageName: open-xchange-file-storage-mail
+      tags: ["Mail Drive", "Filestorage", "Limit", "IMAP"]

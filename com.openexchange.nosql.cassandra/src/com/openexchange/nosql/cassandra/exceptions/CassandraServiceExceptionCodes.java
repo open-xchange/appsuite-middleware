@@ -89,6 +89,14 @@ public enum CassandraServiceExceptionCodes implements DisplayableOXExceptionCode
      * An exception indicating that a query cannot be executed because it is syntactically incorrect, invalid, unauthorized or any other reason.
      */
     QUERY_VALIDATION_ERROR("Invalid query: %1$s", Category.CATEGORY_ERROR, 5),
+    /**
+     * Could not initialise the connection to the Cassandra cluster: %1$s
+     */
+    CANNOT_INITIALISE_CLUSTER("Could not initialise the connection to the Cassandra cluster: %1$s", Category.CATEGORY_ERROR, 6),
+    /**
+     * The keyspace '%1$s' does not exist.
+     */
+    KEYSPACE_DOES_NOT_EXIST("The keyspace '%1$s' does not exist.", CATEGORY_ERROR, 7),
     ;
 
     private final int number;

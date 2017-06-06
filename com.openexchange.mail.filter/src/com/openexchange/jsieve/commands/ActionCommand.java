@@ -354,7 +354,7 @@ public class ActionCommand extends ControlOrActionCommand {
             this.commandName = commandName;
             this.minNumberOfArguments = minNumberOfArguments;
             this.tagArgs = tagArgs;
-            this.required = null == required || required.isEmpty() ? "" : required;
+            this.required = null == required || required.isEmpty() ? null : required;
             this.jsonName = jsonName;
         }
 

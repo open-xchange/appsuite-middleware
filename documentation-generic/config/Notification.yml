@@ -1,0 +1,93 @@
+feature_name: Notification
+feature_description: |
+  The settings on this page govern, when notification eMails are sent once a task or appointment is modified.
+  Whether notification mails are sent is goverened:
+  <ol>
+    <li>By a user specific setting in the configuration.</li>
+    <li>By the checkbox when creating a task/appointment.</li>
+    <li>By this settings.</li>
+  </ol>
+  <h3>1. The user specific setting</h3>
+  Each user can specify whether he wants to receive notification emails for tasks or appointments. The user can
+  set this individually per object type. If the user chooses not to be notified for (say) tasks, that's the end of
+  the story, the notification mails won't ever bother her (for tasks). She may choose separately that she's interested
+  about appointment notifications, and enable the corresponding feature. This would mean she might be notified of changes
+  to appointments in which she is a participant. This is goverened by the other settings.
+  
+  <h3>2. The checkbox when creating/modifying a task/appointment</h3>
+  Notice in the dialog when creating or editing an appointment there is a checkbox labeled 'Notify Participants'.
+  If this checkbox is enabled, the participants of the task/appointment will be notified of the change (unless their
+  user specific setting as per 1. suppress that). Also the person creating or changing the object will not get the
+  notification mail, because, presumably, she knows what she has been doing. Also the owner is always notified
+  of a change to a task/appointment by someone else other than the owner (unless the notification is suppressed as per 1.).
+  
+  <h3>3. Settings on this page</h3>
+  Sometimes an action doesn't allow you to check the checkbox under 2. but it might still be a good idea to notify
+  participants of an action. For example, when deleting an appointment this is usually of great interest to many people.
+  So the setting [[notify_participants_on_delete]] in this file supersedes the checkbox setting. If set to <code>true</code> all
+  participants will be notified when the appointment or task is deleted with the exception of the person deleting
+  the appointment/task.
+properties:
+    - key: notify_participants_on_delete
+      description: |
+        If set to <code>true</code> all participants will be notified when the appointment or task is deleted 
+        with the exception of the person deleting the appointment/task.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: notification.properties
+      packageName: open-xchange-core
+      tags: ["Notification", "Task", "Appointment", "Mail"]
+    - key: object_link
+      description: |
+        Direct links for notifications are generated according to the following pattern.  
+        [hostname] needs to be replaced with the hostname of your machine. This is done automatically by software on backend machines using the
+        hosts canonical host name.  
+        [uiwebpath] is replaced with the value of [[com.openexchange.UIWebPath]].  
+        [module], [object] and [folder] are replaced with the relevant IDs to generate the direct link.
+      defaultValue: http://[hostname]/[uiwebpath]#!!&app=io.ox/[module]&id=[object]&folder=[folder]
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: notification.properties
+      packageName: open-xchange-core
+      tags: ["Notification", "Task", "Appointment", "Host"]
+    - key: imipForInternalUsers
+      description: |
+        Enables/Disables imip-mails for internal users.
+      defaultValue: false
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: notification.properties
+      packageName: open-xchange-core
+      tags: ["Notification", "Task", "Appointment", "Mail"]
+    - key: com.openexchange.notification.fromSource
+      description: |
+        This property defines which email address of a user is used as from header when this user triggers notification mails.  
+        Possible values are: <code>primaryMail</code> or <code>defaultSenderAddress</code>.
+      defaultValue: defaultSenderAddress
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: notification.properties
+      packageName: open-xchange-core
+      tags: ["Notification", "Task", "Appointment", "Mail"]
+    - key: com.openexchange.calendar.notify.poolenabled
+      description: |
+        This property enables/disables the notification Pool for Appointment notifications and invitations.
+        If enabled, changes are combined and mails are summarized according different heuristics.
+        If disabled, changes are sent immediately.
+      defaultValue: true
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: notification.properties
+      packageName: open-xchange-core
+      tags: ["Notification", "Task", "Appointment", "Mail"]

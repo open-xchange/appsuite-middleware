@@ -1,0 +1,107 @@
+feature_name: Mail compose
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/drivemail.html]] for more informations.
+properties:
+    - key: com.openexchange.mail.compose.share.enabled
+      description: |
+        The main switch to enable/disable to send composed share messages.
+
+        Note:  
+        In order to effectively enable composed share messages, the "infostore" and "share_links" capabilities need also to be available.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive"]
+
+    - key: com.openexchange.mail.compose.share.name
+      description: |
+        Specifies the naming for the feature to send composed share messages.
+      defaultValue: "Drive Mail"
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive"]
+
+    - key: com.openexchange.mail.compose.share.threshold
+      description: |
+        Specifies the threshold in bytes when the client is supposed to send a share compose message.
+        Setting this option to <code>0</code> (zero) disables "forced" switch to a share compose message.
+      defaultValue: 0
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive"]
+
+    - key: com.openexchange.mail.compose.share.externalRecipientsLocale
+      description: |
+        Defines the locale to use when sending a composed share message to an external recipient.
+        Expects a locale identifier compliant to RFC 2798 and 2068; such as <code>en_US</code>.
+        Special value <code>user-defined</code> means to select the sending user's locale.
+      defaultValue: user-defined
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive"]
+
+    - key: com.openexchange.mail.compose.share.requiredExpiration
+      description: |
+        Defines whether an expiration date is required to be set, which applied to
+        the folder/files that were shared via a share compose message.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive"]
+
+    - key: com.openexchange.mail.compose.share.forceAutoDelete
+      description: |
+        Defines whether shared folder/files get automatically cleansed if an expiration date is exceeded.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive"]
+
+    - key: com.openexchange.mail.compose.share.preview.timeout
+      description: |
+        Defines default timeout in milliseconds for preview image creation.
+      defaultValue: 1000
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive", "Timeout"]
+
+    - key: com.openexchange.mail.compose.share.documentPreviewEnabled
+      description: |
+        If set to <code>true</code>, preview images for documents are generated. This needs the readerengine.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mail-compose.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "Share", "Drive"]
+

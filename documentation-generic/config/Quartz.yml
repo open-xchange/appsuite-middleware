@@ -1,0 +1,25 @@
+feature_name: Quartz
+properties:
+    - key: com.openexchange.quartz.startLocalScheduler
+      description: |
+        Wether the local quartz scheduler instance should be started.
+        If <code>false</code>, this node is unable to perform local jobs.
+      defaultValue: true
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: quartz.properties
+      packageName: open-xchange-core
+      tags: ["Quartz"]
+    - key: com.openexchange.quartz.localThreads
+      description: |
+        Number of worker threads for the local scheduler instance.
+      defaultValue: 5
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: quartz.properties
+      packageName: open-xchange-core
+      tags: ["Quartz", "Thread"]

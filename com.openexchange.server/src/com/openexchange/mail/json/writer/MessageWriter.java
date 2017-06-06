@@ -70,7 +70,6 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -86,6 +85,7 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.SizePolicy;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -195,7 +195,7 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1, -1);
+        return writeMailMessage(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, null, SizePolicy.NONE, -1, -1);
     }
 
     /**
@@ -217,12 +217,12 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels) throws OXException {
         MessageWriterParams params = MessageWriterParams.builder(accountId, mail, session)
             .setDisplayMode(displayMode)
             .setEmbedded(embedded)
             .setAsMarkup(asMarkup)
-            .setExactLength(exactLength)
+            .setSizePolicy(sizePolicy)
             .setMaxContentSize(maxContentSize)
             .setMaxNestedMessageLevels(maxNestedMessageLevels)
             .setMimeFilter(mimeFilter)
@@ -270,7 +270,7 @@ public final class MessageWriter {
 
         try {
             JsonMessageHandler handler = new JsonMessageHandler(params.getAccountId(), mailPath, mail, params.getDisplayMode(), params.isEmbedded(), params.isAsMarkup(), params.getSession(), usm, params.isToken(), params.getTokenTimeout(), params.getMaxContentSize(), params.getMaxNestedMessageLevels());
-            handler.setExactLength(params.isExactLength());
+            handler.setSizePolicy(params.getSizePolicy());
             if (null != params.getOptTimeZone()) {
                 handler.setTimeZone(params.getOptTimeZone());
             }
@@ -305,7 +305,11 @@ public final class MessageWriter {
             }
             if (null != params.getWarnings()) {
                 List<OXException> list = parser.getWarnings();
-                if (!list.isEmpty()) {
+                if (null != list && !list.isEmpty()) {
+                    params.getWarnings().addAll(list);
+                }
+                list = handler.getWarnings();
+                if (null != list && !list.isEmpty()) {
                     params.getWarnings().addAll(list);
                 }
             }
@@ -498,7 +502,7 @@ public final class MessageWriter {
                 try {
                     Object originalFolder;
                     if (mail.containsOriginalFolder() && null != mail.getOriginalFolder()) {
-                        originalFolder = prepareFullname(accountId, mail.getOriginalFolder());
+                        originalFolder = prepareFullname(mail.getOriginalFolder().getAccountId(), mail.getOriginalFolder().getFullName());
                     } else {
                         // Fall back to regular folder
                         int accId = accountId;
@@ -544,7 +548,8 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().toLowerCaseString());
+                        // Only base type in case of JSON object
+                        jsonContainer.toObject().put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                     } else {
                         jsonContainer.toArray().put(mail.getContentType().toLowerCaseString());
                     }
@@ -621,14 +626,20 @@ public final class MessageWriter {
                     String subject = mail.getSubject();
                     if (withKey) {
                         if (subject != null) {
-                            subject = decodeMultiEncodedHeader(subject);
+                            // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
+                            if (false == mail.isSubjectDecoded()) {
+                                subject = decodeMultiEncodedHeader(subject);
+                            }
                             jsonContainer.toObject().put(MailJSONField.SUBJECT.getKey(), subject.trim());
                         }
                     } else {
                         if (subject == null) {
                             jsonContainer.toArray().put(JSONObject.NULL);
                         } else {
-                            subject = decodeMultiEncodedHeader(subject);
+                            // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
+                            if (false == mail.isSubjectDecoded()) {
+                                subject = decodeMultiEncodedHeader(subject);
+                            }
                             jsonContainer.toArray().put(subject.trim());
                         }
                     }
@@ -798,7 +809,7 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     int colorLabel;
-                    if (MailProperties.getInstance().isUserFlagsEnabled() && mail.containsColorLabel()) {
+                    if (mail.containsColorLabel()) {
                         colorLabel = mail.getColorLabel();
                     } else {
                         colorLabel = 0;

@@ -74,6 +74,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
+import com.openexchange.http.grizzly.service.http.FilterAndPath;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
@@ -245,11 +246,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
             HttpServiceFactory httpServiceFactory;
             {
                 // Build default list of filters
-                ImmutableList.Builder<Filter> builder = ImmutableList.builder();
-                builder.add(new WrappingFilter(grizzlyConfig));
+                ImmutableList.Builder<FilterAndPath> builder = ImmutableList.builder();
+                builder.add(new FilterAndPath(new WrappingFilter(grizzlyConfig), "/*"));
                 boolean isFilterEnabled = configurationService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
                 if (isFilterEnabled) {
-                    builder.add(new RequestReportingFilter(getService(RequestWatcherService.class), configurationService));
+                    builder.add(new FilterAndPath(new RequestReportingFilter(getService(RequestWatcherService.class), configurationService), "/*"));
                 }
 
                 // Create the HttpService factory. Each distinct bundle will get its own instance of HttpServiceImpl.
@@ -258,7 +259,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             // Initialize the filter tracker
             {
-                ServiceTracker<Filter, Filter> tracker = new ServiceTracker<Filter, Filter>(context, Filter.class, new ServletFilterTracker(httpServiceFactory.getMainHttpHandler(), context));
+                ServiceTracker<Filter, Filter> tracker = new ServiceTracker<Filter, Filter>(context, Filter.class, new ServletFilterTracker(httpServiceFactory, context));
                 rememberTracker(tracker);
             }
 

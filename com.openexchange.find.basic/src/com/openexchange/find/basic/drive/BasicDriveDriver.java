@@ -466,14 +466,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             wildcardPatterns = Constants.FILETYPE_PATTERNS_AUDIO;
         } else if (FileType.IMAGES.getIdentifier().equals(fileType)) {
             wildcardPatterns = Constants.FILETYPE_PATTERNS_IMAGES;
-        } else if (FileType.DOC_TEXT.getIdentifier().equals(fileType)) { 
-            wildcardPatterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_TEXT;
-        } else if (FileType.DOC_SPREADSHEET.getIdentifier().equals(fileType)) { 
-            wildcardPatterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_SPREADSHEET;
-        } else if (FileType.DOC_PRESENTATION.getIdentifier().equals(fileType)) { 
-            wildcardPatterns = Constants.FILETYPE_PATTERNS_DOCUMENTS_PRESENTATION;
-        } else if (FileType.PDF.getIdentifier().equals(fileType)) { 
-            wildcardPatterns = Constants.FILETYPE_PATTERNS_PDF;
         } else {
             wildcardPatterns = new String[0];
         }
