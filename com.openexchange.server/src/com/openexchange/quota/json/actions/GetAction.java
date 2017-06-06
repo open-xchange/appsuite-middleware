@@ -50,25 +50,22 @@
 package com.openexchange.quota.json.actions;
 
 import java.util.List;
-import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,11 +76,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetAction implements AJAXActionService {
 
-    private final BundleContext context;
+    private final ServiceLookup services;
 
-    public GetAction(BundleContext context) {
+    /**
+     * Initializes a new {@link GetAction}.
+     */
+    public GetAction(ServiceLookup services) {
         super();
-        this.context = context;
+        this.services = services;
     }
 
     @Override
@@ -91,25 +91,16 @@ public class GetAction implements AJAXActionService {
         String module = req.getParameter("module");
         String accountID = req.getParameter("account");
 
-        ServiceReference<QuotaService> quotaServiceRef = context.getServiceReference(QuotaService.class);
-        if (quotaServiceRef == null) {
+        QuotaService quotaService = services.getOptionalService(QuotaService.class);
+        if (quotaService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
-        } else {
-            QuotaService quotaService = context.getService(quotaServiceRef);
-            try {
-                if (quotaService == null) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
-                } else {
-                    JSONValue result = performRequest(quotaService, session, module, accountID);
-                    return new AJAXRequestResult(result, "json");
-                }
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e);
-            } finally {
-                if (quotaServiceRef != null & quotaService != null) {
-                    context.ungetService(quotaServiceRef);
-                }
-            }
+        }
+
+        try {
+            JSONValue result = performRequest(quotaService, session, module, accountID);
+            return new AJAXRequestResult(result, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
     }
 
@@ -121,59 +112,36 @@ public class GetAction implements AJAXActionService {
                 JSONArray jQuotas = buildQuotasJSON(accountQuotas);
                 if (!jQuotas.isEmpty()) {
                     JSONObject jProvider = new JSONObject();
-                    jProvider.put("display_name", localize(provider.getDisplayName(), session));
+                    jProvider.put("display_name", StringHelper.valueOf(session.getUser().getLocale()).getString(provider.getDisplayName()));
                     jProvider.put("accounts", jQuotas);
                     allQuotas.put(provider.getModuleID(), jProvider);
                 }
             }
 
             return allQuotas;
-        } else {
-            QuotaProvider provider = quotaService.getProvider(module);
-            if (provider == null) {
-                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No provider exists for module '" + module + "'.");
-            }
-
-            if (accountID == null) {
-                return buildQuotasJSON(provider.getFor(session));
-            } else {
-                AccountQuota quota = provider.getFor(session, accountID);
-                if (quota == null) {
-                    throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No account '" + accountID + "' exists for module '" + module + "'.");
-                }
-
-                return buildQuotaJSON(quota);
-            }
-        }
-    }
-
-    private String localize(String str, ServerSession session) throws OXException {
-        String localized = null;
-        try {
-            for (ServiceReference<I18nService> ref : context.getServiceReferences(I18nService.class, null)) {
-                Locale locale = (Locale) ref.getProperty(I18nService.LANGUAGE);
-                if (locale != null && locale.equals(session.getUser().getLocale())) {
-                    I18nService i18nService = context.getService(ref);
-                    if (i18nService != null) {
-                        localized = i18nService.getLocalized(str);
-                        context.ungetService(ref);
-                        break;
-                    }
-                }
-            }
-        } catch (InvalidSyntaxException e) {
-            throw new OXException(e);
         }
 
-        if (localized == null) {
-            return str;
+        // Module available...
+        QuotaProvider provider = quotaService.getProvider(module);
+        if (provider == null) {
+            throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No provider exists for module '" + module + "'.");
         }
 
-        return localized;
+        if (accountID == null) {
+            return buildQuotasJSON(provider.getFor(session));
+        }
+
+        // Account available...
+        AccountQuota quota = provider.getFor(session, accountID);
+        if (quota == null) {
+            throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("No account '" + accountID + "' exists for module '" + module + "'.");
+        }
+
+        return buildQuotaJSON(quota);
     }
 
     private static JSONArray buildQuotasJSON(List<AccountQuota> accountQuotas) throws JSONException {
-        JSONArray jQuotas = new JSONArray();
+        JSONArray jQuotas = new JSONArray(accountQuotas.size());
         for (AccountQuota accountQuota : accountQuotas) {
             JSONObject jQuota = buildQuotaJSON(accountQuota);
             if (jQuota != null) {
@@ -191,7 +159,8 @@ public class GetAction implements AJAXActionService {
             (null == amountQuota || Quota.UNLIMITED == amountQuota.getLimit())) {
             return null;
         }
-        JSONObject jQuota = new JSONObject();
+
+        JSONObject jQuota = new JSONObject(8);
         jQuota.put("account_id", accountQuota.getAccountID());
         jQuota.put("account_name", accountQuota.getAccountName());
         if (null != amountQuota && amountQuota.getLimit() > 0) {
