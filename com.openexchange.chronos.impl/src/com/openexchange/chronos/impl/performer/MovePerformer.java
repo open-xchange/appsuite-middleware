@@ -181,9 +181,10 @@ public class MovePerformer extends AbstractUpdatePerformer {
             updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), targetFolder.getID());
         }
         /*
-         * take over new common folder id & touch event
+         * take over new common folder id, touch event & reset calendar user
          */
         updateCommonFolderId(originalEvent, targetFolder.getID());
+        updateCalendarUser(originalEvent, 0);
     }
 
     private void moveFromPublicToPersonalFolder(Event originalEvent, UserizedFolder targetFolder) throws OXException {
@@ -205,9 +206,10 @@ public class MovePerformer extends AbstractUpdatePerformer {
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
         }
         /*
-         * remove previous common folder id from event & touch event
+         * remove previous common folder id from event, touch event & assign calendar user
          */
         updateCommonFolderId(originalEvent, null);
+        updateCalendarUser(originalEvent, getCalendarUser(targetFolder).getId());
     }
 
     private void moveBetweenPublicFolders(Event originalEvent, UserizedFolder targetFolder) throws OXException {
@@ -271,19 +273,19 @@ public class MovePerformer extends AbstractUpdatePerformer {
                         updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), folderId);
                     }
                 }
+                updateCalendarUser(originalEvent, targetCalendarUser.getId());
             } else {
                 /*
-                 * update event's common folder id & remove alarms of previous calendar user
+                 * update event's common folder id, assign new calendar user & remove alarms of previous calendar user
                  */
                 updateCommonFolderId(originalEvent, targetFolder.getID());
+                updateCalendarUser(originalEvent, targetCalendarUser.getId());
                 storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUser.getId());
             }
         } else {
             /*
-             * move from one personal folder to another user's personal folder, take over target folder for new default attendee
-             * and reset personal calendar folders of further user attendees
+             * move from one personal folder to another user's personal folder
              */
-
             if (isGroupScheduled(originalEvent)) {
                 /*
                  * take over target folder for new default attendee and reset personal calendar folders of further user attendees
@@ -304,6 +306,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 updateCommonFolderId(originalEvent, targetFolder.getID());
                 storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUser.getId());
             }
+            updateCalendarUser(originalEvent, targetCalendarUser.getId());
         }
         /*
          * insert corresponding tombstone & also 'touch' parent event
@@ -329,6 +332,16 @@ public class MovePerformer extends AbstractUpdatePerformer {
             eventUpdate.setPublicFolderId(folderId);
             Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
             storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+            storage.getEventStorage().updateEvent(eventUpdate);
+        }
+    }
+
+    private void updateCalendarUser(Event originalEvent, int calendarUser) throws OXException {
+        if (calendarUser != originalEvent.getCalendarUser()) {
+            Event eventUpdate = new Event();
+            eventUpdate.setId(originalEvent.getId());
+            eventUpdate.setCalendarUser(calendarUser);
+            Consistency.setModified(timestamp, eventUpdate, this.calendarUser.getId());
             storage.getEventStorage().updateEvent(eventUpdate);
         }
     }

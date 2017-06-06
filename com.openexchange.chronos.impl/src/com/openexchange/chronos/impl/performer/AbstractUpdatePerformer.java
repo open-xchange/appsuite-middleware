@@ -64,14 +64,18 @@ import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AlarmMapper;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
+import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.DeleteResultImpl;
@@ -83,6 +87,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 
 /**
@@ -402,6 +407,44 @@ public abstract class AbstractUpdatePerformer {
      */
     protected String getDefaultCalendarID(int userID) throws OXException {
         return session.getConfig().getDefaultFolderID(userID);
+    }
+
+    /**
+     * Prepares the organizer for an event, taking over an external organizer if specified.
+     *
+     * @param organizerData The organizer as defined by the client, or <code>null</code> to prepare the current calendar user as organizer
+     * @return The prepared organizer
+     */
+    protected Organizer prepareOrganizer(Organizer organizerData) throws OXException {
+        Organizer organizer;
+        if (null != organizerData) {
+            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
+            if (0 < organizer.getEntity()) {
+                /*
+                 * internal organizer must match the actual calendar user if specified
+                 */
+                if (organizer.getEntity() != calendarUser.getId()) {
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Autoboxing.I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
+                }
+            } else {
+                /*
+                 * take over external organizer as-is
+                 */
+                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
+            }
+        } else {
+            /*
+             * prepare a default organizer for calendar user
+             */
+            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getId());
+        }
+        /*
+         * apply "sent-by" property if someone is acting on behalf of the calendar user
+         */
+        if (null != organizer && calendarUser.getId() != session.getUserId()) {
+            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
+        }
+        return organizer;
     }
 
 }

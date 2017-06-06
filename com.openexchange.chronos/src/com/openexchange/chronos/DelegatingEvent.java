@@ -259,6 +259,26 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
+    public int getCalendarUser() {
+        return delegate.getCalendarUser();
+    }
+
+    @Override
+    public void setCalendarUser(int value) {
+        delegate.setCalendarUser(value);
+    }
+
+    @Override
+    public void removeCalendarUser() {
+        delegate.removeCalendarUser();
+    }
+
+    @Override
+    public boolean containsCalendarUser() {
+        return delegate.containsCalendarUser();
+    }
+
+    @Override
     public String getSummary() {
         return delegate.getSummary();
     }

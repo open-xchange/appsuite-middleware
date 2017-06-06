@@ -93,9 +93,9 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
     private static final EventField[] TOMBSTONE_FIELDS = {
         EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
         EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
-        EventField.MODIFIED_BY, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE,
-        EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.TRANSP, EventField.UID, EventField.FILENAME,
-        EventField.SEQUENCE
+        EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
+        EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.TRANSP, EventField.UID,
+        EventField.FILENAME, EventField.SEQUENCE
     };
 
     /**
@@ -425,6 +425,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeModifiedBy();
+            }
+        });
+        mappings.put(EventField.CALENDAR_USER, new DefaultMapping<Integer, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsCalendarUser();
+            }
+
+            @Override
+            public void set(Event object, Integer value) throws OXException {
+                object.setCalendarUser(null == value ? 0 : i(value));
+            }
+
+            @Override
+            public Integer get(Event object) {
+                return I(object.getCalendarUser());
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeCalendarUser();
             }
         });
         mappings.put(EventField.SUMMARY, new DefaultMapping<String, Event>() {

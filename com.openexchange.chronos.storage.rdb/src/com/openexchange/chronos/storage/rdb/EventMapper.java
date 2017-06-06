@@ -433,6 +433,28 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeModifiedBy();
             }
         });
+        mappings.put(EventField.CALENDAR_USER, new IntegerMapping<Event>("calendarUser", "Calendar User") {
+
+            @Override
+            public void set(Event event, Integer value) {
+                event.setCalendarUser(null == value ? 0 : i(value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsCalendarUser();
+            }
+
+            @Override
+            public Integer get(Event event) {
+                return I(event.getCalendarUser());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeCalendarUser();
+            }
+        });
         mappings.put(EventField.SEQUENCE, new IntegerMapping<Event>("sequence", "Sequence") {
 
             @Override

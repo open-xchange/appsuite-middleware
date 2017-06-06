@@ -55,6 +55,8 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.TimeZones;
 
@@ -116,6 +118,10 @@ public class Consistency {
     public static void setCreated(Date created, Event event, int createdBy) {
         event.setCreated(created);
         event.setCreatedBy(createdBy);
+    }
+
+    public static void setCalenderUser(UserizedFolder folder, Event event) {
+        event.setCalendarUser(PublicType.getInstance().equals(folder.getType()) ? 0 : folder.getCreatedBy());
     }
 
     private Consistency() {

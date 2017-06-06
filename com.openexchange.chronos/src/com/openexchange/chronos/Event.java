@@ -69,11 +69,12 @@ public class Event {
     private String uid;
     private String filename;
 
-    private int sequence;
     private Date created;
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
+    private int calendarUser;
+    private int sequence;
 
     private String summary;
     private String location;
@@ -482,6 +483,42 @@ public class Event {
      */
     public boolean containsModifiedBy() {
         return isSet(EventField.MODIFIED_BY);
+    }
+
+    /**
+     * Gets the identifier of the calendar user of the event.
+     *
+     * @return The identifier of the calendar user
+     */
+    public int getCalendarUser() {
+        return calendarUser;
+    }
+
+    /**
+     * Sets the identifier of the calendar user of the event.
+     *
+     * @param value The identifier of the calendar user to set
+     */
+    public void setCalendarUser(int value) {
+        calendarUser = value;
+        setFields.add(EventField.CALENDAR_USER);
+    }
+
+    /**
+     * Removes the identifier of the calendar user of the event.
+     */
+    public void removeCalendarUser() {
+        calendarUser = 0;
+        setFields.remove(EventField.CALENDAR_USER);
+    }
+
+    /**
+     * Gets a value indicating whether the identifier of the calendar user of the event has been set or not.
+     *
+     * @return <code>true</code> if the identifier of the calendar user is set, <code>false</code>, otherwise
+     */
+    public boolean containsCalendarUser() {
+        return isSet(EventField.CALENDAR_USER);
     }
 
     /**

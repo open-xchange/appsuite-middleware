@@ -84,6 +84,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
@@ -125,16 +126,18 @@ public class Utils {
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.PUBLIC_FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
-        EventField.CLASSIFICATION, EventField.FOLDER_ID, EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE,
-        EventField.START_TIMEZONE, EventField.RECURRENCE_RULE, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
+        EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.FOLDER_ID, EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY,
+        EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.RECURRENCE_RULE,
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
     );
 
     /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */
     public static final EventField[] NON_CLASSIFIED_FIELDS = {
         EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
-        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
-        EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
-        EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP, EventField.UID, EventField.FILENAME
+        EventField.CALENDAR_USER, EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID,
+        EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID,
+        EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP,
+        EventField.UID, EventField.FILENAME
     };
 
     /**
@@ -156,13 +159,16 @@ public class Utils {
      * Gets a value indicating whether the current calendar user should be added as default attendee to events implicitly or not,
      * independently of the event being group-scheduled or not, based on the value of {@link CalendarParameters#PARAMETER_DEFAULT_ATTENDEE}
      * in the supplied parameters.
+     * <p/>
+     * If the <i>legacy</i> storage is in use, the default attendee is enforced statically.
      *
-     * @param parameters The calendar parameters to evaluate
+     * @param session The calendar session to evaluate
      * @return <code>true</code> the current calendar user should be added as default attendee to events implicitly, <code>false</code>, otherwise
      * @see CalendarParameters#PARAMETER_DEFAULT_ATTENDEE
+     * @see CalendarConfig#isUseLegacyStorage
      */
-    public static boolean isEnforceDefaultAttendee(CalendarParameters parameters) {
-        return parameters.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.TRUE).booleanValue();
+    public static boolean isEnforceDefaultAttendee(CalendarSession session) {
+        return session.getConfig().isUseLegacyStorage() || session.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.TRUE).booleanValue();
     }
 
     /**

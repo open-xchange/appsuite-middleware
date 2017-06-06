@@ -185,8 +185,8 @@ public class AttendeeHelper {
     }
 
     /**
-     * Gets the resulting attendee list after all changes are applied to the original list of attendees. No data is actually changed,
-     * i.e. the internal list of attendees to insert, update and delete are still intact.
+     * Gets a "forecast" of the resulting attendee list after all changes are applied to the original list of attendees. No data is
+     * actually changed, i.e. the internal list of attendees to insert, update and delete are still intact.
      *
      * @return The changed list of attendees
      */
@@ -429,21 +429,7 @@ public class AttendeeHelper {
          */
         int calendarUserId = getCalendarUser(folder).getId();
         List<Attendee> attendees = previewChanges();
-        if (enforceDefaultAttendee) {
-            /*
-             * ensure the calendar user is always present in personal calendar folders
-             */
-            if (false == PublicType.getInstance().equals(folder.getType()) && false == contains(attendees, calendarUserId)) {
-                Attendee defaultAttendee = find(attendeesToDelete, calendarUserId);
-                if (null != defaultAttendee) {
-                    LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(calendarUserId), folder);
-                    attendeesToDelete.remove(defaultAttendee);
-                } else {
-                    LOG.info("Implicitly adding default calendar user {} in personal folder {}.", I(calendarUserId), folder);
-                    attendeesToInsert.add(getDefaultAttendee(session, folder, null));
-                }
-            }
-        } else if (1 == attendees.size() && isLastUserAttendee(attendees, calendarUserId)) {
+        if (false == enforceDefaultAttendee && 1 == attendees.size() && isLastUserAttendee(attendees, calendarUserId)) {
             /*
              * event is not (or no longer) a group-scheduled one, remove default attendee
              */
@@ -455,6 +441,25 @@ public class AttendeeHelper {
             if (null != defaultAttendee) {
                 attendeesToUpdate.remove(defaultAttendee);
                 attendeesToDelete.add(defaultAttendee);
+            } else {
+                defaultAttendee = find(originalAttendees, calendarUserId);
+                if (null != defaultAttendee) {
+                    attendeesToDelete.add(defaultAttendee);
+                }
+            }
+        } else {
+            /*
+             * ensure the calendar user is always present in group-scheduled events in personal calendar folders
+             */
+            if (false == PublicType.getInstance().equals(folder.getType()) && false == contains(attendees, calendarUserId)) {
+                Attendee defaultAttendee = find(attendeesToDelete, calendarUserId);
+                if (null != defaultAttendee) {
+                    LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(calendarUserId), folder);
+                    attendeesToDelete.remove(defaultAttendee);
+                } else {
+                    LOG.info("Implicitly adding default calendar user {} in personal folder {}.", I(calendarUserId), folder);
+                    attendeesToInsert.add(getDefaultAttendee(session, folder, null));
+                }
             }
         }
     }

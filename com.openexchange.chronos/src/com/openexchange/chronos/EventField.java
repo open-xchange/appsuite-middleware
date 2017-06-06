@@ -98,6 +98,10 @@ public enum EventField {
      */
     MODIFIED_BY,
     /**
+     * The identifier of the calendar user of the event.
+     */
+    CALENDAR_USER,
+    /**
      * The summary of the event.
      */
     SUMMARY,

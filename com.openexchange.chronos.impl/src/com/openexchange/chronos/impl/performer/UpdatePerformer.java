@@ -118,6 +118,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.arrays.Arrays;
@@ -254,14 +255,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         session.getEntityResolver().prepare(updatedEvent.getAttendees());
         List<Attendee> newAttendees = updatedEvent.containsAttendees() ?
             AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges() : originalEvent.getAttendees();
-        if (newAttendees.isEmpty()) {
-            /*
-             * no group-scheduled event (any longer), remove
-             */
-
-        }
-        ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, ignoredFields);
-
+        ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, newAttendees, ignoredFields);
         if (null != eventUpdate && 0 < eventUpdate.getUpdatedFields().size()) {
             /*
              * check permissions & conflicts
@@ -707,10 +701,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param originalEvent The original event
      * @param updatedEvent The updated event
+     * @param newAttendees The forecasted resulting attendees in the event after the update was performed
      * @param ignoredFields Additional fields to ignore when determining the differences; {@link UpdatePerformer#SKIPPED_FIELDS} are always skipped
      * @return The event update, or <code>null</code> if no changes of the event data were detected
      */
-    private ItemUpdate<Event, EventField> prepareEventUpdate(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
+    private ItemUpdate<Event, EventField> prepareEventUpdate(Event originalEvent, Event updatedEvent, List<Attendee> newAttendees, EventField... ignoredFields) throws OXException {
         /*
          * determine & check modified fields
          */
@@ -874,10 +869,38 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 case UID:
                 case SERIES_ID:
                 case PUBLIC_FOLDER_ID:
+                case CALENDAR_USER:
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 default:
                     break;
             }
+        }
+        /*
+         * adjust attendee-dependent fields
+         */
+        if (null == newAttendees || 0 == newAttendees.size()) {
+            /*
+             * no group-scheduled event (any longer), ensure to take over common calendar folder & remove organizer
+             */
+            if (null != originalEvent.getOrganizer() || eventUpdate.containsOrganizer()) {
+                eventUpdate.setOrganizer(null);
+            }
+            if (null == originalEvent.getPublicFolderId() || eventUpdate.containsPublicFolderId()) {
+                eventUpdate.setPublicFolderId(folder.getID());
+            }
+        } else {
+            /*
+             * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
+             */
+            if (null == originalEvent.getOrganizer() || eventUpdate.containsOrganizer()) {
+                eventUpdate.setOrganizer(prepareOrganizer(eventUpdate.getOrganizer()));
+            }
+            if (null != originalEvent.getPublicFolderId() || eventUpdate.containsPublicFolderId()) {
+                eventUpdate.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
+            }
+        }
+        if (calendarUser.getId() != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
+            Consistency.setCalenderUser(folder, eventUpdate);
         }
         if (0 == EventMapper.getInstance().getAssignedFields(eventUpdate).length) {
             return null;

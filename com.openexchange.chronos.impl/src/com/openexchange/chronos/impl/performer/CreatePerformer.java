@@ -56,15 +56,11 @@ import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
-import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
@@ -76,7 +72,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 
 /**
@@ -165,10 +160,11 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             event.setUid(Check.uidIsUnique(storage, eventData));
         }
         /*
-         * creation/modification metadata
+         * creation/modification/calendaruser metadata
          */
         Consistency.setCreated(timestamp, event, calendarUser.getId());
         Consistency.setModified(timestamp, event, calendarUser.getId());
+        Consistency.setCalenderUser(folder, event);
         /*
          * date/time related properties
          */
@@ -202,44 +198,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * copy over further (unchecked) event fields
          */
         return EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME);
-    }
-
-    /**
-     * Prepares the organizer for a new event, taking over an external organizer if specified.
-     *
-     * @param organizerData The organizer as defined by the client
-     * @return The prepared organizer
-     */
-    private Organizer prepareOrganizer(Organizer organizerData) throws OXException {
-        Organizer organizer;
-        if (null != organizerData) {
-            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
-            if (0 < organizer.getEntity()) {
-                /*
-                 * internal organizer must match the actual calendar user if specified
-                 */
-                if (organizer.getEntity() != calendarUser.getId()) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Autoboxing.I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
-                }
-            } else {
-                /*
-                 * take over external organizer as-is
-                 */
-                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
-            }
-        } else {
-            /*
-             * prepare a default organizer for calendar user
-             */
-            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getId());
-        }
-        /*
-         * apply "sent-by" property if someone is acting on behalf of the calendar user
-         */
-        if (null != organizer && calendarUser.getId() != session.getUserId()) {
-            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
-        }
-        return organizer;
     }
 
 }

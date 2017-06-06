@@ -161,6 +161,16 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
+    public void setCalendarUser(int value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeCalendarUser() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setSummary(String value) {
         throw new UnsupportedOperationException();
     }
