@@ -53,9 +53,9 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.RetryPolicy;
-import com.openexchange.cluster.lock.policies.RunOnceRetryPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.policy.retry.RetryPolicy;
+import com.openexchange.policy.retry.RunOnceRetryPolicy;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 

@@ -47,34 +47,51 @@
  *
  */
 
-package com.openexchange.cluster.lock.policies;
+package com.openexchange.policy.retry;
 
 /**
- * {@link RetryPolicy}
+ * {@link RunOnceRetryPolicy}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface RetryPolicy {
+public class RunOnceRetryPolicy implements RetryPolicy {
+    
+    private int retryCount = 0;
 
     /**
-     * Returns the maximum amount of allowed retries
-     * 
-     * @return the maximum amount of allowed retries
+     * Initialises a new {@link RunOnceRetryPolicy}.
      */
-    int getMaxTries();
+    public RunOnceRetryPolicy() {
+        super();
+    }
 
-    /**
-     * Returns the amount of retries so far
+    /*
+     * (non-Javadoc)
      * 
-     * @return the amount of retries so far
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
      */
-    int retryCount();
+    @Override
+    public int getMaxTries() {
+        return 1;
+    }
 
-    /**
-     * Returns <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
-     * If this policy allows a retry, then the current retry count will be increased by one.
+    /*
+     * (non-Javadoc)
      * 
-     * @return <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
      */
-    boolean isRetryAllowed();
+    @Override
+    public int retryCount() {
+        return retryCount;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
+     */
+    @Override
+    public boolean isRetryAllowed() {
+        return false;
+    }
 }

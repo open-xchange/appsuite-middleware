@@ -47,22 +47,42 @@
  *
  */
 
-package com.openexchange.cluster.lock.policies;
+package com.openexchange.policy.retry;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
- * {@link RunOnceRetryPolicy}
+ * {@link ExponentialBackOffRetryPolicy}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RunOnceRetryPolicy implements RetryPolicy {
-    
-    private int retryCount = 0;
+public class ExponentialBackOffRetryPolicy implements RetryPolicy {
+
+    private final int maxTries;
+    private int retryCount = 1;
+    private final Random random;
+    private double multiplier = 1.5;
+    private double randomFactor = 0.5;
+    private double interval = 0.5;
 
     /**
-     * Initialises a new {@link RunOnceRetryPolicy}.
+     * Initialises a new {@link ExponentialBackOffRetryPolicy} with a default amount of 10 retries
      */
-    public RunOnceRetryPolicy() {
+    public ExponentialBackOffRetryPolicy() {
+        this(10);
+    }
+
+    /**
+     * Initialises a new {@link ExponentialBackOffRetryPolicy}.
+     * 
+     * @param maxTries The amount of maximum retries
+     */
+    public ExponentialBackOffRetryPolicy(int maxTries) {
         super();
+        this.maxTries = maxTries;
+        random = new Random(System.nanoTime());
+        randomFactor = random.nextDouble();
     }
 
     /*
@@ -72,7 +92,7 @@ public class RunOnceRetryPolicy implements RetryPolicy {
      */
     @Override
     public int getMaxTries() {
-        return 1;
+        return maxTries;
     }
 
     /*
@@ -92,6 +112,27 @@ public class RunOnceRetryPolicy implements RetryPolicy {
      */
     @Override
     public boolean isRetryAllowed() {
+        if (retryCount++ <= maxTries) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(getSleepTime());
+            } catch (InterruptedException e) {
+                return false;
+            }
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * Returns the sleep time in milliseconds
+     * 
+     * @return the sleep time in milliseconds
+     */
+    private long getSleepTime() {
+        double max = interval * multiplier;
+        double min = max - interval;
+        interval = interval * multiplier;
+        double factor = (randomFactor * (max - min)) * 1000;
+        return (long) factor;
     }
 }
