@@ -260,6 +260,28 @@ public class AttendeeHelper {
                     continue;
                 }
             }
+            if (null != removedAttendee.getMember()) {
+                /*
+                 * only remove group member attendee in case either the corresponding group attendee itself, or not all originally participating members are also removed
+                 */
+                Attendee groupAttendee = new Attendee();
+                groupAttendee.setUri(removedAttendee.getMember());
+                groupAttendee.setCuType(CalendarUserType.GROUP);
+                if (null == find(removedAttendees, groupAttendee)) {
+                    boolean attendingOtherMembers = false;
+                    for (Attendee originalAttendee : originalAttendees) {
+                        if (groupAttendee.getUri().equals(originalAttendee.getMember()) && false == contains(removedAttendees, originalAttendee)) {
+                            attendingOtherMembers = true;
+                            break;
+                        }
+                    }
+                    if (false == attendingOtherMembers) {
+                        // preserve group member attendee
+                        LOG.debug("Ignoring removal of group member attendee {} as long as group unchanged.", I(removedAttendee.getEntity()));
+                        continue;
+                    }
+                }
+            }
             attendeeList.remove(removedAttendee);
             attendeesToDelete.add(removedAttendee);
         }
