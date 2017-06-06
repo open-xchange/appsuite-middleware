@@ -175,7 +175,16 @@ public class AutoLoginTools {
                          * invalidate session-cookie (public- and secret-cookies are re-written later)
                          */
                         SessionUtility.removeOXCookies(request, response, Collections.singletonList(expectedSessionCookieName));
-                        LoginPerformer.getInstance().doLogout(sessionID);
+                        logout(sessionID);
+                        return null;
+                    }
+                    if (SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
+                        /*
+                         * session explicitly marked as absent -> discard session (if not yet performed) & cancel auto-login,
+                         * invalidate session-cookie (public- and secret-cookies are re-written later)
+                         */
+                        SessionUtility.removeOXCookies(request, response, Collections.singletonList(expectedSessionCookieName));
+                        tryLogout(sessionID);
                         return null;
                     }
                     throw e;
@@ -183,6 +192,19 @@ public class AutoLoginTools {
             }
         }
         return null;
+    }
+
+    private static void logout(String sessionID) throws OXException {
+        LoginPerformer.getInstance().doLogout(sessionID);
+    }
+
+    private static void tryLogout(String sessionID) {
+        try {
+            logout(sessionID);
+        } catch (OXException e) {
+            // Logout could not be performed
+            LOG.debug("Logout could not be performed.", e);
+        }
     }
 
     private static String optCookieValue(String name, Map<String, Cookie> cookies) {
