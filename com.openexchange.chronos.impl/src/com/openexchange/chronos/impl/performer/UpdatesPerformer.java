@@ -111,7 +111,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
          * perform search & userize the results for the current session's user
          */
         String[] ignore = session.get(CalendarParameters.PARAMETER_IGNORE, String[].class);
-        EventField[] fields = getFields(session, EventField.ATTENDEES);
+        EventField[] fields = getFields(session, EventField.ATTENDEES, EventField.ORGANIZER);
         List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);

@@ -99,7 +99,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          * perform search & userize the results for the current session's user
          */
         SearchTerm<?> searchTerm = getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId()));
-        EventField[] fields = getFields(session, EventField.ATTENDEES);
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         readAdditionalEventData(events, session.getUserId(), fields);
         return postProcess(events, session.getUserId(), true);
