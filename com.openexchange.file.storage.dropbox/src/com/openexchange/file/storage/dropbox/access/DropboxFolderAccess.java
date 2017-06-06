@@ -65,6 +65,7 @@ import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.users.IndividualSpaceAllocation;
+import com.dropbox.core.v2.users.SpaceAllocation;
 import com.dropbox.core.v2.users.SpaceUsage;
 import com.dropbox.core.v2.users.TeamSpaceAllocation;
 import com.openexchange.exception.OXException;
@@ -93,7 +94,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /**
      * Initialises a new {@link DropboxFolderAccess}.
-     * 
+     *
      * @throws OXException
      */
     public DropboxFolderAccess(AbstractOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
@@ -104,7 +105,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#exists(java.lang.String)
      */
     @Override
@@ -129,7 +130,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getFolder(java.lang.String)
      */
     @Override
@@ -156,7 +157,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getPersonalFolder()
      */
     @Override
@@ -166,7 +167,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getTrashFolder()
      */
     @Override
@@ -176,7 +177,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getPublicFolders()
      */
     @Override
@@ -186,7 +187,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getSubfolders(java.lang.String, boolean)
      */
     @Override
@@ -218,7 +219,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getUserSharedFolders()
      */
     @Override
@@ -228,7 +229,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getRootFolder()
      */
     @Override
@@ -245,7 +246,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#createFolder(com.openexchange.file.storage.FileStorageFolder)
      */
     @Override
@@ -263,7 +264,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#updateFolder(java.lang.String, com.openexchange.file.storage.FileStorageFolder)
      */
     @Override
@@ -273,7 +274,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String)
      */
     @Override
@@ -283,7 +284,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -305,7 +306,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#renameFolder(java.lang.String, java.lang.String)
      */
     @Override
@@ -325,7 +326,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String)
      */
     @Override
@@ -342,7 +343,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String, boolean)
      */
     @Override
@@ -352,7 +353,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String)
      */
     @Override
@@ -378,7 +379,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String, boolean)
      */
     @Override
@@ -388,7 +389,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getPath2DefaultFolder(java.lang.String)
      */
     @Override
@@ -406,24 +407,33 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getStorageQuota(java.lang.String)
      */
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
         try {
             SpaceUsage spaceUsage = client.users().getSpaceUsage();
-            IndividualSpaceAllocation individualValue = spaceUsage.getAllocation().getIndividualValue();
-            TeamSpaceAllocation teamValue = spaceUsage.getAllocation().getTeamValue();
-            return new Quota(spaceUsage.getUsed(), individualValue.getAllocated() + teamValue.getAllocated(), Type.STORAGE);
+            SpaceAllocation allocation = spaceUsage.getAllocation();
+
+            IndividualSpaceAllocation individualValue = allocation.getIndividualValue();
+
+            if (allocation.isTeam()) {
+                TeamSpaceAllocation teamValue = allocation.getTeamValue();
+                return new Quota(individualValue.getAllocated() + teamValue.getAllocated(), spaceUsage.getUsed(), Type.STORAGE);
+            }
+
+            return new Quota(individualValue.getAllocated(), spaceUsage.getUsed(), Type.STORAGE);
         } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        } catch (IllegalStateException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getFileQuota(java.lang.String)
      */
     @Override
@@ -433,7 +443,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getQuotas(java.lang.String, com.openexchange.file.storage.Quota.Type[])
      */
     @Override
@@ -461,7 +471,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /**
      * Check for sub folders
-     * 
+     *
      * @param folderId The folder to check for sub folders
      * @return <code>true</code> if at least one entry of the specified folder is of type {@link FolderMetadata}; <code>false</code> otherwise
      * @throws ListFolderErrorException If a list folder error is occurred
@@ -480,7 +490,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     /**
      * Construct a full path from the specified parent and folder name.
      * It simply concatenates both strings by using the '/' path separator.
-     * 
+     *
      * @param parent The parent folder
      * @param folder The folder name
      * @return The full path
