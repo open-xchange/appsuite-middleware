@@ -136,10 +136,11 @@ public class FileStorageQuotaProvider implements QuotaProvider {
 
     private AccountQuota getForService(Session session, String accountID, FileStorageService storageService) throws OXException {
         FileStorageAccountManager accountManager = storageService.getAccountManager();
-        for (FileStorageAccount account : accountManager.getAccounts(session)) {
-            if (account.getId().equals(accountID)) {
-                return getAccountQuota(account, session);
-            }
+        try {
+            FileStorageAccount account = accountManager.getAccount(accountID, session);
+            return getAccountQuota(account, session);
+        } catch (OXException e) {
+            // Could not be retrieved
         }
 
         return null;
