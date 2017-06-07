@@ -93,7 +93,6 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -832,19 +831,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         break;
                     }
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
-                case ORGANIZER:
-                    Organizer organizer = eventUpdate.getOrganizer();
-                    if (null == organizer) {
-                        // ignore implicitly
-                        eventUpdate.removeOrganizer();
-                    } else {
-                        organizer = session.getEntityResolver().prepare(organizer, CalendarUserType.INDIVIDUAL);
-                        if (false == CalendarUtils.matches(originalEvent.getOrganizer(), organizer)) {
-                            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
-                        }
-                        eventUpdate.removeOrganizer();
-                    }
-                    break;
                 case CREATED:
                     // ignore implicitly
                     eventUpdate.removeCreated();
