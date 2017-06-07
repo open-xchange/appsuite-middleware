@@ -51,7 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -86,7 +86,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 
@@ -100,7 +99,7 @@ public abstract class AbstractUpdatePerformer {
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;
-    protected final User calendarUser;
+    protected final int calendarUserId;
     protected final UserizedFolder folder;
     protected final Date timestamp;
     protected final CalendarResultImpl result;
@@ -115,11 +114,11 @@ public abstract class AbstractUpdatePerformer {
     protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super();
         this.folder = folder;
-        this.calendarUser = getCalendarUser(folder);
+        this.calendarUserId = getCalendarUserId(folder);
         this.session = session;
         this.timestamp = new Date();
         this.storage = storage;
-        this.result = new CalendarResultImpl(session, calendarUser, folder.getID()).applyTimestamp(timestamp);
+        this.result = new CalendarResultImpl(session, calendarUserId, folder.getID()).applyTimestamp(timestamp);
     }
 
     /**
@@ -173,7 +172,7 @@ public abstract class AbstractUpdatePerformer {
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
         eventUpdate.setChangeExceptionDates(changeExceptionDates);
-        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
+        Consistency.setModified(timestamp, eventUpdate, calendarUserId);
         storage.getEventStorage().updateEvent(eventUpdate);
         result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(originalMasterEvent.getId())));
     }
@@ -207,7 +206,7 @@ public abstract class AbstractUpdatePerformer {
          * delete event data from storage
          */
         String id = originalEvent.getId();
-        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
         storage.getAttendeeStorage().insertTombstoneAttendees(id, AttendeeMapper.getInstance().getTombstones(originalEvent.getAttendees()));
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
@@ -245,7 +244,7 @@ public abstract class AbstractUpdatePerformer {
          * delete event data from storage for this attendee
          */
         String objectID = originalEvent.getId();
-        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
         storage.getAttendeeStorage().insertTombstoneAttendee(objectID, originalAttendee);
         storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(originalAttendee));
         storage.getAlarmStorage().deleteAlarms(objectID, userID);
@@ -369,7 +368,7 @@ public abstract class AbstractUpdatePerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
         }
-        event = Utils.loadAdditionalEventData(storage, calendarUser.getId(), event, EventField.values());
+        event = Utils.loadAdditionalEventData(storage, calendarUserId, event, EventField.values());
         event.setFolderId(folder.getID());
         return event;
     }
@@ -386,7 +385,7 @@ public abstract class AbstractUpdatePerformer {
                 exceptions.add(exception);
             }
         }
-        return Utils.loadAdditionalEventData(storage, calendarUser.getId(), exceptions, EventField.values());
+        return Utils.loadAdditionalEventData(storage, calendarUserId, exceptions, EventField.values());
     }
 
     protected Event loadExceptionData(String seriesID, RecurrenceId recurrenceID) throws OXException {
@@ -394,7 +393,7 @@ public abstract class AbstractUpdatePerformer {
         if (null == exception) {
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesID, String.valueOf(recurrenceID));
         }
-        exception = Utils.loadAdditionalEventData(storage, calendarUser.getId(), exception, EventField.values());
+        exception = Utils.loadAdditionalEventData(storage, calendarUserId, exception, EventField.values());
         exception.setFolderId(folder.getID());
         return exception;
     }
@@ -423,7 +422,7 @@ public abstract class AbstractUpdatePerformer {
                 /*
                  * internal organizer must match the actual calendar user if specified
                  */
-                if (organizer.getEntity() != calendarUser.getId()) {
+                if (organizer.getEntity() != calendarUserId) {
                     throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Autoboxing.I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
                 }
             } else {
@@ -436,12 +435,12 @@ public abstract class AbstractUpdatePerformer {
             /*
              * prepare a default organizer for calendar user
              */
-            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getId());
+            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUserId);
         }
         /*
          * apply "sent-by" property if someone is acting on behalf of the calendar user
          */
-        if (null != organizer && calendarUser.getId() != session.getUserId()) {
+        if (null != organizer && calendarUserId != session.getUserId()) {
             organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return organizer;

@@ -228,7 +228,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
          */
         Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
         int targetCalendarUserId = getCalendarUserId(targetFolder);
-        if (calendarUser.getId() == targetCalendarUserId) {
+        if (calendarUserId == targetCalendarUserId) {
             /*
              * move from one personal folder to another of the same user
              */
@@ -236,9 +236,9 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 /*
                  * update attendee's folder in a group-scheduled event
                  */
-                Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
+                Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
                 if (null == originalAttendee) {
-                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUser.getId()), originalEvent.getId());
+                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
                 }
                 updateAttendeeFolderId(originalEvent.getId(), originalAttendee, targetFolder.getID());
             } else {
@@ -247,8 +247,8 @@ public class MovePerformer extends AbstractUpdatePerformer {
                  */
                 updateCommonFolderId(originalEvent, targetFolder.getID());
             }
-            updateAttendeeAlarms(originalEvent, originalAlarms.get(I(calendarUser.getId())), calendarUser.getId(), targetFolder.getID());
-        } else if (calendarUser.getId() == session.getUserId()) {
+            updateAttendeeAlarms(originalEvent, originalAlarms.get(I(calendarUserId)), calendarUserId, targetFolder.getID());
+        } else if (calendarUserId == session.getUserId()) {
             /*
              * move from user's own calendar to another one ("reassign")
              */
@@ -262,7 +262,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                     storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
                 }
                 for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-                    if (calendarUser.getId() == originalAttendee.getEntity()) {
+                    if (calendarUserId == originalAttendee.getEntity()) {
                         storage.getAttendeeStorage().insertTombstoneAttendee(originalEvent.getId(), AttendeeMapper.getInstance().getTombstone(originalAttendee));
                         storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
                         storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), originalAttendee.getEntity());
@@ -279,7 +279,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                  */
                 updateCommonFolderId(originalEvent, targetFolder.getID());
                 updateCalendarUser(originalEvent, targetCalendarUserId);
-                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUser.getId());
+                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUserId);
             }
         } else {
             /*
@@ -303,14 +303,14 @@ public class MovePerformer extends AbstractUpdatePerformer {
                  * update event's common folder id & remove alarms of previous calendar user
                  */
                 updateCommonFolderId(originalEvent, targetFolder.getID());
-                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUser.getId());
+                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUserId);
             }
             updateCalendarUser(originalEvent, targetCalendarUserId);
         }
         /*
          * insert corresponding tombstone & also 'touch' parent event
          */
-        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
         touch(originalEvent.getId());
     }
 
@@ -329,8 +329,8 @@ public class MovePerformer extends AbstractUpdatePerformer {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalEvent.getId());
             eventUpdate.setFolderId(folderId);
-            Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
-            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+            Consistency.setModified(timestamp, eventUpdate, calendarUserId);
+            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
             storage.getEventStorage().updateEvent(eventUpdate);
         }
     }
@@ -340,7 +340,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalEvent.getId());
             eventUpdate.setCalendarUser(calendarUser);
-            Consistency.setModified(timestamp, eventUpdate, this.calendarUser.getId());
+            Consistency.setModified(timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
         }
     }

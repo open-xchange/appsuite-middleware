@@ -134,7 +134,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         }
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             newEvent.setFolderId(folder.getID());
-            insertAlarms(newEvent, calendarUser.getId(), Check.alarmsAreValid(event.getAlarms()), false);
+            insertAlarms(newEvent, calendarUserId, Check.alarmsAreValid(event.getAlarms()), false);
         }
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
@@ -162,8 +162,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * creation/modification/calendaruser metadata
          */
-        Consistency.setCreated(timestamp, event, calendarUser.getId());
-        Consistency.setModified(timestamp, event, calendarUser.getId());
+        Consistency.setCreated(timestamp, event, calendarUserId);
+        Consistency.setModified(timestamp, event, calendarUserId);
         Consistency.setCalenderUser(folder, event);
         /*
          * date/time related properties
@@ -172,7 +172,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
         event.setAllDay(eventData.containsAllDay() ? eventData.getAllDay() : false);
         Consistency.adjustAllDayDates(event);
-        Consistency.setTimeZone(event, calendarUser);
+        Consistency.setTimeZone(session, event, calendarUserId);
         /*
          * classification, status, transparency, color
          */

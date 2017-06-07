@@ -131,7 +131,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     private void deleteEvent(Event originalEvent) throws OXException {
-        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
+        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
@@ -142,7 +142,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             }
             return;
         }
-        Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
+        Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
         if (null != userAttendee) {
             /*
              * deletion as one of the attendees
@@ -167,7 +167,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     private void deleteRecurrence(Event originalEvent, RecurrenceId recurrenceID) throws OXException {
-        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
+        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
@@ -199,7 +199,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              */
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceID));
         }
-        Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
+        Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
         if (null != userAttendee) {
             /*
              * deletion as attendee
@@ -282,7 +282,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             if (changeExceptionDates.remove(recurrenceID)) {
                 eventUpdate.setChangeExceptionDates(changeExceptionDates);
             }
-            Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
+            Consistency.setModified(timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
             Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
             result.addUpdate(new UpdateResultImpl(originalMasterEvent, updatedMasterEvent));

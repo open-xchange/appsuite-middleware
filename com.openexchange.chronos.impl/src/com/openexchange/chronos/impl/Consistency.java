@@ -54,6 +54,7 @@ import java.util.Date;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
@@ -77,6 +78,20 @@ public class Consistency {
     public static void setTimeZone(Event event, User user) throws OXException {
         String startTimezone = event.getStartTimeZone();
         event.setStartTimeZone(null == startTimezone ? user.getTimeZone() : Check.timeZoneExists(startTimezone));
+        String endTimezone = event.getEndTimeZone();
+        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
+    }
+
+    /**
+     * Sets the event's start- and end-timezones if not yet specified, falling back to the supplied user's default timezone.
+     *
+     * @param session The calendar session
+     * @param event The event to set the timezones in
+     * @param calendarUserId The identifier of the user to get the fallback timezone from
+     */
+    public static void setTimeZone(CalendarSession session, Event event, int calendarUserId) throws OXException {
+        String startTimezone = event.getStartTimeZone();
+        event.setStartTimeZone(null == startTimezone ? session.getEntityResolver().getTimeZone(calendarUserId).getID() : Check.timeZoneExists(startTimezone));
         String endTimezone = event.getEndTimeZone();
         event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
     }

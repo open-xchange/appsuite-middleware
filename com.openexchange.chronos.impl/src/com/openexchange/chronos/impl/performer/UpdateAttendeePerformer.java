@@ -131,8 +131,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }
-        if (0 < originalAttendee.getEntity() && calendarUser.getId() != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
-            // TODO: even allowed for proxy user? calendarUser.getId() != originalAttendee.getEntity()
+        if (0 < originalAttendee.getEntity() && calendarUserId != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
+            // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
             throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }
         if (null == recurrenceID) {
@@ -164,7 +164,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * store tombstone references in case of a move operation for the attendee
              */
-            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
             storage.getAttendeeStorage().insertTombstoneAttendee(originalEvent.getId(), AttendeeMapper.getInstance().getTombstone(originalAttendee));
         }
         /*
@@ -266,7 +266,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          * take over identifying properties from original
          */
         AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-        if (session.getUserId() != calendarUser.getId() && false == attendeeUpdate.containsSentBy()) {
+        if (session.getUserId() != calendarUserId && false == attendeeUpdate.containsSentBy()) {
             attendeeUpdate.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return attendeeUpdate;

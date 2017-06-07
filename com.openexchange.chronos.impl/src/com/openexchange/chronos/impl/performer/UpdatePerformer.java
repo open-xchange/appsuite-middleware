@@ -119,7 +119,6 @@ import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -303,7 +302,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (updatedEvent.containsAlarms()) {
             //TODO: update alarms for session user or calendar user?
             //            alarmUpdate = updateAlarms(originalEvent, session.getUser(), updatedEvent.getAlarms());
-            wasUpdated |= updateAlarms(originalEvent, calendarUser, updatedEvent.getAlarms());
+            wasUpdated |= updateAlarms(originalEvent, calendarUserId, updatedEvent.getAlarms());
         }
         /*
          * update any stored alarm triggers of all users if required
@@ -322,9 +321,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         }
                     }
                 } else {
-                    List<Alarm> alarms = alarmsByUserID.get(I(calendarUser.getId()));
+                    List<Alarm> alarms = alarmsByUserID.get(I(calendarUserId));
                     if (null != alarms && 0 < alarms.size()) {
-                        storage.getAlarmStorage().updateAlarms(changedEvent, calendarUser.getId(), alarms);
+                        storage.getAlarmStorage().updateAlarms(changedEvent, calendarUserId, alarms);
                     }
                 }
             }
@@ -506,7 +505,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     private boolean updateDeleteExceptions(Event originalEvent, Event updatedEvent) throws OXException {
         if (isSeriesMaster(originalEvent) && null != updatedEvent.getDeleteExceptionDates() && 0 < updatedEvent.getDeleteExceptionDates().size()) {
-            if (isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
+            if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
                 /*
                  * "real" delete exceptions for all attendees, take over as-is during normal update routine
                  */
@@ -515,9 +514,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * check for newly indicated delete exceptions, from the calendar user's point of view
              */
-            Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
+            Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
             Event originalUserEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
-            originalUserEvent = Utils.applyExceptionDates(storage, originalUserEvent, calendarUser.getId());
+            originalUserEvent = Utils.applyExceptionDates(storage, originalUserEvent, calendarUserId);
             SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (0 < exceptionDateUpdates.getRemovedItems().size() || null == userAttendee) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.DELETE_EXCEPTION_DATES);
@@ -555,7 +554,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         List<Attendee> attendeesToDelete = attendeeHelper.getAttendeesToDelete();
         if (0 < attendeesToDelete.size()) {
             requireWritePermissions(originalEvent, attendeesToDelete);
-            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
             storage.getAttendeeStorage().insertTombstoneAttendees(originalEvent.getId(), AttendeeMapper.getInstance().getTombstones(attendeesToDelete));
             storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), attendeesToDelete);
             storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), getUserIDs(attendeesToDelete));
@@ -618,12 +617,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Updates a calendar user's alarms for a specific event.
      *
      * @param event The event to update the alarms in
-     * @param calendarUser The calendar user whose alarms are updated
+     * @param calendarUserId The identifier of the calendar user whose alarms are updated
      * @param updatedAlarms The updated alarms
      * @return <code>true</code> if there were any updates, <code>false</code>, otherwise
      */
-    private boolean updateAlarms(Event event, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
-        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUser.getId());
+    private boolean updateAlarms(Event event, int calendarUserId, List<Alarm> updatedAlarms) throws OXException {
+        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUserId);
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = Utils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
             return false;
@@ -633,7 +632,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * pass updated alarms directly if using legacy storage
          */
         if (session.getConfig().isUseLegacyStorage()) {
-            storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), updatedAlarms);
+            storage.getAlarmStorage().updateAlarms(event, calendarUserId, updatedAlarms);
             return true;
         }
         /*
@@ -657,12 +656,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarms.add(Check.alarmIsValid(alarm));
             }
-            storage.getAlarmStorage().updateAlarms(event, calendarUser.getId(), alarms);
+            storage.getAlarmStorage().updateAlarms(event, calendarUserId, alarms);
         }
         /*
          * insert new alarms
          */
-        insertAlarms(event, calendarUser.getId(), alarmUpdates.getAddedItems(), false);
+        insertAlarms(event, calendarUserId, alarmUpdates.getAddedItems(), false);
         return true;
     }
 
@@ -677,7 +676,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     private boolean resetParticipationStatus(String objectID, List<Attendee> attendees) throws OXException {
         List<Attendee> attendeesToUpdate = new ArrayList<Attendee>();
         for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
-            if (calendarUser.getId() == attendee.getEntity() || ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+            if (calendarUserId == attendee.getEntity() || ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
                 continue;
             }
             Attendee attendeeUpdate = new Attendee();
@@ -716,10 +715,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                      * ignore OPAQUE to TRANSPARENT transition when attendee's participation status is declined
                      */
                     if (null != updatedEvent.getTransp() && Transp.TRANSPARENT.equals(updatedEvent.getTransp().getValue()) &&
-                        false == isOrganizer(originalEvent, calendarUser.getId())) {
-                        Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
+                        false == isOrganizer(originalEvent, calendarUserId)) {
+                        Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
                         if (null != originalAttendee && false == ParticipationStatus.DECLINED.equals(originalAttendee.getPartStat())) {
-                            Attendee updatedAttendee = find(updatedEvent.getAttendees(), calendarUser.getId());
+                            Attendee updatedAttendee = find(updatedEvent.getAttendees(), calendarUserId);
                             if (null == updatedAttendee || ParticipationStatus.DECLINED.equals(updatedAttendee.getPartStat())) {
                                 eventUpdate.removeTransp();
                             }
@@ -885,13 +884,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.ORGANIZER);
                 }
-                eventUpdate.removeOrganizer(); // leave unchanged
+                eventUpdate.removeOrganizer(); // ignore
             }
             if (null != originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
                 eventUpdate.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
             }
         }
-        if (calendarUser.getId() != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
+        if (calendarUserId != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
             Consistency.setCalenderUser(folder, eventUpdate);
         }
         if (0 == EventMapper.getInstance().getAssignedFields(eventUpdate).length) {

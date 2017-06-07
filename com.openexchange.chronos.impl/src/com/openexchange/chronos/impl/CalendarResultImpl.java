@@ -59,7 +59,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link CalendarResultImpl}
@@ -70,7 +69,7 @@ import com.openexchange.groupware.ldap.User;
 public class CalendarResultImpl implements CalendarResult {
 
     protected final CalendarSession session;
-    protected final User calendarUser;
+    protected final int calendarUserId;
     protected final String folderID;
 
     protected Date timestamp;
@@ -82,13 +81,13 @@ public class CalendarResultImpl implements CalendarResult {
      * Initializes a new {@link CalendarResultImpl}.
      *
      * @param session The calendar session
-     * @param calendarUser The actual calendar user
+     * @param calendarUserId The actual calendar user
      * @param folderID The identifier of the folder the event has been created in.
      */
-    public CalendarResultImpl(CalendarSession session, User calendarUser, String folderID) {
+    public CalendarResultImpl(CalendarSession session, int calendarUserId, String folderID) {
         super();
         this.session = session;
-        this.calendarUser = calendarUser;
+        this.calendarUserId = calendarUserId;
         this.folderID = folderID;
     }
 
@@ -215,7 +214,7 @@ public class CalendarResultImpl implements CalendarResult {
 
     @Override
     public int getCalendarUser() {
-        return calendarUser.getId();
+        return calendarUserId;
     }
 
     @Override
