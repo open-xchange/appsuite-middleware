@@ -113,13 +113,13 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             /*
              * not group-scheduled event (only on a single user's calendar), apply parent folder identifier
              */
-            newEvent.setPublicFolderId(folder.getID());
+            newEvent.setFolderId(folder.getID());
         } else {
             /*
              * group-scheduled event, assign organizer and dynamic parent-folder identifier (for non-public folders)
              */
             newEvent.setOrganizer(prepareOrganizer(event.getOrganizer()));
-            newEvent.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
+            newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
         }
         /*
          * check for conflicts

@@ -168,7 +168,7 @@ public final class CopyAction extends IDBasedCalendarAction {
         Event event = session.getCalendarService().getEvent(session, folderId, objectId);
         event.removeId();
         event.removeUid();
-        event.removePublicFolderId();
+        event.removeFolderId();
         CalendarResult result = session.getCalendarService().createEvent(session, targetFolderID, event);
         if (null != result.getCreations() && 0 < result.getCreations().size()) {
             String id = result.getCreations().get(0).getCreatedEvent().getId();
@@ -186,7 +186,7 @@ public final class CopyAction extends IDBasedCalendarAction {
         Event event = access.getEvent(eventID);
         event.removeId();
         event.removeUid();
-        event.removePublicFolderId();
+        event.removeFolderId();
         CalendarResult result = access.createEvent(targetFolderID, event);
         if (null != result.getCreations() && 0 < result.getCreations().size()) {
             String id = result.getCreations().get(0).getCreatedEvent().getId();

@@ -317,14 +317,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                         List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
                         if (null != alarms && 0 < alarms.size()) {
-                            changedEvent.setFolderId(AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID == attendee.getFolderID() ? changedEvent.getPublicFolderId() : attendee.getFolderID());
+                            changedEvent.setFolderId(AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID == attendee.getFolderID() ? changedEvent.getFolderId() : attendee.getFolderID());
                             storage.getAlarmStorage().updateAlarms(changedEvent, attendee.getEntity(), alarms);
                         }
                     }
                 } else {
                     List<Alarm> alarms = alarmsByUserID.get(I(calendarUser.getId()));
                     if (null != alarms && 0 < alarms.size()) {
-                        changedEvent.setFolderId(changedEvent.getPublicFolderId());
                         storage.getAlarmStorage().updateAlarms(changedEvent, calendarUser.getId(), alarms);
                     }
                 }
@@ -868,7 +867,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     break;
                 case UID:
                 case SERIES_ID:
-                case PUBLIC_FOLDER_ID:
+                case FOLDER_ID:
                 case CALENDAR_USER:
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 default:
@@ -885,8 +884,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null != originalEvent.getOrganizer() || eventUpdate.containsOrganizer()) {
                 eventUpdate.setOrganizer(null);
             }
-            if (null == originalEvent.getPublicFolderId() || eventUpdate.containsPublicFolderId()) {
-                eventUpdate.setPublicFolderId(folder.getID());
+            if (null == originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
+                eventUpdate.setFolderId(folder.getID());
             }
         } else {
             /*
@@ -895,8 +894,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null == originalEvent.getOrganizer() || eventUpdate.containsOrganizer()) {
                 eventUpdate.setOrganizer(prepareOrganizer(eventUpdate.getOrganizer()));
             }
-            if (null != originalEvent.getPublicFolderId() || eventUpdate.containsPublicFolderId()) {
-                eventUpdate.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
+            if (null != originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
+                eventUpdate.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
             }
         }
         if (calendarUser.getId() != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {

@@ -119,26 +119,6 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public String getPublicFolderId() {
-        return delegate.getPublicFolderId();
-    }
-
-    @Override
-    public void setPublicFolderId(String value) {
-        delegate.setPublicFolderId(value);
-    }
-
-    @Override
-    public void removePublicFolderId() {
-        delegate.removePublicFolderId();
-    }
-
-    @Override
-    public boolean containsPublicFolderId() {
-        return delegate.containsPublicFolderId();
-    }
-
-    @Override
     public String getUid() {
         return delegate.getUid();
     }

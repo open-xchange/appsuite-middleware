@@ -65,7 +65,6 @@ public class Event {
 
     private String id;
     private String folderId;
-    private String publicFolderId;
     private String uid;
     private String filename;
 
@@ -195,42 +194,6 @@ public class Event {
      */
     public boolean containsFolderId() {
         return isSet(EventField.FOLDER_ID);
-    }
-
-    /**
-     * Gets the public folder identifier of the event.
-     *
-     * @return The public folder identifier
-     */
-    public String getPublicFolderId() {
-        return publicFolderId;
-    }
-
-    /**
-     * Sets the public folder identifier of the event.
-     *
-     * @param value The public folder identifier to set
-     */
-    public void setPublicFolderId(String value) {
-        publicFolderId = value;
-        setFields.add(EventField.PUBLIC_FOLDER_ID);
-    }
-
-    /**
-     * Removes the public folder identifier of the event.
-     */
-    public void removePublicFolderId() {
-        publicFolderId = null;
-        setFields.remove(EventField.PUBLIC_FOLDER_ID);
-    }
-
-    /**
-     * Gets a value indicating whether the public folder identifier of the event has been set or not.
-     *
-     * @return <code>true</code> if the public folder identifier is set, <code>false</code>, otherwise
-     */
-    public boolean containsPublicFolderId() {
-        return isSet(EventField.PUBLIC_FOLDER_ID);
     }
 
     /**

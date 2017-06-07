@@ -187,26 +187,26 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeId();
             }
         });
-        mappings.put(EventField.PUBLIC_FOLDER_ID, new VarCharMapping<Event>("folder", "Folder ID") {
+        mappings.put(EventField.FOLDER_ID, new VarCharMapping<Event>("folder", "Folder ID") {
 
             @Override
             public void set(Event event, String value) {
-                event.setPublicFolderId(value);
+                event.setFolderId(value);
             }
 
             @Override
             public boolean isSet(Event event) {
-                return event.containsPublicFolderId();
+                return event.containsFolderId();
             }
 
             @Override
             public String get(Event event) {
-                return event.getPublicFolderId();
+                return event.getFolderId();
             }
 
             @Override
             public void remove(Event event) {
-                event.removePublicFolderId();
+                event.removeFolderId();
             }
         });
         mappings.put(EventField.SERIES_ID, new IntegerMapping<Event>("series", "Series id") {

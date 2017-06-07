@@ -170,11 +170,11 @@ public class SearchPerformer extends AbstractQueryPerformer {
         }
         SearchTerm<?> searchTerm;
         if (1 == folderIDs.size()) {
-            searchTerm = getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folderIDs.iterator().next());
+            searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderIDs.iterator().next());
         } else {
             CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
             for (String folderID : folderIDs) {
-                orTerm.addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folderID));
+                orTerm.addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderID));
             }
             searchTerm = orTerm;
         }
@@ -192,26 +192,34 @@ public class SearchPerformer extends AbstractQueryPerformer {
         if (null == folderIDs || 0 == folderIDs.size()) {
             return null;
         }
-        SearchTerm<?> folderTerm;
+        SearchTerm<?> eventFolderTerm;
+        SearchTerm<?> attendeeFolderTerm;
         if (1 == folderIDs.size()) {
-            folderTerm = getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folderIDs.iterator().next());
+            String folderID = folderIDs.iterator().next();
+            eventFolderTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderID);
+            attendeeFolderTerm = getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folderID);
         } else {
-            CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            CompositeSearchTerm compositeEventFolderTerm = new CompositeSearchTerm(CompositeOperation.OR);            
+            CompositeSearchTerm compositeAttendeeFolderTerm = new CompositeSearchTerm(CompositeOperation.OR);            
             for (String folderID : folderIDs) {
-                orTerm.addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+                compositeEventFolderTerm.addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+                compositeAttendeeFolderTerm.addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folderID));
             }
-            folderTerm = orTerm;
+            eventFolderTerm = compositeEventFolderTerm;
+            attendeeFolderTerm = compositeAttendeeFolderTerm;
         }
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0))))
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, entityID))
+        SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
+            .addSearchTerm(eventFolderTerm)
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(entityID)))
+                .addSearchTerm(attendeeFolderTerm))
         ;
         if (onlyOwn) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, I(userID)));
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, userID));
         }
-        return searchTerm.addSearchTerm(folderTerm);
+        return searchTerm;
     }
 
     private static SearchTerm<?> getFolderIdsTerm(List<UserizedFolder> folders) throws OXException {

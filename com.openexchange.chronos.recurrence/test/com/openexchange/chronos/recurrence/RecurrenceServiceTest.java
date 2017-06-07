@@ -291,7 +291,7 @@ public abstract class RecurrenceServiceTest {
                 return false;
         } else if (!event.getOrganizer().equals(other.getOrganizer()))
             return false;
-        if (event.getPublicFolderId() != other.getPublicFolderId())
+        if (event.getFolderId() != other.getFolderId())
             return false;
         if (event.getRecurrenceId() == null) {
             if (other.getRecurrenceId() != null)
@@ -401,9 +401,6 @@ public abstract class RecurrenceServiceTest {
         }
         if (event.containsOrganizer()) {
             clone.setOrganizer(event.getOrganizer());
-        }
-        if (event.containsPublicFolderId()) {
-            clone.setPublicFolderId(event.getPublicFolderId());
         }
         if (event.containsRecurrenceId()) {
             clone.setRecurrenceId(event.getRecurrenceId());

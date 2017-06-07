@@ -178,7 +178,7 @@ public abstract class EventConverter {
             case Appointment.OBJECT_ID:
                 return EventField.ID;
             case Appointment.FOLDER_ID:
-                return EventField.PUBLIC_FOLDER_ID;
+                return EventField.FOLDER_ID;
             case Appointment.CREATED_BY:
                 return EventField.CREATED_BY;
             case Appointment.CREATION_DATE:

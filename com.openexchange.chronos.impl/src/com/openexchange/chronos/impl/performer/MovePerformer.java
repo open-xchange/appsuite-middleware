@@ -326,10 +326,10 @@ public class MovePerformer extends AbstractUpdatePerformer {
     }
 
     private void updateCommonFolderId(Event originalEvent, String folderId) throws OXException {
-        if (null == folderId && null != originalEvent.getPublicFolderId() || false == folderId.equals(originalEvent.getPublicFolderId())) {
+        if (null == folderId && null != originalEvent.getFolderId() || false == folderId.equals(originalEvent.getFolderId())) {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalEvent.getId());
-            eventUpdate.setPublicFolderId(folderId);
+            eventUpdate.setFolderId(folderId);
             Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
             storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
             storage.getEventStorage().updateEvent(eventUpdate);

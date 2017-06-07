@@ -50,11 +50,13 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -83,6 +85,17 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      */
     protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
+    }
+
+    protected List<Event> readAttendeeData(List<Event> events, Boolean internal) throws OXException {
+        if (null != events && 0 < events.size()) {
+            String[] objectIDs = getObjectIDs(events);
+            Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs, Boolean.TRUE);
+            for (Event event : events) {
+                event.setAttendees(attendeesById.get(event.getId()));
+            }
+        }
+        return events;
     }
 
     /**
@@ -126,14 +139,14 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      */
     protected String chooseFolderID(Event event) throws OXException {
         /*
-         * check common folder permissions for events in public folders
+         * check common folder permissions for events with a static parent folder
          */
-        if (null != event.getPublicFolderId()) {
-            UserizedFolder folder = findFolder(getVisibleFolders(), event.getPublicFolderId());
+        if (null != event.getFolderId()) {
+            UserizedFolder folder = findFolder(getVisibleFolders(), event.getFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
                 if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUserId()) {
-                    return event.getPublicFolderId();
+                    return event.getFolderId();
                 }
             }
             return null;

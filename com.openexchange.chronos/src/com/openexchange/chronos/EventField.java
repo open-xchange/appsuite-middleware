@@ -66,10 +66,6 @@ public enum EventField {
      */
     FOLDER_ID,
     /**
-     * The common public folder identifier of the event.
-     */
-    PUBLIC_FOLDER_ID,
-    /**
      * The universal identifier of the event.
      */
     UID,

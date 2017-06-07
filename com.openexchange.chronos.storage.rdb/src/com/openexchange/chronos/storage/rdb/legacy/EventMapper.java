@@ -182,26 +182,26 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeId();
             }
         });
-        mappings.put(EventField.PUBLIC_FOLDER_ID, new IntegerMapping<Event>("fid", "Public folder ID") {
+        mappings.put(EventField.FOLDER_ID, new IntegerMapping<Event>("fid", "Folder ID") {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setPublicFolderId(asString(value, true));
+                event.setFolderId(asString(value, true));
             }
 
             @Override
             public boolean isSet(Event event) {
-                return event.containsPublicFolderId();
+                return event.containsFolderId();
             }
 
             @Override
             public Integer get(Event event) {
-                return asInteger(event.getPublicFolderId(), true);
+                return asInteger(event.getFolderId(), true);
             }
 
             @Override
             public void remove(Event event) {
-                event.removePublicFolderId();
+                event.removeFolderId();
             }
         });
         mappings.put(EventField.UID, new VarCharMapping<Event>("uid", "UID") {

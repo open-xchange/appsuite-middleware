@@ -93,7 +93,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
     private static final EventField[] TOMBSTONE_FIELDS = {
         EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
         EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
-        EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
+        EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
         EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.TRANSP, EventField.UID,
         EventField.FILENAME, EventField.SEQUENCE
     };
@@ -249,28 +249,6 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeFolderId();
-            }
-        });
-        mappings.put(EventField.PUBLIC_FOLDER_ID, new DefaultMapping<String, Event>() {
-
-            @Override
-            public boolean isSet(Event object) {
-                return object.containsPublicFolderId();
-            }
-
-            @Override
-            public void set(Event object, String value) throws OXException {
-                object.setPublicFolderId(value);
-            }
-
-            @Override
-            public String get(Event object) {
-                return object.getPublicFolderId();
-            }
-
-            @Override
-            public void remove(Event object) {
-                object.removePublicFolderId();
             }
         });
         mappings.put(EventField.UID, new DefaultMapping<String, Event>() {

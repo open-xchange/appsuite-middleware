@@ -91,16 +91,6 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setPublicFolderId(String value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void removePublicFolderId() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void setUid(String value) {
         throw new UnsupportedOperationException();
     }

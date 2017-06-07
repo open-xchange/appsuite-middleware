@@ -97,7 +97,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
     /** The event fields returned in free/busy queries by default */
     private static final EventField[] FREEBUSY_FIELDS = {
-        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.PUBLIC_FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
+        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
         EventField.ALL_DAY, EventField.SUMMARY, EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE,
         EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
     };
@@ -176,7 +176,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     if (attendee.getEntity() != eventInPeriod.getCreatedBy()) {
                         continue;
                     }
-                    folderID = eventInPeriod.getPublicFolderId();
+                    folderID = eventInPeriod.getFolderId();
                 }
                 if (isSeriesMaster(eventInPeriod)) {
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
