@@ -47,92 +47,52 @@
  *
  */
 
-package com.openexchange.cluster.lock.policies;
+package com.openexchange.java.delegate;
 
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 /**
- * {@link ExponentialBackOffRetryPolicy}
+ * {@link DelegationException}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class ExponentialBackOffRetryPolicy implements RetryPolicy {
+public class DelegationException extends RuntimeException {
 
-    private final int maxTries;
-    private int retryCount = 1;
-    private final Random random;
-    private double multiplier = 1.5;
-    private double randomFactor = 0.5;
-    private double interval = 0.5;
+    private static final long serialVersionUID = 5659167653266376586L;
 
     /**
-     * Initialises a new {@link ExponentialBackOffRetryPolicy} with a default amount of 10 retries
+     * Initializes a new {@link DelegationException}.
      */
-    public ExponentialBackOffRetryPolicy() {
-        this(10);
-    }
-
-    /**
-     * Initialises a new {@link ExponentialBackOffRetryPolicy}.
-     * 
-     * @param maxTries The amount of maximum retries
-     */
-    public ExponentialBackOffRetryPolicy(int maxTries) {
+    public DelegationException() {
         super();
-        this.maxTries = maxTries;
-        random = new Random(System.nanoTime());
-        randomFactor = random.nextDouble();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
-     */
-    @Override
-    public int getMaxTries() {
-        return maxTries;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
-     */
-    @Override
-    public int retryCount() {
-        return retryCount;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
-     */
-    @Override
-    public boolean isRetryAllowed() {
-        if (retryCount++ <= maxTries) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(getSleepTime());
-            } catch (InterruptedException e) {
-                return false;
-            }
-            return true;
-        }
-        return false;
     }
 
     /**
-     * Returns the sleep time in milliseconds
-     * 
-     * @return the sleep time in milliseconds
+     * Initializes a new {@link DelegationException}.
+     *
+     * @param message The detail message
      */
-    private long getSleepTime() {
-        double max = interval * multiplier;
-        double min = max - interval;
-        interval = interval * multiplier;
-        double factor = (randomFactor * (max - min)) * 1000;
-        return (long) factor;
+    public DelegationException(String message) {
+        super(message);
     }
+
+    /**
+     * Initializes a new {@link DelegationException}.
+     *
+     * @param cause The initial cause
+     */
+    public DelegationException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Initializes a new {@link DelegationException}.
+     *
+     * @param message The detail message
+     * @param cause The initial cause
+     */
+    public DelegationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

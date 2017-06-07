@@ -47,38 +47,92 @@
  *
  */
 
-package com.openexchange.quota.json.osgi;
+package com.openexchange.policy.retry;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.json.QuotaActionFactory;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
- * {@link QuotaJSONActivator}
+ * {@link ExponentialBackOffRetryPolicy}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class QuotaJSONActivator extends AJAXModuleActivator {
+public class ExponentialBackOffRetryPolicy implements RetryPolicy {
+
+    private final int maxTries;
+    private int retryCount = 1;
+    private final Random random;
+    private double multiplier = 1.5;
+    private double randomFactor = 0.5;
+    private double interval = 0.5;
 
     /**
-     * Initializes a new {@link QuotaJSONActivator}.
+     * Initialises a new {@link ExponentialBackOffRetryPolicy} with a default amount of 10 retries
      */
-    public QuotaJSONActivator() {
+    public ExponentialBackOffRetryPolicy() {
+        this(10);
+    }
+
+    /**
+     * Initialises a new {@link ExponentialBackOffRetryPolicy}.
+     * 
+     * @param maxTries The amount of maximum retries
+     */
+    public ExponentialBackOffRetryPolicy(int maxTries) {
         super();
+        this.maxTries = maxTries;
+        random = new Random(System.nanoTime());
+        randomFactor = random.nextDouble();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public int getMaxTries() {
+        return maxTries;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        trackService(QuotaService.class);
-        openTrackers();
-        registerModule(new QuotaActionFactory(new ExceptionOnAbsenceServiceLookup(this), context), "quota");
+    public int retryCount() {
+        return retryCount;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
+     */
+    @Override
+    public boolean isRetryAllowed() {
+        if (retryCount++ <= maxTries) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(getSleepTime());
+            } catch (InterruptedException e) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns the sleep time in milliseconds
+     * 
+     * @return the sleep time in milliseconds
+     */
+    private long getSleepTime() {
+        double max = interval * multiplier;
+        double min = max - interval;
+        interval = interval * multiplier;
+        double factor = (randomFactor * (max - min)) * 1000;
+        return (long) factor;
+    }
 }

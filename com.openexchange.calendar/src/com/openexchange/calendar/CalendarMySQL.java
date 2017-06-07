@@ -5355,7 +5355,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             try {
                 ao = calendarSql.getObjectById(oid, fid);
             } catch (Exception e) {
-                LOG.warn("Unable to load appointment for event. Fallback to empty Object.", e);
+                LOG.debug("Unable to load appointment for event. Fallback to empty Object.", e);
                 ao = new CalendarDataObject();
             }
         } else {
