@@ -93,6 +93,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -877,8 +878,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
              */
-            if (null == originalEvent.getOrganizer() || eventUpdate.containsOrganizer()) {
+            if (null == originalEvent.getOrganizer()) {
                 eventUpdate.setOrganizer(prepareOrganizer(eventUpdate.getOrganizer()));
+            } else if (eventUpdate.containsOrganizer()) {
+                Organizer organizer = session.getEntityResolver().prepare(eventUpdate.getOrganizer(), CalendarUserType.INDIVIDUAL);
+                if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.ORGANIZER);
+                }
+                eventUpdate.removeOrganizer(); // leave unchanged
             }
             if (null != originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
                 eventUpdate.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
