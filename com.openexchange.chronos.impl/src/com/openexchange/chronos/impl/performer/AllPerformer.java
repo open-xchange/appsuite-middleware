@@ -50,7 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
@@ -132,7 +132,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         SearchTerm<?> searchTerm = getFolderIdTerm(folder);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), getFields(session));
-        readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
+        readAdditionalEventData(events, getCalendarUserId(folder), getFields(session));
         return postProcess(events, folder, isIncludeClassifiedEvents(session));
     }
 

@@ -53,7 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
@@ -105,11 +105,11 @@ public class GetPerformer extends AbstractQueryPerformer {
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         }
-        readAdditionalEventData(Collections.singletonList(event), getCalendarUser(folder).getId(), fields);
+        readAdditionalEventData(Collections.singletonList(event), getCalendarUserId(folder), fields);
         Check.eventIsInFolder(event, folder);
         event.setFolderId(folder.getID());
         if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, getCalendarUser(folder).getId());
+            event = applyExceptionDates(storage, event, getCalendarUserId(folder));
         }
         return anonymizeIfNeeded(session, event);
     }

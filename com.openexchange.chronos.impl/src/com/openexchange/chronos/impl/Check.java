@@ -51,7 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
@@ -344,7 +344,7 @@ public class Check {
      */
     public static Classification classificationIsValidOnMove(Classification classification, UserizedFolder folder, UserizedFolder targetFolder) throws OXException {
         if (null != classification && false == Classification.PUBLIC.equals(classification)) {
-            if (PublicType.getInstance().equals(targetFolder.getType()) || getCalendarUser(folder).getId() != getCalendarUser(targetFolder).getId()) {
+            if (PublicType.getInstance().equals(targetFolder.getType()) || getCalendarUserId(folder) != getCalendarUserId(targetFolder)) {
                 throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_MOVE.create(
                     String.valueOf(classification), folder.getID(), folder.getType(), targetFolder.getID(), targetFolder.getType());
             }

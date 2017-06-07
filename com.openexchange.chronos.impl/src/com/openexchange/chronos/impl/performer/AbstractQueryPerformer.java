@@ -53,7 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getFrom;
@@ -137,7 +137,7 @@ public abstract class AbstractQueryPerformer {
         } else {
             events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), getFields(session));
         }
-        return readAdditionalEventData(events, getCalendarUser(folder).getId(), getFields(session));
+        return readAdditionalEventData(events, getCalendarUserId(folder), getFields(session));
     }
 
     protected List<Event> readAdditionalEventData(List<Event> events, int userID, EventField[] fields) throws OXException {
@@ -188,7 +188,7 @@ public abstract class AbstractQueryPerformer {
                 if (isResolveOccurrences(session)) {
                     processedEvents.addAll(resolveOccurrences(event));
                 } else {
-                    processedEvents.add(applyExceptionDates(storage, event, getCalendarUser(inFolder).getId()));
+                    processedEvents.add(applyExceptionDates(storage, event, getCalendarUserId(inFolder)));
                 }
             } else {
                 processedEvents.add(event);

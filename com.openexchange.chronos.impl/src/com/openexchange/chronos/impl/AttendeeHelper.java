@@ -54,7 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
@@ -70,7 +70,6 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link AttendeeHelper}
@@ -396,11 +395,11 @@ public class AttendeeHelper {
         /*
          * prepare attendee for default calendar user in folder
          */
-        User calendarUser = getCalendarUser(folder);
-        Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUser.getId());
+        int calendarUserId = getCalendarUserId(folder);
+        Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUserId);
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
         defaultAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : folder.getID());
-        if (session.getUserId() != calendarUser.getId()) {
+        if (session.getUserId() != calendarUserId) {
             defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         /*
@@ -449,7 +448,7 @@ public class AttendeeHelper {
         /*
          * check if resulting attendees would lead to a "group-scheduled" event or not
          */
-        int calendarUserId = getCalendarUser(folder).getId();
+        int calendarUserId = getCalendarUserId(folder);
         List<Attendee> attendees = previewChanges();
         if (false == enforceDefaultAttendee && 1 == attendees.size() && isLastUserAttendee(attendees, calendarUserId)) {
             /*

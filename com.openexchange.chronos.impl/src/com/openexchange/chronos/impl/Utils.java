@@ -167,7 +167,7 @@ public class Utils {
      * @see CalendarConfig#isUseLegacyStorage
      */
     public static boolean isEnforceDefaultAttendee(CalendarSession session) {
-        return session.getConfig().isUseLegacyStorage() || session.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.TRUE).booleanValue();
+        return session.getConfig().isUseLegacyStorage() || session.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**
@@ -544,6 +544,20 @@ public class Utils {
             return Services.getService(UserService.class).getUser(folder.getCreatedBy(), folder.getContext());
         }
         return folder.getUser();
+    }
+
+    /**
+     * Gets the identifier of the actual target calendar user for a specific folder. This is either the current session's user for
+     * "private" or "public" folders, or the folder owner for "shared" calendar folders.
+     *
+     * @param folder The folder to get the calendar user for
+     * @return The identifier of the calendar user
+     */
+    public static int getCalendarUserId(UserizedFolder folder) throws OXException {
+        if (SharedType.getInstance().equals(folder.getType())) {
+            return folder.getCreatedBy();
+        }
+        return folder.getUser().getId();
     }
 
     /**

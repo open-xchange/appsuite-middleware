@@ -50,7 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
@@ -73,8 +73,8 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
@@ -115,7 +115,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
                 .addSearchTerm(searchTerm);
         }
         /*
-         * ... modified after supplied date 
+         * ... modified after supplied date
          */
         searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since))
@@ -164,13 +164,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
-            readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
+            readAdditionalEventData(events, getCalendarUserId(folder), fields);
             newAndModifiedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SearchOptions(session), fields);
-            readAdditionalEventData(events, getCalendarUser(folder).getId(), fields);
+            readAdditionalEventData(events, getCalendarUserId(folder), fields);
             Boolean oldRecurrenceMaserParameter = session.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class);
             try {
                 session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
