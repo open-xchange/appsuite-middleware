@@ -60,6 +60,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Language;
 import com.openexchange.xing.LeadDescription;
 import com.openexchange.xing.XingAPI;
@@ -109,9 +110,11 @@ public class CreateProfileAction extends AbstractXingAction {
         leadDescription.setLastName(lastName);
         leadDescription.setLanguage(Language.valueOf((language != null ? language : Language.DE.getLangId()).toUpperCase()));
 
+        ServerSession serverSession = req.getSession();
+
         OAuthService oauthService = getService(OAuthService.class);
-        OAuthServiceMetaData m = oauthService.getMetaDataRegistry().getService("com.openexchange.oauth.xing", req.getSession().getUserId(), req.getSession().getContextId());
-        WebAuthSession session = new WebAuthSession(new AppKeyPair(m.getAPIKey(req.getSession()), m.getAPISecret(req.getSession())), new ConsumerPair(m.getConsumerKey(), m.getConsumerSecret()));
+        OAuthServiceMetaData m = oauthService.getMetaDataRegistry().getService("com.openexchange.oauth.xing", serverSession.getUserId(), serverSession.getContextId());
+        WebAuthSession session = new WebAuthSession(new AppKeyPair(m.getAPIKey(serverSession), m.getAPISecret(serverSession)), new ConsumerPair(m.getConsumerKey(serverSession), m.getConsumerSecret(serverSession)));
 
         try {
             XingAPI<WebAuthSession> xingAPI = new XingAPI<WebAuthSession>(session);

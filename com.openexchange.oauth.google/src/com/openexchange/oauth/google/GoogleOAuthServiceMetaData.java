@@ -53,9 +53,11 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.Google2Api;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link GoogleOAuthServiceMetaData}
@@ -90,9 +92,8 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     }
 
     @Override
-    public String processAuthorizationURL(String authUrl) {
-        StringBuilder authUrlBuilder = new StringBuilder();
-        authUrlBuilder.append(super.processAuthorizationURL(authUrl));
+    public String processAuthorizationURL(String authUrl, Session session) throws OXException {
+        StringBuilder authUrlBuilder = new StringBuilder(super.processAuthorizationURL(authUrl, session));
         // Request a refresh token, too
         return authUrlBuilder.append("&approval_prompt=force").append("&access_type=offline").toString();
     }
