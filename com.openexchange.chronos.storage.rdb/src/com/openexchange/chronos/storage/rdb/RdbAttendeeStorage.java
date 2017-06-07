@@ -120,6 +120,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void insertAttendees(String eventId, List<Attendee> attendees) throws OXException {
+        if (null == attendees || 0 == attendees.size()) {
+            return;
+        }
         int updated = 0;
         Connection connection = null;
         try {

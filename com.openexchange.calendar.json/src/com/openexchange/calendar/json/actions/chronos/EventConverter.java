@@ -920,12 +920,9 @@ public abstract class EventConverter {
     }
 
     public void convertAttendee(Attendee attendee, List<Participant> participants, List<UserParticipant> users, List<ConfirmableParticipant> confirmations) {
-        if (null == attendee.getCuType()) {
-            return;
-        }
         if (CalendarUserType.GROUP.equals(attendee.getCuType())) {
             participants.add(new GroupParticipant(attendee.getEntity()));
-        } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+        } else if (null == attendee.getCuType() || CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
             if (isInternal(attendee)) {
                 UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
                 userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
