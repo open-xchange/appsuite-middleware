@@ -22,6 +22,9 @@
 	<classpathentry exported="true" kind="lib" path="testlib/powermock-reflect-1.7.0RC4.jar" sourcepath="testlib/source/powermock-reflect-1.7.0RC4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/powermock-module-junit4-1.7.0RC4.jar" sourcepath="testlib/source/powermock-module-junit4-1.7.0RC4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/powermock-module-junit4-common-1.7.0RC4.jar" sourcepath="testlib/source/powermock-module-junit4-common-1.7.0RC4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/bcpg-jdk15on-156.jar" sourcepath="testlib/source/bcpg-jdk15on-1.56-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/bcpkix-jdk15on-156.jar" sourcepath="testlib/source/bcpkix-jdk15on-1.56-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/bcprov-jdk15on-156.jar" sourcepath="testlib/source/bcprov-jdk15on-1.56-sources.jar "/>
 	<classpathentry kind="lib" path="testlib/cglib-nodep-2.2.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
