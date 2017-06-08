@@ -1140,6 +1140,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.executeUpdate();
                 prep.close();
 
+                // update counter table
+                prep = con.prepareStatement("INSERT INTO contexts_per_dbpool (db_pool_id,count) VALUES(?,0);");
+                prep.setInt(1, db_id);
+                prep.executeUpdate();
+                prep.close();
+
+                // update lock table
+                prep = con.prepareStatement("INSERT INTO dbpool_lock (db_pool_id) VALUES(?);");
+                prep.setInt(1, db_id);
+                prep.executeUpdate();
+                prep.close();
             } else {
                 prep = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE db_pool_id = ?");
                 prep.setInt(1, db.getMasterId());
@@ -1219,6 +1230,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setLong(3, store_size);
             stmt.setInt(4, fstore.getMaxContexts());
             stmt.executeUpdate();
+            stmt.close();
+
+            // update counter table
+            stmt = con.prepareStatement("INSERT INTO contexts_per_filestore (filestore_id,count) VALUES (?,0)");
+            stmt.setInt(1, fstore_id);
+            stmt.executeUpdate();
+
             con.commit();
             rollback = false;
 
@@ -1324,7 +1342,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Load potential candidates
             List<Candidate> candidates = new LinkedList<>();
             {
-                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
                 rs = stmt.executeQuery();
 
                 if (!rs.next()) {
@@ -1664,6 +1682,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } finally {
                     closeSQLStuff(stmt);
                 }
+                try {
+                    stmt = con.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
             } else {
                 try {
                     stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
@@ -1721,6 +1753,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             stmt = con.prepareStatement("DELETE FROM filestore WHERE id = ?");
+            stmt.setInt(1, store_id);
+            stmt.executeUpdate();
+            stmt.close();
+
+            stmt = con.prepareStatement("DELETE FROM contexts_per_filestore WHERE filestore_id = ?");
             stmt.setInt(1, store_id);
             stmt.executeUpdate();
 
@@ -2480,7 +2517,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = readConfigdbCon.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id=?");
+                stmt = readConfigdbCon.prepareStatement("SELECT count FROM contexts_per_filestore WHERE filestore_id=?");
                 stmt.setInt(1, filestoreId);
                 result = stmt.executeQuery();
                 if (false == result.next()) {
@@ -2840,17 +2877,18 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final int pool_id = db.getId().intValue();
 
             if (this.USE_UNIT == UNIT_CONTEXT) {
-                ps = configdb_con.prepareStatement("SELECT COUNT(server_id) FROM context_server2db_pool WHERE write_db_pool_id=?");
+                ps = configdb_con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=?");
                 ps.setInt(1, pool_id);
                 final ResultSet rsi = ps.executeQuery();
 
                 if (!rsi.next()) {
                     throw new StorageException("Unable to count contexts of db_pool_id=" + pool_id);
                 }
-                count = rsi.getInt("COUNT(server_id)");
+                count = rsi.getInt("count");
                 rsi.close();
                 ps.close();
             } else if (this.USE_UNIT == UNIT_USER) {
+                // TODO: Do we need to consider count user performance in a schema when creating a context?
                 ppool = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
                 ppool.setInt(1, pool_id);
                 final ResultSet rpool = ppool.executeQuery();
