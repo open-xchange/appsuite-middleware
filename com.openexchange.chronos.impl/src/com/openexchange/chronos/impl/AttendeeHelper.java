@@ -455,7 +455,7 @@ public class AttendeeHelper {
      * Processes the lists of attendees to update/delete/insert in terms of the configured handling of the implicit attendee for the
      * actual calendar user.
      * <p/>
-     * If the default attendee is enforced, this method ensure that the calendar user attendee is always present in
+     * If the default attendee is enforced, this method ensures that the calendar user attendee is always present in
      * personal calendar folders. Otherwise, if the actual calendar user would be the last one in the resulting attendee list, this
      * attendee is removed.
      *
@@ -463,6 +463,12 @@ public class AttendeeHelper {
      *            <code>false</code>, otherwise
      */
     private void handleDefaultAttendee(boolean enforceDefaultAttendee) throws OXException {
+        /*
+         * no default-attendee handling in public folders
+         */
+        if (PublicType.getInstance().equals(folder.getType())) {
+            return;
+        }
         /*
          * check if resulting attendees would lead to a "group-scheduled" event or not
          */

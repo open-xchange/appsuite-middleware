@@ -818,8 +818,8 @@ public class Utils {
     /**
      * Initializes a new attendee collection update based on the supplied original and updated attendee lists.
      *
-     * @param originalAlarms The original attendees
-     * @param updatedAlarms The updated attendees
+     * @param originalAttendees The original attendees
+     * @param updatedAttendees The updated attendees
      * @return The collection update
      */
     public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
