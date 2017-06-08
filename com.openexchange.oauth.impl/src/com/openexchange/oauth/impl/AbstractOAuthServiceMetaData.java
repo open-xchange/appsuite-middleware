@@ -195,7 +195,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         String propValue = ConfigViews.getDefinedStringPropertyFrom(oauthProperty.getName(), null, view);
-        return null == propValue ? oauthProperty.getValue() : propValue;
+        return null == propValue ? oauthProperty.getValue() : (OAuthPropertyID.redirectUrl == propertyId ? urlEncode(propValue) : propValue);
     }
 
     /**
@@ -224,7 +224,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         String propValue = ConfigViews.getDefinedStringPropertyFrom(oauthProperty.getName(), null, view);
-        return null == propValue ? oauthProperty.getValue() : propValue;
+        return null == propValue ? oauthProperty.getValue() : (OAuthPropertyID.redirectUrl == propertyId ? urlEncode(propValue) : propValue);
     }
 
     @Override
