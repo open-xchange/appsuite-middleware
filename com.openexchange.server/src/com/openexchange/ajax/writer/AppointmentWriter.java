@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -69,6 +67,8 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link AppointmentWriter} - Writer for appointments
@@ -177,7 +177,7 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject.containsAlarm()) {
             writeParameter(CalendarFields.ALARM, appointmentObject.getAlarm(), jsonObj);
-        } else if (appointmentObject.containsUserParticipants() && null != session && isPublicFolder(appointmentObject)) {
+        } else if (appointmentObject.containsUserParticipants() && null != appointmentObject.getUsers() && null != session && isPublicFolder(appointmentObject)) {
             final int userId  = session.getUserId();
             /*
              * Check for alarm for requesting user in user participants
