@@ -251,21 +251,20 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * update event data
          */
-        session.getEntityResolver().prepare(updatedEvent.getAttendees());
-        List<Attendee> newAttendees = updatedEvent.containsAttendees() ?
-            AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges() : originalEvent.getAttendees();
+        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent);
+        List<Attendee> newAttendees = attendeeHelper.previewChanges();
         ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, newAttendees, ignoredFields);
         if (null != eventUpdate && 0 < eventUpdate.getUpdatedFields().size()) {
             /*
              * check permissions & conflicts
              */
             requireWritePermissions(originalEvent);
-            if (needsConflictCheck(eventUpdate)) {
+            if (needsConflictCheck(eventUpdate, attendeeHelper)) {
                 Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
                 changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
                 Check.noConflicts(storage, session, changedEvent, newAttendees);
             }
-            if (needsSequenceNumberIncrement(eventUpdate)) {
+            if (needsSequenceNumberIncrement(eventUpdate, attendeeHelper)) {
                 /*
                  * increment sequence number
                  */
@@ -286,7 +285,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * process any attendee updates
          */
         if (updatedEvent.containsAttendees()) {
-            wasUpdated |= updateAttendees(originalEvent, updatedEvent);
+            wasUpdated |= updateAttendees(originalEvent, updatedEvent, attendeeHelper);
         } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
@@ -453,9 +452,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Gets a value indicating whether conflict checks should take place along with the update or not.
      *
      * @param eventUpdate The event update to evaluate
+     * @param attendeeHelper The attendee helper for the update
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
-    private boolean needsConflictCheck(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+    private boolean needsConflictCheck(ItemUpdate<Event, EventField> eventUpdate, AttendeeHelper attendeeHelper) throws OXException {
         if (eventUpdate.containsAnyChangeOf(new EventField[] {
             EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
         })) {
@@ -464,7 +464,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (eventUpdate.getUpdatedFields().contains(EventField.TRANSP) && false == CalendarUtils.isOpaqueTransparency(eventUpdate.getOriginal())) {
             return true;
         }
-        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
         if (0 < attendeeHelper.getAttendeesToInsert().size()) {
             return true;
         }
@@ -475,15 +474,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Gets a value indicating whether the event's sequence number ought to be incremented along with the update or not.
      *
      * @param eventUpdate The event update to evaluate
+     * @param attendeeHelper The attendee helper for the update
      * @return <code>true</code> if the event's sequence number should be updated, <code>false</code>, otherwise
      */
-    private boolean needsSequenceNumberIncrement(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+    private boolean needsSequenceNumberIncrement(ItemUpdate<Event, EventField> eventUpdate, AttendeeHelper attendeeHelper) throws OXException {
         if (eventUpdate.containsAnyChangeOf(new EventField[] {
             EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
         })) {
             return true;
         }
-        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
         if (0 < attendeeHelper.getAttendeesToDelete().size() || 0 < attendeeHelper.getAttendeesToInsert().size() || 0 < attendeeHelper.getAttendeesToUpdate().size()) {
             //TODO: more distinct evaluation of attendee updates
             return true;
@@ -543,8 +542,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         return false;
     }
 
-    private boolean updateAttendees(Event originalEvent, Event updatedEvent) throws OXException {
-        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees());
+    private boolean updateAttendees(Event originalEvent, Event updatedEvent, AttendeeHelper attendeeHelper) throws OXException {
         if (false == attendeeHelper.hasChanges()) {
             return false;
         }

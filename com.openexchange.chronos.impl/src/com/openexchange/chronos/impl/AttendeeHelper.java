@@ -64,6 +64,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -115,6 +116,23 @@ public class AttendeeHelper {
     public static AttendeeHelper onUpdatedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
         attendeeHelper.processUpdatedEvent(emptyForNull(updatedAttendees));
+        return attendeeHelper;
+    }
+
+    /**
+     * Initializes a new {@link AttendeeHelper} for an updated event, only considering updated attendees in case they're explicitly set in
+     * the passed event update.
+     *
+     * @param session The calendar session
+     * @param folder The parent folder of the event being processed
+     * @param originalAttendees The original list of attendees
+     * @param updatedEvent The updated event data as supplied by the client
+     */
+    public static AttendeeHelper onUpdatedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees, Event updatedEvent) throws OXException {
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
+        if (updatedEvent.containsAttendees()) {
+            attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()));
+        }
         return attendeeHelper;
     }
 
