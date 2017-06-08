@@ -2888,7 +2888,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 rsi.close();
                 ps.close();
             } else if (this.USE_UNIT == UNIT_USER) {
-                // TODO: Do we need to consider count user performance in a schema when creating a context?
+                // TODO: Do we need to consider the performance of a user count in a schema when creating a context?
                 ppool = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
                 ppool.setInt(1, pool_id);
                 final ResultSet rpool = ppool.executeQuery();
