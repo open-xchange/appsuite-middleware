@@ -821,14 +821,44 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public void createDatabase(final Database db) throws StorageException {
+    public void createDatabase(final Database db, Connection con) throws StorageException {
         final OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
-        oxutilcommon.createDatabase(db);
+        oxutilcommon.createDatabase(db, con);
     }
 
     @Override
     public void deleteDatabase(final Database db) throws StorageException {
-        OXUtilMySQLStorageCommon.deleteDatabase(db);
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getWriteConnectionForConfigDB();
+            con.setAutoCommit(false);
+            rollback = true;
+
+            OXUtilMySQLStorageCommon.deleteDatabase(db, con);
+
+            con.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+
+            autocommit(con);
+            if (con != null) {
+                try {
+                    cache.pushWriteConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
     }
 
     @Override
@@ -2982,7 +3012,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         String schemaName = db.getName() + '_' + schemaUnique;
         db.setScheme(schemaName);
-        OXUtilStorageInterface.getInstance().createDatabase(db);
+        OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
     }
-
 }

@@ -360,7 +360,7 @@ public class OXContextMySQLStorageCommon {
         if (otherContexts.length == 0) {
             Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
             db.setScheme(dbSchema);
-            OXUtilMySQLStorageCommon.deleteDatabase(db);
+            OXUtilMySQLStorageCommon.deleteDatabase(db, con);
         }
     }
 

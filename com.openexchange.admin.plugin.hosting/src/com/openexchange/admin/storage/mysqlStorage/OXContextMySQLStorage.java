@@ -1561,7 +1561,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             String schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(db);
+            OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
             return SchemaResult.AUTOMATIC;
         }
 
@@ -1645,7 +1645,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(db);
+            OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
         } else {
             db.setScheme(schemaName);
         }
@@ -2831,7 +2831,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             String schemaName = database.getName() + '_' + schemaUnique;
             database.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(database);
+            OXUtilStorageInterface.getInstance().createDatabase(database, configCon);
             configCon.commit();
             return database.getScheme();
         } catch (SQLException e) {
