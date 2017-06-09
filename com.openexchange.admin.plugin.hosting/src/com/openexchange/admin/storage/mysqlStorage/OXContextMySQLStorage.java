@@ -1662,7 +1662,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private static void updateContextServer2DbPool(final Database db, Connection con, final int contextId) throws PoolException {
         final int serverId = cache.getServerId();
-        cache.getPool().deleteAssignment(con, contextId);
         cache.getPool().writeAssignment(con, new Assignment() {
 
             @Override

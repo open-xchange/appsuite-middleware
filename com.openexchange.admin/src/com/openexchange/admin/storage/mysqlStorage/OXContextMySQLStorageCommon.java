@@ -370,16 +370,17 @@ public class OXContextMySQLStorageCommon {
         try {
             // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
             // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
-            final int poolId = pool.getWritePool(contextId);
-            pool.lock(con, poolId);
-            final String dbSchema = pool.getSchemaName(contextId);
-
+            int poolId = pool.getWritePool(contextId);
+            String dbSchema = pool.getSchemaName(contextId);
             int filestoreId = getFilestoreIdFor(con, contextId);
+
+            pool.lock(con, poolId);
+            
             if (0 != filestoreId) {
                 stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
                 stmt.setInt(1, filestoreId);
                 stmt.executeUpdate();
-                Databases.closeSQLStuff(stmt);
+                closeSQLStuff(stmt);
                 stmt = null;
             }
 
@@ -405,7 +406,7 @@ public class OXContextMySQLStorageCommon {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
         } finally {
-            Databases.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
         }
     }
 
@@ -422,7 +423,7 @@ public class OXContextMySQLStorageCommon {
             }
             return filestoreId;
         } finally {
-            Databases.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
         }
     }
 

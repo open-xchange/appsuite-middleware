@@ -93,7 +93,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
     private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
-    private static final String NOTFILLED = "SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count ASC";
+    private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
 
     private final ConfigDatabaseService configDatabaseService;
 
@@ -157,7 +157,6 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     private AssignmentImpl loadAssignment(Connection con, int contextId) throws OXException {
-        final AssignmentImpl retval;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -165,18 +164,18 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             stmt.setInt(1, Server.getServerId());
             stmt.setInt(2, contextId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                int pos = 1;
-                retval = new AssignmentImpl(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++), result.getString(pos++));
-            } else {
-                retval = null;
+            
+            if (false == result.next()) {
+                return null;
             }
+            
+            int pos = 1;
+            return new AssignmentImpl(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++), result.getString(pos++));
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return retval;
     }
 
     private AssignmentImpl loadAssignment(Connection conn, int contextId, boolean errorOnAbsence) throws OXException {

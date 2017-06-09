@@ -739,10 +739,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         Connection configdb_write_con = null;
         PreparedStatement prep = null;
-
+        boolean rollback = false;
         try {
             configdb_write_con = cache.getWriteConnectionForConfigDB();
             configdb_write_con.setAutoCommit(false);
+            rollback = true;
 
             final Integer id = fstore.getId();
             final String url = fstore.getUrl();
@@ -779,6 +780,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             configdb_write_con.commit();
+            rollback = false;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             try {
@@ -794,28 +796,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(pe);
         } catch (final SQLException exp) {
             LOG.error("SQL Error", exp);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of configdb connection!", expd);
-            }
             throw new StorageException(exp);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
+            if (rollback) {
+                rollback(configdb_write_con);
             }
-            try {
-                if (configdb_write_con != null) {
+
+            closeSQLStuff(prep);
+            autocommit(configdb_write_con);
+            if (configdb_write_con != null) {
+                try {
                     cache.pushWriteConnectionForConfigDB(configdb_write_con);
+                } catch (final PoolException ecp) {
+                    LOG.error("Error pushing configdb connection to pool!", ecp);
                 }
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing configdb connection to pool!", ecp);
             }
         }
     }
@@ -865,38 +859,33 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public void deleteMaintenanceReason(final int[] reason_ids) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
-
+        boolean rollback = false;
         try {
             con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
-            for (final int element : reason_ids) {
+            rollback = true;
+
+            for (int element : reason_ids) {
                 stmt = con.prepareStatement("DELETE FROM reason_text WHERE id = ?");
                 stmt.setInt(1, element);
                 stmt.executeUpdate();
                 stmt.close();
             }
             con.commit();
+            rollback = false;
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Erroe closing statement", e);
+            if (rollback) {
+                rollback(con);
             }
+
+            closeSQLStuff(stmt);
+            autocommit(con);
             try {
                 if (con != null) {
                     cache.pushWriteConnectionForConfigDB(con);

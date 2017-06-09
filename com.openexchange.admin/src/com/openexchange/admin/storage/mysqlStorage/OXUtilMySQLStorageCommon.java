@@ -126,11 +126,12 @@ public class OXUtilMySQLStorageCommon {
     private static final AdminCache cache = ClientAdminThread.cache;
 
     public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
-        final Connection con;
         String sql_pass = "";
         if (db.getPassword() != null) {
             sql_pass = db.getPassword();
         }
+
+        Connection con;
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
         } catch (final SQLException e) {
@@ -140,9 +141,12 @@ public class OXUtilMySQLStorageCommon {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
+        boolean error = true;
         boolean created = false;
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             if (existsDatabase(con, db.getScheme())) {
                 throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
@@ -150,25 +154,26 @@ public class OXUtilMySQLStorageCommon {
             // Only delete the schema if it has been created successfully. Otherwise it may happen that we delete a longly existing schema.
             // See bug 18788.
             created = true;
+
             con.setCatalog(db.getScheme());
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initUpdateTaskTable(con, db.getId().intValue(), db.getScheme());
+
             createSchemaCountEntry(db, configdbCon);
+
             con.commit();
+            rollback = false;
+            error = false;
         } catch (final SQLException e) {
-            rollback(con);
-            if (created) {
-                deleteDatabaseSchema(con, db);
-            }
             throw new StorageException(e.toString());
-        } catch (final StorageException e) {
-            rollback(con);
-            if (created) {
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            if (error && created) {
                 deleteDatabaseSchema(con, db);
             }
-            throw e;
-        } finally {
-            autocommit(con);
             cache.closeSimpleConnection(con);
         }
     }
@@ -320,7 +325,7 @@ public class OXUtilMySQLStorageCommon {
     }
 
     public static void deleteDatabase(final Database db, final Connection configdbCon) throws StorageException {
-        final Connection con;
+        Connection con;
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
         } catch (final SQLException e) {
