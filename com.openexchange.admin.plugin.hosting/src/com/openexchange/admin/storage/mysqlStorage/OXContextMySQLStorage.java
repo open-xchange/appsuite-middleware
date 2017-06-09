@@ -2023,9 +2023,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     private void myLockUnlockAllContexts(final boolean lock_all, final int reason_id, final String additionaltable, final String sqlconjunction) throws SQLException, PoolException {
         Connection con_write = null;
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
             con_write = cache.getWriteConnectionForConfigDB();
             con_write.setAutoCommit(false);
+            rollback = true;
+
             if (reason_id != -1) {
                 stmt = con_write.prepareStatement("UPDATE context " + (additionaltable != null ? "," + additionaltable : "") + " SET enabled = ?, reason_id = ? " + (sqlconjunction != null ? sqlconjunction : ""));
                 stmt.setBoolean(1, lock_all);
@@ -2037,21 +2040,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.executeUpdate();
             stmt.close();
             con_write.commit();
+            rollback = false;
         } catch (final SQLException sql) {
             LOG.error("SQL Error", sql);
-            try {
-                if (null != con_write) {
-                    con_write.rollback();
-                }
-            } catch (final SQLException ec) {
-                LOG.error("Error rollback configdb connection", ec);
-            }
             throw sql;
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw e;
         } finally {
             closePreparedStatement(stmt);
+            if (rollback) {
+                rollback(con_write);
+            }
+
+            autocommit(con_write);
             if (con_write != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con_write);
@@ -2065,9 +2067,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     private void myEnableDisableContext(final int context_id, final boolean enabled, final int reason_id) throws SQLException, PoolException {
         Connection con_write = null;
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
             con_write = cache.getWriteConnectionForConfigDB();
             con_write.setAutoCommit(false);
+            rollback = true;
+
             stmt = con_write.prepareStatement("UPDATE context SET enabled = ?, reason_id = ? WHERE cid = ?");
 
             stmt.setBoolean(1, enabled);
@@ -2088,21 +2093,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.executeUpdate();
             stmt.close();
             con_write.commit();
+            rollback = false;
         } catch (final SQLException sql) {
             LOG.error("SQL Error", sql);
-            try {
-                if (null != con_write) {
-                    con_write.rollback();
-                }
-            } catch (final SQLException ec) {
-                LOG.error("Error rollback configdb connection", ec);
-            }
             throw sql;
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw e;
         } finally {
-            closePreparedStatement(stmt);
+            closeSQLStuff(stmt);
+            if (rollback) {
+                rollback(con_write);
+            }
+
+            autocommit(con_write);
             if (con_write != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con_write);
@@ -2439,6 +2443,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (rollback) {
                 rollback(configCon);
             }
+            autocommit(configCon);
             if (null != configCon) {
                 try {
                     cache.pushWriteConnectionForConfigDB(configCon);
@@ -2811,6 +2816,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         Database database = null;
+        boolean rollback = false;
         try {
             // Get database handle
             try {
@@ -2823,6 +2829,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             // Create schema
             startTransaction(configCon);
+            rollback = true;
             int schemaUnique;
             try {
                 schemaUnique = IDGenerator.getId(configCon);
@@ -2833,15 +2840,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             database.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(database, configCon);
             configCon.commit();
+            rollback = false;
             return database.getScheme();
         } catch (SQLException e) {
-            rollback(configCon);
             if (database != null) {
                 OXContextMySQLStorageCommon.deleteEmptySchema(i(database.getId()), database.getScheme());
             }
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
+            if (rollback) {
+                rollback(configCon);
+            }
+            
             autocommit(configCon);
             try {
                 cache.pushWriteConnectionForConfigDB(configCon);
