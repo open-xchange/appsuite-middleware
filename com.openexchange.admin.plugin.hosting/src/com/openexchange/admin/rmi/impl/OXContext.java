@@ -1282,8 +1282,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials credentials)
-        throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         try {
@@ -1342,8 +1341,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials credentials)
-        throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
 
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
@@ -1414,9 +1412,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
      * {@inheritDoc}
      */
     @Override
-    public void downgrade(final Context ctx, final Credentials credentials) throws
-        RemoteException, InvalidCredentialsException, NoSuchContextException,
-        StorageException, DatabaseUpdateException, InvalidDataException {
+    public void downgrade(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(ctx);
@@ -1469,8 +1465,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public String getAccessCombinationName(final Context ctx, final Credentials credentials)
-        throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public String getAccessCombinationName(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         // Resolve admin user and get the module access from db and query cache for access combination name
@@ -1523,8 +1518,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials credentials)
-        throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         try {
@@ -1682,5 +1676,32 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     @Override
     public boolean checkExists(final Context ctx, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         return exists(ctx, credentials);
+    }
+
+    @Override
+    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+        LOGGER.debug("Checking consistency for counters");
+
+        OXContextStorageInterface.getInstance().checkCountsConsistency(checkDatabaseCounts, checkFilestoreCounts);
+    }
+
+    /**
+     * Check for an empty string
+     * 
+     * @param string The string to check
+     */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

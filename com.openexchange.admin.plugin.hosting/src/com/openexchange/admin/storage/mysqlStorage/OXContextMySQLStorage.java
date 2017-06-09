@@ -69,6 +69,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -2847,6 +2848,210 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
+        }
+    }
+
+    @Override
+    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException {
+        // Get connection to 'configdb'
+        Connection configCon;
+        try {
+            configCon = cache.getWriteConnectionForConfigDB();
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+
+        boolean rollback = false;
+        try {
+            startTransaction(configCon);
+            rollback = true;
+
+            checkCountsConsistency(configCon, checkDatabaseCounts, checkFilestoreCounts);
+
+            configCon.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (rollback) {
+                rollback(configCon);
+            }
+            autocommit(configCon);
+            try {
+                cache.pushWriteConnectionForConfigDB(configCon);
+            } catch (PoolException e) {
+                LOG.error("Error pushing configdb connection to pool!", e);
+            }
+        }
+    }
+
+    @Override
+    public void checkCountsConsistency(Connection configCon, boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException {
+        if (null == configCon) {
+            checkCountsConsistency(checkDatabaseCounts, checkFilestoreCounts);
+            return;
+        }
+
+        if (checkFilestoreCounts) {
+            checkFilestoreCountConsistency(configCon);
+        }
+
+        if (checkDatabaseCounts) {
+            checkDBPoolCountConsistency(configCon);
+            checkDBPoolSchemaCountConsistency(configCon);
+        }
+    }
+
+    private void checkFilestoreCountConsistency(Connection configCon) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = configCon.prepareStatement("SELECT filestore.id, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // No file store registered...
+                return;
+            }
+
+            Map<Integer, Integer> counts = new LinkedHashMap<Integer, Integer>(32, 0.9F);
+            do {
+                int filestoreId = rs.getInt(1);
+                int numContexts = rs.getInt(2);
+                counts.put(Integer.valueOf(filestoreId), Integer.valueOf(numContexts));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            stmt = configCon.prepareStatement("INSERT INTO contexts_per_filestore (filestore_id, count) VALUES (?, ?) ON DUPLICATE KEY UPDATE count=?");
+            for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+                int count = entry.getValue().intValue();
+                stmt.setInt(1, entry.getKey().intValue());
+                stmt.setInt(2, count);
+                stmt.setInt(3, count);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private void checkDBPoolCountConsistency(Connection configCon) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = configCon.prepareStatement("SELECT db_cluster.write_db_pool_id, COUNT(context_server2db_pool.cid) AS num FROM db_cluster LEFT JOIN context_server2db_pool ON db_cluster.write_db_pool_id = context_server2db_pool.write_db_pool_id GROUP BY db_cluster.write_db_pool_id ORDER BY num ASC");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // No database registered...
+                return;
+            }
+
+            Map<Integer, Integer> counts = new LinkedHashMap<Integer, Integer>(32, 0.9F);
+            do {
+                int filestoreId = rs.getInt(1);
+                int numContexts = rs.getInt(2);
+                counts.put(Integer.valueOf(filestoreId), Integer.valueOf(numContexts));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbpool (db_pool_id, count) VALUES (?, ?) ON DUPLICATE KEY UPDATE count=?");
+            for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+                int count = entry.getValue().intValue();
+                stmt.setInt(1, entry.getKey().intValue());
+                stmt.setInt(2, count);
+                stmt.setInt(3, count);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private void checkDBPoolSchemaCountConsistency(Connection configCon) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = configCon.prepareStatement("SELECT write_db_pool_id FROM db_cluster ORDER BY write_db_pool_id ASC");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // No database registered...
+                return;
+            }
+
+            List<Integer> poolIds = new LinkedList<Integer>();
+            do {
+                poolIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            class SchemaCount {
+
+                final String schemaName;
+                final int count;
+
+                SchemaCount(String schemaName, int count) {
+                    super();
+                    this.count = count;
+                    this.schemaName = schemaName;
+                }
+            }
+            ;
+
+            Map<Integer, List<SchemaCount>> counts = new LinkedHashMap<Integer, List<SchemaCount>>(32, 0.9F);
+            for (Integer poolId : poolIds) {
+                stmt = configCon.prepareStatement("SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema ORDER BY count ASC");
+                stmt.setInt(1, poolId.intValue());
+                rs = stmt.executeQuery();
+
+                List<SchemaCount> schemaCounts = new LinkedList<SchemaCount>();
+                while (rs.next()) {
+                    schemaCounts.add(new SchemaCount(rs.getString(1), rs.getInt(2)));
+                }
+                counts.put(poolId, schemaCounts);
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+            for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
+                int poolId = entry.getKey().intValue();
+                List<SchemaCount> schemaCounts = entry.getValue();
+                for (SchemaCount schemaCount : schemaCounts) {
+                    stmt.setInt(1, poolId);
+                    stmt.setString(2, schemaCount.schemaName);
+                    stmt.setInt(3, schemaCount.count);
+                    stmt.setInt(4, schemaCount.count);
+                    stmt.addBatch();
+                }
+            }
+            stmt.executeBatch();
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 }

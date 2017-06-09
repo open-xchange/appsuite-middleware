@@ -71,7 +71,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-
 /**
  * This class defines the Open-Xchange API Version 2 for creating and manipulating OX Contexts.<br><br>
  *
@@ -133,10 +132,11 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws ContextExistsException
      */
-    public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+    public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     /**
      * Create a new context! Given access combination name will be used for admin module access rights!
+     * 
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access_combination_name String Access combination name!
@@ -149,10 +149,11 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws ContextExistsException
      */
-    public Context create(final Context ctx, final User admin_user, String access_combination_name,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+    public Context create(final Context ctx, final User admin_user, String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     /**
      * Create a new context! Given access rights be used for admin!
+     * 
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access UserModuleAccess Access rights!
@@ -165,7 +166,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws ContextExistsException
      */
-    public Context create(final Context ctx, final User admin_user, UserModuleAccess access,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+    public Context create(final Context ctx, final User admin_user, UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     /**
      * Create a new context.
@@ -186,10 +187,11 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws ContextExistsException
      */
-    public Context create(final Context ctx, final User admin_user, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+    public Context create(final Context ctx, final User admin_user, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     /**
      * Create a new context! Given access combination name will be used for admin module access rights!
+     * 
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access_combination_name String Access combination name!
@@ -203,10 +205,11 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws ContextExistsException
      */
-    public Context create(final Context ctx, final User admin_user, String access_combination_name,final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+    public Context create(final Context ctx, final User admin_user, String access_combination_name, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     /**
      * Create a new context! Given access rights be used for admin!
+     * 
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access UserModuleAccess Access rights!
@@ -220,8 +223,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws ContextExistsException
      */
-    public Context create(final Context ctx, final User admin_user, UserModuleAccess access,final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
-
+    public Context create(final Context ctx, final User admin_user, UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     /**
      * Delete a context.<br>
@@ -237,7 +239,7 @@ public interface OXContextInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws InvalidDataException
      */
-    public void delete(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException, InvalidDataException;
+    public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException;
 
     /**
      * If context was changed, call this method to flush data
@@ -252,15 +254,14 @@ public interface OXContextInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws InvalidDataException
      */
-    public void downgrade(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException, InvalidDataException;
-
+    public void downgrade(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException;
 
     /**
      * Move all data of a context contained on the filestore to another filestore
-     *         <p>
-     *         This method returns immediately and the data is going to be copied
-     *         in the background. To query the progress and the result of the actual
-     *         task, the AdminJobExecutor interface must be used.
+     * <p>
+     * This method returns immediately and the data is going to be copied
+     * in the background. To query the progress and the result of the actual
+     * task, the AdminJobExecutor interface must be used.
      *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param dst_filestore_id Id of the Filestore to move the context in.
@@ -302,7 +303,7 @@ public interface OXContextInterface extends Remote {
      */
     //    public int moveContextDatabase(Context ctx, Database dst_database_id, MaintenanceReason reason, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, OXContextException;
     //    * @param reason ID of the maintenance reason for disabling the context while the move is in progress.
-    public int moveContextDatabase(final Context ctx, final Database dst_database_id, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, OXContextException;
+    public int moveContextDatabase(final Context ctx, final Database dst_database_id, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException;
 
     /**
      * Disable given context.<br>
@@ -319,7 +320,7 @@ public interface OXContextInterface extends Remote {
      */
     //public void disable(Context ctx, MaintenanceReason reason, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchReasonException, OXContextException;
     //* @param reason MaintenanceReason
-    public void disable(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchReasonException, OXContextException;
+    public void disable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException;
 
     /**
      * Enable given context.
@@ -332,7 +333,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidDataException
      */
-    public void enable(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Search for contexts<br>
@@ -349,7 +350,7 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occurred.
      */
-    public Context[] list(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    public Context[] list(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Convenience method for listing all contexts
@@ -377,7 +378,7 @@ public interface OXContextInterface extends Remote {
      */
     //public void disableAll(MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchReasonException;
     //* @param reason MaintenanceReason
-    public void disableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchReasonException;
+    public void disableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException;
 
     /**
      * Enable all contexts.
@@ -402,7 +403,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public Context getOwnData(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public Context getOwnData(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Get specified context details
@@ -416,7 +417,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public Context[] getData(final Context[] ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public Context[] getData(final Context[] ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Get specified context details
@@ -430,7 +431,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public Context getData(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public Context getData(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Change specified context!
@@ -446,7 +447,7 @@ public interface OXContextInterface extends Remote {
      * Change storage data informations - Change filestore infos for context. Normally NO need to change!
      *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID
-     * or name for identifying the context itself the object should only contain those field which need to be changed.
+     *            or name for identifying the context itself the object should only contain those field which need to be changed.
      * @param auth
      * @throws RemoteException
      * @throws InvalidCredentialsException
@@ -454,7 +455,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void change(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Gets specified context's capabilities.
@@ -468,7 +469,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public Set<String> getCapabilities(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public Set<String> getCapabilities(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Changes specified context's capabilities.
@@ -484,7 +485,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Gets the configured quotas in given context.
@@ -498,7 +499,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public Quota[] listQuotas(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public Quota[] listQuotas(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Changes specified context's quota for a certain module.
@@ -513,7 +514,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void changeQuota(Context ctx, String module, long quotaValue, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public void changeQuota(Context ctx, String module, long quotaValue, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Change module access rights for ALL users in the specified context.<br>
@@ -532,8 +533,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void changeModuleAccess(final Context ctx,final UserModuleAccess access, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
-
+    public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Change module access rights by "access combination name" for ALL users in the specified context.<br>
@@ -551,7 +551,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void changeModuleAccess(final Context ctx,final String access_combination_name, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Get current module access rights of the context based on the rights of the admin user!
@@ -565,7 +565,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public UserModuleAccess getModuleAccess(final Context ctx,final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Get current access combination name of the context based on the rights of the admin user!
@@ -580,8 +580,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public String getAccessCombinationName(final Context ctx,final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
-
+    public String getAccessCombinationName(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException;
 
     /**
      * Search for context on specified db.
@@ -596,7 +595,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws NoSuchDatabaseException
      */
-    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchDatabaseException;
+    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException;
 
     /**
      * Search for context which store data on specified filestore
@@ -611,7 +610,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws NoSuchFilestoreException
      */
-    public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchFilestoreException;
+    public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException;
 
     /**
      * Determines the user ID of the admin user for a given context
@@ -624,7 +623,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException Thrown when an error in a subsystem occurred.
      * @throws NoSuchContextException
      */
-    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException ;
+    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException;
 
     /**
      * Determines whether a context already exists.
@@ -645,4 +644,17 @@ public interface OXContextInterface extends Remote {
      */
     @Deprecated
     public boolean checkExists(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @param auth Credentials for authenticating against server
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occurred
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid
+     * @throws RemoteException General RMI Exception
+     */
+    public void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
+
 }
