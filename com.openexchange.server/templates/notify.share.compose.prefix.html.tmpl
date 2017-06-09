@@ -5,25 +5,18 @@
         font-family: -apple-system, BlinkMacSystemFont,
             "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
             "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
-        font-size: 16px;
+        max-width: 700px;
         margin: 16px;
     }
 
-    .wrap {
-        position: absolute;
-        left: 0;
-        right: 0;
-        padding: 10px;
-    }
-
     .container {
+        font-size: 16px;
         padding: 16px;
         border-radius: 4px;
         background-color: f5f5f5;
         color: #424242;
         border: 1px solid #eee;
-        margin: 0 auto;
-        max-width: 700px;
+
     }
 
     hr {
@@ -136,50 +129,50 @@
     }
 </style>
 
-<div class="wrap">
-    <div class="container">
-        <p class="intro">
-          ${intro}
-        </p>
-        <table class="base">
-          <tr>
-            <td>
-              <table>
-                <tr class="base-row">
-                  <#list previews?keys as key>
-                    <td class="item">
-                      <table>
-                        <tr class="item-row">
-                          <td align="left"><img class="item-image" src="${previews[key]}" alt="" /></td>
-                        </tr>
-                        <tr class="item-row">
-                          <td align="left" class="item-text">
-                            ${filenames[key]}
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </#list>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-        <p style="clear:both">
-          <#if more?has_content>${more}</#if>
-        </p>
-        <p>
-          <@styledButton link=link>${link_text}</@styledButton>
-        </p>
-        <#if password?has_content>
-          <p>
-            ${password}
-          </p>
-        </#if>
-        <#if expiration?has_content>
-          <p>
-            ${expiration}
-          </p>
-        </#if>
-    </div>
+
+<div class="container">
+    <p class="intro">
+      ${intro}
+    </p>
+    <table class="base">
+      <tr>
+        <td>
+          <table>
+            <tr class="base-row">
+              <#list previews?keys as key>
+                <td class="item">
+                  <table>
+                    <tr class="item-row">
+                      <td align="left"><img class="item-image" src="${previews[key]}" alt="" /></td>
+                    </tr>
+                    <tr class="item-row">
+                      <td align="left" class="item-text">
+                        ${filenames[key]}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </#list>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <p style="clear:both">
+      <#if more?has_content>${more}</#if>
+    </p>
+    <p>
+      <@styledButton link=link>${link_text}</@styledButton>
+    </p>
+    <#if password?has_content>
+      <p>
+        ${password}
+      </p>
+    </#if>
+    <#if expiration?has_content>
+      <p>
+        ${expiration}
+      </p>
+    </#if>
 </div>
+
