@@ -2699,16 +2699,41 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (ctx.getFilestoreId() != null) {
             final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
             final Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId().intValue(), false);
-            PreparedStatement prep = null;
             final int context_id = ctx.getId().intValue();
+            
+            PreparedStatement prep = null;
+            ResultSet rs = null;
             try {
 
                 if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+                    prep = configdb_write_con.prepareStatement("SELECT context.filestore_id FROM context WHERE context.cid = ?");
+                    prep.setInt(1, context_id);
+                    rs = prep.executeQuery();
+                    int oldFilestoreId = rs.next() ? rs.getInt(1) : 0;
+                    closeSQLStuff(rs, prep);
+                    rs = null;
+                    prep = null;
+                    
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
                     prep.setInt(1, filestore.getId().intValue());
                     prep.setInt(2, context_id);
                     prep.executeUpdate();
-                    prep.close();
+                    closeSQLStuff(prep);
+                    prep = null;
+                    
+                    if (oldFilestoreId != 0) {
+                        prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                        prep.setInt(1, oldFilestoreId);
+                        prep.executeUpdate();
+                        closeSQLStuff(prep);
+                        prep = null;
+                    }
+
+                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
+                    prep.setInt(1, filestore.getId().intValue());
+                    prep.executeUpdate();
+                    closeSQLStuff(prep);
+                    prep = null;
                 }
 
                 String filestore_name = ctx.getFilestore_name();
@@ -2717,11 +2742,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     prep.setString(1, filestore_name);
                     prep.setInt(2, context_id);
                     prep.executeUpdate();
-                    prep.close();
+                    closeSQLStuff(prep);
+                    prep = null;
                 }
 
             } finally {
-                Databases.closeSQLStuff(prep);
+                closeSQLStuff(prep);
             }
         }
     }
@@ -2784,6 +2810,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.setString(3, targetSchema);
             stmt.setString(4, sourceSchema);
             stmt.executeUpdate();
+            
+            checkCountsConsistency(con, true, false);
 
             LOG.info("Successfully restored database pool references in configdb for schema {}", targetSchema);
         } catch (final SQLException e) {
