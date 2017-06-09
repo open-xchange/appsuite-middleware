@@ -47,25 +47,17 @@
  *
  */
 
-package com.openexchange.calendar.json.converters;
+package com.openexchange.chronos.json.converter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
-import com.openexchange.calendar.json.actions.chronos.EventConverter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -74,46 +66,51 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventResultConverter extends AbstractCalendarJSONResultConverter {
-
-    private final ServiceLookup services;
-    private final AppointmentResultConverter delegate;
-
-    /**
-     * Initializes a new {@link EventResultConverter}.
-     */
-    public EventResultConverter(ServiceLookup services) {
-        super();
-        this.services = services;
-        this.delegate = new AppointmentResultConverter(services);
-    }
+public class EventResultConverter implements ResultConverter {
 
     @Override
     public String getInputFormat() {
-        return "eventDocument";
+        return "event";
     }
 
     @Override
-    protected void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone userTimeZone) throws OXException {
-        Object resultObject = result.getResultObject();
-        if (null == resultObject) {
-            return;
+    public String getOutputFormat() {
+        return "json";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        /*
+         * determine timezone
+         */
+        String timeZoneID = requestData.getParameter("timezone");
+        if (null == timeZoneID) {
+            timeZoneID = session.getUser().getTimeZone();
         }
-        CalendarSession calendarSession = services.getService(CalendarService.class).init(request.getSession());
-        EventConverter eventConverter = new DefaultEventConverter(services, calendarSession);
+        /*
+         * check and convert result object
+         */
+        Object resultObject = result.getResultObject();
         if (Event.class.isInstance(resultObject)) {
-            CalendarDataObject appointment = eventConverter.getAppointment((Event) resultObject);
-            result.setResultObject(appointment, delegate.getInputFormat());
-            delegate.convertCalendar(request, result, session, converter, userTimeZone);
-        } else if (Collections.class.isInstance(resultObject)) {
-            Collection<?> collection = (Collection<?>) resultObject;
-            List<Appointment> appointments = new ArrayList<Appointment>(collection.size());
-            for (Object object : collection) {
-                appointments.add(eventConverter.getAppointment((Event) object));
-            }
-            delegate.convert(appointments, request, result, userTimeZone);
-        } else {
-            throw new UnsupportedOperationException();
+            /*
+             * Only one event to convert
+             */
+            resultObject = convertEvent((Event) resultObject, timeZoneID, session);
+        }
+        //TODO
+        result.setResultObject(resultObject, "json");
+    }
+
+    private JSONObject convertEvent(Event event, String timeZoneID, ServerSession session) throws OXException {
+        try {
+            return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getMappedFields(), timeZoneID);
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
 

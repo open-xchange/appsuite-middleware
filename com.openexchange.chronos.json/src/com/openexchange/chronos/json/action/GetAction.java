@@ -47,74 +47,45 @@
  *
  */
 
-package com.openexchange.calendar.json.converters;
+package com.openexchange.chronos.json.action;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
-import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.composition.CompositeEventID;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link EventResultConverter}
+ * {@link GetAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventResultConverter extends AbstractCalendarJSONResultConverter {
-
-    private final ServiceLookup services;
-    private final AppointmentResultConverter delegate;
+public class GetAction extends ChronosAction {
 
     /**
-     * Initializes a new {@link EventResultConverter}.
+     * Initializes a new {@link GetAction}.
+     *
+     * @param services A service lookup reference
      */
-    public EventResultConverter(ServiceLookup services) {
-        super();
-        this.services = services;
-        this.delegate = new AppointmentResultConverter(services);
+    protected GetAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public String getInputFormat() {
-        return "eventDocument";
-    }
-
-    @Override
-    protected void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone userTimeZone) throws OXException {
-        Object resultObject = result.getResultObject();
-        if (null == resultObject) {
-            return;
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        CompositeEventID eventId;
+        try {
+            String uniqueID = requestData.requireParameter("id");
+            eventId = CompositeEventID.parse(uniqueID);
+        } catch (IllegalArgumentException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        CalendarSession calendarSession = services.getService(CalendarService.class).init(request.getSession());
-        EventConverter eventConverter = new DefaultEventConverter(services, calendarSession);
-        if (Event.class.isInstance(resultObject)) {
-            CalendarDataObject appointment = eventConverter.getAppointment((Event) resultObject);
-            result.setResultObject(appointment, delegate.getInputFormat());
-            delegate.convertCalendar(request, result, session, converter, userTimeZone);
-        } else if (Collections.class.isInstance(resultObject)) {
-            Collection<?> collection = (Collection<?>) resultObject;
-            List<Appointment> appointments = new ArrayList<Appointment>(collection.size());
-            for (Object object : collection) {
-                appointments.add(eventConverter.getAppointment((Event) object));
-            }
-            delegate.convert(appointments, request, result, userTimeZone);
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        Event event = calendarAccess.getEvent(eventId);
+        return new AJAXRequestResult(event, event.getLastModified(), "event");
     }
 
 }

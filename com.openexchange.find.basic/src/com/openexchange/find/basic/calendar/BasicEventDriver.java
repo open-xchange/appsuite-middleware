@@ -147,7 +147,7 @@ public class BasicEventDriver extends BasicCalendarDriver {
         int stopIndex = 0 < size ? Math.min(events.size(), startIndex + size) : events.size();
         List<Document> documents = new ArrayList<Document>(stopIndex - startIndex);
         for (int i = startIndex; i < stopIndex; i++) {
-            documents.add(new CalendarDocument(events.get(i), "event"));
+            documents.add(new CalendarDocument(events.get(i), "eventDocument"));
         }
         return documents;
     }
