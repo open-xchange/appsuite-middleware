@@ -141,7 +141,7 @@ public final class Initialization {
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
-        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor);
+        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor, LockMech.lockMechFor(configuration.getProperty(Configuration.Property.LOCK_MECH, LockMech.ROW_LOCK.getId())));
         if (null != cacheService) {
             configDatabaseService.setCacheService(cacheService);
         }

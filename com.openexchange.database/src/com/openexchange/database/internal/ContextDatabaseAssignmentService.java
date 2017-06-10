@@ -122,7 +122,7 @@ interface ContextDatabaseAssignmentService {
      */
     Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException;
 
-    void lock(Connection con, int writePoolId) throws OXException;
+    void lock(Connection con, int writePoolId, String schemaName) throws OXException;
 
     /**
      * Gets all existing schemas in this installation.

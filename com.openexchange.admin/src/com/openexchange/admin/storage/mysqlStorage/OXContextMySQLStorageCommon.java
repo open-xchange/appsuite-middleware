@@ -324,7 +324,7 @@ public class OXContextMySQLStorageCommon {
         }
         try {
             startTransaction(con);
-            cache.getPool().lock(con, poolId);
+            cache.getPool().lock(con, poolId, dbSchema);
             deleteEmptySchema(con, poolId, dbSchema, cache);
             con.commit();
         } catch (SQLException e) {
@@ -374,7 +374,7 @@ public class OXContextMySQLStorageCommon {
             String dbSchema = pool.getSchemaName(contextId);
             int filestoreId = getFilestoreIdFor(con, contextId);
 
-            pool.lock(con, poolId);
+            pool.lock(con, poolId, dbSchema);
             
             if (0 != filestoreId) {
                 stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");

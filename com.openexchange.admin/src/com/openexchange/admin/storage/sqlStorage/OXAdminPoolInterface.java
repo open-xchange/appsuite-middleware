@@ -118,5 +118,5 @@ public interface OXAdminPoolInterface {
      */
     Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws PoolException;
 
-    void lock(Connection con, int writePoolId) throws PoolException;
+    void lock(Connection con, int writePoolId, String schemaName) throws PoolException;
 }
