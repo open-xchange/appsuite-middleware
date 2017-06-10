@@ -1577,8 +1577,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 return SchemaResult.SCHEMA_NAME;
             case IN_MEMORY:
                 // Get the schema name advertised by cache
-                SchemaCacheFinalize cacheFinalize = inMemoryLookupSchema(configCon, db);
-                return SchemaResult.inMemoryWith(cacheFinalize);
+                SchemaCacheResult cacheResult = inMemoryLookupSchema(configCon, db);
+                return SchemaResult.inMemoryWith(cacheResult);
             default:
                 automaticLookupSchema(configCon, db);
                 return SchemaResult.AUTOMATIC;
@@ -1595,7 +1595,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         db.setScheme(schemaName);
     }
 
-    private SchemaCacheFinalize inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
+    private SchemaCacheResult inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
         // Get cache instance
         SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
         ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, cache.getPool());
@@ -1605,17 +1605,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         SchemaCacheResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
         if (null != schemaResult) {
             db.setScheme(schemaResult.getSchemaName());
-            return schemaResult.getFinalize();
+            return schemaResult;
         }
 
-        // No suitable schema known to cache. Therefore clear cache state & perform regular schema look-up/creation
-        schemaCache.clearFor(poolId);
-        autoFindOrCreateSchema(configCon, db, false);
+        // No suitable schema known to cache. Therefore return null to initiate regular schema look-up/creation
         return null;
     }
 
     private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
-        autoFindOrCreateSchema(configCon, db, true);
+        autoFindOrCreateSchema(configCon, db);
     }
 
     /**
@@ -1626,13 +1624,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @param clearSchemaCache Whether schema cache is supposed to be cleared
      * @throws StorageException If a suitable schema cannot be found
      */
-    private void autoFindOrCreateSchema(Connection configCon, Database db, boolean clearSchemaCache) throws StorageException {
+    private void autoFindOrCreateSchema(Connection configCon, Database db) throws StorageException {
         // Clear schema cache once "live" schema information is requested
-        if (clearSchemaCache) {
-            SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
-            if (null != optCache) {
-                optCache.clearFor(db.getId().intValue());
-            }
+        SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
+        if (null != optCache) {
+            optCache.clearFor(db.getId().intValue());
         }
 
         // Freshly determine the next schema to use
@@ -2700,7 +2696,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
             final Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId().intValue(), false);
             final int context_id = ctx.getId().intValue();
-            
+
             PreparedStatement prep = null;
             ResultSet rs = null;
             try {
@@ -2713,14 +2709,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     closeSQLStuff(rs, prep);
                     rs = null;
                     prep = null;
-                    
+
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
                     prep.setInt(1, filestore.getId().intValue());
                     prep.setInt(2, context_id);
                     prep.executeUpdate();
                     closeSQLStuff(prep);
                     prep = null;
-                    
+
                     if (oldFilestoreId != 0) {
                         prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
                         prep.setInt(1, oldFilestoreId);
@@ -2810,7 +2806,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.setString(3, targetSchema);
             stmt.setString(4, sourceSchema);
             stmt.executeUpdate();
-            
+
             checkCountsConsistency(con, true, false);
 
             LOG.info("Successfully restored database pool references in configdb for schema {}", targetSchema);
@@ -2880,7 +2876,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (rollback) {
                 rollback(configCon);
             }
-            
+
             autocommit(configCon);
             try {
                 cache.pushWriteConnectionForConfigDB(configCon);
