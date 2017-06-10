@@ -61,7 +61,7 @@ import java.util.PriorityQueue;
  * <pre>
  * SchemaInfo schemaInfo = ...;
  * synchronized (schemaInfo) {
- *     ...
+ * ...
  * }
  * </pre>
  * The only exception is the {@link #isDeprecated()} method, which is allowed to be called w/o holding instance lock.
@@ -72,11 +72,13 @@ import java.util.PriorityQueue;
 public class SchemaInfo {
 
     private final PriorityQueue<SchemaCount> queue;
+    private final Map<String, SchemaCount> name2schema;
     private final Map<String, SchemaCount> inUse;
     private final int poolId;
     private long stamp;
     private long modCount;
     private volatile boolean deprecated; // Declare as "volatile" for non-synchronized access
+    private final boolean sequentialContextCreationPerSchema;
 
     /**
      * Initializes a new {@link SchemaInfo}.
@@ -85,9 +87,11 @@ public class SchemaInfo {
         super();
         this.poolId = poolId;
         queue = new PriorityQueue<SchemaCount>(32);
+        name2schema = new HashMap<String, SchemaCount>(32, 0.9F);
         inUse = new HashMap<String, SchemaCount>(32, 0.9F);
         deprecated = true; // Deprecated by default
         modCount = 0L;
+        sequentialContextCreationPerSchema = false;
     }
 
     /**
@@ -126,6 +130,7 @@ public class SchemaInfo {
         deprecated = true;
         stamp = 0;
         queue.clear();
+        name2schema.clear();
         inUse.clear();
     }
 
@@ -140,6 +145,7 @@ public class SchemaInfo {
     public void initializeWith(Map<String, Integer> contextCountPerSchema) {
         // Clear, ...
         queue.clear();
+        name2schema.clear();
         inUse.clear();
 
         // Increase modification count and ...
@@ -147,7 +153,9 @@ public class SchemaInfo {
 
         // ... refill queue
         for (Map.Entry<String, Integer> entry : contextCountPerSchema.entrySet()) {
-            queue.offer(new SchemaCount(entry.getKey(), entry.getValue().intValue(), modCount));
+            SchemaCount schemaCount = new SchemaCount(entry.getKey(), entry.getValue().intValue(), modCount);
+            queue.offer(schemaCount);
+            name2schema.put(schemaCount.name, schemaCount);
         }
         stamp = System.currentTimeMillis();
         deprecated = false;
@@ -169,32 +177,56 @@ public class SchemaInfo {
             return null;
         }
 
-        while (true) {
-            if (this.modCount != modCount) {
-                // Reinitialized in the meantime
-                return null;
-            }
-
-            for (SchemaCount nextSchema; (nextSchema = queue.poll()) != null;) {
-                if (nextSchema.count < maxContexts) {
-                    // May be used for at least one more context
-                    nextSchema.incrementCount();
-
-                    // Put into in-use collection
-                    inUse.put(nextSchema.name, nextSchema);
-
-                    return nextSchema;
+        if (sequentialContextCreationPerSchema) {
+            //Only one context is allowed to be created in a schema concurrently
+            while (true) {
+                if (this.modCount != modCount) {
+                    // Reinitialized in the meantime
+                    return null;
                 }
-            }
 
-            // Found no available schema. Are there schemas currently in use?
-            if (inUse.isEmpty()) {
-                return null;
-            }
+                for (SchemaCount nextSchema; (nextSchema = queue.poll()) != null;) {
+                    if (nextSchema.count < maxContexts) {
+                        // May be used for at least one more context
+                        nextSchema.incrementCount();
 
-            // Await until an in-use one becomes available
-            this.wait();
+                        // Put into in-use collection
+                        inUse.put(nextSchema.name, nextSchema);
+
+                        return nextSchema;
+                    }
+                }
+
+                // Found no available schema. Are there schemas currently in use?
+                if (inUse.isEmpty()) {
+                    return null;
+                }
+
+                // Await until an in-use one becomes available
+                this.wait();
+            }
         }
+
+        // Allow concurrent context creations in one schema
+        if (this.modCount != modCount) {
+            // Reinitialized in the meantime
+            return null;
+        }
+
+        for (SchemaCount nextSchema; (nextSchema = queue.poll()) != null;) {
+            if (nextSchema.count < maxContexts) {
+                // May be used for at least one more context
+                nextSchema.incrementCount();
+
+                // Re-offer
+                queue.offer(nextSchema);
+
+                return nextSchema;
+            }
+        }
+
+        // Found no available schema.
+        return null;
     }
 
     /**
@@ -211,15 +243,30 @@ public class SchemaInfo {
                 return;
             }
 
-            SchemaCount usedSchemaCount = inUse.remove(schemaName);
-            if (null != usedSchemaCount) {
-                // Decrement counter and make it re-available
-                if (decrement) {
-                    usedSchemaCount.decrementCount();
-                }
+            if (sequentialContextCreationPerSchema) {
+                SchemaCount usedSchemaCount = inUse.remove(schemaName);
+                if (null != usedSchemaCount) {
+                    // Decrement counter and make it re-available
+                    if (decrement) {
+                        usedSchemaCount.decrementCount();
+                    }
 
-                // Re-offer
-                queue.offer(usedSchemaCount);
+                    // Re-offer
+                    queue.offer(usedSchemaCount);
+                }
+            } else {
+                // Allow concurrent context creations in one schema
+                SchemaCount usedSchemaCount = name2schema.get(schemaName);
+                if (null != usedSchemaCount) {
+                    // Decrement counter and make it re-available
+                    if (decrement) {
+                        usedSchemaCount.decrementCount();
+                    }
+
+                    // Re-offer
+                    queue.remove(usedSchemaCount);
+                    queue.offer(usedSchemaCount);
+                }
             }
         } finally {
             // Notify possibly waiting threads

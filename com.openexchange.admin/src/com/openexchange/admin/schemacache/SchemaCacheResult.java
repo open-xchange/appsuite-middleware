@@ -58,7 +58,7 @@ package com.openexchange.admin.schemacache;
 public class SchemaCacheResult {
 
     /**
-     * The special result indicating that there are no schemas at all available for a database.
+     * The special result indicating that there are no schemata at all available for a database.
      */
     public static final SchemaCacheResult DATABASE_EMPTY = new SchemaCacheResult(null, null);
 
