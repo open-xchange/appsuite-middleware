@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.schemacache.inmemory;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -123,7 +124,12 @@ public class InMemorySchemaCache implements SchemaCache {
         SchemaInfo schemaInfo = getSchemaInfo(poolId);
         synchronized (schemaInfo) {
             if (false == isAccessible(schemaInfo)) {
-                schemaInfo.initializeWith(closure.getContextCountPerSchema(poolId, maxContexts));
+                Map<String, Integer> contextCountPerSchema = closure.getContextCountPerSchema(poolId, maxContexts);
+                if (contextCountPerSchema.isEmpty()) {
+                    // No schemas available
+                    return SchemaCacheResult.DATABASE_EMPTY;
+                }
+                schemaInfo.initializeWith(contextCountPerSchema);
             }
 
             try {
