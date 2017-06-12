@@ -51,11 +51,8 @@ package com.openexchange.ajax.task;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.Assert;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -63,6 +60,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -74,8 +72,6 @@ import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -83,11 +79,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TaskTools extends Assert {
-
-    private TaskTools() {
-        super();
-    }
+public final class TaskTools extends ParticipantTools {
 
     /**
      * This method implements storing of a task through the AJAX interface.
@@ -221,6 +213,13 @@ public final class TaskTools extends Assert {
         return retval;
     }
 
+    /**
+     * Compares the specified objects
+     * 
+     * @param taskObj1 The expected {@link Task}
+     * @param taskObj2 The actual {@link Task}
+     * @throws Exception if an error is occurred
+     */
     public static void compareObject(final Task taskObj1, final Task taskObj2) throws Exception {
         assertEquals("id is not equals", taskObj1.getObjectID(), taskObj2.getObjectID());
         assertEqualsAndNotNull("title is not equals", taskObj1.getTitle(), taskObj2.getTitle());
@@ -246,56 +245,5 @@ public final class TaskTools extends Assert {
 
         assertEqualsAndNotNull("participants are not equals", participants2String(taskObj1.getParticipants()), participants2String(taskObj2.getParticipants()));
         assertEqualsAndNotNull("users are not equals", users2String(taskObj1.getUsers()), users2String(taskObj2.getUsers()));
-    }
-
-    public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws Exception {
-        if (expect != null) {
-            assertNotNull(message + " is null", value);
-            assertEquals(message, expect, value);
-        }
-    }
-
-    private static Set<String> participants2String(final Participant[] participant) throws Exception {
-        if (participant == null) {
-            return null;
-        }
-
-        final Set<String> hs = new HashSet<>();
-
-        for (int a = 0; a < participant.length; a++) {
-            hs.add(participant2String(participant[a]));
-        }
-
-        return hs;
-    }
-
-    private static String participant2String(final Participant p) throws Exception {
-        final StringBuffer sb = new StringBuffer();
-        sb.append("T" + p.getType());
-        sb.append("ID" + p.getIdentifier());
-
-        return sb.toString();
-    }
-
-    private static Set<String> users2String(final UserParticipant[] users) throws Exception {
-        if (users == null) {
-            return null;
-        }
-
-        final Set<String> hs = new HashSet<>();
-
-        for (int a = 0; a < users.length; a++) {
-            hs.add(user2String(users[a]));
-        }
-
-        return hs;
-    }
-
-    private static String user2String(final UserParticipant user) throws Exception {
-        final StringBuffer sb = new StringBuffer();
-        sb.append("ID" + user.getIdentifier());
-        sb.append("C" + user.getConfirm());
-
-        return sb.toString();
     }
 }

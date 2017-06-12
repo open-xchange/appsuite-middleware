@@ -51,10 +51,10 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import com.openexchange.ajax.appointment.AppointmentTools;
 import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.webdav.xml.AppointmentTest;
 
 public class ICalExportTest extends AbstractICalTest {
 
@@ -80,7 +80,7 @@ public class ICalExportTest extends AbstractICalTest {
                 found = true;
                 appointmentObj.setUntil(appointmentArray[a].getUntil());
                 appointmentArray[a].setParentFolderID(appointmentFolderId);
-                AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
+                AppointmentTools.compareObject(appointmentObj, appointmentArray[a]);
             }
         }
 
