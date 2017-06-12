@@ -645,6 +645,8 @@ GetSessionsResponse:
   $ref: ./sessionmanagement/GetSessionsResponse.yaml
 RemoveSessionBody:
   $ref: ./sessionmanagement/RemoveSessionBody.yaml
+RemoveAllOtherSessionsBody:
+  $ref: ./sessionmanagement/RemoveAllOtherSessionsBody.yaml
 
 
 
