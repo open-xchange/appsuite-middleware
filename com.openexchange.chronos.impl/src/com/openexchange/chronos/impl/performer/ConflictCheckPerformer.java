@@ -260,7 +260,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             /*
              * skip checks with event itself or any other event from same series
              */
-            if (eventInPeriod.getId() == masterEvent.getId() || masterEvent.getSeriesId() == eventInPeriod.getSeriesId()) {
+            if (eventInPeriod.getId().equals(masterEvent.getId()) || null != eventInPeriod.getSeriesId() && eventInPeriod.getSeriesId().equals(masterEvent.getSeriesId())) {
                 continue;
             }
             /*
