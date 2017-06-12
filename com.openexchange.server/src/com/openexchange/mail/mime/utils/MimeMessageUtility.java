@@ -1091,20 +1091,17 @@ public final class MimeMessageUtility {
 
                     // Remember last match position
                     lastMatch = m.end();
-                } catch (final UnsupportedEncodingException e) {
-                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    sb.append(handleUnsupportedEncoding(encoding, encodedValue));
-                    lastMatch = m.end();
-                } catch (final ParseException e) {
+                } catch (UnsupportedTransferEncodingException e) {
+                    return decodeMultiEncodedHeaderSafe(headerValue);
+                } catch (ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
                 }
             } while (m.find());
             if (null != prev) {
                 try {
                     sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
-                } catch (UnsupportedEncodingException e) {
-                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    sb.append(handleUnsupportedEncoding(prev.charset, prev.value.toString()));
+                } catch (UnsupportedTransferEncodingException e) {
+                    return decodeMultiEncodedHeaderSafe(headerValue);
                 } catch (ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
                 }
@@ -1140,7 +1137,7 @@ public final class MimeMessageUtility {
         return hdrVal;
     }
 
-    private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedEncodingException {
+    private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         if (MessageUtility.isBig5(charset)) {
             String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
             if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
@@ -1164,7 +1161,7 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static String doDecodeEncodedWord(String charset2, String encoding, String encodedValue) throws ParseException, UnsupportedEncodingException {
+    private static String doDecodeEncodedWord(String charset2, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         String charset = MimeUtility.javaCharset(charset2);
         if (encodedValue.length() <= 0) {
             return "";
@@ -1181,7 +1178,7 @@ public final class MimeMessageUtility {
         } else if (encoding.equalsIgnoreCase("Q")) {
             is = new QDecoderStream(Streams.newByteArrayInputStream(asciiBytes));
         } else {
-            throw new UnsupportedEncodingException("unknown encoding: " + encoding);
+            throw new UnsupportedTransferEncodingException("unknown encoding: " + encoding);
         }
 
         // Read decoded bytes
@@ -1236,33 +1233,32 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static String handleUnsupportedEncoding(String encoding, String encodedValue) {
-        final String asciiText = encodedValue;
-        final String detectedCharset;
-        final byte[] rawBytes;
-        {
-            final String transferEncoding = encoding;
-            if ("Q".equalsIgnoreCase(transferEncoding)) {
-                try {
-                    rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(asciiText));
-                } catch (final DecoderException e) {
-                    /*
-                     * Invalid quoted-printable
-                     */
-                    LOG.warn("Cannot decode quoted-printable", e);
-                    return asciiText;
-                }
-            } else if ("B".equalsIgnoreCase(transferEncoding)) {
-                rawBytes = Base64.decodeBase64(Charsets.toAsciiBytes(asciiText));
-            } else {
+    private static String handleUnsupportedEncoding(String transferEncoding, String encodedValue) {
+        // Extract raw bytes through decoding with passed transfer-encoding
+        byte[] rawBytes;
+        if ("Q".equalsIgnoreCase(transferEncoding)) {
+            try {
+                rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(encodedValue));
+            } catch (final DecoderException e) {
                 /*
-                 * Unknown transfer-encoding; just return current match
+                 * Invalid quoted-printable
                  */
-                LOG.warn("Unknown transfer-encoding: {}", transferEncoding);
-                return asciiText;
+                LOG.warn("Cannot decode quoted-printable", e);
+                return encodedValue;
             }
-            detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
+        } else if ("B".equalsIgnoreCase(transferEncoding)) {
+            rawBytes = Base64.decodeBase64(Charsets.toAsciiBytes(encodedValue));
+        } else {
+            /*
+             * Unknown transfer-encoding; just return current match
+             */
+            LOG.warn("Unknown transfer-encoding: {}", transferEncoding);
+            return encodedValue;
         }
+
+        // Auto-detect charset from raw bytes
+        String detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
+
         try {
             return new String(rawBytes, Charsets.forName(detectedCharset));
         } catch (final UnsupportedCharsetException e) {
@@ -1270,7 +1266,7 @@ public final class MimeMessageUtility {
              * Even detected charset is unknown... giving up
              */
             LOG.warn("Unknown character-encoding: {}", detectedCharset);
-            return asciiText;
+            return encodedValue;
         }
     }
 
