@@ -47,27 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement;
+package com.openexchange.ajax.sessionmanagement.actions;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.sessionmanagement.tests.GetSessionsTest;
-import com.openexchange.ajax.sessionmanagement.tests.RemoveAllOtherSessionsTest;
-import com.openexchange.ajax.sessionmanagement.tests.RemoveSessionTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link SessionManagementSuite}
+ * {@link RemoveAllOtherSessionsResponse}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    GetSessionsTest.class,
-    RemoveSessionTest.class,
-    RemoveAllOtherSessionsTest.class
-})
+public class RemoveAllOtherSessionsResponse extends AbstractAJAXResponse {
 
-public final class SessionManagementSuite {
+    /**
+     * Initializes a new {@link RemoveAllOtherSessionsResponse}.
+     * 
+     * @param response
+     */
+    protected RemoveAllOtherSessionsResponse(Response response) {
+        super(response);
+    }
+
 }
