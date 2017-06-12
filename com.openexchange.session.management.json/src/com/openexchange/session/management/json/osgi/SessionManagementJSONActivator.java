@@ -50,6 +50,7 @@
 package com.openexchange.session.management.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.json.SessionManagementActionFactory;
 
@@ -63,7 +64,7 @@ public class SessionManagementJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessionManagementService.class };
+        return new Class<?>[] { SessionManagementService.class, LeanConfigurationService.class };
     }
 
     @Override
