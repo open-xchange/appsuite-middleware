@@ -1292,10 +1292,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(5);
             do {
                 Connection oxCon = null;
+                try {
+                    oxCon = cache.getConnectionForContext(contextId);
+                } catch (PoolException e) {
+                    LOG.error("Pool Error", e);
+                    throw new StorageException(e);
+                }
+                
                 condition.resetTransactionRollbackException();
                 boolean rollback = false;
                 try {
-                    oxCon = cache.getConnectionForContext(contextId);
                     Databases.startTransaction(oxCon);
                     rollback = true;
 
@@ -1357,9 +1363,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     ctx.setEnabled(Boolean.TRUE);
                     adminUser.setId(I(adminId));
                     return ctx;
-                } catch (final PoolException e) {
-                    LOG.error("Pool Error", e);
-                    throw new StorageException(e);
                 } catch (final OXException e) {
                     SQLException sqle = DBUtils.extractSqlException(e);
                     if (!condition.isFailedTransactionRollback(sqle)) {
@@ -1604,7 +1607,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         SchemaCacheResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
         if (SchemaCacheResult.DATABASE_EMPTY == schemaResult) {
             // No schema at all... Need to create one anyway
-            autoFindOrCreateSchema(configCon, db);
+            autoFindOrCreateSchema(configCon, db, true);
             return SchemaResult.AUTOMATIC;
         }
         if (null != schemaResult) {
@@ -1618,7 +1621,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
-        autoFindOrCreateSchema(configCon, db);
+        autoFindOrCreateSchema(configCon, db, false);
     }
 
     /**
@@ -1626,10 +1629,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      *
      * @param configCon The connection to configDb
      * @param db The database to get the schema for
-     * @param clearSchemaCache Whether schema cache is supposed to be cleared
+     * @param forceCreate <code>true</code> to enforce schema creation <b>w/o</b> checking if an unfilled one is available; otherwise <code>false</code> to check prior to creation
      * @throws StorageException If a suitable schema cannot be found
      */
-    private void autoFindOrCreateSchema(Connection configCon, Database db) throws StorageException {
+    private void autoFindOrCreateSchema(Connection configCon, Database db, boolean forceCreate) throws StorageException {
         // Clear schema cache once "live" schema information is requested
         SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
         if (null != optCache) {
@@ -1637,7 +1640,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // Freshly determine the next schema to use
-        String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
+        String schemaName = forceCreate ? null : getNextUnfilledSchemaFromDB(db.getId(), configCon);
         if (schemaName == null) {
             int schemaUnique;
             try {
