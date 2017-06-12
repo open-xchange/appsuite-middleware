@@ -56,7 +56,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class ExportRequest {
