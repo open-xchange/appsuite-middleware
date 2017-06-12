@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,81 +47,42 @@
  *
  */
 
-package com.openexchange.importexport.json;
+package com.openexchange.mail.mime.utils;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+/**
+ * The Transfer Encoding is not supported.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
+ */
+public class UnsupportedTransferEncodingException extends IOException {
 
-public class ExportRequest {
+    private static final long serialVersionUID = 597922586356765695L;
 
-	private ServerSession session;
-	private AJAXRequestData request;
-	private String folder;
-	private List<Integer> columns;
+    /**
+     * Constructs an UnsupportedTransferEncodingException without a detail message.
+     */
+    public UnsupportedTransferEncodingException() {
+        super();
+    }
 
-	public ExportRequest(AJAXRequestData request, ServerSession session) throws OXException {
-		this.setSession(session);
-		this.setRequest(request);
+    /**
+     * Constructs an UnsupportedTransferEncodingException with a detail message.
+     * @param s Describes the reason for the exception.
+     */
+    public UnsupportedTransferEncodingException(String s) {
+        super(s);
+    }
 
-		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
-			throw ImportExportExceptionCodes.NEED_FOLDER.create();
-		}
-		String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
-		if(colStr != null){
-			String[] split = colStr.split(",");
-			setColumns(new LinkedList<Integer>());
-			for(String s: split){
-				try {
-					getColumns().add(Integer.valueOf(s));
-				} catch (NumberFormatException e) {
-					throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(e, s);
-				}
-			}
-		}
-		this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-
-	}
-
-	public String getFolder() {
-		return folder;
-	}
-
-	public void setFolder(String folder) {
-		this.folder = folder;
-	}
-
-	public AJAXRequestData getRequest() {
-		return request;
-	}
-
-	public void setRequest(AJAXRequestData request) {
-		this.request = request;
-	}
-
-	public ServerSession getSession() {
-		return session;
-	}
-
-	public void setSession(ServerSession session) {
-		this.session = session;
-	}
-
-	public List<Integer> getColumns() {
-		return columns;
-	}
-
-	public void setColumns(List<Integer> columns) {
-		this.columns = columns;
-	}
-	
-	public String getObjectId() {
-	    final String contactID = request.getParameter("id");
-	    return contactID;
-	}
+    /**
+     * Constructs an UnsupportedTransferEncodingException with a detail message and a cause.
+     *
+     * @param s Describes the reason for the exception.
+     * @param cause The initial cause
+     */
+    public UnsupportedTransferEncodingException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }
