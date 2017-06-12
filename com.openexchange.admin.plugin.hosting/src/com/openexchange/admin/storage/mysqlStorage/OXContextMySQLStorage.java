@@ -2933,6 +2933,33 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // Drop non-existing ones held in count table
+            stmt = configCon.prepareStatement("SELECT contexts_per_filestore.filestore_id FROM contexts_per_filestore LEFT JOIN filestore ON contexts_per_filestore.filestore_id=filestore.id WHERE filestore.id IS NULL");
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                List<Integer> ids = new LinkedList<Integer>();
+                do {
+                    ids.add(Integer.valueOf(rs.getInt(1)));
+                } while (rs.next());
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                stmt = configCon.prepareStatement("DELETE FROM contexts_per_filestore WHERE filestore_id=?");
+                for (Integer id : ids) {
+                    stmt.setInt(1, id.intValue());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+            } else {
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+            // Check count entries for existing ones
             stmt = configCon.prepareStatement("SELECT filestore.id, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -2973,6 +3000,42 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // Drop non-existing ones held in count table
+            stmt = configCon.prepareStatement("SELECT contexts_per_dbpool.db_pool_id FROM contexts_per_dbpool LEFT JOIN db_cluster ON contexts_per_dbpool.db_pool_id=db_cluster.write_db_pool_id WHERE db_cluster.write_db_pool_id IS NULL");
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                List<Integer> ids = new LinkedList<Integer>();
+                do {
+                    ids.add(Integer.valueOf(rs.getInt(1)));
+                } while (rs.next());
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                stmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=?");
+                for (Integer id : ids) {
+                    stmt.setInt(1, id.intValue());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+
+                stmt = configCon.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
+                for (Integer id : ids) {
+                    stmt.setInt(1, id.intValue());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+            } else {
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+            // Check count entries for existing ones
             stmt = configCon.prepareStatement("SELECT db_cluster.write_db_pool_id, COUNT(context_server2db_pool.cid) AS num FROM db_cluster LEFT JOIN context_server2db_pool ON db_cluster.write_db_pool_id = context_server2db_pool.write_db_pool_id GROUP BY db_cluster.write_db_pool_id ORDER BY num ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -3013,6 +3076,45 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // Drop non-existing ones held in count table
+            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname FROM contexts_per_dbschema LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname=context_server2db_pool.db_schema WHERE context_server2db_pool.write_db_pool_id IS NULL");
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                class DbAndSchema {
+                    final int dbId;
+                    final String schema;
+
+                    DbAndSchema(int dbId, String schema) {
+                        super();
+                        this.dbId = dbId;
+                        this.schema = schema;
+                    }
+                }
+
+                List<DbAndSchema> ids = new LinkedList<DbAndSchema>();
+                do {
+                    ids.add(new DbAndSchema(rs.getInt(1), rs.getString(2)));
+                } while (rs.next());
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                stmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
+                for (DbAndSchema das : ids) {
+                    stmt.setInt(1, das.dbId);
+                    stmt.setString(2, das.schema);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+            } else {
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+            // Check count entries for existing ones
             stmt = configCon.prepareStatement("SELECT write_db_pool_id FROM db_cluster ORDER BY write_db_pool_id ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
