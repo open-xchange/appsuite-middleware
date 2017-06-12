@@ -303,7 +303,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
     }
 
     private static String getSafeValue(String sValue) {
-        return sValue.indexOf(':') < 0 ? sValue : Charsets.toAsciiString(URLCodec.encodeUrl(BIT_SET_PARAMS, sValue.getBytes(Charsets.UTF_8)));
+        return sValue.indexOf(':') < 0 && sValue.indexOf('%') < 0 ? sValue : Charsets.toAsciiString(URLCodec.encodeUrl(BIT_SET_PARAMS, sValue.getBytes(Charsets.UTF_8)));
     }
 
     private static String decodeSafeValue(String value) throws DecoderException {
