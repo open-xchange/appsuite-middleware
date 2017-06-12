@@ -2284,11 +2284,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             mass.insertMailAccount(account, userId, context, null, con);
             lockTable("updateTask", con);
         } catch (final OXException e) {
-            log.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e.toString());
+            throw new StorageException("Problem storing the primary mail account.", e);
         } catch (SQLException e) {
-            log.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e.toString());
+            throw new StorageException("Problem storing the primary mail account.", e);
         }
     }
 
