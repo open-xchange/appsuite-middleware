@@ -17,7 +17,7 @@ The feedback is collected from the user by showing a dedicated dialog within the
 
 * Stars mode (per module) with a comment field and stars from 1 to 5.
 
-The user is able to give his feedback, as often as he desires. Every given feedback is stored inside the <code>globaldb</code> database in the <code>feedback</code> table. The middleware provides a HTTP API for those purposes which is used by the UI and documented [here](/components/middleware/http{{ site.baseurl }}/index.html?version={{ site.baseurl }}#/StoreRequest).
+The user is able to give his feedback, as often as he desires. Every given feedback is stored inside the <code>globaldb</code> database in the <code>feedback</code> table. The middleware provides a HTTP API for those purposes which is used by the UI and documented [here](/components/middleware/http{{ site.baseurl }}/index.html#!/userfeedback/store).
 
 Since 7.8.4 the Open-Xchange server provides a default implementation for <code>star-rating-v1</code>. It is easy to create a custom feedback type by implementing related interfaces and register the custom feedback type for a defined user group (see above).
 
@@ -37,7 +37,7 @@ To review the collected feedback, a service provider can trigger the export of t
 
 ## star-rating-v1 export
 
-For feedback type <code>star-rating-v1</code> the export as comma separated values in a file and raw type as JSON is provided. This can be done by using the provided REST API, [documented here](/components/middleware/http{{ site.baseurl }}/index.html?version={{ site.baseurl }}#/Userfeedback/ExportCSVRequest) or a CLT (CSV only), [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/ExportUserFeedback.html). 
+For feedback type <code>star-rating-v1</code> the export as comma separated values in a file and raw type as JSON is provided. This can be done by using the provided REST API or a CLT (CSV only), [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/ExportUserFeedback.html). 
 
 To ensure privacy the user and context id are delivered in a hashed form. This way multiple entries can be matched to one user without revealing their identity. Generally the following parameters are supported to filter the stored data:
 
@@ -55,7 +55,7 @@ Raw export will provide a JSON array containing the requested feedback (based on
 
 
 # Delete feedback
-After a certain amount of time, it can be necessary to delete the collected feedback data to preserve database space. For those purposes a REST service, [documented here](/components/middleware/http{{ site.baseurl }}/index.html?version={{ site.baseurl }}#/Userfeedback/DeleteRequest) and a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/DeleteUserFeedback.html) are available. The data can be deleted for a context group and one feedback type at a time. If no information is provided, the used default values are:
+After a certain amount of time, it can be necessary to delete the collected feedback data to preserve database space. For those purposes a REST service or a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/DeleteUserFeedback.html) are available. The data can be deleted for a context group and one feedback type at a time. If no information is provided, the used default values are:
 
 * context group : 'default'
 * feedback type : 'star-rating-v1'
@@ -63,7 +63,7 @@ After a certain amount of time, it can be necessary to delete the collected feed
 The user can also provide a timeframe, that should be considered. Only the data inside this timeframe will be deleted.
 
 # Send Feedback via mail
-In some cases the feedback has to be provided for a set of interested parties to evaluate the result. For this purpose the server provides a service to send the feedback file via email. There are two ways to trigger this, by using the REST service, [documented here](/components/middleware/http{{ site.baseurl }}/index.html?version={{ site.baseurl }}#/Userfeedback/SendMailRequest) and a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/SendFeedbackViaMail.html). Since feedback providing and sending is an administrative task, the service provider must also configure the SMTP server to be used, by setting the properties [described here](https://documentation.open-xchange.com/latest/middleware/configuration/properties.html#userfeedback) in a <code>.properties</code> file, accessible by the server.
+In some cases the feedback has to be provided for a set of interested parties to evaluate the result. For this purpose the server provides a service to send the feedback file via email. There are two ways to trigger this, by using the REST service or a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/SendFeedbackViaMail.html). Since feedback providing and sending is an administrative task, the service provider must also configure the SMTP server to be used, by setting the properties [described here](https://documentation.open-xchange.com/latest/middleware/configuration/properties.html#userfeedback) in a <code>.properties</code> file, accessible by the server.
 
 ## Send secure
 
