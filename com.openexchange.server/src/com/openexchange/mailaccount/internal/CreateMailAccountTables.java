@@ -184,7 +184,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "cid INT4 UNSIGNED NOT NULL,"
         + "user INT4 UNSIGNED NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
-        + "uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "uidl VARCHAR(128) CHARACTER SET latin1 NOT NULL,"
         + "fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, user, id, uidl)"
@@ -194,7 +194,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "cid INT4 UNSIGNED NOT NULL,"
         + "user INT4 UNSIGNED NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
-        + "uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "uidl VARCHAR(128) CHARACTER SET latin1 NOT NULL,"
         + "PRIMARY KEY (cid, user, id, uidl)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
     };

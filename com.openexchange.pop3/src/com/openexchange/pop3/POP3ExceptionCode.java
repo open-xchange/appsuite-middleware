@@ -59,7 +59,7 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 
 /**
  * {@link DisplayableOXExceptionCode} - The POP3 error codes.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
@@ -381,6 +381,10 @@ public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
      * POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
      */
     QUOTA_CONSTRAINT("POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.", POP3ExceptionMessage.QUOTA_CONSTRAINT_MSG, CATEGORY_USER_INPUT, 2072),
+    /**
+     * POP3 message's UIDL mapping cannot be stored for UIDL: %1$s
+     */
+    UIDL_TOO_BIG("POP3 message's UIDL mapping cannot be stored for UIDL: %1$s", OXExceptionStrings.SQL_ERROR_MSG, CATEGORY_ERROR, 2073),
     ;
 
     private final String message;

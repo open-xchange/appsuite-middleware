@@ -76,7 +76,7 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
     public QuotaActionFactory(final ServiceLookup services, final BundleContext context) {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        GetAction getAction = new com.openexchange.quota.json.actions.GetAction(context);
+        GetAction getAction = new com.openexchange.quota.json.actions.GetAction(services);
         actions.put("get", getAction);
         actions.put("GET", getAction);
         actions.put("filestore", new com.openexchange.quota.json.actions.FilestoreAction(services));

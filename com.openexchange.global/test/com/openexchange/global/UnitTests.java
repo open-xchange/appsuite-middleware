@@ -54,6 +54,7 @@ import com.openexchange.exception.interception.OXExceptionInterceptorRegistratio
 import com.openexchange.global.tools.id.IDManglerTest;
 import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
 import com.openexchange.sessiond.SessionFilterTest;
+import com.openexchange.tools.filename.Bug53791Test;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -76,6 +77,7 @@ public class UnitTests {
         tests.addTestSuite(OXExceptionInterceptorRegistrationTest.class);
         tests.addTest(new JUnit4TestAdapter(SessionFilterTest.class));
         tests.addTestSuite(Bug50893Test.class);
+        tests.addTest(new JUnit4TestAdapter(Bug53791Test.class));
         return tests;
     }
 }

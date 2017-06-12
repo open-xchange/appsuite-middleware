@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.container;
 
-import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -4076,6 +4075,9 @@ public class Contact extends CommonObject {
         return true;
     }
 
+    /**
+     * Gets a string suitable to sort contacts (as used when ordering contact results via {@link Contact#SPECIAL_SORTING}).
+     */
     public String getSortName() {
         /*
          * prefer display name for distribution lists
@@ -4091,60 +4093,32 @@ public class Contact extends CommonObject {
             return sortName;
         }
         /*
-         * prefer lastname if set
+         * for contacts, use last- and firstname, preferring the yomi names if set
          */
-        String sortName = getYomiLastName();
-        if (Strings.isEmpty(sortName)) {
-            sortName = getSurName();
-        }
-        if (false == Strings.isEmpty(sortName)) {
-            /*
-             * append firstname if possible
-             */
-            String firstName = getYomiFirstName();
-            if (Strings.isEmpty(firstName)) {
-                firstName = getGivenName();
-            }
-            if (false == Strings.isEmpty(firstName)) {
-                sortName += firstName;
-            }
-        } else {
-            /*
-             * display name?
-             */
-            if (Strings.isEmpty(sortName)) {
-                /*
-                 * display name?
-                 */
-                sortName = getDisplayName();
-                if (Strings.isEmpty(sortName)) {
-                    /*
-                     * company?
-                     */
-                    sortName = getYomiCompany();
-                    if (Strings.isEmpty(sortName)) {
-                        sortName = getCompany();
-                        if (Strings.isEmpty(sortName)) {
-                            /*
-                             * email1
-                             */
-                            sortName = getEmail1();
-                            if (Strings.isEmpty(sortName)) {
-                                /*
-                                 * email2
-                                 */
-                                sortName = getEmail2();
-                                if (Strings.isEmpty(sortName)) {
-                                    sortName = ""; // empty
-                                }
-                            }
-                        }
-                    }
+        {
+            StringBuilder stringBuilder = new StringBuilder(64);
+            for (String value : new String[] { getYomiLastName(), getYomiFirstName(), getSurName(), getGivenName() }) {
+                if (Strings.isNotEmpty(value)) {
+                    stringBuilder.append(value);
                 }
             }
+            if (0 < Strings.trim(stringBuilder).length()) {
+                return stringBuilder.toString();
+            }
         }
-
-        return sortName;
+        /*
+         * otherwise, use first non-empty value in displayname, (yomi)company, email1, email2
+         */
+        for (int column : new int[] { DISPLAY_NAME, YOMI_COMPANY, COMPANY, EMAIL1, EMAIL2 }) {
+            String value = (String) get(column);
+            if (Strings.isNotEmpty(value)) {
+                return value;
+            }
+        }
+        /*
+         * fallback to empty sortname
+         */
+        return "";
     }
 
 }
