@@ -83,12 +83,19 @@ public abstract class AbstractExportAction implements AJAXActionService {
 
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
         final List<Integer> cols = req.getColumns();
-        final SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
+        final SizedInputStream sis;
+        if(null == req.getObjectId() || 0 == req.getObjectId().length()){
+            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
+        }
+        else{
+            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), Integer.parseInt(req.getObjectId()), cols != null ? I2i(cols) : null, getOptionalParams(req));
+        }
+
         if (null == sis) {
             // Streamed
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
-
+        
         final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export." + sis.getFormat().getExtension());
         fileHolder.setDisposition("attachment");
         req.getRequest().setFormat("file");

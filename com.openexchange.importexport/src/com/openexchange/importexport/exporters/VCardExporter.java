@@ -306,6 +306,11 @@ public class VCardExporter implements Exporter {
         if (objectId != null) {
             Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
             exportContact(session, contactObj, null, null, writer);
+            try {
+                writer.flush();
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+            }
             return;
         }
 
