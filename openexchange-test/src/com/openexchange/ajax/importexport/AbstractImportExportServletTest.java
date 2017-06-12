@@ -52,6 +52,9 @@ package com.openexchange.ajax.importexport;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +72,6 @@ import com.openexchange.groupware.importexport.ContactTestData;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.webdav.xml.FolderTest;
 
 /**
  * Test of the ImporterExporter servlet. This class serves as library for all
@@ -190,7 +192,9 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         if (folderId == -1) {
             return;
         }
-        FolderTest.deleteFolder(getClient().getSession().getConversation(), new int[] { folderId }, getClient().getHostname(), testUser.getLogin(), testUser.getPassword());
+        final Calendar cal = GregorianCalendar.getInstance();
+        FolderTestManager ftm = new FolderTestManager(getClient());
+        ftm.deleteFolderOnServer(folderId, new Date(cal.getTimeInMillis()));
     }
 
     public static void assertEquals(final String message, final List l1, final List l2) {

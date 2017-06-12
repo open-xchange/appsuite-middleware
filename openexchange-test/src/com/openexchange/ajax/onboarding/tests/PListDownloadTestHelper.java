@@ -69,9 +69,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpNotFoundException;
+import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.webdav.xml.AbstractWebdavXMLTest;
 import xmlwise.Plist;
 import xmlwise.XmlParseException;
 
@@ -81,7 +81,7 @@ import xmlwise.XmlParseException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
+public class PListDownloadTestHelper {
 
     /**
      * Initializes a new {@link PListDownloadTestHelper}.
@@ -145,7 +145,7 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
         try {
             final WebRequest webRequest = new GetMethodWebRequest(host + url);
 
-            final WebResponse webResponse = getNewWebConversation().getResponse(webRequest);
+            final WebResponse webResponse = new WebConversation().getResponse(webRequest);
 
             assertEquals(200, webResponse.getResponseCode());
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
