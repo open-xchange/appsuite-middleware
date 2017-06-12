@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
@@ -56,6 +57,7 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
 
     private final boolean failOnError;
     private final Boolean exportDlists;
+    private int contactId;
 
     public VCardExportRequest(int folderId, boolean failOnError) {
         this(folderId, null, failOnError);
@@ -65,16 +67,22 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
         super(Action.VCard, folderId);
         this.failOnError = failOnError;
         this.exportDlists = exportDlists;
+        this.contactId = -1;
+    }
+    
+    public VCardExportRequest(int folderId, int contactId, boolean failOnError) {
+        this(folderId, failOnError);
+        this.contactId = contactId;
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         Parameter[] parameters = super.getParameters();
         if (null != exportDlists) {
-            Parameter[] newParameters = new Parameter[parameters.length + 1];
-            System.arraycopy(parameters, 0, newParameters, 0, parameters.length);
-            newParameters[newParameters.length - 1] = new Parameter("export_dlists", exportDlists.booleanValue());
-            return newParameters;
+            parameters = parametersToAdd(new Parameter("export_dlists", exportDlists.booleanValue()), parameters);            
+        }
+        else if (contactId > 0) {
+            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_ID, contactId), parameters); 
         }
         return parameters;
     }
@@ -82,5 +90,12 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
     @Override
     public AbstractAJAXParser<VCardExportResponse> getParser() {
         return new VCardExportParser(failOnError);
+    }
+    
+    private com.openexchange.ajax.framework.AJAXRequest.Parameter[] parametersToAdd(Parameter parameter, Parameter[] parameters) {
+        Parameter[] newParameters = new Parameter[parameters.length + 1];
+        System.arraycopy(parameters, 0, newParameters, 0, parameters.length);
+        newParameters[newParameters.length - 1] = parameter;
+        return newParameters;
     }
 }

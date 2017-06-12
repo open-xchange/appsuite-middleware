@@ -47,82 +47,42 @@
  *
  */
 
-package com.openexchange.importexport.json;
+package com.openexchange.ajax.importexport;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import static org.junit.Assert.*;
+import java.io.IOException;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.VCardExportRequest;
+import com.openexchange.ajax.importexport.actions.VCardExportResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.container.Contact;
 
-public class ExportRequest {
+/**
+ * {@link SingleVCardExportTest}
+ *
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10
+ */
+public class SingleVCardExportTest extends AbstractManagedContactTest {
 
-	private ServerSession session;
-	private AJAXRequestData request;
-	private String folder;
-	private List<Integer> columns;
-
-	public ExportRequest(AJAXRequestData request, ServerSession session) throws OXException {
-		this.setSession(session);
-		this.setRequest(request);
-
-		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
-			throw ImportExportExceptionCodes.NEED_FOLDER.create();
-		}
-		String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
-		if(colStr != null){
-			String[] split = colStr.split(",");
-			setColumns(new LinkedList<Integer>());
-			for(String s: split){
-				try {
-					getColumns().add(Integer.valueOf(s));
-				} catch (NumberFormatException e) {
-					throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(e, s);
-				}
-			}
-		}
-		this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-
-	}
-
-	public String getFolder() {
-		return folder;
-	}
-
-	public void setFolder(String folder) {
-		this.folder = folder;
-	}
-
-	public AJAXRequestData getRequest() {
-		return request;
-	}
-
-	public void setRequest(AJAXRequestData request) {
-		this.request = request;
-	}
-
-	public ServerSession getSession() {
-		return session;
-	}
-
-	public void setSession(ServerSession session) {
-		this.session = session;
-	}
-
-	public List<Integer> getColumns() {
-		return columns;
-	}
-
-	public void setColumns(List<Integer> columns) {
-		this.columns = columns;
-	}
-	
-	public String getObjectId() {
-	    final String contactID = request.getParameter("id");
-	    return contactID;
-	}
+    public SingleVCardExportTest() {
+        super();
+    }
+    
+    @Test
+    public void testVCardSingleExport() throws OXException, IOException, JSONException{
+        Contact contact = generateContact("Singlecontact");
+        int contactId = cotm.newAction(contact).getObjectID();
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, contactId, false));
+        String vcard = (String) vcardExportResponse.getData();
+        assertNotNull(vcard);        
+    }
+    
+    @Test
+    public void testVCardSingleExportDistList() {
+        //add a case with distributionlist
+    }
+    
 }
