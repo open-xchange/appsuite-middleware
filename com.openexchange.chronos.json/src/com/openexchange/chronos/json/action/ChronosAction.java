@@ -49,13 +49,27 @@
 
 package com.openexchange.chronos.json.action;
 
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TimeZone;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.provider.composition.CompositeEventID;
+import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -82,14 +96,101 @@ public abstract class ChronosAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class).createAccess(session);
+        IDBasedCalendarAccess calendarAccess = initCalendarAccess(requestData);
         return perform(calendarAccess, requestData);
     }
 
     protected abstract AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException;
 
+    /**
+     * Gets a list of required parameter names that will be evaluated. If missing in the request, an appropriate exception is thrown. By
+     * default, an empty list is returned.
+     *
+     * @return The list of required parameters
+     */
+    protected Set<String> getRequiredParameters() {
+        return Collections.emptySet();
+    }
+
+    /**
+     * Gets a list of parameter names that will be evaluated if set, but are not required to fulfill the request. By default, an empty
+     * list is returned.
+     *
+     * @return The list of optional parameters
+     */
+    protected Set<String> getOptionalParameters() {
+        return Collections.emptySet();
+    }
+
     protected <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
         return com.openexchange.osgi.Tools.requireService(clazz, services);
+    }
+
+    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData) throws OXException {
+        String value = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
+        try {
+            return CompositeFolderID.parse(value);
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_FOLDERID, value);
+        }
+    }
+
+    protected CompositeEventID parseIdParameter(AJAXRequestData requestData) throws OXException {
+        String value = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
+        try {
+            return CompositeEventID.parse(value);
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_FOLDERID, value);
+        }
+    }
+
+    /**
+     * Initializes the calendar access for a request and parses all known parameters supplied by the client, throwing an appropriate
+     * exception in case a required parameters is missing.
+     *
+     * @param requestData The underlying request data
+     * @return The initialized calendar access
+     */
+    protected IDBasedCalendarAccess initCalendarAccess(AJAXRequestData requestData) throws OXException {
+        IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class).createAccess(requestData.getSession());
+        Set<String> requiredParameters = getRequiredParameters();
+        Set<String> optionalParameters = getOptionalParameters();
+        Set<String> parameters = new HashSet<String>();
+        parameters.addAll(requiredParameters);
+        parameters.addAll(optionalParameters);
+        for (String parameter : parameters) {
+            Entry<String, ?> entry = parseParameter(requestData, parameter, requiredParameters.contains(parameter));
+            if (null != entry) {
+                calendarAccess.set(entry.getKey(), entry.getValue());
+            }
+        }
+        return calendarAccess;
+    }
+
+    protected static Entry<String, ?> parseParameter(AJAXRequestData request, String parameter, boolean required) throws OXException {
+        String value = request.getParameter(parameter);
+        if (Strings.isEmpty(value)) {
+            if (false == required) {
+                return null;
+            }
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameter);
+        }
+        try {
+            switch (parameter) {
+                case "rangeStart":
+                    return new AbstractMap.SimpleEntry<String, Date>(CalendarParameters.PARAMETER_RANGE_START, new Date(Long.parseLong(value)));
+                case "rangeEnd":
+                    return new AbstractMap.SimpleEntry<String, Date>(CalendarParameters.PARAMETER_RANGE_END, new Date(Long.parseLong(value)));
+                case "expand":
+                    return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(false == Boolean.parseBoolean(value)));
+                case "timezone":
+                    return new AbstractMap.SimpleEntry<String, TimeZone>(CalendarParameters.PARAMETER_TIMEZONE, TimeZoneUtils.getTimeZone(value));
+                default:
+                    throw new IllegalArgumentException("unknown paramter: " + parameter);
+            }
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, value);
+        }
     }
 
 }

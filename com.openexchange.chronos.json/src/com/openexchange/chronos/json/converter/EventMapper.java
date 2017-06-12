@@ -75,6 +75,8 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
@@ -1128,8 +1130,30 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             return null;
         }
         JSONArray jsonArray = new JSONArray(extendedProperties.size());
-        //TODO
+        for (ExtendedProperty extendedProperty : extendedProperties) {
+            jsonArray.put(serializeExtendedProperty(extendedProperty));
+        }
         return jsonArray;
+    }
+
+    private static JSONObject serializeExtendedProperty(ExtendedProperty extendedProperty) throws JSONException {
+        if (null == extendedProperty) {
+            return null;
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", extendedProperty.getName());
+        jsonObject.put("value", extendedProperty.getValue());
+        List<ExtendedPropertyParameter> parameters = extendedProperty.getParameters();
+        if (null == parameters || parameters.isEmpty()) {
+            return jsonObject;
+        }
+        JSONArray jsonParameters = new JSONArray(parameters.size());
+        for (int i = 0; i < parameters.size(); i++) {
+            ExtendedPropertyParameter parameter = parameters.get(i);
+            jsonParameters.add(i, new JSONObject().putOpt("name", parameter.getName()).putOpt("value", parameter.getValue()));
+        }
+        jsonObject.put("parameters", jsonParameters);
+        return jsonObject;
     }
 
 }

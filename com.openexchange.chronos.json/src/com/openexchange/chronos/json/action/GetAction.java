@@ -49,11 +49,11 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -66,6 +66,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class GetAction extends ChronosAction {
 
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone");
+
     /**
      * Initializes a new {@link GetAction}.
      *
@@ -76,15 +78,13 @@ public class GetAction extends ChronosAction {
     }
 
     @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+    @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        CompositeEventID eventId;
-        try {
-            String uniqueID = requestData.requireParameter("id");
-            eventId = CompositeEventID.parse(uniqueID);
-        } catch (IllegalArgumentException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        Event event = calendarAccess.getEvent(eventId);
+        Event event = calendarAccess.getEvent(parseIdParameter(requestData));
         return new AJAXRequestResult(event, event.getLastModified(), "event");
     }
 

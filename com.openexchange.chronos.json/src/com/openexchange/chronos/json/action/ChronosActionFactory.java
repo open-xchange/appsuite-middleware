@@ -71,6 +71,8 @@ public class ChronosActionFactory implements AJAXActionServiceFactory {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("get", new GetAction(services));
+        actions.put("all", new AllAction(services));
+        actions.put("calendars", new CalendarsAction(services));
         this.actions = actions.build();
     }
 

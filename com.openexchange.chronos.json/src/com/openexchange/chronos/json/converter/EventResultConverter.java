@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.json.converter;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -98,17 +100,38 @@ public class EventResultConverter implements ResultConverter {
         Object resultObject = result.getResultObject();
         if (Event.class.isInstance(resultObject)) {
             /*
-             * Only one event to convert
+             * only one event to convert
              */
             resultObject = convertEvent((Event) resultObject, timeZoneID, session);
+        } else if (List.class.isInstance(resultObject)) {
+            /*
+             * convert list of calendars
+             */
+            resultObject = convertEvents((List<Event>) resultObject, timeZoneID, session);
+        } else {
+            throw new UnsupportedOperationException();
         }
-        //TODO
         result.setResultObject(resultObject, "json");
     }
 
     private JSONObject convertEvent(Event event, String timeZoneID, ServerSession session) throws OXException {
         try {
             return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getMappedFields(), timeZoneID);
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+    }
+
+    private JSONArray convertEvents(List<Event> events, String timeZoneID, ServerSession session) throws OXException {
+        if (null == events) {
+            return null;
+        }
+        try {
+            JSONArray jsonArray = new JSONArray(events.size());
+            for (Event event : events) {
+                jsonArray.put(EventMapper.getInstance().serialize(event, EventMapper.getInstance().getMappedFields(), timeZoneID));
+            }
+            return jsonArray;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
