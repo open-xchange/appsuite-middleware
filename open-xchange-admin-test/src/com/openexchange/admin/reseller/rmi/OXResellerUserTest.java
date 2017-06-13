@@ -211,7 +211,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
                 // premium test
                 // premium=contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,
-                // readcreatesharedfolders,ical,vcard,webdav,webdavxml
+                // readcreatesharedfolders,ical,vcard,webdav
                 final UserModuleAccess access = new UserModuleAccess();
                 access.disableAll();
                 access.setContacts(true);
@@ -225,7 +225,6 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 access.setIcal(true);
                 access.setVcard(true);
                 access.setWebdav(true);
-                access.setWebdavXml(true);
                 access.setGlobalAddressBookDisabled(false);
 
                 createUser(ctx, access, ctxadmcreds);

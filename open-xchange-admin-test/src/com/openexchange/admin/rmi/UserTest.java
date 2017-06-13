@@ -101,7 +101,7 @@ public class UserTest extends AbstractTest {
 
     // global setting for stored password
     protected final String pass = "foo-user-pass";
-  
+
     protected OXUserInterface getUserClient() throws Exception {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
@@ -567,7 +567,6 @@ public class UserTest extends AbstractTest {
         srv_response.setTasks(!srv_response.getTasks());
         srv_response.setVcard(!srv_response.getVcard());
         srv_response.setWebdav(!srv_response.getWebdav());
-        srv_response.setWebdavXml(!srv_response.getWebdavXml());
         srv_response.setWebmail(!srv_response.getWebmail());
 
         // submit changes
@@ -1116,11 +1115,10 @@ public class UserTest extends AbstractTest {
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestoreOwner");
         notallowed.add("setFilestore_name");
-        
+
         notallowed.add("setPrimaryAccountName");
         notallowed.add("setDriveFolderMode");
-        
-        
+
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
 
@@ -1845,7 +1843,6 @@ public class UserTest extends AbstractTest {
         assertEquals("access tasks not equal", a.getTasks(), b.getTasks());
         assertEquals("access vcard not equal", a.getVcard(), b.getVcard());
         assertEquals("access webdav not equal", a.getWebdav(), b.getWebdav());
-        assertEquals("access webdav xml not equal", a.getWebdavXml(), b.getWebdavXml());
         assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
     }
 
