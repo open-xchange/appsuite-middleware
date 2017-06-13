@@ -84,11 +84,11 @@ public abstract class AbstractExportAction implements AJAXActionService {
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
         final List<Integer> cols = req.getColumns();
         final SizedInputStream sis;
-        if(null == req.getObjectId() || 0 == req.getObjectId().length()){
+        if(null == req.getBatchIds() || req.getBatchIds().isEmpty()){
             sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
         }
         else{
-            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), Integer.parseInt(req.getObjectId()), cols != null ? I2i(cols) : null, getOptionalParams(req));
+            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), 0, cols != null ? I2i(cols) : null, getOptionalParams(req), req.getBatchIds());
         }
 
         if (null == sis) {
