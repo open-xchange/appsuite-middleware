@@ -464,7 +464,6 @@ public class ReportClientBase extends AbstractJMXTools {
             put("TASKS", "access-tasks");
             put("VCARD", "access-vcard");
             put("WEBDAV", "access-webdav");
-            put("WEBDAV_XML", "access-webdav-xml");
             put("WEBMAIL", "access-webmail");
             put("EDIT_GROUP", "access-edit-group");
             put("EDIT_RESOURCE", "access-edit-resource");

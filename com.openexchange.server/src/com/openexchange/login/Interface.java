@@ -58,8 +58,6 @@ public enum Interface {
 
     HTTP_JSON,
 
-    WEBDAV_XML,
-
     WEBDAV_INFOSTORE,
 
     WEBDAV_ICAL,

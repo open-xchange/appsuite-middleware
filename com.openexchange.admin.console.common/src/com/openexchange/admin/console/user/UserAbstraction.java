@@ -461,7 +461,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_TASKS = "access-tasks";
     protected static final String OPT_ACCESS_VCARD = "access-vcard";
     protected static final String OPT_ACCESS_WEBDAV = "access-webdav";
-    protected static final String OPT_ACCESS_WEBDAV_XML = "access-webdav-xml";
     protected static final String OPT_ACCESS_WEBMAIL = "access-webmail";
     protected static final String OPT_ACCESS_EDIT_GROUP = "access-edit-group";
     protected static final String OPT_ACCESS_EDIT_RESOURCE = "access-edit-resource";
