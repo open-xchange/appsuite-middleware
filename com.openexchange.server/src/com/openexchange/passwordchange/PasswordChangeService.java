@@ -309,6 +309,7 @@ public abstract class PasswordChangeService {
             properties.put("com.openexchange.passwordchange.session", session);
             properties.put("com.openexchange.passwordchange.oldPassword", event.getOldPassword());
             properties.put("com.openexchange.passwordchange.newPassword", event.getNewPassword());
+            properties.put("com.openexchange.passwordchange.ipAddress", event.getIpAddress());
             properties.put(CommonEvent.PUBLISH_MARKER, Boolean.TRUE);
             eventAdmin.postEvent(new Event("com/openexchange/passwordchange", properties));
         }
