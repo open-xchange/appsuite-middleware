@@ -51,7 +51,9 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
@@ -61,6 +63,7 @@ import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.java.Strings;
 
 /**
  * {@link AttendeeMapper}
@@ -285,7 +288,8 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
             @Override
             public void set(Attendee attendee, String value) {
-                attendee.setMember(value);
+                String[] splitted = Strings.splitByComma(value);
+                attendee.setMember(null != splitted ? Arrays.asList(splitted) : null);
             }
 
             @Override
@@ -295,7 +299,16 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
             @Override
             public String get(Attendee attendee) {
-                return attendee.getMember();
+                List<String> value = attendee.getMember();
+                if (null == value || 0 == value.size()) {
+                    return null;
+                }
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(value.get(0));
+                for (int i = 1; i < value.size(); i++) {
+                    stringBuilder.append(',').append(value.get(i));
+                }
+                return stringBuilder.toString();
             }
 
             @Override

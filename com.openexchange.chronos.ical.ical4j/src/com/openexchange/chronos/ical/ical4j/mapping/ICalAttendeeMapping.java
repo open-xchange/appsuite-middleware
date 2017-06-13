@@ -186,8 +186,8 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
         } else {
             property.getParameters().removeAll(Parameter.RSVP);
         }
-        if (null != attendee.getMember()) {
-            property.getParameters().replace(new Member(attendee.getMember()));
+        if (null != attendee.getMember() && 0 < attendee.getMember().size()) {
+            property.getParameters().replace(new Member(getAddressList(attendee.getMember())));
         } else {
             property.getParameters().removeAll(Parameter.MEMBER);
         }
@@ -236,13 +236,8 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
             attendee.setRsvp(Boolean.valueOf(rsvp));
         }
         Parameter memberParameter = property.getParameter(Parameter.MEMBER);
-
         if (null != memberParameter && Member.class.isInstance(memberParameter)) {
-            Member member = (Member) memberParameter;
-            AddressList groupAddresses = member.getGroups();
-            if (null != groupAddresses && 0 < groupAddresses.size()) {
-                attendee.setMember(String.valueOf(groupAddresses.iterator().next()));
-            }
+            attendee.setMember(getUris(((Member) memberParameter).getGroups()));
         }
         return attendee;
     }
@@ -268,6 +263,29 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
             }
         }
         return property;
+    }
+
+    private static List<String> getUris(AddressList addressList) {
+        if (null == addressList || 0 == addressList.size()) {
+            return null;
+        }
+        List<String> uris = new ArrayList<String>(addressList.size());
+        for (Iterator<?> iterator = addressList.iterator(); iterator.hasNext();) {
+            URI uri = (URI) iterator.next();
+            uris.add(String.valueOf(uri));
+        }
+        return uris;
+    }
+
+    private static AddressList getAddressList(List<String> uris) throws URISyntaxException {
+        if (null == uris || 0 == uris.size()) {
+            return null;
+        }
+        AddressList addressList = new AddressList();
+        for (String uri : uris) {
+            addressList.add(new URI(uri));
+        }
+        return addressList;
     }
 
 }

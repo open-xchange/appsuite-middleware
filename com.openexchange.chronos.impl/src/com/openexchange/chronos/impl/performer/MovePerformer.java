@@ -67,6 +67,7 @@ import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -300,10 +301,21 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 }
             } else {
                 /*
+                 * add previous and new calendar users as attendee (to match expectations of com.openexchange.ajax.appointment.MoveTestNew)
+                 */
+                List<Attendee> attendees = new ArrayList<Attendee>(2);
+                Attendee previousDefaultAttendee = AttendeeHelper.getDefaultAttendee(session, folder, null);
+                previousDefaultAttendee.setFolderID(getDefaultCalendarID(previousDefaultAttendee.getEntity()));
+                attendees.add(previousDefaultAttendee);
+                attendees.add(AttendeeHelper.getDefaultAttendee(session, targetFolder, null));
+                storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendees);
+
+                //TODO: it would make more sense to just move the event as-is:
+                /*
                  * update event's common folder id & remove alarms of previous calendar user
                  */
-                updateCommonFolderId(originalEvent, targetFolder.getID());
-                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUserId);
+                //                updateCommonFolderId(originalEvent, targetFolder.getID());
+                //                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUserId);
             }
             updateCalendarUser(originalEvent, targetCalendarUserId);
         }

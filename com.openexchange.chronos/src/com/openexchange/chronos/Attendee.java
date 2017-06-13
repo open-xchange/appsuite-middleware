@@ -50,6 +50,7 @@
 package com.openexchange.chronos;
 
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * {@link Attendee}
@@ -66,7 +67,7 @@ public class Attendee extends CalendarUser {
     private String comment;
     private Boolean rsvp;
     private String folderId;
-    private String member;
+    private List<String> member;
 
     private final EnumSet<AttendeeField> setFields;
 
@@ -470,7 +471,7 @@ public class Attendee extends CalendarUser {
      *
      * @return The group- or list membership
      */
-    public String getMember() {
+    public List<String> getMember() {
         return member;
     }
 
@@ -479,7 +480,7 @@ public class Attendee extends CalendarUser {
      *
      * @param value The group- or list membership to set
      */
-    public void setMember(String value) {
+    public void setMember(List<String> value) {
         member = value;
         setFields.add(AttendeeField.MEMBER);
     }

@@ -653,6 +653,33 @@ public class CalendarUtils {
     }
 
     /**
+     * Filters a list of attendees based on their group membership, i.e. gets all attendees that are associated with a specific group.
+     *
+     * @param attendees The attendees to filter
+     * @param groupUri The group uri to filter the attendees by
+     * @return The filtered attendees, or an empty list if there were no matching attendees
+     */
+    public static List<Attendee> filterByMembership(List<Attendee> attendees, String groupUri) {
+        if (null == attendees) {
+            return Collections.emptyList();
+        }
+        List<Attendee> filteredAttendees = new ArrayList<Attendee>(attendees.size());
+        for (Attendee attendee : attendees) {
+            List<String> groupMemberships = attendee.getMember();
+            if (null == groupMemberships || 0 == groupMemberships.size()) {
+                continue;
+            }
+            for (String groupMembership : groupMemberships) {
+                if (groupMembership.equals(groupUri)) {
+                    filteredAttendees.add(attendee);
+                    break;
+                }
+            }
+        }
+        return filteredAttendees;
+    }
+
+    /**
      * Gets the entity identifiers of all attendees representing internal users.
      *
      * @param attendees The attendees to extract the user identifiers for

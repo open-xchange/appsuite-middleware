@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.arrays.Collections.put;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -251,7 +252,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     /**
-     * Constructs the final attendee list for an event my pre-processing and merging the supplied lists of loaded attendees.
+     * Constructs the final attendee list for an event by pre-processing and merging the supplied lists of loaded attendees.
      *
      * @param internalAttendees The internal attendees as loaded from the storage
      * @param userAttendees The user attendees as loaded from the storage
@@ -268,9 +269,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 if (null != find(internalAttendees, userAttendee.getEntity())) {
                     attendees.add(entityResolver.applyEntityData(userAttendee));
                 } else {
-                    int groupID = findGroupID(internalAttendees, userAttendee.getEntity());
-                    if (-1 != groupID) {
-                        userAttendee.setMember(ResourceId.forGroup(context.getContextId(), groupID));
+                    int[] groupIDs = findGroupIDs(internalAttendees, userAttendee.getEntity());
+                    if (null != groupIDs && 0 < groupIDs.length) {
+                        List<String> groupMemberships = new ArrayList<String>(groupIDs.length);
+                        for (int groupID : groupIDs) {
+                            groupMemberships.add(ResourceId.forGroup(context.getContextId(), groupID));
+                        }
+                        userAttendee.setMember(groupMemberships);
                         attendees.add(entityResolver.applyEntityData(userAttendee));
                     }
                 }
@@ -292,14 +297,15 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return attendees;
     }
 
-    private int findGroupID(List<Attendee> internalAttendees, int member) throws OXException {
-        for (Attendee internalAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
-            int[] members = entityResolver.getGroupMembers(internalAttendee.getEntity());
+    private int[] findGroupIDs(List<Attendee> internalAttendees, int member) throws OXException {
+        Set<Integer> groupIDs = new HashSet<Integer>();
+        for (Attendee groupAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
+            int[] members = entityResolver.getGroupMembers(groupAttendee.getEntity());
             if (com.openexchange.tools.arrays.Arrays.contains(members, member)) {
-                return internalAttendee.getEntity();
+                groupIDs.add(I(groupAttendee.getEntity()));
             }
         }
-        return -1;
+        return I2i(groupIDs);
     }
 
     private void prefetchEntities(Collection<List<Attendee>> internalAttendees, Collection<List<Attendee>> userAttendees) throws OXException {

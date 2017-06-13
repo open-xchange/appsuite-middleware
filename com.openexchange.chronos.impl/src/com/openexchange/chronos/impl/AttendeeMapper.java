@@ -357,7 +357,13 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
                 object.removeFolderID();
             }
         });
-        mappings.put(AttendeeField.MEMBER, new DefaultMapping<String, Attendee>() {
+        mappings.put(AttendeeField.MEMBER, new DefaultMapping<List<String>, Attendee>() {
+
+            @Override
+            public void copy(Attendee from, Attendee to) throws OXException {
+                List<String> value = get(from);
+                set(to, null == value ? null : new ArrayList<String>(value));
+            }
 
             @Override
             public boolean isSet(Attendee object) {
@@ -365,12 +371,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
 
             @Override
-            public void set(Attendee object, String value) throws OXException {
+            public void set(Attendee object, List<String> value) throws OXException {
                 object.setMember(value);
             }
 
             @Override
-            public String get(Attendee object) {
+            public List<String> get(Attendee object) {
                 return object.getMember();
             }
 

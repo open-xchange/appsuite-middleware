@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
+import static com.openexchange.chronos.common.CalendarUtils.filterByMembership;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
@@ -264,30 +265,20 @@ public class AttendeeHelper {
                 /*
                  * only remove group attendee in case all originally participating members are also removed
                  */
-                String groupURI = removedAttendee.getUri();
-                boolean attendingMembers = false;
-                for (int memberID : session.getEntityResolver().getGroupMembers(removedAttendee.getEntity())) {
-                    if (null != findMember(originalAttendees, memberID, groupURI) && null == findMember(removedAttendees, memberID, groupURI)) {
-                        attendingMembers = true;
-                    }
-                }
-                if (attendingMembers) {
+                if (hasAttendingGroupMembers(removedAttendee.getUri(), originalAttendees, removedAttendees)) {
                     // preserve group attendee
                     LOG.debug("Ignoring removal of group {} as long as there are attending members.", I(removedAttendee.getEntity()));
                     continue;
                 }
             }
-            if (null != removedAttendee.getMember()) {
+            if (null != removedAttendee.getMember() && 0 < removedAttendee.getMember().size()) {
                 /*
-                 * only remove group member attendee in case either the corresponding group attendee itself, or not all originally participating members are also removed
+                 * only remove group member attendee in case either the corresponding group attendee itself, or *not all* originally participating members are also removed
                  */
-                Attendee groupAttendee = new Attendee();
-                groupAttendee.setUri(removedAttendee.getMember());
-                groupAttendee.setCuType(CalendarUserType.GROUP);
-                if (null == find(removedAttendees, groupAttendee)) {
+                if (false == containsAllUris(removedAttendees, removedAttendee.getMember())) {
                     boolean attendingOtherMembers = false;
-                    for (Attendee originalAttendee : originalAttendees) {
-                        if (groupAttendee.getUri().equals(originalAttendee.getMember()) && false == contains(removedAttendees, originalAttendee)) {
+                    for (String groupUri : removedAttendee.getMember()) {
+                        if (hasAttendingGroupMembers(groupUri, originalAttendees, removedAttendees)) {
                             attendingOtherMembers = true;
                             break;
                         }
@@ -371,7 +362,7 @@ public class AttendeeHelper {
                     ATTENDEE_PUBLIC_FOLDER_ID : session.getConfig().getDefaultFolderID(memberID));
                 memberAttendee.setPartStat(session.getConfig().getInitialPartStat(memberID, inPublicFolder));
                 if (false == resolveGroupAttendees) {
-                    memberAttendee.setMember(groupAttendee.getUri());
+                    memberAttendee.setMember(Collections.singletonList(groupAttendee.getUri()));
                 }
                 attendees.add(memberAttendee);
             }
@@ -436,22 +427,6 @@ public class AttendeeHelper {
     }
 
     /**
-     * Looks up an internal user attendee who attends as member of a specific group.
-     *
-     * @param attendees The attendees to search
-     * @param memberID The identifier of the user to lookup as group member
-     * @param groupURI The group's URI
-     * @return The member attendee, or <code>null</code> if not found
-     */
-    private Attendee findMember(List<Attendee> attendees, int memberID, String groupURI) {
-        Attendee attendee = find(attendees, memberID);
-        if (null != attendee && null != attendee.getMember() && attendee.getMember().equals(groupURI)) {
-            return attendee;
-        }
-        return null;
-    }
-
-    /**
      * Processes the lists of attendees to update/delete/insert in terms of the configured handling of the implicit attendee for the
      * actual calendar user.
      * <p/>
@@ -507,6 +482,47 @@ public class AttendeeHelper {
                 }
             }
         }
+    }
+
+    /**
+     * Gets a value indicating whether a resulting attendee list is going to contain at least one member of a specific group or not.
+     *
+     * @param groupUri The uri of the group to check
+     * @param originalAttendees The list of original attendees
+     * @param removedAttendees The list of removed attendees
+     * @return <code>true</code> if there'll be at least one group member afterwards, <code>false</code>, otherwise
+     */
+    private static boolean hasAttendingGroupMembers(String groupUri, List<Attendee> originalAttendees, List<Attendee> removedAttendees) {
+        for (Attendee originalMemberAttendee : filterByMembership(originalAttendees, groupUri)) {
+            if (null == find(removedAttendees, originalMemberAttendee)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsAllUris(List<Attendee> attendees, List<String> uris) {
+        if (null == uris || 0 == uris.size()) {
+            return true;
+        }
+        for (String uri : uris) {
+            if (false == containsUri(attendees, uri)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean containsUri(List<Attendee> attendees, String uri) {
+        if (null == attendees || 0 == attendees.size()) {
+            return false;
+        }
+        for (Attendee attendee : attendees) {
+            if (uri.equalsIgnoreCase(attendee.getUri())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
