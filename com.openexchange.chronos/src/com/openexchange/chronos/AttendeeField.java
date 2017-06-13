@@ -101,5 +101,9 @@ public enum AttendeeField {
      * The group- or list membership of the attendee.
      */
     MEMBER,
+    /**
+     * The e-mail address of the attendee.
+     */
+    EMAIL
 
 }

@@ -385,6 +385,28 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
                 object.removeMember();
             }
         });
+        mappings.put(AttendeeField.EMAIL, new DefaultMapping<String, Attendee>() {
+
+            @Override
+            public boolean isSet(Attendee object) {
+                return object.containsEMail();
+            }
+
+            @Override
+            public void set(Attendee object, String value) throws OXException {
+                object.setEMail(value);
+            }
+
+            @Override
+            public String get(Attendee object) {
+                return object.getEMail();
+            }
+
+            @Override
+            public void remove(Attendee object) {
+                object.removeEMail();
+            }
+        });
         return mappings;
     }
 

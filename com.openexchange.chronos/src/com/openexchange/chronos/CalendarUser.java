@@ -62,6 +62,7 @@ public class CalendarUser {
     protected String cn;
     protected int entity;
     protected CalendarUser sentBy;
+    protected String email;
 
     /**
      * Gets the address URI identifying the calendar user.
@@ -100,18 +101,18 @@ public class CalendarUser {
     }
 
     /**
-     * Gets the entity
+     * Gets the internal entity identifier of the calendar user.
      *
-     * @return The entity
+     * @return The entity identifier
      */
     public int getEntity() {
         return entity;
     }
 
     /**
-     * Sets the entity
+     * Sets the internal entity identifier of the calendar user.
      *
-     * @param entity The entity to set
+     * @param entity The entity identifier to set
      */
     public void setEntity(int entity) {
         this.entity = entity;
@@ -133,6 +134,24 @@ public class CalendarUser {
      */
     public void setSentBy(CalendarUser sentBy) {
         this.sentBy = sentBy;
+    }
+
+    /**
+     * Gets the e-mail address of the calendar user.
+     *
+     * @return The e-mail address
+     */
+    public String getEMail() {
+        return email;
+    }
+
+    /**
+     * Sets the e-mail address of the calendar user.
+     *
+     * @param email The e-mail address to set
+     */
+    public void setEMail(String email) {
+        this.email = email;
     }
 
 }

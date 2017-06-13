@@ -502,6 +502,44 @@ public class Attendee extends CalendarUser {
         return isSet(AttendeeField.MEMBER);
     }
 
+    /**
+     * Gets the e-mail address of the attendee.
+     *
+     * @return The e-mail address
+     */
+    @Override
+    public String getEMail() {
+        return email;
+    }
+
+    /**
+     * Sets the entity identifier of the attendee.
+     *
+     * @param value The entity identifier to set
+     */
+    @Override
+    public void setEMail(String value) {
+        email = value;
+        setFields.add(AttendeeField.EMAIL);
+    }
+
+    /**
+     * Removes the e-mail address of the attendee.
+     */
+    public void removeEMail() {
+        email = null;
+        setFields.remove(AttendeeField.EMAIL);
+    }
+
+    /**
+     * Gets a value indicating whether the e-mail address of the attendee has been set or not.
+     *
+     * @return <code>true</code> if the e-mail address is set, <code>false</code>, otherwise
+     */
+    public boolean containsEMail() {
+        return isSet(AttendeeField.EMAIL);
+    }
+
     @Override
     public String toString() {
         return "Attendee [cuType=" + cuType + ", partStat=" + partStat + ", uri=" + uri + ", entity=" + entity + "]";

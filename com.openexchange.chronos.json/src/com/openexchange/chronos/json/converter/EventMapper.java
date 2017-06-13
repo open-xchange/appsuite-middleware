@@ -1094,6 +1094,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         }
         calendarUser.setUri(jsonObject.optString("uri", null));
         calendarUser.setCn(jsonObject.optString("cn", null));
+        calendarUser.setEMail(jsonObject.optString("email", null));
         calendarUser.setSentBy(deserializeCalendarUser(jsonObject.optJSONObject("sentBy"), CalendarUser.class));
         if (jsonObject.has("entity")) {
             calendarUser.setEntity(jsonObject.getInt("entity"));
@@ -1109,6 +1110,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt("uri", calendarUser.getUri());
         jsonObject.putOpt("cn", calendarUser.getCn());
+        jsonObject.putOpt("email", calendarUser.getEMail());
         jsonObject.putOpt("sentBy", serializeCalendarUser(calendarUser.getSentBy()));
         if (0 < calendarUser.getEntity()) {
             jsonObject.put("entity", calendarUser.getEntity());

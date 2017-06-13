@@ -453,6 +453,9 @@ public class DefaultEntityResolver implements EntityResolver {
         if (null == fields || Arrays.contains(fields, AttendeeField.URI)) {
             attendee.setUri(getCalAddress(user));
         }
+        if (null == fields || Arrays.contains(fields, AttendeeField.EMAIL)) {
+            attendee.setEMail(user.getMail());
+        }
         return attendee;
     }
 
