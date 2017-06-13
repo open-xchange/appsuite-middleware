@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.internal;
+package com.openexchange.chronos.provider.composition.impl;
 
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;

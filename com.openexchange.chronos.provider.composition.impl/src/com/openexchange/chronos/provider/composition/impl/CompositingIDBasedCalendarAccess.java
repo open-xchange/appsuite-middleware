@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.internal;
+package com.openexchange.chronos.provider.composition.impl;
 
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withRelativeID;
@@ -65,7 +65,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -496,11 +495,6 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
      * @return The calendar accounts
      */
     private List<CalendarAccount> getAccounts() throws OXException {
-
-        if (1 == 2) {
-            createAccounts();
-        }
-
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
         accounts.add(DEFAULT_ACCOUNT);
         CalendarAccountStorageFactory storageFactory = services.getOptionalService(CalendarAccountStorageFactory.class);
@@ -509,42 +503,6 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
             accounts.addAll(accountStorage.loadAccounts(session.getUserId()));
         }
         return accounts;
-    }
-
-    private void createAccounts() throws OXException {
-        CalendarAccountStorageFactory storageFactory = services.getOptionalService(CalendarAccountStorageFactory.class);
-        CalendarAccountStorage accountStorage = storageFactory.create(ServerSessionAdapter.valueOf(session).getContext());
-        Map<String, Object> config;
-
-        //        config = new HashMap<String, Object>();
-        //        config.put("name", "effzeh");
-        //        config.put("color", "red");
-        //        config.put("uri", "http://127.0.0.1/effzeh.ics");
-        //        config.put("refreshInterval", TimeUnit.DAYS.toMillis(3L));
-        //        accountStorage.insertAccount("ical", session.getUserId(), config);
-        //
-        //        config = new HashMap<String, Object>();
-        //        config.put("name", "Feiertage");
-        //        config.put("color", "lightgreen");
-        //        config.put("uri", "http://www.ifeiertage.de/nw-.ics");
-        //        config.put("refreshInterval", TimeUnit.DAYS.toMillis(3L));
-        //        accountStorage.insertAccount("ical", session.getUserId(), config);
-        //
-        //        config = new HashMap<String, Object>();
-        //        config.put("name", "SchedJoules");
-        //        config.put("color", "blue");
-        //        config.put("uri", "https://holidays.schedjoules.com/calendars/766e8a162f82?l=de");
-        //        config.put("refreshInterval", TimeUnit.DAYS.toMillis(3L));
-        //        config.put("authHeader", "Token token=\"0443a55244bb2b6224fd48e0416f0d9c\"");
-        //        accountStorage.insertAccount("ical", session.getUserId(), config);
-
-        config = new HashMap<String, Object>();
-        config.put("name", "AWB Abfuhrkalender");
-        config.put("color", "black");
-        config.put("uri", "https://appsuite-dev-share.open-xchange.com/ajax/share/066458e509bc896166458e49bc9a47d0ac1f482ebdfabb69/1/2/MTI2NDk2");
-        config.put("refreshInterval", TimeUnit.DAYS.toMillis(3L));
-        accountStorage.insertAccount("ical", session.getUserId(), config);
-
     }
 
     /**

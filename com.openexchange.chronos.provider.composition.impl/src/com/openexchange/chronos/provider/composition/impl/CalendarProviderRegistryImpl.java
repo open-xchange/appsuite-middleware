@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.internal;
+package com.openexchange.chronos.provider.composition.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
