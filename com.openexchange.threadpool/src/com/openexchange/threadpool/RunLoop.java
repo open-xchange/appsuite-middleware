@@ -115,8 +115,8 @@ public abstract class RunLoop<E> implements Runnable {
             /*
              * Try to handle the element if the RunLoop isn't paused
              */
+            handleLock.lock();
             try {
-                handleLock.lock();
                 while(isPaused.get()) {
                     proceedCondition.await();
                 }
