@@ -77,6 +77,7 @@ public class SingleVCardExportTest extends AbstractManagedContactTest {
         int contactId = cotm.newAction(contact).getObjectID();
         VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, contactId, false));
         String vcard = (String) vcardExportResponse.getData();
+        
         assertNotNull(vcard);        
     }
     
