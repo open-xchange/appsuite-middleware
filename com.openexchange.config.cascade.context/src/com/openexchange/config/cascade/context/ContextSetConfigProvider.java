@@ -220,8 +220,25 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     @Override
-    protected Collection<String> getAllPropertyNames(Context context) {
-        return Collections.emptyList();
+    protected Collection<String> getAllPropertyNamesFor(Context context, int userId) throws OXException {
+        if (userId == NO_USER) {
+            return Collections.emptyList();
+        }
+
+        Set<String> allNames = new HashSet<String>();
+        Set<String> tags = getSpecification(context, getUserPermissionBits(context, userId));
+        boolean somethingAdded = false;
+        for (ContextSetConfig c : contextSetConfigs) {
+            if (c.matches(tags)) {
+                somethingAdded = allNames.addAll(c.getConfiguration().keySet());
+            }
+        }
+        if (false == somethingAdded) {
+            return Collections.emptyList();
+        }
+        allNames.remove("withTags");
+        allNames.remove("addTags");
+        return allNames;
     }
 
     protected String findFirst(List<Map<String, Object>> configData, String property) {
