@@ -143,15 +143,14 @@ public class DefaultEntityResolver implements EntityResolver {
         attendee = resolveExternals(attendee);
         if (isInternal(attendee)) {
             /*
-             * internal entity, ensure it exists & enhance with static properties
+             * internal entity, ensure it exists
              */
             attendee.setCuType(checkExistence(attendee.getEntity(), attendee.getCuType()));
-            return applyEntityData(attendee);
         }
         /*
-         * external entity otherwise, take over as-is
+         * return attendee, enhanced with static properties
          */
-        return attendee;
+        return applyEntityData(attendee);
     }
 
     @Override
@@ -229,10 +228,22 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public Attendee applyEntityData(Attendee attendee, AttendeeField... fields) throws OXException {
-        if (null == attendee || false == CalendarUtils.isInternal(attendee)) {
-            LOG.warn("Ignoring attempt to apply internal entity data for non-internal attendee {}", attendee);
+        if (null == attendee) {
+            LOG.warn("Ignoring attempt to apply entity data for passed null reference");
             return attendee;
         }
+        if (false == CalendarUtils.isInternal(attendee)) {
+            /*
+             * copy over email address for external attendees
+             */
+            if (null == attendee.getEMail()) {
+                attendee.setEMail(extractEMailAddress(attendee.getUri()));
+            }
+            return attendee;
+        }
+        /*
+         * apply known entity data for internal attendees
+         */
         if (CalendarUserType.GROUP.equals(attendee.getCuType())) {
             return applyEntityData(attendee, getGroup(attendee.getEntity()), fields);
         }
@@ -586,7 +597,7 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * try lookup by e-mail address, otherwise
          */
-        String mail = CalendarUtils.extractEMailAddress(uri);
+        String mail = extractEMailAddress(uri);
         for (User knownUser : knownUsers.values()) {
             if (mail.equals(knownUser.getMail()) || considerAliases && Arrays.contains(knownUser.getAliases(), mail)) {
                 return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);

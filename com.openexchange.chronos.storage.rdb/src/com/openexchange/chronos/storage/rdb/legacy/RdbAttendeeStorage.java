@@ -292,7 +292,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
         }
         if (null != externalAttendees) {
-            attendees.addAll(externalAttendees);
+            for (Attendee externalAttendee : externalAttendees) {
+                attendees.add(entityResolver.applyEntityData(externalAttendee));
+            }
         }
         return attendees;
     }

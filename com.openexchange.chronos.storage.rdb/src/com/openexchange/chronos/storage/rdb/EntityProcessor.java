@@ -265,13 +265,7 @@ public class EntityProcessor {
         if (null == entityResolver) {
             return attendee;
         }
-        if (0 < attendee.getEntity()) {
-            /*
-             * apply entity data for internal attendees
-             */
-            attendee = entityResolver.applyEntityData(attendee);
-        }
-        return attendee;
+        return entityResolver.applyEntityData(attendee);
     }
 
     private static String writeVObjectProperty(VObjectProperty property) throws OXException {

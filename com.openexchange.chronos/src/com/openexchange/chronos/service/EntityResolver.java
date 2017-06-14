@@ -179,7 +179,7 @@ public interface EntityResolver {
     <T extends CalendarUser> T applyEntityData(T calendarUser, int userID) throws OXException;
 
     /**
-     * Applies the default set of static properties for the supplied internal attendee entity based on the underlying groupware object.
+     * Applies the default set of static properties for the supplied attendee entity based on the underlying groupware object.
      * This typically includes the attendee's common name or calendar user address for the supplied internal attendee entity.
      *
      * @param attendee The attendee to apply the static entity data for
