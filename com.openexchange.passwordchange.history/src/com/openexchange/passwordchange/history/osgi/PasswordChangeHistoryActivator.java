@@ -56,9 +56,11 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeEventListener;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTrackerRegistry;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTrackerRegistryImpl;
 import com.openexchange.passwordchange.history.tracker.RuntimeTracker;
+import com.openexchange.user.UserServiceInterceptor;
 
 /**
  * 
@@ -100,6 +102,9 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
         Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(EventConstants.EVENT_TOPIC, handler.getTopic());
         registerService(EventHandler.class, handler, properties);
+
+        // get serServiceInterceptor.class and register interceptor
+        registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor());
 
         LOG.info("Finished starting PasswordChangeHistory bundle");
     }

@@ -49,46 +49,50 @@
 
 package com.openexchange.passwordchange.history.tracker;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import java.util.Map;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.passwordchange.exeption.PasswordChangeHistoryException;
+import com.openexchange.passwordchange.history.osgi.Services;
+import com.openexchange.user.AbstractUserServiceInterceptor;
 
 /**
- * {@link PasswordChangeEventListener}
+ * {@link PasswordChangeInterceptor}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeEventListener implements EventHandler {
+public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
-    private static final String TOPIC = "com/openexchange/passwordchange";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
+    private static final String LIMIT = "com.openexchange.passwordchange.limit";
 
-    /**
-     * Initializes a new {@link PasswordChangeEventListener}.
-     */
-    public PasswordChangeEventListener() {
-        super();
-    }
-
-    /**
-     * Gets the topic of interest.
-     *
-     * @return The topic
-     */
-    public String getTopic() {
-        return TOPIC;
+    @Override
+    public int getRanking() {
+        return 10;
     }
 
     @Override
-    public void handleEvent(Event event) {
-        if (false == TOPIC.equals(event.getTopic())) {
-            return;
+    public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
+        // Check if password was changed
+        if (null != user.getUserPassword()) {
+            // so password was changed..
+            PasswordChangeUtility.callTracker(context.getContextId(), user.getId(), null, PasswordChangeInfo.PROVISIONING);
         }
-        // Read values
-        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
-        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
-
-        // Process tracking
-        PasswordChangeUtility.callTracker(contextID, userID, ipAdderess, PasswordChangeInfo.APPSUITE);
     }
+
+    @Override
+    public void afterDelete(Context context, User user, Contact contactData) throws OXException {
+        ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
+        if (null == casscade) {
+            LOG.warn("Could not get config to delete password history.");
+            throw new PasswordChangeHistoryException(PasswordChangeHistoryException.MISSING_SERVICE);
+        }
+        // Clear DB after deletion of user
+        PasswordChangeUtility.clearFor(context.getContextId(), user.getId(), casscade.getView(context.getContextId(), user.getId()).get(LIMIT, Integer.class));
+    }
+
 }

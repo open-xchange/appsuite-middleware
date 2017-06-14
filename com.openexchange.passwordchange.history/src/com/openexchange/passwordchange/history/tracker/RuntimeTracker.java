@@ -56,7 +56,6 @@ import java.util.Map;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
 import com.openexchange.passwordchange.history.tracker.RuntimeTracker;
-import com.openexchange.session.Session;
 
 /**
  * {@link RuntimeTracker} - Does not save anything to a DB. Dies with server shutdown. ~DummyTracker for testing
@@ -66,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public class RuntimeTracker implements PasswordChangeTracker {
 
-    Map<Session, PasswordChangeInfo> infos;
+    Map<PasswordChangeInfo, Map<Integer, Integer>> infos;
 
     /**
      * Initializes a new {@link RuntimeTracker}.
@@ -77,48 +76,31 @@ public class RuntimeTracker implements PasswordChangeTracker {
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(Session session) {
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) {
         List<PasswordChangeInfo> lst = new LinkedList<>();
-        for (Session ses : infos.keySet()) {
-            // Check if same user and context
-            if (sameSession(session, ses)) {
-                lst.add(infos.get(ses));
+        // Very inefficient .. but this is only for testing, so we are okay
+        for (PasswordChangeInfo info : infos.keySet()) {
+            Map<Integer, Integer> tmp = infos.get(info);
+            for (Integer context : tmp.keySet()) {
+                if (context == contextID && tmp.get(context) == userID) {
+                    // Found
+                    lst.add(info);
+                }
             }
         }
         return lst;
     }
 
     @Override
-    public void trackPasswordChange(Session session, PasswordChangeInfo info) {
-        if (null != session && null != info) {
-            infos.put(session, info);
-        }
+    public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) {
+        HashMap<Integer, Integer> map = new HashMap<>(1);
+        map.put(contextID, userID);
+        infos.put(info, map);
     }
 
     @Override
-    public void clear(Session session, int limit) {
-        if (limit <= 0) {
-            // Remove all
-            for (Session ses : infos.keySet()) {
-                if (sameSession(session, ses)) {
-                    infos.remove(ses);
-                }
-            }
-        } else {
-            // Gather and delete only oldest
-            List<Session> check = new LinkedList<>();
-            for (Session ses : infos.keySet()) {
-                if (sameSession(session, ses)) {
-                    check.add(ses);
-                }
-            }
-            if (check.size() > limit) {
-                //TODO Remove oldest with some fancy algorithm
-            }
-        }
-    }
-
-    private boolean sameSession(Session one, Session two) {
-        return one.getUserId() == two.getUserId() && one.getContextId() == two.getContextId();
+    public void clear(int userID, int contextID, int limit) {
+        // Clear for all. Testing class after all
+        infos.clear();
     }
 }
