@@ -111,6 +111,7 @@ public class XMLModifierCLT {
         options.addOption(createOption("a", "add", true, "XML file that should add the elements denoted by the XPath. - can be used to read from STDIN.", false));
         options.addOption(createOption("r", "replace", true, "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
         options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
+        options.addOption(createOption("z", "zap", false, "Defines if duplicate matching elements should be removed(zapped) instead of only being replaced (-r).", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
@@ -145,7 +146,7 @@ public class XMLModifierCLT {
                 doAdd(document, expression, add);
             } else if (cmd.hasOption('r')) {
                 Document replace = parseInput("-".equals(cmd.getOptionValue('r')), cmd.getOptionValue('r'));
-                doReplace(cmd.getOptionValue('d'), document, expression, replace);
+                doReplace(cmd.getOptionValue('d'), cmd.hasOption('z'), document, expression, replace);
             } else {
                 System.err.println("Unknown operation mode.");
             }
@@ -220,7 +221,7 @@ public class XMLModifierCLT {
         }
     }
 
-    private static void doReplace(String identifier, Document document, XPathExpression expression, Document replace) throws XPathExpressionException {
+    private static void doReplace(String identifier, boolean removeDuplicates, Document document, XPathExpression expression, Document replace) throws XPathExpressionException {
         NodeList toReplaceList = (NodeList) expression.evaluate(replace, XPathConstants.NODESET);
         for (int i = 0; i < toReplaceList.getLength(); i++) {
             Node toReplace = toReplaceList.item(i);
@@ -234,8 +235,25 @@ public class XMLModifierCLT {
                 if (toReplaceIdentifier.equals(origIdentifier)) {
                     Node imported = document.importNode(toReplace, true);
                     Node parent = original.getParentNode();
-                    parent.replaceChild(imported, original);
-                    found = true;
+                    if (!found) {
+                     parent.replaceChild(imported, original);
+                     found = true;
+                    } else {
+                        //already seen it, should we remove duplicates? 
+                        if (removeDuplicates) {
+                            //indentation is a text node which has to be removed
+                            Node prev = original.getPreviousSibling();
+                            if (prev != null && 
+                                prev.getNodeType() == Node.TEXT_NODE &&
+                                prev.getNodeValue().trim().isEmpty()) {
+                                parent.removeChild(prev);
+                            }
+                            parent.removeChild(original);
+                        } else {
+                            //don't zap, simply replace
+                            parent.replaceChild(imported, original);
+                        }
+                    }
                 }
             }
             if (!found) {

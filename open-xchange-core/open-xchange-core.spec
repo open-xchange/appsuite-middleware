@@ -21,7 +21,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1287,16 +1287,19 @@ EOF
 fi
 
 # SoftwareChange_Request-2990
-TMPFILE=$(mktemp)
-rm -f $TMPFILE
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
+# Bug #53993
+if ! egrep -q '^\s*<logger.*com\.hazelcast\.internal\.(monitors|diagnostics).*$' /opt/open-xchange/etc/logback.xml; then
+  TMPFILE=$(mktemp)
+  rm -f $TMPFILE
+  cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
 <configuration>
     <logger name="com.hazelcast.internal.monitors" level="INFO"/>
 </configuration>
 EOF
-if [ -e $TMPFILE ]; then
+  if [ -e $TMPFILE ]; then
     cat $TMPFILE > /opt/open-xchange/etc/logback.xml
     rm -f $TMPFILE
+  fi
 fi
 ox_add_property com.openexchange.hazelcast.healthMonitorLevel silent /opt/open-xchange/etc/hazelcast.properties
 
@@ -1554,6 +1557,21 @@ fi
 # SoftwareChange_Request-4098
 ox_remove_property com.openexchange.mail.attachmentDisplaySizeLimit /opt/open-xchange/etc/mail.properties
 
+# Bug #53993: Zap duplicate loggers
+if [[ 1 < $(egrep -c '^\s*<logger.*"com\.hazelcast\.internal\.diagnostics".*$' /opt/open-xchange/etc/logback.xml) ]]; then
+  TMPFILE=$(mktemp)
+  rm -f $TMPFILE
+  cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
+<configuration>
+    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
+</configuration>
+EOF
+  if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+  fi
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1595,6 +1613,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Tue Jun 06 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-06-08 (4180)
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

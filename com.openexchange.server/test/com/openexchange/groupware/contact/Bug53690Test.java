@@ -47,80 +47,46 @@
  *
  */
 
-package com.openexchange.admin.console.admincore;
+package com.openexchange.groupware.contact;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 
-public class AllPluginsLoaded extends AbstractMBeanCLI<Void> {
+/**
+ * {@link Bug53690Test}
+ *
+ * Fields considered for sorting / categorizing contacts inconsistent
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
+ */
+public class Bug53690Test {
 
-    /**
-     * The main method invoked on CLT execution.
-     *
-     * @param args The command-line arguments
-     */
-    public static void main(String[] args) {
-        new AllPluginsLoaded().execute(args);
+    @Test
+    public void testSortWithYomiFirstNameOnly() {
+        Contact contact = new Contact();
+        contact.setYomiFirstName("test");
+        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
     }
 
-    // ---------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link AllPluginsLoaded}.
-     */
-    public AllPluginsLoaded() {
-        super();
+    @Test
+    public void testSortWithGivenNameOnly() {
+        Contact contact = new Contact();
+        contact.setGivenName("test");
+        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
     }
 
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        checkOptions(cmd, null);
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
-        // Nothing to check
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "allpluginsloaded";
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        // Nothing
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PluginsLoadedMBean pluginsLoadedMBean = getMBean(mbsc, PluginsLoadedMBean.class, PluginsLoadedMBean.DOMAIN);
-        if (pluginsLoadedMBean.allPluginsLoaded()) {
-            System.exit(0);
-        } else {
-            System.exit(1);
-        }
-        return null;
+    @Test
+    public void testSortYomiNamesFirst() {
+        Contact contact = new Contact();
+        contact.setYomiFirstName("YomiFirstName");
+        contact.setYomiLastName("YomiLastName");
+        contact.setSurName("SurName");
+        contact.setGivenName("GivenName");
+        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
+        assertTrue("Yomi names not first", contact.getSortName().startsWith("YomiLastNameYomiFirstName"));
     }
 
 }

@@ -1,7 +1,7 @@
 /userfeedback/v1/export/{context-group}/{type}/raw:
   get:
     security:
-      - basic: []
+      - basicAuth: []
     operationId: exportRAW
     tags:
       - Userfeedback

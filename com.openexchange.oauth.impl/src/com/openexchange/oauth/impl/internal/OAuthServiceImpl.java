@@ -49,9 +49,10 @@
 
 package com.openexchange.oauth.impl.internal;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -572,12 +573,15 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
-        startTransaction(con);
-        boolean committed = false;
+        boolean rollback = false;
         try {
+            startTransaction(con);
+            rollback = true;
+
             deleteAccount(accountId, user, contextId, con);
+
             con.commit(); // COMMIT
-            committed = true;
+            rollback = false;
             LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", accountId, user, contextId);
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -586,7 +590,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final RuntimeException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (!committed) {
+            if (rollback) {
                 rollback(con);
             }
             autocommit(con);
@@ -665,8 +669,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
-        final List<Setter> list = setterFrom(arguments, scopes);
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+        final List<Setter> list = setterFrom(arguments);
         if (list.isEmpty()) {
             /*
              * Nothing to update
@@ -838,7 +842,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                  * Commit
                  */
                 writeCon.commit();
-                
+
                 // No need to re-authorise if access not present
                 OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
                 if (access != null) {
@@ -991,7 +995,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         int set(int pos, PreparedStatement stmt) throws SQLException;
     }
 
-    private List<Setter> setterFrom(final Map<String, Object> arguments, final Set<OAuthScope> scopes) throws OXException {
+    private List<Setter> setterFrom(final Map<String, Object> arguments) throws OXException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*
          * Check for display name
@@ -1044,21 +1048,23 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         /*
          * Scopes
          */
-        ret.add(new Setter() {
+        final Set<OAuthScope> scopes = (Set<OAuthScope>) arguments.get(OAuthConstants.ARGUMENT_SCOPES);
+        if (null != scopes) {
+            ret.add(new Setter() {
 
-            @Override
-            public void appendTo(StringBuilder stmtBuilder) {
-                stmtBuilder.append("scope = ?");
-            }
+                @Override
+                public void appendTo(StringBuilder stmtBuilder) {
+                    stmtBuilder.append("scope = ?");
+                }
 
-            @Override
-            public int set(int pos, PreparedStatement stmt) throws SQLException {
-                String scope = Strings.concat(" ", scopes.toArray());
-                stmt.setString(pos, scope);
-                return ++pos;
-            }
-
-        });
+                @Override
+                public int set(int pos, PreparedStatement stmt) throws SQLException {
+                    String scope = Strings.concat(" ", scopes.toArray());
+                    stmt.setString(pos, scope);
+                    return pos + 1;
+                }
+            });
+        }
         /*
          * Other arguments?
          */
@@ -1310,14 +1316,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } finally {
             closeSQLStuff(rs, stmt);
             provider.releaseWriteConnection(context, con);
-        }
-    }
-
-    private static void startTransaction(final Connection con) throws OXException {
-        try {
-            con.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
-            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 

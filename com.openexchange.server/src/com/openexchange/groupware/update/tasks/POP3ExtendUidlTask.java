@@ -47,50 +47,74 @@
  *
  */
 
-package com.openexchange.quota.json;
+package com.openexchange.groupware.update.tasks;
 
-import java.util.Collection;
-import java.util.Map;
-import org.osgi.framework.BundleContext;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.quota.json.actions.GetAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link QuotaActionFactory}
+ * {@link POP3ExtendUidlTask} - Extends <code>uidl</code> column of the <code>pop3_storage_ids</code> and <code>pop3_storage_deleted</code> tables.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.0
  */
-public class QuotaActionFactory implements AJAXActionServiceFactory {
+public final class POP3ExtendUidlTask extends UpdateTaskAdapter {
 
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link QuotaActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public QuotaActionFactory(final ServiceLookup services, final BundleContext context) {
+    public POP3ExtendUidlTask() {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        GetAction getAction = new com.openexchange.quota.json.actions.GetAction(services);
-        actions.put("get", getAction);
-        actions.put("GET", getAction);
-        actions.put("filestore", new com.openexchange.quota.json.actions.FilestoreAction(services));
-        actions.put("mail", new com.openexchange.quota.json.actions.MailAction(services));
-        this.actions = actions.build();
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BLOCKING);
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public String[] getDependencies() {
+        return new String[] { POP3CheckAndDropObsoleteTablesTaskV2.class.getName() };
     }
+
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        Connection con = Database.getNoTimeout(contextId, true);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            if (128 != Tools.getVarcharColumnSize("uidl", "pop3_storage_ids", con)) {
+                Column column = new Column("uidl", "VARCHAR(128) CHARACTER SET latin1 NOT NULL");
+                Tools.modifyColumns(con, "pop3_storage_ids", column);
+            }
+
+            if (128 != Tools.getVarcharColumnSize("uidl", "pop3_storage_deleted", con)) {
+                Column column = new Column("uidl", "VARCHAR(128) CHARACTER SET latin1 NOT NULL");
+                Tools.modifyColumns(con, "pop3_storage_deleted", column);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Database.backNoTimeout(contextId, true, con);
+        }
+    }
+
 }

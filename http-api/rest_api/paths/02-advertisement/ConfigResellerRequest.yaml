@@ -1,6 +1,6 @@
 /advertisement/v1/config/reseller:
   put:
-    operationId: put
+    operationId: putAdvertisementByReseller
     tags:
       - Advertisement
     summary: Sets all advertisement configurations for a given reseller
