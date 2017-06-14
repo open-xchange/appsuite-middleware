@@ -83,7 +83,7 @@ public class RdbCalendarStorage implements CalendarStorage {
      */
     public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super();
-        eventStorage = new RdbEventStorage(context, dbProvider, txPolicy);
+        eventStorage = new RdbEventStorage(context, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
         attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);

@@ -70,6 +70,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
@@ -93,15 +94,19 @@ import com.openexchange.search.SearchTerm;
  */
 public class RdbEventStorage extends RdbStorage implements EventStorage {
 
+    private final EntityResolver entityResolver;
+
     /**
      * Initializes a new {@link RdbEventStorage}.
      *
      * @param context The context
+     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbEventStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbEventStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
+        this.entityResolver = entityResolver;
     }
 
     @Override
@@ -279,22 +284,23 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             return logExecuteUpdate(stmt);
         }
     }
-    private static int insertTombstoneEvent(Connection connection, int contextID, Event event) throws SQLException, OXException {
+
+    private int insertTombstoneEvent(Connection connection, int contextID, Event event) throws SQLException, OXException {
         return insertOrReplaceEvent(connection, "del_dates", true, contextID, event);
     }
 
-    private static int insertEvent(Connection connection, int contextID, Event event) throws SQLException, OXException {
+    private int insertEvent(Connection connection, int contextID, Event event) throws SQLException, OXException {
         return insertOrReplaceEvent(connection, "prg_dates", false, contextID, event);
     }
 
-    private static int insertOrReplaceEvent(Connection connection, String tableName, boolean replace, int contextID, Event event) throws SQLException, OXException {
+    private int insertOrReplaceEvent(Connection connection, String tableName, boolean replace, int contextID, Event event) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields();
         String sql = new StringBuilder()
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ')
             .append("(cid,").append(EventMapper.getInstance().getColumns(mappedFields)).append(") ")
             .append("VALUES (?,").append(EventMapper.getInstance().getParameters(mappedFields)).append(");")
         .toString();
-        Event eventData = Compat.adjustPriorSave(connection, contextID, event);
+        Event eventData = Compat.adjustPriorSave(entityResolver, connection, contextID, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -303,13 +309,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private static int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
+    private int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
         EventField[] assignedfields = EventMapper.getInstance().getAssignedFields(event);
         String sql = new StringBuilder()
             .append("UPDATE prg_dates SET ").append(EventMapper.getInstance().getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
-        Event eventData = Compat.adjustPriorSave(connection, contextID, event);
+        Event eventData = Compat.adjustPriorSave(entityResolver, connection, contextID, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             parameterIndex = EventMapper.getInstance().setParameters(stmt, parameterIndex, eventData, assignedfields);
@@ -319,7 +325,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private static Event selectEvent(Connection connection, int contextID, int objectID, EventField[] fields) throws SQLException, OXException {
+    private Event selectEvent(Connection connection, int contextID, int objectID, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         String sql = new StringBuilder()
             .append("SELECT ").append(EventMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates ")
@@ -330,13 +336,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(2, objectID);
             ResultSet resultSet = logExecuteQuery(stmt);
             if (resultSet.next()) {
-                return readEvent(resultSet, mappedFields, null);
+                return readEvent(entityResolver, resultSet, mappedFields, null);
             }
         }
         return null;
     }
 
-    private static Event selectException(Connection connection, int contextID, int seriesID, long recurrenceDatePosition, EventField[] fields) throws SQLException, OXException {
+    private Event selectException(Connection connection, int contextID, int seriesID, long recurrenceDatePosition, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         String sql = new StringBuilder()
             .append("SELECT ").append(EventMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates ")
@@ -348,17 +354,17 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setString(3, String.valueOf(recurrenceDatePosition));
             ResultSet resultSet = logExecuteQuery(stmt);
             if (resultSet.next()) {
-                return readEvent(resultSet, mappedFields, null);
+                return readEvent(entityResolver, resultSet, mappedFields, null);
             }
         }
         return null;
     }
 
-    private static Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
-        return Compat.adjustAfterLoad(EventMapper.getInstance().fromResultSet(resultSet, fields, columnLabelPrefix));
+    private static Event readEvent(EntityResolver entityResolver, ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
+        return Compat.adjustAfterLoad(entityResolver, EventMapper.getInstance().fromResultSet(resultSet, fields, columnLabelPrefix));
     }
 
-    private static List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
+    private List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         SearchAdapter adapter = new SearchAdapter(contextID, null, "d.", "m.", "e.").append(searchTerm).append(filters);
         StringBuilder stringBuilder = new StringBuilder()
@@ -396,13 +402,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             adapter.setParameters(stmt, parameterIndex);
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                events.add(readEvent(resultSet, mappedFields, "d."));
+                events.add(readEvent(entityResolver, resultSet, mappedFields, "d."));
             }
         }
         return events;
     }
 
-    private static List<Event> selectOverlappingEvents(Connection connection, int contextID, int[] userIDs, int[] otherEntityIDs, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
+    private List<Event> selectOverlappingEvents(Connection connection, int contextID, int[] userIDs, int[] otherEntityIDs, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d");
@@ -466,13 +472,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                events.add(readEvent(resultSet, mappedFields, "d."));
+                events.add(readEvent(entityResolver, resultSet, mappedFields, "d."));
             }
         }
         return events;
     }
 
-    static RecurrenceData selectRecurrenceData(Connection connection, int contextID, int seriesID, boolean deleted) throws SQLException, OXException {
+    static RecurrenceData selectRecurrenceData(EntityResolver entityResolver, Connection connection, int contextID, int seriesID, boolean deleted) throws SQLException, OXException {
         EventField[] fields = EventMapper.getInstance().getMappedFields(new EventField[] {
             EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE,
             EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
@@ -488,7 +494,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(3, seriesID);
             ResultSet resultSet = logExecuteQuery(stmt);
             if (resultSet.next()) {
-                Event event = readEvent(resultSet, fields, null);
+                Event event = readEvent(entityResolver, resultSet, fields, null);
                 return new DefaultRecurrenceData(event);
             }
         }

@@ -191,6 +191,7 @@ public class EntityProcessor {
             organizer = entityResolver.applyEntityData(organizer, resourceId.getEntity());
         } else {
             organizer.setUri(property.getValue());
+            organizer = entityResolver.applyEntityData(organizer, CalendarUserType.INDIVIDUAL);
         }
         VObjectParameters parameters = property.getParameters();
         if (null != parameters) {
@@ -203,6 +204,7 @@ public class EntityProcessor {
                         sentBy = entityResolver.applyEntityData(sentBy, sentByResourceId.getEntity());
                     } else {
                         sentBy.setUri(firstValue);
+                        sentBy = entityResolver.applyEntityData(sentBy, CalendarUserType.INDIVIDUAL);
                     }
                     organizer.setSentBy(sentBy);
                 }

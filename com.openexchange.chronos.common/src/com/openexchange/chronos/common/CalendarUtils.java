@@ -259,7 +259,18 @@ public class CalendarUtils {
      * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
      */
     public static boolean isInternal(Attendee attendee) {
-        return 0 < attendee.getEntity() || 0 == attendee.getEntity() && CalendarUserType.GROUP.equals(attendee.getCuType());
+        return isInternal(attendee, attendee.getCuType());
+    }
+
+    /**
+     * Gets a value indicating whether a calendar user represents an <i>internal</i> entity, i.e. an internal user, group or resource, or not.
+     *
+     * @param calendarUser The calendar user to check
+     * @param cuType The calendar user type to assume
+     * @return <code>true</code> if the calendar user is internal, <code>false</code>, otherwise
+     */
+    public static boolean isInternal(CalendarUser calendarUser, CalendarUserType cuType) {
+        return 0 < calendarUser.getEntity() || 0 == calendarUser.getEntity() && CalendarUserType.GROUP.equals(cuType);
     }
 
     /**

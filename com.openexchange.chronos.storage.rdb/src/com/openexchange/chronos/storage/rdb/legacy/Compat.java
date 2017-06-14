@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
@@ -77,6 +78,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
@@ -104,10 +106,11 @@ public class Compat {
      * <b>Note:</b> This method requires that the properties {@link EventField#ALL_DAY}, {@link EventField#RECURRENCE_RULE},
      * {@link EventField#START_TIMEZONE}, {@link EventField#START_DATE} and {@link EventField#END_DATE} were loaded.
      *
+     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      * @param event The event to adjust
      * @return The (possibly adjusted) event reference
      */
-    public static Event adjustAfterLoad(Event event) throws OXException {
+    public static Event adjustAfterLoad(EntityResolver entityResolver, Event event) throws OXException {
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
             /*
              * extract series pattern and "absolute duration" / "recurrence calculator" field
@@ -165,19 +168,25 @@ public class Compat {
         if (event.containsStartTimeZone()) {
             event.setEndTimeZone(event.getStartTimeZone());
         }
-
+        /*
+         * enhance organizer with static properties
+         */
+        if (event.containsOrganizer() && null != event.getOrganizer() && null != entityResolver) {
+            event.setOrganizer(entityResolver.applyEntityData(event.getOrganizer(), CalendarUserType.INDIVIDUAL));
+        }
         return event;
     }
 
     /**
      * Adjusts certain properties of an event prior inserting it into the database.
      *
+     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      * @param event The event to adjust
      * @param connection The connection to use
      * @param contextID The context identifier
      * @return The adjusted event data to store
      */
-    public static Event adjustPriorSave(Connection connection, int contextID, Event event) throws OXException, SQLException {
+    public static Event adjustPriorSave(EntityResolver entityResolver, Connection connection, int contextID, Event event) throws OXException, SQLException {
         /*
          * prepare event data for insert
          */
@@ -207,7 +216,7 @@ public class Compat {
             if (null != eventData.getRecurrenceId() && RecurrenceData.class.isInstance(eventData.getRecurrenceId())) {
                 recurrenceData = (RecurrenceData) eventData.getRecurrenceId();
             } else {
-                recurrenceData = RdbEventStorage.selectRecurrenceData(connection, contextID, asInt(eventData.getSeriesId()), false);
+                recurrenceData = RdbEventStorage.selectRecurrenceData(entityResolver, connection, contextID, asInt(eventData.getSeriesId()), false);
             }
             if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
                 // TODO really required to also store series pattern for exceptions?

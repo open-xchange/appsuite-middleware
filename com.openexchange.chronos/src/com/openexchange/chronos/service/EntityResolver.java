@@ -197,6 +197,15 @@ public interface EntityResolver {
     Attendee applyEntityData(Attendee attendee, AttendeeField... fields) throws OXException;
 
     /**
+     * Applies specific properties for the supplied calendar user based on the underlying groupware object.
+     *
+     * @param calendarUser The calendar user to apply the static entity data for
+     * @param cuType The corresponding calendar user type
+     * @return The passed calendar user reference, enriched by the resolved static entity data
+     */
+    <T extends CalendarUser> T applyEntityData(T calendarUser, CalendarUserType cuType) throws OXException;
+
+    /**
      * Prefetches information about the underlying groupware objects that are targeted by the supplied list of attendees.
      *
      * @param attendees The attendees to prefetch information for
