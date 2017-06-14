@@ -1357,7 +1357,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         String fullName = argument.getFullname();
 
-        MailMessage message = mailAccess.getMessageStorage().getMessage(folder, fullName, false);
+        MailMessage message = mailAccess.getMessageStorage().getMessage(fullName, msgUID, false);
         if (null == message) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(msgUID, fullName);
         }
