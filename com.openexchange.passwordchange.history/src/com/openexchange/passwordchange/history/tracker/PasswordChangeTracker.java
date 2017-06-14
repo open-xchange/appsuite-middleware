@@ -52,7 +52,6 @@ package com.openexchange.passwordchange.history.tracker;
 import java.util.List;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
-import com.openexchange.session.Session;
 
 /**
  * {@link PasswordChangeTracker} - Defines the operations need to be done to for a password change history
@@ -65,26 +64,29 @@ public interface PasswordChangeTracker {
     /**
      * The current data stored in the database
      * 
-     * @param session The session to acquire the data for
+     * @param userID The ID of the user to list the password changes for
+     * @param contextID The context ID of the user
      * @return {@link List} of all available password change events (~ the history)
      */
-    List<PasswordChangeInfo> listPasswordChanges(Session session);
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID);
 
     /**
      * Adds a new set of information to the database
      * 
-     * @param session The session to get user and context from
+     * @param userID The ID of the user to track the password changes for
+     * @param contextID The context ID of the user
      * @param info The {@link PasswordChangeInfo} to be added
      */
-    void trackPasswordChange(Session session, PasswordChangeInfo info);
+    void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info);
 
     /**
      * Clears the PasswordChange informations for a specific user
      * 
-     * @param session To identify the user
+     * @param userID The ID of the user to clear recorded password changes for
+     * @param contextID The context ID of the user
      * @param limit The limit of entries to store in the DB. If current entries exceed the limitation the oldest
      *            entries get deleted. If set to <code>0</code> all entries will be deleted
      */
-    void clear(Session session, int limit);
+    void clear(int userID, int contextID, int limit);
 
 }

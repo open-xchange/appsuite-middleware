@@ -47,48 +47,26 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.exeption;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link PasswordChangeEventListener}
+ * {@link PasswordChangeHistoryException}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeEventListener implements EventHandler {
-
-    private static final String TOPIC = "com/openexchange/passwordchange";
+public class PasswordChangeHistoryException extends OXException {
 
     /**
-     * Initializes a new {@link PasswordChangeEventListener}.
+     * serialVersionUID
      */
-    public PasswordChangeEventListener() {
+    private static final long serialVersionUID = 3235785698701534991L;
+    public static final String MISSING_SERVICE = "Service is missing";
+
+    public PasswordChangeHistoryException(String message) {
         super();
-    }
-
-    /**
-     * Gets the topic of interest.
-     *
-     * @return The topic
-     */
-    public String getTopic() {
-        return TOPIC;
-    }
-
-    @Override
-    public void handleEvent(Event event) {
-        if (false == TOPIC.equals(event.getTopic())) {
-            return;
-        }
-        // Read values
-        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
-        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
-
-        // Process tracking
-        PasswordChangeUtility.callTracker(contextID, userID, ipAdderess, PasswordChangeInfo.APPSUITE);
+        this.setLogMessage(message);
     }
 }
