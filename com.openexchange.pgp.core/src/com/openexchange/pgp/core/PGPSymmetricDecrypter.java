@@ -92,10 +92,31 @@ public class PGPSymmetricDecrypter extends PGPDecrypter {
     /**
      * Initializes a new {@link PGPSymmetricDecrypter}.
      *
+     * @param key The symmetric key data to use for decryption
+     * @param strategy A custom strategy to retrieval public keys for signature verification
+     */
+    public PGPSymmetricDecrypter(final byte[] key, PGPKeyRetrievalStrategy strategy) {
+        super(strategy);
+        this.key = key;
+    }
+
+    /**
+     * Initializes a new {@link PGPSymmetricDecrypter}.
+     *
      * @param The symmetric key to use for decryption
      */
     public PGPSymmetricDecrypter(PGPSymmetricKey key) {
         this(key.getKeyData());
+    }
+
+    /**
+     * Initializes a new {@link PGPSymmetricDecrypter}.
+     *
+     * @param The symmetric key to use for decryption
+     * @param strategy A custom strategy to retrieval public keys for signature verification
+     */
+    public PGPSymmetricDecrypter(PGPSymmetricKey key, PGPKeyRetrievalStrategy strategy) {
+        this(key.getKeyData(), strategy);
     }
 
     /*

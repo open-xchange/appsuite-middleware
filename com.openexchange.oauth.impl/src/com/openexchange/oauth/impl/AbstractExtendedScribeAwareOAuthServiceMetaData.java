@@ -67,7 +67,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.DefaultAPI;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.OAuthConfigurationProperty;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthToken;
@@ -110,11 +109,6 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         this.registerTokenBasedDeferrer = registerTokenBasedDeferrer;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#getRegisterToken(java.lang.String)
-     */
     @Override
     public String getRegisterToken(String authUrl) {
         int pos = authUrl.indexOf("&state=");
@@ -126,13 +120,8 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return nextPos < 0 ? authUrl.substring(pos + 7) : authUrl.substring(pos + 7, nextPos);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#processAuthorizationURL(java.lang.String)
-     */
     @Override
-    public String processAuthorizationURL(String authUrl) {
+    public String processAuthorizationURL(String authUrl, final Session session) throws OXException {
         int pos = authUrl.indexOf("&redirect_uri=");
         if (pos <= 0) {
             return authUrl;
@@ -144,11 +133,11 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         {
             int nextPos = authUrl.indexOf('&', pos + 1);
             if (nextPos < 0) {
-                String redirectUri = trimRedirectUri(authUrl.substring(pos + 14));
+                String redirectUri = trimRedirectUri(authUrl.substring(pos + 14), session);
                 authUrlBuilder = new StringBuilder(authUrl.substring(0, pos)).append("&redirect_uri=").append(redirectUri);
             } else {
                 // There are more URL parameters
-                String redirectUri = trimRedirectUri(authUrl.substring(pos + 14, nextPos));
+                String redirectUri = trimRedirectUri(authUrl.substring(pos + 14, nextPos), session);
                 authUrlBuilder = new StringBuilder(authUrl.substring(0, pos)).append("&redirect_uri=").append(redirectUri).append(authUrl.substring(nextPos));
             }
         }
@@ -157,11 +146,6 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return authUrlBuilder.append("&state=").append("__ox").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#processArguments(java.util.Map, java.util.Map, java.util.Map)
-     */
     @Override
     public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) throws OXException {
         String pCode = org.scribe.model.OAuthConstants.CODE;
@@ -249,17 +233,16 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      *
      * @param redirectUri The redirect URI to trim
      * @return The trimmed redirect URI
+     * @throws OXException If redirect URI cannot be returned
      */
-    private String trimRedirectUri(String redirectUri) {
-        OAuthConfigurationProperty oAuthProperty = getOAuthProperty(OAuthPropertyID.redirectUrl);
-        if (oAuthProperty == null) {
+    private String trimRedirectUri(String redirectUri, Session session) throws OXException {
+        String actual = optFromConfigViewFactory(session, null, OAuthPropertyID.redirectUrl);
+        if (null == actual) {
             return redirectUri;
         }
-        String actual = oAuthProperty.getValue();
-        if (!stripProtocol(redirectUri).startsWith(stripProtocol(actual))) {
-            return redirectUri;
-        }
-        return actual;
+
+        boolean startsWith = stripProtocol(redirectUri).startsWith(stripProtocol(actual));
+        return startsWith ? actual : redirectUri;
     }
 
     /**

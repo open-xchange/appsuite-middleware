@@ -65,7 +65,6 @@ import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -82,6 +81,7 @@ import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 

@@ -47,72 +47,92 @@
  *
  */
 
-package com.openexchange.config.cascade.context;
+package com.openexchange.policy.retry;
 
-import java.util.Collection;
-import java.util.Collections;
-import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceLookup;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
- * {@link AbstractContextBasedConfigProvider}
+ * {@link ExponentialBackOffRetryPolicy}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractContextBasedConfigProvider implements ConfigProviderService {
+public class ExponentialBackOffRetryPolicy implements RetryPolicy {
 
-    /** The service look-up */
-    protected final ServiceLookup services;
+    private final int maxTries;
+    private int retryCount = 1;
+    private final Random random;
+    private double multiplier = 1.5;
+    private double randomFactor = 0.5;
+    private double interval = 0.5;
 
     /**
-     * Initializes a new {@link AbstractContextBasedConfigProvider}.
-     * @param contexts
+     * Initialises a new {@link ExponentialBackOffRetryPolicy} with a default amount of 10 retries
      */
-    protected AbstractContextBasedConfigProvider(ServiceLookup services) {
+    public ExponentialBackOffRetryPolicy() {
+        this(10);
+    }
+
+    /**
+     * Initialises a new {@link ExponentialBackOffRetryPolicy}.
+     * 
+     * @param maxTries The amount of maximum retries
+     */
+    public ExponentialBackOffRetryPolicy(int maxTries) {
         super();
-        this.services = services;
+        this.maxTries = maxTries;
+        random = new Random(System.nanoTime());
+        randomFactor = random.nextDouble();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
+     */
     @Override
-    public BasicProperty get(String property, int contextId, int userId) throws OXException {
-        if (contextId == NO_CONTEXT) {
-            return NO_PROPERTY;
-        }
-        return get(property, services.getService(ContextService.class).getContext(contextId), userId);
+    public int getMaxTries() {
+        return maxTries;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
+     */
     @Override
-    public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
-        if (contextId == NO_CONTEXT) {
-            return Collections.emptyList();
+    public int retryCount() {
+        return retryCount;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
+     */
+    @Override
+    public boolean isRetryAllowed() {
+        if (retryCount++ <= maxTries) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(getSleepTime());
+            } catch (InterruptedException e) {
+                return false;
+            }
+            return true;
         }
-        return getAllPropertyNamesFor(services.getService(ContextService.class).getContext(contextId), userId);
+        return false;
     }
 
     /**
-     * Gets all available property names
-     *
-     * @param context The associated context
-     * @param optUser The optional user or <code>null</code> (if not specified)
-     * @return All available property names
-     * @throws OXException If property names cannot be returned
+     * Returns the sleep time in milliseconds
+     * 
+     * @return the sleep time in milliseconds
      */
-    protected abstract Collection<String> getAllPropertyNamesFor(Context context, int userId) throws OXException;
-
-    /**
-     * Gets the denoted property
-     *
-     * @param property The property name
-     * @param context The associated context
-     * @param user The identifier for the associated user
-     * @return The property
-     * @throws OXException If property cannot be returned
-     */
-    protected abstract BasicProperty get(String property, Context context, int user) throws OXException;
-
+    private long getSleepTime() {
+        double max = interval * multiplier;
+        double min = max - interval;
+        interval = interval * multiplier;
+        double factor = (randomFactor * (max - min)) * 1000;
+        return (long) factor;
+    }
 }

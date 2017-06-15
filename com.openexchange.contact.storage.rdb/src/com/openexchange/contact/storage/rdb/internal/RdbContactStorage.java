@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.Connection;
@@ -80,8 +81,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.java.Streams;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.search.SearchTerm;
@@ -1055,14 +1058,14 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
 
             final ContactConfig conf = ContactConfig.getInstance();
-            final boolean scale_images = conf.getBoolean(ContactConfig.Property.SCALE_IMAGES);
+            final boolean scale_images = conf.getBoolean(ContactConfig.Property.SCALE_IMAGES).booleanValue();
             if (!scale_images) {
                 return;
             }
-            final int image_width = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_WIDTH));
-            final int image_height = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_HEIGHT));
+            final int image_width = Integer.parseInt(conf.getString(ContactConfig.Property.SCALED_IMAGE_WIDTH));
+            final int image_height = Integer.parseInt(conf.getString(ContactConfig.Property.SCALED_IMAGE_HEIGHT));
             int typeNumber;
-            typeNumber = Integer.valueOf(conf.getString(ContactConfig.Property.SCALE_TYPE));
+            typeNumber = Integer.parseInt(conf.getString(ContactConfig.Property.SCALE_TYPE));
             ScaleType type = ScaleType.CONTAIN;
             switch (typeNumber) {
                 case 1:
@@ -1084,12 +1087,22 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             byte[] transformedImage;
             {
                 ImageTransformationService transformationService = RdbServiceLookup.getService(ImageTransformationService.class, true);
-                BufferedImage originalImage = transformationService.transfom(imageBytes).getImage();
-                if (null == originalImage || originalImage.getWidth() <= image_width && originalImage.getHeight() <= image_height) {
-                    return;
-                }
                 String formatName = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
-                transformedImage = transformationService.transfom(originalImage)
+
+                ImageMetadataService imageMetadataService = RdbServiceLookup.optService(ImageMetadataService.class);
+                if (null == imageMetadataService) {
+                    BufferedImage originalImage = transformationService.transfom(imageBytes).getImage();
+                    if (null == originalImage || originalImage.getWidth() <= image_width && originalImage.getHeight() <= image_height) {
+                        return;
+                    }
+                } else {
+                    Dimension dimension = imageMetadataService.getDimensionFor(Streams.newByteArrayInputStream(imageBytes), formatName, null);
+                    if (null != dimension && dimension.getWidth() <= image_width && dimension.getHeight() <= image_height) {
+                        return;
+                    }
+                }
+
+                transformedImage = transformationService.transfom(imageBytes)
                     .rotate()
                     .scale(image_width, image_height, type, true)
                     .getBytes(formatName)
@@ -1099,7 +1112,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 contact.setImage1(transformedImage);
             }
         } catch (OXException | IOException | NumberFormatException ex) {
-            LOG.error("Unable to resize contact image due to " + ex.getMessage());
+            LOG.error("Unable to resize contact image due to " + ex.getMessage(), ex);
         }
     }
 

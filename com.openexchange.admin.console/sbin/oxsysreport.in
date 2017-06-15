@@ -97,6 +97,7 @@ PROCS='
     dmesg;
     free;
     getmissingservices;
+    hostname -f;
     java -version;
     listbundles;
     listconfigdiff;

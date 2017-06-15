@@ -283,7 +283,7 @@ public class CSVContactExporter implements Exporter {
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }

@@ -65,7 +65,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -74,11 +73,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
-import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
@@ -134,27 +134,40 @@ public class GoogleApiClients {
 
         // Get default Google account
         OAuthAccount defaultAccount = oAuthService.getDefaultAccount(KnownApi.GOOGLE, session);
-
-        if (reacquireIfExpired) {
-            try {
-                // Create Scribe Google OAuth service
-                final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-                serviceBuilder.apiKey(defaultAccount.getMetaData().getAPIKey(session)).apiSecret(defaultAccount.getMetaData().getAPISecret(session));
-                Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
-
-                // Check expiry
-                int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
-                if (expiry < REFRESH_THRESHOLD) {
-                    // Less than 1 minute to live -> refresh token!
-                    ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                    defaultAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount), new ExponentialBackOffRetryPolicy());
-                }
-            } catch (org.scribe.exceptions.OAuthException e) {
-                throw handleScribeOAuthException(e, defaultAccount, session);
-            }
-        }
-
+        defaultAccount = reacquireIfExpired(session, reacquireIfExpired, defaultAccount);
         return defaultAccount;
+    }
+
+    /**
+     * Check if the OAuth token of the specified {@link OAuthAccount} was expired and re-acquire if necessary
+     * 
+     * @param session The groupware {@link Session}
+     * @param reacquireIfExpired perform the requisition check
+     * @param oauthAccount The {@link OAuthAccount}
+     * @return The {@link OAuthAccount} with the (renewed) token
+     * @throws OXException if an error is occurred
+     */
+    private static OAuthAccount reacquireIfExpired(final Session session, final boolean reacquireIfExpired, OAuthAccount oauthAccount) throws OXException {
+        if (!reacquireIfExpired) {
+            return oauthAccount;
+        }
+        try {
+            // Create Scribe Google OAuth service
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+            serviceBuilder.apiKey(oauthAccount.getMetaData().getAPIKey(session)).apiSecret(oauthAccount.getMetaData().getAPISecret(session));
+            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+
+            // Check expiry
+            int expiry = scribeOAuthService.getExpiry(oauthAccount.getToken());
+            if (expiry < REFRESH_THRESHOLD) {
+                // Less than 1 minute to live -> refresh token!
+                ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+                oauthAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, oauthAccount), new ExponentialBackOffRetryPolicy());
+            }
+        } catch (org.scribe.exceptions.OAuthException e) {
+            throw handleScribeOAuthException(e, oauthAccount, session);
+        }
+        return oauthAccount;
     }
 
     /**
@@ -191,24 +204,7 @@ public class GoogleApiClients {
         // Get default Google account
         OAuthAccount googleAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
 
-        if (reacquireIfExpired) {
-            try {
-                // Create Scribe Google OAuth service
-                final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-                serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-                Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
-
-                // Check expiry
-                int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-                if (expiry < REFRESH_THRESHOLD) {
-                    // Less than 1 minute to live -> refresh token!
-                    ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                    googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
-                }
-            } catch (org.scribe.exceptions.OAuthException e) {
-                throw handleScribeOAuthException(e, googleAccount, session);
-            }
-        }
+        googleAccount = reacquireIfExpired(session, reacquireIfExpired, googleAccount);
 
         return googleAccount;
     }
@@ -385,6 +381,8 @@ public class GoogleApiClients {
         try {
             // Initialize transport
             NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
+
+            googleOAuthAccount = reacquireIfExpired(session, true, googleOAuthAccount);
 
             // Build credentials
             return new GoogleCredential.Builder().setClientSecrets(googleOAuthAccount.getMetaData().getAPIKey(session), googleOAuthAccount.getMetaData().getAPISecret(session)).setJsonFactory(JSON_FACTORY).setTransport(transport).build().setRefreshToken(googleOAuthAccount.getSecret()).setAccessToken(googleOAuthAccount.getToken());

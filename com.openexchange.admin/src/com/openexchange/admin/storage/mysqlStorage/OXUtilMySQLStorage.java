@@ -49,13 +49,14 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -115,7 +116,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author d7
@@ -155,7 +155,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      */
     public OXUtilMySQLStorage() {
         super();
-        this.cache = ClientAdminThreadExtended.cache;;
+        this.cache = ClientAdminThreadExtended.cache;
+        ;
         prop = cache.getProperties();
         int use_unit_tmp = UNIT_CONTEXT;
         final String unit = prop.getProp("CREATE_CONTEXT_USE_UNIT", "context");
@@ -200,9 +201,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(ecp);
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                rollback(con);
             }
-            DBUtils.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
             if (con != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
@@ -241,20 +242,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con.commit();
             rollback = false;
         } catch (final DataTruncation dt) {
-            DBUtils.rollback(con);
+            rollback(con);
             rollback = false;
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
-            DBUtils.rollback(con);
+            rollback(con);
             rollback = false;
             LOG.error("SQL Error", sql);
             throw new StorageException(sql.toString(), sql);
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                rollback(con);
             }
-            DBUtils.autocommit(con);
+            autocommit(con);
             try {
                 cache.pushWriteConnectionForConfigDB(con);
             } catch (final PoolException e) {
@@ -407,7 +408,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
             prep.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(prep);
+            closeSQLStuff(prep);
         }
     }
 
@@ -651,7 +652,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     prep.setInt(3, userId);
                     prep.setInt(4, filestoreId);
                     changed = prep.executeUpdate() > 0;
-                    Databases.closeSQLStuff(prep);
+                    prep.close();
 
                     if (changed) {
                         prep = con.prepareStatement("SELECT 1 FROM filestore_usage WHERE cid=? AND user=?");
@@ -1071,7 +1072,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             return id;
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                rollback(con);
             }
         }
     }
@@ -1181,9 +1182,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(ecp);
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                rollback(con);
             }
-            DBUtils.closeSQLStuff(rs, prep);
+            closeSQLStuff(rs, prep);
             if (con != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
@@ -1233,9 +1234,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(ecp);
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                rollback(con);
             }
-            DBUtils.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
             if (con != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
@@ -1270,7 +1271,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
@@ -1307,6 +1308,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // Define candidate class
             class Candidate {
+
                 final int id;
                 final int maxNumberOfEntities;
                 final int numberOfEntities;
@@ -1386,7 +1388,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
@@ -1487,9 +1489,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(ecp);
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                rollback(con);
             }
-            DBUtils.closeSQLStuff(prep);
+            closeSQLStuff(prep);
             if (con != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
@@ -1642,7 +1644,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(con);
+            startTransaction(con);
             rollback = true;
 
             lock(con);
@@ -1931,6 +1933,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             class FidAndName {
+
                 final int filestoreId;
                 final String name;
 
@@ -1939,7 +1942,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     this.filestoreId = filestoreId;
                     this.name = name;
                 }
-            };
+            }
+            ;
 
             List<FidAndName> fids = new LinkedList<>();
             do {
@@ -2169,6 +2173,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         int taskCount = 0;
         for (final Collection<FilestoreContextBlock> dbBlock : dbMap.values()) {
             completionService.submit(new Callable<Void>() {
+
                 @Override
                 public Void call() throws Exception {
                     updateBlocksInSameDBWithFilestoreUsage(dbBlock);
@@ -2185,7 +2190,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         updateFilestoresWithUsageFromBlocks(stores, blocks);
 
         // We read bytes from the database but the RMI client wants to see mega bytes.
-        for (final Filestore store: stores){
+        for (final Filestore store : stores) {
             store.setSize(L(toMB(l(store.getSize()))));
             store.setUsed(L(toMB(l(store.getUsed()))));
         }
@@ -2297,7 +2302,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
             }
         }
-
 
         return blocks.values();
     }
@@ -2421,7 +2425,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (null == numUsers) {
                 numUsers = I(0);
             }
-
 
             store.setUsed(Long.valueOf(usedBytesCtx.longValue() + usedBytesUsr.longValue()));
             store.setCurrentContexts(Integer.valueOf(numContexts.intValue() + numUsers.intValue()));
@@ -2663,7 +2666,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     // -------------------------------------------------------------------------------------------------------------------------
 
-   static String getSqlInString(Collection<Integer> col) {
+    static String getSqlInString(Collection<Integer> col) {
         if (col == null || col.isEmpty()) {
             return null;
         }
@@ -2726,7 +2729,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         try {
             configCon = cache.getWriteConnectionForConfigDB();
             final Database db;
-            DBUtils.startTransaction(configCon);
+            startTransaction(configCon);
             if (null == optDBId || i(optDBId) <= 0) {
                 db = getNextDBHandleByWeight(configCon);
             } else {
@@ -2751,7 +2754,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
     }
-
 
     @Override
     public Database getNextDBHandleByWeight(final Connection con) throws SQLException, StorageException {
@@ -2811,7 +2813,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 retval.add(db);
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            closeSQLStuff(rs, stmt);
         }
         for (final DatabaseHandle db : retval) {
             final int db_count = countUnits(db, con);
@@ -2896,8 +2898,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             return count;
         } finally {
-            DBUtils.closeSQLStuff(ps);
-            DBUtils.closeSQLStuff(ppool);
+            closeSQLStuff(ps);
+            closeSQLStuff(ppool);
         }
     }
 

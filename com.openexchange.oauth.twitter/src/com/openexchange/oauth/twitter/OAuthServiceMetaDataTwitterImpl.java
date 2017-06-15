@@ -61,6 +61,7 @@ import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataTwitterImpl}
@@ -93,7 +94,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
     }
 
     @Override
-    public String processAuthorizationURL(final String authUrl) {
+    public String processAuthorizationURL(final String authUrl, Session session) {
         return authUrl;
     }
 

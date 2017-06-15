@@ -201,11 +201,11 @@ public class ICalExporter implements Exporter {
 
     @Override
     public SizedInputStream exportData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        return exportData(session, format, folderID, 0, fieldsToBeExported, optionalParams);
+        return exportData(session, format, folderID, 0, fieldsToBeExported, optionalParams, null);
     }
 
     @Override
-    public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException {
         FolderObject folder = getFolder(session, folderID);
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));

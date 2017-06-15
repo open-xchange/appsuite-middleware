@@ -47,79 +47,34 @@
  *
  */
 
-package com.openexchange.dav.caldav.bugs;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.test.concurrent.ParallelSuite;
+package com.openexchange.policy.retry;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link RetryPolicy}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(ParallelSuite.class)
-@SuiteClasses({ // @formatter:off
-    Bug21794Test.class,
-    Bug22094Test.class,
-    Bug22352Test.class,
-    Bug22338Test.class,
-    Bug22395Test.class,
-    Bug22451Test.class,
-    Bug22723Test.class,
-    Bug23067Test.class,
-    Bug23167Test.class,
-    Bug23181Test.class,
-    Bug32897Test.class,
-    Bug23610Test.class,
-    Bug23612Test.class,
-    Bug24682Test.class,
-    Bug25783Test.class,
-    Bug25672Test.class,
-    Bug26957Test.class,
-    Bug27224Test.class,
-    Bug27309Test.class,
-    Bug28490Test.class,
-    Bug28734Test.class,
-    Bug29554Test.class,
-    Bug29728Test.class,
-    Bug25160Test.class,
-    Bug30359Test.class,
-    Bug31453Test.class,
-    Bug31490Test.class,
-    Bug36943Test.class,
-    Bug37112Test.class,
-    Bug37887Test.class,
-    Bug39098Test.class,
-    Bug39819Test.class,
-    Bug40298Test.class,
-    Bug40657Test.class,
-    Bug42104Test.class,
-    Bug43297Test.class,
-    Bug43376Test.class,
-    Bug43521Test.class,
-    Bug43782Test.class,
-    Bug44131Test.class,
-    Bug44144Test.class,
-    Bug44167Test.class,
-    Bug44309Test.class,
-    Bug44304Test.class,
-    Bug46811Test.class,
-    Bug47121Test.class,
-    Bug48856Test.class,
-    Bug44109Test.class,
-    Bug48917Test.class,
-    Bug48241Test.class,
-    Bug45028Test.class,
-    Bug48828Test.class,
-    Bug48242Test.class,
-    Bug51462Test.class,
-    Bug51768Test.class,
-    Bug52255Test.class,
-    Bug52095Test.class,
-    Bug53479Test.class,
-    Bug54192Test.class
-}) // @formatter:on
-public final class CalDAVBugSuite {
+public interface RetryPolicy {
 
+    /**
+     * Returns the maximum amount of allowed retries
+     * 
+     * @return the maximum amount of allowed retries
+     */
+    int getMaxTries();
+
+    /**
+     * Returns the amount of retries so far
+     * 
+     * @return the amount of retries so far
+     */
+    int retryCount();
+
+    /**
+     * Returns <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
+     * If this policy allows a retry, then the current retry count will be increased by one.
+     * 
+     * @return <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
+     */
+    boolean isRetryAllowed();
 }

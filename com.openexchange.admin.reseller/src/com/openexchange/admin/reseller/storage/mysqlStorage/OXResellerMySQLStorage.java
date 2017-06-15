@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.reseller.storage.mysqlStorage;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -83,7 +84,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author choeger
@@ -415,7 +415,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.close();
             return admin;
         } finally {
-            DBUtils.closeSQLStuff(rs, prep);
+            closeSQLStuff(rs, prep);
         }
     }
 
@@ -1764,7 +1764,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.executeUpdate();
             prep.close();
         } finally {
-            DBUtils.closeSQLStuff(prep);
+            closeSQLStuff(prep);
         }
     }
 
@@ -1777,7 +1777,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.executeUpdate();
             prep.close();
         } finally {
-            DBUtils.closeSQLStuff(prep);
+            closeSQLStuff(prep);
         }
     }
 

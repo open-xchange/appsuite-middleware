@@ -47,51 +47,52 @@
  *
  */
 
-package com.openexchange.cluster.lock.policies;
+package com.openexchange.java.delegate;
+
 
 /**
- * {@link RunOnceRetryPolicy}
+ * {@link DelegationException}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class RunOnceRetryPolicy implements RetryPolicy {
-    
-    private int retryCount = 0;
+public class DelegationException extends RuntimeException {
+
+    private static final long serialVersionUID = 5659167653266376586L;
 
     /**
-     * Initialises a new {@link RunOnceRetryPolicy}.
+     * Initializes a new {@link DelegationException}.
      */
-    public RunOnceRetryPolicy() {
+    public DelegationException() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
+    /**
+     * Initializes a new {@link DelegationException}.
+     *
+     * @param message The detail message
      */
-    @Override
-    public int getMaxTries() {
-        return 1;
+    public DelegationException(String message) {
+        super(message);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
+    /**
+     * Initializes a new {@link DelegationException}.
+     *
+     * @param cause The initial cause
      */
-    @Override
-    public int retryCount() {
-        return retryCount;
+    public DelegationException(Throwable cause) {
+        super(cause);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
+    /**
+     * Initializes a new {@link DelegationException}.
+     *
+     * @param message The detail message
+     * @param cause The initial cause
      */
-    @Override
-    public boolean isRetryAllowed() {
-        return false;
+    public DelegationException(String message, Throwable cause) {
+        super(message, cause);
     }
+
 }

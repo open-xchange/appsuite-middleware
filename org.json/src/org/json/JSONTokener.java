@@ -58,6 +58,15 @@ public class JSONTokener {
     }
 
     /**
+     * Gets this tokener's source string
+     *
+     * @return The source string
+     */
+    String getSource() {
+        return mySource;
+    }
+
+    /**
      * Back up one character. This provides a sort of lookahead capability,
      * so that you can test for a digit or letter before attempting to parse
      * the next number or identifier.

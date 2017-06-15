@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
@@ -347,7 +348,7 @@ public class FilenameReserverImpl implements FilenameReserver {
             stringBuilder.append(" OR name LIKE ?");
         }
         stringBuilder.append(");");
-        Map<String, DocumentMetadata> conflictingFilenames = new HashMap<String, DocumentMetadata>();
+        Map<String, DocumentMetadata> conflictingFilenames = new TreeMap<String, DocumentMetadata>(String.CASE_INSENSITIVE_ORDER);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {

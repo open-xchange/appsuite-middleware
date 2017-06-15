@@ -420,10 +420,10 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
             if (allocation.isTeam()) {
                 TeamSpaceAllocation teamValue = allocation.getTeamValue();
-                return new Quota(spaceUsage.getUsed(), individualValue.getAllocated() + teamValue.getAllocated(), Type.STORAGE);
+                return new Quota(individualValue.getAllocated() + teamValue.getAllocated(), spaceUsage.getUsed(), Type.STORAGE);
             }
 
-            return new Quota(spaceUsage.getUsed(), individualValue.getAllocated(), Type.STORAGE);
+            return new Quota(individualValue.getAllocated(), spaceUsage.getUsed(), Type.STORAGE);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         } catch (IllegalStateException e) {

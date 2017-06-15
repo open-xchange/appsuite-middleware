@@ -57,7 +57,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.SecureContentWrapper;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -69,6 +68,7 @@ import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

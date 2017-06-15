@@ -50,6 +50,7 @@
 package com.openexchange.quota.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.json.QuotaActionFactory;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
@@ -75,6 +76,8 @@ public final class QuotaJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        trackService(QuotaService.class);
+        openTrackers();
         registerModule(new QuotaActionFactory(new ExceptionOnAbsenceServiceLookup(this), context), "quota");
     }
 

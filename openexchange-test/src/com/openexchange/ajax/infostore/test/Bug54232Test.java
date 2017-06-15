@@ -47,79 +47,68 @@
  *
  */
 
-package com.openexchange.dav.caldav.bugs;
+package com.openexchange.ajax.infostore.test;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.test.concurrent.ParallelSuite;
+import org.junit.Test;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.junit.Assert;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link Bug54232Test}
+ *
+ * file names are case sensitive
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-@RunWith(ParallelSuite.class)
-@SuiteClasses({ // @formatter:off
-    Bug21794Test.class,
-    Bug22094Test.class,
-    Bug22352Test.class,
-    Bug22338Test.class,
-    Bug22395Test.class,
-    Bug22451Test.class,
-    Bug22723Test.class,
-    Bug23067Test.class,
-    Bug23167Test.class,
-    Bug23181Test.class,
-    Bug32897Test.class,
-    Bug23610Test.class,
-    Bug23612Test.class,
-    Bug24682Test.class,
-    Bug25783Test.class,
-    Bug25672Test.class,
-    Bug26957Test.class,
-    Bug27224Test.class,
-    Bug27309Test.class,
-    Bug28490Test.class,
-    Bug28734Test.class,
-    Bug29554Test.class,
-    Bug29728Test.class,
-    Bug25160Test.class,
-    Bug30359Test.class,
-    Bug31453Test.class,
-    Bug31490Test.class,
-    Bug36943Test.class,
-    Bug37112Test.class,
-    Bug37887Test.class,
-    Bug39098Test.class,
-    Bug39819Test.class,
-    Bug40298Test.class,
-    Bug40657Test.class,
-    Bug42104Test.class,
-    Bug43297Test.class,
-    Bug43376Test.class,
-    Bug43521Test.class,
-    Bug43782Test.class,
-    Bug44131Test.class,
-    Bug44144Test.class,
-    Bug44167Test.class,
-    Bug44309Test.class,
-    Bug44304Test.class,
-    Bug46811Test.class,
-    Bug47121Test.class,
-    Bug48856Test.class,
-    Bug44109Test.class,
-    Bug48917Test.class,
-    Bug48241Test.class,
-    Bug45028Test.class,
-    Bug48828Test.class,
-    Bug48242Test.class,
-    Bug51462Test.class,
-    Bug51768Test.class,
-    Bug52255Test.class,
-    Bug52095Test.class,
-    Bug53479Test.class,
-    Bug54192Test.class
-}) // @formatter:on
-public final class CalDAVBugSuite {
+public class Bug54232Test extends AbstractInfostoreTest {
+
+    /**
+     * Initializes a new {@link Bug54232Test}.
+     *
+     * @param name The test name
+     */
+    public Bug54232Test() {
+        super();
+    }
+
+    @Test
+    public void testCreateCaseConflictingFiles() throws Exception {
+        /*
+         * create first file
+         */
+        File file1 = itm.createFileOnServer(getClient().getValues().getPrivateInfostoreFolder(), "test.txt", "text/plain");
+        File reloadedFile1 = itm.getAction(file1.getId());
+        /*
+         * try to create another file with same name, ignoring case
+         */
+        File file2 = itm.createFileOnServer(getClient().getValues().getPrivateInfostoreFolder(), "Test.txt", "text/plain");
+        File reloadedFile2 = itm.getAction(file2.getId());
+        Assert.assertFalse(reloadedFile1.getFileName().equalsIgnoreCase(reloadedFile2.getFileName()));
+    }
+
+    @Test
+    public void testRenameCaseConflictingFiles() throws Exception {
+        /*
+         * create first file
+         */
+        File file1 = itm.createFileOnServer(getClient().getValues().getPrivateInfostoreFolder(), "test.txt", "text/plain");
+        File reloadedFile1 = itm.getAction(file1.getId());
+        /*
+         * create another file
+         */
+        File file2 = itm.createFileOnServer(getClient().getValues().getPrivateInfostoreFolder(), "test2.txt", "text/plain");
+        File reloadedFile2 = itm.getAction(file2.getId());
+        /*
+         * rename 2nd file to same name, ignoring case
+         */
+        DefaultFile file2Update = new DefaultFile();
+        file2Update.setId(reloadedFile2.getId());
+        file2Update.setFileName("Test.txt");
+        itm.updateAction(file2Update, new File.Field[] { File.Field.FILENAME }, reloadedFile2.getLastModified());
+        reloadedFile2 = itm.getAction(file2.getId());
+        Assert.assertFalse(reloadedFile1.getFileName().equalsIgnoreCase(reloadedFile2.getFileName()));
+    }
 
 }

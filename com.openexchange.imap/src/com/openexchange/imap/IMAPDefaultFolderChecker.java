@@ -581,7 +581,7 @@ public class IMAPDefaultFolderChecker {
         // Detect if spam option is enabled
         boolean isSpamOptionEnabled;
         {
-            UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+            UserSettingMail usm = UserSettingMailStorage.getInstance().loadUserSettingMail(session.getUserId(), ctx);
             isSpamOptionEnabled = usm.isSpamOptionEnabled();
         }
 

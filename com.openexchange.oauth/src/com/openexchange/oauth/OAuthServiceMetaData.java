@@ -91,41 +91,47 @@ public interface OAuthServiceMetaData {
     /**
      * Gets the API key that belongs to a given session
      *
-     * @param session
+     * @param session The session providing user information
      * @return The API key
-     * @throws OXException
+     * @throws OXException If API key cannot be returned
      */
     String getAPIKey(Session session) throws OXException;
 
     /**
      * Gets the API secret that belongs to a given session
      *
-     * @param session
+     * @param session The session providing user information
      * @return The API key
-     * @throws OXException
+     * @throws OXException If API secret cannot be returned
      */
     String getAPISecret(Session session) throws OXException;
 
     /**
      * Get the consumer key (upsell)
      *
-     * @return the consumer key
+     * @param session The session providing user information
+     * @return The consumer key
+     * @throws OXException If consumer key cannot be returned
      */
-    String getConsumerKey();
+    String getConsumerKey(Session session) throws OXException;
 
     /**
      * Get the consumer secret (upsell)
      *
-     * @return the consumer secret
+     * @param session The session providing user information
+     * @return The consumer secret
+     * @throws OXException If consumer secret cannot be returned
      */
-    String getConsumerSecret();
+    String getConsumerSecret(Session session) throws OXException;
 
     /**
      * Returns the product name of the registered OAuth application
      *
+     * @param session The session providing user information
      * @return the product name of the registered OAuth application
+     * @throws OXException If product name cannot be returned
      */
-    String getProductName();
+    String getProductName(Session session) throws OXException;
 
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.
@@ -138,9 +144,12 @@ public interface OAuthServiceMetaData {
     /**
      * Processes specified authorization URL.
      *
+     * @param authUrl The authorization URL
+     * @param session The session providing user information
      * @return The processed authorization URL
+     * @throws OXException If processing the authorization URL fails
      */
-    String processAuthorizationURL(String authUrl);
+    String processAuthorizationURL(String authUrl, Session session) throws OXException;
 
     /**
      * Processes specified authorization URL with respect to call-back.
