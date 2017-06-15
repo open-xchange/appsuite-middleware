@@ -132,6 +132,7 @@ public enum IMAPClientParameters {
             md.update((byte) session.hashCode());
             md.update((byte) session.getUserId());
             md.update((byte) session.getContextId());
+            md.update((byte) System.nanoTime());
 
             return asHex(md.digest(), 8);
         } catch (NoSuchAlgorithmException e) {
