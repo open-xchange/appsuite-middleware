@@ -49,6 +49,10 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RECURRENCE_MASTER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMEZONE;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
@@ -64,7 +68,6 @@ import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -97,9 +100,17 @@ public abstract class ChronosAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(requestData);
-        return perform(calendarAccess, requestData);
+        AJAXRequestResult result = perform(calendarAccess, requestData);
+        return result;
     }
 
+    /**
+     * Performs a request.
+     *
+     * @param calendarAccess The initialized calendar access to use
+     * @param requestData The underlying request data
+     * @return The request result
+     */
     protected abstract AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException;
 
     /**
@@ -176,20 +187,24 @@ public abstract class ChronosAction implements AJAXActionService {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameter);
         }
         try {
-            switch (parameter) {
-                case "rangeStart":
-                    return new AbstractMap.SimpleEntry<String, Date>(CalendarParameters.PARAMETER_RANGE_START, new Date(Long.parseLong(value)));
-                case "rangeEnd":
-                    return new AbstractMap.SimpleEntry<String, Date>(CalendarParameters.PARAMETER_RANGE_END, new Date(Long.parseLong(value)));
-                case "expand":
-                    return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(false == Boolean.parseBoolean(value)));
-                case "timezone":
-                    return new AbstractMap.SimpleEntry<String, TimeZone>(CalendarParameters.PARAMETER_TIMEZONE, TimeZoneUtils.getTimeZone(value));
-                default:
-                    throw new IllegalArgumentException("unknown paramter: " + parameter);
-            }
+            return parseParameter(parameter, value);
         } catch (IllegalArgumentException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, value);
+        }
+    }
+
+    private static Entry<String, ?> parseParameter(String parameter, String value) throws IllegalArgumentException {
+        switch (parameter) {
+            case "rangeStart":
+                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_START, new Date(Long.parseLong(value)));
+            case "rangeEnd":
+                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(Long.parseLong(value)));
+            case "expand":
+                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(false == Boolean.parseBoolean(value)));
+            case "timezone":
+                return new AbstractMap.SimpleEntry<String, TimeZone>(PARAMETER_TIMEZONE, TimeZoneUtils.getTimeZone(value));
+            default:
+                throw new IllegalArgumentException("unknown paramter: " + parameter);
         }
     }
 

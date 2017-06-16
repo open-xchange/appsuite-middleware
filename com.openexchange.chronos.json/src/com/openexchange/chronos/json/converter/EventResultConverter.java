@@ -116,7 +116,7 @@ public class EventResultConverter implements ResultConverter {
 
     private JSONObject convertEvent(Event event, String timeZoneID, ServerSession session) throws OXException {
         try {
-            return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getMappedFields(), timeZoneID);
+            return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
@@ -126,15 +126,11 @@ public class EventResultConverter implements ResultConverter {
         if (null == events) {
             return null;
         }
-        try {
-            JSONArray jsonArray = new JSONArray(events.size());
-            for (Event event : events) {
-                jsonArray.put(EventMapper.getInstance().serialize(event, EventMapper.getInstance().getMappedFields(), timeZoneID));
-            }
-            return jsonArray;
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        JSONArray jsonArray = new JSONArray(events.size());
+        for (Event event : events) {
+            jsonArray.put(convertEvent(event, timeZoneID, session));
         }
+        return jsonArray;
     }
 
 }

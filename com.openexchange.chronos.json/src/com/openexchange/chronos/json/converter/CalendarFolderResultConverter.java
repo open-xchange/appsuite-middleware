@@ -153,6 +153,7 @@ public class CalendarFolderResultConverter implements ResultConverter {
             value += timeZone.getOffset(value);
             jsonObject.put("lastModified", value);
         }
+
         return jsonObject;
     }
 

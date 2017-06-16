@@ -56,9 +56,13 @@ import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -116,6 +120,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         return INSTANCE;
     }
 
+
     /**
      * Initializes a new {@link EventMapper}.
      */
@@ -126,6 +131,24 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
     public EventField[] getMappedFields() {
         return mappedFields;
+    }
+
+    public EventField[] getAssignedFields(Event event, EventField... mandatoryFields) {
+        if (null == event) {
+            throw new IllegalArgumentException("event");
+        }
+        Set<EventField> setFields = new HashSet<EventField>();
+        for (Entry<EventField, ? extends JsonMapping<? extends Object, Event>> entry : getMappings().entrySet()) {
+            JsonMapping<? extends Object, Event> mapping = entry.getValue();
+            if (mapping.isSet(event)) {
+                EventField field = entry.getKey();
+                setFields.add(field);
+            }
+        }
+        if (null != mandatoryFields) {
+            setFields.addAll(Arrays.asList(mandatoryFields));
+        }
+        return setFields.toArray(newArray(setFields.size()));
     }
 
     @Override
