@@ -80,6 +80,7 @@ import com.openexchange.oauth.impl.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.impl.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.impl.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.impl.internal.OAuthServiceImpl;
+import com.openexchange.oauth.impl.internal.ReauthorizeListenerRegistry;
 import com.openexchange.oauth.impl.scope.impl.OAuthScopeRegistryImpl;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
@@ -129,6 +130,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
             DeleteListenerRegistry.initInstance();
             InvalidationListenerRegistry.initInstance();
+            ReauthorizeListenerRegistry.initInstance();
             /*
              * Collect OAuth services
              */
@@ -253,6 +255,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
+            ReauthorizeListenerRegistry.releaseInstance();
             Services.setServiceLookup(null);
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.oauth\" failed.", e);
