@@ -115,7 +115,10 @@ public abstract class DefaultDbMultiMapping<T, O> extends DefaultMapping<T, O> i
 
     @Override
     public void set(ResultSet resultSet, O object, String[] columnLabels) throws SQLException, OXException {
-        set(object, get(resultSet, columnLabels));
+        T value = get(resultSet, columnLabels);
+        if (null != value) {
+            set(object, value);
+        }
     }
 
     @Override
