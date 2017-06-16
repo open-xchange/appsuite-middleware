@@ -79,8 +79,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
     private static final int TARGET = 2;
 
-    private static final int[] COMPARISON_COLUMNS = {
-        Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
+    private static final int[] COMPARISON_COLUMNS = { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
 
     @Override
     public int calculateSimilarityScore(final CalendarDataObject original, final CalendarDataObject candidate, final Object session) throws OXException {
@@ -182,9 +181,9 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         try {
             calendarSql.deleteAppointmentsInFolder(target.getFolderIdAsInt());
         } catch (SQLException e) {
-
+            // At least log in debug level
+            LOG.debug("{}", e.getMessage(), e);
         }
-
 
         return userInfo;
     }
@@ -202,14 +201,14 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         calendarSql.updateAppointmentObject(update, original.getParentFolderID(), original.getLastModified());
     }
 
-    private void addPrefixToUID (final CalendarDataObject cdo){
-                cdo.setUid(getPrefixForUID(cdo) + cdo.getUid());
+    private void addPrefixToUID(final CalendarDataObject cdo) {
+        cdo.setUid(getPrefixForUID(cdo) + cdo.getUid());
     }
 
-    private String getPrefixForUID (final CalendarDataObject cdo){
-        if (null != cdo.getUid()){
-            if (! cdo.getUid().equals("")){
-                    return Integer.toString(cdo.getContextID() + cdo.getParentFolderID());
+    private String getPrefixForUID(final CalendarDataObject cdo) {
+        if (null != cdo.getUid()) {
+            if (!cdo.getUid().equals("")) {
+                return Integer.toString(cdo.getContextID() + cdo.getParentFolderID());
             }
         }
         return "";

@@ -49,12 +49,12 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,7 +86,6 @@ import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
-import com.openexchange.tools.sql.DBUtils;
 
 public class OXContextMySQLStorageCommon {
 
@@ -107,7 +106,7 @@ public class OXContextMySQLStorageCommon {
 
     // TODO: The average size parameter can be removed if we have an new property handler which can
     // deal right with plugin properties
-    public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException, StorageException  {
+    public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException, StorageException {
         Connection oxdb_read = null;
         PreparedStatement prep = null;
         final int context_id = ctx.getId();
@@ -157,7 +156,7 @@ public class OXContextMySQLStorageCommon {
                 // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
                 // SEE #11094 FOR DETAILS!
                 final String login_mapping = rs.getString(10);
-                if(!ctx.getIdAsString().equals(login_mapping)){
+                if (!ctx.getIdAsString().equals(login_mapping)) {
                     cs.addLoginMapping(login_mapping);
                 }
             }
@@ -167,7 +166,7 @@ public class OXContextMySQLStorageCommon {
                 // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
                 // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
                 // SEE #11094 FOR DETAILS!
-                if(!ctx.getIdAsString().equals(login_mapping)){
+                if (!ctx.getIdAsString().equals(login_mapping)) {
                     cs.addLoginMapping(login_mapping);
                 }
             }
@@ -214,23 +213,23 @@ public class OXContextMySQLStorageCommon {
     /**
      * Parses a dynamic attribute from the contextAttribute table
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
+     * 
      * @throws StorageException
      */
     public static String[] parseDynamicAttribute(final String name) throws StorageException {
         final int pos = name.indexOf('/');
-        if(pos == -1) {
-            throw new StorageException("Could not parse dynamic attribute name: "+name);
+        if (pos == -1) {
+            throw new StorageException("Could not parse dynamic attribute name: " + name);
         }
         final String[] parsed = new String[2];
         parsed[0] = name.substring(0, pos);
-        parsed[1] = name.substring(pos+1);
+        parsed[1] = name.substring(pos + 1);
         return parsed;
     }
 
     public static boolean isDynamicAttribute(final String name) {
         return name.indexOf('/') >= 0;
     }
-
 
     private void loadDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException, PoolException, StorageException {
         ResultSet rs = null;
@@ -261,8 +260,8 @@ public class OXContextMySQLStorageCommon {
             throw new StorageException(e.getMessage(), e);
         }
         DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache, failOnMissing));
-        if( null != filters && !filters.isEmpty()) {
-            for(final Filter<Context, Context> f : filters) {
+        if (null != filters && !filters.isEmpty()) {
+            for (final Filter<Context, Context> f : filters) {
                 output = output.addFilter(f);
             }
         }
@@ -304,12 +303,13 @@ public class OXContextMySQLStorageCommon {
         } finally {
             closeSQLStuff(group_stmt);
         }
-        
+
     }
 
     /**
      * Checks if there are any context referencing the given schema on the given database. If this is not the case, then the database will
      * be deleted.
+     * 
      * @param poolId should be the pool identifier of the master database server of a database cluster.
      * @param dbSchema the name of the database schema that should be checked for deletion.
      * @throws StorageException if somehow the check and delete process fails.
@@ -375,11 +375,13 @@ public class OXContextMySQLStorageCommon {
             final String dbSchema = pool.getSchemaName(contextId);
             pool.deleteAssignment(con, contextId);
             deleteEmptySchema(con, poolId, dbSchema, cache);
+
             log.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
+
             log.debug("Deleting context entry for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
@@ -437,14 +439,17 @@ public class OXContextMySQLStorageCommon {
         try {
             final int serverId = cache.getServerId();
             cache.getPool().writeAssignment(con, new AssignmentInsertData() {
+
                 @Override
                 public int getContextId() {
                     return i(ctx.getId());
                 }
+
                 @Override
                 public int getServerId() {
                     return serverId;
                 }
+
                 @Override
                 public int getReadPoolId() {
                     Integer readId = db.getRead_id();
@@ -454,10 +459,12 @@ public class OXContextMySQLStorageCommon {
                     }
                     return i(readId);
                 }
+
                 @Override
                 public int getWritePoolId() {
                     return i(db.getId());
                 }
+
                 @Override
                 public String getSchema() {
                     return db.getScheme();
@@ -553,7 +560,7 @@ public class OXContextMySQLStorageCommon {
             }
         }
         // check for the gid number feature
-        if ("sequence_gid_number".equals(tableName)){
+        if ("sequence_gid_number".equals(tableName)) {
             final int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
             if (startnum > 0) {
                 // we use the gid number feature
@@ -627,7 +634,7 @@ public class OXContextMySQLStorageCommon {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.", e);
+                throw new StorageException("Cannot map '" + mapping + "' to the newly created context. This mapping is already in use.", e);
             }
             log.error("SQL Error", e);
             throw e;

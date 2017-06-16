@@ -50,6 +50,7 @@
 package com.openexchange.importexport.exporters;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.formats.Format;
@@ -99,9 +100,10 @@ public interface Exporter {
 	 * @param objectId: Id of an entry in that folder that is to be exported.
 	 * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+	 * @param batchIds: Ids of multiple entries in different folders
 	 * @return InputStream in requested format.
 	 * @throws OXException
 	 */
-	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException;
 
 }

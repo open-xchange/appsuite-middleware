@@ -86,9 +86,9 @@ public final class IMAPStoreCache {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
 
-    private static final int SHRINKER_MILLIS = (MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000;
+    private static int SHRINKER_MILLIS = (MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000;
 
-    protected static final int IDLE_MILLIS = MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000;
+    protected static int IDLE_MILLIS = MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000;
 
     private static volatile IMAPStoreCache instance;
 
@@ -127,13 +127,17 @@ public final class IMAPStoreCache {
 
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
-               shutDownInstance();
-               initInstance();
+                shutDownInstance();
+
+                SHRINKER_MILLIS = configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3) * 1000;
+                IDLE_MILLIS = configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4) * 1000;
+
+                initInstance();
             }
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.checkConnected", "com.openexchange.imap.storeContainerType", "com.openexchange.imap.maxNumConnections");
+                return Reloadables.interestsForProperties("com.openexchange.imap.checkConnected", "com.openexchange.imap.storeContainerType", "com.openexchange.imap.maxNumConnections", "com.openexchange.mail.mailAccessCacheShrinkerSeconds", "com.openexchange.mail.mailAccessCacheIdleSeconds");
             }
         });
     }
@@ -203,6 +207,7 @@ public final class IMAPStoreCache {
 
     /**
      * Initializes a new {@link IMAPStoreCache}.
+     * 
      * @param container
      */
     private IMAPStoreCache(final boolean checkConnected, final Container container) {
@@ -227,8 +232,7 @@ public final class IMAPStoreCache {
     private void init() {
         final TimerService timer = Services.getService(TimerService.class);
         final Runnable task = new CloseElapsedRunnable(this);
-        final int shrinkerMillis = SHRINKER_MILLIS;
-        timerTask = timer.scheduleWithFixedDelay(task, shrinkerMillis, shrinkerMillis);
+        timerTask = timer.scheduleWithFixedDelay(task, SHRINKER_MILLIS, SHRINKER_MILLIS);
     }
 
     private void shutDown() {
@@ -331,14 +335,14 @@ public final class IMAPStoreCache {
 
     private IMAPStoreContainer newContainer(String server, int port, int accountId, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
         switch (containerType) {
-        case UNBOUNDED:
-            return new UnboundedIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
-        case BOUNDARY_AWARE:
-            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
-        case NON_CACHING:
-            return new NonCachingIMAPStoreContainer(accountId, session, server, port, propagateClientIp);
-        default:
-            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
+            case UNBOUNDED:
+                return new UnboundedIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
+            case BOUNDARY_AWARE:
+                return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
+            case NON_CACHING:
+                return new NonCachingIMAPStoreContainer(accountId, session, server, port, propagateClientIp);
+            default:
+                return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         }
     }
 
@@ -549,5 +553,4 @@ public final class IMAPStoreCache {
             return true;
         }
     }
-
 }

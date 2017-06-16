@@ -75,6 +75,9 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
     /** The special locale for <code>"en"</code> language */
     private final Locale en_Locale;
 
+    /** The special locale for <code>"ja"</code> language */
+    private final Locale ja_Locale;
+
     /**
      * Initializes a new {@link I18nServiceRegistryImpl}.
      */
@@ -82,6 +85,7 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
         super();
         services = new ConcurrentHashMap<Locale, I18nService>(32, 0.9F, 1);
         en_Locale = new Locale("en");
+        ja_Locale = new Locale("ja");
     }
 
     /**
@@ -147,6 +151,8 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
          */
         if (en_Locale.getLanguage().equals(language)) {
             return services.get(DEFAULT_LOCALE);
+        } else if (ja_Locale.getLanguage().equals(language)) {
+            return services.get(Locale.JAPAN);
         }
 
         // Guess best fit...

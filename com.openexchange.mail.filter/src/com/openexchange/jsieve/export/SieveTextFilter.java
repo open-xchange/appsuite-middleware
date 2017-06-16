@@ -704,6 +704,16 @@ public final class SieveTextFilter {
         return false;
     }
 
+    /**
+     * Writes the {@link Rule}s as a multi-line {@link String}. The non commented and commented outputs contain
+     * all correctly parsed sieve scripts. The rules {@link List} contains all the {@link Rule}s (also the ones
+     * with syntax errors).
+     * 
+     * @param nonCommentedOutput The non commented rules
+     * @param commentedOutput The commented rules
+     * @param rules All the rules
+     * @return A {@link List} with all {@link Rule}s as string objects
+     */
     private List<String> interweaving(final List<OwnType> nonCommentedOutput, final List<OwnType> commentedOutput, final List<Rule> rules) {
         final List<String> retval = new ArrayList<String>();
         retval.add(FIRST_LINE + (new Date()).toString());
@@ -733,12 +743,22 @@ public final class SieveTextFilter {
 
         for (final Rule rule : rules) {
             final RuleComment ruleComment = rule.getRuleComment();
-            final String text = rule.getText();
+            String text = rule.getText();
             if (null != text) {
                 final int line = ruleComment.getLine();
                 final int size = retval.size();
                 if (line > size) {
                     fillup(retval, line - size);
+                }
+
+                // Retain the commented state
+                if (rule.isCommented()) {
+                    String[] split = text.split(CRLF);
+                    StringBuilder sb = new StringBuilder();
+                    for (String s : split) {
+                        sb.append(COMMENT_TAG).append(s).append(CRLF);
+                    }
+                    text = sb.toString();
                 }
                 final ArrayList<String> stringToList = stringToList(text);
                 removeEmptyLines(retval, line, stringToList.size());

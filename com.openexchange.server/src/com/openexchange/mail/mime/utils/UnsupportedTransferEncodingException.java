@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,42 @@
  *
  */
 
-package com.openexchange.cluster.lock.policies;
+package com.openexchange.mail.mime.utils;
+
+import java.io.IOException;
 
 /**
- * {@link RetryPolicy}
+ * The Transfer Encoding is not supported.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface RetryPolicy {
+public class UnsupportedTransferEncodingException extends IOException {
+
+    private static final long serialVersionUID = 597922586356765695L;
 
     /**
-     * Returns the maximum amount of allowed retries
-     * 
-     * @return the maximum amount of allowed retries
+     * Constructs an UnsupportedTransferEncodingException without a detail message.
      */
-    int getMaxTries();
+    public UnsupportedTransferEncodingException() {
+        super();
+    }
 
     /**
-     * Returns the amount of retries so far
-     * 
-     * @return the amount of retries so far
+     * Constructs an UnsupportedTransferEncodingException with a detail message.
+     * @param s Describes the reason for the exception.
      */
-    int retryCount();
+    public UnsupportedTransferEncodingException(String s) {
+        super(s);
+    }
 
     /**
-     * Returns <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
-     * If this policy allows a retry, then the current retry count will be increased by one.
-     * 
-     * @return <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
+     * Constructs an UnsupportedTransferEncodingException with a detail message and a cause.
+     *
+     * @param s Describes the reason for the exception.
+     * @param cause The initial cause
      */
-    boolean isRetryAllowed();
+    public UnsupportedTransferEncodingException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

@@ -413,6 +413,7 @@ public final class OXFolderUtility {
                         warnings.add(OXFolderExceptionCode.CREATOR_STAYS_ADMIN.create(Integer.valueOf(creator), Integer.valueOf(folderObj.getObjectID())));
                     }
                     oclPerm.setFolderAdmin(true);
+                    adminEntities.add(oclPerm.getEntity());
                     found = true;
                 }
             }

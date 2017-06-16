@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cluster.lock.policies;
+package com.openexchange.policy.retry;
 
 /**
  * {@link RunOnceRetryPolicy}

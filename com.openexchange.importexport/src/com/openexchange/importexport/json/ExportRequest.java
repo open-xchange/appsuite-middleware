@@ -49,9 +49,10 @@
 
 package com.openexchange.importexport.json;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Map;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -64,14 +65,40 @@ public class ExportRequest {
 	private AJAXRequestData request;
 	private String folder;
 	private List<Integer> columns;
+	private Map<String, List<String>> batchIds;
 
 	public ExportRequest(AJAXRequestData request, ServerSession session) throws OXException {
 		this.setSession(session);
 		this.setRequest(request);
 
-		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
-			throw ImportExportExceptionCodes.NEED_FOLDER.create();
-		}
+		String vcardStr = request.getParameter(AJAXServlet.PARAMETER_VCARD_EXPORT);
+        if(vcardStr != null && vcardStr.length() > 0) {            
+            String[] split = vcardStr.split(",");
+            batchIds = new HashMap<String, List<String>>();
+            for(String s: split){
+                try {
+                    String[] nextSplit = s.split("\\.");
+                    String key = nextSplit[0];
+                    String valueEntry = nextSplit[1];
+                    if(!batchIds.containsKey(nextSplit[0])){
+                        List<String> valueList = new LinkedList<String>();
+                        valueList.add(valueEntry);
+                        batchIds.put(key, valueList);
+                    } else{
+                        List<String> list = batchIds.get(key);
+                        list.add(valueEntry);
+                        batchIds.put(key, list);
+                    }          
+                }catch (IndexOutOfBoundsException e){
+                    throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create();
+                }
+            }
+        } else {
+            if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
+                throw ImportExportExceptionCodes.NEED_FOLDER.create();
+            }
+        }
+		
 		String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
 		if(colStr != null){
 			String[] split = colStr.split(",");
@@ -85,10 +112,17 @@ public class ExportRequest {
 			}
 		}
 		this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-
 	}
+    
+    public Map<String, List<String>> getBatchIds() {
+        return batchIds;
+    }
+    
+    public void setBatchIds(Map<String, List<String>> batchIds) {
+        this.batchIds = batchIds;
+    }
 
-	public String getFolder() {
+    public String getFolder() {
 		return folder;
 	}
 
@@ -118,5 +152,10 @@ public class ExportRequest {
 
 	public void setColumns(List<Integer> columns) {
 		this.columns = columns;
+	}
+	
+	public String getObjectId() {
+	    final String contactID = request.getParameter(AJAXServlet.PARAMETER_ID);
+	    return contactID;
 	}
 }

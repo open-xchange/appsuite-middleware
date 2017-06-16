@@ -136,7 +136,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         public int compare(ImageTransformation t1, ImageTransformation t2) {
             boolean isRotate1 = t1 == RotateTransformation.getInstance();
             boolean isRotate2 = t2 == RotateTransformation.getInstance();
-            return isRotate1 ? (isRotate2 ? 0 : 1) : (isRotate2 ? -1 : 0);
+            return isRotate1 ? (isRotate2 ? 0 : -1) : (isRotate2 ? 1 : 0);
         }
     };
 

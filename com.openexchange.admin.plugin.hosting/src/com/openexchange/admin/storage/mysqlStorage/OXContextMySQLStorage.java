@@ -49,12 +49,12 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -274,7 +274,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
 
                     // Start transaction on ConfigDB
-                    DBUtils.startTransaction(conForConfigDB);
+                    Databases.startTransaction(conForConfigDB);
                     rollbackConfigDB = true;
 
                     // Execute to delete context on Configdb AND to drop associated database if this context is the last one
@@ -304,7 +304,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     if (rollbackConfigDB) {
                         rollback(conForConfigDB);
                     }
-                    DBUtils.autocommit(conForConfigDB);
+                    autocommit(conForConfigDB);
                     if (null != conForConfigDB) {
                         try {
                             adminCache.pushWriteConnectionForConfigDB(conForConfigDB);
@@ -1295,7 +1295,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 boolean rollback = false;
                 try {
                     oxCon = cache.getConnectionForContext(contextId);
-                    DBUtils.startTransaction(oxCon);
+                    Databases.startTransaction(oxCon);
                     rollback = true;
 
                     if (lockOnWriteContextToPayloadDb) {

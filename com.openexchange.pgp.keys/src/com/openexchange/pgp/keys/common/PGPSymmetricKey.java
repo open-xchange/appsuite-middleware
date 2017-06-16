@@ -47,92 +47,62 @@
  *
  */
 
-package com.openexchange.cluster.lock.policies;
+package com.openexchange.pgp.keys.common;
 
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
+import com.openexchange.tools.encoding.Base64;
 
 /**
- * {@link ExponentialBackOffRetryPolicy}
+ * {@link PGPSymmetricKey} represents a symmetric PGP session key
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.0
  */
-public class ExponentialBackOffRetryPolicy implements RetryPolicy {
+public class PGPSymmetricKey implements AutoCloseable{
 
-    private final int maxTries;
-    private int retryCount = 1;
-    private final Random random;
-    private double multiplier = 1.5;
-    private double randomFactor = 0.5;
-    private double interval = 0.5;
+    private byte[] keyData;
 
     /**
-     * Initialises a new {@link ExponentialBackOffRetryPolicy} with a default amount of 10 retries
+     * Initializes a new {@link PGPSymmetricKey}.
+     *
+     * @param value The symmetric key value
      */
-    public ExponentialBackOffRetryPolicy() {
-        this(10);
+    private PGPSymmetricKey(byte[] keyData) {
+        this.keyData = keyData;
     }
 
     /**
-     * Initialises a new {@link ExponentialBackOffRetryPolicy}.
-     * 
-     * @param maxTries The amount of maximum retries
+     * Creates a new {@link PGPSymmetricKey} from base64 encoded data
+     *
+     * @param base64 the encoded data
+     * @return A new {@link PGPSymmetricKey}
      */
-    public ExponentialBackOffRetryPolicy(int maxTries) {
-        super();
-        this.maxTries = maxTries;
-        random = new Random(System.nanoTime());
-        randomFactor = random.nextDouble();
+    public static PGPSymmetricKey fromBase64(String base64) {
+        return new PGPSymmetricKey(Base64.decode(base64));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
+    /**
+     * Gets the raw symmetric key data.
+     *
+     * @return The raw symmetric key data
      */
-    @Override
-    public int getMaxTries() {
-        return maxTries;
+    public byte[] getKeyData() {
+        return this.keyData;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
+    /**
+     * Wipes the key data from memory
      */
-    @Override
-    public int retryCount() {
-        return retryCount;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
-     */
-    @Override
-    public boolean isRetryAllowed() {
-        if (retryCount++ <= maxTries) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(getSleepTime());
-            } catch (InterruptedException e) {
-                return false;
-            }
-            return true;
+    public void wipe() {
+        for (int i = 0; i < keyData.length; i++) {
+            keyData[i] = 0x0;
         }
-        return false;
     }
 
-    /**
-     * Returns the sleep time in milliseconds
-     * 
-     * @return the sleep time in milliseconds
+    /* (non-Javadoc)
+     * @see java.lang.AutoCloseable#close()
      */
-    private long getSleepTime() {
-        double max = interval * multiplier;
-        double min = max - interval;
-        interval = interval * multiplier;
-        double factor = (randomFactor * (max - min)) * 1000;
-        return (long) factor;
+    @Override
+    public void close() throws Exception {
+        wipe();
     }
 }

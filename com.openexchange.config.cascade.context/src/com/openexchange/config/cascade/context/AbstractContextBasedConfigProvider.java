@@ -91,16 +91,18 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         if (contextId == NO_CONTEXT) {
             return Collections.emptyList();
         }
-        return getAllPropertyNames(services.getService(ContextService.class).getContext(contextId));
+        return getAllPropertyNamesFor(services.getService(ContextService.class).getContext(contextId), userId);
     }
 
     /**
      * Gets all available property names
      *
      * @param context The associated context
+     * @param optUser The optional user or <code>null</code> (if not specified)
      * @return All available property names
+     * @throws OXException If property names cannot be returned
      */
-    protected abstract Collection<String> getAllPropertyNames(Context context);
+    protected abstract Collection<String> getAllPropertyNamesFor(Context context, int userId) throws OXException;
 
     /**
      * Gets the denoted property
