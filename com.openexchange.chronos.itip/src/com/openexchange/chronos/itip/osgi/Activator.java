@@ -49,7 +49,18 @@
 
 package com.openexchange.chronos.itip.osgi;
 
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.itip.sender.MailSenderService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.group.GroupService;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * 
@@ -67,6 +78,24 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final ContextService contexts = getService(ContextService.class);
+        final UserService users = getService(UserService.class);
+        final ResourceService resources = getService(ResourceService.class);
+        final GroupService groups = getService(GroupService.class);
+        final ConfigurationService config = getService(ConfigurationService.class);
+        final ICalService icalService = getService(ICalService.class);
+        final HtmlService htmlService = getService(HtmlService.class);
+        final AttachmentBase attachments = getService(AttachmentBase.class);
+        final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
+        final TimerService timers = getService(TimerService.class);
+
+        int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);
+        int stateChangeInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.states", 600000);
+        int priorityInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.priority", 900000);
+        boolean poolEnabled = false;
+        
+
+        MailSenderService sender = new DefaultMailSenderService(icalService, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);
 
     }
 

@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.tools.AppointmentDiff;

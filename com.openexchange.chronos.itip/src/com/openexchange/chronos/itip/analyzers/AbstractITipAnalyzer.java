@@ -67,6 +67,7 @@ import com.openexchange.chronos.itip.ITipAnalyzer;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipChange.Type;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
+import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
