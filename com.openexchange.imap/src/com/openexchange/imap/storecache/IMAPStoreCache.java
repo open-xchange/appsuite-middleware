@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
@@ -86,9 +87,9 @@ public final class IMAPStoreCache {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
 
-    private static int SHRINKER_MILLIS = (MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000;
+    private static final AtomicInteger SHRINKER_MILLIS = new AtomicInteger((MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000);
 
-    protected static int IDLE_MILLIS = MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000;
+    protected static final AtomicInteger IDLE_MILLIS = new AtomicInteger(MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000);
 
     private static volatile IMAPStoreCache instance;
 
@@ -117,8 +118,8 @@ public final class IMAPStoreCache {
     public static void shutDownInstance() {
         final IMAPStoreCache tmp = instance;
         if (null != tmp) {
-            tmp.shutDown();
             instance = null;
+            tmp.shutDown();
         }
     }
 
@@ -129,8 +130,8 @@ public final class IMAPStoreCache {
             public void reloadConfiguration(final ConfigurationService configService) {
                 shutDownInstance();
 
-                SHRINKER_MILLIS = configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3) * 1000;
-                IDLE_MILLIS = configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4) * 1000;
+                SHRINKER_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3) * 1000);
+                IDLE_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4) * 1000);
 
                 initInstance();
             }
@@ -207,7 +208,7 @@ public final class IMAPStoreCache {
 
     /**
      * Initializes a new {@link IMAPStoreCache}.
-     * 
+     *
      * @param container
      */
     private IMAPStoreCache(final boolean checkConnected, final Container container) {
@@ -232,7 +233,7 @@ public final class IMAPStoreCache {
     private void init() {
         final TimerService timer = Services.getService(TimerService.class);
         final Runnable task = new CloseElapsedRunnable(this);
-        timerTask = timer.scheduleWithFixedDelay(task, SHRINKER_MILLIS, SHRINKER_MILLIS);
+        timerTask = timer.scheduleWithFixedDelay(task, SHRINKER_MILLIS.get(), SHRINKER_MILLIS.get());
     }
 
     private void shutDown() {
@@ -292,7 +293,7 @@ public final class IMAPStoreCache {
             boolean debug = LOG.isDebugEnabled();
             ThreadPoolService threadPool = ThreadPools.getThreadPool();
             if (null != threadPool) {
-                long stamp = System.currentTimeMillis() - IDLE_MILLIS;
+                long stamp = System.currentTimeMillis() - IDLE_MILLIS.get();
                 do {
                     IMAPStoreContainer container = containers.next();
                     if (null != container && container.hasElapsed(stamp)) {
