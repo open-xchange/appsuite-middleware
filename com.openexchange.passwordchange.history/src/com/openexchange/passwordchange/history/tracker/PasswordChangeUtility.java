@@ -53,6 +53,7 @@ import java.sql.Timestamp;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.passwordchange.exeption.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.osgi.Services;
 
 /**
@@ -126,30 +127,30 @@ public final class PasswordChangeUtility {
         ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
         if (null == casscade) {
             LOG.warn("Could not get config.");
-            throw new OXException();
+            throw PasswordChangeHistoryException.MISSING_SERVICE.create("ConfigCasscade");
         }
         ConfigView view;
         view = casscade.getView(userID, contextID);
         boolean enabled = view.get(ENABLED, Boolean.class);
         if (false == enabled) {
-            throw new OXException();
+            throw PasswordChangeHistoryException.DISABLED.create(userID, contextID);
         }
         // If empty, password change history is not wanted after all 
         String symbolicTrackerName = view.get(TRACKER, String.class);
         if (null == symbolicTrackerName || symbolicTrackerName.isEmpty()) {
             LOG.debug("No PasswordChangeTracker found .. No tracking wanted ");
-            throw new OXException();
+            throw PasswordChangeHistoryException.MISSING_CONFIGURATION.create(userID, contextID);
         }
         // Load registry to get the fitting tracker
         PasswordChangeTrackerRegistry trackerRegistry = Services.getOptionalService(PasswordChangeTrackerRegistry.class);
         if (null == trackerRegistry) {
             LOG.debug("Could not get PasswordChangeTrackerRegistry");
-            throw new OXException();
+            throw PasswordChangeHistoryException.MISSING_SERVICE.create("PasswordChangeTrackerRegistry");
         }
         PasswordChangeTracker tracker = trackerRegistry.getTracker(symbolicTrackerName);
         if (null == tracker) {
             LOG.error("Could not load {} for user {} in context {}", symbolicTrackerName, userID, contextID);
-            throw new OXException();
+            throw PasswordChangeHistoryException.MISSING_TRACKER.create(symbolicTrackerName);
         }
         return tracker;
     }

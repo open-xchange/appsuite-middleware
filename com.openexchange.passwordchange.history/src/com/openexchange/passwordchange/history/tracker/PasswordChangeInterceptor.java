@@ -89,7 +89,7 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
         ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
         if (null == casscade) {
             LOG.warn("Could not get config to delete password history.");
-            throw new PasswordChangeHistoryException(PasswordChangeHistoryException.MISSING_SERVICE);
+            throw PasswordChangeHistoryException.MISSING_SERVICE.create("ConfigViewFactory");
         }
         // Clear DB after deletion of user
         PasswordChangeUtility.clearFor(context.getContextId(), user.getId(), casscade.getView(context.getContextId(), user.getId()).get(LIMIT, Integer.class));
