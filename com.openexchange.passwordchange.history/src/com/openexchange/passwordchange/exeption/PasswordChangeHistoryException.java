@@ -49,7 +49,11 @@
 
 package com.openexchange.passwordchange.exeption;
 
+import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionFactory;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 
 /**
  * {@link PasswordChangeHistoryException}
@@ -57,16 +61,81 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeHistoryException extends OXException {
+public enum PasswordChangeHistoryException implements DisplayableOXExceptionCode {
+
+    MISSING_SERVICE("Service %s missing for a password change history", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 100),
+
+    DISABLED("Password change histroy for user %s in context %s is disabled", MESSAGE, Category.CATEGORY_PERMISSION_DENIED, 101),
+
+    MISSING_CONFIGURATION("Tracker for user %s in context %s is not configured. Therefor no history is created.", MESSAGE, Category.CATEGORY_CONFIGURATION, 102),
+
+    MISSING_TRACKER("The tracker %s was not found in the register.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 103)
+
+    ;
+
+    private static final String PREFIX = "HCE";
+
+    private final String message;
+
+    private final String displayMessage;
+
+    private final Category category;
+
+    private final int number;
+
+    private PasswordChangeHistoryException(final String message, String displayMessage, final Category category, final int number) {
+        this.message = message;
+        this.displayMessage = displayMessage;
+        this.category = category;
+        this.number = number;
+    }
+
+    @Override
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(e);
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public Category getCategory() {
+        return category;
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     /**
-     * serialVersionUID
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
      */
-    private static final long serialVersionUID = 3235785698701534991L;
-    public static final String MISSING_SERVICE = "Service is missing";
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
 
-    public PasswordChangeHistoryException(String message) {
-        super();
-        this.setLogMessage(message);
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 }
