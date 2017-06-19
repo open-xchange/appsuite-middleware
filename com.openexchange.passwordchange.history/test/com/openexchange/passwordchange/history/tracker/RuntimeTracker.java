@@ -49,45 +49,58 @@
 
 package com.openexchange.passwordchange.history.tracker;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTrackerRegistry;
+import com.openexchange.passwordchange.history.tracker.RuntimeTracker;
 
 /**
- * {@link PasswordChangeTrackerRegistry}
+ * {@link RuntimeTracker} - Does not save anything to a DB. DummyTracker for testing
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface PasswordChangeTrackerRegistry {
+public class RuntimeTracker implements PasswordChangeTracker {
+
+    Map<PasswordChangeInfo, Map<Integer, Integer>> infos;
 
     /**
-     * Register a {@link PasswordChangeTracker} under a symbolic name.
-     * 
-     * @param symbolicName The name under the service is searched. Symbolic name will be used in configuration. See "com.openexchange.passwordchange.tracker"
-     * @param tracker The actual tracker instance that does the tracking of password change history
+     * Initializes a new {@link RuntimeTracker}.
      */
-    void register(String symbolicName, PasswordChangeTracker tracker);
+    public RuntimeTracker() {
+        super();
+        infos = new HashMap<>();
+    }
 
-    /**
-     * Unregisters a {@link PasswordChangeTracker}
-     * 
-     * @param symbolicName The name to search the tracker for
-     */
-    void unregister(String symbolicName);
+    @Override
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) {
+        List<PasswordChangeInfo> lst = new LinkedList<>();
+        // Very inefficient .. but this is only for testing, so we are okay
+        for (PasswordChangeInfo info : infos.keySet()) {
+            Map<Integer, Integer> tmp = infos.get(info);
+            for (Integer context : tmp.keySet()) {
+                if (context == contextID && tmp.get(context) == userID) {
+                    // Found
+                    lst.add(info);
+                }
+            }
+        }
+        return lst;
+    }
 
-    /**
-     * Returns all available trackers with their symbolic names
-     * 
-     * @return {@link Map} with symbolic names and actual trackers
-     */
-    Map<String, PasswordChangeTracker> getTrackers();
+    @Override
+    public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) {
+        HashMap<Integer, Integer> map = new HashMap<>(1);
+        map.put(contextID, userID);
+        infos.put(info, map);
+    }
 
-    /**
-     * Get the tracker fitting to the symbolic name
-     * 
-     * @param symbolicName to search a tracker for
-     * @return The actaul tracker or <code>null</code>
-     */
-    PasswordChangeTracker getTracker(String symbolicName);
+    @Override
+    public void clear(int userID, int contextID, int limit) {
+        // Clear for all. Testing class after all
+        infos.clear();
+    }
 }

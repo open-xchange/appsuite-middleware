@@ -55,11 +55,10 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeEventListener;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInterceptor;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTrackerRegistry;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTrackerRegistryImpl;
-import com.openexchange.passwordchange.history.tracker.RuntimeTracker;
+import com.openexchange.passwordchange.history.events.PasswordChangeEventListener;
+import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
+import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
+import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryImpl;
 import com.openexchange.user.UserServiceInterceptor;
 
 /**
@@ -92,9 +91,8 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
         // Register the different services for this bundle
         Services.set(this);
 
-        // Register a password change registry with a single dummy service        
+        // Register a password change registry  
         PasswordChangeTrackerRegistry registry = new PasswordChangeTrackerRegistryImpl();
-        registry.register("RuntimeTracker", new RuntimeTracker());
         registerService(PasswordChangeTrackerRegistry.class, registry);
 
         // Register event for password change
