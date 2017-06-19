@@ -253,7 +253,9 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * do the same with a proxy calendar user in "sent-by"
          */
-        applyEntityData(attendee.getSentBy(), CalendarUserType.INDIVIDUAL);
+        if(attendee.getSentBy() != null){
+            applyEntityData(attendee.getSentBy(), CalendarUserType.INDIVIDUAL);
+        }
         return attendee;
     }
 
@@ -292,7 +294,9 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * do the same with a proxy calendar user in "sent-by"
          */
-        applyEntityData(calendarUser.getSentBy(), CalendarUserType.INDIVIDUAL);
+        if(calendarUser.getSentBy() != null){
+            applyEntityData(calendarUser.getSentBy(), CalendarUserType.INDIVIDUAL);
+        }
         return calendarUser;
     }
 
