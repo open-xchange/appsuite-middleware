@@ -303,7 +303,7 @@ public class VCardExporter implements Exporter {
 
         // Get required contact service
         ContactService contactService = ImportExportServices.getContactService();
-//        contactService.isFolderEmpty(session, folderID)
+        
         // Either export a single contact...
         if (objectId != null) {
             Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
