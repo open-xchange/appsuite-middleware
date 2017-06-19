@@ -112,7 +112,7 @@ public final class IMAPStoreCache {
             container = Container.getDefault();
         }
         tmp = new IMAPStoreCache(checkConnected, container);
-        tmp.reinit();
+        tmp.reinit(true);
         instance = tmp;
     }
 
@@ -136,7 +136,7 @@ public final class IMAPStoreCache {
                 IDLE_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4) * 1000);
                 IMAPStoreCache tmp = instance;
                 if (null != tmp) {
-                    tmp.reinit();
+                    tmp.reinit(false);
                 }
             }
 
@@ -235,7 +235,7 @@ public final class IMAPStoreCache {
         return containerType.getStoreClass();
     }
 
-    private void reinit() {
+    private void reinit(boolean withInitialDelay) {
         TimerService timer = Services.getService(TimerService.class);
 
         ScheduledTimerTask timerTask = this.timerTask;
@@ -247,7 +247,7 @@ public final class IMAPStoreCache {
 
         Runnable task = new CloseElapsedRunnable(this);
         int delayMillis = SHRINKER_MILLIS.get();
-        this.timerTask = timer.scheduleWithFixedDelay(task, delayMillis, delayMillis);
+        this.timerTask = timer.scheduleWithFixedDelay(task, withInitialDelay ? delayMillis : 0L, delayMillis);
     }
 
     private void shutDown() {
