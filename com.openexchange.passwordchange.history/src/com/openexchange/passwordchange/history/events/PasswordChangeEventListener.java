@@ -47,60 +47,49 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.events;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
-import com.openexchange.passwordchange.history.tracker.RuntimeTracker;
 
 /**
- * {@link RuntimeTracker} - Does not save anything to a DB. Dies with server shutdown. ~DummyTracker for testing
+ * {@link PasswordChangeEventListener}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class RuntimeTracker implements PasswordChangeTracker {
+public class PasswordChangeEventListener implements EventHandler {
 
-    Map<PasswordChangeInfo, Map<Integer, Integer>> infos;
+    private static final String TOPIC = "com/openexchange/passwordchange";
 
     /**
-     * Initializes a new {@link RuntimeTracker}.
+     * Initializes a new {@link PasswordChangeEventListener}.
      */
-    public RuntimeTracker() {
+    public PasswordChangeEventListener() {
         super();
-        infos = new HashMap<>();
+    }
+
+    /**
+     * Gets the topic of interest.
+     *
+     * @return The topic
+     */
+    public String getTopic() {
+        return TOPIC;
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) {
-        List<PasswordChangeInfo> lst = new LinkedList<>();
-        // Very inefficient .. but this is only for testing, so we are okay
-        for (PasswordChangeInfo info : infos.keySet()) {
-            Map<Integer, Integer> tmp = infos.get(info);
-            for (Integer context : tmp.keySet()) {
-                if (context == contextID && tmp.get(context) == userID) {
-                    // Found
-                    lst.add(info);
-                }
-            }
+    public void handleEvent(Event event) {
+        if (false == TOPIC.equals(event.getTopic())) {
+            return;
         }
-        return lst;
-    }
+        // Read values
+        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
+        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
+        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
 
-    @Override
-    public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) {
-        HashMap<Integer, Integer> map = new HashMap<>(1);
-        map.put(contextID, userID);
-        infos.put(info, map);
-    }
-
-    @Override
-    public void clear(int userID, int contextID, int limit) {
-        // Clear for all. Testing class after all
-        infos.clear();
+        // Process tracking
+        PasswordChangeUtility.recordChange(contextID, userID, ipAdderess, PasswordChangeInfo.APPSUITE);
     }
 }

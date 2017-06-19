@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.events;
 
 import java.sql.Timestamp;
 import com.openexchange.config.cascade.ConfigView;
@@ -55,6 +55,9 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.exeption.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.osgi.Services;
+import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
 
 /**
  * {@link PasswordChangeUtility}
@@ -70,14 +73,14 @@ public final class PasswordChangeUtility {
     private static final String TRACKER = "com.openexchange.passwordchange.tracker";
 
     /**
-     * Calls the according tracker for a user if the feature is available
+     * Calls the according tracker for a user if the feature is available and saves the data
      * 
      * @param contextID The context of the user
      * @param userID The ID representing the user. For this user the password change will be recorded
      * @param ipAddress The IP address if available
      * @param source The calling resource. See {@link PasswordChangeInfo#APPSUITE}, {@link PasswordChangeInfo#PROVISIONING} or {@link PasswordChangeInfo#UNKOWN}
      */
-    public static void callTracker(int contextID, int userID, final String ipAddress, final String source) {
+    public static void recordChange(int contextID, int userID, final String ipAddress, final String source) {
         try {
             PasswordChangeTracker tracker = loadTracker(contextID, userID);
             final Timestamp current = new Timestamp(System.currentTimeMillis());

@@ -47,48 +47,63 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.registry;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryImpl;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
 
 /**
- * {@link PasswordChangeEventListener}
+ * {@link PasswordChangeTrackerRegistryImpl}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeEventListener implements EventHandler {
+public class PasswordChangeTrackerRegistryImpl implements PasswordChangeTrackerRegistry {
 
-    private static final String TOPIC = "com/openexchange/passwordchange";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeTrackerRegistryImpl.class);
+    private Map<String, PasswordChangeTracker> trackers;
 
     /**
-     * Initializes a new {@link PasswordChangeEventListener}.
+     * Initializes a new {@link PasswordChangeTrackerRegistryImpl}.
      */
-    public PasswordChangeEventListener() {
+    public PasswordChangeTrackerRegistryImpl() {
         super();
-    }
-
-    /**
-     * Gets the topic of interest.
-     *
-     * @return The topic
-     */
-    public String getTopic() {
-        return TOPIC;
+        trackers = new HashMap<>();
     }
 
     @Override
-    public void handleEvent(Event event) {
-        if (false == TOPIC.equals(event.getTopic())) {
-            return;
+    public void register(String symbolicName, PasswordChangeTracker tracker) {
+        if (checkSymbolic(symbolicName) || null != tracker) {
+            trackers.put(symbolicName, tracker);
+        } else {
+            LOG.debug("Could not add PasswordChangeTracker for name {}", symbolicName);
         }
-        // Read values
-        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
-        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
+    }
 
-        // Process tracking
-        PasswordChangeUtility.callTracker(contextID, userID, ipAdderess, PasswordChangeInfo.APPSUITE);
+    @Override
+    public void unregister(String symbolicName) {
+        if (checkSymbolic(symbolicName)) {
+            LOG.debug("Try to remove PasswordChangeTracker with name {}", symbolicName);
+            trackers.remove(symbolicName);
+        }
+    }
+
+    @Override
+    public Map<String, PasswordChangeTracker> getTrackers() {
+        return trackers;
+    }
+
+    @Override
+    public PasswordChangeTracker getTracker(String symbolicName) {
+        if (checkSymbolic(symbolicName)) {
+            return trackers.get(symbolicName);
+        }
+        return null;
+    }
+
+    private boolean checkSymbolic(String symbolicName) {
+        return null != symbolicName && false == symbolicName.isEmpty();
     }
 }

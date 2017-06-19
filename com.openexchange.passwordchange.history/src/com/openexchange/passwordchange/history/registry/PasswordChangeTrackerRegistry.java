@@ -47,64 +47,46 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.registry;
 
-import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTrackerRegistry;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTrackerRegistryImpl;
 
 /**
- * {@link PasswordChangeTrackerRegistryImpl}
+ * {@link PasswordChangeTrackerRegistry}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeTrackerRegistryImpl implements PasswordChangeTrackerRegistry {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeTrackerRegistryImpl.class);
-    private Map<String, PasswordChangeTracker> trackers;
+public interface PasswordChangeTrackerRegistry {
 
     /**
-     * Initializes a new {@link PasswordChangeTrackerRegistryImpl}.
+     * Register a {@link PasswordChangeTracker} under a symbolic name.
+     * 
+     * @param symbolicName The name under the service is searched. Symbolic name will be used in configuration. See "com.openexchange.passwordchange.tracker"
+     * @param tracker The actual tracker instance that does the tracking of password change history
      */
-    public PasswordChangeTrackerRegistryImpl() {
-        super();
-        trackers = new HashMap<>();
-    }
+    void register(String symbolicName, PasswordChangeTracker tracker);
 
-    @Override
-    public void register(String symbolicName, PasswordChangeTracker tracker) {
-        if (checkSymbolic(symbolicName) || null != tracker) {
-            trackers.put(symbolicName, tracker);
-        } else {
-            LOG.debug("Could not add PasswordChangeTracker for name {}", symbolicName);
-        }
-    }
+    /**
+     * Unregisters a {@link PasswordChangeTracker}
+     * 
+     * @param symbolicName The name to search the tracker for
+     */
+    void unregister(String symbolicName);
 
-    @Override
-    public void unregister(String symbolicName) {
-        if (checkSymbolic(symbolicName)) {
-            LOG.debug("Try to remove PasswordChangeTracker with name {}", symbolicName);
-            trackers.remove(symbolicName);
-        }
-    }
+    /**
+     * Returns all available trackers with their symbolic names
+     * 
+     * @return {@link Map} with symbolic names and actual trackers
+     */
+    Map<String, PasswordChangeTracker> getTrackers();
 
-    @Override
-    public Map<String, PasswordChangeTracker> getTrackers() {
-        return trackers;
-    }
-
-    @Override
-    public PasswordChangeTracker getTracker(String symbolicName) {
-        if (checkSymbolic(symbolicName)) {
-            return trackers.get(symbolicName);
-        }
-        return null;
-    }
-
-    private boolean checkSymbolic(String symbolicName) {
-        return null != symbolicName && false == symbolicName.isEmpty();
-    }
+    /**
+     * Get the tracker fitting to the symbolic name
+     * 
+     * @param symbolicName to search a tracker for
+     * @return The actaul tracker or <code>null</code>
+     */
+    PasswordChangeTracker getTracker(String symbolicName);
 }
