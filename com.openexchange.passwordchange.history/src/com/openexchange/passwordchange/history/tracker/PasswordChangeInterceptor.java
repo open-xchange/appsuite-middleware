@@ -67,8 +67,15 @@ import com.openexchange.user.AbstractUserServiceInterceptor;
  */
 public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
     private static final String LIMIT = "com.openexchange.passwordchange.limit";
+
+    /**
+     * Initializes a new {@link PasswordChangeInterceptor}.
+     */
+    public PasswordChangeInterceptor() {
+        super();
+    }
 
     @Override
     public int getRanking() {
@@ -79,20 +86,44 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         // Check if password was changed
         if (null != user.getUserPassword()) {
+            final int contextID = context.getContextId();
+            final int userID = user.getId();
             // so password was changed..
-            PasswordChangeUtility.callTracker(context.getContextId(), user.getId(), null, PasswordChangeInfo.PROVISIONING);
+            Thread t = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    PasswordChangeUtility.callTracker(contextID, userID, null, PasswordChangeInfo.PROVISIONING);
+                }
+            }, "PasswordChangeHistory");
+            t.setDaemon(true);
+            t.start();
         }
     }
 
     @Override
     public void afterDelete(Context context, User user, Contact contactData) throws OXException {
-        ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
+        final ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
         if (null == casscade) {
             LOG.warn("Could not get config to delete password history.");
             throw PasswordChangeHistoryException.MISSING_SERVICE.create("ConfigViewFactory");
         }
+        final int contextID = context.getContextId();
+        final int userID = user.getId();
         // Clear DB after deletion of user
-        PasswordChangeUtility.clearFor(context.getContextId(), user.getId(), casscade.getView(context.getContextId(), user.getId()).get(LIMIT, Integer.class));
-    }
+        Thread t = new Thread(new Runnable() {
 
+            @Override
+            public void run() {
+                try {
+                    PasswordChangeUtility.clearFor(contextID, userID, casscade.getView(contextID, userID).get(LIMIT, Integer.class));
+                } catch (OXException e) {
+                    // In case view can not be loaded
+                    LOG.error("Could not delete password chage history for " + String.valueOf(userID) + " in context " + String.valueOf(contextID));
+                }
+            }
+        }, "PasswordChangeHistory");
+        t.setDaemon(true);
+        t.start();
+    }
 }
