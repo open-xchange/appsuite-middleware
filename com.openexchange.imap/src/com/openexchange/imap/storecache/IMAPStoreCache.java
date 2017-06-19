@@ -85,18 +85,21 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class IMAPStoreCache {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
+    /** The logger instzance */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
 
-    private static final AtomicInteger SHRINKER_MILLIS = new AtomicInteger((MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000);
+    /** Holder for shrinker frequency in milliseconds */
+    static final AtomicInteger SHRINKER_MILLIS = new AtomicInteger((MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000);
 
-    protected static final AtomicInteger IDLE_MILLIS = new AtomicInteger(MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000);
+    /** Holder for idle time in milliseconds */
+    static final AtomicInteger IDLE_MILLIS = new AtomicInteger(MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000);
 
     private static volatile IMAPStoreCache instance;
 
     /**
      * Initializes this cache.
      */
-    public static void initInstance() {
+    public static synchronized void initInstance() {
         IMAPStoreCache tmp = instance;
         if (null != tmp) {
             return;
@@ -108,14 +111,15 @@ public final class IMAPStoreCache {
             LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"{}\" instead.", Container.getDefault().getId());
             container = Container.getDefault();
         }
-        tmp = instance = new IMAPStoreCache(checkConnected, container);
-        tmp.init();
+        tmp = new IMAPStoreCache(checkConnected, container);
+        tmp.reinit();
+        instance = tmp;
     }
 
     /**
      * Shuts-down this cache.
      */
-    public static void shutDownInstance() {
+    public static synchronized void shutDownInstance() {
         final IMAPStoreCache tmp = instance;
         if (null != tmp) {
             instance = null;
@@ -128,17 +132,17 @@ public final class IMAPStoreCache {
 
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
-                shutDownInstance();
-
                 SHRINKER_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3) * 1000);
                 IDLE_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4) * 1000);
-
-                initInstance();
+                IMAPStoreCache tmp = instance;
+                if (null != tmp) {
+                    tmp.reinit();
+                }
             }
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.checkConnected", "com.openexchange.imap.storeContainerType", "com.openexchange.imap.maxNumConnections", "com.openexchange.mail.mailAccessCacheShrinkerSeconds", "com.openexchange.mail.mailAccessCacheIdleSeconds");
+                return Reloadables.interestsForProperties("com.openexchange.mail.mailAccessCacheShrinkerSeconds", "com.openexchange.mail.mailAccessCacheIdleSeconds");
             }
         });
     }
@@ -163,6 +167,7 @@ public final class IMAPStoreCache {
         private final boolean debug;
 
         protected ContainerCloseElapsedRunnable(final IMAPStoreContainer container, final long stamp, final boolean debug) {
+            super();
             this.container = container;
             this.stamp = stamp;
             this.debug = debug;
@@ -230,20 +235,29 @@ public final class IMAPStoreCache {
         return containerType.getStoreClass();
     }
 
-    private void init() {
-        final TimerService timer = Services.getService(TimerService.class);
-        final Runnable task = new CloseElapsedRunnable(this);
-        timerTask = timer.scheduleWithFixedDelay(task, SHRINKER_MILLIS.get(), SHRINKER_MILLIS.get());
+    private void reinit() {
+        TimerService timer = Services.getService(TimerService.class);
+
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            this.timerTask = null;
+            timerTask.cancel();
+            timer.purge();
+        }
+
+        Runnable task = new CloseElapsedRunnable(this);
+        int delayMillis = SHRINKER_MILLIS.get();
+        this.timerTask = timer.scheduleWithFixedDelay(task, delayMillis, delayMillis);
     }
 
     private void shutDown() {
         List<IMAPStoreContainer> containers = new ArrayList<IMAPStoreContainer>(this.map.values());
         this.map.clear();
 
-        final ScheduledTimerTask timerTask = this.timerTask;
+        ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
-            timerTask.cancel();
             this.timerTask = null;
+            timerTask.cancel();
         }
 
         if (!containers.isEmpty()) {
