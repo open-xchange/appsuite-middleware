@@ -105,5 +105,13 @@ public interface Exporter {
 	 * @throws OXException
 	 */
 	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException;
-
+	
+	/**
+	 * @param session: The session object to be able to check permissions. 
+	 * @param folder: The folder to name the export file after
+	 * @param batchIds: The ids which determine the export file name
+	 * @return String the name of the export file
+	 */
+	String getExportFileName(ServerSession sessionObj, String folder, Map<String, List<String>> batchIds) throws OXException;
+	
 }
