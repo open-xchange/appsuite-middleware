@@ -60,7 +60,6 @@ import com.openexchange.folderstorage.ContentType;
 public class CalendarContentType implements ContentType {
 
     private static final long serialVersionUID = 1568536482010132574L;
-
     private static final CalendarContentType INSTANCE = new CalendarContentType();
 
     /**
@@ -81,12 +80,14 @@ public class CalendarContentType implements ContentType {
 
     @Override
     public String toString() {
-        return "calendar";
+        //        return "calendar";
+        return "event";
     }
 
     @Override
     public int getModule() {
         // From FolderObject.CALENDAR
+        // used at
         return 2;
     }
 

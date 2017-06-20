@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
+import com.openexchange.chronos.provider.composition.CompositeID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -82,6 +83,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link CalendarFolderStorage}
@@ -334,10 +336,7 @@ public class CalendarFolderStorage implements FolderStorage {
         CompositeFolderID folderID = CompositeFolderID.parse(folderId);
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
         CalendarFolder calendarFolder = calendarAccess.getFolder(folderID);
-        Folder storageFolder = getStorageFolder(treeId, calendarFolder);
-
-        //        storageFolder.setAccountID(folderID.getQualifiedAccountID());
-        return storageFolder;
+        return getStorageFolder(treeId, getQualifiedAccountID(folderID), getDefaultContentType(), calendarFolder);
     }
 
     @Override
@@ -450,6 +449,16 @@ public class CalendarFolderStorage implements FolderStorage {
             sortableIds.add(new CalendarId(folders.get(i).getId(), i, null));
         }
         return sortableIds.toArray(new SortableId[sortableIds.size()]);
+    }
+
+    /**
+     * Gets a qualified, unique identifier for the calendar account referenced by the supplied composite event- or folder identifier.
+     *
+     * @param compositeID The composite identifier to get the account identifier for
+     * @return The qualified account identifier
+     */
+    private static String getQualifiedAccountID(CompositeID compositeID) {
+        return IDMangler.mangle(CompositeFolderID.CAL_PREFIX, String.valueOf(compositeID.getAccountId()));
     }
 
 }
