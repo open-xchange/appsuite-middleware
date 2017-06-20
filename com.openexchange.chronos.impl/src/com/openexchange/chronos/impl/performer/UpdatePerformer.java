@@ -166,7 +166,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (isSeriesMaster(originalEvent) && updatedEvent.containsRecurrenceId() && null != updatedEvent.getRecurrenceId()) {
             updateEvent(originalEvent, updatedEvent, updatedEvent.getRecurrenceId());
         } else {
-            updateEvent(originalEvent, updatedEvent);
+            if(updateEvent(originalEvent, updatedEvent)){
+                result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
+            }
         }
         return result;
     }
@@ -182,6 +184,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  */
                 Event originalExceptionEvent = loadExceptionData(originalEvent.getId(), recurrenceID);
                 if (updateEvent(originalExceptionEvent, updatedEvent)) {
+                    result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
                     touch(originalEvent.getSeriesId());
                 }
             } else {
@@ -215,6 +218,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * update for existing change exception
              */
             if (updateEvent(originalEvent, updatedEvent)) {
+                result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
                 touch(originalEvent.getSeriesId());
             }
         } else {
@@ -334,7 +338,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null == eventUpdate) {
                 touch(originalEvent.getId());
             }
-            result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
         }
         return wasUpdated;
     }
