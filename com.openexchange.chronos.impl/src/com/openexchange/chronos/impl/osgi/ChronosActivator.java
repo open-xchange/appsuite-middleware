@@ -53,8 +53,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
+import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -118,6 +120,7 @@ public class ChronosActivator extends HousekeepingActivator {
             CalendarService calendarService = new CalendarServiceImpl(calendarHandlers);
             registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
+            registerService(CalendarUtilities.class, new DefaultCalendarUtilities(this));
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;

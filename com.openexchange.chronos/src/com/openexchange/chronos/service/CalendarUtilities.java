@@ -53,6 +53,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link CalendarUtilities}
@@ -60,6 +61,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
+@SingletonService
 public interface CalendarUtilities {
 
     /**
@@ -101,5 +103,13 @@ public interface CalendarUtilities {
      * @return <code>true</code> if truncated values were trimmed successfully, <code>false</code>, otherwise
      */
     boolean handleDataTruncation(OXException e, Event event);
+
+    /**
+     * Gets an entity resolver for a specific context.
+     *
+     * @param contextId The identifier of the context to get the entity resolver for
+     * @return The entity resolver
+     */
+    EntityResolver getEntityResolver(int contextId) throws OXException;
 
 }

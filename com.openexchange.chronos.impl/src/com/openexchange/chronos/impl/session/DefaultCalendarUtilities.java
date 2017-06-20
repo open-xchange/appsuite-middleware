@@ -55,11 +55,14 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.EventUpdateImpl;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DefaultCalendarUtilities}
@@ -69,11 +72,28 @@ import com.openexchange.groupware.tools.mappings.MappedTruncation;
  */
 public class DefaultCalendarUtilities implements CalendarUtilities {
 
+    private final CalendarSession session;
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link DefaultCalendarUtilities}.
+     *
+     * @param services A service lookup reference
      */
-    public DefaultCalendarUtilities() {
+    public DefaultCalendarUtilities(ServiceLookup services) {
+        this(services, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultCalendarUtilities}.
+     *
+     * @param services A service lookup reference
+     * @param session The underlying calendar session, or <code>null</code> if not bound to a specific session
+     */
+    public DefaultCalendarUtilities(ServiceLookup services, CalendarSession session) {
         super();
+        this.services = services;
+        this.session = session;
     }
 
     @Override
@@ -130,6 +150,14 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
     @Override
     public Event copyEvent(Event event, EventField... fields) throws OXException {
         return EventMapper.getInstance().copy(event, null, fields);
+    }
+
+    @Override
+    public EntityResolver getEntityResolver(int contextId) throws OXException {
+        if (null != session && session.getContextId() == contextId) {
+            return session.getEntityResolver();
+        }
+        return new DefaultEntityResolver(contextId, services);
     }
 
 }
