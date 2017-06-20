@@ -301,7 +301,7 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
     public CalendarResult deleteEvent(CompositeEventID eventID) throws OXException {
         GroupwareCalendarAccess calendarAccess = getGroupwareAccess(eventID.getAccountId());
         CalendarResult result = calendarAccess.deleteEvent(getRelativeID(eventID));
-        return result;
+        return new IDManglingCalendarResult(result, eventID);
     }
 
     @Override
