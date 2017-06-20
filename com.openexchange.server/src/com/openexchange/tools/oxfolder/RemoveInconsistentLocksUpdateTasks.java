@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -57,8 +59,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableTask;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveInconsistentLocksUpdateTasks} removes all file locks which may be hold by any user which doesn't have any permissions to do so anymore.
@@ -95,10 +97,10 @@ public class RemoveInconsistentLocksUpdateTasks extends UpdateTaskAdapter {
             rows = stmt.executeUpdate();
             con.commit();
         } catch (SQLException e) {
-            DBUtils.rollback(con);
+            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
             if (rows > 0) {
                 dbService.backForUpdateTask(params.getContextId(), con);
             } else {
@@ -115,7 +117,7 @@ public class RemoveInconsistentLocksUpdateTasks extends UpdateTaskAdapter {
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.FolderPermissionReadAllForUserInfostore.class.getName() };
+        return new String[] { ObjectPermissionCreateTableTask.class.getName(), com.openexchange.groupware.update.tasks.FolderPermissionReadAllForUserInfostore.class.getName() };
     }
 
 }

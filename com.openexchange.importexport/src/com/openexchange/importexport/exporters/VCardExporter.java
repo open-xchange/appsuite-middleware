@@ -69,6 +69,7 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.CommonObject;
@@ -259,7 +260,7 @@ public class VCardExporter implements Exporter {
                 final OutputStream out = requestData.optOutputStream();
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getExportFileName(session, folder, batchIds) + Format.VCARD.getExtension());
                     requestData.removeCachingHeader();
                     export(session, folder, oId, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET), batchIds);
                     return null;
@@ -302,7 +303,7 @@ public class VCardExporter implements Exporter {
 
         // Get required contact service
         ContactService contactService = ImportExportServices.getContactService();
-
+        
         // Either export a single contact...
         if (objectId != null) {
             Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
@@ -429,5 +430,50 @@ public class VCardExporter implements Exporter {
         System.arraycopy(fields, 0, retval, 0, fields.length);
         retval[fields.length] = fieldToAdd;
         return retval;
+    }
+    
+    @Override
+    public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException{
+        if(null == folder){
+            if(batchIds.size() == 1) {
+                //exactly one contact to export, file name equals contact name
+                String folderId = batchIds.keySet().iterator().next();
+                String batchId = batchIds.get(folderId).get(0);
+                return createVcardName(session, folderId, batchId);
+            } else {
+                //batch of contact ids, file name is set to a default
+                return "Batch Contacts";
+            }
+        } else {
+            //case export complete folder, file name equals folder name
+            return createVcardName(session, folder, null);
+        }
+    }    
+    
+    private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
+        ContactService contactService = ImportExportServices.getContactService();
+        FolderService folderService = ImportExportServices.getFolderService();
+        final StringBuilder sb = new StringBuilder();
+        if (null == batchId || batchId.equals("") ) {
+            try {
+                FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
+                sb.append(folderObj.getFolderName());
+            } catch (OXException e) {
+                    throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);            
+            } finally {
+                sb.append("export");
+            }
+        } else {                         
+            try {
+                Contact contactObj = contactService.getContact(session, folder, batchId, null);
+                sb.append(contactObj.getGivenName()+" "+contactObj.getSurName());
+            } catch (OXException e) {
+                throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
+            } finally {
+                sb.append("export");
+            }
+        }
+        sb.append(".");
+        return sb.toString();
     }
 }

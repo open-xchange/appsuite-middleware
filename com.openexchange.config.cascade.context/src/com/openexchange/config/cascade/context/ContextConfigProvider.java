@@ -84,7 +84,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(Context ctx) {
+    public Collection<String> getAllPropertyNamesFor(Context ctx, int userId) {
         Map<String, List<String>> attributes = ctx.getAttributes();
         Set<String> allNames = new HashSet<String>();
 

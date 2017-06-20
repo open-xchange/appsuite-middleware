@@ -61,6 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  * Defines a class able to export a certain type of OX folder as a certain format
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> - exportFileName
  * @see com.openexchange.groupware.Types
  */
 public interface Exporter {
@@ -105,5 +106,16 @@ public interface Exporter {
 	 * @throws OXException
 	 */
 	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException;
-
+	
+	/**
+	 * Creates a proper export file name based on the folder or the object to export
+	 * 
+	 * @param session: The session object to be able to check permissions. 
+	 * @param folder: The folder to name the export file after
+	 * @param batchIds: The ids which determine the export file name
+	 * @return String the name of the export file
+	 * @throws OXException
+	 */
+	String getExportFileName(ServerSession sessionObj, String folder, Map<String, List<String>> batchIds) throws OXException;
+	
 }
