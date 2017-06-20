@@ -101,4 +101,8 @@ public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> impl
     public String getServletPath() {
         return EXPORT_URL;
     }
+    
+    public int getFolderId() {
+        return folderId;
+    }    
 }
