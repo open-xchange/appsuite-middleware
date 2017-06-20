@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.groupware;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -209,16 +208,16 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
     CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException;
 
     /**
-     * Deletes one or more existing events.
+     * Deletes an existing event.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param eventIDs The identifiers of the events to delete
+     * @param eventID The identifier of the event to delete
      * @return The delete result
      */
-    Map<EventID, CalendarResult> deleteEvents(List<EventID> eventIDs) throws OXException;
+    CalendarResult deleteEvent(EventID eventID) throws OXException;
 
 }

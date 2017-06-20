@@ -51,7 +51,6 @@ package com.openexchange.chronos.service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -354,7 +353,7 @@ public interface CalendarService {
     CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee) throws OXException;
 
     /**
-     * Deletes one or more existing events.
+     * Delete a existing event.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
@@ -362,9 +361,9 @@ public interface CalendarService {
      * </ul>
      *
      * @param session The calendar session
-     * @param eventIDs The identifiers of the events to delete
+     * @param eventID The identifier of the event to delete
      * @return The delete result
      */
-    Map<EventID, CalendarResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
+    CalendarResult deleteEvent(CalendarSession session, EventID eventID) throws OXException;
 
 }

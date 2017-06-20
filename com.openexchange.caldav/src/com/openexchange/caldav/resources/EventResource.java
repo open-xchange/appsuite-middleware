@@ -421,7 +421,10 @@ public class EventResource extends DAVObjectResource<Event> {
         }
         CalendarSession calendarSession = getCalendarSession();
         calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(event.getLastModified().getTime()));
-        calendarSession.getCalendarService().deleteEvents(calendarSession, eventIDs);
+
+        for(EventID id: eventIDs){
+            calendarSession.getCalendarService().deleteEvent(calendarSession, id);
+        }
     }
 
     private void updateEvent(CalDAVImport caldavImport) throws OXException {

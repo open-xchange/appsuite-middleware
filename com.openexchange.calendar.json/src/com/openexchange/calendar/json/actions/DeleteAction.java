@@ -50,9 +50,9 @@
 package com.openexchange.calendar.json.actions;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -169,9 +169,9 @@ public final class DeleteAction extends IDBasedCalendarAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         List<EventID> requestedIDs = parseRequestedIDs(session, request);
-        Map<EventID, CalendarResult> results = session.getCalendarService().deleteEvents(session, requestedIDs);
         Date timestamp = new Date(0L);
-        for (CalendarResult result : results.values()) {
+        for (EventID id : requestedIDs) {
+            CalendarResult result = session.getCalendarService().deleteEvent(session, id);
             timestamp = getLatestModified(timestamp, result.getTimestamp());
         }
         return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
@@ -180,9 +180,13 @@ public final class DeleteAction extends IDBasedCalendarAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
         List<CompositeEventID> requestedIDs = parseRequestedIDs(access, request);
-        Map<CompositeEventID, CalendarResult> results = access.deleteEvents(requestedIDs);
+        List<CalendarResult> results = new ArrayList<>();
+        for(CompositeEventID id: requestedIDs){
+            CalendarResult result = access.deleteEvent(id);
+            results.add(result);
+        }
         Date timestamp = new Date(0L);
-        for (CalendarResult result : results.values()) {
+        for (CalendarResult result : results) {
             timestamp = getLatestModified(timestamp, result.getTimestamp());
         }
         return new AJAXRequestResult(new JSONArray(0), timestamp, "json");

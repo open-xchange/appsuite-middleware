@@ -298,20 +298,10 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
     }
 
     @Override
-    public Map<CompositeEventID, CalendarResult> deleteEvents(List<CompositeEventID> eventIDs) throws OXException {
-        Map<Integer, List<EventID>> idsPerAccountId = getIDsPerAccountId(eventIDs);
-        Map<CompositeEventID, CalendarResult> results = new HashMap<CompositeEventID, CalendarResult>(eventIDs.size());
-        for (Entry<Integer, List<EventID>> entry : idsPerAccountId.entrySet()) {
-            Integer accountId = entry.getKey();
-            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId.intValue());
-            Map<EventID, CalendarResult> resultsByID = calendarAccess.deleteEvents(entry.getValue());
-            for (Entry<EventID, CalendarResult> resultByID : resultsByID.entrySet()) {
-                EventID eventID = resultByID.getKey();
-                CompositeEventID compositeEventID = new CompositeEventID(accountId, eventID.getFolderID(), eventID.getObjectID());
-                results.put(compositeEventID, new IDManglingCalendarResult(resultByID.getValue(), compositeEventID));
-            }
-        }
-        return results;
+    public CalendarResult deleteEvent(CompositeEventID eventID) throws OXException {
+        GroupwareCalendarAccess calendarAccess = getGroupwareAccess(eventID.getAccountId());
+        CalendarResult result = calendarAccess.deleteEvent(getRelativeID(eventID));
+        return result;
     }
 
     @Override

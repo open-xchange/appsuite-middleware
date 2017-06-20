@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -224,8 +223,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess {
     }
 
     @Override
-    public Map<EventID, CalendarResult> deleteEvents(List<EventID> eventIDs) throws OXException {
-        return getCalendarService().deleteEvents(session, eventIDs);
+    public CalendarResult deleteEvent(EventID eventID) throws OXException {
+        return getCalendarService().deleteEvent(session, eventID);
     }
 
     /**

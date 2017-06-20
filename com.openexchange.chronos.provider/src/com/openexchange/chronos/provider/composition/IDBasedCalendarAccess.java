@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.composition;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -323,16 +322,16 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     CalendarResult updateAttendee(CompositeEventID eventID, Attendee attendee) throws OXException;
 
     /**
-     * Deletes one or more existing events.
+     * Deletes an existing event.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param eventIDs The composite identifiers of the events to delete
-     * @return The delete result, mapped by the corresponding identifiers
+     * @param eventID The composite identifier of the event to delete
+     * @return The delete result
      */
-    Map<CompositeEventID, CalendarResult> deleteEvents(List<CompositeEventID> eventIDs) throws OXException;
+    CalendarResult deleteEvent(CompositeEventID eventID) throws OXException;
 
 }

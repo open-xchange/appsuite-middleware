@@ -52,9 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -337,30 +335,27 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public Map<EventID, CalendarResult> deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
+    public CalendarResult deleteEvent(CalendarSession session, final EventID eventID) throws OXException {
         /*
-         * delete events
+         * delete event
          */
-        Map<EventID, CalendarResult> results = new StorageOperation<Map<EventID, CalendarResult>>(session) {
+        CalendarResult result = new StorageOperation<CalendarResult>(session) {
 
             @Override
-            protected Map<EventID, CalendarResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-                Map<EventID, CalendarResult> results = new HashMap<EventID, CalendarResult>(eventIDs.size());
-                for (EventID eventID : eventIDs) {
-                    results.put(eventID, new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp));
-                }
-                return results;
+
+                return new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
+
             }
         }.executeUpdate();
+
         /*
          * notify handlers
          */
-        for (CalendarResult result : results.values()) {
-            notifyHandlers(result);
-        }
-        return results;
+        notifyHandlers(result);
+        return result;
     }
 
     private CalendarResult notifyHandlers(CalendarResult result) {
