@@ -54,6 +54,8 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.converter.CalendarFolderResultConverter;
+import com.openexchange.chronos.json.converter.CalendarResultConverter;
+import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 
@@ -82,6 +84,8 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
              * register result converters
              */
             registerService(ResultConverter.class, new EventResultConverter());
+            registerService(ResultConverter.class, new EventConflictResultConverter());
+            registerService(ResultConverter.class, new CalendarResultConverter());
             registerService(ResultConverter.class, new CalendarFolderResultConverter());
         } catch (Exception e) {
             getLogger(ChronosJsonActivator.class).error("error starting {}", context.getBundle(), e);

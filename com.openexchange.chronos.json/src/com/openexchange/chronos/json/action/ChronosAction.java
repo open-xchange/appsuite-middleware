@@ -53,6 +53,8 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANG
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RECURRENCE_MASTER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMEZONE;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
@@ -203,6 +205,10 @@ public abstract class ChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(false == Boolean.parseBoolean(value)));
             case "timezone":
                 return new AbstractMap.SimpleEntry<String, TimeZone>(PARAMETER_TIMEZONE, TimeZoneUtils.getTimeZone(value));
+            case PARAMETER_IGNORE_CONFLICTS:
+                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_IGNORE_CONFLICTS, Boolean.parseBoolean(value));
+            case PARAMETER_TIMESTAMP:
+                return new AbstractMap.SimpleEntry<String, Long>(PARAMETER_TIMESTAMP, Long.parseLong(value));
             default:
                 throw new IllegalArgumentException("unknown paramter: " + parameter);
         }

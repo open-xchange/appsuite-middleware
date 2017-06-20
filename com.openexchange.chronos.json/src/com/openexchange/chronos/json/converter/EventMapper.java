@@ -109,7 +109,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
     private static final EventMapper INSTANCE = new EventMapper();
 
-    private EventField[] mappedFields;
+    private final EventField[] mappedFields;
 
     /**
      * Gets the EventMapper instance.
@@ -855,7 +855,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
-                set(to, deserializeCalendarUser(from, Organizer.class));
+                JSONObject organizer = (JSONObject) from.get("organizer");
+                set(to, deserializeCalendarUser(organizer, Organizer.class));
             }
 
             @Override
@@ -1105,7 +1106,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         return mappings;
     }
 
-    private <T extends CalendarUser> T deserializeCalendarUser(JSONObject jsonObject, Class<T> calendarUserClass) throws JSONException {
+    <T extends CalendarUser> T deserializeCalendarUser(JSONObject jsonObject, Class<T> calendarUserClass) throws JSONException {
         if (null == jsonObject) {
             return null;
         }
@@ -1126,7 +1127,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         return calendarUser;
     }
 
-    private static JSONObject serializeCalendarUser(CalendarUser calendarUser) throws JSONException {
+    static JSONObject serializeCalendarUser(CalendarUser calendarUser) throws JSONException {
         if (null == calendarUser) {
             return null;
         }
